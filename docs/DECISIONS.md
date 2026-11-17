@@ -129,3 +129,25 @@ GROW/BACK/TOP, segments, STRING/BYTES views, and general printing remain
 unsupported. `GET` is not treated as `NTH`; it needs its own semantics.
 Cycles made by `PUTREST` raise on `LENGTH` in this implementation. No game
 rules, upstream sources, or GPLv3 code were changed.
+
+## ADR-0009: Type registry and shared structured casts
+
+**Decision:** Store type registration in the parameterized atom space, keyed
+by ATOM identity. Built-in types record their primitive storage type;
+`NEWTYPE` registers a new tag with a pre-existing primitive type. `CHTYPE`
+for LIST/VECTOR/UVECTOR storage wraps that storage with a new type tag,
+preserving mutation and identity after a round trip. FALSE-to-LIST casts
+share the payload chain. `REST` drops a user type tag to the primitive type.
+Reject primitive mismatches, dangerous built-in targets, and WORD bit
+reinterpretation explicitly.
+
+**Why:** Chapter 6 of the MDL manual and nine pinned Confusion probes
+corroborate TYPE/PRIMTYPE/TYPEPRIM distinction, NEWTYPE registration,
+shared data, and type-sensitive identity. Confusion reports OBLIST's
+primitive type as UVECTOR. Tests cover aliasing and negative conversion
+boundaries.
+
+**Consequence:** General type declarations, `#NAME` reader notation,
+PRINTTYPE/EVALTYPE/APPLYTYPE, and numeric WORD reinterprets remain open.
+The Racket type registry contains only types proven for this subset; it is
+not a complete historical table. No upstream or game rules changed.

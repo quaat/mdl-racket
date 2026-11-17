@@ -180,6 +180,41 @@ boundary errors, and quoted literal identity belong in
 and full STRING/BYTES view semantics remain outside this slice and must fail
 explicitly rather than being approximated.
 
+## M1 issue #6 specification: type tags and constructors
+
+The [MDL manual, chapter 6](https://mdl-language.readthedocs.io/en/latest/06-data-types/)
+distinguishes `TYPE` from `PRIMTYPE`: FIX and FLOAT both have primitive
+type WORD; FALSE has primitive type LIST. `TYPEPRIM` maps a type atom to its
+primitive type. `NEWTYPE name base-type` registers a fresh type atom with
+the base type's primitive storage and returns the name atom. `CHTYPE` returns
+an object with the new TYPE and the same data part, and errors on primitive
+type mismatch or dangerous conversion. The manual says `REST` of a new
+structured type returns its primitive type. This slice supports changing
+structured LIST, VECTOR, and UVECTOR types only, including FALSE/LIST casts.
+Numeric word bit reinterpretation and `NEWTYPE` declaration patterns require
+their own verified implementation and must error here.
+
+Pinned Confusion input and output are in `docs/evidence/M1/types-cases.json`
+and `types-reference.json`: nine isolated processes exited zero with empty
+stderr. `PRIMTYPE` and `TYPEPRIM` observations agree with the manual;
+Confusion reports OBLIST's primitive type as UVECTOR.
+`NEWTYPE M1-BOX VECTOR` returns `M1-BOX`; its tagged vector's TYPE is
+M1-BOX, PRIMTYPE is VECTOR, and NTH remains available. A tagged LIST shares
+mutable storage with its REST view, which has TYPE LIST. Casting FALSE to
+LIST shares its payload: PUT on the resulting LIST changes the original
+FALSE. A tagged UVECTOR retains UTYPE FIX, while REST has TYPE UVECTOR.
+`CHTYPE` of a value to its current TYPE returns an identical value in the
+observed case. Changing a VECTOR to a new TYPE changes `==?` and `=?` to
+false against the original, while changing it back to VECTOR restores
+identity. A FALSE-to-LIST-to-FALSE round trip also restores identity.
+Tests for type registration, data sharing, primitive mismatch,
+and unsupported conversions belong in `tests/type_test.rkt`.
+
+The full MDL type table, declaration patterns, `PRINTTYPE`/`EVALTYPE`/
+`APPLYTYPE`, general `#NAME` reader notation, dynamic atom blocking, and
+WORD bit reinterprets remain outside this slice. They must raise explicit
+errors if encountered by the compiler/runtime.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in

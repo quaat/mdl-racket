@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "name": "m1-types-constructors",
+  "recorded_at": "2026-11-17T18:05:42.298971+00:00",
+  "interpreter_sha256": "99728037f046ee68fdbb6ef69f44155e3c03f9c0b2b0840fbc218c75024c21e3",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "primitive-types",
+      "expression": "<PRIMTYPE 1>\n<PRIMTYPE 1.0>\n<PRIMTYPE #FALSE (1)>\n<PRIMTYPE [1 2]>\n<PRIMTYPE ![1 2!] >",
+      "input": "<PRIMTYPE 1>\n<PRIMTYPE 1.0>\n<PRIMTYPE #FALSE (1)>\n<PRIMTYPE [1 2]>\n<PRIMTYPE ![1 2!] >\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nWORD\nWORD\nLIST\nVECTOR\nUVECTOR\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "WORD\nWORD\nLIST\nVECTOR\nUVECTOR\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "typeprim",
+      "expression": "<TYPEPRIM FIX>\n<TYPEPRIM FLOAT>\n<TYPEPRIM FORM>\n<TYPEPRIM VECTOR>\n<TYPEPRIM OBLIST>",
+      "input": "<TYPEPRIM FIX>\n<TYPEPRIM FLOAT>\n<TYPEPRIM FORM>\n<TYPEPRIM VECTOR>\n<TYPEPRIM OBLIST>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nWORD\nWORD\nLIST\nVECTOR\nUVECTOR\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "WORD\nWORD\nLIST\nVECTOR\nUVECTOR\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "newtype-vector",
+      "expression": "<NEWTYPE M1-BOX VECTOR>\n<TYPEPRIM M1-BOX>\n<SETG M1-V <CHTYPE [1 2] M1-BOX>>\n<TYPE ,M1-V>\n<PRIMTYPE ,M1-V>\n<NTH ,M1-V 2>",
+      "input": "<NEWTYPE M1-BOX VECTOR>\n<TYPEPRIM M1-BOX>\n<SETG M1-V <CHTYPE [1 2] M1-BOX>>\n<TYPE ,M1-V>\n<PRIMTYPE ,M1-V>\n<NTH ,M1-V 2>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-BOX\nVECTOR\n#M1-BOX [1 2]\nM1-BOX\nVECTOR\n2\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-BOX\nVECTOR\n#M1-BOX [1 2]\nM1-BOX\nVECTOR\n2\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "newtype-list-alias",
+      "expression": "<NEWTYPE M1-TAG LIST>\n<SETG M1-L <CHTYPE (1 2 3) M1-TAG>>\n<TYPE ,M1-L>\n<TYPE <REST ,M1-L>>\n<PUT <REST ,M1-L> 1 9>\n<NTH ,M1-L 2>",
+      "input": "<NEWTYPE M1-TAG LIST>\n<SETG M1-L <CHTYPE (1 2 3) M1-TAG>>\n<TYPE ,M1-L>\n<TYPE <REST ,M1-L>>\n<PUT <REST ,M1-L> 1 9>\n<NTH ,M1-L 2>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-TAG\n#M1-TAG (1 2 3)\nM1-TAG\nLIST\n(9 3)\n9\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-TAG\n#M1-TAG (1 2 3)\nM1-TAG\nLIST\n(9 3)\n9\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "false-to-list",
+      "expression": "<SETG M1-F #FALSE (1 2)>\n<SETG M1-L <CHTYPE ,M1-F LIST>>\n<TYPE ,M1-L>\n<PUT ,M1-L 2 9>\n,M1-F",
+      "input": "<SETG M1-F #FALSE (1 2)>\n<SETG M1-L <CHTYPE ,M1-F LIST>>\n<TYPE ,M1-L>\n<PUT ,M1-L 2 9>\n,M1-F\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (1 2)\n(1 2)\nLIST\n(1 9)\n#FALSE (1 9)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE (1 2)\n(1 2)\nLIST\n(1 9)\n#FALSE (1 9)\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "newtype-uvector",
+      "expression": "<NEWTYPE M1-U UVECTOR>\n<SETG M1-V <CHTYPE ![1 2!] M1-U>>\n<TYPE ,M1-V>\n<UTYPE ,M1-V>\n<TYPE <REST ,M1-V>>",
+      "input": "<NEWTYPE M1-U UVECTOR>\n<SETG M1-V <CHTYPE ![1 2!] M1-U>>\n<TYPE ,M1-V>\n<UTYPE ,M1-V>\n<TYPE <REST ,M1-V>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-U\n#M1-U ![1 2!]\nM1-U\nFIX\nUVECTOR\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-U\n#M1-U ![1 2!]\nM1-U\nFIX\nUVECTOR\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "newtype-same-type",
+      "expression": "<NEWTYPE M1-T VECTOR>\n<SETG M1-V <CHTYPE [1 2] M1-T>>\n<==? ,M1-V <CHTYPE ,M1-V M1-T>>\n<=? ,M1-V <CHTYPE ,M1-V M1-T>>",
+      "input": "<NEWTYPE M1-T VECTOR>\n<SETG M1-V <CHTYPE [1 2] M1-T>>\n<==? ,M1-V <CHTYPE ,M1-V M1-T>>\n<=? ,M1-V <CHTYPE ,M1-V M1-T>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-T\n#M1-T [1 2]\nT\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-T\n#M1-T [1 2]\nT\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "newtype-cross-type-identity",
+      "expression": "<NEWTYPE M1-T VECTOR>\n<SETG M1-V [1 2]>\n<SETG M1-W <CHTYPE ,M1-V M1-T>>\n<==? ,M1-V ,M1-W>\n<==? ,M1-V <CHTYPE ,M1-W VECTOR>>\n<=? ,M1-V ,M1-W>",
+      "input": "<NEWTYPE M1-T VECTOR>\n<SETG M1-V [1 2]>\n<SETG M1-W <CHTYPE ,M1-V M1-T>>\n<==? ,M1-V ,M1-W>\n<==? ,M1-V <CHTYPE ,M1-W VECTOR>>\n<=? ,M1-V ,M1-W>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-T\n[1 2]\n#M1-T [1 2]\n#FALSE ()\nT\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-T\n[1 2]\n#M1-T [1 2]\n#FALSE ()\nT\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "false-roundtrip-identity",
+      "expression": "<SETG M1-F #FALSE (1 2)>\n<==? ,M1-F <CHTYPE <CHTYPE ,M1-F LIST> FALSE>>",
+      "input": "<SETG M1-F #FALSE (1 2)>\n<==? ,M1-F <CHTYPE <CHTYPE ,M1-F LIST> FALSE>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (1 2)\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE (1 2)\nT\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

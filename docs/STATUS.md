@@ -62,3 +62,15 @@ zero with empty stderr; one deliberate UVECTOR error case is recorded
 separately. The five-turn capture matches the approved M0 golden except for
 `captured_at`. See `docs/evidence/M1/SEQUENCES.md` for exact evidence and
 limits. Type constructors, full bindings, and 36-bit arithmetic remain open.
+
+## M1 issue #6: type tags and constructors (local PASS)
+
+**Local slice checks: PASS. M1 milestone: NOT YET PASS.** `PRIMTYPE`,
+`TYPEPRIM`, `NEWTYPE`, and structured `CHTYPE` now preserve user type tags
+and shared LIST/VECTOR/UVECTOR storage. The implementation rejects mismatched
+primitive types and unimplemented built-in and WORD conversions. Nine focused
+Confusion cases exited zero with empty stderr; `make test` passes 152 Racket
+checks and 13 Python tests. Source sweep remains 36/36 text files, and the
+five-turn reference capture matches the approved golden except for timestamp.
+See `docs/evidence/M1/TYPES.md` for commands, hashes, and limits. Local/global
+binding semantics and 36-bit arithmetic remain open.
