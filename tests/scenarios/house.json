@@ -1,0 +1,11 @@
+{
+  "name": "house-smoke",
+  "description": "A small deterministic-ish starting-room transcript; random events require separate seeded tests.",
+  "commands": [
+    "look",
+    "open mailbox",
+    "take leaflet",
+    "inventory",
+    "score"
+  ]
+}

@@ -1,0 +1,130 @@
+# MDL on Racket — original Zork preservation harness
+
+> **Status: M0 bootstrap, NOT a playable game.** This repository is a starting
+> point for developing an MDL-compatible `#lang mdl` in Racket and validating it
+> against the reconstructed December 1977 Zork running in Confusion.
+>
+> The historical game sources and interpreter are **not bundled**. The included
+> fetcher retrieves two immutable upstream GitHub commits after network access is
+> available. All verification below is local and reproducible, modulo toolchain
+> versions and original input/time/randomness.
+
+## Goals
+
+1. Execute original MDL game code, not a newly designed text-adventure engine.
+2. Keep the MIT 1977 source unchanged; track reconstructive patches separately.
+3. Establish a working Confusion oracle and differential tests before translating
+   complex semantics.
+4. Build a source-located MDL parser and a `#lang mdl` implementation in Racket.
+5. Eventually offer a browser UI; choose a server-backed Racket runtime first,
+   and only commit to client-side WASM after feasibility experiments.
+6. Keep research evidence in the repository: sources, tests, deviations, decisions,
+   and reproducibility details.
+
+## Prerequisites (Linux)
+
+- Racket (the harness targets modern Racket; compatibility must be confirmed on
+  your installed release)
+- Python 3.11+ and `venv`/`pip`
+- Git, GCC/G++, GNU Make, Perl, and `libgc-dev` for the patched Confusion interpreter
+- Internet access to fetch source checkouts and Python packages
+
+Ubuntu/Debian example:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y racket git build-essential make perl libgc-dev python3-venv
+```
+
+## Installation
+
+```bash
+unzip mdl-racket-zork-harness.zip
+cd mdl-racket-zork-harness
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+raco pkg install --auto --link
+make doctor
+make test
+```
+
+`make doctor` reports detected tools and fails only if required commands are
+missing. Successful detection does not mean the Racket tests or Confusion
+gameplay have passed; run the validation targets explicitly.
+
+`make test` requires Racket and the locally linked Racket package. It tests
+**the bootstrap reader/compiler**, not the original Zork game. If `raco` reports
+that the package is already installed, inspect `raco pkg show` rather than
+blindly reinstalling it.
+
+### Source checkout and historical reference
+
+```bash
+make sources               # downloads/locks original upstream checkouts
+make reference-build       # builds native Confusion (may need toolchain fixes)
+make reference-capture     # saves a JSON capture in artifacts/reference/house.json
+```
+
+Reference source paths are:
+
+- `.cache/upstream/mit_zork/zork/` — original MIT 1977 release
+- `.cache/upstream/mdlzork/mdlzork_771212/patched_confusion/` — playable reconstruction
+- `.cache/upstream/mdlzork/confusion_patched/` — patched C++ MDL interpreter
+
+All `.cache` paths are excluded from Git. `sources.lock.json` pins the commits.
+The `fetch_sources.py` script refuses to replace modified upstream checkouts.
+
+Once a candidate game implementation exists, it must emit a JSON transcript
+in the [documented interchange format](docs/TESTING.md):
+
+```bash
+python scripts/compare_transcripts.py \
+  artifacts/reference/house.json artifacts/candidate/house.json
+```
+
+**No candidate Zork runtime exists yet.** Differential testing is a planned
+acceptance gate, not a capability claimed for M0.
+
+## What the starting code actually supports
+
+- A custom `#lang mdl` reader for a small subset of angle-bracket MDL syntax.
+- Source-located AST nodes and a conservative compiler.
+- Basic `DEFINE` with simple parameters, `SETG`, `GVAL`, local/global references,
+  arithmetic, comparisons, a small `COND` subset, and a few collection forms.
+- An intentionally incomplete compatibility runtime.
+- Parser smoke tests, compile tests, native Confusion reference scripts,
+  transcript comparison, and offline Python harness tests.
+
+**Not supported yet:** complete original MDL syntax, macros, true MDL FALSE,
+actor/room types, shared mutable sequence semantics, general nonlocal control
+flow, event scheduling, original parser, gameplay, and client-side web execution.
+Unsupported compile constructs fail with errors; the reader's acceptance of a
+construct does not imply implemented semantics.
+
+## Working with Codex
+
+Start at [`AGENTS.md`](AGENTS.md), then [`docs/CODEX_START.md`](docs/CODEX_START.md).
+The plan and precise gates are in [`docs/PLAN.md`](docs/PLAN.md). Treat
+[`docs/STATUS.md`](docs/STATUS.md) as the current source of truth: never label
+any untested target as passing.
+
+Recommended first instruction for Codex: **complete M0 verification, run the
+historical source reader against pinned source files, repair found parsing bugs,
+and capture a proven Confusion baseline before implementing additional runtime
+features.**
+
+## Sources, provenance, licensing
+
+- [MITDDC/zork](https://github.com/MITDDC/zork) — original historical sources;
+  MIT-0 **to the extent MIT holds rights**.
+- [heasm66/mdlzork](https://github.com/heasm66/mdlzork) — reconstructed
+  December 1977 game and patched Confusion.
+- Confusion is **GPLv3**; the reconstructed gameplay imports later Zork
+  material. Review rights before redistributing binaries, sources, or hosted
+  commercial variants. The harness MIT-0 license does **not** override upstream
+  licenses. See [`docs/PROVENANCE.md`](docs/PROVENANCE.md).
+
+This repository is an independent development scaffold. It has not been
+validated by running Racket or Confusion in the environment where it was
+packaged; see [`docs/STATUS.md`](docs/STATUS.md) for explicit evidence.

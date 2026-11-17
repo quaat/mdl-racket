@@ -1,0 +1,33 @@
+name: Experimental Confusion baseline (manual)
+on:
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential perl libgc-dev
+      - name: Python dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Fetch pinned sources
+        run: make sources
+      - name: Compile Confusion
+        run: make reference-build
+      - name: Capture reference transcript
+        run: make reference-capture
+      - name: Upload transcript (review required before approval)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: confusion-reference-evidence
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14

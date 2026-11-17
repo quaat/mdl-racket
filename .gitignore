@@ -1,0 +1,14 @@
+.cache/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+compiled/
+artifacts/*
+!artifacts/README.md
+!artifacts/reference/
+!artifacts/reference/.gitkeep
+!artifacts/candidate/
+!artifacts/candidate/.gitkeep
+.DS_Store
+*.log

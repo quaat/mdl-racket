@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "engine": "confusion-patched-1977",
+  "scenario": "house-smoke",
+  "captured_at": "2026-11-17T10:24:07.560376+00:00",
+  "engine_sha256": "95561174b654c01583a7b2ba776f60ceaa40aa26d531d7e4c2391e8d57da9715",
+  "game_sha256": "92fdfa3e7500a91042a57f7d6a46c4e906c9587a4a094b4ca219a6a1b0ffb7a4",
+  "commands": [
+    {
+      "input": "look",
+      "output": ".\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING",
+      "prompt_returned": true
+    },
+    {
+      "input": "open mailbox",
+      "output": " for details\n\nYou are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "take leaflet",
+      "output": "You are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "inventory",
+      "output": "I can't see a mailb here.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "score",
+      "output": "I can't see a leafl here.\n",
+      "prompt_returned": true
+    }
+  ],
+  "initial_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 11:23:53\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY",
+  "complete": true,
+  "error": null,
+  "process_exitstatus": null,
+  "process_signalstatus": 1
+}

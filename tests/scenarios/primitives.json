@@ -1,0 +1,10 @@
+{
+  "name": "primitive-smoke",
+  "description": "Expressions for the native MDL REPL. Expected outputs are intentionally absent until observed and reviewed.",
+  "cases": [
+    { "name": "arithmetic", "expression": "<+ 1 2>" },
+    { "name": "empty-false", "expression": "<>" },
+    { "name": "false-truth", "expression": "<NOT <>>" },
+    { "name": "conditional", "expression": "<COND (<G? 3 2> 42) (T 0)>" }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "mit_zork": {
+      "url": "https://github.com/MITDDC/zork.git",
+      "commit": "d94501340842e006791fce0757dc0043b8ec8916",
+      "purpose": "Unmodified historical source for December 1977 Zork",
+      "license_note": "MIT-0, to the extent MIT holds rights"
+    },
+    "mdlzork": {
+      "url": "https://github.com/heasm66/mdlzork.git",
+      "commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+      "purpose": "Reconstructed 1977 game plus patched Confusion interpreter",
+      "license_note": "Confusion GPL-3.0; inspect licenses/provenance for reconstructed game"
+    }
+  }
+}
