@@ -59,8 +59,7 @@ For every milestone or PR, include:
 - failing-then-passing test evidence where relevant;
 - Confusion transcript paths, approved golden comparisons, and RNG/input settings;
 - security and licensing impact; unresolved risks; next actionable task.
-- a README update for the milestone, or an explicit explanation of why the
-  existing README already states the exact gate result and limits.
+- for each milestone gate, a README update stating its result and limits.
 
 For web features, also include screenshots and manual accessibility checks.
 Never write a 'fully passing' report if the reference engine or language tests
