@@ -4,6 +4,7 @@
 (provide current-mdl-globals current-mdl-locals mdl-setg! mdl-gval mdl-define!
          mdl-set! mdl-lval mdl-with-bindings mdl-apply mdl-list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
+         mdl-word mdl-word? mdl-word-bits
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          current-mdl-atom-space make-mdl-atom-space
          mdl-false mdl-false? mdl-false-payload)
@@ -116,7 +117,7 @@
                           ("FALSE" . "LIST") ("VECTOR" . "VECTOR")
                           ("UVECTOR" . "UVECTOR") ("STRING" . "STRING")
                           ("FIX" . "WORD") ("FLOAT" . "WORD")
-                          ("WORD" . "WORD")))])
+                          ("WORD" . "WORD") ("BITS" . "WORD")))])
     (define type-atom (atom-value (car entry) initial))
     (hash-set! (oblist-value-entries initial) (car entry) type-atom)
     (hash-set! types type-atom (cdr entry))
@@ -233,18 +234,154 @@
 
 (struct mdl-array (kind storage start length element-type))
 (struct mdl-typed-value (type value))
+(struct mdl-word-value (bits))
+(struct mdl-bits-value (width edge))
+
+(define word-mask (sub1 (arithmetic-shift 1 36)))
+(define fix-min (- (arithmetic-shift 1 35)))
+(define fix-max (sub1 (arithmetic-shift 1 35)))
+
+(define mdl-word? mdl-word-value?)
+(define mdl-word-bits mdl-word-value-bits)
+(define (mdl-word value)
+  (unless (and (exact-integer? value) (<= fix-min value word-mask))
+    (error 'mdl-word "expected a 36-bit word value"))
+  (mdl-word-value (bitwise-and value word-mask)))
+
+(define (word-bits-of value)
+  (define base (mdl-base value))
+  (cond [(mdl-word? base) (mdl-word-bits base)]
+        [(and (exact-integer? base) (<= fix-min base fix-max))
+         (bitwise-and base word-mask)]
+        [else (error 'mdl-word "expected FIX or WORD data")]))
+
+(define (word-signed bits)
+  (if (bitwise-bit-set? bits 35)
+      (- bits (arithmetic-shift 1 36))
+      bits))
+
+(define (check-fix who value)
+  (unless (and (exact-integer? value) (<= fix-min value fix-max))
+    (error who "FIX overflow"))
+  value)
+
+(define (check-number who value)
+  (unless (and (real? value) (= value value))
+    (error who "expected MDL FIX or FLOAT"))
+  (when (exact-integer? value) (check-fix who value))
+  value)
+
+(define (arithmetic-step who op left right)
+  (check-number who left)
+  (check-number who right)
+  (if (and (exact-integer? left) (exact-integer? right))
+      (check-fix who
+                 (if (eq? who 'mdl-div)
+                     (begin
+                       (when (zero? right) (error who "division by zero"))
+                       (quotient left right))
+                     (op left right)))
+      (let ([a (exact->inexact left)] [b (exact->inexact right)])
+        (when (and (eq? who 'mdl-div) (zero? b))
+          (error who "division by zero"))
+        (define result (op a b))
+        (when (or (eqv? result +inf.0) (eqv? result -inf.0)
+                  (not (= result result)))
+          (error who "FLOAT overflow"))
+        result)))
+
+(define (mdl-add . values)
+  (for/fold ([acc 0]) ([value (in-list values)])
+    (arithmetic-step 'mdl-add + acc value)))
+
+(define (mdl-sub . values)
+  (cond [(null? values) 0]
+        [(null? (cdr values)) (arithmetic-step 'mdl-sub - 0 (car values))]
+        [else (for/fold ([acc (check-number 'mdl-sub (car values))])
+                        ([value (in-list (cdr values))])
+                (arithmetic-step 'mdl-sub - acc value))]))
+
+(define (mdl-mul . values)
+  (for/fold ([acc 1]) ([value (in-list values)])
+    (arithmetic-step 'mdl-mul * acc value)))
+
+(define (mdl-div . values)
+  (cond [(null? values) 1]
+        [(null? (cdr values)) (arithmetic-step 'mdl-div / 1 (car values))]
+        [else (for/fold ([acc (check-number 'mdl-div (car values))])
+                        ([value (in-list (cdr values))])
+                (arithmetic-step 'mdl-div / acc value))]))
+
+(define (mdl-mod left right)
+  (check-fix 'mdl-mod left)
+  (check-fix 'mdl-mod right)
+  (when (zero? right) (error 'mdl-mod "division by zero"))
+  (modulo left right))
+
+(define (mdl-fix value)
+  (check-number 'mdl-fix value)
+  (check-fix 'mdl-fix (inexact->exact (truncate value))))
+
+(define (mdl-float value)
+  (check-number 'mdl-float value)
+  (exact->inexact value))
+
+(define (mdl-bits width [edge 0])
+  (unless (and (exact-integer? width) (exact-integer? edge)
+               (<= 0 width 36) (<= 0 edge 35) (<= (+ width edge) 36))
+    (error 'mdl-bits "BITS range outside 36-bit WORD"))
+  (mdl-bits-value width edge))
+
+(define (bits-mask bits)
+  (unless (mdl-bits-value? bits) (error 'mdl-bits "expected BITS value"))
+  (sub1 (arithmetic-shift 1 (mdl-bits-value-width bits))))
+
+(define (mdl-getbits from bits)
+  (mdl-word (bitwise-and (arithmetic-shift (word-bits-of from)
+                                          (- (mdl-bits-value-edge bits)))
+                         (bits-mask bits))))
+
+(define (mdl-putbits to bits [from 0])
+  (define mask (arithmetic-shift (bits-mask bits) (mdl-bits-value-edge bits)))
+  (mdl-word (bitwise-and word-mask
+                         (bitwise-ior (bitwise-and (word-bits-of to)
+                                                   (bitwise-not mask))
+                                      (arithmetic-shift
+                                       (bitwise-and (word-bits-of from)
+                                                    (bits-mask bits))
+                                       (mdl-bits-value-edge bits))))))
+
+(define (word-fold op identity values)
+  (mdl-word (bitwise-and word-mask
+                         (for/fold ([acc identity]) ([value (in-list values)])
+                           (op acc (word-bits-of value))))))
+
+(define (mdl-andb . values) (word-fold bitwise-and word-mask values))
+(define (mdl-orb . values) (word-fold bitwise-ior 0 values))
+(define (mdl-xorb . values) (word-fold bitwise-xor 0 values))
+(define (mdl-eqvb . values)
+  (word-fold (lambda (a b) (bitwise-not (bitwise-xor a b)))
+             word-mask values))
+
+(define (mdl-lsh value amount)
+  (check-fix 'mdl-lsh amount)
+  (mdl-word (bitwise-and word-mask
+                         (arithmetic-shift (word-bits-of value)
+                                           (remainder amount 256)))))
 
 (define (mdl-base value)
   (if (mdl-typed-value? value) (mdl-typed-value-value value) value))
 
 (define (mdl-type-name value)
   (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
+        [(mdl-word? value) "WORD"]
+        [(mdl-bits-value? value) "BITS"]
         [(mdl-false? value) "FALSE"]
         [(mdl-atom? value) "ATOM"]
         [(mdl-oblist? value) "OBLIST"]
         [(or (null? value) (mpair? value)) "LIST"]
         [(mdl-array? value) (symbol->string (mdl-array-kind value))]
-        [(exact-integer? value) "FIX"]
+        [(exact-integer? value) (check-fix 'mdl-type value) "FIX"]
         [(and (real? value) (inexact? value)) "FLOAT"]
         [(string? value) "STRING"]
         [else (error 'mdl-type "unsupported MDL type ~a" value)]))
@@ -333,6 +470,12 @@
          (and (eq? (mdl-typed-value-type left) (mdl-typed-value-type right))
               (mdl-identical? (mdl-base left) (mdl-base right)))]
         [(or (mdl-typed-value? left) (mdl-typed-value? right)) #f]
+        [(and (mdl-word? left) (mdl-word? right))
+         (= (mdl-word-bits left) (mdl-word-bits right))]
+        [(and (mdl-bits-value? left) (mdl-bits-value? right))
+         (and (= (mdl-bits-value-width left) (mdl-bits-value-width right))
+              (= (mdl-bits-value-edge left) (mdl-bits-value-edge right)))]
+        [(and (number? left) (number? right)) (eqv? left right)]
         [(and (mdl-false? left) (mdl-false? right))
          (eq? (mdl-false-value-payload left) (mdl-false-value-payload right))]
         [(and (mdl-array? left) (mdl-array? right))
@@ -347,6 +490,10 @@
          (and (eq? (mdl-typed-value-type left) (mdl-typed-value-type right))
               (mdl-equal? (mdl-base left) (mdl-base right)))]
         [(or (mdl-typed-value? left) (mdl-typed-value? right)) #f]
+        [(and (mdl-word? left) (mdl-word? right))
+         (= (mdl-word-bits left) (mdl-word-bits right))]
+        [(and (mdl-bits-value? left) (mdl-bits-value? right))
+         (mdl-identical? left right)]
         [(and (mdl-array? left) (mdl-array? right))
          (and (eq? (mdl-array-kind left) (mdl-array-kind right))
               (= (mdl-array-length left) (mdl-array-length right))
@@ -402,20 +549,27 @@
       value
       (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
         (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
-                   (not (member target '("LIST" "FALSE" "VECTOR" "UVECTOR"))))
+                   (not (member target '("LIST" "FALSE" "VECTOR" "UVECTOR"
+                                         "FIX" "WORD"))))
           (error 'mdl-chtype "unsupported built-in TYPE conversion"))
         (when (and (not (or (null? base) (mpair? base)
                             (mdl-false? base) (mdl-array? base)))
                    (not (string=? (mdl-atom-pname desired-prim) "WORD")))
           (error 'mdl-chtype "unsupported primitive storage conversion"))
-        (cond [(string=? target "LIST")
+        (cond [(string=? (mdl-atom-pname desired-prim) "WORD")
+               (cond [(string=? target "FIX")
+                      (word-signed (word-bits-of base))]
+                     [(string=? target "WORD")
+                      (mdl-word (word-bits-of base))]
+                     [(or (exact-integer? base) (mdl-word? base))
+                      (mdl-typed-value type (mdl-word (word-bits-of base)))]
+                     [else (error 'mdl-chtype "unsupported WORD reinterpretation")])]
+              [(string=? target "LIST")
                (mdl-list-head base 'mdl-chtype)]
               [(string=? target "FALSE")
                (mdl-false (mdl-list-head base 'mdl-chtype))]
               [(or (string=? target "VECTOR") (string=? target "UVECTOR"))
                base]
-              [(string=? (mdl-atom-pname desired-prim) "WORD")
-               (error 'mdl-chtype "unsupported WORD reinterpretation")]
               [(member (mdl-atom-pname desired-prim) '("LIST" "VECTOR" "UVECTOR"))
                (mdl-typed-value type base)]
               [else (error 'mdl-chtype "unsupported primitive type conversion")]))))
@@ -440,6 +594,16 @@
         "TYPEPRIM" mdl-typeprim
         "NEWTYPE" mdl-newtype
         "CHTYPE" mdl-chtype
+        "FIX" mdl-fix
+        "FLOAT" mdl-float
+        "BITS" mdl-bits
+        "GETBITS" mdl-getbits
+        "PUTBITS" mdl-putbits
+        "ANDB" mdl-andb
+        "ORB" mdl-orb
+        "XORB" mdl-xorb
+        "EQVB" mdl-eqvb
+        "LSH" mdl-lsh
         "UTYPE" mdl-utype
         "LIST" mdl-list
         "VECTOR" mdl-vector
@@ -458,11 +622,11 @@
         "REMOVE" mdl-remove
         "OBLIST?" mdl-oblist-of
         "PNAME" mdl-pname
-        "+" +
-        "-" -
-        "*" *
-        "/" /
-        "MOD" modulo
+        "+" mdl-add
+        "-" mdl-sub
+        "*" mdl-mul
+        "/" mdl-div
+        "MOD" mdl-mod
         "L?" (lambda (a b) (mdl-boolean (< a b)))
         "L=?" (lambda (a b) (mdl-boolean (<= a b)))
         "G?" (lambda (a b) (mdl-boolean (> a b)))

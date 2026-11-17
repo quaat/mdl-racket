@@ -3,7 +3,8 @@
 ## Test layers
 
 1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST,
-   mutable sequences, type constructors, and local/global bindings on the
+   mutable sequences, type constructors, local/global bindings, and the
+   documented 36-bit FIX/WORD subset on the
    explicitly supported subset. The target refreshes the linked `#lang mdl`
    module before tests so changed runtime exports are visible.
 2. `python -m pytest -q tests/test_harness.py`: source lock, reference

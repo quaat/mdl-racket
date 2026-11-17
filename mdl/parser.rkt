@@ -137,6 +137,10 @@
             (node 'typed (cons name (read-node! c)))]
            [(and (string-ci=? name "#FALSE") (equal? (peek c) #\())
             (node 'false (mdl-node-value (read-node! c)))]
+           [(and (string-ci=? name "#WORD") (peek c)
+                 (or (char-numeric? (peek c))
+                     (memv (peek c) '(#\* #\- #\+))))
+            (node 'typed (cons name (read-node! c)))]
            [else (node 'atom name)]))]
       [(#\> #\) #\] #\}) (parse-error c "unexpected closing delimiter")]
       [else

@@ -1,0 +1,7 @@
+{
+  "name": "m1-word-reference-errors",
+  "cases": [
+    {"name": "confusion-rot-missing", "expression": "<ROT 1 -1>"},
+    {"name": "division-by-zero", "expression": "</ 1 0>"}
+  ]
+}

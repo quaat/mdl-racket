@@ -87,3 +87,19 @@ are preserved separately, including Confusion's missing `UNASSIGN` builtin.
 golden still matches except for timestamp. See `docs/evidence/M1/BINDINGS.md`.
 Optional/auxiliary arguments, explicit environments, and 36-bit arithmetic
 remain open.
+
+## M1 issue #8: 36-bit FIX and WORD operations (local PASS)
+
+**Local slice checks: PASS for the documented subset. M1 milestone: NOT YET
+PASS.** FIX input and arithmetic now enforce the manual's 36-bit signed
+range; WORD values use a 36-bit mask. The slice implements octal and `#WORD`
+literals, integer division, MOD, WORD casts, ANDB/ORB/XORB/EQVB, LSH,
+BITS/GETBITS/PUTBITS, and type-sensitive numeric identity. `make test`
+passes 262 Racket checks and 13 Python tests; the selected historical text
+sweep still parses 36/36 files. Nine focused Confusion cases exit zero with
+empty stderr, and two deliberate error cases are saved. The house capture
+matches the approved golden except for timestamp. Confusion uses 64-bit
+WORD output, allows FIX beyond the PDP-10 range, returns zero for `</>`,
+and lacks ROT; the Racket target follows the historical manual on 36-bit
+limits and `</>` and leaves ROT unsupported. See
+`docs/evidence/M1/WORDS.md` for exact evidence and limits.
