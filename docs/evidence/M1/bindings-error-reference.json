@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "m1-binding-error-observations",
+  "recorded_at": "2026-11-17T18:09:32.113881+00:00",
+  "interpreter_sha256": "99728037f046ee68fdbb6ef69f44155e3c03f9c0b2b0840fbc218c75024c21e3",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "confusion-unassign-missing",
+      "expression": "<SET M1-X 3>\n<UNASSIGN M1-X>",
+      "input": "<SET M1-X 3>\n<UNASSIGN M1-X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n UNASSIGN \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n UNASSIGN \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "unassigned-gval",
+      "expression": "<GVAL M1-NO-GVAL>",
+      "input": "<GVAL M1-NO-GVAL>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"GVAL\" \n M1-NO-GVAL \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"GVAL\" \n M1-NO-GVAL \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "unassigned-lval",
+      "expression": "<LVAL M1-NO-LVAL>",
+      "input": "<LVAL M1-NO-LVAL>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n M1-NO-LVAL \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n M1-NO-LVAL \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

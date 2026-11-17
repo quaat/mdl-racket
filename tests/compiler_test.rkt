@@ -12,6 +12,6 @@
            (lambda () (compile-program (parse-mdl "<DEFINE F (\"AUX\" X) .X>"))))
 (check-exn exn:fail?
            (lambda () (compile-program (parse-mdl "#ROOM {\"WHOUS\"}"))))
-(check-exn #rx"computed GVAL is not supported"
-           (lambda () (compile-program (parse-mdl ",<CXFLAG .LEAVINGS>"))))
+(check-not-exn
+ (lambda () (compile-program (parse-mdl ",<CXFLAG .LEAVINGS>"))))
 (displayln "minimal #lang mdl compilation tests passed")

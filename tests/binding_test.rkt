@@ -1,0 +1,39 @@
+#lang racket/base
+(require rackunit "../mdl/parser.rkt" "../mdl/compiler.rkt"
+         "../mdl/runtime/core.rkt")
+
+(define-namespace-anchor anchor)
+(define test-namespace (namespace-anchor->namespace anchor))
+(define (run source)
+  (parameterize ([current-namespace test-namespace]
+                 [current-mdl-globals (make-hasheq)]
+                 [current-mdl-locals (list (make-hasheq))]
+                 [current-mdl-atom-space (make-mdl-atom-space)])
+    (for/fold ([result #f]) ([expr (in-list (compile-program (parse-mdl source)))])
+      (eval expr))))
+
+(check-equal? (run "<SET M1-X 3> <SETG M1-X 12> .M1-X") 3)
+(check-equal? (run "<SET M1-X 3> <SETG M1-X 12> ,M1-X") 12)
+(check-equal? (run "<SET M1-X 3> <SETG M1-X 12> <VALUE M1-X>") 3)
+(check-equal? (run "<SETG M1-X 12> <VALUE M1-X>") 12)
+(check-equal? (run "<SET M1-X 3> <LVAL M1-X>") 3)
+(check-equal? (run "<SETG M1-X 12> <GVAL M1-X>") 12)
+(check-equal? (run "<SET M1-X 3> <DEFINE M1-F (M1-X) <SET M1-X 9> .M1-X> <M1-F 4> .M1-X") 3)
+(check-equal? (run "<DEFINE M1-F () <SET M1-FREE 8>> <M1-F> .M1-FREE") 8)
+(check-equal? (run "<SET M1-X 1> <DEFINE M1-G () .M1-X> <DEFINE M1-F (M1-X) <M1-G>> <M1-F 4>") 4)
+(check-equal? (run "<SET M1-X 1> <DEFINE M1-G () .M1-X> <DEFINE M1-F (M1-X) <M1-G>> <M1-F 4> .M1-X") 1)
+(check-equal? (run "<SET M1-X 1> <DEFINE M1-G () <SET M1-X 7>> <DEFINE M1-F (M1-X) <M1-G> .M1-X> <M1-F 4>") 7)
+(check-equal? (run "<SET M1-X 1> <DEFINE M1-G () <SET M1-X 7>> <DEFINE M1-F (M1-X) <M1-G> .M1-X> <M1-F 4> .M1-X") 1)
+(check-equal? (run "<SETG M1-X!-M1-OB 1> <SETG M1-X 2> ,M1-X!-M1-OB") 1)
+(check-equal? (run "<SETG M1-X!-M1-OB 1> <SETG M1-X 2> ,M1-X") 2)
+(check-equal? (run "<SETG M1-A <ATOM \"M1-X\">> <SETG ,M1-A 17> <GVAL ,M1-A>") 17)
+(check-equal? (run "<SETG M1-A <ATOM \"M1-X\">> <SET ,M1-A 17> <LVAL ,M1-A>") 17)
+(check-equal? (run "<SET M1-X 3> <SETG M1-X 12> <GUNASSIGN M1-X> .M1-X") 3)
+(check-true (procedure? (run ",+")))
+(check-exn #rx"unassigned MDL global" (lambda () (run ",M1-NO-GLOBAL")))
+(check-exn #rx"unassigned MDL local" (lambda () (run ".M1-NO-LOCAL")))
+(check-exn #rx"unassigned MDL global" (lambda () (run "<SETG M1-X 12> <GUNASSIGN M1-X> ,M1-X")))
+(check-exn #rx"expected an MDL ATOM" (lambda () (run "<SETG 1 2>")))
+(check-exn #rx"expected an MDL ATOM" (lambda () (run "<SET 1 2>")))
+(check-exn exn:fail? (lambda () (run "<SETG + 9> <+ 1 2>")))
+(displayln "local and global binding tests passed")

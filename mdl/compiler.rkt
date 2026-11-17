@@ -73,9 +73,13 @@
       (when (or (member "AUX" names) (member "OPTIONAL" names)
                 (member "TUPLE" names) (check-duplicates names))
         (unsupported args "non-simple or duplicate DEFINE parameters"))
-      `(mdl-define! ,fn-name
+      `(mdl-define! (mdl-atom ,fn-name)
                     (lambda ,(map local-id names)
-                      ,(compile-sequence (cddr xs) names))))))
+                      (mdl-with-bindings
+                       (list ,@(map (lambda (name)
+                                      `(cons (mdl-atom ,name) ,(local-id name)))
+                                    names))
+                       (lambda () ,(compile-sequence (cddr xs) names))))))))
 
 (define (compile-cond n clauses locals)
   (when (null? clauses) (unsupported n "COND requires at least one clause"))
@@ -129,20 +133,15 @@
           [(DEFINE) (compile-definition n args)]
           [(SETG)
            (unless (= (length args) 2) (unsupported n "SETG expects name and value"))
-           `(mdl-setg! ,(atom-name (first args))
+           `(mdl-setg! ,(compile-expression (first args) locals)
                        ,(compile-expression (second args) locals))]
           [(GVAL)
            (unless (= (length args) 1) (unsupported n "GVAL expects one atom"))
-           `(mdl-gval ,(atom-name (first args)))]
+           `(mdl-gval ,(compile-expression (first args) locals))]
           [(SET)
            (unless (= (length args) 2) (unsupported n "SET expects name and value"))
-           (let ([name (atom-name (first args))])
-             (unless (member name locals)
-               (unsupported n "SET currently supports function parameters only"))
-             (let ([ident (local-id name)])
-               `(let ([new-value ,(compile-expression (second args) locals)])
-                  (set! ,ident new-value)
-                  new-value)))]
+           `(mdl-set! ,(compile-expression (first args) locals)
+                      ,(compile-expression (second args) locals))]
           [(COND) (compile-cond n args locals)]
           [(AND) (compile-and args locals)]
           [(OR) (compile-or args locals)]
@@ -175,14 +174,11 @@
     [(false) (retain-literal n)]
     [(string) (mdl-node-value n)]
     [(local)
-     (let ([name (string-upcase (mdl-node-value n))])
-       (unless (member name locals)
-         (unsupported n (format "unbound MDL local .~a" name)))
-       (local-id name))]
+     `(mdl-lval (mdl-atom ,(string-upcase (mdl-node-value n))))]
     [(global)
-     (unless (string? (mdl-node-value n))
-       (unsupported n "computed GVAL is not supported in M0"))
-     `(mdl-gval ,(string-upcase (mdl-node-value n)))]
+     `(mdl-gval ,(if (string? (mdl-node-value n))
+                     `(mdl-atom ,(string-upcase (mdl-node-value n)))
+                     (compile-expression (mdl-node-value n) locals)))]
     [(quote) (compile-quote (mdl-node-value n))]
     [(list) `(mdl-list ,@(map (lambda (a) (compile-expression a locals))
                               (mdl-node-value n)))]

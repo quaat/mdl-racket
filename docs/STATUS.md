@@ -74,3 +74,16 @@ checks and 13 Python tests. Source sweep remains 36/36 text files, and the
 five-turn reference capture matches the approved golden except for timestamp.
 See `docs/evidence/M1/TYPES.md` for commands, hashes, and limits. Local/global
 binding semantics and 36-bit arithmetic remain open.
+
+## M1 issue #7: local and global bindings (local PASS)
+
+**Local slice checks: PASS. M1 milestone: NOT YET PASS.** Atom-keyed globals
+and dynamic local frames replace the bootstrap string table and lexical-only
+parameter lookup. `SET`, `SETG`, `LVAL`, `GVAL`, `VALUE`, and `GUNASSIGN` have
+reference-backed behavior on the supported function subset. Nine focused
+Confusion cases exited zero with empty stderr; three expected error probes
+are preserved separately, including Confusion's missing `UNASSIGN` builtin.
+`make test` passes 176 Racket checks and 13 Python tests. The approved house
+golden still matches except for timestamp. See `docs/evidence/M1/BINDINGS.md`.
+Optional/auxiliary arguments, explicit environments, and 36-bit arithmetic
+remain open.

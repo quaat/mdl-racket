@@ -1,0 +1,8 @@
+{
+  "name": "m1-binding-error-observations",
+  "cases": [
+    {"name": "confusion-unassign-missing", "expression": "<SET M1-X 3>\n<UNASSIGN M1-X>"},
+    {"name": "unassigned-gval", "expression": "<GVAL M1-NO-GVAL>"},
+    {"name": "unassigned-lval", "expression": "<LVAL M1-NO-LVAL>"}
+  ]
+}
