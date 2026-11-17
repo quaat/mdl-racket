@@ -1,0 +1,14 @@
+{
+  "name": "m1-types-constructors",
+  "cases": [
+    {"name": "primitive-types", "expression": "<PRIMTYPE 1>\n<PRIMTYPE 1.0>\n<PRIMTYPE #FALSE (1)>\n<PRIMTYPE [1 2]>\n<PRIMTYPE ![1 2!] >"},
+    {"name": "typeprim", "expression": "<TYPEPRIM FIX>\n<TYPEPRIM FLOAT>\n<TYPEPRIM FORM>\n<TYPEPRIM VECTOR>\n<TYPEPRIM OBLIST>"},
+    {"name": "newtype-vector", "expression": "<NEWTYPE M1-BOX VECTOR>\n<TYPEPRIM M1-BOX>\n<SETG M1-V <CHTYPE [1 2] M1-BOX>>\n<TYPE ,M1-V>\n<PRIMTYPE ,M1-V>\n<NTH ,M1-V 2>"},
+    {"name": "newtype-list-alias", "expression": "<NEWTYPE M1-TAG LIST>\n<SETG M1-L <CHTYPE (1 2 3) M1-TAG>>\n<TYPE ,M1-L>\n<TYPE <REST ,M1-L>>\n<PUT <REST ,M1-L> 1 9>\n<NTH ,M1-L 2>"},
+    {"name": "false-to-list", "expression": "<SETG M1-F #FALSE (1 2)>\n<SETG M1-L <CHTYPE ,M1-F LIST>>\n<TYPE ,M1-L>\n<PUT ,M1-L 2 9>\n,M1-F"},
+    {"name": "newtype-uvector", "expression": "<NEWTYPE M1-U UVECTOR>\n<SETG M1-V <CHTYPE ![1 2!] M1-U>>\n<TYPE ,M1-V>\n<UTYPE ,M1-V>\n<TYPE <REST ,M1-V>>"},
+    {"name": "newtype-same-type", "expression": "<NEWTYPE M1-T VECTOR>\n<SETG M1-V <CHTYPE [1 2] M1-T>>\n<==? ,M1-V <CHTYPE ,M1-V M1-T>>\n<=? ,M1-V <CHTYPE ,M1-V M1-T>>"},
+    {"name": "newtype-cross-type-identity", "expression": "<NEWTYPE M1-T VECTOR>\n<SETG M1-V [1 2]>\n<SETG M1-W <CHTYPE ,M1-V M1-T>>\n<==? ,M1-V ,M1-W>\n<==? ,M1-V <CHTYPE ,M1-W VECTOR>>\n<=? ,M1-V ,M1-W>"},
+    {"name": "false-roundtrip-identity", "expression": "<SETG M1-F #FALSE (1 2)>\n<==? ,M1-F <CHTYPE <CHTYPE ,M1-F LIST> FALSE>>"}
+  ]
+}

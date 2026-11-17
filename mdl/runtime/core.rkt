@@ -32,7 +32,7 @@
 
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
-(struct atom-space (initial root named))
+(struct atom-space (initial root named types builtins))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -40,6 +40,8 @@
 
 (define (make-mdl-atom-space)
   (define named (make-hasheq))
+  (define types (make-hasheq))
+  (define builtins (make-hasheq))
   (define root (oblist-value #f (make-hash) 151))
   (define root-name (atom-value "ROOT" root))
   (hash-set! (oblist-value-entries root) "ROOT" root-name)
@@ -48,7 +50,17 @@
   (hash-set! (oblist-value-entries root) "INITIAL" initial-name)
   (define initial (oblist-value initial-name (make-hash) 151))
   (hash-set! named initial-name initial)
-  (atom-space initial root named))
+  (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
+                          ("LIST" . "LIST") ("FORM" . "LIST")
+                          ("FALSE" . "LIST") ("VECTOR" . "VECTOR")
+                          ("UVECTOR" . "UVECTOR") ("STRING" . "STRING")
+                          ("FIX" . "WORD") ("FLOAT" . "WORD")
+                          ("WORD" . "WORD")))])
+    (define type-atom (atom-value (car entry) initial))
+    (hash-set! (oblist-value-entries initial) (car entry) type-atom)
+    (hash-set! types type-atom (cdr entry))
+    (hash-set! builtins type-atom #t))
+  (atom-space initial root named types builtins))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
@@ -159,9 +171,14 @@
                 (cons (mcar remaining) (loop (mcdr remaining) seen))])))
 
 (struct mdl-array (kind storage start length element-type))
+(struct mdl-typed-value (type value))
+
+(define (mdl-base value)
+  (if (mdl-typed-value? value) (mdl-typed-value-value value) value))
 
 (define (mdl-type-name value)
-  (cond [(mdl-false? value) "FALSE"]
+  (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
+        [(mdl-false? value) "FALSE"]
         [(mdl-atom? value) "ATOM"]
         [(mdl-oblist? value) "OBLIST"]
         [(or (null? value) (mpair? value)) "LIST"]
@@ -175,15 +192,16 @@
   (mdl-array 'VECTOR (list->vector values) 0 (length values) #f))
 
 (define (mdl-uvector . values)
-  (define element-type (and (pair? values) (mdl-type-name (car values))))
+  (define element-type (and (pair? values) (mdl-type (car values))))
   (for ([value (in-list values)])
     (when (or (string=? (mdl-type-name value) "STRING")
-              (not (string=? (mdl-type-name value) element-type)))
+              (not (eq? (mdl-type value) element-type)))
       (error 'mdl-uvector "UVECTOR elements must have one permitted TYPE")))
   (mdl-array 'UVECTOR (list->vector values) 0 (length values) element-type))
 
 (define (mdl-list-head value who)
-  (cond [(mdl-false? value) (mdl-false-value-payload value)]
+  (cond [(mdl-typed-value? value) (mdl-list-head (mdl-base value) who)]
+        [(mdl-false? value) (mdl-false-value-payload value)]
         [(or (null? value) (mpair? value)) value]
         [else (error who "unsupported structured value ~a" value)]))
 
@@ -196,22 +214,24 @@
           [else (error who "offset out of range")])))
 
 (define (mdl-length value)
-  (cond [(mdl-array? value) (mdl-array-length value)]
+  (define base (mdl-base value))
+  (cond [(mdl-array? base) (mdl-array-length base)]
         [(string? value) (string-length value)]
         [else (length (mdl-list->list (mdl-list-head value 'mdl-length)))]))
 
 (define (mdl-rest value [offset 1])
   (unless (and (exact-integer? offset) (>= offset 0))
     (error 'mdl-rest "offset out of range"))
-  (if (mdl-array? value)
+  (define base (mdl-base value))
+  (if (mdl-array? base)
       (begin
-        (when (> offset (mdl-array-length value))
+        (when (> offset (mdl-array-length base))
           (error 'mdl-rest "offset out of range"))
-        (if (zero? offset) value
-            (mdl-array (mdl-array-kind value) (mdl-array-storage value)
-                       (+ (mdl-array-start value) offset)
-                       (- (mdl-array-length value) offset)
-                       (mdl-array-element-type value))))
+        (if (and (zero? offset) (not (mdl-typed-value? value))) value
+            (mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                       (+ (mdl-array-start base) offset)
+                       (- (mdl-array-length base) offset)
+                       (mdl-array-element-type base))))
       (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))
 
 (define (mdl-check-index who value index)
@@ -220,20 +240,22 @@
 
 (define (mdl-nth value [index 1])
   (mdl-check-index 'mdl-nth value index)
-  (if (mdl-array? value)
-      (vector-ref (mdl-array-storage value) (+ (mdl-array-start value) (sub1 index)))
+  (define base (mdl-base value))
+  (if (mdl-array? base)
+      (vector-ref (mdl-array-storage base) (+ (mdl-array-start base) (sub1 index)))
       (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth) (sub1 index) 'mdl-nth))))
 
 (define (mdl-put! value index item)
   (mdl-check-index 'mdl-put value index)
-  (if (mdl-array? value)
+  (define base (mdl-base value))
+  (if (mdl-array? base)
       (begin
-        (when (and (eq? (mdl-array-kind value) 'UVECTOR)
-                   (not (string=? (mdl-type-name item)
-                                  (mdl-array-element-type value))))
+        (when (and (eq? (mdl-array-kind base) 'UVECTOR)
+                   (not (eq? (mdl-type item)
+                             (mdl-array-element-type base))))
           (error 'mdl-put "UVECTOR PUT type violation"))
-        (vector-set! (mdl-array-storage value)
-                     (+ (mdl-array-start value) (sub1 index)) item))
+        (vector-set! (mdl-array-storage base)
+                     (+ (mdl-array-start base) (sub1 index)) item))
       (set-mcar! (mdl-list-tail (mdl-list-head value 'mdl-put)
                                  (sub1 index) 'mdl-put) item))
   value)
@@ -246,15 +268,25 @@
   head)
 
 (define (mdl-identical? left right)
-  (if (and (mdl-array? left) (mdl-array? right))
+  (cond [(and (mdl-typed-value? left) (mdl-typed-value? right))
+         (and (eq? (mdl-typed-value-type left) (mdl-typed-value-type right))
+              (mdl-identical? (mdl-base left) (mdl-base right)))]
+        [(or (mdl-typed-value? left) (mdl-typed-value? right)) #f]
+        [(and (mdl-false? left) (mdl-false? right))
+         (eq? (mdl-false-value-payload left) (mdl-false-value-payload right))]
+        [(and (mdl-array? left) (mdl-array? right))
       (and (eq? (mdl-array-kind left) (mdl-array-kind right))
            (eq? (mdl-array-storage left) (mdl-array-storage right))
            (= (mdl-array-start left) (mdl-array-start right))
-           (= (mdl-array-length left) (mdl-array-length right)))
-      (eq? left right)))
+           (= (mdl-array-length left) (mdl-array-length right)))]
+        [else (eq? left right)]))
 
 (define (mdl-equal? left right)
-  (cond [(and (mdl-array? left) (mdl-array? right))
+  (cond [(and (mdl-typed-value? left) (mdl-typed-value? right))
+         (and (eq? (mdl-typed-value-type left) (mdl-typed-value-type right))
+              (mdl-equal? (mdl-base left) (mdl-base right)))]
+        [(or (mdl-typed-value? left) (mdl-typed-value? right)) #f]
+        [(and (mdl-array? left) (mdl-array? right))
          (and (eq? (mdl-array-kind left) (mdl-array-kind right))
               (= (mdl-array-length left) (mdl-array-length right))
               (for/and ([i (in-range (mdl-array-length left))])
@@ -277,17 +309,70 @@
   (if value (mdl-atom "T") (mdl-false '())))
 
 (define (mdl-type value)
-  (mdl-atom (mdl-type-name value)))
+  (if (mdl-typed-value? value)
+      (mdl-typed-value-type value)
+      (mdl-atom (mdl-type-name value))))
+
+(define (mdl-typeprim type)
+  (require-atom 'mdl-typeprim type)
+  (define prim
+    (hash-ref (atom-space-types (current-mdl-atom-space)) type
+              (lambda () (error 'mdl-typeprim "unknown MDL TYPE ~a" (mdl-atom-pname type)))))
+  (mdl-atom prim))
+
+(define (mdl-primtype value)
+  (mdl-typeprim (mdl-type value)))
+
+(define (mdl-newtype name base-type)
+  (require-atom 'mdl-newtype name)
+  (define prim (mdl-typeprim base-type))
+  (define types (atom-space-types (current-mdl-atom-space)))
+  (when (hash-has-key? types name)
+    (error 'mdl-newtype "MDL TYPE already exists: ~a" (mdl-atom-pname name)))
+  (hash-set! types name (mdl-atom-pname prim))
+  name)
+
+(define (mdl-chtype value type)
+  (require-atom 'mdl-chtype type)
+  (define desired-prim (mdl-typeprim type))
+  (unless (eq? (mdl-primtype value) desired-prim)
+    (error 'mdl-chtype "primitive type mismatch"))
+  (if (eq? (mdl-type value) type)
+      value
+      (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
+        (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
+                   (not (member target '("LIST" "FALSE" "VECTOR" "UVECTOR"))))
+          (error 'mdl-chtype "unsupported built-in TYPE conversion"))
+        (when (and (not (or (null? base) (mpair? base)
+                            (mdl-false? base) (mdl-array? base)))
+                   (not (string=? (mdl-atom-pname desired-prim) "WORD")))
+          (error 'mdl-chtype "unsupported primitive storage conversion"))
+        (cond [(string=? target "LIST")
+               (mdl-list-head base 'mdl-chtype)]
+              [(string=? target "FALSE")
+               (mdl-false (mdl-list-head base 'mdl-chtype))]
+              [(or (string=? target "VECTOR") (string=? target "UVECTOR"))
+               base]
+              [(string=? (mdl-atom-pname desired-prim) "WORD")
+               (error 'mdl-chtype "unsupported WORD reinterpretation")]
+              [(member (mdl-atom-pname desired-prim) '("LIST" "VECTOR" "UVECTOR"))
+               (mdl-typed-value type base)]
+              [else (error 'mdl-chtype "unsupported primitive type conversion")]))))
 
 (define (mdl-utype value)
-  (unless (and (mdl-array? value) (eq? (mdl-array-kind value) 'UVECTOR))
+  (define base (mdl-base value))
+  (unless (and (mdl-array? base) (eq? (mdl-array-kind base) 'UVECTOR))
     (error 'mdl-utype "UTYPE requires UVECTOR"))
-  (if (mdl-array-element-type value)
-      (mdl-atom (mdl-array-element-type value))
+  (if (mdl-array-element-type base)
+      (mdl-array-element-type base)
       (mdl-false '())))
 
 (define builtin-table
   (hash "TYPE" mdl-type
+        "PRIMTYPE" mdl-primtype
+        "TYPEPRIM" mdl-typeprim
+        "NEWTYPE" mdl-newtype
+        "CHTYPE" mdl-chtype
         "UTYPE" mdl-utype
         "LIST" mdl-list
         "VECTOR" mdl-vector
