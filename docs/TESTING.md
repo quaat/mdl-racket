@@ -18,6 +18,12 @@
    transcript comparison (once a candidate game engine is available).
 8. Future: state diff, randomized test corpus, complete 500-point game, browser.
 
+The M1 candidate gate also runs `tests/integration_test.rkt` for structural
+versus identity equality and left-to-right argument evaluation. Three
+matching Confusion cases are saved under `docs/evidence/M1/integration-*`.
+See `docs/evidence/M1/GATE.md` for the candidate gate matrix and exact
+commands. This is a semantic micro-runtime gate, not a Zork gameplay gate.
+
 ## Frozen 1977 baseline
 
 The archived MIT source omits some components required to run the game.

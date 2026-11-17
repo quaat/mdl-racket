@@ -40,6 +40,11 @@
     [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
     [(regexp-match? #px"^\\*[0-7]+\\*$" val)
      (fix-or-float (string->number (substring val 1 (sub1 (string-length val))) 8))]
+    [(regexp-match? #px"^\\*[0-9]+\\*$" val)
+     (unsupported n "invalid octal FIX token")]
+    [(regexp-match? #px"^[+-]?[0-9]+(\\.[0-9]*)?[Ee][+-]?[0-9]+$" val)
+     (unsupported n "unsupported numeric token")]
+    [(string-prefix? val "#") (unsupported n "unsupported # reader token")]
     [else `(mdl-atom ,val)]))
 
 (define (compile-typed n)

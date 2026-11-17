@@ -288,6 +288,21 @@ shift direction, BITS extraction/insertion, and negative inputs. FLOAT
 precision and PDP-10 36-bit FLOAT bit reinterpretation, ROT, machine-specific
 overflow-control switches, and random-number behavior remain unsupported.
 
+## M1 integrated equality and evaluation order audit
+
+Three isolated pinned Confusion cases in
+`docs/evidence/M1/integration-cases.json` and `integration-reference.json`
+all exited zero with empty stderr. FIX and FLOAT values with the same
+mathematical magnitude are neither structurally nor identically equal;
+two separately read large FIX values compare equal by both predicates.
+Separate LIST and VECTOR values compare structurally equal but not
+identical. Function arguments evaluate left to right: the second argument
+observes the global mutation made by the first. Matching assertions are in
+`tests/integration_test.rkt`. The compiler also rejects an unknown `#`
+reader token, scientific numeric notation outside the supported compiler
+subset, and malformed octal input explicitly; these checks fail before
+runtime evaluation rather than creating ordinary atoms.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in

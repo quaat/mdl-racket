@@ -1,4 +1,4 @@
-# Status — 2026-11-17 (M0 gate approved)
+# Status — 2026-11-17 (M1 candidate gate locally verified)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -18,11 +18,13 @@ Codex conversation on 2026-11-17; its SHA256 is
 `ef270218760101039e499e3dd2b47834cd080f432209822db691fd936d70f7fc`.
 [GitHub issue #1](https://github.com/quaat/mdl-racket/issues/1) and merged
 [PR #2](https://github.com/quaat/mdl-racket/pull/2) track M0. Both PR workflows
-passed. **M1 is current**, starting with a separately gated values/FALSE/atoms
-slice. This status does not claim Racket game execution or runtime equivalence.
+passed. **M1 is current**; its stacked candidate gate passes locally while
+the mainline integration awaits review. This status does not claim Racket
+game execution or runtime equivalence.
 
-The first M1 slice is [issue #3](https://github.com/quaat/mdl-racket/issues/3)
-(first-class FALSE); the issue list and dependency graph are in `docs/PLAN.md`.
+The M1 issue list and dependency graph are in `docs/PLAN.md`. Slice sections
+below record each feature at its own PR head; later slices extend those
+capabilities.
 
 See `docs/evidence/M0/REPORT.md` for exact commands, hashes, and limits.
 
@@ -103,3 +105,20 @@ WORD output, allows FIX beyond the PDP-10 range, returns zero for `</>`,
 and lacks ROT; the Racket target follows the historical manual on 36-bit
 limits and `</>` and leaves ROT unsupported. See
 `docs/evidence/M1/WORDS.md` for exact evidence and limits.
+
+## M1 integrated candidate gate
+
+**PASS on the stacked M1 candidate branch and gate audit CI; mainline
+integration NOT RUN.**
+The M1 gate in `docs/PLAN.md` requires independent Confusion-backed primitive
+tests, property and mutation-aliasing tests, and explicit failure on
+unsupported constructs. All five primitive slices have local and harness/
+native CI PASS. The integrated audit adds three Confusion cases for equality
+and evaluation order, nine Racket assertions, and three red-to-green strict
+compiler checks. `make test` passes 274 Racket checks and 13 Python tests;
+`make sources` verifies both pins; the current M1 sweep parses all 36 text
+files; the five-turn reference capture matches the approved M0 golden except
+for `captured_at`. Details and limitations are in
+`docs/evidence/M1/GATE.md`. PRs #12–#16 and this gate closure PR remain
+unmerged, so the gate is not yet recorded as PASS on `main`. No Racket Zork
+execution or gameplay parity is claimed.

@@ -1,8 +1,8 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 gate PASS; M1 semantic runtime work is in progress. NOT a
-> playable game.** This repository is a starting point for developing an
-> MDL-compatible `#lang mdl` in Racket and validating it
+> **Status: M0 gate PASS; M1 candidate gate PASS on the stacked branch,
+> pending mainline merge. NOT a playable game.** This repository is a starting
+> point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
 > The historical game sources and interpreter are **not bundled**. The included
@@ -94,9 +94,11 @@ acceptance gate, not a capability claimed for M0.
 M0 passed its source, reader, native Confusion, test, and approved golden
 transcript gates. The first M1 slice,
 [FALSE values and truth operators](https://github.com/quaat/mdl-racket/pull/10),
-has merged with passing local and CI checks. The atom/OBLIST slice is under
-review; mutable sequence, type constructor, binding, and 36-bit WORD tests
-pass locally. The M1 milestone remains open. Reproduce the checks with
+has merged with passing local and CI checks. The five later M1 slices and
+integrated gate pass on the stacked candidate branch and in CI; PRs #12–#16
+and [gate closure PR #18](https://github.com/quaat/mdl-racket/pull/18) are
+pending merge. The M1 gate is **NOT RUN on `main`**.
+Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
 See the [M0 report](docs/evidence/M0/REPORT.md),
@@ -105,7 +107,8 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
 [M1 sequence report](docs/evidence/M1/SEQUENCES.md),
 [M1 type report](docs/evidence/M1/TYPES.md),
 [M1 binding report](docs/evidence/M1/BINDINGS.md),
-[M1 word report](docs/evidence/M1/WORDS.md), and
+[M1 word report](docs/evidence/M1/WORDS.md),
+[M1 gate report](docs/evidence/M1/GATE.md), and
 [current gate status](docs/STATUS.md) for hashes, outputs, and limits.
 
 - A custom `#lang mdl` reader for a small subset of angle-bracket MDL syntax.
@@ -137,6 +140,10 @@ control flow, ROT, PDP-10 FLOAT bit layout, event scheduling,
 original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.
+
+The next milestone is [M2 execution semantics and MDL compilation](docs/PLAN.md).
+It begins after the M1 PR stack is reviewed and merged. M2 must execute initial
+original source definitions; it does not assume a new game engine.
 
 ## Working with Codex
 
