@@ -50,3 +50,18 @@ comments' historical associations still omitted from the AST. A parse result
 does not imply evaluation support. The golden game capture includes a build
 timestamp in the Confusion banner and records SIGHUP cleanup after the fifth
 command; future comparisons must account for the documented protocol.
+
+## ADR-0005: Modern compiler compatibility for pinned Confusion
+
+**Decision:** Build the exported Confusion copy with `-include cstdint` in
+`CXXFLAGS`. Keep the upstream checkout and exported source bytes unchanged.
+
+**Why:** The Ubuntu 24.04 CI compiler rejects `uint64_t` in `macros.hpp`
+because that header does not include `<cstdint>`. The local older compiler
+accepted the same pinned source through a transitive include. Explicitly
+supplying the standard header fixes the toolchain dependency without editing
+GPLv3 source in the MIT-0 harness.
+
+**Consequence:** The native binary hash changes on rebuild because Confusion
+embeds compile time in its banner. The golden transcript must be reviewed
+against the new build, with toolchain/version differences recorded.

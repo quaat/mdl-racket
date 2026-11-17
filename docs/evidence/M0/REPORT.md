@@ -1,21 +1,25 @@
 # M0 local verification report — 2026-11-17
 
-**Gate: BLOCKED.** Local source, reader, test, native build, capture, and probe
-checks pass. Remote CI and human approval of the golden fixture remain open.
+**Gate: FAIL on first native CI run; fix pending rerun.** Local source, reader,
+test, native build, capture, and probe checks pass with the documented compiler
+compatibility flag. Human approval of the golden fixture remains open.
 GitHub issue [#1](https://github.com/quaat/mdl-racket/issues/1) tracks M0;
-the work is on `feat/m0-reader-reference-validation`. The `gh` CLI token is
+PR [#2](https://github.com/quaat/mdl-racket/pull/2) carries the work on
+`feat/m0-reader-reference-validation`. The `gh` CLI token is
 invalid, but the connected GitHub app can create issues and PRs.
 
 ## Provenance and environment
 
-- Local base commit SHA: `862feac` (`initial version`). The M0 implementation
-  commit SHA will be recorded in the PR description/comment after commit.
+- Local base commit SHA: `862feacc4158855f8d32052bafa92f72e408a96d`
+  (`initial version`). M0 implementation commit:
+  `0c71aa2a74bf423cf2edfd9c07186f8a243d828e`. The compatibility follow-up
+  commit SHA will be recorded in the PR comment after commit.
 - Archival `MITDDC/zork`: `d94501340842e006791fce0757dc0043b8ec8916`.
 - Reconstructed `heasm66/mdlzork` and Confusion: `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`.
 - Both pinned worktrees had empty `git status --porcelain` after building.
 - Linux 5.10.0-46-amd64 x86_64; Racket 7.9 [bc]; Python 3.13.0;
   pexpect 4.9.0; pytest 8.4.2; g++ 10.2.1; BDW GC 8.0.4.
-- Native `mdli` SHA256: `735334939c09ea60a0240aa257ba56e647953ff9ab0aa6358040a5bf15214e48`.
+- Native `mdli` SHA256 after compatibility rebuild: `99728037f046ee68fdbb6ef69f44155e3c03f9c0b2b0840fbc218c75024c21e3`.
 - Reconstructed game image SHA256: `92fdfa3e7500a91042a57f7d6a46c4e906c9587a4a094b4ca219a6b0ffb7a4`.
 - Source manifest: `artifacts/environment/sources.json` (local generated artifact).
 
@@ -45,6 +49,10 @@ invalid, but the connected GitHub app can create issues and PRs.
 | `make reference-capture` and `make reference-probe` (plain, after venv setup) | 0 each | Both outputs match reviewed evidence apart from timestamps |
 | `gh auth status` | 1 | Active account token invalid |
 | `git switch -c feat/m0-reader-reference-validation` | 0 after scoped `.git` write approval | M0 worktree carried onto a review branch |
+| [GitHub Harness checks run 44124806506](https://github.com/quaat/mdl-racket/actions/runs/44124806506) | 0 | Offline Racket and Python jobs succeeded on PR #2 |
+| [GitHub native run 44124806654](https://github.com/quaat/mdl-racket/actions/runs/44124806654) | 2 | `macros.hpp:125:9: error: ‘uint64_t’ does not name a type`; compiler suggests `<cstdint>`; source sweep step passed |
+| `make reference-build` with `-include cstdint` | 0 | Exported Confusion copy builds locally; upstream source unchanged; `_XOPEN_SOURCE` redefinition warning in `mdl_assoc.cpp` |
+| `make reference-capture`; `make reference-probe`; `make test` after rebuild | 0 each | Five prompts and 12 primitive exits clean; 26 Racket and 13 Python tests pass |
 
 During the final rerun, `make test` temporarily exited 2 because
 `mdl/runtime/core.rkt` had appeared at `mdl/lang/runtime/core.rkt`; the
@@ -63,7 +71,7 @@ Other `.nbin` and saved-game artifacts were not treated as textual MDL source.
 ## Reference review and golden
 
 The reviewed capture is `house-golden.json`, SHA256
-`f1f91f95ad0c197598207047d70c30afece4243b637b2dd0a09130a8e09326cb`.
+`ef270218760101039e499e3dd2b47834cd080f432209822db691fd936d70f7fc`.
 Input is `west`, `open mailbox`, `take leaflet`, `inventory`, `score`, starting
 from the pinned save's north side of the house. The output reaches West of
 House, reveals and takes the leaflet, shows it in inventory, and reports 0/500
@@ -77,12 +85,16 @@ terminates the still-running game: `process_exitstatus=null`,
 `process_signalstatus=1` (SIGHUP). Confusion's banner includes a C++ build
 timestamp, so rebuilding changes `initial_output`. No RNG seed was set; the
 two matching runs establish stability only for this five-command scenario.
+After the compiler compatibility rebuild, all five command outputs and the
+opening scene after the banner matched the earlier reviewed capture exactly;
+the engine hash and embedded compile timestamp changed. The fixture was
+manually reviewed and refreshed for the new local binary.
 The archival binary is not the reconstructed save image. Archive versus
 playable reconstruction patches remain documented in `docs/PROVENANCE.md` and
 upstream `mdlzork_771212/README.md`; no local patch was applied.
 
 Primitive reference evidence is `primitives.json`, SHA256
-`eb39904e80027bad2808d26b685e93d8ce2df5cf513d4d050b4b92c1635f24a5`,
+`76271e83e6440f4b017a44732a721ae56e9765275039e63179689a6e8da6ee0e`,
 with exact per-case `.mud` input and `.reference.txt` raw stdout in `probes/`.
 The native REPL has no prompt. Each process received its expression sequence
 and `<QUIT>`, exited 0, and wrote no stderr. Findings for FALSE versus `NIL`,
@@ -105,16 +117,17 @@ and `<QUIT>`, exited 0, and wrote no stderr. Findings for FALSE versus `NIL`,
   upstream checkout/build area; no C++ code was copied into the MIT-0 runtime
   and no mixed binary was distributed.
 - CI workflow files exist locally. The native workflow only uploads JSON
-  evidence; it has not run on GitHub. Remote CI results are required before
-  calling the M0 gate PASS.
+  evidence. Offline CI passed. Native CI failed on an omitted standard C++
+  header in pinned Confusion; a build-only `-include cstdint` workaround is
+  prepared and must pass remotely before M0 can pass. See `docs/PROVENANCE.md`.
 
 ## Blocker and next action
 
-Root cause: remote CI and human golden approval have not yet occurred. The
-repository and [M0 issue #1](https://github.com/quaat/mdl-racket/issues/1)
-now exist. **Recommended next action:** check both PR workflows and request
-review/approval of the golden transcript there. Until
-then, M0 is BLOCKED and M1 work does not start.
+Root cause: Ubuntu 24.04 native CI rejected `uint64_t` because pinned Confusion
+omits `<cstdint>`; the build flag fixes local compilation without changing
+upstream bytes. **Recommended next action:** push the compatibility fix and
+confirm the native PR workflow passes, then obtain human approval of the
+golden transcript. Until then, M0 is FAIL and M1 work does not start.
 
 When M0 closes, proposed M1 issue order is: values/FALSE/atoms → mutable
 LIST/VECTOR/UVECTOR views and identity → types/constructors → local/global

@@ -24,6 +24,16 @@ Add future development patches under `patches/` (not implemented in M0), each
 with an ADR, tests, changed-file SHA, and provenance. Never edit archival
 sources or quietly ship historical data as if newly authored.
 
+### M0 compiler compatibility flag
+
+The native reference build uses `-include cstdint` in `CXXFLAGS` when compiling
+the exported copy of pinned Confusion. The unmodified `macros.hpp` uses
+`uint64_t` without including its defining header; Ubuntu 24.04's compiler
+reports that omission. The flag supplies only a standard declaration and
+does not modify `.cache/upstream/`, game data, or Confusion semantics. The
+exact flag set is printed by `scripts/build_confusion.sh` and recorded in the
+M0 report. No source patch is applied.
+
 ## Licensing and redistribution
 
 The new scaffold code in this repository is under MIT-0 (see `LICENSE`).
