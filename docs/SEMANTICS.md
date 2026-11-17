@@ -150,6 +150,36 @@ atom space. Dynamic `.OBLIST` lookup, `BLOCK`/`ENDBLOCK`, associations, and
 full structured OBLIST access remain separate work; unsupported calls must
 error rather than silently return a placeholder.
 
+## M1 issue #5 specification: mutable sequence views
+
+The [MDL manual, chapter 7](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/)
+specifies 1-based `NTH`/`PUT`, `REST` with default offset 1, and `PUTREST`
+that rewires the tail of a LIST-primtype head. `PUT` returns the original
+structure. LIST tails are shared pointer chains; VECTOR and UVECTOR `REST`
+values share backing storage. `REST` retypes its result to the source's
+PRIMTYPE, so `REST` of FALSE returns LIST. UVECTOR elements must have one TYPE.
+Quoted structured literals retain identity across function calls; separate
+source literals remain distinct. Empty LIST values are canonical for `==?`.
+
+Pinned Confusion inputs and raw output are in
+`docs/evidence/M1/sequences-cases.json` and `sequences-reference.json`:
+ten processes exited zero with empty stderr. Mutation through LIST, VECTOR,
+and UVECTOR REST views was visible from each original structure. `PUTREST`
+through a LIST tail changed the original `(1 2 3)` to `(1 2 8)`; `PUT` returned
+its input by identity. `REST 0` and repeated `REST` of the same structure
+were `==?`. `TYPE <REST #FALSE (1 2)>` returned LIST, and PUT on the FALSE
+changed its payload. `UTYPE ![1 2!]` returned FIX. A separate deliberate
+`<PUT ![1 2!] 1 "bad">` probe is retained in
+`sequences-error-reference.json`: Confusion printed
+`UVECTOR-PUT-TYPE-VIOLATION` and wrote an error to stderr, so the probe command
+correctly exited 1 rather than treating the case as a passing transcript.
+
+Tests for LIST/REST/PUT/PUTREST, VECTOR/UVECTOR aliasing, type restrictions,
+boundary errors, and quoted literal identity belong in
+`tests/sequence_test.rkt`. Dynamic type tags, GROW, BACK/TOP, segment syntax,
+and full STRING/BYTES view semantics remain outside this slice and must fail
+explicitly rather than being approximated.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in

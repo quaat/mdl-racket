@@ -12,7 +12,8 @@
 
 (check-true (mdl-false? (run "<>")))
 (check-equal? (mdl-false-payload (run "<>")) '())
-(check-equal? (mdl-false-payload (run "#FALSE (1 NIL)")) '(1 NIL))
+(check-equal? (car (mdl-false-payload (run "#FALSE (1 NIL)"))) 1)
+(check-eq? (cadr (mdl-false-payload (run "#FALSE (1 NIL)"))) (mdl-atom "NIL"))
 (check-false (mdl-truthy? (run "#FALSE (1)")))
 (check-true (mdl-truthy? (run "NIL")))
 (check-eq? (run "NIL") (mdl-atom "NIL"))
@@ -43,10 +44,9 @@
 (check-equal? (run "<SETG X 0> <COND (7) (T <SETG X 1>)> ,X") 0)
 (check-exn #rx"COND requires at least one clause"
            (lambda () (compile-program (parse-mdl "<COND>"))))
-(check-exn #rx"quoting this MDL form is not implemented"
+(check-exn #rx"this MDL data construct is not implemented"
            (lambda () (compile-program (parse-mdl "#FALSE (<+ 1 2>)"))))
 (check-exn #rx"#FALSE requires a LIST payload"
            (lambda () (compile-program (parse-mdl "#FALSE"))))
-(check-exn #rx"TYPE currently supports"
-           (lambda () (run "<TYPE 7>")))
+(check-eq? (run "<TYPE 7>") (mdl-atom "FIX"))
 (displayln "FALSE value and truth tests passed")

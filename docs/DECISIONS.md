@@ -107,3 +107,25 @@ cannot represent two atoms with the same PNAME in different OBLISTs.
 and full OBLIST bucket geometry, dynamic `.OBLIST`, and associations remain
 outside this slice. Confusion prints 17 default buckets while the manual says
 13; no bucket count behavior is claimed. No upstream or game source changed.
+
+## ADR-0008: Mutable LIST tails and array views
+
+**Decision:** Represent LIST-primtype values as mutable Racket pair chains and
+VECTOR/UVECTOR values as a typed view over shared vector storage. `REST`
+advances a LIST tail pointer or array view offset; `PUT` mutates through the
+view and returns its input; `PUTREST` rewires a nonempty LIST head. A FALSE
+payload is a LIST chain, and `REST` of FALSE returns a LIST view. Bind quoted
+structured literals once per compiled source expression so function calls
+retain their identity. Nested literal atoms use the atom space.
+
+**Why:** Chapter 7 of the MDL manual and ten successful pinned Confusion
+probes show shared tails, shared array storage, and identity-preserving
+mutation. A separate Confusion UVECTOR type violation probe exits with an
+error. Tests include 1-based access, boundary errors, aliasing, and a
+deterministic property sweep over LIST lengths 2 through 10.
+
+**Consequence:** This is a narrow sequence subset. Dynamic type tags,
+GROW/BACK/TOP, segments, STRING/BYTES views, and general printing remain
+unsupported. `GET` is not treated as `NTH`; it needs its own semantics.
+Cycles made by `PUTREST` raise on `LENGTH` in this implementation. No game
+rules, upstream sources, or GPLv3 code were changed.

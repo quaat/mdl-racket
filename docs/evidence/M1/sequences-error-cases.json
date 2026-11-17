@@ -1,0 +1,6 @@
+{
+  "name": "m1-uvector-type-error",
+  "cases": [
+    {"name": "uvector-put-type-error", "expression": "<PUT ![1 2!] 1 \"bad\">"}
+  ]
+}

@@ -49,3 +49,16 @@ and OBLIST values replace the symbol placeholder. Direct reader names and
 Confusion processes exited zero with empty stderr. Dynamic `.OBLIST`,
 associations, full OBLIST structure, and general binding semantics remain
 unsupported. See `docs/evidence/M1/ATOMS.md` for commands and deviations.
+
+## M1 issue #5: mutable sequences and shared views (local PASS)
+
+**Local slice checks: PASS. M1 milestone: NOT YET PASS.** LIST values now use
+mutable shared tails; VECTOR and UVECTOR values use shared storage views.
+`REST`, `NTH`, `LENGTH`, `PUT`, `PUTREST`, and `UTYPE` have tested behavior on
+the supported sequence types. Direct FALSE payloads and quoted structured
+literals retain MDL atoms and mutable structure identity. `make test` passes
+125 Racket checks and 13 Python tests. Ten successful Confusion probes exited
+zero with empty stderr; one deliberate UVECTOR error case is recorded
+separately. The five-turn capture matches the approved M0 golden except for
+`captured_at`. See `docs/evidence/M1/SEQUENCES.md` for exact evidence and
+limits. Type constructors, full bindings, and 36-bit arithmetic remain open.
