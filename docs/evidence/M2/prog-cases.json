@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "m2-prog-return",
+  "cases": [
+    {"name": "normal-completion", "expression": "<PROG () 1 2>"},
+    {"name": "aux-initialization", "expression": "<PROG ((M2-X 2) (M2-Y <+ .M2-X 3>)) .M2-Y>"},
+    {"name": "aux-shadow-initializer", "expression": "<SET M2-X 10>\n<PROG ((M2-X <+ .M2-X 1>)) .M2-X>"},
+    {"name": "unassigned-then-set", "expression": "<PROG (M2-X) <SET M2-X 4> .M2-X>"},
+    {"name": "outer-local-restored", "expression": "<SET M2-X 5>\n<PROG ((M2-X 7)) .M2-X>\n.M2-X"},
+    {"name": "early-return", "expression": "<PROG () <RETURN 42> 99>"},
+    {"name": "return-default-t", "expression": "<PROG () <RETURN> 99>"},
+    {"name": "nested-return", "expression": "<PROG ((M2-X 1)) <PROG ((M2-X 2)) <RETURN .M2-X>> .M2-X>"},
+    {"name": "mutation-before-return", "expression": "<SETG M2-G 0>\n<PROG () <SETG M2-G 1> <RETURN ,M2-G> <SETG M2-G 2>>\n,M2-G"}
+  ]
+}

@@ -1,0 +1,2 @@
+#lang mdl
+<SETG M2-PROG-VALUE <PROG ((M2-X 2)) <RETURN <+ .M2-X 3>> 99>>

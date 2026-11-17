@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "name": "m2-prog-reference-crash-observation",
+  "cases": [
+    {"name": "return-during-aux-initialization", "expression": "<PROG ((M2-X <RETURN 6>)) 99>"}
+  ]
+}

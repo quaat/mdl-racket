@@ -1,8 +1,10 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list)
-(provide current-mdl-globals current-mdl-locals mdl-setg! mdl-gval mdl-define!
-         mdl-set! mdl-lval mdl-with-bindings mdl-apply mdl-list
+(provide current-mdl-globals current-mdl-locals current-mdl-return
+         mdl-setg! mdl-gval mdl-define!
+         mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings mdl-return
+         mdl-apply mdl-list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-word mdl-word? mdl-word-bits
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
@@ -21,6 +23,7 @@
 
 (define current-mdl-globals (make-parameter (make-hasheq)))
 (define current-mdl-locals (make-parameter (list (make-hasheq))))
+(define current-mdl-return (make-parameter #f))
 (define unassigned (gensym 'mdl-unassigned))
 
 (define (binding-atom who value)
@@ -60,6 +63,24 @@
     (hash-set! frame atom (cdr entry)))
   (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
     (thunk)))
+
+(define (mdl-with-aux-bindings specs thunk)
+  (define frame (make-hasheq))
+  (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
+    (for ([entry (in-list specs)])
+      (define atom (binding-atom 'mdl-with-aux-bindings (car entry)))
+      (when (hash-has-key? frame atom)
+        (error 'mdl-with-aux-bindings "duplicate auxiliary binding"))
+      ;; Evaluate before installing this binding. Earlier auxiliary bindings
+      ;; are visible, while this initializer may still see an outer binding.
+      (define initializer (cdr entry))
+      (hash-set! frame atom (if initializer (initializer) unassigned)))
+    (thunk)))
+
+(define (mdl-return value)
+  (define escape (current-mdl-return))
+  (unless escape (error 'mdl-return "no active PROG in current function"))
+  (escape value))
 
 (define (global-option atom)
   (define globals (current-mdl-globals))

@@ -110,11 +110,44 @@
         (unsupported args "non-simple or duplicate DEFINE parameters"))
       `(mdl-define! (mdl-atom ,fn-name)
                     (lambda ,(map local-id names)
-                      (mdl-with-bindings
-                       (list ,@(map (lambda (name)
-                                      `(cons (mdl-atom ,name) ,(local-id name)))
-                                    names))
-                       (lambda () ,(compile-sequence (cddr xs) names))))))))
+                      (parameterize ([current-mdl-return #f])
+                        (mdl-with-bindings
+                         (list ,@(map (lambda (name)
+                                        `(cons (mdl-atom ,name) ,(local-id name)))
+                                      names))
+                         (lambda () ,(compile-sequence (cddr xs) names)))))))))
+
+(define (compile-prog n args locals)
+  (when (null? args) (unsupported n "PROG requires an auxiliary LIST and body"))
+  (when (and (>= (length args) 2)
+             (is-kind? (car args) 'atom)
+             (is-kind? (second args) 'list))
+    (unsupported n "named PROG activation is not implemented"))
+  (define aux (car args))
+  (unless (is-kind? aux 'list)
+    (unsupported aux "PROG requires an auxiliary LIST"))
+  (when (null? (cdr args)) (unsupported n "PROG requires a body"))
+  (define names '())
+  (define specs
+    (for/list ([item (in-list (mdl-node-value aux))])
+      (define-values (name initializer)
+        (cond [(is-kind? item 'atom) (values (atom-name item) #f)]
+              [(and (is-kind? item 'list)
+                    (= (length (mdl-node-value item)) 2))
+               (define pair (mdl-node-value item))
+               (values (atom-name (first pair)) (second pair))]
+              [else (unsupported item "PROG auxiliary must be an ATOM or two-element LIST")]))
+      (when (member name names)
+        (unsupported item "duplicate PROG auxiliary binding"))
+      (set! names (cons name names))
+      `(cons (mdl-atom ,name)
+             ,(if initializer
+                  `(lambda () ,(compile-expression initializer locals))
+                  #f))))
+  `(let/ec mdl-prog-exit
+     (parameterize ([current-mdl-return mdl-prog-exit])
+       (mdl-with-aux-bindings (list ,@specs)
+                              (lambda () ,(compile-sequence (cdr args) locals))))))
 
 (define (compile-cond n clauses locals)
   (when (null? clauses) (unsupported n "COND requires at least one clause"))
@@ -166,6 +199,13 @@
              [args (cdr xs)])
         (case (string->symbol op)
           [(DEFINE) (compile-definition n args)]
+          [(PROG) (compile-prog n args locals)]
+          [(RETURN)
+           (when (> (length args) 1)
+             (unsupported n "RETURN with explicit activation is not implemented"))
+           `(mdl-return ,(if (null? args)
+                             '(mdl-atom "T")
+                             (compile-expression (car args) locals)))]
           [(SETG)
            (unless (= (length args) 2) (unsupported n "SETG expects name and value"))
            `(mdl-setg! ,(compile-expression (first args) locals)

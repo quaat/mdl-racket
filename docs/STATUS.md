@@ -1,4 +1,4 @@
-# Status — 2026-11-17 (M1 gate PASS on main)
+# Status — 2026-11-17 (M2 first slice locally verified)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -123,3 +123,25 @@ All 60 successful M1 probe results and six expected error observations match
 their saved outputs on the rebuilt oracle. Details, exact commands, merge
 SHAs, and limitations are in `docs/evidence/M1/GATE.md`. No Racket Zork
 execution or gameplay parity is claimed.
+
+## M2 issue #20: scoped PROG and bare RETURN
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** Unnamed
+`PROG` now creates an auxiliary local frame and returns its last body value;
+bare `RETURN` exits the closest `PROG` within the current function. Initializers
+run in order before their own new binding is installed, so they can read an
+outer binding, while later initializers see earlier new bindings. An unassigned
+auxiliary can be assigned with `SET`. Nested exits restore local frames, and a
+bare `RETURN` in a called function cannot exit its caller's `PROG`.
+
+`make test` passes 294 Racket checks and 13 Python tests. Nine focused pinned
+Confusion cases exited zero with empty stderr; three expected error cases are
+saved separately. Confusion crashes with signal 11 on `RETURN` in a PROG
+auxiliary initializer; Racket follows the manual's activation-on-entry rule
+for that case, and the deviation is recorded separately. `make check-source`
+still parses 36/36 selected text files.
+The five-turn reference capture and baseline probes pass, and the M1 golden
+comparison passes with its documented build-metadata exclusions. Named
+activations, explicit target `RETURN`, `REPEAT`, `AGAIN`, `GO`, `UNWIND`,
+complex function formals, macros, and source loading remain unsupported.
+Exact commands, hashes, and observations are in `docs/evidence/M2/PROG.md`.

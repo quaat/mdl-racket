@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m2-prog-reference-crash-observation",
+  "recorded_at": "2026-11-17T19:07:17.813104+00:00",
+  "interpreter_sha256": "25f3ca662a801e57cb207b076b77fa3d7ab4658d8b4539e6fe057346d587c201",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "complete": false,
+  "cases": [
+    {
+      "name": "return-during-aux-initialization",
+      "expression": "<PROG ((M2-X <RETURN 6>)) 99>",
+      "input": "<PROG ((M2-X <RETURN 6>)) 99>\n<QUIT>\n",
+      "exit_code": -11,
+      "stdout": "",
+      "stderr": "",
+      "startup_output": "",
+      "result_output": null,
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ]
+}

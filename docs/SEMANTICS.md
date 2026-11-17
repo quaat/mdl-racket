@@ -50,7 +50,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | MDL vectors | VECTOR/UVECTOR shared REST views | full STRING/BYTES and growth | M1 issue #5 |
 | `OBLIST` / `ATOM` | identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, bucket geometry | M1 issue #4 |
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
-| `RETURN` / `AGAIN` / `UNWIND` | not supported | MDL activation record semantics | **NOT IMPLEMENTED** |
+| `PROG` / `RETURN` | scoped M2 slice in progress | named activations, explicit target RETURN, AGAIN/UNWIND | M2 issue #20 |
 | MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
 | `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
@@ -302,6 +302,44 @@ observes the global mutation made by the first. Matching assertions are in
 reader token, scientific numeric notation outside the supported compiler
 subset, and malformed octal input explicitly; these checks fail before
 runtime evaluation rather than creating ordinary atoms.
+
+## M2 issue #20 specification: scoped PROG and bare RETURN
+
+The [MDL manual, chapter 10](https://mdl-language.readthedocs.io/en/latest/10-looping/)
+requires a `PROG` auxiliary LIST, followed by at least one body expression.
+An optional activation name precedes the list, but this first slice supports
+only the unnamed form. On entry, `PROG` creates an activation and binds each
+auxiliary variable in order. A bare auxiliary ATOM is bound but unassigned;
+an `(ATOM expression)` initializer evaluates in the environment being built,
+then assigns the new binding. Thus a later initializer sees earlier new
+bindings, while a variable's own initializer can still see an outer binding
+of the same name. The last body value is returned on normal completion.
+
+`RETURN` evaluates its value once, then exits the closest surrounding `PROG`
+within the current function, skipping later expressions and unwinding local
+bindings. With no value argument it returns the ATOM `T`. The
+[manual's activation rules](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+say a plain function does not itself create an activation; a bare `RETURN`
+inside a helper does not target a caller's `PROG`. Named activations, explicit
+target `RETURN`, `REPEAT`, `AGAIN`, `GO`, and `UNWIND` remain unsupported and
+must fail explicitly. This slice implements only current-function, unnamed
+`PROG` activation behavior; it does not claim full MDL continuation parity.
+
+The manual says the activation is generated before auxiliary binding. The
+Racket slice therefore permits `RETURN` in an auxiliary initializer and
+returns its value. Pinned Confusion instead exits by signal 11 on
+`<PROG ((M2-X <RETURN 6>)) 99>`. This is a documented reference deviation,
+not a passing differential case; see `prog-crash-cases.json` and
+`prog-crash-reference.json`.
+
+Pinned Confusion cases are saved in `docs/evidence/M2/prog-cases.json` and
+`prog-reference.json`; expected errors are in `prog-error-cases.json` and
+`prog-error-reference.json`. They test normal completion, left-to-right aux
+initialization and shadowing, unassigned aux followed by SET, restoration of
+outer locals, early/default/nested RETURN, mutation before escape, and errors
+outside a PROG or across a function boundary. Matching Racket assertions
+belong in `tests/prog_test.rkt`. The reference process ends each case with
+`<QUIT>` and does not use time or randomness.
 
 ## M0 native Confusion observations (2026-11-17)
 

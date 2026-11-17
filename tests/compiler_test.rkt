@@ -2,12 +2,16 @@
 (require rackunit racket/runtime-path "../mdl/runtime/core.rkt"
          "../mdl/parser.rkt" "../mdl/compiler.rkt")
 (define-runtime-path fixture "fixtures/basic.mdl")
+(define-runtime-path prog-fixture "fixtures/prog.mdl")
 (parameterize ([current-mdl-globals (make-hash)])
   (dynamic-require fixture #f)
   (check-equal? (mdl-gval "ANSWER") 42)
   (check-equal? (mdl-gval "CONDITIONAL") 42)
   (check-true (mdl-false? (mdl-gval "NIL-EXAMPLE")))
   (check-eq? (mdl-gval "FALSE-SAME") (mdl-atom "T")))
+(parameterize ([current-mdl-globals (make-hash)])
+  (dynamic-require prog-fixture #f)
+  (check-equal? (mdl-gval "M2-PROG-VALUE") 5))
 (check-exn exn:fail?
            (lambda () (compile-program (parse-mdl "<DEFINE F (\"AUX\" X) .X>"))))
 (check-exn exn:fail?

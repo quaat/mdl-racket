@@ -3,8 +3,8 @@
 ## Test layers
 
 1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST,
-   mutable sequences, type constructors, local/global bindings, and the
-   documented 36-bit FIX/WORD subset on the
+   mutable sequences, type constructors, local/global bindings, the
+   documented 36-bit FIX/WORD subset, and scoped M2 PROG/RETURN on the
    explicitly supported subset. The target refreshes the linked `#lang mdl`
    module before tests so changed runtime exports are visible.
 2. `python -m pytest -q tests/test_harness.py`: source lock, reference
@@ -18,11 +18,18 @@
    transcript comparison (once a candidate game engine is available).
 8. Future: state diff, randomized test corpus, complete 500-point game, browser.
 
-The M1 candidate gate also runs `tests/integration_test.rkt` for structural
+The M1 gate also runs `tests/integration_test.rkt` for structural
 versus identity equality and left-to-right argument evaluation. Three
 matching Confusion cases are saved under `docs/evidence/M1/integration-*`.
-See `docs/evidence/M1/GATE.md` for the candidate gate matrix and exact
+See `docs/evidence/M1/GATE.md` for the merged gate matrix and exact
 commands. This is a semantic micro-runtime gate, not a Zork gameplay gate.
+
+The first M2 slice runs `tests/prog_test.rkt` and a `#lang mdl` fixture for
+unnamed PROG auxiliaries and bare RETURN. Focused Confusion cases and expected
+errors are under `docs/evidence/M2/prog-*`; see `PROG.md` there for commands,
+reference hashes, the deliberately nonzero expected-error probe suite, a
+separate Confusion signal-11 crash during auxiliary initialization, and
+unsupported activation behavior. These tests do not satisfy the full M2 gate.
 
 ## Frozen 1977 baseline
 
