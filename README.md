@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 and M1 gates PASS on `main`. NOT a playable game.** This repository is a starting
+> **Status: M0 and M1 gates PASS on `main`; M2 first slice in progress. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -54,7 +54,8 @@ missing. Successful detection does not mean the Racket tests or Confusion
 gameplay have passed; run the validation targets explicitly.
 
 `make test` requires Racket and the locally linked Racket package. It tests
-**the bootstrap reader/compiler and implemented M1 primitives**, not the original Zork
+**the bootstrap reader/compiler, implemented M1 primitives, and scoped M2
+PROG/RETURN**, not the original Zork
 game. If `raco` reports that the package is already installed, inspect
 `raco pkg show` rather than blindly reinstalling it.
 
@@ -105,6 +106,13 @@ Confusion cases plus six expected error observations reproduce their saved
 results. The fresh native build changes its binary hash and embedded build
 timestamp; the approved five-turn transcript matches after excluding those
 fields and capture time. See the M1 gate report for the comparison contract.
+The first M2 slice adds unnamed `PROG` auxiliary frames and bare `RETURN`
+within the current function. Its local tests and focused Confusion probes pass;
+the **M2 milestone gate is not yet PASS**. See the
+[M2 PROG report](docs/evidence/M2/PROG.md) and
+[issue #20](https://github.com/quaat/mdl-racket/issues/20). Confusion crashes on
+`RETURN` during auxiliary initialization; that reference deviation is recorded
+in the report.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
@@ -136,6 +144,8 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
   lookup, and global unassignment on the supported subset.
 - Historical 36-bit FIX and WORD behavior for the documented arithmetic,
   octal, bitwise, shift, and bit field subset.
+- Unnamed `PROG` with sequential auxiliary initialization and bare `RETURN`
+  from the closest PROG in the current function.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
@@ -148,8 +158,8 @@ original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.
 
-The next milestone is [M2 execution semantics and MDL compilation](docs/PLAN.md).
-M2 must execute initial
+The current milestone is [M2 execution semantics and MDL compilation](docs/PLAN.md).
+Its gate requires executing initial
 original source definitions; it does not assume a new game engine.
 
 ## Working with Codex

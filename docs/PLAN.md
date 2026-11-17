@@ -86,6 +86,30 @@ source definitions, with no loss of semantic aliasing/continuations.
 **Tasks:** #12 control flow and activation records, #13 macros,
 #14 function application/binding, #15 source loader, #16 random/event APIs.
 
+### M2 first slice and dependency order
+
+| Work item | Scope | Depends on |
+|---|---|---|
+| [Issue #20](https://github.com/quaat/mdl-racket/issues/20) | Unnamed PROG auxiliaries and bare RETURN in the current function | M1 |
+| Next control slice | REPEAT/AGAIN, named activations, explicit target RETURN, nonlocal unwinding | #20 |
+| Function binding slice | OPTIONAL/AUX/TUPLE and application/activation semantics | #20; coordinate with control slice |
+| Macro and loader slices | DEFMAC expansion, cross-file loading, initial original source definitions | Function binding and control slices |
+| Integrated gate | Structured tests and original definitions execute without lost aliasing or continuations | Prior M2 slices |
+
+```mermaid
+flowchart LR
+  M1 --> I20["#20 PROG / bare RETURN"]
+  I20 --> C["Control and activations"]
+  I20 --> F["Function binding"]
+  C --> L["Macro and source loading"]
+  F --> L
+  L --> G["M2 integrated gate"]
+```
+
+Issue #20 is a local slice, not an M2 gate pass. The later work items are
+proposed dependencies; create focused issues when their semantics and tests
+are ready to review.
+
 ## M3 — Actual 1977 game boots in Racket
 
 **Build:** world structures (`defs`, `makstr`, `dung`), vocabulary,

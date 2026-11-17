@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "m2-prog-return-expected-errors",
+  "cases": [
+    {"name": "unassigned-aux", "expression": "<PROG (M2-X) .M2-X>"},
+    {"name": "return-outside-prog", "expression": "<RETURN 3>"},
+    {"name": "return-cross-function", "expression": "<DEFINE M2-H () <RETURN 7>>\n<PROG () <M2-H> 9>"}
+  ]
+}

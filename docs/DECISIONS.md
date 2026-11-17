@@ -196,3 +196,27 @@ Confusion at the documented width/identity boundaries. PDP-10 FLOAT
 precision and bit layout, machine overflow switches, ROT, and the complete
 arithmetic library remain unsupported. No upstream source or game rule
 changed; no GPLv3 reference code was copied.
+
+## ADR-0012: Scoped PROG activation and sequential auxiliary bindings
+
+**Decision:** Compile unnamed `PROG` to a Racket escape continuation and a
+separate dynamic auxiliary frame. Evaluate each auxiliary initializer before
+installing that variable's new binding; install an explicit unassigned marker
+for bare auxiliary atoms. Bind the escape continuation for the PROG body and
+initializers. A plain `DEFINE` call clears the implicit RETURN target before
+its body, so bare `RETURN` inside a helper cannot exit a caller's PROG. Reject
+named activations and explicit target RETURN at compilation.
+
+**Why:** The MDL manual's chapters 9–10 and nine pinned Confusion probes show
+normal value, sequential initialization, shadowing, frame restoration, and
+early/default/nested returns. Three expected-error probes distinguish
+unassigned auxiliaries and RETURN across a function boundary. Confusion
+crashes with signal 11 when RETURN occurs in an auxiliary initializer, while
+the manual specifies an activation before auxiliary binding; the Racket
+slice follows the manual on that case and records the discrepancy.
+
+**Consequence:** This models one activation boundary without claiming general
+MDL continuation semantics. REPEAT, AGAIN, GO, UNWIND, named activations,
+complex function formals, and source linking remain separate M2 work. The
+reference's error printer and Racket error messages differ. No original game
+source, rule, public license, or GPLv3 code changed.
