@@ -6,7 +6,7 @@
   (dynamic-require fixture #f)
   (check-equal? (mdl-gval "ANSWER") 42)
   (check-equal? (mdl-gval "CONDITIONAL") 42)
-  (check-false (mdl-gval "NIL-EXAMPLE")))
+  (check-true (mdl-false? (mdl-gval "NIL-EXAMPLE"))))
 (check-exn exn:fail?
            (lambda () (compile-program (parse-mdl "<DEFINE F (\"AUX\" X) .X>"))))
 (check-exn exn:fail?

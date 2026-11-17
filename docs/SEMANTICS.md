@@ -38,7 +38,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | `<DEFINE>` | simple fixed arity only | MDL parameters incl `OPTIONAL`, `AUX`, `TUPLE`, callable globals | bootstrap tests only |
 | `<SETG>`/`,GLOB` | hash-backed process-local environment | original MDL global binding/lookup semantics | bootstrap tests only |
 | `.LOCAL` | lexical variable with limited SET | dynamic and named activation semantics as applicable | bootstrap tests only |
-| `<>` / `#FALSE` | `<>` maps to Racket `#f` | full MDL FALSE type, truth, value payload | **NOT IMPLEMENTED** |
+| `<>` / `#FALSE` | M0 maps `<>` to Racket `#f` | distinct MDL FALSE value with payload; literal payload is data | M1 issue #3 in progress |
 | `<COND>` | simplified test + value branches | MDL predicate truth and branch return value, evaluation order | bootstrap tests only |
 | `AND`/`OR` | approximated with Racket logic | MDL short-circuit and false-value semantics | **NOT VERIFIED** |
 | MDL lists | mcons/mutable pair construction | aliasing, nested views, REST/PUTREST/PUT and identity | **NOT IMPLEMENTED** |
@@ -75,6 +75,43 @@ For each semantic question, save:
 The reference interpreter is not necessarily an exact PDP-10 interpreter.
 When its semantics and the original manual differ, record the discrepancy
 before deciding how the new runtime should behave.
+
+## M1 issue #3 specification: FALSE values and truth operators
+
+The [MDL manual, chapter 8](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+specifies `FALSE` as a structured type with `LIST` primtype. `<>` produces
+`#FALSE ()`; `#FALSE (items)` is direct representation, so its items are data,
+not evaluated expressions. Every non-`FALSE` MDL object is true, including the
+atom `NIL`, zero, and empty lists. `T` is an atom, not a host Boolean.
+
+`NOT` returns `T` for any FALSE and empty FALSE otherwise. `AND` evaluates
+left to right, stops at and returns the first FALSE, or returns its last value;
+zero arguments return `T`. `OR` stops at and returns the first non-FALSE, or
+returns its last FALSE; zero arguments return empty FALSE. `COND` evaluates
+each test once, returns the selected clause's last value (or test for a
+test-only clause), and returns the last FALSE if no clause succeeds. Its
+documented minimum is one clause. These operators must preserve payloads and
+skip unselected side effects.
+The manual's equality rule for empty LIST primtype values means two empty
+FALSE values of the same type are `==?`. Distinct nonempty FALSE payloads are
+not `==?`, though equal payloads are `=?`.
+
+Pinned Confusion probe inputs and raw output are in
+`docs/evidence/M1/false-cases.json` and `false-reference.json`; the latter
+records interpreter SHA-256 and exit codes. All eleven cases exited zero with
+empty stderr. Observed: `NIL` is an `ATOM` and `<NOT NIL>` gives empty FALSE;
+`AND` returns `#FALSE (1)`, `OR` and `COND` return their last `#FALSE (2)`;
+empty `AND` gives `T`, empty `OR` gives `#FALSE ()`; a test-only `COND` gives
+`7`; short-circuited `SETG` forms do not execute.
+Confusion also gives `T`, empty FALSE, and `T` for `==?` on two empty FALSEs,
+`==?` on two independently read payload FALSEs, and `=?` on those payloads.
+
+Implementation tests for this slice belong in `tests/false_test.rkt` and
+`tests/parser_test.rkt`. The payload is retained as reader data; mutable LIST
+view operations, general type introspection, and full atom/OBLIST semantics
+remain separate M1 issues. Unsupported payload syntax must fail explicitly.
+`TYPE` is supported here only for FALSE and placeholder ATOM values, returning
+their MDL type atoms; other types still raise an explicit unsupported error.
 
 ## M0 native Confusion observations (2026-11-17)
 

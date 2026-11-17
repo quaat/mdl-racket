@@ -132,9 +132,12 @@
       [(#\#)
        (let ([name (read-atom! c)])
          (skip-ws! c)
-         (if (equal? (peek c) #\{)
-             (node 'typed (cons name (read-node! c)))
-             (node 'atom name)))]
+         (cond
+           [(equal? (peek c) #\{)
+            (node 'typed (cons name (read-node! c)))]
+           [(and (string-ci=? name "#FALSE") (equal? (peek c) #\())
+            (node 'false (mdl-node-value (read-node! c)))]
+           [else (node 'atom name)]))]
       [(#\> #\) #\] #\}) (parse-error c "unexpected closing delimiter")]
       [else
        (let ([raw (read-atom! c)])

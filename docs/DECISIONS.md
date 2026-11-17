@@ -65,3 +65,21 @@ GPLv3 source in the MIT-0 harness.
 **Consequence:** The native binary hash changes on rebuild because Confusion
 embeds compile time in its banner. The golden transcript must be reviewed
 against the new build, with toolchain/version differences recorded.
+
+## ADR-0006: First-class FALSE in the bootstrap runtime
+
+**Decision:** Represent MDL FALSE with a dedicated Racket structure carrying
+its unevaluated LIST payload. Only this structure is false in MDL truth tests;
+empty FALSE values share one canonical instance for MDL `==?` identity;
+host booleans reaching those tests raise an error. Preserve values and
+evaluation order in `NOT`, `AND`, `OR`, and `COND`. Return MDL atoms or FALSE
+from the small set of existing predicate builtins. Recognize `TYPE` only for
+FALSE and placeholder ATOM values.
+
+**Why:** The MDL manual's chapter 8 and ten pinned Confusion probes agree on
+FALSE payloads, `NIL` truth, return values, and short circuit behavior.
+
+**Consequence:** The M0 fixture now stores an MDL FALSE instead of Racket
+`#f`. Display, mutable payload views, general type operations, and atom
+identity remain unsupported or approximate. The change does not alter the
+reference source or game rules.
