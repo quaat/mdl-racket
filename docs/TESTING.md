@@ -76,12 +76,14 @@ fixture to `docs/evidence/<milestone>/`. Failed capture JSON belongs in
 `artifacts/` and must not be treated as truth. Avoid including private data,
 credentials, or host paths in published evidence.
 
-M0's locally reviewed, human-approval-pending fixture is
+M0's locally reviewed and maintainer-approved fixture is
 `docs/evidence/M0/house-golden.json`; hashes, exact command sequence, output
 review, timestamp limitation, and PTY exit behavior are in
 `docs/evidence/M0/REPORT.md`. The second observed capture matched the first
 except for `captured_at`. Rebuilding native Confusion changes its banner's
 compile timestamp and thus the exact `initial_output` field.
+Approval was given in the Codex conversation on 2026-11-17 for the fixture
+with SHA256 `ef270218760101039e499e3dd2b47834cd080f432209822db691fd936d70f7fc`.
 
 ## Cross-engine limitations
 

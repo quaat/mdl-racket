@@ -1,9 +1,9 @@
 # M0 local verification report — 2026-11-17
 
-**Gate: BLOCKED on human golden approval.** Local source, reader, test, native
+**Gate: PASS after maintainer golden approval.** Local source, reader, test, native
 build, capture, and probe checks pass with the documented compiler
-compatibility flag. Both PR workflows pass. Human approval of the golden
-fixture remains open.
+compatibility flag. Both PR workflows pass. The maintainer approved the golden
+fixture in the Codex conversation on 2026-11-17.
 GitHub issue [#1](https://github.com/quaat/mdl-racket/issues/1) tracks M0;
 PR [#2](https://github.com/quaat/mdl-racket/pull/2) carries the work on
 `feat/m0-reader-reference-validation`. The `gh` CLI token is
@@ -15,6 +15,7 @@ invalid, but the connected GitHub app can create issues and PRs.
   (`initial version`). M0 implementation commit:
   `0c71aa2a74bf423cf2edfd9c07186f8a243d828e`. Compatibility follow-up:
   `64950d5c141be8bc1aa82a1f98dd6fa39d6540f9`.
+- M0 PR #2 merge commit: `899159cd2ebf63b2de53a26317d919413d3e55c9`.
 - Archival `MITDDC/zork`: `d94501340842e006791fce0757dc0043b8ec8916`.
 - Reconstructed `heasm66/mdlzork` and Confusion: `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`.
 - Both pinned worktrees had empty `git status --porcelain` after building.
@@ -80,7 +81,9 @@ from the pinned save's north side of the house. The output reaches West of
 House, reveals and takes the leaflet, shows it in inventory, and reports 0/500
 in seven moves. `take leaflet` prints both `Taken.` and `You already have it.`;
 this is recorded verbatim, not rewritten. No error text appears in the five
-responses. This is an agent review; **human golden approval remains pending**.
+responses. The maintainer approved this exact fixture in the Codex
+conversation on 2026-11-17. Approval applies to SHA256
+`ef270218760101039e499e3dd2b47834cd080f432209822db691fd936d70f7fc`.
 
 The PTY uses 40 rows by 100 columns, echo disabled, a 30-second response
 timeout, and line-start `>` prompts. After the fifth prompt, the runner
@@ -93,8 +96,9 @@ opening scene after the banner matched the earlier reviewed capture exactly;
 the engine hash and embedded compile timestamp changed. The fixture was
 manually reviewed and refreshed for the new local binary.
 The archival binary is not the reconstructed save image. Archive versus
-playable reconstruction patches remain documented in `docs/PROVENANCE.md` and
-upstream `mdlzork_771212/README.md`; no local patch was applied.
+playable reconstruction deltas are explicitly inventoried in
+`docs/PROVENANCE.md`, with the pinned upstream `mdlzork_771212/README.md` as
+source; no local source patch was applied.
 
 Primitive reference evidence is `primitives.json`, SHA256
 `76271e83e6440f4b017a44732a721ae56e9765275039e63179689a6e8da6ee0e`,
@@ -126,18 +130,18 @@ and `<QUIT>`, exited 0, and wrote no stderr. Findings for FALSE versus `NIL`,
   [artifact 14347736562](https://github.com/quaat/mdl-racket/actions/runs/44125722256/artifacts/14347736562)
   (ZIP digest `sha256:89e82a03119367faac34d783d6cb17da8f328d2aff84222869db7b26f0095329`).
   CI logs confirm the capture/probe counts. The uploaded JSON was not
-  independently byte-compared with the local golden; human review remains.
+  independently byte-compared with the local golden; this is a known limit
+  of the M0 evidence, not a game-parity claim.
 
-## Blocker and next action
+## Gate result and next action
 
-Remaining blocker: written human approval of the golden transcript is required
-by the M0 acceptance gate. The first native CI compiler failure was fixed by
-the build flag, and the rerun passed without changing upstream bytes.
-**Recommended next action:** review `house-golden.json` and approve it in
-[PR #2](https://github.com/quaat/mdl-racket/pull/2), or record specific
-discrepancies to resolve. Until then, M0 is BLOCKED and M1 work does not start.
+The M0 gate is **PASS** on the merged branch: tests, source coverage, native
+reference, CI, explicit reconstruction delta inventory, and written golden
+approval are present. This does not establish archival exactness or game parity.
+The first native CI compiler failure was fixed by a build flag without changing
+upstream bytes. Next, begin M1 with a separately tested FALSE/value primitive.
 
-When M0 closes, proposed M1 issue order is: values/FALSE/atoms → mutable
+Proposed M1 issue order is: values/FALSE/atoms → mutable
 LIST/VECTOR/UVECTOR views and identity → types/constructors → local/global
 binding → 36-bit arithmetic. Each slice needs a documented Confusion probe,
 failing-then-passing Racket tests, and differential validation before the next.
