@@ -40,6 +40,11 @@
     [(vector uvector) (list->vector (map quote-datum (mdl-node-value n)))]
     [else (unsupported n "quoting this MDL form is not implemented")]))
 
+(define (compile-quote n)
+  (if (is-kind? n 'atom)
+      (mdl-constant n)
+      `(quote ,(quote-datum n))))
+
 (define (compile-sequence body locals)
   (when (null? body) (error 'mdl-compiler "empty body"))
   `(begin ,@(map (lambda (n) (compile-expression n locals)) body)))
@@ -139,7 +144,7 @@
                 (mdl-atom "T"))]
           [(QUOTE)
            (unless (= (length args) 1) (unsupported n "QUOTE expects one argument"))
-           `(quote ,(quote-datum (first args)))]
+           (compile-quote (first args))]
           [else
            `(mdl-apply ,op ,@(map (lambda (a) (compile-expression a locals)) args))]))))
 
@@ -176,7 +181,7 @@
      (unless (string? (mdl-node-value n))
        (unsupported n "computed GVAL is not supported in M0"))
      `(mdl-gval ,(string-upcase (mdl-node-value n)))]
-    [(quote) `(quote ,(quote-datum (mdl-node-value n)))]
+    [(quote) (compile-quote (mdl-node-value n))]
     [(list) `(mdl-list ,@(map (lambda (a) (compile-expression a locals))
                               (mdl-node-value n)))]
     [(vector) `(vector ,@(map (lambda (a) (compile-expression a locals))

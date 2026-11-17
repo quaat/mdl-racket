@@ -26,7 +26,7 @@ The first M1 slice is [issue #3](https://github.com/quaat/mdl-racket/issues/3)
 
 See `docs/evidence/M0/REPORT.md` for exact commands, hashes, and limits.
 
-## M1 issue #3: FALSE values (in review)
+## M1 issue #3: FALSE values (merged)
 
 **Local slice checks: PASS. M1 milestone: NOT YET PASS.** The reader now groups
 `#FALSE (items)` as one source-located node. The bootstrap compiler/runtime
@@ -36,5 +36,16 @@ currently recognizes only FALSE and placeholder ATOM values. `make test`
 passes 63 Racket checks and 13 Python tests; the source sweep parses 36/36
 text files; reference capture matches the approved M0 golden except for its
 timestamp. Thirteen focused Confusion processes exited zero with empty stderr.
-M1 evidence and limitations are in `docs/evidence/M1/REPORT.md`. This does not
-establish game execution or complete MDL semantics.
+M1 FALSE evidence and limitations are in `docs/evidence/M1/REPORT.md`; the
+slice merged in [PR #10](https://github.com/quaat/mdl-racket/pull/10).
+
+## M1 issue #4: atom identity and OBLIST (in review)
+
+**Local slice checks: PASS. M1 milestone: NOT YET PASS.** Identity-bearing ATOM
+and OBLIST values replace the symbol placeholder. Direct reader names and
+`!-` trailers intern through an atom space; `ATOM`, `MOBLIST`, `LOOKUP`,
+`INSERT`, `REMOVE`, `OBLIST?`, and `PNAME` have focused implementations.
+`make test` passes 83 Racket checks and 13 Python tests; seven focused
+Confusion processes exited zero with empty stderr. Dynamic `.OBLIST`,
+associations, full OBLIST structure, and general binding semantics remain
+unsupported. See `docs/evidence/M1/ATOMS.md` for commands and deviations.

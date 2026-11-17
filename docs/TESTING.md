@@ -2,8 +2,8 @@
 
 ## Test layers
 
-1. `raco test tests/parser_test.rkt tests/compiler_test.rkt`: reader and
-   bootstrap compiler on explicitly supported subset.
+1. `make test-racket`: reader, bootstrap compiler, FALSE, and atom/OBLIST
+   semantics on the explicitly supported subset.
 2. `python -m pytest -q tests/test_harness.py`: source lock, reference
    interchange format, exact comparator and transcript normalization.
 3. `racket scripts/mdl_check.rkt ...`: syntax parse coverage on pinned
@@ -37,7 +37,7 @@ The runner uses a PTY because the original reader expects terminal behavior.
 It waits for a `>` prompt. Timeouts, unexpected early exits, and missing
 binaries are failures, not passing tests. If the prompt protocol differs on
 some platform, fix the PTY bridge with documented, tested input handling.
-No one has run this baseline in the packaging environment.
+The M0 baseline was built and captured locally and in CI; see the M0 report.
 
 ## Transcript JSON schema v1
 
