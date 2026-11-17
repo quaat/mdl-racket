@@ -1,4 +1,4 @@
-# Status — 2026-11-17 (M1 candidate gate locally verified)
+# Status — 2026-11-17 (M1 gate PASS on main)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -18,13 +18,12 @@ Codex conversation on 2026-11-17; its SHA256 is
 `ef270218760101039e499e3dd2b47834cd080f432209822db691fd936d70f7fc`.
 [GitHub issue #1](https://github.com/quaat/mdl-racket/issues/1) and merged
 [PR #2](https://github.com/quaat/mdl-racket/pull/2) track M0. Both PR workflows
-passed. **M1 is current**; its stacked candidate gate passes locally while
-the mainline integration awaits review. This status does not claim Racket
+passed. **M1 is PASS on `main`; M2 is current.** This status does not claim Racket
 game execution or runtime equivalence.
 
 The M1 issue list and dependency graph are in `docs/PLAN.md`. Slice sections
-below record each feature at its own PR head; later slices extend those
-capabilities.
+below preserve each feature's status at its PR head; the final combined gate
+result is at the end of this file.
 
 See `docs/evidence/M0/REPORT.md` for exact commands, hashes, and limits.
 
@@ -41,7 +40,7 @@ timestamp. Thirteen focused Confusion processes exited zero with empty stderr.
 M1 FALSE evidence and limitations are in `docs/evidence/M1/REPORT.md`; the
 slice merged in [PR #10](https://github.com/quaat/mdl-racket/pull/10).
 
-## M1 issue #4: atom identity and OBLIST (in review)
+## M1 issue #4: atom identity and OBLIST (merged)
 
 **Local slice checks: PASS. M1 milestone: NOT YET PASS.** Identity-bearing ATOM
 and OBLIST values replace the symbol placeholder. Direct reader names and
@@ -52,7 +51,7 @@ Confusion processes exited zero with empty stderr. Dynamic `.OBLIST`,
 associations, full OBLIST structure, and general binding semantics remain
 unsupported. See `docs/evidence/M1/ATOMS.md` for commands and deviations.
 
-## M1 issue #5: mutable sequences and shared views (local PASS)
+## M1 issue #5: mutable sequences and shared views (merged)
 
 **Local slice checks: PASS. M1 milestone: NOT YET PASS.** LIST values now use
 mutable shared tails; VECTOR and UVECTOR values use shared storage views.
@@ -65,7 +64,7 @@ separately. The five-turn capture matches the approved M0 golden except for
 `captured_at`. See `docs/evidence/M1/SEQUENCES.md` for exact evidence and
 limits. Type constructors, full bindings, and 36-bit arithmetic remain open.
 
-## M1 issue #6: type tags and constructors (local PASS)
+## M1 issue #6: type tags and constructors (merged)
 
 **Local slice checks: PASS. M1 milestone: NOT YET PASS.** `PRIMTYPE`,
 `TYPEPRIM`, `NEWTYPE`, and structured `CHTYPE` now preserve user type tags
@@ -77,7 +76,7 @@ five-turn reference capture matches the approved golden except for timestamp.
 See `docs/evidence/M1/TYPES.md` for commands, hashes, and limits. Local/global
 binding semantics and 36-bit arithmetic remain open.
 
-## M1 issue #7: local and global bindings (local PASS)
+## M1 issue #7: local and global bindings (merged)
 
 **Local slice checks: PASS. M1 milestone: NOT YET PASS.** Atom-keyed globals
 and dynamic local frames replace the bootstrap string table and lexical-only
@@ -90,7 +89,7 @@ golden still matches except for timestamp. See `docs/evidence/M1/BINDINGS.md`.
 Optional/auxiliary arguments, explicit environments, and 36-bit arithmetic
 remain open.
 
-## M1 issue #8: 36-bit FIX and WORD operations (local PASS)
+## M1 issue #8: 36-bit FIX and WORD operations (merged)
 
 **Local slice checks: PASS for the documented subset. M1 milestone: NOT YET
 PASS.** FIX input and arithmetic now enforce the manual's 36-bit signed
@@ -106,10 +105,10 @@ and lacks ROT; the Racket target follows the historical manual on 36-bit
 limits and `</>` and leaves ROT unsupported. See
 `docs/evidence/M1/WORDS.md` for exact evidence and limits.
 
-## M1 integrated candidate gate
+## M1 integrated gate on main
 
-**PASS on the stacked M1 candidate branch and gate audit CI; mainline
-integration NOT RUN.**
+**PASS on `main` at merge commit
+`a68cbb970b7028853fbcf7885c6c7c42f9470fe5`.**
 The M1 gate in `docs/PLAN.md` requires independent Confusion-backed primitive
 tests, property and mutation-aliasing tests, and explicit failure on
 unsupported constructs. All five primitive slices have local and harness/
@@ -117,8 +116,10 @@ native CI PASS. The integrated audit adds three Confusion cases for equality
 and evaluation order, nine Racket assertions, and three red-to-green strict
 compiler checks. `make test` passes 274 Racket checks and 13 Python tests;
 `make sources` verifies both pins; the current M1 sweep parses all 36 text
-files; the five-turn reference capture matches the approved M0 golden except
-for `captured_at`. Details and limitations are in
-`docs/evidence/M1/GATE.md`. PRs #12–#16 and this gate closure PR remain
-unmerged, so the gate is not yet recorded as PASS on `main`. No Racket Zork
+files. A fresh native build changes the binary hash and its embedded banner
+timestamp. The five-turn reference capture matches the approved M0 golden
+after excluding `captured_at`, `engine_sha256`, and that banner timestamp.
+All 60 successful M1 probe results and six expected error observations match
+their saved outputs on the rebuilt oracle. Details, exact commands, merge
+SHAs, and limitations are in `docs/evidence/M1/GATE.md`. No Racket Zork
 execution or gameplay parity is claimed.

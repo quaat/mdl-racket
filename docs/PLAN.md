@@ -35,7 +35,7 @@ manual and automated test documentation.
 #03 source manifest & provenance, #04 native Confusion build,
 #05 reference PTY and transcripts, #06 M0 integration report.
 
-## M1 — MDL semantic micro-runtime (CURRENT)
+## M1 — MDL semantic micro-runtime (PASS)
 
 **Build:** atom identity/OBLIST, truth and FALSE, local/global environments,
 mutable LIST/VECTOR/UVECTOR with shared views, `NEWTYPE`/`CHTYPE`, 36-bit
@@ -73,7 +73,7 @@ Begin with only the FALSE/value primitive in #3. Close each issue on its own
 Confusion-backed tests and evidence; this graph is planning, not a claim that
 later semantics are already implemented.
 
-## M2 — Execution semantics and MDL compilation
+## M2 — Execution semantics and MDL compilation (CURRENT)
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,
