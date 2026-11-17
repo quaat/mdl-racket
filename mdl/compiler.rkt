@@ -143,10 +143,29 @@
           [else
            `(mdl-apply ,op ,@(map (lambda (a) (compile-expression a locals)) args))]))))
 
+(define current-false-literals (make-parameter #f))
+
 (define (compile-expression n [locals '()])
+  ;; Each top-level expression gets one lexical binding per FALSE literal.
+  ;; A DEFINE then closes over the literal, retaining its identity on calls.
+  (if (current-false-literals)
+      (compile-expression/body n locals)
+      (let ([literals (box '())])
+        (parameterize ([current-false-literals literals])
+          (define body (compile-expression/body n locals))
+          (if (null? (unbox literals))
+              body
+              `(let ,(reverse (unbox literals)) ,body))))))
+
+(define (compile-expression/body n locals)
   (case (mdl-node-kind n)
     [(atom) (mdl-constant n)]
-    [(false) `(mdl-false ',(map quote-datum (mdl-node-value n)))]
+    [(false)
+     (define id (gensym 'mdl-false-literal))
+     (set-box! (current-false-literals)
+               (cons (list id `(mdl-false ',(map quote-datum (mdl-node-value n))))
+                     (unbox (current-false-literals))))
+     id]
     [(string) (mdl-node-value n)]
     [(local)
      (let ([name (string-upcase (mdl-node-value n))])

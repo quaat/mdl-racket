@@ -33,8 +33,8 @@ See `docs/evidence/M0/REPORT.md` for exact commands, hashes, and limits.
 represent FALSE separately from `NIL`, preserve literal payloads, and return
 MDL values from `NOT`, `AND`, `OR`, `COND`, and supported predicates. `TYPE`
 currently recognizes only FALSE and placeholder ATOM values. `make test`
-passes 59 Racket checks and 13 Python tests; the source sweep parses 36/36
+passes 63 Racket checks and 13 Python tests; the source sweep parses 36/36
 text files; reference capture matches the approved M0 golden except for its
-timestamp. Eleven focused Confusion processes exited zero with empty stderr.
+timestamp. Thirteen focused Confusion processes exited zero with empty stderr.
 M1 evidence and limitations are in `docs/evidence/M1/REPORT.md`. This does not
 establish game execution or complete MDL semantics.

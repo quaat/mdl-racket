@@ -4,6 +4,8 @@
     {"name": "nil-value", "expression": "NIL\n<TYPE NIL>\n<NOT NIL>"},
     {"name": "false-type", "expression": "<TYPE <>>\n<TYPE #FALSE (1)>\n<TYPE NIL>"},
     {"name": "false-identity", "expression": "<==? <> <>>\n<==? #FALSE (1) #FALSE (1)>\n<=? #FALSE (1) #FALSE (1)>"},
+    {"name": "literal-identity-across-calls", "expression": "<DEFINE M1-F () #FALSE (1)>\n<==? <M1-F> <M1-F>>"},
+    {"name": "distinct-literal-identity", "expression": "<DEFINE M1-G () <==? #FALSE (1) #FALSE (1)>>\n<M1-G>"},
     {"name": "and-payload", "expression": "<AND 3 #FALSE (1) 7>"},
     {"name": "and-empty", "expression": "<AND>"},
     {"name": "or-last-false", "expression": "<OR #FALSE (1) #FALSE (2)>"},

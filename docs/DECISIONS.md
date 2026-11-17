@@ -76,6 +76,10 @@ evaluation order in `NOT`, `AND`, `OR`, and `COND`. Return MDL atoms or FALSE
 from the small set of existing predicate builtins. Recognize `TYPE` only for
 FALSE and placeholder ATOM values.
 
+The compiler binds each direct FALSE literal once per compiled top-level
+expression. A function closure thus reuses its source literal across calls,
+while separately written nonempty literals keep distinct identities.
+
 **Why:** The MDL manual's chapter 8 and ten pinned Confusion probes agree on
 FALSE payloads, `NIL` truth, return values, and short circuit behavior.
 

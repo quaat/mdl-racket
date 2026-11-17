@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "m1-false-values",
-  "recorded_at": "2026-11-17T17:00:34.229442+00:00",
+  "recorded_at": "2026-11-17T17:27:32.888705+00:00",
   "interpreter_sha256": "99728037f046ee68fdbb6ef69f44155e3c03f9c0b2b0840fbc218c75024c21e3",
   "protocol": "one local process per case; stdin expression then <QUIT>",
   "cases": [
@@ -38,6 +38,30 @@
       "stderr": "",
       "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
       "result_output": "T\n#FALSE ()\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "literal-identity-across-calls",
+      "expression": "<DEFINE M1-F () #FALSE (1)>\n<==? <M1-F> <M1-F>>",
+      "input": "<DEFINE M1-F () #FALSE (1)>\n<==? <M1-F> <M1-F>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-F\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-F\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "distinct-literal-identity",
+      "expression": "<DEFINE M1-G () <==? #FALSE (1) #FALSE (1)>>\n<M1-G>",
+      "input": "<DEFINE M1-G () <==? #FALSE (1) #FALSE (1)>>\n<M1-G>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-G\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-G\n#FALSE ()\n",
       "ok": true,
       "error": null
     },

@@ -95,16 +95,23 @@ skip unselected side effects.
 The manual's equality rule for empty LIST primtype values means two empty
 FALSE values of the same type are `==?`. Distinct nonempty FALSE payloads are
 not `==?`, though equal payloads are `=?`.
+The same manual says evaluating a FALSE neither copies it nor evaluates its
+elements. A nonempty FALSE literal in a function must therefore retain its
+identity across calls. Separately written nonempty literals must retain
+distinct identities, even when their payloads compare structurally equal.
 
 Pinned Confusion probe inputs and raw output are in
 `docs/evidence/M1/false-cases.json` and `false-reference.json`; the latter
-records interpreter SHA-256 and exit codes. All eleven cases exited zero with
+records interpreter SHA-256 and exit codes. All thirteen cases exited zero with
 empty stderr. Observed: `NIL` is an `ATOM` and `<NOT NIL>` gives empty FALSE;
 `AND` returns `#FALSE (1)`, `OR` and `COND` return their last `#FALSE (2)`;
 empty `AND` gives `T`, empty `OR` gives `#FALSE ()`; a test-only `COND` gives
 `7`; short-circuited `SETG` forms do not execute.
 Confusion also gives `T`, empty FALSE, and `T` for `==?` on two empty FALSEs,
 `==?` on two independently read payload FALSEs, and `=?` on those payloads.
+The review follow-up cases give `T` for two calls returning one literal and
+empty FALSE for two distinct literals in one function; both processes exited
+zero with empty stderr.
 
 Implementation tests for this slice belong in `tests/false_test.rkt` and
 `tests/parser_test.rkt`. The payload is retained as reader data; mutable LIST

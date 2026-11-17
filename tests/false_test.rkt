@@ -22,6 +22,10 @@
 (check-equal? (run "<==? <> <>>") 'T)
 (check-true (mdl-false? (run "<==? #FALSE (1) #FALSE (1)>")))
 (check-equal? (run "<=? #FALSE (1) #FALSE (1)>") 'T)
+(check-equal? (run "<DEFINE F () #FALSE (1)> <==? <F> <F>>") 'T)
+(check-true (mdl-false?
+             (run "<DEFINE G () <==? #FALSE (1) #FALSE (1)>> <G>")))
+(check-equal? (run "<DEFINE H () <COND (T #FALSE (1))>> <==? <H> <H>>") 'T)
 (check-true (mdl-truthy? (run "0")))
 (check-true (mdl-truthy? (run "()")))
 (check-exn #rx"host Boolean escaped" (lambda () (mdl-truthy? #f)))

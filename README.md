@@ -106,8 +106,9 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
 - Basic `DEFINE` with simple parameters, `SETG`, `GVAL`, local/global references,
   arithmetic, comparisons, and a few collection forms.
 - First-class MDL FALSE literals with payloads, distinct from the `NIL` atom;
-  value-preserving `NOT`, `AND`, `OR`, and `COND` truth behavior, plus limited
-  `TYPE` recognition for FALSE and placeholder ATOM values.
+  stable literal identity across function calls; value-preserving `NOT`, `AND`,
+  `OR`, and `COND` truth behavior; and limited `TYPE` recognition for FALSE and
+  placeholder ATOM values.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
