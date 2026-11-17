@@ -30,6 +30,8 @@ errors are under `docs/evidence/M2/prog-*`; see `PROG.md` there for commands,
 reference hashes, the deliberately nonzero expected-error probe suite, a
 separate Confusion signal-11 crash during auxiliary initialization, and
 unsupported activation behavior. These tests do not satisfy the full M2 gate.
+Issue #22 adds `module+ test` checks in `mdl/runtime/core.rkt` for activation
+identity, ownership, stale-frame rejection, and cleanup on return or error.
 
 ## Frozen 1977 baseline
 

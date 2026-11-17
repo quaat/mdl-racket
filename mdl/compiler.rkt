@@ -110,12 +110,13 @@
         (unsupported args "non-simple or duplicate DEFINE parameters"))
       `(mdl-define! (mdl-atom ,fn-name)
                     (lambda ,(map local-id names)
-                      (parameterize ([current-mdl-return #f])
-                        (mdl-with-bindings
-                         (list ,@(map (lambda (name)
-                                        `(cons (mdl-atom ,name) ,(local-id name)))
-                                      names))
-                         (lambda () ,(compile-sequence (cddr xs) names)))))))))
+                      (mdl-with-function-scope
+                       (lambda ()
+                         (mdl-with-bindings
+                          (list ,@(map (lambda (name)
+                                         `(cons (mdl-atom ,name) ,(local-id name)))
+                                       names))
+                          (lambda () ,(compile-sequence (cddr xs) names))))))))))
 
 (define (compile-prog n args locals)
   (when (null? args) (unsupported n "PROG requires an auxiliary LIST and body"))
@@ -144,10 +145,10 @@
              ,(if initializer
                   `(lambda () ,(compile-expression initializer locals))
                   #f))))
-  `(let/ec mdl-prog-exit
-     (parameterize ([current-mdl-return mdl-prog-exit])
-       (mdl-with-aux-bindings (list ,@specs)
-                              (lambda () ,(compile-sequence (cdr args) locals))))))
+  `(mdl-with-prog-activation
+    (lambda ()
+      (mdl-with-aux-bindings (list ,@specs)
+                             (lambda () ,(compile-sequence (cdr args) locals))))))
 
 (define (compile-cond n clauses locals)
   (when (null? clauses) (unsupported n "COND requires at least one clause"))

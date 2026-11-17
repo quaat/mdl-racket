@@ -91,7 +91,9 @@ source definitions, with no loss of semantic aliasing/continuations.
 | Work item | Scope | Depends on |
 |---|---|---|
 | [Issue #20](https://github.com/quaat/mdl-racket/issues/20) | Unnamed PROG auxiliaries and bare RETURN in the current function | M1 |
-| Next control slice | REPEAT/AGAIN, named activations, explicit target RETURN, nonlocal unwinding | #20 |
+| [Issue #22](https://github.com/quaat/mdl-racket/issues/22) | Explicit activation frames, function ownership, and lifetime | #20 |
+| [Issue #23](https://github.com/quaat/mdl-racket/issues/23) | Terminating structural equality on cyclic mutable values | M1 equality; before broader execution |
+| Next control slice | REPEAT/AGAIN, named activations, explicit target RETURN, nonlocal unwinding | #22, #23 |
 | Function binding slice | OPTIONAL/AUX/TUPLE and application/activation semantics | #20; coordinate with control slice |
 | Macro and loader slices | DEFMAC expansion, cross-file loading, initial original source definitions | Function binding and control slices |
 | Integrated gate | Structured tests and original definitions execute without lost aliasing or continuations | Prior M2 slices |
@@ -99,7 +101,10 @@ source definitions, with no loss of semantic aliasing/continuations.
 ```mermaid
 flowchart LR
   M1 --> I20["#20 PROG / bare RETURN"]
-  I20 --> C["Control and activations"]
+  I20 --> I22["#22 activation frames"]
+  M1 --> I23["#23 cyclic equality"]
+  I22 --> C["Control and activations"]
+  I23 --> C
   I20 --> F["Function binding"]
   C --> L["Macro and source loading"]
   F --> L
