@@ -30,20 +30,29 @@
      (string->number (substring val 1 (sub1 (string-length val))) 8)]
     [else `(mdl-atom ,val)]))
 
-(define (quote-datum n)
+(define (compile-data n)
   (case (mdl-node-kind n)
-    [(atom) (let ([value (mdl-constant n)])
-              (if (number? value) value
-                  (string->symbol (mdl-node-value n))))]
+    [(atom) (mdl-constant n)]
     [(string) (mdl-node-value n)]
-    [(list) (map quote-datum (mdl-node-value n))]
-    [(vector uvector) (list->vector (map quote-datum (mdl-node-value n)))]
-    [else (unsupported n "quoting this MDL form is not implemented")]))
+    [(list) `(mdl-list ,@(map compile-data (mdl-node-value n)))]
+    [(vector) `(mdl-vector ,@(map compile-data (mdl-node-value n)))]
+    [(uvector) `(mdl-uvector ,@(map compile-data (mdl-node-value n)))]
+    [(false) `(mdl-false (mdl-list ,@(map compile-data (mdl-node-value n))))]
+    [else (unsupported n "this MDL data construct is not implemented")]))
+
+(define current-mdl-literals (make-parameter #f))
+
+(define (retain-literal n)
+  (define id (gensym 'mdl-literal))
+  (set-box! (current-mdl-literals)
+            (cons (list id (compile-data n))
+                  (unbox (current-mdl-literals))))
+  id)
 
 (define (compile-quote n)
   (if (is-kind? n 'atom)
       (mdl-constant n)
-      `(quote ,(quote-datum n))))
+      (retain-literal n)))
 
 (define (compile-sequence body locals)
   (when (null? body) (error 'mdl-compiler "empty body"))
@@ -148,15 +157,13 @@
           [else
            `(mdl-apply ,op ,@(map (lambda (a) (compile-expression a locals)) args))]))))
 
-(define current-false-literals (make-parameter #f))
-
 (define (compile-expression n [locals '()])
-  ;; Each top-level expression gets one lexical binding per FALSE literal.
+  ;; Retain each source literal once per compiled top-level expression.
   ;; A DEFINE then closes over the literal, retaining its identity on calls.
-  (if (current-false-literals)
+  (if (current-mdl-literals)
       (compile-expression/body n locals)
       (let ([literals (box '())])
-        (parameterize ([current-false-literals literals])
+        (parameterize ([current-mdl-literals literals])
           (define body (compile-expression/body n locals))
           (if (null? (unbox literals))
               body
@@ -165,12 +172,7 @@
 (define (compile-expression/body n locals)
   (case (mdl-node-kind n)
     [(atom) (mdl-constant n)]
-    [(false)
-     (define id (gensym 'mdl-false-literal))
-     (set-box! (current-false-literals)
-               (cons (list id `(mdl-false ',(map quote-datum (mdl-node-value n))))
-                     (unbox (current-false-literals))))
-     id]
+    [(false) (retain-literal n)]
     [(string) (mdl-node-value n)]
     [(local)
      (let ([name (string-upcase (mdl-node-value n))])
@@ -184,8 +186,10 @@
     [(quote) (compile-quote (mdl-node-value n))]
     [(list) `(mdl-list ,@(map (lambda (a) (compile-expression a locals))
                               (mdl-node-value n)))]
-    [(vector) `(vector ,@(map (lambda (a) (compile-expression a locals))
-                             (mdl-node-value n)))]
+    [(vector) `(mdl-vector ,@(map (lambda (a) (compile-expression a locals))
+                                 (mdl-node-value n)))]
+    [(uvector) `(mdl-uvector ,@(map (lambda (a) (compile-expression a locals))
+                                   (mdl-node-value n)))]
     [(form) (compile-form n locals)]
     [else (unsupported n (format "unsupported MDL construct ~a" (mdl-node-kind n)))]))
 

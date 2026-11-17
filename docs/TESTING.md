@@ -2,8 +2,8 @@
 
 ## Test layers
 
-1. `make test-racket`: reader, bootstrap compiler, FALSE, and atom/OBLIST
-   semantics on the explicitly supported subset.
+1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST, and
+   mutable sequence semantics on the explicitly supported subset.
 2. `python -m pytest -q tests/test_harness.py`: source lock, reference
    interchange format, exact comparator and transcript normalization.
 3. `racket scripts/mdl_check.rkt ...`: syntax parse coverage on pinned

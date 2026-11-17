@@ -2,6 +2,7 @@
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list)
 (provide current-mdl-globals mdl-setg! mdl-gval mdl-define! mdl-apply mdl-list
+         mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          current-mdl-atom-space make-mdl-atom-space
          mdl-false mdl-false? mdl-false-payload)
@@ -9,9 +10,12 @@
 (struct mdl-false-value (payload) #:transparent)
 (define empty-mdl-false (mdl-false-value '()))
 (define (mdl-false payload)
-  (if (null? payload) empty-mdl-false (mdl-false-value payload)))
+  (define list-payload (mdl-normalize-list payload))
+  (if (null? list-payload) empty-mdl-false (mdl-false-value list-payload)))
 (define mdl-false? mdl-false-value?)
-(define mdl-false-payload mdl-false-value-payload)
+(define (mdl-false-payload value)
+  (unless (mdl-false? value) (error 'mdl-false-payload "expected FALSE"))
+  (mdl-list->list (mdl-false-value-payload value)))
 
 (define current-mdl-globals (make-parameter (make-hash)))
 
@@ -141,6 +145,129 @@
 (define (mdl-list . vals)
   (foldr mcons '() vals))
 
+(define (mdl-normalize-list value)
+  (cond [(or (null? value) (mpair? value)) value]
+        [(list? value) (apply mdl-list value)]
+        [else (error 'mdl-list "expected LIST-primtype value")]))
+
+(define (mdl-list->list value)
+  (let loop ([remaining value] [seen (make-hasheq)])
+    (cond [(null? remaining) '()]
+          [(not (mpair? remaining)) (error 'mdl-list "improper LIST")]
+          [(hash-has-key? seen remaining) (error 'mdl-list "cyclic LIST")]
+          [else (hash-set! seen remaining #t)
+                (cons (mcar remaining) (loop (mcdr remaining) seen))])))
+
+(struct mdl-array (kind storage start length element-type))
+
+(define (mdl-type-name value)
+  (cond [(mdl-false? value) "FALSE"]
+        [(mdl-atom? value) "ATOM"]
+        [(mdl-oblist? value) "OBLIST"]
+        [(or (null? value) (mpair? value)) "LIST"]
+        [(mdl-array? value) (symbol->string (mdl-array-kind value))]
+        [(exact-integer? value) "FIX"]
+        [(and (real? value) (inexact? value)) "FLOAT"]
+        [(string? value) "STRING"]
+        [else (error 'mdl-type "unsupported MDL type ~a" value)]))
+
+(define (mdl-vector . values)
+  (mdl-array 'VECTOR (list->vector values) 0 (length values) #f))
+
+(define (mdl-uvector . values)
+  (define element-type (and (pair? values) (mdl-type-name (car values))))
+  (for ([value (in-list values)])
+    (when (or (string=? (mdl-type-name value) "STRING")
+              (not (string=? (mdl-type-name value) element-type)))
+      (error 'mdl-uvector "UVECTOR elements must have one permitted TYPE")))
+  (mdl-array 'UVECTOR (list->vector values) 0 (length values) element-type))
+
+(define (mdl-list-head value who)
+  (cond [(mdl-false? value) (mdl-false-value-payload value)]
+        [(or (null? value) (mpair? value)) value]
+        [else (error who "unsupported structured value ~a" value)]))
+
+(define (mdl-list-tail value count who)
+  (unless (and (exact-integer? count) (>= count 0))
+    (error who "offset out of range"))
+  (let loop ([remaining value] [n count])
+    (cond [(zero? n) remaining]
+          [(mpair? remaining) (loop (mcdr remaining) (sub1 n))]
+          [else (error who "offset out of range")])))
+
+(define (mdl-length value)
+  (cond [(mdl-array? value) (mdl-array-length value)]
+        [(string? value) (string-length value)]
+        [else (length (mdl-list->list (mdl-list-head value 'mdl-length)))]))
+
+(define (mdl-rest value [offset 1])
+  (unless (and (exact-integer? offset) (>= offset 0))
+    (error 'mdl-rest "offset out of range"))
+  (if (mdl-array? value)
+      (begin
+        (when (> offset (mdl-array-length value))
+          (error 'mdl-rest "offset out of range"))
+        (if (zero? offset) value
+            (mdl-array (mdl-array-kind value) (mdl-array-storage value)
+                       (+ (mdl-array-start value) offset)
+                       (- (mdl-array-length value) offset)
+                       (mdl-array-element-type value))))
+      (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))
+
+(define (mdl-check-index who value index)
+  (unless (and (exact-integer? index) (<= 1 index) (<= index (mdl-length value)))
+    (error who "index out of range")))
+
+(define (mdl-nth value [index 1])
+  (mdl-check-index 'mdl-nth value index)
+  (if (mdl-array? value)
+      (vector-ref (mdl-array-storage value) (+ (mdl-array-start value) (sub1 index)))
+      (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth) (sub1 index) 'mdl-nth))))
+
+(define (mdl-put! value index item)
+  (mdl-check-index 'mdl-put value index)
+  (if (mdl-array? value)
+      (begin
+        (when (and (eq? (mdl-array-kind value) 'UVECTOR)
+                   (not (string=? (mdl-type-name item)
+                                  (mdl-array-element-type value))))
+          (error 'mdl-put "UVECTOR PUT type violation"))
+        (vector-set! (mdl-array-storage value)
+                     (+ (mdl-array-start value) (sub1 index)) item))
+      (set-mcar! (mdl-list-tail (mdl-list-head value 'mdl-put)
+                                 (sub1 index) 'mdl-put) item))
+  value)
+
+(define (mdl-putrest! head tail)
+  (define head-list (mdl-list-head head 'mdl-putrest))
+  (unless (mpair? head-list)
+    (error 'mdl-putrest "PUTREST requires nonempty LIST-primtype head"))
+  (set-mcdr! head-list (mdl-list-head tail 'mdl-putrest))
+  head)
+
+(define (mdl-identical? left right)
+  (if (and (mdl-array? left) (mdl-array? right))
+      (and (eq? (mdl-array-kind left) (mdl-array-kind right))
+           (eq? (mdl-array-storage left) (mdl-array-storage right))
+           (= (mdl-array-start left) (mdl-array-start right))
+           (= (mdl-array-length left) (mdl-array-length right)))
+      (eq? left right)))
+
+(define (mdl-equal? left right)
+  (cond [(and (mdl-array? left) (mdl-array? right))
+         (and (eq? (mdl-array-kind left) (mdl-array-kind right))
+              (= (mdl-array-length left) (mdl-array-length right))
+              (for/and ([i (in-range (mdl-array-length left))])
+                (mdl-equal? (mdl-nth left (add1 i))
+                            (mdl-nth right (add1 i)))))]
+        [(and (mdl-false? left) (mdl-false? right))
+         (mdl-equal? (mdl-false-value-payload left)
+                     (mdl-false-value-payload right))]
+        [(and (mpair? left) (mpair? right))
+         (and (mdl-equal? (mcar left) (mcar right))
+              (mdl-equal? (mcdr left) (mcdr right)))]
+        [else (equal? left right)]))
+
 (define (mdl-truthy? value)
   (when (boolean? value)
     (error 'mdl-truthy? "host Boolean escaped into an MDL truth test: ~a" value))
@@ -150,13 +277,26 @@
   (if value (mdl-atom "T") (mdl-false '())))
 
 (define (mdl-type value)
-  (cond [(mdl-false? value) (mdl-atom "FALSE")]
-        [(mdl-atom? value) (mdl-atom "ATOM")]
-        [(mdl-oblist? value) (mdl-atom "OBLIST")]
-        [else (error 'mdl-type "TYPE currently supports FALSE, ATOM, and OBLIST only: ~a" value)]))
+  (mdl-atom (mdl-type-name value)))
+
+(define (mdl-utype value)
+  (unless (and (mdl-array? value) (eq? (mdl-array-kind value) 'UVECTOR))
+    (error 'mdl-utype "UTYPE requires UVECTOR"))
+  (if (mdl-array-element-type value)
+      (mdl-atom (mdl-array-element-type value))
+      (mdl-false '())))
 
 (define builtin-table
   (hash "TYPE" mdl-type
+        "UTYPE" mdl-utype
+        "LIST" mdl-list
+        "VECTOR" mdl-vector
+        "UVECTOR" mdl-uvector
+        "LENGTH" mdl-length
+        "REST" mdl-rest
+        "NTH" mdl-nth
+        "PUT" mdl-put!
+        "PUTREST" mdl-putrest!
         "ATOM" (lambda (name)
                  (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
                  (atom-value name #f))
@@ -175,13 +315,9 @@
         "L=?" (lambda (a b) (mdl-boolean (<= a b)))
         "G?" (lambda (a b) (mdl-boolean (> a b)))
         "G=?" (lambda (a b) (mdl-boolean (>= a b)))
-        "=?" (lambda (a b) (mdl-boolean (equal? a b)))
-        "==?" (lambda (a b) (mdl-boolean (eq? a b)))
-        "N==?" (lambda (a b) (mdl-boolean (not (eq? a b))))
-        "LENGTH" (lambda (v)
-                    (cond [(string? v) (string-length v)]
-                          [(vector? v) (vector-length v)]
-                          [else (error 'mdl-length "unsupported type ~a" v)]))))
+        "=?" (lambda (a b) (mdl-boolean (mdl-equal? a b)))
+        "==?" (lambda (a b) (mdl-boolean (mdl-identical? a b)))
+        "N==?" (lambda (a b) (mdl-boolean (not (mdl-identical? a b))))))
 
 (define (mdl-apply name . args)
   (define fn (hash-ref builtin-table name #f))

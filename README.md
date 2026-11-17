@@ -55,7 +55,7 @@ missing. Successful detection does not mean the Racket tests or Confusion
 gameplay have passed; run the validation targets explicitly.
 
 `make test` requires Racket and the locally linked Racket package. It tests
-**the bootstrap reader/compiler and M1 FALSE slice**, not the original Zork
+**the bootstrap reader/compiler and implemented M1 primitives**, not the original Zork
 game. If `raco` reports that the package is already installed, inspect
 `raco pkg show` rather than blindly reinstalling it.
 
@@ -95,31 +95,34 @@ M0 passed its source, reader, native Confusion, test, and approved golden
 transcript gates. The first M1 slice,
 [FALSE values and truth operators](https://github.com/quaat/mdl-racket/pull/10),
 has merged with passing local and CI checks. The atom/OBLIST slice is under
-review; the M1 milestone remains open. Reproduce
+review; mutable sequence tests pass locally. The M1 milestone remains open. Reproduce
 the checks with `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
 See the [M0 report](docs/evidence/M0/REPORT.md),
 [M1 FALSE report](docs/evidence/M1/REPORT.md),
-[M1 atom report](docs/evidence/M1/ATOMS.md), and
+[M1 atom report](docs/evidence/M1/ATOMS.md),
+[M1 sequence report](docs/evidence/M1/SEQUENCES.md), and
 [current gate status](docs/STATUS.md) for hashes, outputs, and limits.
 
 - A custom `#lang mdl` reader for a small subset of angle-bracket MDL syntax.
 - Source-located AST nodes and a conservative compiler.
 - Basic `DEFINE` with simple parameters, `SETG`, `GVAL`, local/global references,
   arithmetic, comparisons, and a few collection forms.
-- First-class MDL FALSE literals with payloads, distinct from the `NIL` atom;
+- First-class MDL FALSE literals with mutable payloads, distinct from the `NIL` atom;
   stable literal identity across function calls; value-preserving `NOT`, `AND`,
   `OR`, and `COND` truth behavior; and limited `TYPE` recognition for FALSE and
   ATOM and OBLIST values.
 - Identity-bearing ATOM values, named OBLISTs, lookup/insertion/removal, and
   explicit `!-` OBLIST trailers on reader atom literals.
+- Mutable LIST, VECTOR, and UVECTOR values with shared `REST` views,
+  1-based `NTH`/`PUT`, LIST `PUTREST`, and uniform UVECTOR element checks.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
 
-**Not supported yet:** complete original MDL syntax, macros, mutable FALSE
-payload views, dynamic `.OBLIST` and full type semantics, actor/room types, shared
-mutable sequence semantics, general nonlocal control flow, event scheduling,
+**Not supported yet:** complete original MDL syntax, macros, dynamic `.OBLIST`
+and full type semantics, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
+general nonlocal control flow, event scheduling,
 original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.

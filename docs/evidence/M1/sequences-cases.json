@@ -1,0 +1,15 @@
+{
+  "name": "m1-mutable-sequences",
+  "cases": [
+    {"name": "list-rest-put", "expression": "<SETG M1-L (1 2 3)>\n<SETG M1-TAIL <REST ,M1-L>>\n<PUT ,M1-TAIL 1 9>\n,M1-L"},
+    {"name": "list-putrest", "expression": "<SETG M1-L (1 2 3)>\n<SETG M1-TAIL <REST ,M1-L>>\n<PUTREST ,M1-TAIL (8)>\n,M1-L"},
+    {"name": "list-identity", "expression": "<SETG M1-L (1 2 3)>\n<==? ,M1-L <PUT ,M1-L 2 9>>\n<==? ,M1-L <REST ,M1-L 0>>\n<==? <REST ,M1-L> <REST ,M1-L>>"},
+    {"name": "vector-rest-put", "expression": "<SETG M1-V [1 2 3]>\n<SETG M1-TAIL <REST ,M1-V>>\n<PUT ,M1-TAIL 1 9>\n,M1-V"},
+    {"name": "vector-identity", "expression": "<SETG M1-V [1 2 3]>\n<==? ,M1-V <REST ,M1-V 0>>\n<==? <REST ,M1-V> <REST ,M1-V>>"},
+    {"name": "uvector-rest-put", "expression": "<SETG M1-U ![1 2 3!]>\n<SETG M1-TAIL <REST ,M1-U>>\n<PUT ,M1-TAIL 1 9>\n,M1-U"},
+    {"name": "uvector-type", "expression": "<TYPE ![1 2!]>\n<UTYPE ![1 2!]>\n<TYPE <REST ![1 2!]>>"},
+    {"name": "quoted-list-identity", "expression": "<DEFINE M1-F () '(1 2)>\n<==? <M1-F> <M1-F>>"},
+    {"name": "list-access", "expression": "<SETG M1-L (1 2 3)>\n<NTH ,M1-L 2>\n<LENGTH ,M1-L>\n<REST ,M1-L 2>"},
+    {"name": "false-list-view", "expression": "<SETG M1-F #FALSE (1 2)>\n<TYPE <REST ,M1-F>>\n<PUT ,M1-F 2 9>\n,M1-F"}
+  ]
+}
