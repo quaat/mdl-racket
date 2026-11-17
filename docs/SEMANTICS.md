@@ -26,6 +26,11 @@ a minimal Confusion probe (source + output), and a Racket regression test.
   *The MDL Programming Language*,
   [§4.2.2](https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/).
   Tests: `tests/parser_test.rkt`.
+- `#WORD` followed by a decimal or octal numeric literal is read as one
+  source-located typed node. Unsupported typed literal names remain AST
+  data and fail explicitly at compilation. Reference: the manual's
+  [machine-word chapter](https://mdl-language.readthedocs.io/en/latest/18-machine-words-and-bits/).
+  Tests: `tests/parser_test.rkt` and `tests/word_test.rkt`.
 - Backslash in a string quotes the following character. In particular,
   `\n` in source represents `n`, not a newline escape. Reference:
   *The MDL Programming Language*,
@@ -46,7 +51,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | `OBLIST` / `ATOM` | identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, bucket geometry | M1 issue #4 |
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
 | `RETURN` / `AGAIN` / `UNWIND` | not supported | MDL activation record semantics | **NOT IMPLEMENTED** |
-| MDL octal `*777*` | basic scalar parsing | 36-bit signed/unsigned bit semantics | **NOT VERIFIED** |
+| MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
 | `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
 | `SAVE` / `RESTORE` | not supported | stable per-player snapshots; validated against reference | **NOT IMPLEMENTED** |
@@ -193,6 +198,8 @@ structured type returns its primitive type. This slice supports changing
 structured LIST, VECTOR, and UVECTOR types only, including FALSE/LIST casts.
 Numeric word bit reinterpretation and `NEWTYPE` declaration patterns require
 their own verified implementation and must error here.
+The later issue #8 slice adds FIX/WORD reinterpretation; the declaration
+pattern limit remains.
 
 Pinned Confusion input and output are in `docs/evidence/M1/types-cases.json`
 and `types-reference.json`: nine isolated processes exited zero with empty
@@ -245,6 +252,41 @@ records unassigned LVAL/GVAL failures and a reference discrepancy:
 Confusion build, so its attempted call reports `UNBOUND-VARIABLE`.
 `UNASSIGN`, explicit ENVIRONMENT arguments, OPTIONAL/AUX/TUPLE formals,
 PROCESS isolation, and compiled UNSPECIAL optimization remain unsupported.
+
+## M1 issue #8 specification: 36-bit FIX and WORD operations
+
+The [MDL manual, chapter 2](https://mdl-language.readthedocs.io/en/latest/02-read-evaluate-print/)
+states that PDP-10 FIX ranges from `-34359738368` to `34359738367`.
+Out-of-range decimal or octal FIX input becomes FLOAT; arithmetic that
+produces an out-of-range FIX raises overflow. Asterisks around digits specify
+an octal FIX literal. The [arithmetic chapter](https://mdl-language.readthedocs.io/en/latest/03-built-in-functions/)
+specifies left-to-right arithmetic, FIX division truncated toward zero,
+FLOAT contagion, and zero-argument identities `+`/`-` = 0 and `*`/`/` = 1.
+The [machine-word chapter](https://mdl-language.readthedocs.io/en/latest/18-machine-words-and-bits/)
+specifies 36-bit WORD storage, bitwise ANDB/ORB/XORB/EQVB, LSH, BITS,
+GETBITS, and PUTBITS. CHTYPE between FIX and WORD reinterprets a word's
+bits; WORD is not directly accepted by arithmetic. Numeric `==?` compares
+type and data bits, not Racket object allocation.
+
+Pinned Confusion observations are in `docs/evidence/M1/word-cases.json` and
+`word-reference.json`: nine isolated successful processes, all exit 0 with
+empty stderr. A separate deliberate error suite records missing `ROT` and
+division by zero. Confusion agrees on in-range FIX arithmetic and low-bit
+operations, but its native WORD output has 22 octal digits (64-bit storage),
+`*777777777777*` remains a positive FIX 68719476735, and `</>` returns 0.
+The historical manual requires a 36-bit WORD, an out-of-range octal literal
+to become FLOAT, and zero-argument division to return 1. These deltas are
+explicit; the Racket target follows the manual for them. `ROT` is documented
+by the manual but unbound in this Confusion build. This slice implements only
+the word operations used or independently corroborated in the selected
+source; `ROT` remains unsupported pending another reference.
+
+Racket tests in `tests/word_test.rkt` will cover reader octal and #WORD
+literals, FIX range and overflow, left-to-right arithmetic, truncating
+division, type-sensitive numeric identity, 36-bit masking, bitwise identities,
+shift direction, BITS extraction/insertion, and negative inputs. FLOAT
+precision and PDP-10 36-bit FLOAT bit reinterpretation, ROT, machine-specific
+overflow-control switches, and random-number behavior remain unsupported.
 
 ## M0 native Confusion observations (2026-11-17)
 

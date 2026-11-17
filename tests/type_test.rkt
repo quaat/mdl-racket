@@ -38,5 +38,6 @@
 (check-exn #rx"unsupported built-in TYPE conversion" (lambda () (run "<CHTYPE (1 2) FORM>")))
 (check-exn #rx"already exists" (lambda () (run "<NEWTYPE FIX VECTOR>")))
 (check-exn #rx"unknown MDL TYPE" (lambda () (run "<TYPEPRIM M1-UNKNOWN>")))
-(check-exn #rx"unsupported WORD" (lambda () (run "<NEWTYPE M1-W FIX> <CHTYPE 1 M1-W>")))
+(check-equal? (name "<NEWTYPE M1-W FIX> <TYPE <CHTYPE 1 M1-W>>") "M1-W")
+(check-equal? (run "<NEWTYPE M1-W FIX> <CHTYPE <CHTYPE 1 M1-W> FIX>") 1)
 (displayln "MDL type constructor tests passed")

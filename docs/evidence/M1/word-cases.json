@@ -1,0 +1,14 @@
+{
+  "name": "m1-36-bit-words",
+  "cases": [
+    {"name": "fix-boundaries", "expression": "34359738367\n-34359738368\n*777777777777*\n*000000000010*\n<==? 10000000000 10000000000>"},
+    {"name": "integer-arithmetic", "expression": "<+ 2 4 6>\n<- 5 3 2>\n<* 3 4>\n</ 11 7>\n</ -11 7>\n<MOD -11 7>\n<+>\n<->\n<*>\n</>"},
+    {"name": "float-contagion", "expression": "<+ 1 2.0>\n</ 11 7 2.0>\n<TYPE <+ 1 2.0>>"},
+    {"name": "word-cast", "expression": "<CHTYPE 8 WORD>\n<TYPE <CHTYPE 8 WORD>>\n<CHTYPE <CHTYPE -1 WORD> FIX>"},
+    {"name": "bitwise", "expression": "<ANDB 7 3>\n<ORB 1 2>\n<XORB 7 3>\n<EQVB 1 1>\n<ANDB>\n<ORB>\n<XORB>\n<EQVB>"},
+    {"name": "shifts", "expression": "<LSH 8 6>\n<LSH 8 -6>"},
+    {"name": "bits-get-put", "expression": "<GETBITS *012345670123* <BITS 6 18>>\n<PUTBITS #WORD *777777777777* <BITS 6 3>>\n<GETBITS 255 <BITS 4 4>>"},
+    {"name": "word-identity", "expression": "<==? <CHTYPE 8 WORD> <CHTYPE 8 WORD>>\n<=? <CHTYPE 8 WORD> <CHTYPE 8 WORD>>\n<==? -1 *777777777777*>"},
+    {"name": "native-width-delta", "expression": "<+ 34359738367 1>\n<TYPE 34359738368>\n#WORD *777777777777*"}
+  ]
+}

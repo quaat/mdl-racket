@@ -174,3 +174,25 @@ documenting it. Explicit ENVIRONMENT arguments, complex formal parameters,
 PROCESS-specific local stacks, and compiled UNSPECIAL behavior remain open.
 The Makefile refreshes the linked `#lang mdl` module to avoid stale compiled
 exports during local tests. No upstream or game rules changed.
+
+## ADR-0011: Historical 36-bit FIX/WORD over native Confusion width
+
+**Decision:** Use the manual's signed 36-bit FIX range and 36-bit WORD mask.
+Out-of-range FIX literals become FLOAT when representable; FIX arithmetic
+checks every intermediate result for overflow. WORD casts reinterpret the
+36-bit pattern, and bit/field operations mask results to 36 bits. Recognize
+`#WORD` with a numeric payload as one source-located reader node. Keep ROT
+unsupported until a reference implementation can corroborate it.
+
+**Why:** Chapters 2, 3, and 18 of the MDL manual specify these rules.
+Nine pinned Confusion probes corroborate in-range arithmetic and low-bit
+operations, but reveal Confusion's native 64-bit WORD output, out-of-range
+FIX values, a zero result for zero-argument division (the manual says one),
+and no ROT global binding. These are explicit reference deviations, not
+reasons to change the preservation target.
+
+**Consequence:** The numeric slice is not byte-for-byte equivalent to
+Confusion at the documented width/identity boundaries. PDP-10 FLOAT
+precision and bit layout, machine overflow switches, ROT, and the complete
+arithmetic library remain unsupported. No upstream source or game rule
+changed; no GPLv3 reference code was copied.

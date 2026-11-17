@@ -21,14 +21,43 @@
 (define (mdl-constant n)
   (define val (mdl-node-value n))
   (define upper (string-upcase val))
+  (define (fix-or-float number)
+    (if (and (exact-integer? number)
+             (or (< number -34359738368) (> number 34359738367)))
+        (let ([float (exact->inexact number)])
+          (when (or (eqv? float +inf.0) (eqv? float -inf.0))
+            (unsupported n "FLOAT literal overflow"))
+          float)
+        number))
   (cond
     [(string=? upper "#FALSE") (unsupported n "#FALSE requires a LIST payload")]
+    [(string=? upper "#WORD") (unsupported n "#WORD requires a numeric payload")]
     [(member upper '("T" "ELSE" "NIL")) `(mdl-atom ,upper)]
-    [(regexp-match? #px"^[+-]?[0-9]+$" val) (string->number val)]
+    [(regexp-match? #px"^[+-]?[0-9]+$" val)
+     (fix-or-float (string->number val))]
+    [(regexp-match? #px"^[+-]?[0-9]+\\.$" val)
+     (fix-or-float (string->number (substring val 0 (sub1 (string-length val)))))]
     [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
     [(regexp-match? #px"^\\*[0-7]+\\*$" val)
-     (string->number (substring val 1 (sub1 (string-length val))) 8)]
+     (fix-or-float (string->number (substring val 1 (sub1 (string-length val))) 8))]
     [else `(mdl-atom ,val)]))
+
+(define (compile-typed n)
+  (define tagged (mdl-node-value n))
+  (define name (string-upcase (car tagged)))
+  (define value (cdr tagged))
+  (unless (string=? name "#WORD")
+    (unsupported n (format "unsupported typed literal ~a" name)))
+  (unless (is-kind? value 'atom)
+    (unsupported n "#WORD requires a numeric literal"))
+  (define raw (mdl-node-value value))
+  (define bits
+    (cond [(regexp-match? #px"^\\*[0-7]+\\*$" raw)
+           (string->number (substring raw 1 (sub1 (string-length raw))) 8)]
+          [(regexp-match? #px"^[+-]?[0-9]+$" raw)
+           (string->number raw)]
+          [else (unsupported n "#WORD requires a decimal or octal integer")]))
+  `(mdl-word ,bits))
 
 (define (compile-data n)
   (case (mdl-node-kind n)
@@ -38,6 +67,7 @@
     [(vector) `(mdl-vector ,@(map compile-data (mdl-node-value n)))]
     [(uvector) `(mdl-uvector ,@(map compile-data (mdl-node-value n)))]
     [(false) `(mdl-false (mdl-list ,@(map compile-data (mdl-node-value n))))]
+    [(typed) (compile-typed n)]
     [else (unsupported n "this MDL data construct is not implemented")]))
 
 (define current-mdl-literals (make-parameter #f))
@@ -186,6 +216,7 @@
                                  (mdl-node-value n)))]
     [(uvector) `(mdl-uvector ,@(map (lambda (a) (compile-expression a locals))
                                    (mdl-node-value n)))]
+    [(typed) (compile-typed n)]
     [(form) (compile-form n locals)]
     [else (unsupported n (format "unsupported MDL construct ~a" (mdl-node-kind n)))]))
 

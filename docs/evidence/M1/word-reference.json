@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "name": "m1-36-bit-words",
+  "recorded_at": "2026-11-17T18:22:57.827676+00:00",
+  "interpreter_sha256": "99728037f046ee68fdbb6ef69f44155e3c03f9c0b2b0840fbc218c75024c21e3",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "fix-boundaries",
+      "expression": "34359738367\n-34359738368\n*777777777777*\n*000000000010*\n<==? 10000000000 10000000000>",
+      "input": "34359738367\n-34359738368\n*777777777777*\n*000000000010*\n<==? 10000000000 10000000000>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n34359738367\n-34359738368\n68719476735\n8\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "34359738367\n-34359738368\n68719476735\n8\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "integer-arithmetic",
+      "expression": "<+ 2 4 6>\n<- 5 3 2>\n<* 3 4>\n</ 11 7>\n</ -11 7>\n<MOD -11 7>\n<+>\n<->\n<*>\n</>",
+      "input": "<+ 2 4 6>\n<- 5 3 2>\n<* 3 4>\n</ 11 7>\n</ -11 7>\n<MOD -11 7>\n<+>\n<->\n<*>\n</>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n12\n0\n12\n1\n-1\n3\n0\n0\n1\n0\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "12\n0\n12\n1\n-1\n3\n0\n0\n1\n0\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "float-contagion",
+      "expression": "<+ 1 2.0>\n</ 11 7 2.0>\n<TYPE <+ 1 2.0>>",
+      "input": "<+ 1 2.0>\n</ 11 7 2.0>\n<TYPE <+ 1 2.0>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3.0000000\n0.5000000\nFLOAT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3.0000000\n0.5000000\nFLOAT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "word-cast",
+      "expression": "<CHTYPE 8 WORD>\n<TYPE <CHTYPE 8 WORD>>\n<CHTYPE <CHTYPE -1 WORD> FIX>",
+      "input": "<CHTYPE 8 WORD>\n<TYPE <CHTYPE 8 WORD>>\n<CHTYPE <CHTYPE -1 WORD> FIX>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#WORD *0000000000000000000010*\nWORD\n-1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#WORD *0000000000000000000010*\nWORD\n-1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "bitwise",
+      "expression": "<ANDB 7 3>\n<ORB 1 2>\n<XORB 7 3>\n<EQVB 1 1>\n<ANDB>\n<ORB>\n<XORB>\n<EQVB>",
+      "input": "<ANDB 7 3>\n<ORB 1 2>\n<XORB 7 3>\n<EQVB 1 1>\n<ANDB>\n<ORB>\n<XORB>\n<EQVB>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#WORD *0000000000000000000003*\n#WORD *0000000000000000000003*\n#WORD *0000000000000000000004*\n#WORD *1777777777777777777777*\n#WORD *1777777777777777777777*\n#WORD *0000000000000000000000*\n#WORD *0000000000000000000000*\n#WORD *1777777777777777777777*\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#WORD *0000000000000000000003*\n#WORD *0000000000000000000003*\n#WORD *0000000000000000000004*\n#WORD *1777777777777777777777*\n#WORD *1777777777777777777777*\n#WORD *0000000000000000000000*\n#WORD *0000000000000000000000*\n#WORD *1777777777777777777777*\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "shifts",
+      "expression": "<LSH 8 6>\n<LSH 8 -6>",
+      "input": "<LSH 8 6>\n<LSH 8 -6>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#WORD *0000000000000000001000*\n#WORD *0000000000000000000000*\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#WORD *0000000000000000001000*\n#WORD *0000000000000000000000*\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "bits-get-put",
+      "expression": "<GETBITS *012345670123* <BITS 6 18>>\n<PUTBITS #WORD *777777777777* <BITS 6 3>>\n<GETBITS 255 <BITS 4 4>>",
+      "input": "<GETBITS *012345670123* <BITS 6 18>>\n<PUTBITS #WORD *777777777777* <BITS 6 3>>\n<GETBITS 255 <BITS 4 4>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#WORD *0000000000000000000045*\n#WORD *0000000000777777777007*\n#WORD *0000000000000000000017*\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#WORD *0000000000000000000045*\n#WORD *0000000000777777777007*\n#WORD *0000000000000000000017*\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "word-identity",
+      "expression": "<==? <CHTYPE 8 WORD> <CHTYPE 8 WORD>>\n<=? <CHTYPE 8 WORD> <CHTYPE 8 WORD>>\n<==? -1 *777777777777*>",
+      "input": "<==? <CHTYPE 8 WORD> <CHTYPE 8 WORD>>\n<=? <CHTYPE 8 WORD> <CHTYPE 8 WORD>>\n<==? -1 *777777777777*>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\nT\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\nT\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "native-width-delta",
+      "expression": "<+ 34359738367 1>\n<TYPE 34359738368>\n#WORD *777777777777*",
+      "input": "<+ 34359738367 1>\n<TYPE 34359738368>\n#WORD *777777777777*\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n34359738368\nFIX\n#WORD *0000000000777777777777*\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "34359738368\nFIX\n#WORD *0000000000777777777777*\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}
