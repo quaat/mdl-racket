@@ -67,9 +67,9 @@ were not executed.
 
 ## Scope discipline
 
-Use `docs/STATUS.md` to identify the current milestone. M0 passed its approved
-reference gate; M1 is the current semantic runtime work. The bootstrap compiler
-is only a demonstration and not part of a faithful game engine yet.
+Use `docs/STATUS.md` to identify the first unmet milestone gate. M0 established
+the approved reference baseline. The bootstrap compiler is only a demonstration
+and not part of a faithful game engine yet.
 
 Do not implement the whole language in one PR. Preferred vertical slices:
 reader -> semantic primitive -> reference probe -> property test -> translation
