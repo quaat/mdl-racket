@@ -1,7 +1,8 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 gate PASS; M1 semantic runtime work is next. NOT a playable game.** This repository is a starting
-> point for developing an MDL-compatible `#lang mdl` in Racket and validating it
+> **Status: M0 gate PASS; M1 semantic runtime work is in progress. NOT a
+> playable game.** This repository is a starting point for developing an
+> MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
 > The historical game sources and interpreter are **not bundled**. The included
@@ -54,9 +55,9 @@ missing. Successful detection does not mean the Racket tests or Confusion
 gameplay have passed; run the validation targets explicitly.
 
 `make test` requires Racket and the locally linked Racket package. It tests
-**the bootstrap reader/compiler**, not the original Zork game. If `raco` reports
-that the package is already installed, inspect `raco pkg show` rather than
-blindly reinstalling it.
+**the bootstrap reader/compiler and M1 FALSE slice**, not the original Zork
+game. If `raco` reports that the package is already installed, inspect
+`raco pkg show` rather than blindly reinstalling it.
 
 ### Source checkout and historical reference
 
@@ -88,19 +89,34 @@ python scripts/compare_transcripts.py \
 **No candidate Zork runtime exists yet.** Differential testing is a planned
 acceptance gate, not a capability claimed for M0.
 
-## What the starting code actually supports
+## Current implementation and milestone evidence
+
+M0 passed its source, reader, native Confusion, test, and approved golden
+transcript gates. The first M1 slice,
+[FALSE values and truth operators](https://github.com/quaat/mdl-racket/pull/10),
+has passing local and CI checks; the M1 milestone remains open. Reproduce
+the checks with `make test`, `make sources`, `make check-source`,
+`make reference-build`, `make reference-capture`, and `make reference-probe`.
+See the [M0 report](docs/evidence/M0/REPORT.md),
+[M1 FALSE report](docs/evidence/M1/REPORT.md), and
+[current gate status](docs/STATUS.md) for hashes, outputs, and limits.
 
 - A custom `#lang mdl` reader for a small subset of angle-bracket MDL syntax.
 - Source-located AST nodes and a conservative compiler.
 - Basic `DEFINE` with simple parameters, `SETG`, `GVAL`, local/global references,
-  arithmetic, comparisons, a small `COND` subset, and a few collection forms.
+  arithmetic, comparisons, and a few collection forms.
+- First-class MDL FALSE literals with payloads, distinct from the `NIL` atom;
+  stable literal identity across function calls; value-preserving `NOT`, `AND`,
+  `OR`, and `COND` truth behavior; and limited `TYPE` recognition for FALSE and
+  placeholder ATOM values.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
 
-**Not supported yet:** complete original MDL syntax, macros, true MDL FALSE,
-actor/room types, shared mutable sequence semantics, general nonlocal control
-flow, event scheduling, original parser, gameplay, and client-side web execution.
+**Not supported yet:** complete original MDL syntax, macros, mutable FALSE
+payload views, full atom/OBLIST and type semantics, actor/room types, shared
+mutable sequence semantics, general nonlocal control flow, event scheduling,
+original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.
 
@@ -111,10 +127,8 @@ The plan and precise gates are in [`docs/PLAN.md`](docs/PLAN.md). Treat
 [`docs/STATUS.md`](docs/STATUS.md) as the current source of truth: never label
 any untested target as passing.
 
-Recommended first instruction for Codex: **complete M0 verification, run the
-historical source reader against pinned source files, repair found parsing bugs,
-and capture a proven Confusion baseline before implementing additional runtime
-features.**
+For each milestone, follow the first unmet gate in `docs/STATUS.md`, record
+the evidence, and update this README when the gate result changes.
 
 ## Sources, provenance, licensing
 

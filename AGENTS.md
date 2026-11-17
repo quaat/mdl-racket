@@ -39,7 +39,11 @@ Read this file **before doing any development**. Read `docs/PLAN.md`,
 6. Run `make test` (or report missing toolchain precisely). Run reference
    validation for any behavior change. Check source SHA before comparing runs.
 7. Record evidence under `docs/evidence/<milestone>/` and update `docs/STATUS.md`,
-   `docs/SEMANTICS.md`, and `docs/DECISIONS.md` when relevant.
+   `docs/SEMANTICS.md`, and `docs/DECISIONS.md` when relevant. At every milestone
+   gate, update `README.md` with the verified status, supported and unsupported
+   capabilities, reproduction commands, evidence links, and next milestone.
+   Keep its claims consistent with the gate result; update it for a failed or
+   blocked gate as well as a passing one.
 8. Record a final issue/PR comment including commands, exit statuses, and
    how to reproduce; label gate PASS / FAIL / BLOCKED / NOT RUN.
 9. Do **not** continue to the next gate if this gate failed. If blocked, record
@@ -55,6 +59,7 @@ For every milestone or PR, include:
 - failing-then-passing test evidence where relevant;
 - Confusion transcript paths, approved golden comparisons, and RNG/input settings;
 - security and licensing impact; unresolved risks; next actionable task.
+- for each milestone gate, a README update stating its result and limits.
 
 For web features, also include screenshots and manual accessibility checks.
 Never write a 'fully passing' report if the reference engine or language tests
@@ -62,9 +67,9 @@ were not executed.
 
 ## Scope discipline
 
-Current work is **M0**. Complete verified Racket tests, a reliable reader
-for actual 1977 files, and a runnable Confusion oracle first. The M0 compiler
-is only a demonstration and not part of a faithful game engine yet.
+Use `docs/STATUS.md` to identify the first unmet milestone gate. M0 established
+the approved reference baseline. The bootstrap compiler is only a demonstration
+and not part of a faithful game engine yet.
 
 Do not implement the whole language in one PR. Preferred vertical slices:
 reader -> semantic primitive -> reference probe -> property test -> translation

@@ -31,4 +31,8 @@
 (check-exn exn:fail? (lambda () (parse-mdl ";")))
 (check-exn exn:fail? (lambda () (parse-mdl "<DEFINE X (A) <+ .A 1>")))
 (check-exn exn:fail? (lambda () (parse-mdl "\"unterminated")))
+(define false-node (car (parse-mdl "#FALSE (1 NIL)")))
+(check-equal? (mdl-node-kind false-node) 'false)
+(check-equal? (map mdl-node-value (mdl-node-value false-node)) '("1" "NIL"))
+(check-equal? (length (parse-mdl "#FALSE (1 NIL)")) 1)
 (displayln "reader smoke tests passed")

@@ -1,0 +1,18 @@
+{
+  "name": "m1-false-values",
+  "cases": [
+    {"name": "nil-value", "expression": "NIL\n<TYPE NIL>\n<NOT NIL>"},
+    {"name": "false-type", "expression": "<TYPE <>>\n<TYPE #FALSE (1)>\n<TYPE NIL>"},
+    {"name": "false-identity", "expression": "<==? <> <>>\n<==? #FALSE (1) #FALSE (1)>\n<=? #FALSE (1) #FALSE (1)>"},
+    {"name": "literal-identity-across-calls", "expression": "<DEFINE M1-F () #FALSE (1)>\n<==? <M1-F> <M1-F>>"},
+    {"name": "distinct-literal-identity", "expression": "<DEFINE M1-G () <==? #FALSE (1) #FALSE (1)>>\n<M1-G>"},
+    {"name": "and-payload", "expression": "<AND 3 #FALSE (1) 7>"},
+    {"name": "and-empty", "expression": "<AND>"},
+    {"name": "or-last-false", "expression": "<OR #FALSE (1) #FALSE (2)>"},
+    {"name": "or-empty", "expression": "<OR>"},
+    {"name": "cond-last-false", "expression": "<COND (#FALSE (1) 7) (#FALSE (2) 8)>"},
+    {"name": "cond-test-only", "expression": "<COND (7) (T 8)>"},
+    {"name": "and-short-circuit", "expression": "<SETG M1-X 0>\n<AND #FALSE (1) <SETG M1-X 1>>\n,M1-X"},
+    {"name": "or-short-circuit", "expression": "<SETG M1-X 0>\n<OR 7 <SETG M1-X 1>>\n,M1-X"}
+  ]
+}

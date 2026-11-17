@@ -22,9 +22,8 @@
   (define val (mdl-node-value n))
   (define upper (string-upcase val))
   (cond
-    [(string=? upper "T") #t]
-    [(string=? upper "ELSE") #t]
-    [(string=? upper "NIL") #f]
+    [(string=? upper "#FALSE") (unsupported n "#FALSE requires a LIST payload")]
+    [(member upper '("T" "ELSE" "NIL")) `(mdl-atom ,upper)]
     [(regexp-match? #px"^[+-]?[0-9]+$" val) (string->number val)]
     [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
     [(regexp-match? #px"^\\*[0-7]+\\*$" val)
@@ -33,7 +32,9 @@
 
 (define (quote-datum n)
   (case (mdl-node-kind n)
-    [(atom) (string->symbol (mdl-node-value n))]
+    [(atom) (let ([value (mdl-constant n)])
+              (if (number? value) value
+                  (string->symbol (mdl-node-value n))))]
     [(string) (mdl-node-value n)]
     [(list) (map quote-datum (mdl-node-value n))]
     [(vector uvector) (list->vector (map quote-datum (mdl-node-value n)))]
@@ -63,20 +64,50 @@
                       ,(compile-sequence (cddr xs) names))))))
 
 (define (compile-cond n clauses locals)
+  (when (null? clauses) (unsupported n "COND requires at least one clause"))
   (define (compile-clause clause)
     (unless (and (is-kind? clause 'list) (pair? (mdl-node-value clause)))
       (unsupported clause "COND requires nonempty parenthesized clauses"))
-    (let ([exprs (mdl-node-value clause)])
-      (list `(mdl-truthy? ,(compile-expression (car exprs) locals))
-            (if (null? (cdr exprs))
-                (compile-expression (car exprs) locals)
-                (compile-sequence (cdr exprs) locals)))))
-  `(cond ,@(map compile-clause clauses) [else #f]))
+    (mdl-node-value clause))
+  (define (loop remaining)
+    (define exprs (compile-clause (car remaining)))
+    (define test-id (gensym 'mdl-test))
+    `(let ([,test-id ,(compile-expression (car exprs) locals)])
+       (if (mdl-truthy? ,test-id)
+           ,(if (null? (cdr exprs)) test-id
+                (compile-sequence (cdr exprs) locals))
+           ,(if (null? (cdr remaining)) test-id
+                (loop (cdr remaining))))))
+  (loop clauses))
+
+(define (compile-and args locals)
+  (if (null? args)
+      '(mdl-atom "T")
+      (let loop ([remaining args])
+        (if (null? (cdr remaining))
+            (compile-expression (car remaining) locals)
+            (let ([value-id (gensym 'mdl-and)])
+              `(let ([,value-id ,(compile-expression (car remaining) locals)])
+                 (if (mdl-truthy? ,value-id)
+                     ,(loop (cdr remaining))
+                     ,value-id)))))))
+
+(define (compile-or args locals)
+  (if (null? args)
+      '(mdl-false '())
+      (let loop ([remaining args])
+        (if (null? (cdr remaining))
+            (compile-expression (car remaining) locals)
+            (let ([value-id (gensym 'mdl-or)])
+              `(let ([,value-id ,(compile-expression (car remaining) locals)])
+                 (if (mdl-truthy? ,value-id)
+                     ,value-id
+                     ,(loop (cdr remaining)))))))))
 
 (define (compile-form n locals)
   (define xs (mdl-node-value n))
   (if (null? xs)
-      #f
+      '(mdl-false '())
       (let* ([op-node (car xs)]
              [op (atom-name op-node)]
              [args (cdr xs)])
@@ -99,22 +130,42 @@
                   (set! ,ident new-value)
                   new-value)))]
           [(COND) (compile-cond n args locals)]
-          [(AND)
-           `(and ,@(map (lambda (a)
-                         `(mdl-truthy? ,(compile-expression a locals))) args))]
-          [(OR) `(or ,@(map (lambda (a) (compile-expression a locals)) args))]
+          [(AND) (compile-and args locals)]
+          [(OR) (compile-or args locals)]
           [(NOT)
            (unless (= (length args) 1) (unsupported n "NOT expects one argument"))
-           `(not (mdl-truthy? ,(compile-expression (first args) locals)))]
+           `(if (mdl-truthy? ,(compile-expression (first args) locals))
+                (mdl-false '())
+                (mdl-atom "T"))]
           [(QUOTE)
            (unless (= (length args) 1) (unsupported n "QUOTE expects one argument"))
            `(quote ,(quote-datum (first args)))]
           [else
            `(mdl-apply ,op ,@(map (lambda (a) (compile-expression a locals)) args))]))))
 
+(define current-false-literals (make-parameter #f))
+
 (define (compile-expression n [locals '()])
+  ;; Each top-level expression gets one lexical binding per FALSE literal.
+  ;; A DEFINE then closes over the literal, retaining its identity on calls.
+  (if (current-false-literals)
+      (compile-expression/body n locals)
+      (let ([literals (box '())])
+        (parameterize ([current-false-literals literals])
+          (define body (compile-expression/body n locals))
+          (if (null? (unbox literals))
+              body
+              `(let ,(reverse (unbox literals)) ,body))))))
+
+(define (compile-expression/body n locals)
   (case (mdl-node-kind n)
     [(atom) (mdl-constant n)]
+    [(false)
+     (define id (gensym 'mdl-false-literal))
+     (set-box! (current-false-literals)
+               (cons (list id `(mdl-false ',(map quote-datum (mdl-node-value n))))
+                     (unbox (current-false-literals))))
+     id]
     [(string) (mdl-node-value n)]
     [(local)
      (let ([name (string-upcase (mdl-node-value n))])
