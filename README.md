@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 bootstrap, NOT a playable game.** This repository is a starting
+> **Status: M0 locally verified, gate BLOCKED, NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -64,6 +64,8 @@ blindly reinstalling it.
 make sources               # downloads/locks original upstream checkouts
 make reference-build       # builds native Confusion (may need toolchain fixes)
 make reference-capture     # saves a JSON capture in artifacts/reference/house.json
+make check-source          # sweeps selected 1977 text files with the Racket reader
+make reference-probe       # captures isolated Confusion primitive observations
 ```
 
 Reference source paths are:
@@ -125,6 +127,6 @@ features.**
   commercial variants. The harness MIT-0 license does **not** override upstream
   licenses. See [`docs/PROVENANCE.md`](docs/PROVENANCE.md).
 
-This repository is an independent development scaffold. It has not been
-validated by running Racket or Confusion in the environment where it was
-packaged; see [`docs/STATUS.md`](docs/STATUS.md) for explicit evidence.
+This repository is an independent development scaffold. Local Racket and
+Confusion checks were run on 2026-11-17; remote CI and human golden review
+remain open. See [`docs/STATUS.md`](docs/STATUS.md) for explicit evidence.

@@ -1,5 +1,5 @@
 #lang mdl
-; Minimal M0 subset, NOT full historical MDL.
+;"Minimal M0 subset, NOT full historical MDL."
 <SETG VALUE 10>
 <DEFINE DOUBLE (N) <* .N 2>>
 <SETG ANSWER <+ <DOUBLE ,VALUE> 22>>

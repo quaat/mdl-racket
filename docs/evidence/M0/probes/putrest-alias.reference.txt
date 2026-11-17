@@ -1,0 +1,9 @@
+Welcome to 'Confusion', a MDL interpreter.
+Copyright 2009 Matthew T. Russotto
+This Confusion created Nov 17 2026 @ 11:27:20
+This program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.
+This is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details
+
+
+LISTENING-AT-LEVEL 1 PROCESS 1
+(1 2 8)

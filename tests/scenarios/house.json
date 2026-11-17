@@ -1,8 +1,8 @@
 {
   "name": "house-smoke",
-  "description": "A small deterministic-ish starting-room transcript; random events require separate seeded tests.",
+  "description": "Move from the saved north-side start to the mailbox; random events require separate seeded tests.",
   "commands": [
-    "look",
+    "west",
     "open mailbox",
     "take leaflet",
     "inventory",

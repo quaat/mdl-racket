@@ -1,8 +1,9 @@
 SHELL := /bin/bash
 .PHONY: doctor sources install test test-racket test-python check-source reference-build reference-capture reference-probe compare
 
-PYTHON ?= python3
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
+export TMPDIR ?= /tmp
 
 doctor:
 	@$(PYTHON) scripts/doctor.py
@@ -20,10 +21,10 @@ test-racket:
 	@raco test tests/parser_test.rkt tests/compiler_test.rkt
 
 test-python:
-	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py
+	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py
 
 check-source:
-	@$(RACKET) scripts/mdl_check.rkt .cache/upstream/mit_zork/zork/lcf/defs.63
+	@$(PYTHON) scripts/check_1977_sources.py
 
 reference-build: sources
 	@bash scripts/build_confusion.sh
@@ -36,5 +37,4 @@ compare:
 	@$(PYTHON) scripts/compare_transcripts.py artifacts/reference/house.json "$(CANDIDATE)"
 
 reference-probe:
-	@test -n "$(PROMPT)" || (echo 'Usage: make reference-probe PROMPT=<observed-Confusion-REPL-prompt>' >&2; exit 2)
-	@$(PYTHON) -m scripts.mdl_probe --cases tests/scenarios/primitives.json --output artifacts/reference/primitives.json --prompt "$(PROMPT)"
+	@$(PYTHON) -m scripts.mdl_probe --cases tests/scenarios/primitives.json --output artifacts/reference/primitives.json

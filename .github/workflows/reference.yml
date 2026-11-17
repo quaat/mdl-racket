@@ -1,5 +1,6 @@
-name: Experimental Confusion baseline (manual)
+name: Native Confusion reference
 on:
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -11,23 +12,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Native dependencies
+      - name: Install native dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential perl libgc-dev
+          sudo apt-get install -y racket g++ make perl libgc-dev
       - name: Python dependencies
         run: python -m pip install -r requirements.txt
-      - name: Fetch pinned sources
-        run: make sources
-      - name: Compile Confusion
-        run: make reference-build
-      - name: Capture reference transcript
-        run: make reference-capture
-      - name: Upload transcript (review required before approval)
+      - name: Verify pinned sources and reader
+        run: |
+          make sources
+          make check-source
+      - name: Build and capture native reference
+        run: |
+          make reference-build
+          make reference-capture
+          make reference-probe
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: confusion-reference-evidence
-          path: artifacts/
-          if-no-files-found: warn
-          retention-days: 14
+          name: native-reference-evidence
+          path: |
+            artifacts/environment/sources.json
+            artifacts/reference/house.json
+            artifacts/reference/primitives.json
+            docs/evidence/M0/reader-sweep.json
