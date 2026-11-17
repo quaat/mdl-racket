@@ -1,7 +1,8 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list)
-(provide current-mdl-globals mdl-setg! mdl-gval mdl-define! mdl-apply mdl-list
+(provide current-mdl-globals current-mdl-locals mdl-setg! mdl-gval mdl-define!
+         mdl-set! mdl-lval mdl-with-bindings mdl-apply mdl-list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          current-mdl-atom-space make-mdl-atom-space
@@ -17,15 +18,75 @@
   (unless (mdl-false? value) (error 'mdl-false-payload "expected FALSE"))
   (mdl-list->list (mdl-false-value-payload value)))
 
-(define current-mdl-globals (make-parameter (make-hash)))
+(define current-mdl-globals (make-parameter (make-hasheq)))
+(define current-mdl-locals (make-parameter (list (make-hasheq))))
+(define unassigned (gensym 'mdl-unassigned))
+
+(define (binding-atom who value)
+  (cond [(mdl-atom? value) value]
+        [(string? value) (mdl-atom value)]
+        [else (error who "expected an MDL ATOM")]))
+
+(define (local-option atom)
+  (let loop ([frames (current-mdl-locals)])
+    (cond [(null? frames) unassigned]
+          [(hash-has-key? (car frames) atom) (hash-ref (car frames) atom)]
+          [else (loop (cdr frames))])))
+
+(define (mdl-lval name)
+  (define atom (binding-atom 'mdl-lval name))
+  (define result (local-option atom))
+  (if (eq? result unassigned)
+      (error 'mdl-lval "unassigned MDL local ~a" (mdl-atom-pname atom))
+      result))
+
+(define (mdl-set! name value)
+  (define atom (binding-atom 'mdl-set name))
+  (define frames (current-mdl-locals))
+  (define target
+    (or (for/or ([frame (in-list frames)])
+          (and (hash-has-key? frame atom) frame))
+        (last frames)))
+  (hash-set! target atom value)
+  value)
+
+(define (mdl-with-bindings pairs thunk)
+  (define frame (make-hasheq))
+  (for ([entry (in-list pairs)])
+    (define atom (binding-atom 'mdl-with-bindings (car entry)))
+    (when (hash-has-key? frame atom)
+      (error 'mdl-with-bindings "duplicate local parameter"))
+    (hash-set! frame atom (cdr entry)))
+  (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
+    (thunk)))
+
+(define (global-option atom)
+  (define globals (current-mdl-globals))
+  (cond [(hash-has-key? globals atom) (hash-ref globals atom)]
+        [(eq? atom (mdl-atom (mdl-atom-pname atom)))
+         (hash-ref builtin-table (mdl-atom-pname atom) unassigned)]
+        [else unassigned]))
 
 (define (mdl-setg! name value)
-  (hash-set! (current-mdl-globals) name value)
+  (hash-set! (current-mdl-globals) (binding-atom 'mdl-setg name) value)
   value)
 
 (define (mdl-gval name)
-  (hash-ref (current-mdl-globals) name
-            (lambda () (error 'mdl-gval "unassigned MDL global ~a" name))))
+  (define atom (binding-atom 'mdl-gval name))
+  (define result (global-option atom))
+  (if (eq? result unassigned)
+      (error 'mdl-gval "unassigned MDL global ~a" (mdl-atom-pname atom))
+      result))
+
+(define (mdl-value name)
+  (define atom (binding-atom 'mdl-value name))
+  (define local (local-option atom))
+  (if (eq? local unassigned) (mdl-gval atom) local))
+
+(define (mdl-gunassign! name)
+  (define atom (binding-atom 'mdl-gunassign name))
+  (hash-set! (current-mdl-globals) atom unassigned)
+  atom)
 
 (define (mdl-define! name fn)
   (mdl-setg! name fn))
@@ -369,6 +430,12 @@
 
 (define builtin-table
   (hash "TYPE" mdl-type
+        "LVAL" mdl-lval
+        "GVAL" mdl-gval
+        "VALUE" mdl-value
+        "SET" mdl-set!
+        "SETG" mdl-setg!
+        "GUNASSIGN" mdl-gunassign!
         "PRIMTYPE" mdl-primtype
         "TYPEPRIM" mdl-typeprim
         "NEWTYPE" mdl-newtype
@@ -405,5 +472,10 @@
         "N==?" (lambda (a b) (mdl-boolean (not (mdl-identical? a b))))))
 
 (define (mdl-apply name . args)
-  (define fn (hash-ref builtin-table name #f))
-  (apply (if fn fn (mdl-gval name)) args))
+  (define atom (binding-atom 'mdl-apply name))
+  (define global (global-option atom))
+  (define fn (if (eq? global unassigned) (local-option atom) global))
+  (unless (procedure? fn)
+    (error 'mdl-apply "unassigned or non-applicable MDL operator ~a"
+           (mdl-atom-pname atom)))
+  (apply fn args))

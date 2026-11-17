@@ -1,0 +1,14 @@
+{
+  "name": "m1-local-global-bindings",
+  "cases": [
+    {"name": "local-global-value", "expression": "<SET M1-X 3>\n<SETG M1-X 12>\n.M1-X\n,M1-X\n<VALUE M1-X>"},
+    {"name": "parameter-shadowing", "expression": "<SET M1-X 3>\n<DEFINE M1-F (M1-X) <SET M1-X 9> .M1-X>\n<M1-F 4>\n.M1-X"},
+    {"name": "free-local-persists", "expression": "<DEFINE M1-F () <SET M1-FREE 8>>\n<M1-F>\n.M1-FREE"},
+    {"name": "dynamic-free-reference", "expression": "<SET M1-X 1>\n<DEFINE M1-G () .M1-X>\n<DEFINE M1-F (M1-X) <M1-G>>\n<M1-F 4>\n.M1-X"},
+    {"name": "dynamic-free-assignment", "expression": "<SET M1-X 1>\n<DEFINE M1-G () <SET M1-X 7>>\n<DEFINE M1-F (M1-X) <M1-G> .M1-X>\n<M1-F 4>\n.M1-X"},
+    {"name": "separate-atom-global", "expression": "<SETG M1-X!-M1-OB 1>\n<SETG M1-X 2>\n,M1-X!-M1-OB\n,M1-X"},
+    {"name": "computed-atom-global", "expression": "<SETG M1-A <ATOM \"M1-X\">>\n<SETG ,M1-A 17>\n<GVAL ,M1-A>"},
+    {"name": "value-global-fallback", "expression": "<SETG M1-X 12>\n<VALUE M1-X>"},
+    {"name": "gunassign-local-survives", "expression": "<SET M1-X 3>\n<SETG M1-X 12>\n<GUNASSIGN M1-X>\n.M1-X"}
+  ]
+}

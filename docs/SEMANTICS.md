@@ -22,7 +22,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
   `tests/parser_test.rkt`.
 - `,` is read syntax for `GVAL` of the following object. The AST stores a
   plain atom name for `,NAME` and a child node for `,<FORM ...>`. Evaluation
-  of computed references remains unsupported by the M0 compiler. Reference:
+  of computed references is supported in the M1 binding subset. Reference:
   *The MDL Programming Language*,
   [§4.2.2](https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/).
   Tests: `tests/parser_test.rkt`.
@@ -33,18 +33,18 @@ a minimal Confusion probe (source + output), and a Racket regression test.
   and pinned Confusion `mdl_read.cpp` (`READSTATE_INSTRING_LIT_BS`). Test:
   `tests/parser_test.rkt`.
 
-| Construct | M0 behavior | Required target behavior | Evidence |
+| Construct | Current supported subset | Remaining target behavior | Evidence |
 |---|---|---|---|
-| `<DEFINE>` | simple fixed arity only | MDL parameters incl `OPTIONAL`, `AUX`, `TUPLE`, callable globals | bootstrap tests only |
-| `<SETG>`/`,GLOB` | hash-backed process-local environment | original MDL global binding/lookup semantics | bootstrap tests only |
-| `.LOCAL` | lexical variable with limited SET | dynamic and named activation semantics as applicable | bootstrap tests only |
-| `<>` / `#FALSE` | M0 maps `<>` to Racket `#f` | distinct MDL FALSE value with payload; literal payload is data | M1 issue #3 in progress |
-| `<COND>` | simplified test + value branches | MDL predicate truth and branch return value, evaluation order | bootstrap tests only |
-| `AND`/`OR` | approximated with Racket logic | MDL short-circuit and false-value semantics | **NOT VERIFIED** |
-| MDL lists | mcons/mutable pair construction | aliasing, nested views, REST/PUTREST/PUT and identity | **NOT IMPLEMENTED** |
-| MDL vectors | Racket vectors (bootstrap) | original vector and UVECTOR/structure distinctions | **NOT VERIFIED** |
-| `OBLIST` / `ATOM` | M1 identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, and complete OBLIST structure | issue #4 slice in progress |
-| `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | not supported | original type tags and accessors | **NOT IMPLEMENTED** |
+| `<DEFINE>` | simple fixed arity, dynamic parameter bindings | OPTIONAL/AUX/TUPLE, activation records | M1 issue #7 |
+| `<SETG>`/`,GLOB` | atom-identity global table; computed atom operand | PROCESS behavior and full source loader | M1 issue #7 |
+| `.LOCAL` | atom-keyed dynamic frames for simple functions | explicit ENVIRONMENT and UNSPECIAL rules | M1 issue #7 |
+| `<>` / `#FALSE` | distinct FALSE with mutable LIST payload | full type-directed print/eval | M1 issues #3/#5 |
+| `<COND>` | value-preserving branches and single test evaluation | later control forms | M1 issue #3 |
+| `AND`/`OR` | short circuit with MDL FALSE values | full expression compiler | M1 issue #3 |
+| MDL lists | mutable shared tails, REST/PUT/PUTREST | GROW/BACK/TOP and segments | M1 issue #5 |
+| MDL vectors | VECTOR/UVECTOR shared REST views | full STRING/BYTES and growth | M1 issue #5 |
+| `OBLIST` / `ATOM` | identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, bucket geometry | M1 issue #4 |
+| `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
 | `RETURN` / `AGAIN` / `UNWIND` | not supported | MDL activation record semantics | **NOT IMPLEMENTED** |
 | MDL octal `*777*` | basic scalar parsing | 36-bit signed/unsigned bit semantics | **NOT VERIFIED** |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
@@ -214,6 +214,37 @@ The full MDL type table, declaration patterns, `PRINTTYPE`/`EVALTYPE`/
 `APPLYTYPE`, general `#NAME` reader notation, dynamic atom blocking, and
 WORD bit reinterprets remain outside this slice. They must raise explicit
 errors if encountered by the compiler/runtime.
+
+## M1 issue #7 specification: local and global atom values
+
+The [MDL manual, chapter 4](https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/)
+specifies separate local and global values on an ATOM. `SET`/`SETG` return
+the assigned value; `LVAL`/`GVAL` and their `.`/`,` reader abbreviations
+retrieve only the respective binding, with an error if unassigned. `VALUE`
+prefers an assigned local and falls back to a global. `GUNASSIGN` removes the
+global value. A FORM resolves an operator's global value before its local
+value. Binding is by ATOM identity, not PNAME text.
+
+The [manual, chapter 5](https://mdl-language.readthedocs.io/en/latest/05-simple-functions/)
+specifies dynamic function parameter binding: a call temporarily binds its
+parameter ATOMs, restores their prior local values on return, and leaves
+other ATOMs' values intact. A `SET` of a free atom with no active parameter
+binding therefore persists after the function returns. This slice models
+those rules for simple required parameters with a stack of atom-keyed local
+frames and a separate atom-keyed global table. The runtime will reject
+unassigned reads and non-ATOM binding operands.
+
+Nine pinned Confusion cases in `docs/evidence/M1/bindings-cases.json` and
+`bindings-reference.json` exited zero with empty stderr. They confirm
+local/global separation, VALUE precedence and fallback, parameter shadowing,
+free assignment persistence, dynamic free reads, same-PNAME atoms in different
+OBLISTs, computed uninterned global operands, and GUNASSIGN leaving local
+values intact. A separate error suite in `bindings-error-reference.json`
+records unassigned LVAL/GVAL failures and a reference discrepancy:
+`UNASSIGN` is documented by the manual but has no global binding in this
+Confusion build, so its attempted call reports `UNBOUND-VARIABLE`.
+`UNASSIGN`, explicit ENVIRONMENT arguments, OPTIONAL/AUX/TUPLE formals,
+PROCESS isolation, and compiled UNSPECIAL optimization remain unsupported.
 
 ## M0 native Confusion observations (2026-11-17)
 

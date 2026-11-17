@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "name": "m1-local-global-bindings",
+  "recorded_at": "2026-11-17T18:13:35.446517+00:00",
+  "interpreter_sha256": "99728037f046ee68fdbb6ef69f44155e3c03f9c0b2b0840fbc218c75024c21e3",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "local-global-value",
+      "expression": "<SET M1-X 3>\n<SETG M1-X 12>\n.M1-X\n,M1-X\n<VALUE M1-X>",
+      "input": "<SET M1-X 3>\n<SETG M1-X 12>\n.M1-X\n,M1-X\n<VALUE M1-X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n12\n3\n12\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n12\n3\n12\n3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "parameter-shadowing",
+      "expression": "<SET M1-X 3>\n<DEFINE M1-F (M1-X) <SET M1-X 9> .M1-X>\n<M1-F 4>\n.M1-X",
+      "input": "<SET M1-X 3>\n<DEFINE M1-F (M1-X) <SET M1-X 9> .M1-X>\n<M1-F 4>\n.M1-X\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\nM1-F\n9\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\nM1-F\n9\n3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "free-local-persists",
+      "expression": "<DEFINE M1-F () <SET M1-FREE 8>>\n<M1-F>\n.M1-FREE",
+      "input": "<DEFINE M1-F () <SET M1-FREE 8>>\n<M1-F>\n.M1-FREE\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-F\n8\n8\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-F\n8\n8\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "dynamic-free-reference",
+      "expression": "<SET M1-X 1>\n<DEFINE M1-G () .M1-X>\n<DEFINE M1-F (M1-X) <M1-G>>\n<M1-F 4>\n.M1-X",
+      "input": "<SET M1-X 1>\n<DEFINE M1-G () .M1-X>\n<DEFINE M1-F (M1-X) <M1-G>>\n<M1-F 4>\n.M1-X\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\nM1-G\nM1-F\n4\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "1\nM1-G\nM1-F\n4\n1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "dynamic-free-assignment",
+      "expression": "<SET M1-X 1>\n<DEFINE M1-G () <SET M1-X 7>>\n<DEFINE M1-F (M1-X) <M1-G> .M1-X>\n<M1-F 4>\n.M1-X",
+      "input": "<SET M1-X 1>\n<DEFINE M1-G () <SET M1-X 7>>\n<DEFINE M1-F (M1-X) <M1-G> .M1-X>\n<M1-F 4>\n.M1-X\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\nM1-G\nM1-F\n7\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "1\nM1-G\nM1-F\n7\n1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "separate-atom-global",
+      "expression": "<SETG M1-X!-M1-OB 1>\n<SETG M1-X 2>\n,M1-X!-M1-OB\n,M1-X",
+      "input": "<SETG M1-X!-M1-OB 1>\n<SETG M1-X 2>\n,M1-X!-M1-OB\n,M1-X\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n2\n1\n2\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "1\n2\n1\n2\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "computed-atom-global",
+      "expression": "<SETG M1-A <ATOM \"M1-X\">>\n<SETG ,M1-A 17>\n<GVAL ,M1-A>",
+      "input": "<SETG M1-A <ATOM \"M1-X\">>\n<SETG ,M1-A 17>\n<GVAL ,M1-A>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM1-X!-#FALSE ()\n17\n17\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M1-X!-#FALSE ()\n17\n17\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "value-global-fallback",
+      "expression": "<SETG M1-X 12>\n<VALUE M1-X>",
+      "input": "<SETG M1-X 12>\n<VALUE M1-X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n12\n12\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "12\n12\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "gunassign-local-survives",
+      "expression": "<SET M1-X 3>\n<SETG M1-X 12>\n<GUNASSIGN M1-X>\n.M1-X",
+      "input": "<SET M1-X 3>\n<SETG M1-X 12>\n<GUNASSIGN M1-X>\n.M1-X\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n12\nM1-X\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n12\nM1-X\n3\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

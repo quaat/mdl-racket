@@ -151,3 +151,26 @@ boundaries.
 PRINTTYPE/EVALTYPE/APPLYTYPE, and numeric WORD reinterprets remain open.
 The Racket type registry contains only types proven for this subset; it is
 not a complete historical table. No upstream or game rules changed.
+
+## ADR-0010: Atom-keyed local and global binding frames
+
+**Decision:** Store global values under ATOM identity. A separate dynamic
+stack of local frames binds simple function parameters for the duration of
+each call. `SET` updates the nearest active binding, or the persistent root
+local frame when no parameter binds the ATOM. Explicit `GVAL` and `LVAL`
+report unassigned errors; `VALUE` checks local before global. FORM operator
+resolution checks global before local, including replaceable builtins.
+`GUNASSIGN` installs an unassigned marker. Computed GVAL and computed
+SET/SETG operands now evaluate to an ATOM.
+
+**Why:** Chapters 4 and 5 of the MDL manual specify separate values and
+dynamic parameter binding. Nine pinned Confusion cases corroborate local
+shadowing/restoration, free assignments, atom identity, VALUE precedence,
+and GUNASSIGN. Racket tests check the same behavior and errors.
+
+**Consequence:** `UNASSIGN` is still unsupported because this pinned
+Confusion build reports its own operator as unbound, despite the manual
+documenting it. Explicit ENVIRONMENT arguments, complex formal parameters,
+PROCESS-specific local stacks, and compiled UNSPECIAL behavior remain open.
+The Makefile refreshes the linked `#lang mdl` module to avoid stale compiled
+exports during local tests. No upstream or game rules changed.

@@ -95,7 +95,7 @@ M0 passed its source, reader, native Confusion, test, and approved golden
 transcript gates. The first M1 slice,
 [FALSE values and truth operators](https://github.com/quaat/mdl-racket/pull/10),
 has merged with passing local and CI checks. The atom/OBLIST slice is under
-review; mutable sequence and type constructor tests pass locally. The M1
+review; mutable sequence, type constructor, and binding tests pass locally. The M1
 milestone remains open. Reproduce
 the checks with `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
@@ -103,7 +103,8 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
 [M1 FALSE report](docs/evidence/M1/REPORT.md),
 [M1 atom report](docs/evidence/M1/ATOMS.md),
 [M1 sequence report](docs/evidence/M1/SEQUENCES.md),
-[M1 type report](docs/evidence/M1/TYPES.md), and
+[M1 type report](docs/evidence/M1/TYPES.md),
+[M1 binding report](docs/evidence/M1/BINDINGS.md), and
 [current gate status](docs/STATUS.md) for hashes, outputs, and limits.
 
 - A custom `#lang mdl` reader for a small subset of angle-bracket MDL syntax.
@@ -120,13 +121,16 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
   1-based `NTH`/`PUT`, LIST `PUTREST`, and uniform UVECTOR element checks.
 - Type tags and structured `CHTYPE`, with `PRIMTYPE`, `TYPEPRIM`, and `NEWTYPE`
   for the documented subset.
+- Atom-keyed local/global values with dynamic parameter frames, `VALUE`
+  lookup, and global unassignment on the supported subset.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
 
 **Not supported yet:** complete original MDL syntax, macros, dynamic `.OBLIST`
 and full type declarations, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
-general nonlocal control flow, event scheduling,
+explicit environments and complex function parameters, general nonlocal
+control flow, event scheduling,
 original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.
