@@ -1,0 +1,2 @@
+<PROG () <RETURN 42> 99>
+<QUIT>

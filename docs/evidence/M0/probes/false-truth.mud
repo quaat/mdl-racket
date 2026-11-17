@@ -1,0 +1,2 @@
+<NOT #FALSE (1)>
+<QUIT>

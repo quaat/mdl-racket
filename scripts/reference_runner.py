@@ -23,6 +23,7 @@ GAME = ROOT / ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion"
 EXE = ROOT / ".cache/build/confusion_patched/mdli"
 IMAGE = GAME / "SAVEFILE/ZORK.SAVE"
 ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+PROMPT = re.compile(r"(?m)^>")
 
 
 def canonical_text(text: str) -> str:
@@ -62,13 +63,14 @@ def capture(scenario: dict[str, Any], timeout: float) -> dict[str, Any]:
         "error": None,
     }
     try:
-        # Original RDCOM writes '>' before reading each line.
-        child.expect_exact(">")
+        # RDCOM writes '>' at the start of a line. The banner contains
+        # <WARRANTY> and <COPYING>, which are not prompts.
+        child.expect(PROMPT)
         record["initial_output"] = canonical_text(child.before)
         for command in commands:
             child.sendline(command)
             try:
-                idx = child.expect([">", pexpect.EOF, pexpect.TIMEOUT])
+                idx = child.expect([PROMPT, pexpect.EOF, pexpect.TIMEOUT])
             except OSError as exc:
                 raise RuntimeError(f"PTY failure after {command!r}: {exc}") from exc
             record["commands"].append({"input": command,

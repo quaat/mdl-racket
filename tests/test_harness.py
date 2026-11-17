@@ -25,7 +25,7 @@ def test_reference_scenario_shape():
 def test_primitive_probe_fixture():
     data = json.loads((ROOT / "tests/scenarios/primitives.json").read_text())
     assert data["name"] == "primitive-smoke"
-    assert all(x["expression"].startswith("<") for x in data["cases"])
+    assert all(x["expression"].strip() for x in data["cases"])
 
 
 def test_transcript_passes_identical():

@@ -33,3 +33,35 @@ this custom language, and game semantics dominate initial risk.
 
 **Consequence:** Web session service can wrap an isolated Racket engine; a
 standalone client is a separately gated feasibility study.
+
+## ADR-0004: M0 reference protocols and reader scope
+
+**Decision:** Treat `;` as a comment on one MDL object; accept both `!]` and
+bare `]` for uvector input; retain computed `GVAL` as an AST node and reject
+its compilation in M0. Match game prompts only at the start of a line. Probe
+the promptless native REPL with one local process per case, ending in `<QUIT>`.
+
+**Why:** The 1977 source and MDL manual show these lexical forms. The Confusion
+banner contains `<WARRANTY>` and `<COPYING>`, which caused false PTY prompt
+matches. The bare REPL emits no prompt, while `<QUIT>` yields clean exit 0.
+
+**Consequence:** Reader parse coverage is 36/36 selected text files, with
+comments' historical associations still omitted from the AST. A parse result
+does not imply evaluation support. The golden game capture includes a build
+timestamp in the Confusion banner and records SIGHUP cleanup after the fifth
+command; future comparisons must account for the documented protocol.
+
+## ADR-0005: Modern compiler compatibility for pinned Confusion
+
+**Decision:** Build the exported Confusion copy with `-include cstdint` in
+`CXXFLAGS`. Keep the upstream checkout and exported source bytes unchanged.
+
+**Why:** The Ubuntu 24.04 CI compiler rejects `uint64_t` in `macros.hpp`
+because that header does not include `<cstdint>`. The local older compiler
+accepted the same pinned source through a transitive include. Explicitly
+supplying the standard header fixes the toolchain dependency without editing
+GPLv3 source in the MIT-0 harness.
+
+**Consequence:** The native binary hash changes on rebuild because Confusion
+embeds compile time in its banner. The golden transcript must be reviewed
+against the new build, with toolchain/version differences recorded.

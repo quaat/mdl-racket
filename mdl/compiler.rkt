@@ -121,7 +121,10 @@
        (unless (member name locals)
          (unsupported n (format "unbound MDL local .~a" name)))
        (local-id name))]
-    [(global) `(mdl-gval ,(string-upcase (mdl-node-value n)))]
+    [(global)
+     (unless (string? (mdl-node-value n))
+       (unsupported n "computed GVAL is not supported in M0"))
+     `(mdl-gval ,(string-upcase (mdl-node-value n)))]
     [(quote) `(quote ,(quote-datum (mdl-node-value n)))]
     [(list) `(mdl-list ,@(map (lambda (a) (compile-expression a locals))
                               (mdl-node-value n)))]

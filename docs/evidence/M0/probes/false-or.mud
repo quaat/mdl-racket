@@ -1,0 +1,2 @@
+<OR #FALSE (1) 7>
+<QUIT>

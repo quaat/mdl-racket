@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "engine": "confusion-patched-1977",
+  "scenario": "house-smoke",
+  "captured_at": "2026-11-17T16:23:41.603950+00:00",
+  "engine_sha256": "99728037f046ee68fdbb6ef69f44155e3c03f9c0b2b0840fbc218c75024c21e3",
+  "game_sha256": "92fdfa3e7500a91042a57f7d6a46c4e906c9587a4a094b4ca219a6a1b0ffb7a4",
+  "commands": [
+    {
+      "input": "west",
+      "output": "West of House\nThere is a small mailbox here.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "open mailbox",
+      "output": "Opening the mailbox reveals a leaflet.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "take leaflet",
+      "output": "Taken.\nYou already have it.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "inventory",
+      "output": "You are carrying:\nA leaflet\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "score",
+      "output": "\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\n",
+      "prompt_returned": true
+    }
+  ],
+  "initial_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 17 2026 @ 17:23:25\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\nYou are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n",
+  "complete": true,
+  "error": null,
+  "process_exitstatus": null,
+  "process_signalstatus": 1
+}

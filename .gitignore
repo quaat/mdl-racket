@@ -7,8 +7,10 @@ compiled/
 artifacts/*
 !artifacts/README.md
 !artifacts/reference/
+artifacts/reference/*
 !artifacts/reference/.gitkeep
 !artifacts/candidate/
+artifacts/candidate/*
 !artifacts/candidate/.gitkeep
 .DS_Store
 *.log

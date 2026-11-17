@@ -1,27 +1,22 @@
-# Status — 2026-11-17 (starter archive)
+# Status — 2026-11-17 (M0 local verification)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
-| Source SHAs captured | PASS (metadata only) | `sources.lock.json` pins verified GitHub commit metadata |
-| Upstream clones installed locally | NOT RUN | Network required; `make sources` |
-| Reader/compiler files created | PASS (files exist) | `mdl/` source; no Racket runtime was available in packaging environment |
-| Racket syntax and unit tests | NOT RUN | **Racket not installed in packaging environment**; `make test-racket` |
-| Offline Python harness tests | **PASS** | `python3 -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py`: 9 passed, 1 benign PTY deprecation warning (packaging environment) |
-| Confusion C++ build | NOT RUN | `make reference-build` requires internet, compiler, and libgc |
-| Confusion startup / gameplay capture | NOT RUN | `make reference-capture` |
-| 1977 textual source parse coverage | NOT RUN | `racket scripts/mdl_check.rkt ...` |
-| Candidate MDL Zork gameplay | NOT IMPLEMENTED | Bootstrap compiler does not execute source game |
-| Differential game parity | NOT IMPLEMENTED | Requires running candidate engine |
-| Browser gameplay | NOT IMPLEMENTED | Deferred until core game semantics pass |
+| Source SHA verification | **PASS** | `make sources` verified both locked commits and clean upstream trees; see `artifacts/environment/sources.json` |
+| Racket and Python tests | **PASS** | Plain `make test`: 26 Racket and 13 Python tests pass with pinned dependencies in ignored `.venv`; Makefile selects the venv and `/tmp`. Earlier failures on read-only `/var/tmp` and missing `pexpect` are recorded in the report. |
+| December 1977 text reader sweep | **PASS for parsing** | `make check-source`: 36/36 selected UTF-8 MDL text files parsed, four non-text files classified separately; per-file offsets, hashes and counts in `docs/evidence/M0/reader-sweep.json` |
+| Native Confusion build | **PASS** | `make reference-build` built `mdli` from pinned `mdlzork` without changing checkout |
+| Opening scene plus five commands | **PASS for reference capture** | `make reference-capture`: all prompts returned, no observed reference errors; reviewed `docs/evidence/M0/house-golden.json` |
+| Primitive reference probes | **PASS for reference only** | `make reference-probe`: 12/12 processes exited 0 with empty stderr; `docs/evidence/M0/primitives.json` |
+| CI offline job | **PASS** | [Harness checks run 44125722477](https://github.com/quaat/mdl-racket/actions/runs/44125722477) completed successfully on PR #2 |
+| CI native reference job | **PASS** | [Run 44125722256](https://github.com/quaat/mdl-racket/actions/runs/44125722256) verified 36 text files, built Confusion, captured five turns, and probed 12 cases. First run failed on missing `<cstdint>`; build-only flag fixed it. |
+| Candidate Racket gameplay / parity | **NOT IMPLEMENTED** | M0 compiler is demonstrative only |
 
-First priority: run and repair the M0 scaffold on a machine with Racket,
-then verify native Confusion reference behavior. Any failure is a useful
-finding; record exact reproduction evidence rather than changing the status
-without tests.
+**M0 gate: BLOCKED** only on written human approval of the reviewed golden
+transcript. [GitHub issue #1](https://github.com/quaat/mdl-racket/issues/1) and
+[PR #2](https://github.com/quaat/mdl-racket/pull/2) track the work. Local reader,
+reference build, capture, tests, and both PR workflows pass. Do not start M1
+until the M0 gate is reviewed and closed. Next action: review and approve the
+golden fixture in the PR.
 
-## Packaging correction — 2026-11-17
-
-Corrected local package install instructions in README, Makefile, and GitHub CI:
-`raco pkg install --auto --link` (without a final `.`). The previous
-`--link .` failed because `.` is not a valid inferred package name.
-Added an offline regression test; native Racket execution remains unverified.
+See `docs/evidence/M0/REPORT.md` for exact commands, hashes, and limits.

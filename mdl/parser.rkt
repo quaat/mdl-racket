@@ -12,6 +12,10 @@
   (and (< (cursor-pos c) (string-length (cursor-text c)))
        (string-ref (cursor-text c) (cursor-pos c))))
 
+(define (peek-next c)
+  (and (< (add1 (cursor-pos c)) (string-length (cursor-text c)))
+       (string-ref (cursor-text c) (add1 (cursor-pos c)))))
+
 (define (advance! c)
   (define ch (peek c))
   (when ch
@@ -27,11 +31,10 @@
          (cursor-line c) (cursor-column c) message))
 
 (define (skip-comment! c)
-  (let loop ()
-    (define ch (peek c))
-    (when (and ch (not (char=? ch #\newline)))
-      (advance! c)
-      (loop))))
+  (advance! c) ; semicolon
+  (skip-ws! c)
+  (unless (peek c) (parse-error c "comment without an MDL object"))
+  (read-node! c))
 
 (define (skip-ws! c)
   (let loop ()
@@ -55,6 +58,8 @@
     (define ch (peek c))
     (cond
       [(delimiter? ch) (get-output-string out)]
+      [(and (char=? ch #\!) (equal? (peek-next c) #\]))
+       (get-output-string out)]
       [(char=? ch #\\)
        (advance! c)
        (let ([escaped (advance! c)])
@@ -76,12 +81,7 @@
       [(char=? ch #\\)
        (let ([escaped (advance! c)])
          (unless escaped (parse-error c "unterminated string escape"))
-         (write-char
-          (case escaped
-            [(#\n) #\newline]
-            [(#\t) #\tab]
-            [else escaped])
-          out)
+         (write-char escaped out)
          (loop))]
       [else (write-char ch out) (loop)])))
 
@@ -91,7 +91,13 @@
     (let ([ch (peek c)])
       (cond
         [(not ch) (parse-error c (format "unclosed delimiter, expected ~a" terminator))]
-        [(char=? ch terminator) (advance! c) (reverse acc)]
+        [(and (eq? terminator 'uvector) (char=? ch #\!)
+              (equal? (peek-next c) #\]))
+         (advance! c) (advance! c) (reverse acc)]
+        [(and (eq? terminator 'uvector) (char=? ch #\]))
+         (advance! c) (reverse acc)]
+        [(and (char? terminator) (char=? ch terminator))
+         (advance! c) (reverse acc)]
         [else (loop (cons (read-node! c) acc))]))))
 
 (define (read-node! c)
@@ -111,8 +117,7 @@
       [(#\,)
        (advance! c)
        (let ([name (read-atom! c)])
-         (when (string=? name "") (parse-error c "empty global reference"))
-         (node 'global name))]
+         (node 'global (if (string=? name "") (read-node! c) name)))]
       [(#\.)
        (advance! c)
        (let ([name (read-atom! c)])
@@ -121,7 +126,7 @@
       [(#\!)
        (advance! c)
        (if (equal? (peek c) #\[)
-           (begin (advance! c) (node 'uvector (read-delimited! c #\])))
+           (begin (advance! c) (node 'uvector (read-delimited! c 'uvector)))
            (node 'splice (read-node! c)))]
       [(#\%) (advance! c) (node 'percent (read-node! c))]
       [(#\#)

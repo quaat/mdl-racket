@@ -23,7 +23,11 @@ fi
 mkdir -p "$BUILD_ROOT"
 rm -rf -- "$CONFUSION_BUILD"
 git -C "$UPSTREAM" archive --format=tar HEAD confusion_patched | tar -xf - -C "$BUILD_ROOT"
-make -C "$CONFUSION_BUILD" mdli
+# Newer GCC no longer gets uint64_t transitively in macros.hpp. Inject the
+# standard header at compile time; do not alter the pinned source checkout.
+CONFUSION_CXXFLAGS='-g -DGC_DEBUG -O2 -Wall -Wno-switch -Wno-unused-but-set-variable -include cstdint'
+printf 'Confusion C++ flags: %s\n' "$CONFUSION_CXXFLAGS"
+make -C "$CONFUSION_BUILD" CXXFLAGS="$CONFUSION_CXXFLAGS" mdli
 [[ -x "$CONFUSION_BUILD/mdli" ]] || { echo 'Confusion build did not produce mdli' >&2; exit 1; }
 printf 'Confusion built at %s\n' "$CONFUSION_BUILD/mdli"
 printf 'Reference image at %s\n' "$GAME/SAVEFILE/ZORK.SAVE"

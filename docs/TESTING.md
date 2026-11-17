@@ -10,7 +10,7 @@
    historical source. Record file-by-file results; no unsupported syntax skips.
 4. `make reference-build`: native Confusion compile (requires GC/libgc-dev).
 5. `make reference-capture`: actual game run on pinned 1977 reconstructed save.
-6. `python -m scripts.mdl_probe --cases tests/scenarios/primitives.json --output artifacts/reference/primitives.json --prompt '<verified prompt>'`: experimental semantic-probe capture. Determine the actual native REPL prompt first; this command has not been validated.
+6. `make reference-probe`: run isolated Confusion primitive probes through stdin. The native REPL has no prompt; each case ends with `<QUIT>`. Raw output, stderr, and exit code are captured for review.
 7. `python scripts/compare_transcripts.py REF CAND`: strict differential
    transcript comparison (once a candidate game engine is available).
 8. Future: state diff, randomized test corpus, complete 500-point game, browser.
@@ -75,6 +75,13 @@ record the SHA256 and captured source commits, and only then copy a curated
 fixture to `docs/evidence/<milestone>/`. Failed capture JSON belongs in
 `artifacts/` and must not be treated as truth. Avoid including private data,
 credentials, or host paths in published evidence.
+
+M0's locally reviewed, human-approval-pending fixture is
+`docs/evidence/M0/house-golden.json`; hashes, exact command sequence, output
+review, timestamp limitation, and PTY exit behavior are in
+`docs/evidence/M0/REPORT.md`. The second observed capture matched the first
+except for `captured_at`. Rebuilding native Confusion changes its banner's
+compile timestamp and thus the exact `initial_output` field.
 
 ## Cross-engine limitations
 
