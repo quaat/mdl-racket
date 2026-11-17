@@ -20,6 +20,26 @@ See upstream `mdlzork_771212/README.md` for its change-by-change notes,
 including missing combat code filled by a later source, MDL compatibility
 changes, and a parser defect that otherwise impedes completion.
 
+For the pinned December 1977 target, the following inventory separates the
+archival source from the playable Confusion reconstruction. It summarizes the
+upstream notes at commit `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`;
+individual edits have not been independently re-adjudicated against a PDP-10
+runtime.
+
+| Area | Archive → playable reconstruction | Classification |
+|---|---|---|
+| Missing modules | `81prim.mud` comes from 1981, `78melee.mud` from 1978, and `81tell-repl.mud` replaces TELL | Later-source substitution; not archival exactness |
+| MDL syntax and Confusion compatibility | `OFFSET` becomes `NOFFSET`; `#ROOM`, `#OBJECT`, `#EXIT` and related typed-brace forms become callable forms; escaped control characters become `<ASCII ...>` | Interpreter compatibility changes, not proof of identical evaluation |
+| World flags and additions | `77defs.mud` adds flag testers; `77patch.mud` adds new definitions; `77dung.mud` adds `IN!` and `OUT!` actions | Playable reconstruction with possible behavioral effects |
+| Parser rule | `77np.mud` changes an `OR` to `AND` in the `CAN-TAKE?`/`NO-TAKE` check; upstream notes this avoids an unwinnable boat case | Deliberate puzzle-rule correction; behavioral delta |
+| Action and room code | `77act1.mud` changes an orphan-object `PUT` target; `77rooms.mud` adjusts save/error handling and input reads | Potential behavioral deltas requiring scenario validation |
+| Source formatting | CRLF conversion and removal of form-feed/NUL padding in several reconstructed files | Transport/reader delta; presumed nonsemantic, not independently proved |
+| Startup image | `SAVEFILE/ZORK.SAVE` is the reconstructed Confusion game image | Playable reference, not the archival binary |
+
+The M0 golden transcript establishes the reconstructed reference's observed
+opening behavior only. Runtime equivalence between archive, Confusion, and
+Racket remains a later milestone.
+
 Add future development patches under `patches/` (not implemented in M0), each
 with an ADR, tests, changed-file SHA, and provenance. Never edit archival
 sources or quietly ship historical data as if newly authored.

@@ -14,7 +14,7 @@ Confusion reference for every agreed regression case, including endgame to
 Each milestone has a separate issue/PR chain, a named gate, evidence, and
 known limitations. Stop on failures instead of masking them.
 
-## M0 — Proven reference and viable frontend for MDL source (CURRENT)
+## M0 — Proven reference and viable frontend for MDL source (PASS)
 
 **Deliverables:** source lock; CI; source-located MDL AST reader; minimal
 `#lang mdl`; native Confusion executable; capture scenario; diff harness;
@@ -35,7 +35,7 @@ manual and automated test documentation.
 #03 source manifest & provenance, #04 native Confusion build,
 #05 reference PTY and transcripts, #06 M0 integration report.
 
-## M1 — MDL semantic micro-runtime
+## M1 — MDL semantic micro-runtime (CURRENT)
 
 **Build:** atom identity/OBLIST, truth and FALSE, local/global environments,
 mutable LIST/VECTOR/UVECTOR with shared views, `NEWTYPE`/`CHTYPE`, 36-bit
@@ -46,6 +46,32 @@ property and mutation-aliasing tests; no unsupported fallthrough.
 
 **Tasks:** #07 values/false/atoms, #08 mutable sequence and identity,
 #09 types and data constructors, #10 global bindings, #11 bit arithmetic.
+
+### M1 issue order and dependencies
+
+| GitHub issue | Vertical slice | Depends on |
+|---|---|---|
+| [#3](https://github.com/quaat/mdl-racket/issues/3) | First-class FALSE values, first part of task #07 | M0 |
+| [#4](https://github.com/quaat/mdl-racket/issues/4) | Atom identity and OBLIST, rest of task #07 | #3 |
+| [#5](https://github.com/quaat/mdl-racket/issues/5) | Mutable sequences and shared REST views, task #08 | #3 |
+| [#6](https://github.com/quaat/mdl-racket/issues/6) | Types and constructors, task #09 | #3, #5 |
+| [#7](https://github.com/quaat/mdl-racket/issues/7) | Local/global bindings, task #10 | #3, #4 |
+| [#8](https://github.com/quaat/mdl-racket/issues/8) | 36-bit arithmetic, task #11 | #3; coordinate numeric tags with #6 |
+
+```mermaid
+flowchart LR
+  M0 --> I3["#3 FALSE values"]
+  I3 --> I4["#4 atoms / OBLIST"]
+  I3 --> I5["#5 mutable sequences"]
+  I3 --> I8["#8 36-bit arithmetic"]
+  I5 --> I6["#6 types / constructors"]
+  I4 --> I7["#7 local / global bindings"]
+  I6 -. numeric type contract .-> I8
+```
+
+Begin with only the FALSE/value primitive in #3. Close each issue on its own
+Confusion-backed tests and evidence; this graph is planning, not a claim that
+later semantics are already implemented.
 
 ## M2 — Execution semantics and MDL compilation
 

@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 locally verified, gate BLOCKED, NOT a playable game.** This repository is a starting
+> **Status: M0 gate PASS; M1 semantic runtime work is next. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -128,5 +128,5 @@ features.**
   licenses. See [`docs/PROVENANCE.md`](docs/PROVENANCE.md).
 
 This repository is an independent development scaffold. Local Racket and
-Confusion checks were run on 2026-11-17; remote CI and human golden review
-remain open. See [`docs/STATUS.md`](docs/STATUS.md) for explicit evidence.
+Confusion checks, remote CI, and golden review completed on 2026-11-17.
+See [`docs/STATUS.md`](docs/STATUS.md) for explicit M0 evidence and M1 limits.
