@@ -18,7 +18,7 @@ install:
 test: test-racket test-python
 
 test-racket:
-	@raco test tests/parser_test.rkt tests/compiler_test.rkt tests/false_test.rkt
+	@raco test tests/parser_test.rkt tests/compiler_test.rkt tests/false_test.rkt tests/atom_test.rkt
 
 test-python:
 	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py

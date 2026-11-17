@@ -1,0 +1,12 @@
+{
+  "name": "m1-atom-oblist",
+  "cases": [
+    {"name": "read-interning", "expression": "<==? 'M1-PLAIN 'M1-PLAIN>\n<OBLIST? 'M1-PLAIN>\n<TYPE 'M1-PLAIN>"},
+    {"name": "fresh-atom", "expression": "<==? <ATOM \"M1-X\"> <ATOM \"M1-X\">>\n<OBLIST? <ATOM \"M1-X\">>"},
+    {"name": "named-oblist", "expression": "<==? <MOBLIST 'M1-O> <MOBLIST 'M1-O>>\n<TYPE <MOBLIST 'M1-O>>"},
+    {"name": "lookup-and-identity", "expression": "<SETG M1-O <MOBLIST 'M1-O>>\n<SETG M1-X <INSERT \"M1-X\" ,M1-O>>\n<==? ,M1-X <LOOKUP \"M1-X\" ,M1-O>>\n<OBLIST? ,M1-X>\n<PNAME ,M1-X>"},
+    {"name": "same-name-different-oblists", "expression": "<SETG M1-OA <MOBLIST 'M1-OA>>\n<SETG M1-OB <MOBLIST 'M1-OB>>\n<SETG M1-XA <INSERT \"M1-X\" ,M1-OA>>\n<SETG M1-XB <INSERT \"M1-X\" ,M1-OB>>\n<==? ,M1-XA ,M1-XB>\n<=? ,M1-XA ,M1-XB>\n<PNAME ,M1-XA>\n<PNAME ,M1-XB>"},
+    {"name": "remove-reinsert", "expression": "<SETG M1-O <MOBLIST 'M1-O>>\n<SETG M1-X <INSERT \"M1-X\" ,M1-O>>\n<==? ,M1-X <REMOVE ,M1-X>>\n<OBLIST? ,M1-X>\n<LOOKUP \"M1-X\" ,M1-O>\n<==? ,M1-X <INSERT ,M1-X ,M1-O>>"},
+    {"name": "trailer-notation", "expression": "<MOBLIST 'M1-TRAILER>\n<==? 'M1-X!-M1-TRAILER 'M1-X!-M1-TRAILER>\n<OBLIST? 'M1-X!-M1-TRAILER>"}
+  ]
+}

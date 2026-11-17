@@ -84,6 +84,26 @@ while separately written nonempty literals keep distinct identities.
 FALSE payloads, `NIL` truth, return values, and short circuit behavior.
 
 **Consequence:** The M0 fixture now stores an MDL FALSE instead of Racket
-`#f`. Display, mutable payload views, general type operations, and atom
-identity remain unsupported or approximate. The change does not alter the
+`#f`. At this decision's point, display, mutable payload views, general type
+operations, and atom identity remained unsupported or approximate. ADR-0007
+addresses the first atom identity slice. The change does not alter the
 reference source or game rules.
+
+## ADR-0007: Identity-bearing atom and OBLIST values
+
+**Decision:** Give each MDL ATOM its own identity, PNAME, and optional OBLIST
+membership. Ordinary reader names intern in the current default atom space;
+`!-` trailers select a named OBLIST. `MOBLIST` reuses an OBLIST by name atom.
+`ATOM` creates an uninterned value; `LOOKUP`, `INSERT`, and `REMOVE` manage
+membership explicitly. Keep the atom space parameterizable for session
+isolation. Quoted atom literals compile through the same interning operation.
+
+**Why:** The MDL manual's chapter 15 and seven pinned Confusion probes agree
+on identity, membership, trailer, and lookup behavior. Racket symbols alone
+cannot represent two atoms with the same PNAME in different OBLISTs.
+
+**Consequence:** The new atom and OBLIST structures are opaque so `==?` and
+`=?` both compare atom identity. Printing still uses Racket debug notation,
+and full OBLIST bucket geometry, dynamic `.OBLIST`, and associations remain
+outside this slice. Confusion prints 17 default buckets while the manual says
+13; no bucket count behavior is claimed. No upstream or game source changed.

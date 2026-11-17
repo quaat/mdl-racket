@@ -7,7 +7,7 @@
   (check-equal? (mdl-gval "ANSWER") 42)
   (check-equal? (mdl-gval "CONDITIONAL") 42)
   (check-true (mdl-false? (mdl-gval "NIL-EXAMPLE")))
-  (check-equal? (mdl-gval "FALSE-SAME") 'T))
+  (check-eq? (mdl-gval "FALSE-SAME") (mdl-atom "T")))
 (check-exn exn:fail?
            (lambda () (compile-program (parse-mdl "<DEFINE F (\"AUX\" X) .X>"))))
 (check-exn exn:fail?

@@ -43,7 +43,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | `AND`/`OR` | approximated with Racket logic | MDL short-circuit and false-value semantics | **NOT VERIFIED** |
 | MDL lists | mcons/mutable pair construction | aliasing, nested views, REST/PUTREST/PUT and identity | **NOT IMPLEMENTED** |
 | MDL vectors | Racket vectors (bootstrap) | original vector and UVECTOR/structure distinctions | **NOT VERIFIED** |
-| `OBLIST` / `ATOM` | interned symbol placeholder | atom identity, lookup/insertion, multi-oblist namespaces | **NOT IMPLEMENTED** |
+| `OBLIST` / `ATOM` | M1 identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, and complete OBLIST structure | issue #4 slice in progress |
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | not supported | original type tags and accessors | **NOT IMPLEMENTED** |
 | `RETURN` / `AGAIN` / `UNWIND` | not supported | MDL activation record semantics | **NOT IMPLEMENTED** |
 | MDL octal `*777*` | basic scalar parsing | 36-bit signed/unsigned bit semantics | **NOT VERIFIED** |
@@ -119,6 +119,36 @@ view operations, general type introspection, and full atom/OBLIST semantics
 remain separate M1 issues. Unsupported payload syntax must fail explicitly.
 `TYPE` is supported here only for FALSE and placeholder ATOM values, returning
 their MDL type atoms; other types still raise an explicit unsupported error.
+
+## M1 issue #4 specification: ATOM and OBLIST identity
+
+The [MDL manual, chapter 15](https://mdl-language.readthedocs.io/en/latest/15-lexical-blocking/)
+defines an OBLIST as a table of atoms keyed by PNAME. Reading the same name in
+the same OBLIST returns the same ATOM; the same PNAME in different OBLISTs
+denotes distinct ATOMs. `<ATOM string>` creates a fresh uninterned atom.
+`<MOBLIST name>` returns the existing named OBLIST or creates one. `<LOOKUP
+string oblist>` does not insert; `<INSERT string-or-uninterned-atom oblist>`
+inserts and errors on duplicate PNAME or an already interned atom. `REMOVE`
+returns the removed atom and leaves it uninterned; `OBLIST?` returns its
+current OBLIST or empty FALSE. `PNAME` returns a new string. Reader trailer
+syntax `A!-OB` selects the OBLIST named `OB` and creates it if needed.
+
+The exact inputs and raw outputs in `docs/evidence/M1/atoms-cases.json` and
+`atoms-reference.json` corroborate seven cases in pinned Confusion (all exit
+zero, empty stderr): ordinary quoted names intern identically; two calls to
+`ATOM` differ; named `MOBLIST` calls return one object; `LOOKUP` finds an
+inserted atom; same PNAME in two OBLISTs is neither `==?` nor `=?`; removal
+clears membership and reinsertion preserves identity; trailer notation
+interns within its named OBLIST. Confusion prints 17 buckets for a default
+MOBLIST, while the manual says 13. Bucket geometry is not part of this slice;
+the discrepancy remains explicit rather than treated as historical parity.
+
+Tests for this slice belong in `tests/atom_test.rkt` and the existing compiler
+tests. The implementation will use identity-bearing ATOM/OBLIST values;
+ordinary quoted atom literals and reader trailers will resolve through an
+atom space. Dynamic `.OBLIST` lookup, `BLOCK`/`ENDBLOCK`, associations, and
+full structured OBLIST access remain separate work; unsupported calls must
+error rather than silently return a placeholder.
 
 ## M0 native Confusion observations (2026-11-17)
 
