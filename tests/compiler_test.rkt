@@ -14,4 +14,10 @@
            (lambda () (compile-program (parse-mdl "#ROOM {\"WHOUS\"}"))))
 (check-not-exn
  (lambda () (compile-program (parse-mdl ",<CXFLAG .LEAVINGS>"))))
+(check-exn #rx"unsupported # reader token"
+           (lambda () (compile-program (parse-mdl "#UNKNOWN"))))
+(check-exn #rx"unsupported numeric token"
+           (lambda () (compile-program (parse-mdl "1E2"))))
+(check-exn #rx"invalid octal FIX token"
+           (lambda () (compile-program (parse-mdl "*8*"))))
 (displayln "minimal #lang mdl compilation tests passed")
