@@ -1,8 +1,9 @@
 # M0 local verification report — 2026-11-17
 
-**Gate: FAIL on first native CI run; fix pending rerun.** Local source, reader,
-test, native build, capture, and probe checks pass with the documented compiler
-compatibility flag. Human approval of the golden fixture remains open.
+**Gate: BLOCKED on human golden approval.** Local source, reader, test, native
+build, capture, and probe checks pass with the documented compiler
+compatibility flag. Both PR workflows pass. Human approval of the golden
+fixture remains open.
 GitHub issue [#1](https://github.com/quaat/mdl-racket/issues/1) tracks M0;
 PR [#2](https://github.com/quaat/mdl-racket/pull/2) carries the work on
 `feat/m0-reader-reference-validation`. The `gh` CLI token is
@@ -12,8 +13,8 @@ invalid, but the connected GitHub app can create issues and PRs.
 
 - Local base commit SHA: `862feacc4158855f8d32052bafa92f72e408a96d`
   (`initial version`). M0 implementation commit:
-  `0c71aa2a74bf423cf2edfd9c07186f8a243d828e`. The compatibility follow-up
-  commit SHA will be recorded in the PR comment after commit.
+  `0c71aa2a74bf423cf2edfd9c07186f8a243d828e`. Compatibility follow-up:
+  `64950d5c141be8bc1aa82a1f98dd6fa39d6540f9`.
 - Archival `MITDDC/zork`: `d94501340842e006791fce0757dc0043b8ec8916`.
 - Reconstructed `heasm66/mdlzork` and Confusion: `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`.
 - Both pinned worktrees had empty `git status --porcelain` after building.
@@ -51,6 +52,8 @@ invalid, but the connected GitHub app can create issues and PRs.
 | `git switch -c feat/m0-reader-reference-validation` | 0 after scoped `.git` write approval | M0 worktree carried onto a review branch |
 | [GitHub Harness checks run 44124806506](https://github.com/quaat/mdl-racket/actions/runs/44124806506) | 0 | Offline Racket and Python jobs succeeded on PR #2 |
 | [GitHub native run 44124806654](https://github.com/quaat/mdl-racket/actions/runs/44124806654) | 2 | `macros.hpp:125:9: error: ‘uint64_t’ does not name a type`; compiler suggests `<cstdint>`; source sweep step passed |
+| [GitHub Harness checks run 44125722477](https://github.com/quaat/mdl-racket/actions/runs/44125722477) | 0 | Racket and Python steps succeeded on the compatibility commit |
+| [GitHub native run 44125722256](https://github.com/quaat/mdl-racket/actions/runs/44125722256) | 0 | Source sweep 36 parsed / 4 non-text, Confusion build, five-turn capture, and 12 primitive probes succeeded |
 | `make reference-build` with `-include cstdint` | 0 | Exported Confusion copy builds locally; upstream source unchanged; `_XOPEN_SOURCE` redefinition warning in `mdl_assoc.cpp` |
 | `make reference-capture`; `make reference-probe`; `make test` after rebuild | 0 each | Five prompts and 12 primitive exits clean; 26 Racket and 13 Python tests pass |
 
@@ -117,17 +120,22 @@ and `<QUIT>`, exited 0, and wrote no stderr. Findings for FALSE versus `NIL`,
   upstream checkout/build area; no C++ code was copied into the MIT-0 runtime
   and no mixed binary was distributed.
 - CI workflow files exist locally. The native workflow only uploads JSON
-  evidence. Offline CI passed. Native CI failed on an omitted standard C++
-  header in pinned Confusion; a build-only `-include cstdint` workaround is
-  prepared and must pass remotely before M0 can pass. See `docs/PROVENANCE.md`.
+  evidence. Both PR workflows pass on commit `64950d5`. The first native run
+  failed on an omitted standard C++ header in pinned Confusion; build-only
+  `-include cstdint` fixed it. The successful native run uploaded
+  [artifact 14347736562](https://github.com/quaat/mdl-racket/actions/runs/44125722256/artifacts/14347736562)
+  (ZIP digest `sha256:89e82a03119367faac34d783d6cb17da8f328d2aff84222869db7b26f0095329`).
+  CI logs confirm the capture/probe counts. The uploaded JSON was not
+  independently byte-compared with the local golden; human review remains.
 
 ## Blocker and next action
 
-Root cause: Ubuntu 24.04 native CI rejected `uint64_t` because pinned Confusion
-omits `<cstdint>`; the build flag fixes local compilation without changing
-upstream bytes. **Recommended next action:** push the compatibility fix and
-confirm the native PR workflow passes, then obtain human approval of the
-golden transcript. Until then, M0 is FAIL and M1 work does not start.
+Remaining blocker: written human approval of the golden transcript is required
+by the M0 acceptance gate. The first native CI compiler failure was fixed by
+the build flag, and the rerun passed without changing upstream bytes.
+**Recommended next action:** review `house-golden.json` and approve it in
+[PR #2](https://github.com/quaat/mdl-racket/pull/2), or record specific
+discrepancies to resolve. Until then, M0 is BLOCKED and M1 work does not start.
 
 When M0 closes, proposed M1 issue order is: values/FALSE/atoms → mutable
 LIST/VECTOR/UVECTOR views and identity → types/constructors → local/global
