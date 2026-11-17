@@ -1,7 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 gate PASS; M1 candidate gate PASS on the stacked branch,
-> pending mainline merge. NOT a playable game.** This repository is a starting
+> **Status: M0 and M1 gates PASS on `main`. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -92,12 +91,20 @@ acceptance gate, not a capability claimed for M0.
 ## Current implementation and milestone evidence
 
 M0 passed its source, reader, native Confusion, test, and approved golden
-transcript gates. The first M1 slice,
-[FALSE values and truth operators](https://github.com/quaat/mdl-racket/pull/10),
-has merged with passing local and CI checks. The five later M1 slices and
-integrated gate pass on the stacked candidate branch and in CI; PRs #12–#16
-and [gate closure PR #18](https://github.com/quaat/mdl-racket/pull/18) are
-pending merge. The M1 gate is **NOT RUN on `main`**.
+transcript gates. M1's [FALSE slice](https://github.com/quaat/mdl-racket/pull/10),
+[atoms](https://github.com/quaat/mdl-racket/pull/12),
+[sequences](https://github.com/quaat/mdl-racket/pull/13),
+[types](https://github.com/quaat/mdl-racket/pull/14),
+[bindings](https://github.com/quaat/mdl-racket/pull/15),
+[36-bit words](https://github.com/quaat/mdl-racket/pull/16), and
+[integrated gate audit](https://github.com/quaat/mdl-racket/pull/18) are merged.
+The M1 gate is **PASS on `main`** at merge commit
+`a68cbb970b7028853fbcf7885c6c7c42f9470fe5`: 274 Racket checks and 13 Python
+tests pass, all 36 selected historical text files parse, and 60 successful
+Confusion cases plus six expected error observations reproduce their saved
+results. The fresh native build changes its binary hash and embedded build
+timestamp; the approved five-turn transcript matches after excluding those
+fields and capture time. See the M1 gate report for the comparison contract.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
@@ -142,7 +149,7 @@ Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.
 
 The next milestone is [M2 execution semantics and MDL compilation](docs/PLAN.md).
-It begins after the M1 PR stack is reviewed and merged. M2 must execute initial
+M2 must execute initial
 original source definitions; it does not assume a new game engine.
 
 ## Working with Codex
