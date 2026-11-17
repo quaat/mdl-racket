@@ -341,6 +341,23 @@ outside a PROG or across a function boundary. Matching Racket assertions
 belong in `tests/prog_test.rkt`. The reference process ends each case with
 `<QUIT>` and does not use time or randomness.
 
+## M2 issue #22 specification: activation frame invariants
+
+The [MDL function-activation chapter](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+defines an activation as a particular evaluation of a Function, invalid once
+that evaluation finishes. The
+[looping chapter](https://mdl-language.readthedocs.io/en/latest/10-looping/)
+says a bare `RETURN` targets the nearest surrounding PROG or REPEAT within the
+*current function*. This slice keeps only unnamed PROG and bare RETURN, but
+represents each entry with a distinct runtime frame: an owner token for its
+function invocation, an escape destination, and a live state. Active frames
+form a dynamic stack. The nearest live frame owned by the current function is
+the implicit target; a called function has its own owner and cannot consume
+its caller's bare target. Normal completion, RETURN, and exception unwinding
+remove the frame and invalidate it. Existing M2 reference cases test nested
+PROGs and function boundaries; additional Racket tests cover frame identity,
+lifetime, and cleanup. Named and explicit-target activations remain unsupported.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in

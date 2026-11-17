@@ -113,6 +113,8 @@ the **M2 milestone gate is not yet PASS**. See the
 [issue #20](https://github.com/quaat/mdl-racket/issues/20). Confusion crashes on
 `RETURN` during auxiliary initialization; that reference deviation is recorded
 in the report.
+The [activation-frame hardening slice](docs/evidence/M2/ACTIVATIONS.md)
+records function ownership and frame lifetime before broader control flow.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.

@@ -220,3 +220,25 @@ MDL continuation semantics. REPEAT, AGAIN, GO, UNWIND, named activations,
 complex function formals, and source linking remain separate M2 work. The
 reference's error printer and Racket error messages differ. No original game
 source, rule, public license, or GPLv3 code changed.
+
+## ADR-0013: Owned activation frames before broader control flow
+
+**Decision:** Represent each unnamed PROG entry with an opaque activation
+frame carrying a function-invocation owner, escape destination, and live
+state. Keep active frames on a dynamic stack. A bare RETURN selects the nearest
+frame owned by the current function invocation. A plain DEFINE call creates a
+new owner. Normal exit, RETURN, and exception unwinding invalidate the frame.
+The compiler uses runtime scope helpers instead of a single dynamically
+scoped continuation parameter.
+
+**Why:** The manual treats an ACTIVATION as one particular evaluation and says
+bare RETURN targets a PROG in the current function. Existing pinned Confusion
+cases distinguish nested PROGs and called-function boundaries. New Racket
+tests verify frame identity, stale-frame rejection, and cleanup after normal,
+RETURN, and error exits.
+
+**Consequence:** This hardens the representation of the existing unnamed
+PROG subset. Named activations, explicit target RETURN, REPEAT, AGAIN, GO,
+and UNWIND remain unsupported; no new semantic parity is claimed. Cyclic
+equality is tracked separately as issue #23. No upstream source, game rule,
+public license, or GPLv3 reference code changed.

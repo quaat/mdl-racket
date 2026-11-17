@@ -1,4 +1,4 @@
-# Status — 2026-11-17 (M2 first slice locally verified)
+# Status — 2026-11-17 (M2 activation hardening locally verified)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -145,3 +145,18 @@ comparison passes with its documented build-metadata exclusions. Named
 activations, explicit target `RETURN`, `REPEAT`, `AGAIN`, `GO`, `UNWIND`,
 complex function formals, macros, and source loading remain unsupported.
 Exact commands, hashes, and observations are in `docs/evidence/M2/PROG.md`.
+
+## M2 issue #22: activation frames and function ownership
+
+**Local hardening slice: PASS. M2 milestone: NOT YET PASS.** The unnamed PROG
+subset now has an explicit dynamic stack of activation frames. Each frame
+belongs to one function invocation and becomes invalid on normal completion,
+RETURN, or an error. Bare RETURN resolves the nearest live frame belonging to
+the current function; a called DEFINE cannot consume its caller's frame.
+`make test` passes 308 Racket checks and 13 Python tests. Pinned source
+verification and the 36/36 text reader sweep pass. A rebuilt Confusion
+reproduces the nine saved successful M2 cases and three expected errors; the
+five-turn capture, 12 baseline probes, and approved M1 comparison pass under
+the documented build-metadata exclusions. Named/explicit activation targets
+remain unsupported. Cyclic structural equality is tracked separately in
+issue #23. See `docs/evidence/M2/ACTIVATIONS.md` for exact evidence and limits.

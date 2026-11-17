@@ -1,9 +1,10 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list)
-(provide current-mdl-globals current-mdl-locals current-mdl-return
+(provide current-mdl-globals current-mdl-locals
          mdl-setg! mdl-gval mdl-define!
-         mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings mdl-return
+         mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings
+         mdl-with-function-scope mdl-with-prog-activation mdl-return
          mdl-apply mdl-list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-word mdl-word? mdl-word-bits
@@ -23,7 +24,9 @@
 
 (define current-mdl-globals (make-parameter (make-hasheq)))
 (define current-mdl-locals (make-parameter (list (make-hasheq))))
-(define current-mdl-return (make-parameter #f))
+(struct mdl-activation (owner escape [live? #:mutable]))
+(define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
+(define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
 
 (define (binding-atom who value)
@@ -77,10 +80,30 @@
       (hash-set! frame atom (if initializer (initializer) unassigned)))
     (thunk)))
 
+(define (mdl-with-function-scope thunk)
+  (parameterize ([current-mdl-function-owner (gensym 'mdl-function)])
+    (thunk)))
+
+(define (mdl-with-prog-activation thunk)
+  (let/ec escape
+    (define frame (mdl-activation (current-mdl-function-owner) escape #t))
+    (dynamic-wind
+      void
+      (lambda ()
+        (parameterize ([current-mdl-activations
+                        (cons frame (current-mdl-activations))])
+          (thunk)))
+      (lambda () (set-mdl-activation-live?! frame #f)))))
+
 (define (mdl-return value)
-  (define escape (current-mdl-return))
-  (unless escape (error 'mdl-return "no active PROG in current function"))
-  (escape value))
+  (define target
+    (for/first ([frame (in-list (current-mdl-activations))]
+                #:when (eq? (mdl-activation-owner frame)
+                            (current-mdl-function-owner)))
+      frame))
+  (unless (and target (mdl-activation-live? target))
+    (error 'mdl-return "no active PROG in current function"))
+  ((mdl-activation-escape target) value))
 
 (define (global-option atom)
   (define globals (current-mdl-globals))
@@ -664,3 +687,52 @@
     (error 'mdl-apply "unassigned or non-applicable MDL operator ~a"
            (mdl-atom-pname atom)))
   (apply fn args))
+
+(module+ test
+  (require rackunit)
+  (define leaked #f)
+  (check-equal?
+   (mdl-with-prog-activation
+    (lambda ()
+      (set! leaked (car (current-mdl-activations)))
+      (mdl-return 17)
+      99))
+   17)
+  (check-false (mdl-activation-live? leaked))
+  (check-equal? (current-mdl-activations) '())
+  (check-exn #rx"no active PROG"
+             (lambda ()
+               (parameterize ([current-mdl-activations (list leaked)])
+                 (mdl-return 19))))
+  (define abandoned #f)
+  (check-exn #rx"intentional failure"
+             (lambda ()
+               (mdl-with-prog-activation
+                (lambda ()
+                  (set! abandoned (car (current-mdl-activations)))
+                  (error 'test "intentional failure")))))
+  (check-false (mdl-activation-live? abandoned))
+  (check-equal? (current-mdl-activations) '())
+  (check-equal?
+   (mdl-with-prog-activation
+    (lambda ()
+      (check-exn #rx"no active PROG"
+                 (lambda ()
+                   (mdl-with-function-scope (lambda () (mdl-return 7)))))
+      (mdl-return 8)))
+   8)
+  (check-equal?
+   (mdl-with-prog-activation
+    (lambda ()
+      (define outer (car (current-mdl-activations)))
+      (define inner
+        (mdl-with-prog-activation
+         (lambda ()
+           (define current (car (current-mdl-activations)))
+           (check-false (eq? current outer))
+           (check-eq? (cadr (current-mdl-activations)) outer)
+           current)))
+      (check-false (mdl-activation-live? inner))
+      (check-true (mdl-activation-live? outer))
+      (mdl-return 23)))
+   23))
