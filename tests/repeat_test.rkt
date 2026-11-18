@@ -22,10 +22,10 @@
            (lambda () (run "<AGAIN>")))
 (check-exn #rx"no active PROG or REPEAT"
            (lambda () (run "<DEFINE M2-H () <AGAIN>> <PROG () <M2-H> 9>")))
-(check-exn #rx"AGAIN with explicit activation"
-           (lambda () (compile-program (parse-mdl "<AGAIN ACT>"))))
-(check-exn #rx"named REPEAT activation"
-           (lambda () (compile-program (parse-mdl "<REPEAT ACT () 1>"))))
+(check-exn #rx"AGAIN accepts at most one activation"
+           (lambda () (compile-program (parse-mdl "<AGAIN ACT ANOTHER>"))))
+(check-exn #rx"activation name duplicates an auxiliary binding"
+           (lambda () (compile-program (parse-mdl "<REPEAT M2-X (M2-X) 1>"))))
 (check-exn #rx"REPEAT requires a body"
            (lambda () (compile-program (parse-mdl "<REPEAT ()>"))))
 (displayln "unnamed REPEAT and bare AGAIN tests passed")

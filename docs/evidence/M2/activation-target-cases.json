@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "m2-named-activation-targets",
+  "cases": [
+    {"name": "named-prog-type", "expression": "<PROG M2-ACT () <TYPE .M2-ACT>>"},
+    {"name": "named-prog-primtype", "expression": "<PROG M2-ACT () <PRIMTYPE .M2-ACT>>"},
+    {"name": "activation-typeprim", "expression": "<TYPEPRIM ACTIVATION>"},
+    {"name": "name-visible-in-aux", "expression": "<PROG M2-ACT ((M2-X <TYPE .M2-ACT>)) .M2-X>"},
+    {"name": "name-shadows-outer", "expression": "<SET M2-ACT 4>\n<PROG M2-ACT () <TYPE .M2-ACT>>\n.M2-ACT"},
+    {"name": "named-prog-return", "expression": "<PROG M2-ACT () <RETURN 7 .M2-ACT> 99>"},
+    {"name": "outer-target-return", "expression": "<PROG M2-OUT () <PROG M2-IN () <RETURN 8 .M2-OUT>> 99>"},
+    {"name": "named-prog-again", "expression": "<SETG M2-C 0>\n<PROG M2-ACT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 3> <RETURN ,M2-C .M2-ACT>) (ELSE <AGAIN .M2-ACT>)>>"},
+    {"name": "named-repeat-return", "expression": "<REPEAT M2-ACT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N .M2-ACT>)>>"},
+    {"name": "cross-function-return", "expression": "<DEFINE M2-H (A) <RETURN 12 .A>>\n<PROG M2-ACT () <M2-H .M2-ACT> 99>"},
+    {"name": "cross-function-again", "expression": "<SETG M2-C 0>\n<DEFINE M2-H (A) <AGAIN .A>>\n<PROG M2-ACT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 3> <RETURN ,M2-C>) (ELSE <M2-H .M2-ACT>)>>"}
+  ]
+}

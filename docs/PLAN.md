@@ -94,7 +94,8 @@ source definitions, with no loss of semantic aliasing/continuations.
 | [Issue #22](https://github.com/quaat/mdl-racket/issues/22) | Explicit activation frames, function ownership, and lifetime | #20 |
 | [Issue #23](https://github.com/quaat/mdl-racket/issues/23) | Terminating structural equality on cyclic mutable values | M1 equality; before broader execution |
 | [Issue #26](https://github.com/quaat/mdl-racket/issues/26) | Unnamed REPEAT and bare AGAIN within the current function | #22, #23 |
-| Later control slice | Named activations, explicit target RETURN/AGAIN, nonlocal unwinding | #26 |
+| [Issue #28](https://github.com/quaat/mdl-racket/issues/28) | Named PROG/REPEAT activations and explicit target RETURN/AGAIN | #26 |
+| Later control slice | Function activation formals, GO, UNWIND | #28; coordinate with function binding |
 | Function binding slice | OPTIONAL/AUX/TUPLE and application/activation semantics | #20; coordinate with control slice |
 | Macro and loader slices | DEFMAC expansion, cross-file loading, initial original source definitions | Function binding and control slices |
 | Integrated gate | Structured tests and original definitions execute without lost aliasing or continuations | Prior M2 slices |
@@ -107,8 +108,9 @@ flowchart LR
   I22 --> C["Control and activations"]
   I23 --> C
   C --> I26["#26 REPEAT / bare AGAIN"]
+  I26 --> I28["#28 named activations / targets"]
   I20 --> F["Function binding"]
-  I26 --> L["Macro and source loading"]
+  I28 --> L["Macro and source loading"]
   F --> L
   L --> G["M2 integrated gate"]
 ```

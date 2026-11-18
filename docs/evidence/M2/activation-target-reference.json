@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "name": "m2-named-activation-targets",
+  "recorded_at": "2026-11-18T12:25:56.960742+00:00",
+  "interpreter_sha256": "2c58ef023d2ac306bdf661ee0afc0123eef94a8608c108a36ddc2e8808ab4d95",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "named-prog-type",
+      "expression": "<PROG M2-ACT () <TYPE .M2-ACT>>",
+      "input": "<PROG M2-ACT () <TYPE .M2-ACT>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nACTIVATION\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "ACTIVATION\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "named-prog-primtype",
+      "expression": "<PROG M2-ACT () <PRIMTYPE .M2-ACT>>",
+      "input": "<PROG M2-ACT () <PRIMTYPE .M2-ACT>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFRAME\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "FRAME\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "activation-typeprim",
+      "expression": "<TYPEPRIM ACTIVATION>",
+      "input": "<TYPEPRIM ACTIVATION>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFRAME\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "FRAME\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "name-visible-in-aux",
+      "expression": "<PROG M2-ACT ((M2-X <TYPE .M2-ACT>)) .M2-X>",
+      "input": "<PROG M2-ACT ((M2-X <TYPE .M2-ACT>)) .M2-X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nACTIVATION\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "ACTIVATION\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "name-shadows-outer",
+      "expression": "<SET M2-ACT 4>\n<PROG M2-ACT () <TYPE .M2-ACT>>\n.M2-ACT",
+      "input": "<SET M2-ACT 4>\n<PROG M2-ACT () <TYPE .M2-ACT>>\n.M2-ACT\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n4\nACTIVATION\n4\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "4\nACTIVATION\n4\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "named-prog-return",
+      "expression": "<PROG M2-ACT () <RETURN 7 .M2-ACT> 99>",
+      "input": "<PROG M2-ACT () <RETURN 7 .M2-ACT> 99>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n7\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "7\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "outer-target-return",
+      "expression": "<PROG M2-OUT () <PROG M2-IN () <RETURN 8 .M2-OUT>> 99>",
+      "input": "<PROG M2-OUT () <PROG M2-IN () <RETURN 8 .M2-OUT>> 99>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n8\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "8\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "named-prog-again",
+      "expression": "<SETG M2-C 0>\n<PROG M2-ACT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 3> <RETURN ,M2-C .M2-ACT>) (ELSE <AGAIN .M2-ACT>)>>",
+      "input": "<SETG M2-C 0>\n<PROG M2-ACT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 3> <RETURN ,M2-C .M2-ACT>) (ELSE <AGAIN .M2-ACT>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "named-repeat-return",
+      "expression": "<REPEAT M2-ACT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N .M2-ACT>)>>",
+      "input": "<REPEAT M2-ACT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N .M2-ACT>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "cross-function-return",
+      "expression": "<DEFINE M2-H (A) <RETURN 12 .A>>\n<PROG M2-ACT () <M2-H .M2-ACT> 99>",
+      "input": "<DEFINE M2-H (A) <RETURN 12 .A>>\n<PROG M2-ACT () <M2-H .M2-ACT> 99>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-H\n12\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-H\n12\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "cross-function-again",
+      "expression": "<SETG M2-C 0>\n<DEFINE M2-H (A) <AGAIN .A>>\n<PROG M2-ACT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 3> <RETURN ,M2-C>) (ELSE <M2-H .M2-ACT>)>>",
+      "input": "<SETG M2-C 0>\n<DEFINE M2-H (A) <AGAIN .A>>\n<PROG M2-ACT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 3> <RETURN ,M2-C>) (ELSE <M2-H .M2-ACT>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\nM2-H\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\nM2-H\n3\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

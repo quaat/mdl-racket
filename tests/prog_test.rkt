@@ -26,10 +26,10 @@
 (check-exn #rx"no active PROG" (lambda () (run "<RETURN 3>")))
 (check-exn #rx"no active PROG"
            (lambda () (run "<DEFINE M2-H () <RETURN 7>> <PROG () <M2-H> 9>")))
-(check-exn #rx"named PROG activation"
-           (lambda () (compile-program (parse-mdl "<PROG ACT () 1>"))))
-(check-exn #rx"explicit activation"
-           (lambda () (compile-program (parse-mdl "<RETURN 1 ACT>"))))
+(check-exn #rx"RETURN accepts at most a value and activation"
+           (lambda () (compile-program (parse-mdl "<RETURN 1 2 3>"))))
+(check-exn #rx"activation name duplicates an auxiliary binding"
+           (lambda () (compile-program (parse-mdl "<PROG M2-X (M2-X) 1>"))))
 (check-exn #rx"PROG requires an auxiliary LIST"
            (lambda () (compile-program (parse-mdl "<PROG 1 2>"))))
 (check-exn #rx"PROG requires a body"

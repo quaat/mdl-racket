@@ -120,7 +120,10 @@ terminate on tested self-referencing values and reports unresolved distinct
 cycles explicitly. M2's integrated gate remains open.
 The [REPEAT/AGAIN slice](docs/evidence/M2/REPEAT.md) adds unnamed `REPEAT`
 and bare `AGAIN` in the current function; auxiliaries are bound once across
-restarts. Named activations and explicit targets remain unsupported.
+restarts. The [named activation slice](docs/evidence/M2/ACTIVATION-TARGETS.md)
+adds named `PROG`/`REPEAT` frames and explicit `RETURN`/`AGAIN` targets,
+including transfers from called functions. Function activation formals,
+`GO`, and `UNWIND` remain unsupported.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
