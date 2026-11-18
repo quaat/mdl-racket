@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "name": "m2-cyclic-equality-crash-observation",
+  "cases": [
+    {"name": "distinct-vector-cycles", "expression": "<DEFINE M2-EQ () <SET X [0]> <SET Y [0]> <PUT .X 1 .X> <PUT .Y 1 .Y> <=? .X .Y>>\n<M2-EQ>"}
+  ]
+}

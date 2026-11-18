@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "name": "m2-cyclic-equality-timeout-observation",
+  "cases": [
+    {"name": "distinct-tail-cycles", "expression": "<DEFINE M2-EQ () <SET X (1)> <SET Y (1)> <PUTREST .X .X> <PUTREST .Y .Y> <=? .X .Y>>\n<M2-EQ>"}
+  ]
+}

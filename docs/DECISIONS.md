@@ -242,3 +242,24 @@ PROG subset. Named activations, explicit target RETURN, REPEAT, AGAIN, GO,
 and UNWIND remain unsupported; no new semantic parity is claimed. Cyclic
 equality is tracked separately as issue #23. No upstream source, game rule,
 public license, or GPLv3 reference code changed.
+
+## ADR-0014: Bounded structural equality for cyclic values
+
+**Decision:** Keep `=?` identical-object fast paths and finite structural
+comparison, including repeated but acyclic shared substructures. Track pairs
+of distinct structured objects only while their comparison is active. If a
+pair recurs on that path, raise an explicit unsupported-cyclic-comparison
+error. Preserve FALSE when structure differs before repetition; leave `==?`
+identity behavior unchanged.
+
+**Why:** The manual defines structural equality and permits cyclic LIST and
+VECTOR objects, but gives no finite result for two distinct repeated cycles.
+Pinned Confusion returns T for self-comparison, FALSE for cycles with an
+immediate difference, times out on distinct equal-content LIST cycles, and
+exits by signal 11 on distinct self-referencing VECTORs. A guessed general
+coinductive equality rule would be an unverified semantic addition.
+
+**Consequence:** `=?` now terminates deterministically on tested cyclic
+values, but deliberately reports a limitation for unresolved distinct cycles.
+This does not establish full cyclic equality parity. No upstream source,
+game rule, public license, deployed service, or GPLv3 code changed.

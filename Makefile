@@ -19,7 +19,7 @@ test: test-racket test-python
 
 test-racket:
 	@raco make mdl/lang/main.rkt
-	@raco test mdl/runtime/core.rkt tests/parser_test.rkt tests/compiler_test.rkt tests/false_test.rkt tests/atom_test.rkt tests/sequence_test.rkt tests/type_test.rkt tests/binding_test.rkt tests/word_test.rkt tests/integration_test.rkt tests/prog_test.rkt
+	@raco test mdl/runtime/core.rkt tests/parser_test.rkt tests/compiler_test.rkt tests/false_test.rkt tests/atom_test.rkt tests/sequence_test.rkt tests/type_test.rkt tests/binding_test.rkt tests/word_test.rkt tests/integration_test.rkt tests/prog_test.rkt tests/equality_cycle_test.rkt
 
 test-python:
 	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py

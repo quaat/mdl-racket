@@ -530,27 +530,49 @@
         [else (eq? left right)]))
 
 (define (mdl-equal? left right)
-  (cond [(and (mdl-typed-value? left) (mdl-typed-value? right))
-         (and (eq? (mdl-typed-value-type left) (mdl-typed-value-type right))
-              (mdl-equal? (mdl-base left) (mdl-base right)))]
-        [(or (mdl-typed-value? left) (mdl-typed-value? right)) #f]
-        [(and (mdl-word? left) (mdl-word? right))
-         (= (mdl-word-bits left) (mdl-word-bits right))]
-        [(and (mdl-bits-value? left) (mdl-bits-value? right))
-         (mdl-identical? left right)]
-        [(and (mdl-array? left) (mdl-array? right))
-         (and (eq? (mdl-array-kind left) (mdl-array-kind right))
-              (= (mdl-array-length left) (mdl-array-length right))
-              (for/and ([i (in-range (mdl-array-length left))])
-                (mdl-equal? (mdl-nth left (add1 i))
-                            (mdl-nth right (add1 i)))))]
-        [(and (mdl-false? left) (mdl-false? right))
-         (mdl-equal? (mdl-false-value-payload left)
-                     (mdl-false-value-payload right))]
-        [(and (mpair? left) (mpair? right))
-         (and (mdl-equal? (mcar left) (mcar right))
-              (mdl-equal? (mcdr left) (mcdr right)))]
-        [else (equal? left right)]))
+  (define active (make-hasheq))
+  (define (compare-structured a b thunk)
+    (define rights
+      (hash-ref active a
+                (lambda ()
+                  (define fresh (make-hasheq))
+                  (hash-set! active a fresh)
+                  fresh)))
+    (when (hash-has-key? rights b)
+      (error 'mdl-equal? "unsupported cyclic structural equality"))
+    (hash-set! rights b #t)
+    (dynamic-wind void thunk (lambda () (hash-remove! rights b))))
+  (define (loop a b)
+    (cond [(mdl-identical? a b) #t]
+          [(and (mdl-typed-value? a) (mdl-typed-value? b))
+           (and (eq? (mdl-typed-value-type a) (mdl-typed-value-type b))
+                (compare-structured a b
+                  (lambda () (loop (mdl-base a) (mdl-base b)))))]
+          [(or (mdl-typed-value? a) (mdl-typed-value? b)) #f]
+          [(and (mdl-word? a) (mdl-word? b))
+           (= (mdl-word-bits a) (mdl-word-bits b))]
+          [(and (mdl-bits-value? a) (mdl-bits-value? b))
+           (mdl-identical? a b)]
+          [(and (mdl-array? a) (mdl-array? b))
+           (and (eq? (mdl-array-kind a) (mdl-array-kind b))
+                (= (mdl-array-length a) (mdl-array-length b))
+                (compare-structured a b
+                  (lambda ()
+                    (for/and ([i (in-range (mdl-array-length a))])
+                      (loop (mdl-nth a (add1 i))
+                            (mdl-nth b (add1 i)))))))]
+          [(and (mdl-false? a) (mdl-false? b))
+           (compare-structured a b
+             (lambda ()
+               (loop (mdl-false-value-payload a)
+                     (mdl-false-value-payload b))))]
+          [(and (mpair? a) (mpair? b))
+           (compare-structured a b
+             (lambda ()
+               (and (loop (mcar a) (mcar b))
+                    (loop (mcdr a) (mcdr b)))))]
+          [else (equal? a b)]))
+  (loop left right))
 
 (define (mdl-truthy? value)
   (when (boolean? value)
