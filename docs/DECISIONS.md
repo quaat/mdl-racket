@@ -279,6 +279,27 @@ AGAIN in REPEAT, and nested RETURN.
 
 **Consequence:** Restart uses tail iteration and preserves mutable local
 bindings. Named activations, explicit target transfer, GO, UNWIND, and
-AGAIN from auxiliary initializers remains outside this slice. No
+AGAIN from auxiliary initializers remain outside this slice. No
 upstream source, game rule, public license, deployed service, or GPLv3 code
 changed.
+
+## ADR-0016: Opaque named activations and explicit transfer validation
+
+**Decision:** Bind an opaque ACTIVATION value around a named PROG or REPEAT
+before auxiliary initialization. Keep the frame on the dynamic stack while
+the body is active and mark it inactive when the evaluation ends. Explicit
+RETURN/AGAIN targets may select a live enclosing PROG/REPEAT frame across a
+called function boundary; validate both type and membership in the current
+dynamic stack before invoking its escape or restart continuation. Bare
+transfers retain current-function ownership rules.
+
+**Why:** The manual defines ACTIVATION identity and lifetime, named binding,
+and explicit target transfers. Eleven finite pinned Confusion probes confirm
+type, primitive FRAME type, binding order, shadowing, nested and cross-function
+transfer. Confusion crashes or reports frame errors on malformed and stale
+targets, so copying its failure mode is not a semantic requirement.
+
+**Consequence:** Named PROG/REPEAT and explicit targets are now available in
+the tested subset. Function activation formals, GO, UNWIND, `LEGAL?`, and
+general FRAME operations remain unsupported. No upstream source, game rule,
+public license, deployed service, or GPLv3 code changed.

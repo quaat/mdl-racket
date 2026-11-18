@@ -86,7 +86,7 @@
 
 (define restart-token (gensym 'mdl-restart))
 
-(define (mdl-with-prog-activation body [specs '()] [repeat? #f])
+(define (mdl-with-prog-activation body [specs '()] [repeat? #f] [name #f])
   (let/ec escape
     (define frame (mdl-activation (current-mdl-function-owner) escape #f #t))
     (dynamic-wind
@@ -94,17 +94,21 @@
       (lambda ()
         (parameterize ([current-mdl-activations
                         (cons frame (current-mdl-activations))])
-          (mdl-with-aux-bindings
-           specs
-           (lambda ()
-             (let loop ()
-               (define result
-                 (let/ec restart
-                   (set-mdl-activation-restart! frame restart)
-                   (body)))
-               (if (or repeat? (eq? result restart-token))
-                   (loop)
-                   result))))))
+          (define (run-body)
+            (mdl-with-aux-bindings
+             specs
+             (lambda ()
+               (let loop ()
+                 (define result
+                   (let/ec restart
+                     (set-mdl-activation-restart! frame restart)
+                     (body)))
+                 (if (or repeat? (eq? result restart-token))
+                     (loop)
+                     result)))))
+          (if name
+              (mdl-with-bindings (list (cons name frame)) run-body)
+              (run-body))))
       (lambda () (set-mdl-activation-live?! frame #f)))))
 
 (define (current-mdl-activation)
@@ -113,17 +117,30 @@
                           (current-mdl-function-owner)))
     frame))
 
-(define (mdl-return value)
-  (define target (current-mdl-activation))
-  (unless (and target (mdl-activation-live? target))
-    (error 'mdl-return "no active PROG or REPEAT in current function"))
+(define implicit-activation (gensym 'mdl-implicit-activation))
+
+(define (resolve-activation who supplied)
+  (if (eq? supplied implicit-activation)
+      (let ([target (current-mdl-activation)])
+        (unless (and target (mdl-activation-live? target))
+          (error who "no active PROG or REPEAT in current function"))
+        target)
+      (begin
+        (unless (mdl-activation? supplied)
+          (error who "expected ACTIVATION target"))
+        (unless (and (mdl-activation-live? supplied)
+                     (memq supplied (current-mdl-activations)))
+          (error who "inactive ACTIVATION target"))
+        supplied)))
+
+(define (mdl-return value [supplied implicit-activation])
+  (define target (resolve-activation 'mdl-return supplied))
   ((mdl-activation-escape target) value))
 
-(define (mdl-again)
-  (define target (current-mdl-activation))
-  (unless (and target (mdl-activation-live? target)
-               (mdl-activation-restart target))
-    (error 'mdl-again "no active PROG or REPEAT in current function"))
+(define (mdl-again [supplied implicit-activation])
+  (define target (resolve-activation 'mdl-again supplied))
+  (unless (mdl-activation-restart target)
+    (error 'mdl-again "ACTIVATION body restart is unavailable"))
   ((mdl-activation-restart target) restart-token))
 
 (define (global-option atom)
@@ -182,7 +199,9 @@
                           ("FALSE" . "LIST") ("VECTOR" . "VECTOR")
                           ("UVECTOR" . "UVECTOR") ("STRING" . "STRING")
                           ("FIX" . "WORD") ("FLOAT" . "WORD")
-                          ("WORD" . "WORD") ("BITS" . "WORD")))])
+                          ("WORD" . "WORD") ("BITS" . "WORD")
+                          ("FRAME" . "FRAME")
+                          ("ACTIVATION" . "FRAME")))])
     (define type-atom (atom-value (car entry) initial))
     (hash-set! (oblist-value-entries initial) (car entry) type-atom)
     (hash-set! types type-atom (cdr entry))
@@ -439,6 +458,7 @@
 
 (define (mdl-type-name value)
   (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
+        [(mdl-activation? value) "ACTIVATION"]
         [(mdl-word? value) "WORD"]
         [(mdl-bits-value? value) "BITS"]
         [(mdl-false? value) "FALSE"]

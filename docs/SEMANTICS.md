@@ -50,7 +50,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | MDL vectors | VECTOR/UVECTOR shared REST views | full STRING/BYTES and growth | M1 issue #5 |
 | `OBLIST` / `ATOM` | identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, bucket geometry | M1 issue #4 |
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
-| `PROG` / `REPEAT` / `RETURN` / `AGAIN` | unnamed frames and bare transfers in current function | named activations, explicit targets, GO/UNWIND | M2 issues #20, #26 |
+| `PROG` / `REPEAT` / `RETURN` / `AGAIN` | named and unnamed frames; bare and explicit transfers to PROG/REPEAT | function activations, GO/UNWIND | M2 issues #20, #26, #28 |
 | MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
 | `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
@@ -397,6 +397,33 @@ raises an explicit runtime error. The implementation must use iteration
 without accumulating Racket stack frames across repetitions, and must unwind
 nested scopes on a transfer. Tests belong in `tests/repeat_test.rkt`; finite
 reference observations belong under `docs/evidence/M2/repeat-*`.
+
+## M2 issue #28 specification: named activations and explicit targets
+
+The [MDL function chapter](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+defines an ACTIVATION as one evaluation of a Function, invalid after that
+evaluation ends. The [looping chapter](https://mdl-language.readthedocs.io/en/latest/10-looping/)
+binds an optional name to a PROG or REPEAT activation before auxiliary
+bindings. `<RETURN value activation>` exits the specified live enclosing
+Function, and `<AGAIN activation>` restarts its body without rebinding
+auxiliaries. An explicit target may cross a called function's boundary;
+bare transfers remain limited to the current function. Transfer unwinds
+intervening scopes. The value expression of RETURN is evaluated once before
+its target expression, following MDL argument order.
+
+This slice supports named PROG/REPEAT frames and explicit targets to a live
+enclosing PROG/REPEAT only. A named frame is an opaque identity-bearing
+ACTIVATION value, with PRIMTYPE FRAME. Wrong-type, stale, and non-enclosing
+targets raise explicit errors. Function activation formals (`DEFINE` with a
+name or `"NAME"`/`"ACT"`), GO, UNWIND, and general FRAME operations remain
+unsupported. The pinned Confusion success probes are saved in
+`docs/evidence/M2/activation-target-reference.json`: eleven isolated child
+processes exited 0. Error probes are separate: wrong-type RETURN crashed
+Confusion with signal 11; wrong-type AGAIN and stale targets produced a frame
+error. Confusion has no `LEGAL?` binding in this build, so that manual
+operation is not added by this slice. Tests belong in
+`tests/activation_target_test.rkt` and must cover cross-function transfer,
+shadowing, identity, type, and stale-frame rejection.
 
 ## M0 native Confusion observations (2026-11-17)
 

@@ -1,4 +1,4 @@
-# Status — 2026-11-18 (M2 REPEAT/AGAIN slice locally verified)
+# Status — 2026-11-18 (M2 named activation slice locally verified)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -190,3 +190,20 @@ finite Confusion cases exited zero with empty stderr and match the Racket
 assertions. The five-turn capture, 12 baseline probes, and approved M1
 reference/golden comparison pass. See `docs/evidence/M2/REPEAT.md` for
 commands, hashes, one transient `/var/tmp` test-runner failure, and remaining limits.
+
+## M2 issue #28: named activations and explicit targets
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** Named PROG/REPEAT now
+bind an opaque ACTIVATION before their auxiliaries. Explicit RETURN/AGAIN
+can target a live enclosing PROG/REPEAT, including across a called simple
+DEFINE; bare transfers still obey current-function ownership. TYPE reports
+ACTIVATION and PRIMTYPE reports FRAME. Wrong-type and stale targets fail
+explicitly. `make test` passes 347 Racket checks and 13 Python tests; the
+source sweep parses 36/36 selected text files. Eleven focused Confusion
+processes exited zero with empty stderr. Six separate invalid-target,
+duplicate-name, and unbound-LEGAL? observations include one signal-11 crash
+and are not counted as successes. Native build, five-turn capture, 12 baseline
+probes, and the approved M1 golden comparison pass locally. Function
+activation formals, GO, UNWIND, and original game execution remain open.
+See `docs/evidence/M2/ACTIVATION-TARGETS.md` for exact commands, hashes,
+deviations, and remaining limits.

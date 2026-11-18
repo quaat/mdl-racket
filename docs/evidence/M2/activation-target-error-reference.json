@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "name": "m2-activation-target-errors",
+  "recorded_at": "2026-11-18T12:25:56.956451+00:00",
+  "interpreter_sha256": "2c58ef023d2ac306bdf661ee0afc0123eef94a8608c108a36ddc2e8808ab4d95",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "return-wrong-type",
+      "expression": "<PROG M2-ACT () <RETURN 7 1>>",
+      "input": "<PROG M2-ACT () <RETURN 7 1>>\n<QUIT>\n",
+      "exit_code": -11,
+      "stdout": "",
+      "stderr": "",
+      "startup_output": "",
+      "result_output": null,
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "again-wrong-type",
+      "expression": "<PROG M2-ACT () <AGAIN 1>>",
+      "input": "<PROG M2-ACT () <AGAIN 1>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Tried to jump to frame not on stack!\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "return-stale",
+      "expression": "<SETG M2-S #FALSE ()>\n<PROG M2-ACT () <SETG M2-S .M2-ACT> 1>\n<RETURN 2 ,M2-S>",
+      "input": "<SETG M2-S #FALSE ()>\n<PROG M2-ACT () <SETG M2-S .M2-ACT> 1>\n<RETURN 2 ,M2-S>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Tried to jump to frame not on stack!\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "again-stale",
+      "expression": "<SETG M2-S #FALSE ()>\n<PROG M2-ACT () <SETG M2-S .M2-ACT> 1>\n<AGAIN ,M2-S>",
+      "input": "<SETG M2-S #FALSE ()>\n<PROG M2-ACT () <SETG M2-S .M2-ACT> 1>\n<AGAIN ,M2-S>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Tried to jump to frame not on stack!\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "duplicate-name-aux",
+      "expression": "<PROG M2-ACT ((M2-ACT 4)) .M2-ACT>",
+      "input": "<PROG M2-ACT ((M2-ACT 4)) .M2-ACT>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-ARGUMENT-LIST\" \n \"Duplicate formal argument\" \n M2-ACT \n ((M2-ACT 4)) \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-ARGUMENT-LIST\" \n \"Duplicate formal argument\" \n M2-ACT \n ((M2-ACT 4)) \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "legal-unbound",
+      "expression": "<PROG M2-ACT () <LEGAL? .M2-ACT>>",
+      "input": "<PROG M2-ACT () <LEGAL? .M2-ACT>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n LEGAL? \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n LEGAL? \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

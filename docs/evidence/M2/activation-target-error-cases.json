@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m2-activation-target-errors",
+  "cases": [
+    {"name": "return-wrong-type", "expression": "<PROG M2-ACT () <RETURN 7 1>>"},
+    {"name": "again-wrong-type", "expression": "<PROG M2-ACT () <AGAIN 1>>"},
+    {"name": "return-stale", "expression": "<SETG M2-S #FALSE ()>\n<PROG M2-ACT () <SETG M2-S .M2-ACT> 1>\n<RETURN 2 ,M2-S>"},
+    {"name": "again-stale", "expression": "<SETG M2-S #FALSE ()>\n<PROG M2-ACT () <SETG M2-S .M2-ACT> 1>\n<AGAIN ,M2-S>"},
+    {"name": "duplicate-name-aux", "expression": "<PROG M2-ACT ((M2-ACT 4)) .M2-ACT>"},
+    {"name": "legal-unbound", "expression": "<PROG M2-ACT () <LEGAL? .M2-ACT>>"}
+  ]
+}

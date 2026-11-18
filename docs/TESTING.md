@@ -39,6 +39,11 @@ Issue #26 adds `tests/repeat_test.rkt` for unnamed REPEAT and bare AGAIN,
 including auxiliary initialization once, PROG restart, nested RETURN,
 function ownership, stale-frame rejection, and a 1,000-step stack check.
 Focused native inputs and results are under `docs/evidence/M2/repeat-*`.
+Issue #28 adds `tests/activation_target_test.rkt` for named PROG/REPEAT,
+ACTIVATION/FRAME type reporting, name visibility during auxiliary binding,
+explicit RETURN/AGAIN across nested and called functions, and wrong-type or
+stale-target rejection. Eleven successful Confusion observations and six
+separate error/crash observations are under `docs/evidence/M2/activation-target-*`.
 
 ## Frozen 1977 baseline
 

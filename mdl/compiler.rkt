@@ -122,14 +122,16 @@
   (define name (if repeat? "REPEAT" "PROG"))
   (when (null? args)
     (unsupported n (format "~a requires an auxiliary LIST and body" name)))
-  (when (and (>= (length args) 2)
-             (is-kind? (car args) 'atom)
-             (is-kind? (second args) 'list))
-    (unsupported n (format "named ~a activation is not implemented" name)))
-  (define aux (car args))
+  (define named?
+    (and (>= (length args) 2)
+         (is-kind? (car args) 'atom)
+         (is-kind? (second args) 'list)))
+  (define activation-name (and named? (atom-name (car args))))
+  (define operands (if named? (cdr args) args))
+  (define aux (car operands))
   (unless (is-kind? aux 'list)
     (unsupported aux (format "~a requires an auxiliary LIST" name)))
-  (when (null? (cdr args))
+  (when (null? (cdr operands))
     (unsupported n (format "~a requires a body" name)))
   (define names '())
   (define specs
@@ -148,10 +150,13 @@
              ,(if initializer
                   `(lambda () ,(compile-expression initializer locals))
                   #f))))
+  (when (and activation-name (member activation-name names))
+    (unsupported n "activation name duplicates an auxiliary binding"))
   `(mdl-with-prog-activation
-    (lambda () ,(compile-sequence (cdr args) locals))
+    (lambda () ,(compile-sequence (cdr operands) locals))
     (list ,@specs)
-    ,repeat?))
+    ,repeat?
+    ,(if activation-name `(mdl-atom ,activation-name) #f)))
 
 (define (compile-cond n clauses locals)
   (when (null? clauses) (unsupported n "COND requires at least one clause"))
@@ -206,15 +211,20 @@
           [(PROG) (compile-prog n args locals)]
           [(REPEAT) (compile-prog n args locals #t)]
           [(RETURN)
-           (when (> (length args) 1)
-             (unsupported n "RETURN with explicit activation is not implemented"))
+           (when (> (length args) 2)
+             (unsupported n "RETURN accepts at most a value and activation"))
            `(mdl-return ,(if (null? args)
                              '(mdl-atom "T")
-                             (compile-expression (car args) locals)))]
+                             (compile-expression (car args) locals))
+                        ,@(if (= (length args) 2)
+                              (list (compile-expression (second args) locals))
+                              '()))]
           [(AGAIN)
-           (unless (null? args)
-             (unsupported n "AGAIN with explicit activation is not implemented"))
-           '(mdl-again)]
+           (when (> (length args) 1)
+             (unsupported n "AGAIN accepts at most one activation"))
+           (if (null? args)
+               '(mdl-again)
+               `(mdl-again ,(compile-expression (car args) locals)))]
           [(SETG)
            (unless (= (length args) 2) (unsupported n "SETG expects name and value"))
            `(mdl-setg! ,(compile-expression (first args) locals)
