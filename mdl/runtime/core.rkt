@@ -7,6 +7,9 @@
          mdl-bind-function-formals mdl-call-with-activation
          mdl-with-function-scope mdl-with-prog-activation
          mdl-return mdl-again mdl-go mdl-unwind
+         mdl-eval mdl-make-form mdl-form? mdl-macro? mdl-function?
+         mdl-apply-form mdl-apply-interpreted
+         mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-word mdl-word? mdl-word-bits
@@ -35,6 +38,12 @@
                         [restart #:mutable] [goto #:mutable]
                         [labels #:mutable] [live? #:mutable]))
 (struct mdl-tuple-value (payload))
+;; Interpreted definitions carry their formals and body as runtime MDL
+;; data: a MACRO binds the raw call arguments, an interpreted FUNCTION
+;; binds them per the historical quoted/unquoted rules. Compiled Racket
+;; closures remain the fast path for quoted-formal-free definitions.
+(struct mdl-macro (formals body leading-act))
+(struct mdl-function (formals body leading-act))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
@@ -305,6 +314,437 @@
     (lambda ()
       (unless completed-normally? (erre-thunk) (void)))))
 
+;; ---------------------------------------------------------------------------
+;; Runtime evaluation, FORM values, and macro expansion.
+;;
+;; Confusion evaluates every object dynamically; this runtime needs the
+;; same power for macro expansion results, interpreted definitions, and
+;; loaded source. A FORM is MDL data with TYPE FORM and PRIMTYPE LIST;
+;; `.X', `,X', and `'X' read as the forms <LVAL X>, <GVAL X>, and
+;; <QUOTE X>. Bare atoms, strings, numbers, FALSE payloads, tuples, and
+;; words evaluate to themselves (the reference's mdl_std_eval default
+;; case); LIST, VECTOR, and UVECTOR evaluate their elements into fresh
+;; structures. A nonempty FORM resolves its operator ATOM's global value
+;; before its local value and applies it; an empty FORM is #FALSE ().
+;; A MACRO-valued operator binds the raw call arguments per the
+;; historical formal rules and evaluates the macro's result in place.
+;; ---------------------------------------------------------------------------
+
+(define (mdl-make-form lst)
+  (mdl-typed-value (mdl-atom "FORM") lst))
+
+(define (mdl-form? value)
+  (and (mdl-typed-value? value)
+       (eq? (mdl-typed-value-type value) (mdl-atom "FORM"))))
+
+(define (form-elements form)
+  (mdl-list->list (mdl-typed-value-value form)))
+
+(define (quoted-formal-name item)
+  ;; A quoted formal is the form <QUOTE atom> as stored data.
+  (and (mdl-form? item)
+       (let ([elements (form-elements item)])
+         (and (= 2 (length elements))
+              (eq? (car elements) (mdl-atom "QUOTE"))
+              (mdl-atom? (cadr elements))
+              (cadr elements)))))
+
+(define (resolve-operator atom)
+  (define global (global-option atom))
+  (define result (if (eq? global unassigned) (local-option atom) global))
+  (when (eq? result unassigned)
+    (error 'mdl-eval "unassigned or non-applicable MDL operator ~a"
+           (mdl-atom-pname atom)))
+  result)
+
+(define (mdl-apply-value fn raw-args)
+  (cond
+    [(mdl-macro? fn)
+     (mdl-eval (mdl-apply-interpreted fn raw-args))]
+    [(mdl-function? fn)
+     (mdl-apply-interpreted fn raw-args)]
+    [(procedure? fn)
+     (apply fn (map mdl-eval raw-args))]
+    [else (error 'mdl-apply-value "unassigned or non-applicable MDL operator ~a"
+                 (if (mdl-atom? fn) (mdl-atom-pname fn) fn))]))
+
+;; Historical formal sections over runtime data, mirroring the compiled
+;; parser: required atoms, then OPTIONAL, then one ARGS/TUPLE rest
+;; binding, then AUX; a quoted formal (<QUOTE atom>) binds its argument
+;; raw and is legal only in the required and OPTIONAL sections.
+(define (runtime-formal-specs formals)
+  (define specs '())
+  (define seen '())
+  (define (add-name! atom)
+    (when (member atom seen)
+      (error 'mdl-bind-interpreted "BAD-ARGUMENT-LIST: duplicate formal argument"))
+    (set! seen (cons atom seen)))
+  (let loop ([items (if (mpair? formals) (mdl-list->list formals) formals)]
+             [section 'required])
+    (unless (null? items)
+      (define item (car items))
+      (cond
+        [(string? item)
+         (define marker (string-upcase item))
+         (cond
+           [(member marker '("OPT" "OPTIONAL"))
+            (unless (eq? section 'required)
+              (error 'mdl-bind-interpreted "OPTIONAL in wrong place in formal list"))
+            (loop (cdr items) 'optional)]
+           [(member marker '("ARGS" "TUPLE"))
+            (unless (memq section '(required optional))
+              (error 'mdl-bind-interpreted "~a in wrong place in formal list" marker))
+            (when (or (null? (cdr items)) (not (mdl-atom? (cadr items))))
+              (error 'mdl-bind-interpreted "ARGS or TUPLE requires an ATOM formal"))
+            (add-name! (cadr items))
+            (set! specs (cons (list (if (string=? marker "TUPLE") 'rest-tuple 'rest-args)
+                                    (cadr items) #f)
+                              specs))
+            (loop (cddr items) 'after-rest)]
+           [(member marker '("AUX" "EXTRA"))
+            (unless (memq section '(required optional after-rest))
+              (error 'mdl-bind-interpreted "AUX in wrong place in formal list"))
+            (loop (cdr items) 'aux)]
+           [(member marker '("NAME" "ACT"))
+            (unless (memq section '(required optional after-rest aux))
+              (error 'mdl-bind-interpreted "NAME in wrong place in formal list"))
+            (when (or (null? (cdr items)) (not (mdl-atom? (cadr items))))
+              (error 'mdl-bind-interpreted "NAME requires an ATOM formal"))
+            (add-name! (cadr items))
+            (set! specs (cons (list 'name (cadr items) #f) specs))
+            (loop (cddr items) 'after-name)]
+           [else (error 'mdl-bind-interpreted "unknown formal list marker")])]
+        [(mdl-atom? item)
+         (add-name! item)
+         (define kind
+           (case section
+             [(required) 'required]
+             [(optional) 'optional]
+             [(aux) 'aux]
+             [else (error 'mdl-bind-interpreted
+                          "ATOM formal not allowed in this section")]))
+         (set! specs (cons (list kind item #f) specs))
+         (loop (cdr items) section)]
+        [(quoted-formal-name item) =>
+         (lambda (atom)
+           (add-name! atom)
+           (define kind
+             (case section
+               [(required) 'quoted]
+               [(optional) 'quoted-optional]
+               [else (error 'mdl-bind-interpreted
+                            "quoted formal not allowed in this section")]))
+           (set! specs (cons (list kind atom #f) specs))
+           (loop (cdr items) section))]
+        [(and (mpair? item) (= 2 (length (mdl-list->list item))))
+         (define pair (mdl-list->list item))
+         (unless (memq section '(optional aux))
+           (error 'mdl-bind-interpreted
+                  "2-list defaults are allowed only in OPTIONAL or AUX sections"))
+         (define name (car pair))
+         (when (quoted-formal-name name)
+           (error 'mdl-bind-interpreted "quoted formal cannot take a default"))
+         (unless (mdl-atom? name)
+           (error 'mdl-bind-interpreted "formal name must be an ATOM"))
+         (add-name! name)
+         (set! specs (cons (list section name (cadr pair)) specs))
+         (loop (cdr items) section)]
+        [else (error 'mdl-bind-interpreted "unsupported formal argument")])))
+  (reverse specs))
+
+(define (interpreted-formal-specs formals leading-act)
+  (define specs (runtime-formal-specs formals))
+  (when (and leading-act (member leading-act (map second specs)))
+    (error 'mdl-bind-interpreted "BAD-ARGUMENT-LIST: duplicate formal argument"))
+  (if leading-act
+      (cons (list 'name leading-act #f) specs)
+      specs))
+
+;; Apply an interpreted FUNCTION or MACRO to the raw call arguments. Plain
+;; formals evaluate their argument (lazily, at expansion time in the
+;; reference), quoted formals bind the raw argument, defaults and AUX
+;; initializers evaluate in the growing frame, and the body evaluates
+;; expression by expression. The invocation owns a function activation so
+;; NAME formals and explicit RETURN/AGAIN targets work; AGAIN re-runs the
+;; body without re-binding.
+(define (mdl-apply-interpreted fn raw-args)
+  (define formals (if (mdl-macro? fn) (mdl-macro-formals fn) (mdl-function-formals fn)))
+  (define body (if (mdl-macro? fn) (mdl-macro-body fn) (mdl-function-body fn)))
+  (define leading-act (if (mdl-macro? fn) (mdl-macro-leading-act fn)
+                          (mdl-function-leading-act fn)))
+  (define specs (interpreted-formal-specs formals leading-act))
+  (define raw-list (if (mpair? raw-args) (mdl-list->list raw-args) raw-args))
+  (define caller-owner (current-mdl-function-owner))
+  (define caller-locals (current-mdl-locals))
+  (parameterize ([current-mdl-function-owner (gensym 'mdl-interpreted)])
+  (let/ec escape
+    (define frame (mdl-activation (current-mdl-function-owner) escape 'function
+                                   #f #f #f #t))
+    (dynamic-wind
+      void
+      (lambda ()
+        (parameterize ([current-mdl-activations
+                        (cons frame (current-mdl-activations))])
+          (define locals (make-hasheq))
+          (define (bind! atom value)
+            (when (hash-has-key? locals atom)
+              (error 'mdl-bind-interpreted
+                     "BAD-ARGUMENT-LIST: duplicate formal argument"))
+            (hash-set! locals atom value))
+          (define remaining raw-list)
+          (parameterize ([current-mdl-locals (cons locals (current-mdl-locals))])
+            (for ([spec (in-list specs)])
+              (define kind (first spec))
+              (define name (second spec))
+              (define default (third spec))
+              (define (too-few message)
+                (error 'mdl-bind-interpreted
+                       "~a for ~a" message (mdl-atom-pname name)))
+              (case kind
+                [(required quoted)
+                 (when (null? remaining) (too-few "Too few args in function call"))
+                 (bind! name (if (eq? kind 'quoted)
+                                 (car remaining)
+                                 (parameterize ([current-mdl-function-owner caller-owner]
+                                                [current-mdl-locals caller-locals])
+                                   (mdl-eval (car remaining)))))
+                 (set! remaining (cdr remaining))]
+                [(optional quoted-optional)
+                 (if (null? remaining)
+                     (bind! name (if default (mdl-eval default) unassigned))
+                     (begin
+                       (bind! name (if (eq? kind 'quoted-optional)
+                                       (car remaining)
+                                       (parameterize ([current-mdl-function-owner caller-owner]
+                                                      [current-mdl-locals caller-locals])
+                                         (mdl-eval (car remaining)))))
+                       (set! remaining (cdr remaining))))]
+                [(rest-tuple rest-args)
+                 (bind! name (if (null? remaining)
+                                 (if (eq? kind 'rest-tuple) (mdl-tuple-value '()) '())
+                                 (if (eq? kind 'rest-tuple)
+                                     (mdl-tuple-value
+                                      (apply mdl-list
+                                             (parameterize ([current-mdl-function-owner caller-owner]
+                                                            [current-mdl-locals caller-locals])
+                                               (map mdl-eval remaining))))
+                                     (apply mdl-list remaining))))
+                 (set! remaining '())]
+                [(aux) (bind! name (if default (mdl-eval default) unassigned))]
+                [(name) (bind! name frame)]
+                [else (error 'mdl-bind-interpreted "unknown formal specification")]))
+            (unless (null? remaining)
+              (error 'mdl-bind-interpreted
+                     "TOO-MANY-ARGUMENTS-SUPPLIED in interpreted application"))
+            (let body-loop ()
+              (define result
+                (let/ec restart
+                  (set-mdl-activation-restart! frame restart)
+                  (let value-loop ([items body] [last #f])
+                    (cond
+                      [(null? items) last]
+                      [else (value-loop (cdr items) (mdl-eval (car items)))]))))
+              (if (eq? result restart-token)
+                  (body-loop)
+                  result)))))
+      (lambda () (set-mdl-activation-live?! frame #f))))))
+
+;; The runtime evaluator over MDL data.
+(define (mdl-eval value)
+  (cond
+    [(mdl-form? value) (mdl-eval-form value)]
+    [(mpair? value)
+     (apply mdl-list (map mdl-eval (mdl-list->list value)))]
+    [(and (mdl-array? value) (eq? (mdl-array-kind value) 'VECTOR))
+     (apply mdl-vector
+            (map mdl-eval (for/list ([i (in-range (mdl-array-length value))])
+                            (mdl-nth value (add1 i)))))]
+    [(and (mdl-array? value) (eq? (mdl-array-kind value) 'UVECTOR))
+     (apply mdl-uvector
+            (map mdl-eval (for/list ([i (in-range (mdl-array-length value))])
+                            (mdl-nth value (add1 i)))))]
+    [else value]))
+
+(define (mdl-eval-form form)
+  (define elements (form-elements form))
+  (cond
+    [(null? elements) (mdl-false '())]
+    [(mdl-atom? (car elements))
+     (define op (car elements))
+     (define args (cdr elements))
+     (case (string->symbol (mdl-atom-pname op))
+       [(QUOTE)
+        (unless (= 1 (length args))
+          (error 'mdl-eval "QUOTE expects one argument"))
+        (car args)]
+       [(COND) (runtime-cond args)]
+       [(AND) (runtime-and args)]
+       [(OR) (runtime-or args)]
+       [(NOT)
+        (unless (= 1 (length args)) (error 'mdl-eval "NOT expects one argument"))
+        (if (mdl-truthy? (mdl-eval (car args)))
+            (mdl-false '())
+            (mdl-atom "T"))]
+       [(PROG) (runtime-prog args #f)]
+       [(REPEAT) (runtime-prog args #t)]
+       [(RETURN) (apply mdl-return (map mdl-eval args))]
+       [(AGAIN) (apply mdl-again (map mdl-eval args))]
+       [(GO) (mdl-go (mdl-eval (car args)))]
+       [(UNWIND)
+        (unless (= 2 (length args))
+          (error 'mdl-eval "UNWIND expects a value and cleanup expression"))
+        (mdl-unwind (lambda () (mdl-eval (car args)))
+                    (lambda () (mdl-eval (cadr args))))]
+       [(DEFINE) (runtime-define args #f)]
+       [(DEFMAC) (runtime-define args #t)]
+       [else (mdl-apply-value (resolve-operator op) args)])]
+    [else (mdl-apply-value (mdl-eval (car elements)) (cdr elements))]))
+
+;; Runtime DEFINE and DEFMAC store interpreted definitions. The optional
+;; leading activation atom between the name and the formal list binds the
+;; invocation's own activation, like the compiled forms.
+(define (runtime-define operands macro?)
+  (define who (if macro? "DEFMAC" "DEFINE"))
+  (unless (and (pair? operands) (pair? (cdr operands)))
+    (error 'mdl-eval "~a expects a name, formal list, and body" who))
+  (define name (car operands))
+  (unless (mdl-atom? name)
+    (error 'mdl-eval "First argument of ~a must be an atom" who))
+  (define rest (cdr operands))
+  (define leading-act (and (mdl-atom? (car rest)) (car rest)))
+  (define formals-node (if leading-act
+                           (and (pair? (cdr rest)) (cadr rest))
+                           (car rest)))
+  (define body (if leading-act
+                   (and (pair? (cdr rest)) (cddr rest))
+                   (cdr rest)))
+  (unless (and (or (null? formals-node) (mpair? formals-node))
+               (pair? body))
+    (error 'mdl-eval "~a requires a parenthesized formal list" who))
+  (interpreted-formal-specs formals-node leading-act) ; validation
+  (if macro?
+      (mdl-defmac! name formals-node body leading-act)
+      (mdl-define-interpreted! name formals-node body leading-act)))
+
+(define (runtime-cond clauses)
+  (let loop ([remaining clauses] [last (mdl-false '())])
+    (cond
+      [(null? remaining) last]
+      [else
+       (define clause (mdl-list->list (car remaining)))
+       (unless (pair? clause) (error 'mdl-eval "COND requires nonempty clauses"))
+       (define test-value (mdl-eval (car clause)))
+       (if (mdl-truthy? test-value)
+           (let value-loop ([exprs (cdr clause)] [result test-value])
+             (cond
+               [(null? exprs) result]
+               [else (value-loop (cdr exprs) (mdl-eval (car exprs)))]))
+           (loop (cdr remaining) test-value))])))
+
+(define (runtime-and args)
+  (if (null? args)
+      (mdl-atom "T")
+      (let loop ([remaining args])
+        (if (null? (cdr remaining))
+            (mdl-eval (car remaining))
+            (let ([value (mdl-eval (car remaining))])
+              (if (mdl-truthy? value)
+                  (loop (cdr remaining))
+                  value))))))
+
+(define (runtime-or args)
+  (if (null? args)
+      (mdl-false '())
+      (let loop ([remaining args])
+        (if (null? (cdr remaining))
+            (mdl-eval (car remaining))
+            (let ([value (mdl-eval (car remaining))])
+              (if (mdl-truthy? value)
+                  value
+                  (loop (cdr remaining))))))))
+
+(define (runtime-prog operands repeat?)
+  (define named? (and (pair? operands) (mdl-atom? (car operands))
+                      (pair? (cdr operands))
+                      (or (null? (cadr operands)) (mpair? (cadr operands)))))
+  (define name (and named? (car operands)))
+  (define rest-operands (if named? (cdr operands) operands))
+  (unless (and (pair? rest-operands)
+               (or (null? (car rest-operands)) (mpair? (car rest-operands))))
+    (error 'mdl-eval "PROG or REPEAT requires an auxiliary LIST and body"))
+  (define aux-list (mdl-list->list (car rest-operands)))
+  (define body (cdr rest-operands))
+  (define names '())
+  (define specs
+    (for/list ([item (in-list aux-list)])
+      (define two-list?
+        (and (mpair? item) (= 2 (length (mdl-list->list item)))))
+      (define name-atom (if two-list? (mcar item) item))
+      (unless (mdl-atom? name-atom) (error 'mdl-eval "PROG auxiliary must be an ATOM"))
+      (when (member name-atom names) (error 'mdl-eval "duplicate PROG auxiliary binding"))
+      (set! names (cons name-atom names))
+      (if two-list?
+          (cons name-atom (lambda () (mdl-eval (mcar (mcdr item)))))
+          (cons name-atom #f))))
+  (define items
+    (list->vector
+     (for/list ([item (in-list body)])
+       (if (mdl-atom? item)
+           (cons 'label item)
+           (cons 'expr (lambda () (mdl-eval item)))))))
+  (if name
+      (mdl-with-prog-activation items specs repeat? name)
+      (mdl-with-prog-activation items specs repeat?)))
+
+;; EXPAND performs one top-level macro expansion without evaluating. The
+;; manual returns a non-macro form unchanged; pinned Confusion evaluates
+;; it instead, a recorded deviation.
+(define (mdl-expand value)
+  (if (mdl-form? value)
+      (let* ([elements (form-elements value)])
+        (if (or (null? elements) (not (mdl-atom? (car elements))))
+            value
+            (let* ([operator (car elements)]
+                   [global (global-option operator)]
+                   [fn (if (eq? global unassigned)
+                           (local-option operator)
+                           global)])
+              (if (mdl-macro? fn)
+                  (mdl-apply-interpreted fn (cdr elements))
+                  value))))
+      value))
+
+;; Compiled call sites pass the raw argument data and one thunk per
+;; argument. Interpreted application evaluates a plain formal's raw data
+;; through the runtime evaluator at bind time, so macros and quoted
+;; formals see raw arguments and side effects in unevaluated arguments do
+;; not run; procedure applications evaluate the compiled thunks in order.
+(define (mdl-apply-form name raw-args-thunk arg-thunks)
+  (define atom (binding-atom 'mdl-apply-form name))
+  (define fn (resolve-operator atom))
+  (cond
+    [(or (mdl-macro? fn) (mdl-function? fn))
+     (define result (mdl-apply-interpreted fn (raw-args-thunk)))
+     (if (mdl-macro? fn) (mdl-eval result) result)]
+    [(procedure? fn)
+     (apply fn (map (lambda (thunk) (thunk)) arg-thunks))]
+    [else (error 'mdl-apply-form "unassigned or non-applicable MDL operator ~a"
+                 (mdl-atom-pname atom))]))
+
+(define (mdl-defmac! name formals body [leading-act #f])
+  (require-atom 'mdl-defmac name)
+  (interpreted-formal-specs formals leading-act)
+  (unless (eq? (global-option name) unassigned)
+    (error 'mdl-defmac "Atom is already bound in DEFMAC: ~a" (mdl-atom-pname name)))
+  (hash-set! (current-mdl-globals) name (mdl-macro formals body leading-act))
+  name)
+
+(define (mdl-define-interpreted! name formals body [leading-act #f])
+  (require-atom 'mdl-define-interpreted name)
+  (interpreted-formal-specs formals leading-act)
+  (hash-set! (current-mdl-globals) name (mdl-function formals body leading-act))
+  name)
+
 (define (global-option atom)
   (define globals (current-mdl-globals))
   (cond [(hash-has-key? globals atom) (hash-ref globals atom)]
@@ -364,6 +804,8 @@
                           ("WORD" . "WORD") ("BITS" . "WORD")
                           ("FRAME" . "FRAME")
                           ("TUPLE" . "TUPLE")
+                          ("MACRO" . "LIST")
+                          ("FUNCTION" . "LIST")
                           ("ACTIVATION" . "FRAME")))])
     (define type-atom (atom-value (car entry) initial))
     (hash-set! (oblist-value-entries initial) (car entry) type-atom)
@@ -626,6 +1068,8 @@
         [(mdl-bits-value? value) "BITS"]
         [(mdl-false? value) "FALSE"]
         [(mdl-tuple-value? value) "TUPLE"]
+        [(mdl-macro? value) "MACRO"]
+        [(mdl-function? value) "FUNCTION"]
         [(mdl-atom? value) "ATOM"]
         [(mdl-oblist? value) "OBLIST"]
         [(or (null? value) (mpair? value)) "LIST"]
@@ -910,6 +1354,8 @@
         "NTH" mdl-nth
         "PUT" mdl-put!
         "PUTREST" mdl-putrest!
+        "FORM" (lambda elems (mdl-make-form (apply mdl-list elems)))
+        "EXPAND" mdl-expand
         "ATOM" (lambda (name)
                  (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
                  (atom-value name #f))

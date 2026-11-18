@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "name": "m2-macros",
+  "cases": [
+    {
+      "name": "macro-type",
+      "expression": "<DEFMAC M2-M () <FORM + 1 2>>\n<TYPE ,M2-M>"
+    },
+    {
+      "name": "macro-primtype",
+      "expression": "<DEFMAC M2-M () <FORM + 1 2>>\n<PRIMTYPE ,M2-M>"
+    },
+    {
+      "name": "defmac-returns-name",
+      "expression": "<DEFMAC M2-M () <FORM + 1 2>>"
+    },
+    {
+      "name": "macro-call-expands",
+      "expression": "<DEFMAC M2-M () <FORM + 1 2>>\n<M2-M>"
+    },
+    {
+      "name": "macro-non-form-result",
+      "expression": "<DEFMAC M2-M () 7>\n<M2-M>"
+    },
+    {
+      "name": "macro-defines-function",
+      "expression": "<DEFMAC M2-M () <FORM DEFINE M2-F () 7>>\n<M2-M>\n<M2-F>"
+    },
+    {
+      "name": "quoted-formal-raw",
+      "expression": "<SETG M2-C 0>\n<DEFMAC M2-M ('X) 0>\n<M2-M <SETG M2-C 1>>\n,M2-C"
+    },
+    {
+      "name": "plain-formal-evaluates",
+      "expression": "<SETG M2-C 0>\n<DEFMAC M2-M (X) 0>\n<M2-M <SETG M2-C 1>>\n,M2-C"
+    },
+    {
+      "name": "plain-formal-uses-caller-frame",
+      "expression": "<SET M2-X 3>\n<DEFMAC M2-M (M2-X M2-Y) .M2-Y>\n<M2-M 8 .M2-X>"
+    },
+    {
+      "name": "quoted-formal-builds-form",
+      "expression": "<SETG M2-V 3>\n<DEFMAC M2-M ('X) <FORM N==? <FORM GVAL .X> 4>>\n<COND (<M2-M M2-V> \"EQ\") (ELSE \"NE\")>"
+    },
+    {
+      "name": "macro-arg-in-expansion",
+      "expression": "<DEFMAC M2-M ('X) <FORM + .X 1>>\n<M2-M 5>"
+    },
+    {
+      "name": "plain-formal-value-in-form",
+      "expression": "<DEFMAC M2-M (X) <FORM + .X 1>>\n<M2-M 5>"
+    },
+    {
+      "name": "macro-sees-caller-local",
+      "expression": "<SET M2-L 10>\n<DEFMAC M2-M ('X) <FORM + .X .M2-L>>\n<M2-M 5>"
+    },
+    {
+      "name": "expand-builtin",
+      "expression": "<DEFMAC M2-M () <FORM + 1 2>>\n<EXPAND '<M2-M>>"
+    },
+    {
+      "name": "expand-non-macro",
+      "expression": "<EXPAND '<+ 1 2>>"
+    },
+    {
+      "name": "macro-tuple-args",
+      "expression": "<DEFMAC M2-M (\"TUPLE\" T) <FORM LENGTH .T>>\n<M2-M 1 2 3>"
+    },
+    {
+      "name": "macro-tuple-evaluates",
+      "expression": "<SETG M2-C 0>\n<DEFMAC M2-M (\"TUPLE\" T) 0>\n<M2-M <SETG M2-C 4>>\n,M2-C"
+    },
+    {
+      "name": "macro-args-stays-raw",
+      "expression": "<SETG M2-C 0>\n<DEFMAC M2-M (\"ARGS\" A) 0>\n<M2-M <SETG M2-C 4>>\n,M2-C"
+    },
+    {
+      "name": "nested-macro-in-macro-body",
+      "expression": "<DEFMAC M2-A ('X) <FORM + .X 1>>\n<DEFMAC M2-B ('Y) <FORM * <M2-A .Y> 2>>\n<M2-B 3>"
+    },
+    {
+      "name": "empty-form-is-false",
+      "expression": "<>"
+    },
+    {
+      "name": "quoted-formal-in-optional-supplied",
+      "expression": "<DEFMAC M2-M (\"OPTIONAL\" 'X) <FORM N==? .X 1>>\n<M2-M 1>"
+    },
+    {
+      "name": "macro-name-activation-formal",
+      "expression": "<DEFMAC M2-M (\"NAME\" X) <RETURN 7 .X> 1>\n<M2-M>"
+    },
+    {
+      "name": "function-quoted-formal-raw",
+      "expression": "<SETG M2-C 0>\n<DEFINE M2-F ('X) 0>\n<M2-F <SETG M2-C 1>>\n,M2-C"
+    },
+    {
+      "name": "function-quoted-formal-type",
+      "expression": "<DEFINE M2-F ('X) <TYPE .X>>\n<M2-F 5>"
+    },
+    {
+      "name": "function-quoted-formal-returns-form",
+      "expression": "<DEFINE M2-F ('X) <FORM + .X 1>>\n<TYPE <M2-F 5>>"
+    }
+  ]
+}
