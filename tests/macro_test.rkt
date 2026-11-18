@@ -38,6 +38,16 @@
 (check-equal? (run "<SETG M2-C 0> <DEFINE M2-F ('X) 0> <M2-F <SETG M2-C 1>> ,M2-C") 0)
 (check-equal? (mdl-atom-pname (run "<DEFINE M2-F ('X) <TYPE .X>> <M2-F 5>")) "FIX")
 
+;; A leading activation is bound before quoted arguments without ending
+;; their formal section. Direct and generated definitions use the same rule.
+(check-equal? (run "<DEFINE M2-F M2-SELF ('X) <RETURN .X .M2-SELF>> <M2-F 7>") 7)
+(check-equal? (run "<DEFMAC M2-M M2-SELF ('X) <RETURN <FORM + .X 1> .M2-SELF>> <M2-M 6>") 7)
+(check-equal? (run "<DEFMAC M2-M ('D) .D> <M2-M <DEFINE M2-F M2-SELF ('X) <RETURN .X .M2-SELF>>> <M2-F 7>") 7)
+(check-equal? (mdl-atom-pname
+               (run "<DEFINE M2-F M2-SELF ('X \"OPTIONAL\" (Y <TYPE .M2-SELF>)) .Y> <M2-F 1>"))
+              "ACTIVATION")
+(check-equal? (run "<DEFINE M2-F ('X \"NAME\" M2-SELF) <RETURN .X .M2-SELF>> <M2-F 7>") 7)
+
 ;; Macros build forms from raw arguments; FORM is a first-class value.
 (check-equal? (run "<SETG M2-V 3> <DEFMAC M2-M ('X) <FORM N==? <FORM GVAL .X> 4>> <COND (<M2-M M2-V> \"EQ\") (ELSE \"NE\")>")
               "EQ")
@@ -60,6 +70,11 @@
  (run "<DEFMAC M2-A ('X) <FORM + .X 1>> <DEFMAC M2-B ('Y) <FORM * <M2-A .Y> 2>> <M2-B 3>")
  8)
 (check-equal? (run "<DEFMAC M2-M (\"NAME\" X) <RETURN 7 .X> 1> <M2-M>") 7)
+(check-equal? (run "<DEFINE M2-F ('X) <PROG () 7>> <M2-F 1>") 7)
+(check-equal? (run "<DEFINE M2-F ('X) <REPEAT () <RETURN 8>>> <M2-F 1>") 8)
+(check-equal? (run "<DEFINE M2-F ('X) <PROG M2-SELF () <RETURN 9 .M2-SELF>>> <M2-F 1>") 9)
+(check-equal? (run "<DEFINE M2-F ('X) <REPEAT M2-SELF () <RETURN 8 .M2-SELF>>> <M2-F 1>") 8)
+(check-equal? (run "<DEFMAC M2-M () <FORM PROG () 7>> <M2-M>") 7)
 (check-true (mdl-false? (run "<DEFMAC M2-M (\"OPTIONAL\" 'X) <FORM N==? .X 1>> <M2-M 1>")))
 
 ;; EXPAND performs one top-level macro expansion without evaluating; a
@@ -99,5 +114,7 @@
 (check-exn #rx"quoted formal"
            (lambda () (compile-program
                         (parse-mdl "<DEFMAC M2-M (\"OPTIONAL\" ('X 3)) <FORM + .X 1>>"))))
+(check-exn #rx"BAD-ARGUMENT-LIST"
+           (lambda () (run "<DEFINE M2-F M2-SELF ('M2-SELF) .M2-SELF>")))
 
 (displayln "macro expansion tests passed")

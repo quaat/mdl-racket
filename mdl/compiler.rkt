@@ -132,11 +132,9 @@
   (if (ormap (lambda (spec) (memq (first spec) '(quoted quoted-optional))) specs)
       `(mdl-define-interpreted!
         (mdl-atom ,fn-name)
-        ,(if leading-act
-             `(mdl-list "NAME" (mdl-atom ,leading-act)
-                        ,@(map compile-data (mdl-node-value args-node)))
-             (compile-data args-node))
-        (list ,@(map compile-data body-xs)))
+        ,(compile-data args-node)
+        (list ,@(map compile-data body-xs))
+        ,(if leading-act `(mdl-atom ,leading-act) #f))
       `(mdl-define! (mdl-atom ,fn-name)
      (lambda mdl-given-args
        (mdl-with-function-scope
@@ -386,13 +384,19 @@
           [(DEFMAC)
            (unless (and (pair? args) (is-kind? (first args) 'atom))
              (unsupported n "First argument of DEFMAC must be an atom"))
-           (unless (and (>= (length args) 3)
-                        (is-kind? (second args) 'list))
-             (unsupported n "DEFMAC expects an ATOM name, formal list, and body"))
-           (parse-formal-list (second args))
+           (define-values (leading-act formals-node body-xs)
+             (cond [(and (>= (length args) 4)
+                         (is-kind? (second args) 'atom)
+                         (is-kind? (third args) 'list))
+                    (values (atom-name (second args)) (third args) (cdddr args))]
+                   [(and (>= (length args) 3) (is-kind? (second args) 'list))
+                    (values #f (second args) (cddr args))]
+                   [else (unsupported n "DEFMAC expects an ATOM name, formal list, and body")]))
+           (parse-formal-list formals-node)
            `(mdl-defmac! (mdl-atom ,(atom-name (first args)))
-                         ,(compile-data (second args))
-                         (list ,@(map compile-data (cddr args))))]
+                         ,(compile-data formals-node)
+                         (list ,@(map compile-data body-xs))
+                         ,(if leading-act `(mdl-atom ,leading-act) #f))]
           [(PROG) (compile-prog n args locals)]
           [(REPEAT) (compile-prog n args locals #t)]
           [(RETURN)

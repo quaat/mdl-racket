@@ -42,8 +42,8 @@
 ;; data: a MACRO binds the raw call arguments, an interpreted FUNCTION
 ;; binds them per the historical quoted/unquoted rules. Compiled Racket
 ;; closures remain the fast path for quoted-formal-free definitions.
-(struct mdl-macro (formals body))
-(struct mdl-function (formals body))
+(struct mdl-macro (formals body leading-act))
+(struct mdl-function (formals body leading-act))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
@@ -452,6 +452,14 @@
         [else (error 'mdl-bind-interpreted "unsupported formal argument")])))
   (reverse specs))
 
+(define (interpreted-formal-specs formals leading-act)
+  (define specs (runtime-formal-specs formals))
+  (when (and leading-act (member leading-act (map second specs)))
+    (error 'mdl-bind-interpreted "BAD-ARGUMENT-LIST: duplicate formal argument"))
+  (if leading-act
+      (cons (list 'name leading-act #f) specs)
+      specs))
+
 ;; Apply an interpreted FUNCTION or MACRO to the raw call arguments. Plain
 ;; formals evaluate their argument (lazily, at expansion time in the
 ;; reference), quoted formals bind the raw argument, defaults and AUX
@@ -462,7 +470,9 @@
 (define (mdl-apply-interpreted fn raw-args)
   (define formals (if (mdl-macro? fn) (mdl-macro-formals fn) (mdl-function-formals fn)))
   (define body (if (mdl-macro? fn) (mdl-macro-body fn) (mdl-function-body fn)))
-  (define specs (runtime-formal-specs formals))
+  (define leading-act (if (mdl-macro? fn) (mdl-macro-leading-act fn)
+                          (mdl-function-leading-act fn)))
+  (define specs (interpreted-formal-specs formals leading-act))
   (define raw-list (if (mpair? raw-args) (mdl-list->list raw-args) raw-args))
   (define caller-owner (current-mdl-function-owner))
   (define caller-locals (current-mdl-locals))
@@ -611,16 +621,10 @@
   (unless (and (or (null? formals-node) (mpair? formals-node))
                (pair? body))
     (error 'mdl-eval "~a requires a parenthesized formal list" who))
-  (define formals
-    (if leading-act
-        (apply mdl-list
-               (mdl-atom "NAME") leading-act
-               (mdl-list->list formals-node))
-        formals-node))
-  (runtime-formal-specs formals) ; validation
+  (interpreted-formal-specs formals-node leading-act) ; validation
   (if macro?
-      (mdl-defmac! name formals body)
-      (mdl-define-interpreted! name formals body)))
+      (mdl-defmac! name formals-node body leading-act)
+      (mdl-define-interpreted! name formals-node body leading-act)))
 
 (define (runtime-cond clauses)
   (let loop ([remaining clauses] [last (mdl-false '())])
@@ -661,10 +665,12 @@
 
 (define (runtime-prog operands repeat?)
   (define named? (and (pair? operands) (mdl-atom? (car operands))
-                      (pair? (cdr operands)) (mpair? (cadr operands))))
+                      (pair? (cdr operands))
+                      (or (null? (cadr operands)) (mpair? (cadr operands)))))
   (define name (and named? (car operands)))
   (define rest-operands (if named? (cdr operands) operands))
-  (unless (and (pair? rest-operands) (mpair? (car rest-operands)))
+  (unless (and (pair? rest-operands)
+               (or (null? (car rest-operands)) (mpair? (car rest-operands))))
     (error 'mdl-eval "PROG or REPEAT requires an auxiliary LIST and body"))
   (define aux-list (mdl-list->list (car rest-operands)))
   (define body (cdr rest-operands))
@@ -725,16 +731,18 @@
     [else (error 'mdl-apply-form "unassigned or non-applicable MDL operator ~a"
                  (mdl-atom-pname atom))]))
 
-(define (mdl-defmac! name formals body)
+(define (mdl-defmac! name formals body [leading-act #f])
   (require-atom 'mdl-defmac name)
+  (interpreted-formal-specs formals leading-act)
   (unless (eq? (global-option name) unassigned)
     (error 'mdl-defmac "Atom is already bound in DEFMAC: ~a" (mdl-atom-pname name)))
-  (hash-set! (current-mdl-globals) name (mdl-macro formals body))
+  (hash-set! (current-mdl-globals) name (mdl-macro formals body leading-act))
   name)
 
-(define (mdl-define-interpreted! name formals body)
+(define (mdl-define-interpreted! name formals body [leading-act #f])
   (require-atom 'mdl-define-interpreted name)
-  (hash-set! (current-mdl-globals) name (mdl-function formals body))
+  (interpreted-formal-specs formals leading-act)
+  (hash-set! (current-mdl-globals) name (mdl-function formals body leading-act))
   name)
 
 (define (global-option atom)

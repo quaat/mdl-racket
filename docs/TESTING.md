@@ -67,6 +67,12 @@ and an expansion that defines a function. Twenty-five successful Confusion
 observations and eight deliberate error observations are under
 `docs/evidence/M2/macro-*`; see `MACROS.md` there for commands, hashes,
 and reference deviations. The full M2 gate remains open.
+The PR #35 review added eleven Racket checks for empty auxiliary LISTs in
+interpreted PROG/REPEAT, leading activation names with quoted formals,
+runtime-generated definitions, binding order, and duplicate rejection.
+Ten focused Confusion observations are saved in `macro-review-cases.json`
+and `macro-review-reference.json`; see `MACROS.md` for the failing-then-passing
+record. The integrated M2 gate remains open.
 
 ## Frozen 1977 baseline
 

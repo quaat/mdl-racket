@@ -278,7 +278,7 @@ formals in interpreted DEFINE and DEFMAC. Plain supplied arguments and
 TUPLE rest arguments evaluate in the caller frame; ARGS keeps raw source
 arguments. A macro expansion can define a callable function. Interpreted
 function ownership prevents a bare RETURN from escaping the caller's PROG.
-`make test` passes 502 Racket checks and 13 Python tests. The selected text
+`make test` passes 513 Racket checks and 13 Python tests. The selected text
 sweep still parses 36/36 files. Twenty-five pinned Confusion success cases
 exit zero with empty stderr, and eight separate error observations match
 their saved outputs. The five-turn house capture matches the approved M0
@@ -291,3 +291,8 @@ also differs. Full details and commands are in
 [issue #34](https://github.com/quaat/mdl-racket/issues/34).
 Source loading, declarations, general APPLY/DISPATCH, and original game
 execution remain open. The first unmet **milestone** gate is still M2.
+The PR review follow-up fixes empty auxiliary LISTs in interpreted
+PROG/REPEAT and keeps a leading activation name separate from quoted
+formals in directly compiled and generated definitions. Ten new pinned
+Confusion cases match the Racket regressions; the red-to-green record is in
+[`docs/evidence/M2/MACROS.md`](evidence/M2/MACROS.md#review-follow-up).

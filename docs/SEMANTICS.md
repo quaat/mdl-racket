@@ -528,6 +528,21 @@ The Racket binder validates the full formal list before applying a macro;
 Confusion reaches a too-few-arguments error first for the malformed
 `('X 3)` list in the saved error probe. This is an error-order deviation.
 
+### Review regressions: interpreted empty auxiliaries and leading activations
+
+The runtime evaluator must accept an empty LIST as the auxiliary list of
+`PROG` or `REPEAT`, including their named forms. The MDL manual's looping
+forms permit zero auxiliary bindings; the compiled path already accepts the
+same source syntax. The historical leading activation ATOM in a `DEFINE` or
+`DEFMAC` is separate from the parenthesized formal list. It binds the
+function's activation before argument binding and does not end the required
+or OPTIONAL formal section. A `"NAME"` or `"ACT"` marker *inside* the
+formal list still has to occur after ordinary formals. Duplicate binding
+names are errors. These rules apply to directly compiled definitions,
+runtime-generated definitions, and macro expansion; regression cases are in
+`tests/macro_test.rkt` and pinned local Confusion observations are recorded
+in `docs/evidence/M2/macro-review-*`.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in
