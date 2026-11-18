@@ -388,6 +388,14 @@ Compile-time expansion, declarations, source loading, and general APPLY
 remain separate tasks. No upstream source, game rule, public license,
 deployed service, or GPLv3 reference code changed.
 
+**PR #35 review follow-up:** Keep a leading activation ATOM as its own field
+on an interpreted FUNCTION or MACRO, bind it before parsed formals, and
+reject a duplicate formal name. Encoding it as a prepended `"NAME"` marker
+closed the required-formal section and rejected quoted arguments. The
+runtime evaluator now accepts the empty MDL LIST (`'()`) as a PROG/REPEAT
+auxiliary list, including named activations. Ten pinned Confusion probes
+confirm these cases; see `docs/evidence/M2/MACROS.md#review-follow-up`.
+
 ## ADR-0020: Run CI in a digest-pinned minimal Racket image
 
 **Decision:** Use the Racket project's `racket/racket:8.10-bc` minimal image

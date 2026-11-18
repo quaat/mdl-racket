@@ -148,9 +148,12 @@ based; Confusion has no GO), and `UNWIND` cleanup on nonlocal transfers.
 source loading remain unsupported.
 The [macro slice](docs/evidence/M2/MACROS.md) adds `DEFMAC`, first-class
 FORM construction and evaluation, one-step `EXPAND`, and quoted formals.
-Its local gate is **PASS**: `make test` passes 502 Racket checks and 13 Python
-tests; 25 isolated pinned Confusion success cases and eight separate error
-observations reproduce their saved outputs. This is an M2 slice result; the
+Its local gate is **PASS**: `make test` passes 513 Racket checks and 13 Python
+tests; 25 isolated pinned Confusion success cases, ten review-regression
+cases, and eight separate error observations reproduce their saved outputs.
+The [review follow-up](docs/evidence/M2/MACROS.md#review-follow-up) covers
+empty interpreted PROG/REPEAT auxiliaries and leading activation names with
+quoted formals. This is an M2 slice result; the
 M2 milestone remains open until original source definitions execute.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,

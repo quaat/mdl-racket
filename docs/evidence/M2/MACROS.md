@@ -44,8 +44,8 @@ explicitly.
 | `raco test tests/macro_test.rkt` before frame fix | 1 | Bare RETURN escaped a caller PROG; new assertion red |
 | `raco test tests/macro_test.rkt` before TUPLE fix | 1 | TUPLE argument side effect absent; expected 4, got 0 |
 | `raco test tests/macro_test.rkt` before caller-frame fix | 1 | Second argument saw callee formal; expected 3, got 8 |
-| `raco test tests/macro_test.rkt` final | 0 | 37 checks pass |
-| `make test` final | 0 | 502 Racket checks and 13 Python tests pass |
+| `raco test tests/macro_test.rkt` initial slice | 0 | 37 checks pass |
+| `make test` initial slice | 0 | 502 Racket checks and 13 Python tests pass |
 | `make check-source` | 0 | 36/36 selected text files parse, four non-text files classified separately; generated M0 sweep restored to its committed bytes |
 | `.venv/bin/python -m scripts.mdl_probe --cases docs/evidence/M2/macro-cases.json --output artifacts/reference/macro.json` | 0 | 25/25 reference cases exit zero with empty stderr |
 | `.venv/bin/python -m scripts.mdl_probe --cases docs/evidence/M2/macro-error-cases.json --output artifacts/reference/macro-error.json` | 1, expected | Eight deliberate error observations; all saved fields reproduced |
@@ -75,6 +75,44 @@ Tools: Racket 7.9 [bc], Python 3.13.0. An initial `python3` probe attempt
 exited 1 because system Python lacks `pexpect`; rerunning with the pinned
 `.venv/bin/python` succeeded. No upstream file or GPLv3 Confusion source
 was modified, copied into the runtime, or exposed to a web client.
+
+## Review follow-up
+
+Two [PR #35 review findings](https://github.com/quaat/mdl-racket/pull/35)
+identified failures in the interpreted path. The empty MDL LIST is `'()`;
+`runtime-prog` only accepted `mpair?`, so quoted-formal functions and macros
+failed on `PROG ()` and `REPEAT ()`, including named activations. A leading
+activation ATOM was encoded as a prepended `"NAME"` marker; the parser then
+entered `after-name` and rejected all later formals. The activation is now
+stored separately from the parenthesized formal list and bound before its
+arguments. The marker form inside the list remains valid only at the end.
+Duplicate activation/formal names still fail explicitly.
+
+The new tests were red before implementation: `raco test
+tests/macro_test.rkt` exited 1 with `quoted formal not allowed in this
+section` after 12 checks. After the first fix, it exited 1 after 13 checks
+because the compiled DEFMAC path did not yet accept a leading activation.
+The final command exits 0 with 48 macro checks. `make test` exits 0 with
+513 Racket checks and 13 Python tests; `make check-source` exits 0 with
+36/36 selected text files parsed and four non-text files classified. The
+generated M0 sweep was restored to its committed bytes. `git diff --check`
+exits 0.
+
+`make sources` exits 0 and verifies the clean locked commits above. The
+command `.venv/bin/python -m scripts.mdl_probe --cases
+docs/evidence/M2/macro-review-cases.json --output
+artifacts/reference/macro-review.json` exits 0: ten isolated Confusion
+processes return the expected values with empty stderr. Inputs and reviewed
+fields are in `macro-review-cases.json` and `macro-review-reference.json`.
+The reference interpreter SHA-256 is
+`2c58ef023d2ac306bdf661ee0afc0123eef94a8608c108a36ddc2e8808ab4d95`.
+These fixed expressions do not use gameplay input, RNG, or the clock. They
+confirm runtime behavior for this slice, not original Zork execution or a
+new approved game transcript. The MDL manual chapters 9 and 10 describe
+quoted arguments, activation binding, and empty PROG/REPEAT auxiliary LISTs;
+the pinned Confusion probes confirm the leading-activation cases. No new
+semantic deviation, upstream patch, license transfer, or exposed evaluator
+was introduced. Source loading and the M2 integrated gate remain open.
 
 ## Next action
 

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "m2-macro-review-regressions",
+  "cases": [
+    {
+      "name": "quoted-formal-empty-prog",
+      "expression": "<DEFINE M2-F ('X) <PROG () 7>>\n<M2-F 1>"
+    },
+    {
+      "name": "quoted-formal-empty-repeat",
+      "expression": "<DEFINE M2-F ('X) <REPEAT () <RETURN 8>>>\n<M2-F 1>"
+    },
+    {
+      "name": "quoted-formal-named-empty-prog",
+      "expression": "<DEFINE M2-F ('X) <PROG M2-SELF () <RETURN 9 .M2-SELF>>>\n<M2-F 1>"
+    },
+    {
+      "name": "quoted-formal-named-empty-repeat",
+      "expression": "<DEFINE M2-F ('X) <REPEAT M2-SELF () <RETURN 8 .M2-SELF>>>\n<M2-F 1>"
+    },
+    {
+      "name": "leading-activation-quoted-formal",
+      "expression": "<DEFINE M2-F M2-SELF ('X) <RETURN .X .M2-SELF>>\n<M2-F 7>"
+    },
+    {
+      "name": "leading-activation-macro",
+      "expression": "<DEFMAC M2-M M2-SELF ('X) <RETURN <FORM + .X 1> .M2-SELF>>\n<M2-M 6>"
+    },
+    {
+      "name": "leading-activation-before-optional-default",
+      "expression": "<DEFINE M2-F M2-SELF ('X \"OPTIONAL\" (Y <TYPE .M2-SELF>)) .Y>\n<M2-F 1>"
+    },
+    {
+      "name": "quoted-formal-then-name-marker",
+      "expression": "<DEFINE M2-F ('X \"NAME\" M2-SELF) <RETURN .X .M2-SELF>>\n<M2-F 7>"
+    },
+    {
+      "name": "macro-generated-leading-activation",
+      "expression": "<DEFMAC M2-M ('D) .D>\n<M2-M <DEFINE M2-F M2-SELF ('X) <RETURN .X .M2-SELF>>>\n<M2-F 7>"
+    },
+    {
+      "name": "macro-generated-empty-prog",
+      "expression": "<DEFMAC M2-M () <FORM PROG () 7>>\n<M2-M>"
+    }
+  ]
+}
