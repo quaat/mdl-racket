@@ -2,7 +2,8 @@
 
 **Local slice: PASS. M2 milestone: NOT YET PASS.** Base commit (branch
 `feat/m2-function-formals`, itself pending merge on top of the pending #28
-branch): `931545c594b932f03a4a924b031ad260d89535da`. This slice is tracked
+branch): `4764c17` after the PR #32 review fix (originally developed on
+`931545c594b932f03a4a924b031ad260d89535da`). This slice is tracked
 by [issue #31](https://github.com/quaat/mdl-racket/issues/31) and
 [PR #33](https://github.com/quaat/mdl-racket/pull/33) from branch
 `feat/m2-control-flow`; this file remains the full task record. This slice
@@ -79,7 +80,8 @@ runs for RETURN/AGAIN transfers and errors alike.
 | `scripts/fetch_sources.py` | 0 | Two locked commits verified; upstream trees clean |
 | `make test` before implementation (Racket half) | 0 | 403 Racket checks on the base commit; new `tests/control_test.rkt` aborted red on `DEFINE requires a parenthesized formal list` |
 | Python tests before implementation | 0 | 13 passed |
-| `make test` final (Racket half) | 0 | 455 Racket checks (403 existing + 39 control + 13 new core invariants); three pre-existing checks that asserted NAME/ACT were unsupported were updated to BIND/CALL, which remain unsupported |
+| `make test` final (Racket half) | 0 | 455 Racket checks at `a74b6c6` (403 existing + 39 control + 13 new core invariants); three pre-existing checks that asserted NAME/ACT were unsupported were updated to BIND/CALL, which remain unsupported |
+| `make test-racket` after both review fixes (rebased branch) | 0 | 465 Racket checks (408 from PR #32 with its PUTREST fix + 39 control + 13 core + 5 octal-label checks) |
 | Python tests final | 0 | 13 passed (same sandbox environment note as FORMALS.md) |
 | `scripts/check_1977_sources.py` | 0 | 36 parsed, 0 failed, 4 non-text; frozen M0 sweep restored afterward |
 | `scripts.mdl_probe --cases docs/evidence/M2/control-cases.json` | 0 | 16/16 successful probes, exit 0, empty stderr |
@@ -105,6 +107,18 @@ approved M0 golden SHA-256
 Focused probe inputs are fixed with no time or randomness.
 
 ## Supported and unsupported
+
+## Post-review fix
+
+The Codex review of PR #33 (P1) found that the PROG/REPEAT label predicate
+excluded only decimal-prefixed and `#` tokens, so an octal literal like
+`*10*` was classified as a label — `<PROG () 1 *10*>` returned 1 instead
+of 8, and a malformed token like `*89*` was silently skipped instead of
+reaching `mdl-constant`'s explicit invalid-octal error. Label detection now
+shares one atom-token classification with constant compilation covering
+decimal, FLOAT, scientific, octal (including malformed), and `#` reader
+tokens. Fix commit `fbc2ddb` adds five regression checks
+(`tests/control_test.rkt`).
 
 Supported: the leading activation ATOM and `"NAME"`/`"ACT"` markers; explicit
 RETURN/AGAIN to a function activation from any depth; AGAIN re-running the

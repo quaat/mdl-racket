@@ -255,8 +255,10 @@ GO or TAG, a recorded reference deviation, and TAG values remain
 unsupported. `UNWIND` runs its cleanup when a nonlocal transfer or an error
 crosses below it and returns the guarded expression's value otherwise;
 Confusion skips the cleanup on errors, a deviation the Racket runtime does
-not copy (manual chapter 16). `make test` passes 455 Racket checks and 13
-Python tests under the documented sandbox environment; the 36/36 reader
+not copy (manual chapter 16). `make test` passes 465 Racket checks and 13
+Python tests under the documented sandbox environment after both Codex
+review fixes (PUTREST TUPLE rejection in PR #32 and octal-token label
+exclusion here); the 36/36 reader
 sweep passes; the five-turn capture, 12 baseline probes, the approved M1
 golden comparison, and all 65 saved M2 success cases plus 27 expected-error
 observations reproduce against the pinned binary. Sixteen focused Confusion
