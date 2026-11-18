@@ -59,6 +59,18 @@ M2 control, formals, and macro slices**, not the original Zork
 game. If `raco` reports that the package is already installed, inspect
 `raco pkg show` rather than blindly reinstalling it.
 
+### CI Racket installation
+
+The GitHub Actions jobs use the Racket project's minimal `8.10-bc` Docker
+image, pinned by digest, so each job starts with Racket installed. The harness
+job installs `compiler-lib`, `rackunit-lib`, and `compatibility-lib` for the
+test suite; the native reference job installs its C++ build tools. The
+measured pilot and the apt alternatives are in
+[the CI setup report](docs/evidence/M2/CI-SETUP.md). Run `make test` locally;
+the CI harness uses `scripts/test_racket.sh` for the same Racket test list.
+This CI setup passes both workflows, while the M2 game execution gate remains
+open.
+
 ### Source checkout and historical reference
 
 ```bash

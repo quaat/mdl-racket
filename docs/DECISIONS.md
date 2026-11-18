@@ -387,3 +387,28 @@ validation can report a malformed-list error before Confusion's arity error.
 Compile-time expansion, declarations, source loading, and general APPLY
 remain separate tasks. No upstream source, game rule, public license,
 deployed service, or GPLv3 reference code changed.
+
+## ADR-0020: Run CI in a digest-pinned minimal Racket image
+
+**Decision:** Use the Racket project's `racket/racket:8.10-bc` minimal image
+by immutable digest for both GitHub Actions jobs. Install only the Racket
+libraries needed by the harness tests and the native tools needed by the
+Confusion reference job. Share the Racket test command list between Make and
+CI through `scripts/test_racket.sh`.
+
+**Why:** The existing Ubuntu apt step repeatedly downloaded and installed
+Racket and recommended documentation. One native apt run spent over 16
+minutes in the dependency step. The minimal image pulls quickly in the
+measured pilot and both workflows pass, including the source-lock check,
+reader sweep, native build, and reference capture. `--no-install-recommends`
+would remove the 36 MB documentation package but still download and install
+the Racket package. A full Racket distribution image has a larger compressed
+payload, and a custom prebuilt image would add a publication process.
+
+**Consequence:** CI uses Racket 8.10 BC; local development may use another
+version, so the full suite remains the compatibility check. The container
+still fetches Git/native packages and Racket test libraries per run. The
+image digest is fixed, while package repositories and action major tags can
+change. Reference execution remains local to the CI runner and no raw
+interpreter service is exposed. No upstream source, runtime semantics, game
+rule, public license, or GPLv3 code was changed or copied.

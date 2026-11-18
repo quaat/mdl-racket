@@ -68,6 +68,20 @@ observations and eight deliberate error observations are under
 `docs/evidence/M2/macro-*`; see `MACROS.md` there for commands, hashes,
 and reference deviations. The full M2 gate remains open.
 
+## CI toolchain
+
+Both workflows run in the digest-pinned Racket project `8.10-bc` minimal
+container. The harness job adds Git for the source-lock Python test and the
+Racket packages `compiler-lib`, `rackunit-lib`, and `compatibility-lib` for
+`raco make`, RackUnit, and `racket/mpair`. `make test-racket` and the CI job
+both call `scripts/test_racket.sh`, keeping one test-file list. The native job
+adds Git, G++, Make, Perl, and `libgc-dev`, verifies the locked source commits,
+then builds and captures Confusion. The CI runner still downloads Python
+dependencies and the listed Racket libraries on each job. See
+[`CI-SETUP.md`](evidence/M2/CI-SETUP.md) for exact runs, timing, alternatives,
+and limits. The CI run checks reference execution; it does not establish
+Racket gameplay parity.
+
 ## Frozen 1977 baseline
 
 The archived MIT source omits some components required to run the game.
