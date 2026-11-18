@@ -4,7 +4,7 @@
 (provide current-mdl-globals current-mdl-locals
          mdl-setg! mdl-gval mdl-define!
          mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings
-         mdl-with-function-scope mdl-with-prog-activation mdl-return
+         mdl-with-function-scope mdl-with-prog-activation mdl-return mdl-again
          mdl-apply mdl-list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-word mdl-word? mdl-word-bits
@@ -24,7 +24,7 @@
 
 (define current-mdl-globals (make-parameter (make-hasheq)))
 (define current-mdl-locals (make-parameter (list (make-hasheq))))
-(struct mdl-activation (owner escape [live? #:mutable]))
+(struct mdl-activation (owner escape [restart #:mutable] [live? #:mutable]))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
@@ -84,26 +84,47 @@
   (parameterize ([current-mdl-function-owner (gensym 'mdl-function)])
     (thunk)))
 
-(define (mdl-with-prog-activation thunk)
+(define restart-token (gensym 'mdl-restart))
+
+(define (mdl-with-prog-activation body [specs '()] [repeat? #f])
   (let/ec escape
-    (define frame (mdl-activation (current-mdl-function-owner) escape #t))
+    (define frame (mdl-activation (current-mdl-function-owner) escape #f #t))
     (dynamic-wind
       void
       (lambda ()
         (parameterize ([current-mdl-activations
                         (cons frame (current-mdl-activations))])
-          (thunk)))
+          (mdl-with-aux-bindings
+           specs
+           (lambda ()
+             (let loop ()
+               (define result
+                 (let/ec restart
+                   (set-mdl-activation-restart! frame restart)
+                   (body)))
+               (if (or repeat? (eq? result restart-token))
+                   (loop)
+                   result))))))
       (lambda () (set-mdl-activation-live?! frame #f)))))
 
+(define (current-mdl-activation)
+  (for/first ([frame (in-list (current-mdl-activations))]
+              #:when (eq? (mdl-activation-owner frame)
+                          (current-mdl-function-owner)))
+    frame))
+
 (define (mdl-return value)
-  (define target
-    (for/first ([frame (in-list (current-mdl-activations))]
-                #:when (eq? (mdl-activation-owner frame)
-                            (current-mdl-function-owner)))
-      frame))
+  (define target (current-mdl-activation))
   (unless (and target (mdl-activation-live? target))
-    (error 'mdl-return "no active PROG in current function"))
+    (error 'mdl-return "no active PROG or REPEAT in current function"))
   ((mdl-activation-escape target) value))
+
+(define (mdl-again)
+  (define target (current-mdl-activation))
+  (unless (and target (mdl-activation-live? target)
+               (mdl-activation-restart target))
+    (error 'mdl-again "no active PROG or REPEAT in current function"))
+  ((mdl-activation-restart target) restart-token))
 
 (define (global-option atom)
   (define globals (current-mdl-globals))
@@ -726,6 +747,10 @@
              (lambda ()
                (parameterize ([current-mdl-activations (list leaked)])
                  (mdl-return 19))))
+  (check-exn #rx"no active PROG or REPEAT"
+             (lambda ()
+               (parameterize ([current-mdl-activations (list leaked)])
+                 (mdl-again))))
   (define abandoned #f)
   (check-exn #rx"intentional failure"
              (lambda ()

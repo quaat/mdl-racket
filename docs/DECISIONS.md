@@ -263,3 +263,22 @@ coinductive equality rule would be an unverified semantic addition.
 values, but deliberately reports a limitation for unresolved distinct cycles.
 This does not establish full cyclic equality parity. No upstream source,
 game rule, public license, deployed service, or GPLv3 code changed.
+
+## ADR-0015: Restart an activation body without rebinding auxiliaries
+
+**Decision:** Use the existing owned activation frame for unnamed PROG and
+REPEAT. Bind auxiliaries once inside the frame; expose an internal restart
+escape around each body evaluation. Bare AGAIN invokes that escape for the
+nearest frame owned by the current function. PROG returns its final body
+value; REPEAT iterates after normal body completion until RETURN exits.
+
+**Why:** The manual defines REPEAT as PROG with implicit final AGAIN and says
+AGAIN does not repeat auxiliary binding. Five finite pinned Confusion probes
+confirm the core loop, initializer retention, PROG restart, explicit bare
+AGAIN in REPEAT, and nested RETURN.
+
+**Consequence:** Restart uses tail iteration and preserves mutable local
+bindings. Named activations, explicit target transfer, GO, UNWIND, and
+AGAIN from auxiliary initializers remains outside this slice. No
+upstream source, game rule, public license, deployed service, or GPLv3 code
+changed.

@@ -1,4 +1,4 @@
-# Status — 2026-11-18 (M2 cyclic equality hardening locally verified)
+# Status — 2026-11-18 (M2 REPEAT/AGAIN slice locally verified)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -176,3 +176,17 @@ are recorded separately, not counted as passing oracle cases. The five-turn
 capture, 12 baseline probes, and M1 approved comparison pass with documented
 build-metadata exclusions. See `docs/evidence/M2/EQUALITY.md` for exact
 commands, hashes, and unresolved semantics.
+
+## M2 issue #26: unnamed REPEAT and bare AGAIN
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** Unnamed REPEAT binds
+auxiliaries once, repeats its body until RETURN, and shares the activation
+stack with PROG. Bare AGAIN restarts the nearest PROG or REPEAT within the
+current function without rebinding auxiliaries. Bare RETURN exits either.
+Named activations and explicit target transfers remain unsupported and fail
+at compile time. `make test` passes 331 Racket checks and 13
+Python tests; the 36/36 selected historical text files still parse. Five
+finite Confusion cases exited zero with empty stderr and match the Racket
+assertions. The five-turn capture, 12 baseline probes, and approved M1
+reference/golden comparison pass. See `docs/evidence/M2/REPEAT.md` for
+commands, hashes, one transient `/var/tmp` test-runner failure, and remaining limits.
