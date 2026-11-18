@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "name": "m2-macro-errors",
+  "recorded_at": "2026-11-18T14:34:59.550689+00:00",
+  "interpreter_sha256": "2c58ef023d2ac306bdf661ee0afc0123eef94a8608c108a36ddc2e8808ab4d95",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "defmac-redefine",
+      "expression": "<SETG M2-M 1>\n<DEFMAC M2-M () 1>",
+      "input": "<SETG M2-M 1>\n<DEFMAC M2-M () 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Atom is already bound in DEFMAC\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "defmac-redefine-function",
+      "expression": "<DEFINE M2-M () 1>\n<DEFMAC M2-M () 1>",
+      "input": "<DEFINE M2-M () 1>\n<DEFMAC M2-M () 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-M\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Atom is already bound in DEFMAC\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-M\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "defmac-non-atom-name",
+      "expression": "<DEFMAC \"NOPE\" () 1>",
+      "input": "<DEFMAC \"NOPE\" () 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "First argument of DEFMAC must be an atom\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "macro-unbound-arg",
+      "expression": "<DEFMAC M2-M (X) 1>\n<M2-M .M2-NOPE>",
+      "input": "<DEFMAC M2-M (X) 1>\n<M2-M .M2-NOPE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-M\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n M2-NOPE \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-M\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n M2-NOPE \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "macro-wrong-arity",
+      "expression": "<DEFMAC M2-M ('X 'Y) 1>\n<M2-M 1>",
+      "input": "<DEFMAC M2-M ('X 'Y) 1>\n<M2-M 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-M\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Too few args in function call\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-M\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "quoted-formal-with-default",
+      "expression": "<DEFMAC M2-M ('X 3) <FORM + .X 1>>\n<M2-M>",
+      "input": "<DEFMAC M2-M ('X 3) <FORM + .X 1>>\n<M2-M>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-M\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Too few args in function call\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-M\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "quoted-formal-in-optional-unassigned",
+      "expression": "<DEFMAC M2-M (\"OPTIONAL\" 'X) <FORM N==? .X 1>>\n<M2-M>",
+      "input": "<DEFMAC M2-M (\"OPTIONAL\" 'X) <FORM N==? .X 1>>\n<M2-M>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-M\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n X \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-M\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n X \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "apply-function-with-quoted",
+      "expression": "<DEFINE M2-F ('X) .X>\n<APPLY ,M2-F '(1)>",
+      "input": "<DEFINE M2-F ('X) .X>\n<APPLY ,M2-F '(1)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-F\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Can't use APPLY to call a function with quoted arguments\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 13:24:00\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-F\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

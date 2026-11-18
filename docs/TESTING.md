@@ -61,6 +61,12 @@ invariants are in `mdl/runtime/core.rkt`'s test submodule. Sixteen
 successful Confusion observations and seven error observations are under
 `docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO and
 UNWIND-on-error reference deviations.
+The macro slice adds `tests/macro_test.rkt` to `make test-racket` for DEFMAC,
+FORM, EXPAND, quoted formals, caller-frame argument evaluation, ARGS/TUPLE,
+and an expansion that defines a function. Twenty-five successful Confusion
+observations and eight deliberate error observations are under
+`docs/evidence/M2/macro-*`; see `MACROS.md` there for commands, hashes,
+and reference deviations. The full M2 gate remains open.
 
 ## Frozen 1977 baseline
 

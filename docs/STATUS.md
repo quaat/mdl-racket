@@ -1,4 +1,4 @@
-# Status — 2026-11-18 (M2 named activation slice locally verified)
+# Status — 2026-11-18 (M2 macro slice locally verified)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -269,3 +269,25 @@ remain unsupported. The slice is tracked by
 [PR #33](https://github.com/quaat/mdl-racket/pull/33); the full task record
 is `docs/evidence/M2/CONTROL.md` with commands, hashes, deviations, and
 remaining limits.
+
+## M2 local task: DEFMAC expansion and quoted formals
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** The macro slice adds
+`DEFMAC`, FORM construction and evaluation, one-step `EXPAND`, and quoted
+formals in interpreted DEFINE and DEFMAC. Plain supplied arguments and
+TUPLE rest arguments evaluate in the caller frame; ARGS keeps raw source
+arguments. A macro expansion can define a callable function. Interpreted
+function ownership prevents a bare RETURN from escaping the caller's PROG.
+`make test` passes 502 Racket checks and 13 Python tests. The selected text
+sweep still parses 36/36 files. Twenty-five pinned Confusion success cases
+exit zero with empty stderr, and eight separate error observations match
+their saved outputs. The five-turn house capture matches the approved M0
+golden after the documented capture/build timestamp exclusions. Confusion's
+caller-local expansion behavior differs from the manual's top-level wording;
+Confusion also evaluates non-macro EXPAND input and prints a debug message,
+while Racket keeps the form unchanged. Malformed formal-list error order
+also differs. Full details and commands are in
+[`docs/evidence/M2/MACROS.md`](evidence/M2/MACROS.md), tracked by
+[issue #34](https://github.com/quaat/mdl-racket/issues/34).
+Source loading, declarations, general APPLY/DISPATCH, and original game
+execution remain open. The first unmet **milestone** gate is still M2.

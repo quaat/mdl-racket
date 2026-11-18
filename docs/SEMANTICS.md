@@ -495,6 +495,39 @@ runtime follows the manual. Tests are in `tests/control_test.rkt` plus
 runtime invariants in `mdl/runtime/core.rkt`; commands, hashes, and
 deviations are in `docs/evidence/M2/CONTROL.md`.
 
+## M2 macro slice specification: DEFMAC, FORM, EXPAND, quoted formals
+
+The [MDL manual, chapter 17](https://mdl-language.readthedocs.io/en/latest/17-macro-operations/)
+defines `DEFMAC` with `DEFINE` syntax. Its value has TYPE `MACRO` and
+PRIMTYPE `LIST`. Calling it first applies its function to the **unevaluated**
+call form, then evaluates the expansion at the call site; `EXPAND` performs
+only the first step. The manual says expansion occurs in a top-level
+environment, but the pinned Confusion probe `macro-sees-caller-local` observes
+the caller's local binding. This slice follows that tested reference behavior
+and records the manual difference. `FORM` constructs a first-class FORM from
+evaluated operands; evaluating a FORM resolves its operator and evaluates its
+arguments according to that operator. A quoted formal (`'X`) receives the
+raw argument, while an unquoted formal evaluates it once during binding.
+`"TUPLE"` collects evaluated remaining arguments and `"ARGS"` retains raw
+remaining arguments, matching the pinned `macro-tuple-evaluates` and
+`macro-args-stays-raw` probes. An expansion may itself define a function;
+`macro-defines-function` confirms the resulting definition is callable.
+
+The pinned success and error observations are in `docs/evidence/M2/macro-*`.
+They cover definition return/type, FORM construction, nested expansion,
+quoted and ordinary formals in DEFINE/DEFMAC, tuple collection, optional
+unassigned reads, and explicit `EXPAND`. Confusion evaluates a non-macro
+argument to `EXPAND` and prints a debug message; the manual's one-step
+contract is used here, so the Racket runtime returns that FORM unchanged.
+`APPLY` of a quoted-formal function remains unsupported and must fail
+explicitly. Source loading, declarations, splice/segment semantics, full
+environment control, and compilation-time macro expansion remain outside
+this slice. Tests are in `tests/macro_test.rkt` and the focused reference
+inputs use no random or time-dependent behavior.
+The Racket binder validates the full formal list before applying a macro;
+Confusion reaches a too-few-arguments error first for the malformed
+`('X 3)` list in the saved error probe. This is an error-order deviation.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in

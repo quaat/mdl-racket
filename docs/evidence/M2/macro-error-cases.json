@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "name": "m2-macro-errors",
+  "cases": [
+    {
+      "name": "defmac-redefine",
+      "expression": "<SETG M2-M 1>\n<DEFMAC M2-M () 1>"
+    },
+    {
+      "name": "defmac-redefine-function",
+      "expression": "<DEFINE M2-M () 1>\n<DEFMAC M2-M () 1>"
+    },
+    {
+      "name": "defmac-non-atom-name",
+      "expression": "<DEFMAC \"NOPE\" () 1>"
+    },
+    {
+      "name": "macro-unbound-arg",
+      "expression": "<DEFMAC M2-M (X) 1>\n<M2-M .M2-NOPE>"
+    },
+    {
+      "name": "macro-wrong-arity",
+      "expression": "<DEFMAC M2-M ('X 'Y) 1>\n<M2-M 1>"
+    },
+    {
+      "name": "quoted-formal-with-default",
+      "expression": "<DEFMAC M2-M ('X 3) <FORM + .X 1>>\n<M2-M>"
+    },
+    {
+      "name": "quoted-formal-in-optional-unassigned",
+      "expression": "<DEFMAC M2-M (\"OPTIONAL\" 'X) <FORM N==? .X 1>>\n<M2-M>"
+    },
+    {
+      "name": "apply-function-with-quoted",
+      "expression": "<DEFINE M2-F ('X) .X>\n<APPLY ,M2-F '(1)>"
+    }
+  ]
+}

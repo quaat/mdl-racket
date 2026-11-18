@@ -68,6 +68,20 @@
     [(vector) `(mdl-vector ,@(map compile-data (mdl-node-value n)))]
     [(uvector) `(mdl-uvector ,@(map compile-data (mdl-node-value n)))]
     [(false) `(mdl-false (mdl-list ,@(map compile-data (mdl-node-value n))))]
+    [(form) `(mdl-make-form
+              (mdl-list ,@(map compile-data (mdl-node-value n))))]
+    [(local) `(mdl-make-form
+               (mdl-list (mdl-atom "LVAL")
+                         (mdl-atom ,(string-upcase (mdl-node-value n)))))]
+    [(global)
+     `(mdl-make-form
+       (mdl-list (mdl-atom "GVAL")
+                 ,(if (string? (mdl-node-value n))
+                      `(mdl-atom ,(string-upcase (mdl-node-value n)))
+                      (compile-data (mdl-node-value n)))))]
+    [(quote) `(mdl-make-form
+               (mdl-list (mdl-atom "QUOTE")
+                         ,(compile-data (mdl-node-value n))))]
     [(typed) (compile-typed n)]
     [else (unsupported n "this MDL data construct is not implemented")]))
 
@@ -115,7 +129,15 @@
   (define names
     (append (if leading-act (list leading-act) '())
             (for/list ([spec (in-list specs)]) (second spec))))
-  `(mdl-define! (mdl-atom ,fn-name)
+  (if (ormap (lambda (spec) (memq (first spec) '(quoted quoted-optional))) specs)
+      `(mdl-define-interpreted!
+        (mdl-atom ,fn-name)
+        ,(if leading-act
+             `(mdl-list "NAME" (mdl-atom ,leading-act)
+                        ,@(map compile-data (mdl-node-value args-node)))
+             (compile-data args-node))
+        (list ,@(map compile-data body-xs)))
+      `(mdl-define! (mdl-atom ,fn-name)
      (lambda mdl-given-args
        (mdl-with-function-scope
         (lambda ()
@@ -130,7 +152,7 @@
                 (list ,@(map (lambda (spec) (spec-expression spec names)) all-specs))
                 mdl-given-args
                 #f
-                (lambda () ,(compile-sequence body-xs names)))))))))
+                (lambda () ,(compile-sequence body-xs names))))))))))
 
 ;; Historical formal lists mark sections with STRINGs: "OPT"/"OPTIONAL",
 ;; "ARGS", "TUPLE", "AUX"/"EXTRA", and "NAME"/"ACT" for the function's own
@@ -201,16 +223,28 @@
              [(name) (add-spec! item 'name name) 'after-name]
              [else (unsupported item "ATOM formal not allowed in this section")]))
          (loop (cdr items) next-section)]
+        [(is-kind? item 'quote)
+         (unless (is-kind? (mdl-node-value item) 'atom)
+           (unsupported item "quoted formal must name an ATOM"))
+         (define kind
+           (case section
+             [(required) 'quoted]
+             [(optional) 'quoted-optional]
+             [else (unsupported item "quoted formal not allowed in this section")]))
+         (add-spec! item kind (atom-name (mdl-node-value item)))
+         (loop (cdr items) section)]
         [(and (is-kind? item 'list) (= (length (mdl-node-value item)) 2))
          (unless (memq section '(optional aux))
            (unsupported item
                         "2-list defaults are allowed only in OPTIONAL or AUX sections"))
          (define pair (mdl-node-value item))
+         (when (is-kind? (first pair) 'quote)
+           (unsupported item "quoted formal cannot take a default"))
          (define name (atom-name (first pair)))
          (add-spec! item section name (second pair))
          (loop (cdr items) section)]
         [(is-kind? item 'form)
-         (unsupported item "quoted formal arguments are not supported")]
+         (unsupported item "unsupported FORM in formal list")]
         [else (unsupported item "unsupported formal argument")])))
   (reverse specs))
 
@@ -349,6 +383,16 @@
              [args (cdr xs)])
         (case (string->symbol op)
           [(DEFINE) (compile-definition n args)]
+          [(DEFMAC)
+           (unless (and (pair? args) (is-kind? (first args) 'atom))
+             (unsupported n "First argument of DEFMAC must be an atom"))
+           (unless (and (>= (length args) 3)
+                        (is-kind? (second args) 'list))
+             (unsupported n "DEFMAC expects an ATOM name, formal list, and body"))
+           (parse-formal-list (second args))
+           `(mdl-defmac! (mdl-atom ,(atom-name (first args)))
+                         ,(compile-data (second args))
+                         (list ,@(map compile-data (cddr args))))]
           [(PROG) (compile-prog n args locals)]
           [(REPEAT) (compile-prog n args locals #t)]
           [(RETURN)
@@ -398,7 +442,11 @@
            (unless (= (length args) 1) (unsupported n "QUOTE expects one argument"))
            (compile-quote (first args))]
           [else
-           `(mdl-apply ,op ,@(map (lambda (a) (compile-expression a locals)) args))]))))
+           `(mdl-apply-form ,op
+                            (lambda () (list ,@(map compile-data args)))
+                            (list ,@(map (lambda (a)
+                                           `(lambda () ,(compile-expression a locals)))
+                                         args)))]))))
 
 (define (compile-expression n [locals '()])
   ;; Retain each source literal once per compiled top-level expression.

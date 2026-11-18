@@ -360,3 +360,30 @@ manual-derived only. TAG values, `"BIND"`/`"CALL"` markers, and the FSUBR
 `BIND` remain unsupported and fail explicitly. Bare atom nodes that carry
 number or `#` reader tokens cannot be labels. No upstream source, game rule,
 public license, deployed service, or GPLv3 reference code changed.
+
+## ADR-0019: Runtime FORM data and caller-frame macro arguments
+
+**Decision:** Compile raw call operands as MDL data alongside evaluation
+thunks. Ordinary compiled procedures consume the thunks in order; MACRO
+and interpreted quoted-formal FUNCTION values bind the data themselves.
+Represent FORM as a LIST-primtype tagged value and evaluate macro expansion
+results at the call site. Supplied plain formals and TUPLE rest arguments
+evaluate in the saved caller locals and function owner; ARGS and quoted
+formals retain raw operands. Give each interpreted invocation its own
+function owner. Keep `EXPAND` to one top-level macro expansion.
+
+**Why:** The MDL manual chapter 17 specifies two-stage macro evaluation,
+while pinned Confusion probes confirm raw quoted operands, caller-frame
+argument evaluation, TUPLE versus ARGS, nested expansion, and function
+definitions produced by expansion. The new caller-frame and bare-RETURN
+tests failed against the unfinished runtime draft before the fixes.
+
+**Consequence:** Macro code can construct and evaluate FORM data on the
+documented subset. Confusion observes caller locals during expansion even
+though the manual says top-level; the runtime follows the observed reference
+for this slice. Confusion's debug build evaluates a non-macro EXPAND input;
+the runtime follows the manual's one-step behavior instead. Full formal-list
+validation can report a malformed-list error before Confusion's arity error.
+Compile-time expansion, declarations, source loading, and general APPLY
+remain separate tasks. No upstream source, game rule, public license,
+deployed service, or GPLv3 reference code changed.

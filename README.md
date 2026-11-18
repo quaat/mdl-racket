@@ -54,8 +54,8 @@ missing. Successful detection does not mean the Racket tests or Confusion
 gameplay have passed; run the validation targets explicitly.
 
 `make test` requires Racket and the locally linked Racket package. It tests
-**the bootstrap reader/compiler, implemented M1 primitives, and scoped M2
-PROG/RETURN**, not the original Zork
+**the bootstrap reader/compiler, implemented M1 primitives, and the documented
+M2 control, formals, and macro slices**, not the original Zork
 game. If `raco` reports that the package is already installed, inspect
 `raco pkg show` rather than blindly reinstalling it.
 
@@ -132,8 +132,14 @@ formals (the leading `DEFINE` self-atom used by the 1977 sources and the
 `"NAME"`/`"ACT"` markers) with explicit RETURN/AGAIN to a function's own
 activation, `GO` to labels in the current function's PROG/REPEAT (manual
 based; Confusion has no GO), and `UNWIND` cleanup on nonlocal transfers.
-`"BIND"`/`"CALL"` markers, `TAG`, `GO` across function boundaries, macros,
-and source loading remain unsupported.
+`"BIND"`/`"CALL"` markers, `TAG`, `GO` across function boundaries, and
+source loading remain unsupported.
+The [macro slice](docs/evidence/M2/MACROS.md) adds `DEFMAC`, first-class
+FORM construction and evaluation, one-step `EXPAND`, and quoted formals.
+Its local gate is **PASS**: `make test` passes 502 Racket checks and 13 Python
+tests; 25 isolated pinned Confusion success cases and eight separate error
+observations reproduce their saved outputs. This is an M2 slice result; the
+M2 milestone remains open until original source definitions execute.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
@@ -178,15 +184,19 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
 - `GO` to top-level labels in the current function's PROG/REPEAT bodies,
   with labels skipped in normal flow, and `UNWIND` cleanup expressions that
   run when a nonlocal transfer or error crosses below them.
+- `DEFMAC` calls with runtime expansion, FORM values and `EXPAND`, quoted
+  formals, and caller-frame evaluation of plain and TUPLE arguments.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
 
-**Not supported yet:** complete original MDL syntax, macros, dynamic `.OBLIST`
+**Not supported yet:** complete original MDL syntax, compile-time macro
+expansion, dynamic `.OBLIST`
 and full type declarations, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
 explicit environments, the `"BIND"`/`"CALL"` activation formals, TAG values,
 and `GO` across function boundaries, general nonlocal
-control flow beyond the supported RETURN/AGAIN/GO/UNWIND subset, ROT,
+control flow beyond the supported RETURN/AGAIN/GO/UNWIND subset, source
+loading, general APPLY/DISPATCH, ROT,
 PDP-10 FLOAT bit layout, event scheduling,
 original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a

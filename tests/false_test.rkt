@@ -44,8 +44,7 @@
 (check-equal? (run "<SETG X 0> <COND (7) (T <SETG X 1>)> ,X") 0)
 (check-exn #rx"COND requires at least one clause"
            (lambda () (compile-program (parse-mdl "<COND>"))))
-(check-exn #rx"this MDL data construct is not implemented"
-           (lambda () (compile-program (parse-mdl "#FALSE (<+ 1 2>)"))))
+(check-true (mdl-form? (car (mdl-false-payload (run "#FALSE (<+ 1 2>)")))))
 (check-exn #rx"#FALSE requires a LIST payload"
            (lambda () (compile-program (parse-mdl "#FALSE"))))
 (check-eq? (run "<TYPE 7>") (mdl-atom "FIX"))

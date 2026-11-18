@@ -147,7 +147,7 @@
            (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"BIND\" X) .X>"))))
 (check-exn #rx"CALL"
            (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"CALL\" X) .X>"))))
-(check-exn #rx"quoted formal"
+(check-exn #rx"unsupported FORM in formal list"
            (lambda () (compile-program (parse-mdl "<DEFINE M2-F (<QUOTE X>) .X>"))))
 (check-exn #rx"unknown formal"
            (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"NOPE\" X) .X>"))))
