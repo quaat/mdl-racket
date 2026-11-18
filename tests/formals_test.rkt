@@ -86,6 +86,22 @@
 (check-true (mdl-false?
              (run "<DEFINE M2-F (\"TUPLE\" T) .T> <=? <M2-F 1 2> <LIST 1 2>>")))
 
+;; PUTREST is a LIST-primtype operation; TUPLE operands are rejected
+;; rather than exposing or splicing their payload chains.
+(check-exn #rx"PUTREST requires LIST-primtype"
+           (lambda ()
+             (run "<DEFINE M2-F (\"TUPLE\" X) <PUTREST .X (9)>> <M2-F 1 2 3>")))
+(check-exn #rx"PUTREST requires LIST-primtype"
+           (lambda ()
+             (run "<DEFINE M2-F (\"TUPLE\" X) <PUTREST (1 2 3) .X>> <M2-F 4>")))
+(check-exn #rx"PUTREST requires LIST-primtype"
+           (lambda () (run "<PUTREST (1 2 3) \"TAIL\">")))
+;; LIST and FALSE heads (both LIST-primtype) keep working.
+(check-equal? (mdl-list->racket (run "<PUTREST (1 2 3) (8)>")) (list 1 8))
+(check-equal? (mdl-false-payload
+               (run "<PUT <PUTREST #FALSE (1 2 3) (8)> 2 9>"))
+              '(1 9))
+
 ;; ARGS binds the remaining arguments as a LIST.
 (check-equal? (mdl-list->racket
                (run "<DEFINE M2-F (A \"ARGS\" L) <LIST .A <LENGTH .L>>> <M2-F 1 2 3>"))

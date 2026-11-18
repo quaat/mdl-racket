@@ -603,7 +603,18 @@
                                  (sub1 index) 'mdl-put) item))
   value)
 
+;; PUTREST rewires the tail of a LIST-primtype head. A TUPLE is its own
+;; primitive type, so tuples must not expose or splice their payload
+;; chains here; the primtype check also rejects typed values whose storage
+;; is a tuple, as well as non-LIST operands.
 (define (mdl-putrest! head tail)
+  (define (require-list-primtype value)
+    (define prim (mdl-primtype value))
+    (unless (eq? prim (mdl-atom "LIST"))
+      (error 'mdl-putrest "PUTREST requires LIST-primtype values, not ~a"
+             (mdl-atom-pname prim))))
+  (require-list-primtype head)
+  (require-list-primtype tail)
   (define head-list (mdl-list-head head 'mdl-putrest))
   (unless (mpair? head-list)
     (error 'mdl-putrest "PUTREST requires nonempty LIST-primtype head"))
