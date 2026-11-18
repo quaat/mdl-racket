@@ -76,7 +76,8 @@ reference only; no Confusion code was copied.
 | `raco pkg install --auto --link` (session setup) | 0 | Package linked; in-sandbox runs use `PLTCOLLECTS` because the sandbox hides `~/.local/share/racket` between commands |
 | `make test` before implementation (Racket half) | 0 | 347 Racket checks on the base commit; new `tests/formals_test.rkt` aborted red on `DEFINE optional/AUX/TUPLE arguments not supported in M0` |
 | Python tests before implementation | 0 | 13 passed |
-| `make test` final (Racket half) | 0 | 403 Racket checks (347 existing + 46 formals + 10 new core invariants) |
+| `make test` final (Racket half) | 0 | 403 Racket checks (347 existing + 46 formals + 10 new core invariants); after the Codex review fix below, 408 |
+| `raco test` with the PUTREST fix (72ac750) | 0 | 408 Racket checks, 13 Python tests |
 | Python tests final | 0 | 13 passed (see environment note below) |
 | `scripts/check_1977_sources.py` | 0 | 36 parsed, 0 failed, 4 non-text |
 | `scripts.mdl_probe --cases docs/evidence/M2/formals-cases.json` | 0 | 24/24 successful probes, exit 0, empty stderr |
@@ -107,6 +108,17 @@ has fixed commands but no controlled RNG seed, and Confusion embeds build time
 in its banner (excluded by the comparison contract).
 
 ## Supported and unsupported
+
+## Post-review fix
+
+The Codex review of PR #32 (P1) found that PUTREST unwrapped a TUPLE head
+or tail through `mdl-list-head`, splicing or exposing tuple storage across
+its distinct primitive type. PUTREST now validates both operands through
+PRIMTYPE and rejects non-LIST-primtype values explicitly while keeping
+LIST, FALSE, and typed LIST heads working; TUPLE access for LENGTH, NTH,
+PUT, REST, and equality is unchanged. Fix commit `72ac750` adds five
+regression checks (`tests/formals_test.rkt`), bringing the suite to 408
+Racket checks.
 
 Supported: required formals; `"OPT"`/`"OPTIONAL"`, `"AUX"`/`"EXTRA"`,
 `"ARGS"`, and `"TUPLE"` sections in the reference order with compile-time

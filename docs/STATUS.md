@@ -224,9 +224,11 @@ Malformed formal lists fail at compile time; Confusion validates them at call
 time, a documented stricter deviation. The `gh` CLI is not authenticated in
 this session, so the task record is `docs/evidence/M2/FORMALS.md` on branch
 `feat/m2-function-formals`; the GitHub issue and PR remain to be opened.
-`make test` passes 403 Racket checks and 13 Python tests (the sandboxed
+`make test` passes 408 Racket checks and 13 Python tests (the sandboxed
 session ran the Python half under system Python 3.9 with repo-local pinned
-wheels; see the report). The 36/36 text reader sweep passes; the five-turn
+wheels; see the report). The Codex review of PR #32 found PUTREST splicing
+TUPLE storage; both PUTREST operands are now validated through PRIMTYPE
+and non-LIST-primtype values fail explicitly (fix commit `72ac750`). The 36/36 text reader sweep passes; the five-turn
 capture, 12 baseline probes, the approved M1 golden comparison, and all 69
 saved M2 success cases plus 20 expected-error observations reproduce exactly
 against the pinned binary. Twenty-four focused Confusion formals probes
