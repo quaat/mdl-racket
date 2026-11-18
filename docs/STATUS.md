@@ -296,3 +296,22 @@ PROG/REPEAT and keeps a leading activation name separate from quoted
 formals in directly compiled and generated definitions. Ten new pinned
 Confusion cases match the Racket regressions; the red-to-green record is in
 [`docs/evidence/M2/MACROS.md`](evidence/M2/MACROS.md#review-follow-up).
+
+## M2 infrastructure task: faster CI Racket setup
+
+**CI task: PASS. M2 milestone: NOT YET PASS.** Both workflows passed on the
+digest-pinned minimal Racket `8.10-bc` container: [harness run
+44353286644](https://github.com/quaat/mdl-racket/actions/runs/44353286644)
+and [native run
+44353286715](https://github.com/quaat/mdl-racket/actions/runs/44353286715).
+The harness log spans about 32 seconds and the native log about 43 seconds,
+including image pull, dependencies, and cleanup. The same-day apt baselines
+were 40 seconds for the harness and 84 seconds for one native run; a later
+native apt run took about 17 minutes due to its dependency install. These
+are individual runs, not a controlled benchmark. The full comparison,
+commands, and limitations are in
+[`docs/evidence/M2/CI-SETUP.md`](evidence/M2/CI-SETUP.md), tracked by
+[issue #36](https://github.com/quaat/mdl-racket/issues/36) and
+[PR #37](https://github.com/quaat/mdl-racket/pull/37). No MDL semantics or
+upstream source changed. Source loading and original game execution remain
+the next M2 work.
