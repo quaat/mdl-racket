@@ -78,20 +78,27 @@
   (not (memq 'up (explode-path rel))))
 
 (define (canonical-path absolute)
-  ;; simplify-path does not follow a final symlink. Resolve every component
-  ;; before checking containment, including links to directories.
-  (define pieces (explode-path (simplify-path absolute #f)))
-  (define (follow-link path)
-    (let loop ([candidate path] [hops 0])
-      (when (> hops 32) (error 'mdl-loader "symlink depth limit exceeded"))
-      (if (link-exists? candidate)
-          (loop (simplify-path
-                 (path->complete-path (resolve-path candidate)
-                                      (path-only candidate)) #f)
-                (add1 hops))
-          candidate)))
-  (for/fold ([current (car pieces)]) ([piece (in-list (cdr pieces))])
-    (follow-link (build-path current piece))))
+  ;; A link target can itself contain links in intermediate components.
+  ;; Replay every target from its root, then continue with the remaining
+  ;; suffix, so containment checks match the file that will be opened.
+  (define (pieces path)
+    (explode-path (simplify-path (path->complete-path path) #f)))
+  (let loop ([pending (pieces absolute)] [current #f] [hops 0])
+    (cond
+      [(null? pending) current]
+      [else
+       (define next
+         (if current (build-path current (car pending)) (car pending)))
+       (if (link-exists? next)
+           (begin
+             (when (>= hops 32)
+               (error 'mdl-loader "symlink depth limit exceeded"))
+             (loop (append
+                    (pieces (path->complete-path (resolve-path next)
+                                               (path-only next)))
+                    (cdr pending))
+                   #f (add1 hops)))
+           (loop (cdr pending) next hops))])))
 
 (define (resolve-source session requested)
   (define base
@@ -131,20 +138,22 @@
                          (fail! session "filesystem" "read" file #f #f
                                 (exn-message e)))])
         (file->string path)))
-    (define nodes
-      (with-handlers ([exn:fail:mdl-reader?
-                       (lambda (e)
-                         (fail! session "reader" "parse" file #f
-                                (mdl-node 'file #f
-                                          (exn:fail:mdl-reader-line e)
-                                          (exn:fail:mdl-reader-column e))
-                                (exn-message e)))]
-                      [exn:fail?
-                       (lambda (e)
-                         (fail! session "reader" "parse" file #f #f
-                                (exn-message e)))])
-        (parse-mdl source #:source file)))
-    (for ([node (in-list nodes)] [index (in-naturals 1)])
+    (define next-node (make-mdl-node-reader source #:source file))
+    (let loop ([index 1])
+      (define node
+        (with-handlers ([exn:fail:mdl-reader?
+                         (lambda (e)
+                           (fail! session "reader" "parse" file index
+                                  (mdl-node 'file #f
+                                            (exn:fail:mdl-reader-line e)
+                                            (exn:fail:mdl-reader-column e))
+                                  (exn-message e)))]
+                        [exn:fail?
+                         (lambda (e)
+                           (fail! session "reader" "parse" file index #f
+                                  (exn-message e)))])
+          (next-node)))
+      (when node
       (define compiled
         (with-handlers ([exn:fail:mdl-compiler?
                          (lambda (e)
@@ -173,7 +182,8 @@
                  (hash 'status "PASS" 'file file 'expression_index index
                        'line (mdl-node-line node) 'column (mdl-node-column node)
                        'construct (construct-name node)
-                       'load_chain (chain-names session)))))
+                       'load_chain (chain-names session))))
+      (loop (add1 index))))
     "DONE"))
 
 (define (mdl-session-load! session entry)

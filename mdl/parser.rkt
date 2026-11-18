@@ -2,7 +2,7 @@
 ;; A source-located reader for a deliberately small but growing subset of MDL.
 ;; Does NOT claim to understand all of historical MDL syntax.
 (require racket/port)
-(provide parse-mdl mdl-node mdl-node? mdl-node-kind mdl-node-value
+(provide parse-mdl make-mdl-node-reader mdl-node mdl-node? mdl-node-kind mdl-node-value
          mdl-node-line mdl-node-column
          exn:fail:mdl-reader? exn:fail:mdl-reader-line
          exn:fail:mdl-reader-column)
@@ -154,10 +154,14 @@
          (when (string=? raw "") (parse-error c "invalid token"))
          (node 'atom raw))])))
 
-(define (parse-mdl text #:source [source "<string>"])
+(define (make-mdl-node-reader text #:source [source "<string>"])
   (define c (cursor text 0 1 1 source))
-  (let loop ([acc '()])
+  (lambda ()
     (skip-ws! c)
-    (if (peek c)
-        (loop (cons (read-node! c) acc))
-        (reverse acc))))
+    (and (peek c) (read-node! c))))
+
+(define (parse-mdl text #:source [source "<string>"])
+  (define next-node (make-mdl-node-reader text #:source source))
+  (let loop ([acc '()])
+    (define node (next-node))
+    (if node (loop (cons node acc)) (reverse acc))))

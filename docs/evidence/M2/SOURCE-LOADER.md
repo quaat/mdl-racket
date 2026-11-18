@@ -18,8 +18,8 @@ the nested `81prim.mud` SHA256 is
 `8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571`.
 
 `mdl/loader.rkt` owns one MDL session's globals, local root frame, atom/type
-space and execution records. Each top-level node is compiled and evaluated
-before the next. `FLOAD` calls the same loader in the active session. The
+space and execution records. Each top-level node is read, compiled and
+evaluated before the next. `FLOAD` calls the same loader in the active session. The
 source root is explicit; traversal, symlink escapes, cycles and excessive
 depth fail. The first failure is a structured record with file, exact node
 line/column, expression index, load chain, stage, classification and original
@@ -41,14 +41,14 @@ disabled or excluded.
 | Command | Exit | Observation |
 |---|---:|---|
 | `raco test tests/loader_test.rkt` before loader | 1 | Missing loader module (expected red) |
-| `raco test tests/loader_test.rkt` after implementation | 0 | 41 checks pass |
+| `raco test tests/loader_test.rkt` after review fixes | 0 | 48 checks pass |
 | `make test` before stale-bytecode fix | 2 | Nine module instantiation mismatches, unrelated to MDL evaluation |
-| `make test` after fix and final regressions | 0 | 554 Racket checks, 13 Python tests |
+| `make test` after review fixes | 0 | 561 Racket checks, 13 Python tests |
 | `racket scripts/mdl_load.rkt --source-root /tmp/mdl-loader-cli-fixture --entry ok.mud --report /tmp/mdl-loader-cli-success.json` | 0 | Two expressions completed; status PASS |
 | `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json` | 1 | Two expressions completed; status FAIL at unmodified `81prim.mud` form 2, line 3:9 `#DECL` |
 | `make sources` | 0 | Both locked upstream commits verified, without source edits |
 | `make check-source` (first run) | 2 | Stale compiled `mdl_check.rkt` import after parser exports changed; generated M0 sweep was restored |
-| `make check-source` (after `raco make scripts/mdl_check.rkt` in target) | 0 | 36 text files parsed, four non-text files excluded, zero failures; generated M0 sweep was restored |
+| `make check-source` (after conditional `raco make` in target) | 0 | 36 text files parsed, four non-text files excluded, zero failures; generated M0 sweep was restored |
 | `make reference-build` | 0 | Native pinned Confusion rebuilt; `_XOPEN_SOURCE` redefinition warning |
 | `make reference-capture` | 0 | Five game turns captured locally |
 | `make reference-probe` | 0 | Twelve existing primitive cases captured |
@@ -60,6 +60,27 @@ CI uses the existing digest-pinned Racket 8.10 [bc] container; its result
 belongs to the review PR and is not claimed here before it runs. The approved
 M0 golden was not updated. No RNG seed was set for the fixed five-turn game
 capture; input was `west`, `open mailbox`, `take leaflet`, `inventory`, `score`.
+
+### PR #41 review follow-up
+
+The independent review found two valid bugs. A final symlink could point to
+a path with another symlink in an intermediate component, permitting a file
+outside the root to be opened. A file-wide parse also caused a later malformed
+form to prevent earlier valid forms from executing. New regressions first
+reproduced each problem. The path resolver now replays every symlink target
+component before checking containment. The parser exposes a one-node reader,
+and the loader reads, compiles and evaluates each node before reading the next.
+Tests verify that an indirect escape is rejected without executing the
+outside file, that a valid prefix survives a later reader error, and that an
+earlier runtime error wins over a later parse error.
+
+The initial native CI run failed before the reference build because the
+minimal Racket image lacks `raco make`; G1's unconditional precompile step in
+`make check-source` was wrong for that image. The target now precompiles only
+when the command exists, while the fresh CI checkout can interpret the
+reader sweep directly. The harness CI job passed on the initial PR commit;
+the native job and both review fixes require a new CI run on the follow-up
+commit. No gate is claimed from the failed native job.
 
 The fixture for the successful CLI run was two unmodified test commands,
 `<SETG CLI-VALUE 7>` followed by `<+ ,CLI-VALUE 3>`. The pinned source run

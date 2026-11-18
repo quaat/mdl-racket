@@ -26,6 +26,11 @@ unsupported `#DECL` at line 3:9. See
 [`SOURCE-LOADER.md`](evidence/M2/SOURCE-LOADER.md) and the structured
 [load report](evidence/M2/source-load-first-barrier.json). G2 must invoke the
 unmodified definition with controlled input; no gameplay is claimed.
+The PR #41 review follow-up fixes an indirect symlink escape and preserves
+completed forms before later reader errors. The first native CI run failed
+because the minimal image lacks `raco make`; the conditional precompile fix
+awaits rerun. The local regression suite now reports 561 Racket checks and
+13 Python tests. See the review section of `SOURCE-LOADER.md`.
 
 | Gate | State | Evidence / limitation |
 |---|---|---|

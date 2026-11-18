@@ -425,8 +425,9 @@ rule, public license, or GPLv3 code was changed or copied.
 
 **Decision:** Keep the existing parameterized runtime and create an explicit
 local session object for globals, root local frame, atom/type space, namespace
-and diagnostic records. Parse one file, then compile and evaluate each
-top-level node in order. Route `FLOAD` through that loader in the same session;
+and diagnostic records. Read, compile and evaluate one top-level node at a
+time so later reader errors preserve earlier effects. Route `FLOAD` through
+that loader in the same session;
 return `"DONE"` on success. Resolve nested paths from the containing file and
 require their canonical target to stay within the authorized source root.
 Reject traversal, symlink escapes, cycles and excessive depth. Report partial
