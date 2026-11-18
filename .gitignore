@@ -14,3 +14,4 @@ artifacts/candidate/*
 !artifacts/candidate/.gitkeep
 .DS_Store
 *.log
+.sandbox-pydeps/

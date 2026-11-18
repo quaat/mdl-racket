@@ -4,7 +4,8 @@
 
 1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST,
    mutable sequences, type constructors, local/global bindings, the
-   documented 36-bit FIX/WORD subset, and scoped M2 PROG/RETURN on the
+   documented 36-bit FIX/WORD subset, and scoped M2 execution semantics
+   (PROG/REPEAT/RETURN/AGAIN activations and function formals) on the
    explicitly supported subset. The target refreshes the linked `#lang mdl`
    module before tests so changed runtime exports are visible.
 2. `python -m pytest -q tests/test_harness.py`: source lock, reference
@@ -44,6 +45,14 @@ ACTIVATION/FRAME type reporting, name visibility during auxiliary binding,
 explicit RETURN/AGAIN across nested and called functions, and wrong-type or
 stale-target rejection. Eleven successful Confusion observations and six
 separate error/crash observations are under `docs/evidence/M2/activation-target-*`.
+The function-formals slice adds `tests/formals_test.rkt` for OPTIONAL, AUX,
+TUPLE, and ARGS sections, in-frame defaults, unassigned optional/aux reads,
+TUPLE type/primtype/equality behavior, historical arity error names, and
+compile-time rejection of malformed formal lists; binder invariants are in
+`mdl/runtime/core.rkt`'s test submodule. Twenty-four successful Confusion
+observations and eleven error observations are under
+`docs/evidence/M2/formals-*`; see `FORMALS.md` there for the compile-time
+validation deviation.
 
 ## Frozen 1977 baseline
 

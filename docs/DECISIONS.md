@@ -303,3 +303,33 @@ targets, so copying its failure mode is not a semantic requirement.
 the tested subset. Function activation formals, GO, UNWIND, `LEGAL?`, and
 general FRAME operations remain unsupported. No upstream source, game rule,
 public license, deployed service, or GPLv3 code changed.
+
+## ADR-0017: String-marked formal sections and a TUPLE primitive type
+
+**Decision:** Parse `DEFINE` formal lists by the pinned Confusion section
+state machine: required atoms, then `"OPT"`/`"OPTIONAL"`, then one
+`"ARGS"` or `"TUPLE"` rest binding, then `"AUX"`/`"EXTRA"` locals. Markers
+are STRINGs only; an ATOM named AUX is an ordinary formal. Two-element
+`(ATOM expression)` defaults evaluate left to right in the growing function
+frame. Unsupplied optionals and bare AUX locals carry the PROG-style
+unassigned marker. TUPLE binds remaining arguments as a value with TYPE and
+PRIMTYPE TUPLE — its own primitive type — while ARGS binds a LIST; REST of a
+TUPLE stays a TUPLE. Compile every compiled function as one variadic Racket
+lambda whose arguments flow through a runtime binder that raises the
+historical `TOO-FEW/TOO-MANY-ARGUMENTS-SUPPLIED` and `BAD-ARGUMENT-LIST`
+error names. Reject malformed and unsupported formal lists at compile time.
+
+**Why:** Confusion's `mdl_bind_args` (GPLv3, read as reference only) fixes
+the section order, rest-binding behavior, and error names, and 24 focused
+Confusion probes corroborate defaults, unassigned reads, frame restoration,
+TUPLE typing, equality, and ARGS-vs-TUPLE. The 1977 reconstruction sources
+use these sections pervasively, including `"TUPLE"` before `"AUX"` with
+initializers.
+
+**Consequence:** Formal-list shape errors surface earlier than in Confusion,
+which validates at call time and kills the process; this is a documented
+stricter deviation, as is the earlier duplicate-name rejection. TUPLE
+becomes a registered built-in type whose CHTYPE conversions fail
+explicitly. Activation formals (`"NAME"`, `"ACT"`, `"BIND"`, `"CALL"`),
+quoted formals, GO, and UNWIND remain unsupported. No upstream source, game
+rule, public license, deployed service, or GPLv3 reference code changed.

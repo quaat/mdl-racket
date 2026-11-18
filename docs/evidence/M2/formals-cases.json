@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "name": "m2-function-formals",
+  "cases": [
+    {"name": "optional-bare-set", "expression": "<DEFINE M2-F (A \"OPTIONAL\" B) <SET B 3> <LIST .A .B>>\n<M2-F 1>"},
+    {"name": "optional-bare-supplied", "expression": "<DEFINE M2-F (A \"OPTIONAL\" B) <LIST .A .B>>\n<M2-F 1 2>"},
+    {"name": "optional-default-unsupplied", "expression": "<DEFINE M2-F (A \"OPTIONAL\" (B <+ .A 1>)) .B>\n<M2-F 5>"},
+    {"name": "optional-default-supplied", "expression": "<DEFINE M2-F (A \"OPTIONAL\" (B <+ .A 1>)) .B>\n<M2-F 5 9>"},
+    {"name": "optional-default-sees-earlier", "expression": "<DEFINE M2-F (\"OPTIONAL\" (A 1) (B <+ .A 1>)) <LIST .A .B>>\n<M2-F>"},
+    {"name": "opt-marker-alias-default", "expression": "<DEFINE M2-F (A \"OPT\" (B <+ .A 1>)) .B>\n<M2-F 5>"},
+    {"name": "tuple-structural-equal", "expression": "<DEFINE M2-F (\"TUPLE\" T) .T>\n<=? <M2-F 1 2> <M2-F 1 2>>"},
+    {"name": "tuple-not-identical", "expression": "<DEFINE M2-F (\"TUPLE\" T) .T>\n<==? <M2-F 1 2> <M2-F 1 2>>"},
+    {"name": "tuple-vs-list-structural", "expression": "<DEFINE M2-F (\"TUPLE\" T) .T>\n<=? <M2-F 1 2> <LIST 1 2>>"},
+    {"name": "tuple-typeprim", "expression": "<TYPEPRIM TUPLE>"},
+    {"name": "aux-initializer-sees-required", "expression": "<DEFINE M2-F (A \"AUX\" (B <+ .A 1>)) .B>\n<M2-F 5>"},
+    {"name": "aux-bare-set", "expression": "<DEFINE M2-F (\"AUX\" B) <SET B 3> .B>\n<M2-F>"},
+    {"name": "aux-initializer-sees-earlier-aux", "expression": "<DEFINE M2-F (\"AUX\" (A 2) (B <* .A 5>)) .B>\n<M2-F>"},
+    {"name": "tuple-type", "expression": "<DEFINE M2-F (\"TUPLE\" T) <TYPE .T>>\n<M2-F 1 2 3>"},
+    {"name": "tuple-primtype", "expression": "<DEFINE M2-F (\"TUPLE\" T) <PRIMTYPE .T>>\n<M2-F 1 2 3>"},
+    {"name": "tuple-length", "expression": "<DEFINE M2-F (\"TUPLE\" T) <LENGTH .T>>\n<M2-F 1 2 3>"},
+    {"name": "tuple-rest-type", "expression": "<DEFINE M2-F (\"TUPLE\" T) <TYPE <REST .T>>>\n<M2-F 1 2 3>"},
+    {"name": "tuple-empty", "expression": "<DEFINE M2-F (\"TUPLE\" T) <LENGTH .T>>\n<M2-F>"},
+    {"name": "tuple-then-aux", "expression": "<DEFINE M2-F (A \"TUPLE\" T \"AUX\" (B <LENGTH .T>)) <LIST .A .B>>\n<M2-F 9 1 2 3>"},
+    {"name": "args-list-length", "expression": "<DEFINE M2-F (A \"ARGS\" L) <LIST .A <LENGTH .L>>>\n<M2-F 1 2 3>"},
+    {"name": "args-then-aux", "expression": "<DEFINE M2-F (A \"ARGS\" L \"AUX\" (B <LENGTH .L>)) <LIST .A .B>>\n<M2-F 9 1 2 3>"},
+    {"name": "extra-marker-alias", "expression": "<DEFINE M2-F (\"EXTRA\" B) <SET B 3> .B>\n<M2-F>"},
+    {"name": "aux-restores-outer-local", "expression": "<SET M2-X 1>\n<DEFINE M2-F (\"AUX\" (M2-X 2)) .M2-X>\n<LIST <M2-F> .M2-X>"},
+    {"name": "aux-atom-is-plain-formal", "expression": "<DEFINE M2-F (A AUX B) <LIST .A .B>>\n<M2-F 1 2 3>"}
+  ]
+}

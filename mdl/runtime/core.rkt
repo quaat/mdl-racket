@@ -4,8 +4,9 @@
 (provide current-mdl-globals current-mdl-locals
          mdl-setg! mdl-gval mdl-define!
          mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings
+         mdl-bind-function-formals
          mdl-with-function-scope mdl-with-prog-activation mdl-return mdl-again
-         mdl-apply mdl-list
+         mdl-apply mdl-list mdl-list->list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-word mdl-word? mdl-word-bits
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
@@ -25,6 +26,7 @@
 (define current-mdl-globals (make-parameter (make-hasheq)))
 (define current-mdl-locals (make-parameter (list (make-hasheq))))
 (struct mdl-activation (owner escape [restart #:mutable] [live? #:mutable]))
+(struct mdl-tuple-value (payload))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
@@ -65,6 +67,53 @@
       (error 'mdl-with-bindings "duplicate local parameter"))
     (hash-set! frame atom (cdr entry)))
   (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
+    (thunk)))
+
+;; Function application for OPTIONAL, AUX, TUPLE, and ARGS formal sections.
+;; Confusion's mdl_bind_args processes the formal list at call time in order:
+;; required atoms, then OPTIONAL (with defaults evaluated in the growing
+;; frame), then one ARGS or TUPLE rest binding, then AUX locals. An
+;; unsupplied OPTIONAL or bare AUX binding stays unassigned, like a PROG
+;; auxiliary. TUPLE wraps its arguments in a TUPLE-typed value; ARGS yields a
+;; LIST. Error names follow the observed reference behavior.
+(define (mdl-bind-function-formals fn required optional rest aux args thunk)
+  (define frame (make-hasheq))
+  (define (bind! atom value)
+    (require-atom 'mdl-bind-function-formals atom)
+    (when (hash-has-key? frame atom)
+      (error 'mdl-bind-function-formals
+             "BAD-ARGUMENT-LIST: duplicate formal argument"))
+    (hash-set! frame atom value))
+  (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
+    (define remaining args)
+    (for ([atom (in-list required)])
+      (when (null? remaining)
+        (error 'mdl-bind-function-formals
+               "TOO-FEW-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn)))
+      (bind! atom (car remaining))
+      (set! remaining (cdr remaining)))
+    (for ([spec (in-list optional)])
+      (if (null? remaining)
+          (bind! (car spec) (if (cdr spec) ((cdr spec)) unassigned))
+          (begin
+            (bind! (car spec) (car remaining))
+            (set! remaining (cdr remaining)))))
+    (cond
+      [(null? remaining)
+       ;; An absent rest binding is still bound, to an empty value.
+       (when rest
+         (bind! (cdr rest)
+                (if (eq? (car rest) 'tuple)
+                    (mdl-tuple-value '())
+                    '())))]
+      [(not rest)
+       (error 'mdl-bind-function-formals
+              "TOO-MANY-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn))]
+      [(eq? (car rest) 'tuple)
+       (bind! (cdr rest) (mdl-tuple-value (apply mdl-list remaining)))]
+      [else (bind! (cdr rest) (apply mdl-list remaining))])
+    (for ([spec (in-list aux)])
+      (bind! (car spec) (if (cdr spec) ((cdr spec)) unassigned)))
     (thunk)))
 
 (define (mdl-with-aux-bindings specs thunk)
@@ -201,6 +250,7 @@
                           ("FIX" . "WORD") ("FLOAT" . "WORD")
                           ("WORD" . "WORD") ("BITS" . "WORD")
                           ("FRAME" . "FRAME")
+                          ("TUPLE" . "TUPLE")
                           ("ACTIVATION" . "FRAME")))])
     (define type-atom (atom-value (car entry) initial))
     (hash-set! (oblist-value-entries initial) (car entry) type-atom)
@@ -462,6 +512,7 @@
         [(mdl-word? value) "WORD"]
         [(mdl-bits-value? value) "BITS"]
         [(mdl-false? value) "FALSE"]
+        [(mdl-tuple-value? value) "TUPLE"]
         [(mdl-atom? value) "ATOM"]
         [(mdl-oblist? value) "OBLIST"]
         [(or (null? value) (mpair? value)) "LIST"]
@@ -485,6 +536,7 @@
 (define (mdl-list-head value who)
   (cond [(mdl-typed-value? value) (mdl-list-head (mdl-base value) who)]
         [(mdl-false? value) (mdl-false-value-payload value)]
+        [(mdl-tuple-value? value) (mdl-tuple-value-payload value)]
         [(or (null? value) (mpair? value)) value]
         [else (error who "unsupported structured value ~a" value)]))
 
@@ -505,17 +557,25 @@
 (define (mdl-rest value [offset 1])
   (unless (and (exact-integer? offset) (>= offset 0))
     (error 'mdl-rest "offset out of range"))
-  (define base (mdl-base value))
-  (if (mdl-array? base)
-      (begin
-        (when (> offset (mdl-array-length base))
-          (error 'mdl-rest "offset out of range"))
-        (if (and (zero? offset) (not (mdl-typed-value? value))) value
-            (mdl-array (mdl-array-kind base) (mdl-array-storage base)
-                       (+ (mdl-array-start base) offset)
-                       (- (mdl-array-length base) offset)
-                       (mdl-array-element-type base))))
-      (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))
+  (cond
+    ;; REST of a TUPLE keeps the TUPLE type in the reference.
+    [(mdl-tuple-value? value)
+     (if (zero? offset)
+         value
+         (mdl-tuple-value
+          (mdl-list-tail (mdl-tuple-value-payload value) offset 'mdl-rest)))]
+    [else
+     (define base (mdl-base value))
+     (if (mdl-array? base)
+         (begin
+           (when (> offset (mdl-array-length base))
+             (error 'mdl-rest "offset out of range"))
+           (if (and (zero? offset) (not (mdl-typed-value? value))) value
+               (mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                          (+ (mdl-array-start base) offset)
+                          (- (mdl-array-length base) offset)
+                          (mdl-array-element-type base))))
+         (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest))]))
 
 (define (mdl-check-index who value index)
   (unless (and (exact-integer? index) (<= 1 index) (<= index (mdl-length value)))
@@ -543,7 +603,18 @@
                                  (sub1 index) 'mdl-put) item))
   value)
 
+;; PUTREST rewires the tail of a LIST-primtype head. A TUPLE is its own
+;; primitive type, so tuples must not expose or splice their payload
+;; chains here; the primtype check also rejects typed values whose storage
+;; is a tuple, as well as non-LIST operands.
 (define (mdl-putrest! head tail)
+  (define (require-list-primtype value)
+    (define prim (mdl-primtype value))
+    (unless (eq? prim (mdl-atom "LIST"))
+      (error 'mdl-putrest "PUTREST requires LIST-primtype values, not ~a"
+             (mdl-atom-pname prim))))
+  (require-list-primtype head)
+  (require-list-primtype tail)
   (define head-list (mdl-list-head head 'mdl-putrest))
   (unless (mpair? head-list)
     (error 'mdl-putrest "PUTREST requires nonempty LIST-primtype head"))
@@ -607,6 +678,12 @@
              (lambda ()
                (loop (mdl-false-value-payload a)
                      (mdl-false-value-payload b))))]
+          [(and (mdl-tuple-value? a) (mdl-tuple-value? b))
+           (compare-structured a b
+             (lambda ()
+               (loop (mdl-tuple-value-payload a)
+                     (mdl-tuple-value-payload b))))]
+          [(or (mdl-tuple-value? a) (mdl-tuple-value? b)) #f]
           [(and (mpair? a) (mpair? b))
            (compare-structured a b
              (lambda ()
@@ -802,4 +879,36 @@
       (check-false (mdl-activation-live? inner))
       (check-true (mdl-activation-live? outer))
       (mdl-return 23)))
-   23))
+   23)
+  ;; Function-formal binder invariants.
+  (define binder-atom (mdl-atom "M2-BINDER-CHECK"))
+  (check-equal?
+   (mdl-bind-function-formals
+    binder-atom
+    (list (mdl-atom "A"))
+    (list (cons (mdl-atom "B") #f))
+    #f
+    (list (cons (mdl-atom "C") (lambda () (mdl-lval (mdl-atom "A")))))
+    '(7)
+    (lambda () (mdl-lval (mdl-atom "A"))))
+   7)
+  (check-equal? (length (current-mdl-locals)) 1)
+  (check-exn #rx"TOO-FEW-ARGUMENTS-SUPPLIED"
+             (lambda ()
+               (mdl-bind-function-formals
+                binder-atom (list (mdl-atom "A")) '() #f '() '() void)))
+  (check-exn #rx"TOO-MANY-ARGUMENTS-SUPPLIED"
+             (lambda ()
+               (mdl-bind-function-formals
+                binder-atom '() '() #f '() '(1) void)))
+  (define tuple-check
+    (mdl-bind-function-formals
+     binder-atom '() '() (cons 'tuple (mdl-atom "T")) '() '(1 2 3)
+     (lambda () (mdl-lval (mdl-atom "T")))))
+  (check-equal? (mdl-atom-pname (mdl-type tuple-check)) "TUPLE")
+  (check-equal? (mdl-atom-pname (mdl-primtype tuple-check)) "TUPLE")
+  (check-equal? (mdl-length (mdl-rest tuple-check)) 2)
+  (check-equal? (mdl-atom-pname (mdl-type (mdl-rest tuple-check))) "TUPLE")
+  (check-true (mdl-equal? tuple-check
+                          (mdl-tuple-value (mdl-list 1 2 3))))
+  (check-false (mdl-equal? tuple-check (mdl-list 1 2 3))))

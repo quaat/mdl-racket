@@ -51,6 +51,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | `OBLIST` / `ATOM` | identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, bucket geometry | M1 issue #4 |
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
 | `PROG` / `REPEAT` / `RETURN` / `AGAIN` | named and unnamed frames; bare and explicit transfers to PROG/REPEAT | function activations, GO/UNWIND | M2 issues #20, #26, #28 |
+| `DEFINE` formals | required, OPTIONAL/AUX/TUPLE/ARGS sections with in-frame defaults | `"NAME"`/`"ACT"`/`"BIND"`/`"CALL"` activation formals, quoted formals | M2 formals slice |
 | MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
 | `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
@@ -424,6 +425,40 @@ error. Confusion has no `LEGAL?` binding in this build, so that manual
 operation is not added by this slice. Tests belong in
 `tests/activation_target_test.rkt` and must cover cross-function transfer,
 shadowing, identity, type, and stale-frame rejection.
+
+## M2 function formals specification: OPTIONAL, AUX, TUPLE, and ARGS
+
+Historical `DEFINE` formal lists mark sections with STRINGs: `"OPT"` or
+`"OPTIONAL"`, `"ARGS"`, `"TUPLE"`, and `"AUX"` or `"EXTRA"`. An ATOM named
+`AUX` is an ordinary required formal; only strings are markers. The section
+order is required atoms, then OPTIONAL, then at most one ARGS or TUPLE
+binding, then AUX, following the pinned Confusion `mdl_bind_args` state
+machine. A two-element `(ATOM expression)` LIST supplies an OPTIONAL or AUX
+binding's initial value; it is rejected in the required section. Defaults
+evaluate left to right in the partially built function frame, so a later
+default sees earlier formals. An unsupplied OPTIONAL without a default and a
+bare AUX local remain unassigned, like a PROG auxiliary; reading them errors,
+and `SET` assigns them. AUX bindings restore outer locals on return.
+
+`"TUPLE" X` binds the remaining arguments to a value with TYPE `TUPLE` and
+PRIMTYPE `TUPLE` — a distinct primitive type, not LIST. `TYPEPRIM TUPLE` is
+`TUPLE`, `REST` of a TUPLE keeps TYPE `TUPLE`, two separately made equal
+TUPLEs are `=?` but not `==?`, and a TUPLE never `=?`-equals a LIST of the
+same content. `"ARGS" X` binds the remaining arguments as a LIST. Extra
+arguments without a rest binding raise `TOO-MANY-ARGUMENTS-SUPPLIED`; a
+missing required argument raises `TOO-FEW-ARGUMENTS-SUPPLIED`; a repeated
+formal raises `BAD-ARGUMENT-LIST`.
+
+Pinned Confusion observations are in `docs/evidence/M2/formals-cases.json`
+and `formals-reference.json` (24 successful isolated processes) plus
+`formals-error-cases.json` and `formals-error-reference.json` (11 error
+observations). Confusion stores the formal list as data and validates it at
+call time, killing the process on malformed lists; the Racket compiler
+rejects the same shapes at compile time, a documented stricter deviation.
+`"NAME"`/`"ACT"`/`"BIND"`/`"CALL"` activation formals and quoted formals
+remain unsupported and fail explicitly. Racket tests are in
+`tests/formals_test.rkt` plus binder invariants in `mdl/runtime/core.rkt`;
+commands, hashes, and limits are in `docs/evidence/M2/FORMALS.md`.
 
 ## M0 native Confusion observations (2026-11-17)
 
