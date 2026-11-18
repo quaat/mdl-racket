@@ -4,8 +4,9 @@
 (provide current-mdl-globals current-mdl-locals
          mdl-setg! mdl-gval mdl-define!
          mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings
-         mdl-bind-function-formals
-         mdl-with-function-scope mdl-with-prog-activation mdl-return mdl-again
+         mdl-bind-function-formals mdl-call-with-activation
+         mdl-with-function-scope mdl-with-prog-activation
+         mdl-return mdl-again mdl-go mdl-unwind
          mdl-apply mdl-list mdl-list->list
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-word mdl-word? mdl-word-bits
@@ -25,11 +26,20 @@
 
 (define current-mdl-globals (make-parameter (make-hasheq)))
 (define current-mdl-locals (make-parameter (list (make-hasheq))))
-(struct mdl-activation (owner escape [restart #:mutable] [live? #:mutable]))
+;; kind distinguishes PROG/REPEAT frames from function activations: a bare
+;; RETURN/AGAIN/GO transfer only ever targets 'prog frames, matching the
+;; reference's LASTPROG lookup, while explicit activation targets may select
+;; any live frame. goto is the per-item GO escape; labels maps each top-level
+;; body label ATOM to its item index.
+(struct mdl-activation (owner escape kind
+                        [restart #:mutable] [goto #:mutable]
+                        [labels #:mutable] [live? #:mutable]))
 (struct mdl-tuple-value (payload))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
+(define restart-token (gensym 'mdl-restart))
+(define goto-token (gensym 'mdl-goto))
 
 (define (binding-atom who value)
   (cond [(mdl-atom? value) value]
@@ -69,14 +79,16 @@
   (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
     (thunk)))
 
-;; Function application for OPTIONAL, AUX, TUPLE, and ARGS formal sections.
-;; Confusion's mdl_bind_args processes the formal list at call time in order:
-;; required atoms, then OPTIONAL (with defaults evaluated in the growing
-;; frame), then one ARGS or TUPLE rest binding, then AUX locals. An
-;; unsupplied OPTIONAL or bare AUX binding stays unassigned, like a PROG
-;; auxiliary. TUPLE wraps its arguments in a TUPLE-typed value; ARGS yields a
-;; LIST. Error names follow the observed reference behavior.
-(define (mdl-bind-function-formals fn required optional rest aux args thunk)
+;; Function application for the historical formal sections. Confusion's
+;; mdl_bind_args processes the formal list at call time in order, so the
+;; specs list is ordered: required and OPTIONAL entries consume arguments,
+;; one ARGS/TUPLE rest entry collects the remainder, AUX entries bind
+;; locals, and a NAME/ACT entry binds the function's own activation. Default
+;; expressions evaluate in the growing frame; an unsupplied OPTIONAL or bare
+;; AUX binding stays unassigned, like a PROG auxiliary. TUPLE wraps its
+;; arguments in a TUPLE-typed value; ARGS yields a LIST. Error names follow
+;; the observed reference behavior.
+(define (mdl-bind-function-formals fn specs args activation-frame thunk)
   (define frame (make-hasheq))
   (define (bind! atom value)
     (require-atom 'mdl-bind-function-formals atom)
@@ -84,37 +96,73 @@
       (error 'mdl-bind-function-formals
              "BAD-ARGUMENT-LIST: duplicate formal argument"))
     (hash-set! frame atom value))
+  (define (spec-value spec)
+    (define default (third spec))
+    (if default (default) unassigned))
   (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
     (define remaining args)
-    (for ([atom (in-list required)])
-      (when (null? remaining)
-        (error 'mdl-bind-function-formals
-               "TOO-FEW-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn)))
-      (bind! atom (car remaining))
-      (set! remaining (cdr remaining)))
-    (for ([spec (in-list optional)])
-      (if (null? remaining)
-          (bind! (car spec) (if (cdr spec) ((cdr spec)) unassigned))
-          (begin
-            (bind! (car spec) (car remaining))
-            (set! remaining (cdr remaining)))))
-    (cond
-      [(null? remaining)
-       ;; An absent rest binding is still bound, to an empty value.
-       (when rest
-         (bind! (cdr rest)
-                (if (eq? (car rest) 'tuple)
-                    (mdl-tuple-value '())
-                    '())))]
-      [(not rest)
-       (error 'mdl-bind-function-formals
-              "TOO-MANY-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn))]
-      [(eq? (car rest) 'tuple)
-       (bind! (cdr rest) (mdl-tuple-value (apply mdl-list remaining)))]
-      [else (bind! (cdr rest) (apply mdl-list remaining))])
-    (for ([spec (in-list aux)])
-      (bind! (car spec) (if (cdr spec) ((cdr spec)) unassigned)))
+    (for ([spec (in-list specs)])
+      (case (first spec)
+        [(required)
+         (when (null? remaining)
+           (error 'mdl-bind-function-formals
+                  "TOO-FEW-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn)))
+         (bind! (second spec) (car remaining))
+         (set! remaining (cdr remaining))]
+        [(optional)
+         (if (null? remaining)
+             (bind! (second spec) (spec-value spec))
+             (begin
+               (bind! (second spec) (car remaining))
+               (set! remaining (cdr remaining))))]
+        [(rest)
+         (define kind (second spec))
+         (bind! (third spec)
+                (if (null? remaining)
+                    (if (eq? kind 'tuple) (mdl-tuple-value '()) '())
+                    (if (eq? kind 'tuple)
+                        (mdl-tuple-value (apply mdl-list remaining))
+                        (apply mdl-list remaining))))
+         (set! remaining '())]
+        [(aux) (bind! (second spec) (spec-value spec))]
+        [(name)
+         (unless activation-frame
+           (error 'mdl-bind-function-formals
+                  "NAME formal without a function activation"))
+         (bind! (second spec) activation-frame)]
+        [else (error 'mdl-bind-function-formals
+                     "unknown formal specification ~a" spec)]))
+    (unless (null? remaining)
+      (error 'mdl-bind-function-formals
+             "TOO-MANY-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn)))
     (thunk)))
+
+;; A DEFINE with an activation formal (a leading ATOM or a "NAME"/"ACT"
+;; marker) creates a live activation for its own invocation. Explicit
+;; RETURN/AGAIN may target it from any depth, including called functions;
+;; AGAIN re-runs the body without re-binding formals. The frame exists
+;; before auxiliary initialization, so RETURN during an AUX initializer
+;; exits the whole call.
+(define (mdl-call-with-activation fn specs args body-thunk)
+  (let/ec escape
+    (define frame (mdl-activation (current-mdl-function-owner) escape 'function
+                                 #f #f #f #t))
+    (dynamic-wind
+      void
+      (lambda ()
+        (parameterize ([current-mdl-activations
+                        (cons frame (current-mdl-activations))])
+          (mdl-bind-function-formals fn specs args frame
+            (lambda ()
+              (let body-loop ()
+                (define result
+                  (let/ec restart
+                    (set-mdl-activation-restart! frame restart)
+                    (body-thunk)))
+                (if (eq? result restart-token)
+                    (body-loop)
+                    result))))))
+      (lambda () (set-mdl-activation-live?! frame #f)))))
 
 (define (mdl-with-aux-bindings specs thunk)
   (define frame (make-hasheq))
@@ -133,37 +181,67 @@
   (parameterize ([current-mdl-function-owner (gensym 'mdl-function)])
     (thunk)))
 
-(define restart-token (gensym 'mdl-restart))
-
-(define (mdl-with-prog-activation body [specs '()] [repeat? #f] [name #f])
+;; A PROG or REPEAT body runs as a vector of items: top-level label ATOMs
+;; are skipped in normal flow and index the GO targets; expression items
+;; are thunks. The last expression value is the frame's normal result.
+;; AGAIN restarts the body without re-binding auxiliaries; GO transfers
+;; to the item after a label in the nearest owned PROG/REPEAT.
+(define (mdl-with-prog-activation items [specs '()] [repeat? #f] [name #f])
+  (unless (vector? items)
+    (error 'mdl-with-prog-activation "expected a vector of body items"))
+  (define expr-count
+    (for/sum ([item (in-vector items)])
+      (if (eq? (car item) 'expr) 1 0)))
+  (unless (positive? expr-count)
+    (error 'mdl-with-prog-activation "PROG or REPEAT requires a body expression"))
   (let/ec escape
-    (define frame (mdl-activation (current-mdl-function-owner) escape #f #t))
+    (define frame (mdl-activation (current-mdl-function-owner) escape 'prog
+                                 #f #f #f #t))
     (dynamic-wind
       void
       (lambda ()
         (parameterize ([current-mdl-activations
                         (cons frame (current-mdl-activations))])
-          (define (run-body)
+          (define labels (make-hasheq))
+          (for ([item (in-vector items)] [i (in-naturals)])
+            (when (eq? (car item) 'label)
+              (hash-set! labels (cdr item) i)))
+          (set-mdl-activation-labels! frame labels)
+          (define (run-items)
+            (let loop ([i 0] [last #f])
+              (cond
+                [(>= i (vector-length items)) last]
+                [(eq? (car (vector-ref items i)) 'label) (loop (add1 i) last)]
+                [else
+                 (define value
+                   (let/ec goto-ec
+                     (set-mdl-activation-goto! frame goto-ec)
+                     ((cdr (vector-ref items i)))))
+                 (if (and (pair? value) (eq? (car value) goto-token))
+                     (loop (cdr value) last)
+                     (loop (add1 i) value))])))
+          (define (run)
             (mdl-with-aux-bindings
              specs
              (lambda ()
-               (let loop ()
+               (let outer ()
                  (define result
                    (let/ec restart
                      (set-mdl-activation-restart! frame restart)
-                     (body)))
+                     (run-items)))
                  (if (or repeat? (eq? result restart-token))
-                     (loop)
+                     (outer)
                      result)))))
           (if name
-              (mdl-with-bindings (list (cons name frame)) run-body)
-              (run-body))))
+              (mdl-with-bindings (list (cons name frame)) run)
+              (run))))
       (lambda () (set-mdl-activation-live?! frame #f)))))
 
 (define (current-mdl-activation)
   (for/first ([frame (in-list (current-mdl-activations))]
-              #:when (eq? (mdl-activation-owner frame)
-                          (current-mdl-function-owner)))
+              #:when (and (eq? (mdl-activation-kind frame) 'prog)
+                          (eq? (mdl-activation-owner frame)
+                               (current-mdl-function-owner))))
     frame))
 
 (define implicit-activation (gensym 'mdl-implicit-activation))
@@ -191,6 +269,41 @@
   (unless (mdl-activation-restart target)
     (error 'mdl-again "ACTIVATION body restart is unavailable"))
   ((mdl-activation-restart target) restart-token))
+
+;; GO resumes just before the expression following a top-level label ATOM
+;; in the nearest surrounding PROG or REPEAT of the current function. The
+;; pinned Confusion has no GO or TAG implementation; the semantics follow
+;; the MDL manual, chapter 10.
+(define (mdl-go label)
+  (unless (mdl-atom? label)
+    (error 'mdl-go "GO expects an ATOM label; TAG values are not supported"))
+  (define target (current-mdl-activation))
+  (unless (and target (mdl-activation-live? target))
+    (error 'mdl-go "no active PROG or REPEAT in current function"))
+  (define index
+    (hash-ref (mdl-activation-labels target) label
+              (lambda ()
+                (error 'mdl-go "GO label not found: ~a" (mdl-atom-pname label)))))
+  (unless (mdl-activation-goto target)
+    (error 'mdl-go "GO target position is not active"))
+  ((mdl-activation-goto target) (cons goto-token index)))
+
+;; UNWIND evaluates its first expression and returns its value. If a
+;; nonlocal transfer or an error crosses below this point, the cleanup
+;; expression runs first in the environment of the UNWIND call, its value
+;; is ignored, and the transfer completes. Normal completion never runs the
+;; cleanup. The dynamic-wind post runs for escape-continuation jumps and
+;; exceptions alike.
+(define (mdl-unwind std-thunk erre-thunk)
+  (define completed-normally? #f)
+  (dynamic-wind
+    void
+    (lambda ()
+      (define value (std-thunk))
+      (set! completed-normally? #t)
+      value)
+    (lambda ()
+      (unless completed-normally? (erre-thunk) (void)))))
 
 (define (global-option atom)
   (define globals (current-mdl-globals))
@@ -830,13 +943,14 @@
 
 (module+ test
   (require rackunit)
+  (define (body-item thunk) (cons 'expr thunk))
   (define leaked #f)
   (check-equal?
    (mdl-with-prog-activation
-    (lambda ()
-      (set! leaked (car (current-mdl-activations)))
-      (mdl-return 17)
-      99))
+    (vector (body-item (lambda ()
+                         (set! leaked (car (current-mdl-activations)))
+                         (mdl-return 17)
+                         99))))
    17)
   (check-false (mdl-activation-live? leaked))
   (check-equal? (current-mdl-activations) '())
@@ -852,58 +966,61 @@
   (check-exn #rx"intentional failure"
              (lambda ()
                (mdl-with-prog-activation
-                (lambda ()
-                  (set! abandoned (car (current-mdl-activations)))
-                  (error 'test "intentional failure")))))
+                (vector (body-item (lambda ()
+                                     (set! abandoned (car (current-mdl-activations)))
+                                     (error 'test "intentional failure")))))))
   (check-false (mdl-activation-live? abandoned))
   (check-equal? (current-mdl-activations) '())
   (check-equal?
    (mdl-with-prog-activation
-    (lambda ()
-      (check-exn #rx"no active PROG"
-                 (lambda ()
-                   (mdl-with-function-scope (lambda () (mdl-return 7)))))
-      (mdl-return 8)))
+    (vector (body-item (lambda ()
+                         (check-exn #rx"no active PROG"
+                                    (lambda ()
+                                      (mdl-with-function-scope
+                                       (lambda () (mdl-return 7)))))
+                         (mdl-return 8)))))
    8)
   (check-equal?
    (mdl-with-prog-activation
-    (lambda ()
-      (define outer (car (current-mdl-activations)))
-      (define inner
-        (mdl-with-prog-activation
-         (lambda ()
-           (define current (car (current-mdl-activations)))
-           (check-false (eq? current outer))
-           (check-eq? (cadr (current-mdl-activations)) outer)
-           current)))
-      (check-false (mdl-activation-live? inner))
-      (check-true (mdl-activation-live? outer))
-      (mdl-return 23)))
+    (vector (body-item (lambda ()
+                        (define outer (car (current-mdl-activations)))
+                        (define inner
+                          (mdl-with-prog-activation
+                           (vector (body-item
+                                    (lambda ()
+                                      (define current (car (current-mdl-activations)))
+                                      (check-false (eq? current outer))
+                                      (check-eq? (cadr (current-mdl-activations)) outer)
+                                      current)))))
+                        (check-false (mdl-activation-live? inner))
+                        (check-true (mdl-activation-live? outer))
+                        (mdl-return 23)))))
    23)
-  ;; Function-formal binder invariants.
+  ;; Function-formal binder invariants (v2 ordered specs).
   (define binder-atom (mdl-atom "M2-BINDER-CHECK"))
   (check-equal?
    (mdl-bind-function-formals
     binder-atom
-    (list (mdl-atom "A"))
-    (list (cons (mdl-atom "B") #f))
-    #f
-    (list (cons (mdl-atom "C") (lambda () (mdl-lval (mdl-atom "A")))))
-    '(7)
+    (list (list 'required (mdl-atom "A"))
+          (list 'optional (mdl-atom "B") #f)
+          (list 'aux (mdl-atom "C") (lambda () (mdl-lval (mdl-atom "A")))))
+    '(7) #f
     (lambda () (mdl-lval (mdl-atom "A"))))
    7)
   (check-equal? (length (current-mdl-locals)) 1)
   (check-exn #rx"TOO-FEW-ARGUMENTS-SUPPLIED"
              (lambda ()
                (mdl-bind-function-formals
-                binder-atom (list (mdl-atom "A")) '() #f '() '() void)))
+                binder-atom (list (list 'required (mdl-atom "A")))
+                '() #f void)))
   (check-exn #rx"TOO-MANY-ARGUMENTS-SUPPLIED"
              (lambda ()
-               (mdl-bind-function-formals
-                binder-atom '() '() #f '() '(1) void)))
+               (mdl-bind-function-formals binder-atom '() '(1) #f void)))
   (define tuple-check
     (mdl-bind-function-formals
-     binder-atom '() '() (cons 'tuple (mdl-atom "T")) '() '(1 2 3)
+     binder-atom
+     (list (list 'rest 'tuple (mdl-atom "T")))
+     '(1 2 3) #f
      (lambda () (mdl-lval (mdl-atom "T")))))
   (check-equal? (mdl-atom-pname (mdl-type tuple-check)) "TUPLE")
   (check-equal? (mdl-atom-pname (mdl-primtype tuple-check)) "TUPLE")
@@ -911,4 +1028,73 @@
   (check-equal? (mdl-atom-pname (mdl-type (mdl-rest tuple-check))) "TUPLE")
   (check-true (mdl-equal? tuple-check
                           (mdl-tuple-value (mdl-list 1 2 3))))
-  (check-false (mdl-equal? tuple-check (mdl-list 1 2 3))))
+  (check-false (mdl-equal? tuple-check (mdl-list 1 2 3)))
+  ;; GO label mechanics: labels are skipped; GO resumes after the label.
+  (define go-log '())
+  (check-equal?
+   (mdl-with-prog-activation
+    (vector (body-item (lambda () (set! go-log (cons 'a go-log))))
+            (body-item (lambda () (mdl-go (mdl-atom "M2-LBL")) 'never))
+            (cons 'label (mdl-atom "M2-LBL"))
+            (body-item (lambda () (set! go-log (cons 'b go-log)) 'b))))
+   'b)
+  (check-equal? go-log '(b a))
+  (check-exn #rx"GO label not found"
+             (lambda ()
+               (mdl-with-prog-activation
+                (vector (body-item (lambda () (mdl-go (mdl-atom "M2-NONE"))))))))
+  ;; UNWIND: cleanup only when a transfer or error crosses below it.
+  (check-equal? (mdl-unwind (lambda () 5) (lambda () (set! go-log 'cleaned)))
+                5)
+  (check-equal? go-log '(b a))
+  (define unwind-cleaned? #f)
+  (check-equal?
+   (mdl-with-prog-activation
+    (vector (body-item (lambda ()
+                         (mdl-unwind
+                          (lambda () (mdl-return 9) 'never)
+                          (lambda () (set! unwind-cleaned? #t)))
+                         99))))
+   9)
+  (check-true unwind-cleaned?)
+  (define error-cleaned? #f)
+  (check-exn #rx"boom"
+             (lambda ()
+               (mdl-unwind (lambda () (error 'test "boom"))
+                           (lambda () (set! error-cleaned? #t)))))
+  (check-true error-cleaned?)
+  ;; Function activation formals: explicit targets work; bare transfers
+  ;; skip function frames.
+  (check-equal?
+   (mdl-with-function-scope
+    (lambda ()
+      (mdl-call-with-activation
+       binder-atom
+       (list (list 'name (mdl-atom "M2-SELF")))
+       '()
+       (lambda ()
+         (mdl-return 7 (mdl-lval (mdl-atom "M2-SELF"))) 99))))
+   7)
+  (check-exn #rx"no active PROG"
+             (lambda ()
+               (mdl-with-function-scope
+                (lambda ()
+                  (mdl-call-with-activation binder-atom '() '()
+                                            (lambda () (mdl-return 5)))))))
+  (define self-again-count 0)
+  (check-equal?
+   (mdl-with-function-scope
+    (lambda ()
+      (mdl-call-with-activation
+       binder-atom
+       (list (list 'aux (mdl-atom "N") (lambda () 0)))
+       '()
+       (lambda ()
+         (set! self-again-count (add1 self-again-count))
+         (define n (mdl-lval (mdl-atom "N")))
+         (mdl-set! (mdl-atom "N") (add1 n))
+         (if (= (mdl-lval (mdl-atom "N")) 3)
+             (mdl-lval (mdl-atom "N"))
+             (mdl-again (car (current-mdl-activations))))))))
+   3)
+  (check-equal? self-again-count 3))

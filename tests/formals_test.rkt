@@ -137,11 +137,12 @@
 (check-exn #rx"2-list"
            (lambda () (compile-program (parse-mdl "<DEFINE M2-F ((A 1)) .A>"))))
 
-;; Unsupported formal markers fail explicitly.
-(check-exn #rx"activation formal"
-           (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"NAME\" X) .X>"))))
-(check-exn #rx"activation formal"
-           (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"ACT\" X) .X>"))))
+;; Unsupported formal markers fail explicitly; NAME/ACT activation markers
+;; moved to the control slice and are covered by tests/control_test.rkt.
+(check-exn #rx"activation formal BIND"
+           (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"BIND\" X) .X>"))))
+(check-exn #rx"activation formal CALL"
+           (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"CALL\" X) .X>"))))
 (check-exn #rx"BIND"
            (lambda () (compile-program (parse-mdl "<DEFINE M2-F (\"BIND\" X) .X>"))))
 (check-exn #rx"CALL"

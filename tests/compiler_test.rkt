@@ -13,7 +13,7 @@
   (dynamic-require prog-fixture #f)
   (check-equal? (mdl-gval "M2-PROG-VALUE") 5))
 (check-exn exn:fail?
-           (lambda () (compile-program (parse-mdl "<DEFINE F (\"NAME\" X) .X>"))))
+           (lambda () (compile-program (parse-mdl "<DEFINE F (\"BIND\" X) .X>"))))
 (check-exn exn:fail?
            (lambda () (compile-program (parse-mdl "#ROOM {\"WHOUS\"}"))))
 (check-not-exn

@@ -53,6 +53,14 @@ compile-time rejection of malformed formal lists; binder invariants are in
 observations and eleven error observations are under
 `docs/evidence/M2/formals-*`; see `FORMALS.md` there for the compile-time
 validation deviation.
+The control slice adds `tests/control_test.rkt` for activation formals
+(leading ATOM and `"NAME"`/`"ACT"`), explicit RETURN/AGAIN to a function's
+own activation, bare transfers skipping function frames, GO labels and
+transfers, and UNWIND cleanup on transfers and errors; frame, GO, and UNWIND
+invariants are in `mdl/runtime/core.rkt`'s test submodule. Sixteen
+successful Confusion observations and seven error observations are under
+`docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO and
+UNWIND-on-error reference deviations.
 
 ## Frozen 1977 baseline
 

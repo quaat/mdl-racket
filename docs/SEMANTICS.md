@@ -50,8 +50,9 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | MDL vectors | VECTOR/UVECTOR shared REST views | full STRING/BYTES and growth | M1 issue #5 |
 | `OBLIST` / `ATOM` | identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, bucket geometry | M1 issue #4 |
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
-| `PROG` / `REPEAT` / `RETURN` / `AGAIN` | named and unnamed frames; bare and explicit transfers to PROG/REPEAT | function activations, GO/UNWIND | M2 issues #20, #26, #28 |
-| `DEFINE` formals | required, OPTIONAL/AUX/TUPLE/ARGS sections with in-frame defaults | `"NAME"`/`"ACT"`/`"BIND"`/`"CALL"` activation formals, quoted formals | M2 formals slice |
+| `PROG` / `REPEAT` / `RETURN` / `AGAIN` | named and unnamed frames; bare and explicit transfers to PROG/REPEAT | GO/TAG cross-function transfer is partial | M2 issues #20, #26, #28 |
+| `DEFINE` formals | required, OPTIONAL/AUX/TUPLE/ARGS sections with in-frame defaults; leading activation ATOM and `"NAME"`/`"ACT"` markers | `"BIND"`/`"CALL"` markers, quoted formals | M2 formals and control slices |
+| `GO` / `UNWIND` | GO to labels in the current function's PROG/REPEAT; UNWIND cleanup on transfers and errors | TAG values, GO across function boundaries | M2 control slice |
 | MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
 | `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
@@ -459,6 +460,40 @@ rejects the same shapes at compile time, a documented stricter deviation.
 remain unsupported and fail explicitly. Racket tests are in
 `tests/formals_test.rkt` plus binder invariants in `mdl/runtime/core.rkt`;
 commands, hashes, and limits are in `docs/evidence/M2/FORMALS.md`.
+
+## M2 control slice specification: activation formals, GO, and UNWIND
+
+The [MDL manual, chapter 9](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+and the pinned Confusion `mdl_apply_function` bind a function's own
+ACTIVATION when `DEFINE` carries an activation name ATOM between the function
+name and the formal list (`<DEFINE F SELF (formals) body>`, used 14 times in
+the 1977 reconstruction) or a `"NAME"`/`"ACT"` string marker after any formal
+section, with nothing permitted after the bound atom. The activation exists
+before formal binding, so RETURN during an AUX initializer exits the whole
+call. Explicit RETURN to it terminates the call from any depth, unwinding
+intervening PROGs; explicit AGAIN re-runs the body without re-binding
+formals or AUX locals. Bare RETURN/AGAIN never target function activations
+(the reference's LASTPROG lookup only sees PROG/REPEAT frames).
+
+The [manual, chapter 10](https://mdl-language.readthedocs.io/en/latest/10-looping/)
+defines `<GO atom>`: top-level ATOMs in a PROG or REPEAT body are labels,
+skipped in normal flow, and GO resumes at the expression following the label
+in the immediately surrounding PROG or REPEAT of the current function; a
+missing label errors. The pinned Confusion has no GO and marks TAG
+unimplemented, so GO follows the manual like the ROT precedent, and TAG
+values remain unsupported. Bare atom nodes also carry number and `#` reader
+tokens in this reader; only non-numeric atom names become labels.
+
+The [manual, chapter 16](https://mdl-language.readthedocs.io/en/latest/16-errors-frames-etc/)
+defines `<UNWIND stdexpr errexpr>`: evaluate stdexpr and return its value;
+if a nonlocal return crosses below the UNWIND frame, evaluate errexpr in the
+UNWIND's environment, ignore its value, and complete the transfer. Normal
+completion never runs the cleanup. Pinned Confusion probes are in
+`docs/evidence/M2/control-*` (16 successful and 7 error observations),
+including the reference skipping UNWIND cleanup on errors while the Racket
+runtime follows the manual. Tests are in `tests/control_test.rkt` plus
+runtime invariants in `mdl/runtime/core.rkt`; commands, hashes, and
+deviations are in `docs/evidence/M2/CONTROL.md`.
 
 ## M0 native Confusion observations (2026-11-17)
 

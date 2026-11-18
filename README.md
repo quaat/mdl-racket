@@ -126,8 +126,14 @@ including transfers from called functions.
 The [function formals slice](docs/evidence/M2/FORMALS.md) adds the
 historical `DEFINE` formal sections `"OPTIONAL"`, `"AUX"`, `"TUPLE"`, and
 `"ARGS"` with in-frame defaults, TUPLE-typed rest values, and historical
-arity error names. Function activation formals
-(`"NAME"`/`"ACT"`), `GO`, and `UNWIND` remain unsupported.
+arity error names.
+The [control slice](docs/evidence/M2/CONTROL.md) adds function activation
+formals (the leading `DEFINE` self-atom used by the 1977 sources and the
+`"NAME"`/`"ACT"` markers) with explicit RETURN/AGAIN to a function's own
+activation, `GO` to labels in the current function's PROG/REPEAT (manual
+based; Confusion has no GO), and `UNWIND` cleanup on nonlocal transfers.
+`"BIND"`/`"CALL"` markers, `TAG`, `GO` across function boundaries, macros,
+and source loading remain unsupported.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
@@ -165,15 +171,23 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
   `"TUPLE"`, and `"ARGS"` — with defaults evaluated in the growing function
   frame, unassigned optional/auxiliary bindings, TUPLE-typed rest values
   (TYPE and PRIMTYPE `TUPLE`), and historical arity error names.
+- Function activation formals: the leading `DEFINE` self-atom and the
+  `"NAME"`/`"ACT"` markers bind a function's own ACTIVATION, targetable by
+  explicit `RETURN`/`AGAIN` from any depth, with `AGAIN` re-running the body
+  without re-binding.
+- `GO` to top-level labels in the current function's PROG/REPEAT bodies,
+  with labels skipped in normal flow, and `UNWIND` cleanup expressions that
+  run when a nonlocal transfer or error crosses below them.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
 
 **Not supported yet:** complete original MDL syntax, macros, dynamic `.OBLIST`
 and full type declarations, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
-explicit environments, activation formals (`"NAME"`/`"ACT"`/`"BIND"`/`"CALL"`)
-and quoted formals, general nonlocal
-control flow, ROT, PDP-10 FLOAT bit layout, event scheduling,
+explicit environments, the `"BIND"`/`"CALL"` activation formals, TAG values,
+and `GO` across function boundaries, general nonlocal
+control flow beyond the supported RETURN/AGAIN/GO/UNWIND subset, ROT,
+PDP-10 FLOAT bit layout, event scheduling,
 original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.

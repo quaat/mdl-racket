@@ -237,3 +237,31 @@ succeeded; eleven error observations are recorded separately.
 activation-name atoms before the formal list, GO, UNWIND, macros, and source
 loading remain unsupported. See `docs/evidence/M2/FORMALS.md` for commands,
 hashes, deviations, and remaining limits.
+
+## M2 local task: activation formals, GO, and UNWIND
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** `DEFINE` now accepts a
+function activation name ATOM between the name and the formal list (the form
+the 1977 reconstruction uses 14 times, e.g. `SEARCH-LIST SL`) plus the
+`"NAME"`/`"ACT"` markers after any formal section. The activation exists
+before formal binding, so RETURN during an AUX initializer exits the call;
+explicit RETURN/AGAIN target it from any depth, unwinding intervening PROGs;
+AGAIN re-runs the body without re-binding; bare transfers never target
+function frames. `GO` follows the MDL manual chapter 10: top-level atoms in
+PROG/REPEAT bodies are labels skipped in normal flow, and GO resumes at the
+following expression in the nearest owned frame; the pinned Confusion has no
+GO or TAG, a recorded reference deviation, and TAG values remain
+unsupported. `UNWIND` runs its cleanup when a nonlocal transfer or an error
+crosses below it and returns the guarded expression's value otherwise;
+Confusion skips the cleanup on errors, a deviation the Racket runtime does
+not copy (manual chapter 16). `make test` passes 455 Racket checks and 13
+Python tests under the documented sandbox environment; the 36/36 reader
+sweep passes; the five-turn capture, 12 baseline probes, the approved M1
+golden comparison, and all 65 saved M2 success cases plus 27 expected-error
+observations reproduce against the pinned binary. Sixteen focused Confusion
+control probes succeeded; seven error observations are recorded separately.
+`"BIND"`/`"CALL"` markers, TAG, the FSUBR `BIND`, and macros/source loading
+remain unsupported. The `gh` CLI is still unauthenticated, so the task
+record is `docs/evidence/M2/CONTROL.md` on branch `feat/m2-control-flow`;
+the GitHub issue and PR remain to be opened. See that report for commands,
+hashes, deviations, and remaining limits.
