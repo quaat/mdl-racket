@@ -3,9 +3,12 @@
 ;; Does NOT claim to understand all of historical MDL syntax.
 (require racket/port)
 (provide parse-mdl mdl-node mdl-node? mdl-node-kind mdl-node-value
-         mdl-node-line mdl-node-column)
+         mdl-node-line mdl-node-column
+         exn:fail:mdl-reader? exn:fail:mdl-reader-line
+         exn:fail:mdl-reader-column)
 
 (struct mdl-node (kind value line column) #:transparent)
+(struct exn:fail:mdl-reader exn:fail (line column) #:transparent)
 (struct cursor (text [pos #:mutable] [line #:mutable] [column #:mutable] source) #:transparent)
 
 (define (peek c)
@@ -27,8 +30,11 @@
   ch)
 
 (define (parse-error c message)
-  (error 'mdl-reader "~a:~a:~a: ~a" (cursor-source c)
-         (cursor-line c) (cursor-column c) message))
+  (raise (exn:fail:mdl-reader
+          (format "mdl-reader: ~a:~a:~a: ~a" (cursor-source c)
+                  (cursor-line c) (cursor-column c) message)
+          (current-continuation-marks)
+          (cursor-line c) (cursor-column c))))
 
 (define (skip-comment! c)
   (advance! c) ; semicolon

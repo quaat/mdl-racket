@@ -2,10 +2,16 @@
 ;; A deliberately narrow, tested MDL-to-Racket bootstrap compiler.
 ;; Anything outside this subset raises an error rather than guessing semantics.
 (require racket/list racket/string "parser.rkt")
-(provide compile-program compile-expression)
+(provide compile-program compile-expression
+         exn:fail:mdl-compiler? exn:fail:mdl-compiler-node)
+
+(struct exn:fail:mdl-compiler exn:fail (node) #:transparent)
 
 (define (unsupported n message)
-  (error 'mdl-compiler "~a:~a: ~a" (mdl-node-line n) (mdl-node-column n) message))
+  (raise (exn:fail:mdl-compiler
+          (format "mdl-compiler: ~a:~a: ~a"
+                  (mdl-node-line n) (mdl-node-column n) message)
+          (current-continuation-marks) n)))
 
 (define (is-kind? n kind)
   (and (mdl-node? n) (eq? (mdl-node-kind n) kind)))

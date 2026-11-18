@@ -76,9 +76,10 @@ later semantics are already implemented.
 ## M2 — Execution semantics and MDL compilation (CURRENT)
 
 The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md) passes on
-2026-11-18. G1 is a root-restricted, shared-session loader with sequential
-top-level execution and nested `FLOAD`; G2 invokes an unmodified historical
-definition, preferably `VFLOAD`; G3 evaluates the integrated M2 gate below.
+2026-11-18. [G1](evidence/M2/SOURCE-LOADER.md) implements a root-restricted,
+shared-session loader with sequential top-level execution and nested `FLOAD`.
+G2 invokes an unmodified historical definition, preferably `VFLOAD`; G3
+evaluates the integrated M2 gate below.
 The audit is not an M2 milestone pass.
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,

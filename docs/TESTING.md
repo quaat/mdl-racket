@@ -8,6 +8,16 @@ execution succeeded. See [`SOURCE-READINESS.md`](evidence/M2/SOURCE-READINESS.md
 for file hashes, first failures, baseline commands, and the Racket 7.9/8.10
 check-count investigation.
 
+The G1 loader suite is `raco test tests/loader_test.rkt` and is included in
+`make test-racket` and CI. It uses disposable local files under `/tmp` and
+checks shared session state, macro/function persistence, nested/repeated
+`FLOAD`, partial execution, path containment, cycles, and structured source
+errors. The local CLI can be run with
+`racket scripts/mdl_load.rkt --source-root ROOT --entry FILE --report REPORT`;
+it exits nonzero on actual source execution failure and writes JSON in both
+cases. See [`SOURCE-LOADER.md`](evidence/M2/SOURCE-LOADER.md) for reference
+probes, exact pinned-source run and known deviations.
+
 ## Test layers
 
 1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST,

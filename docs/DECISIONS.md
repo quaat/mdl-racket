@@ -420,3 +420,32 @@ image digest is fixed, while package repositories and action major tags can
 change. Reference execution remains local to the CI runner and no raw
 interpreter service is exposed. No upstream source, runtime semantics, game
 rule, public license, or GPLv3 code was changed or copied.
+
+## ADR-0021: Shared local MDL session and constrained FLOAD
+
+**Decision:** Keep the existing parameterized runtime and create an explicit
+local session object for globals, root local frame, atom/type space, namespace
+and diagnostic records. Parse one file, then compile and evaluate each
+top-level node in order. Route `FLOAD` through that loader in the same session;
+return `"DONE"` on success. Resolve nested paths from the containing file and
+require their canonical target to stay within the authorized source root.
+Reject traversal, symlink escapes, cycles and excessive depth. Report partial
+execution and the first failure through structured errors. Add source
+positions to reader and compiler exceptions without changing their fail-closed
+behavior.
+
+**Why:** The unmodified `77loadall.mud` defines `VFLOAD` then calls it on
+`81prim.mud`. Whole-program precompilation would block this valid ordering.
+Pinned Confusion probes support successful `FLOAD` returning `"DONE"`,
+repeated execution, and side effects surviving later failure. The existing
+atom and type registry already lives in a parameterized atom space, so this
+small session wrapper preserves the established semantics. The local source
+root prevents historical file operations from reading arbitrary host files.
+
+**Consequence:** Controlled multi-file fixtures load and the original
+`77loadall.mud` reaches `81prim.mud`'s unsupported `#DECL` at line 3:9.
+Confusion resolved a relative nested file from process cwd in the observed
+probe; source-relative lookup is a documented local policy deviation. The
+loader does not roll back side effects, emulate Confusion's interactive error
+levels, expose a network evaluator, or implement full MDL filesystem semantics.
+No upstream source or GPLv3 code was copied or modified.

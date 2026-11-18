@@ -24,6 +24,7 @@ test-python:
 	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py
 
 check-source:
+	@raco make scripts/mdl_check.rkt
 	@$(PYTHON) scripts/check_1977_sources.py
 
 reference-build: sources

@@ -13,6 +13,20 @@ native `MUDDLE` global, and source ordering. See
 Next: a controlled source loader and shared MDL session (G1). Original source
 execution and gameplay have not been demonstrated.
 
+## M2 shared-session source loader (G1)
+
+**G1 PASS locally; M2 integrated gate NOT RUN.** A root-restricted local
+loader compiles and executes top-level forms in order, shares MDL state across
+files, and routes nested `FLOAD` through the same session. Controlled fixture
+tests cover ordering, definitions/macros, fresh-session isolation,
+partial failure, missing files, traversal, symlink escape, cycles, repeated
+loads and source diagnostics. The original `77loadall.mud` now executes its
+`VFLOAD` definition and begins `81prim.mud`; it stops on the genuine
+unsupported `#DECL` at line 3:9. See
+[`SOURCE-LOADER.md`](evidence/M2/SOURCE-LOADER.md) and the structured
+[load report](evidence/M2/source-load-first-barrier.json). G2 must invoke the
+unmodified definition with controlled input; no gameplay is claimed.
+
 | Gate | State | Evidence / limitation |
 |---|---|---|
 | Source SHA verification | **PASS** | `make sources` verified both locked commits and clean upstream trees; see `artifacts/environment/sources.json` |

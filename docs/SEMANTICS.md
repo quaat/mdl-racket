@@ -543,6 +543,33 @@ runtime-generated definitions, and macro expansion; regression cases are in
 `tests/macro_test.rkt` and pinned local Confusion observations are recorded
 in `docs/evidence/M2/macro-review-*`.
 
+## M2 G1 source loading and FLOAD specification
+
+The [MDL manual, chapter 1](https://mdl-language.readthedocs.io/en/latest/01-basic-introduction/)
+and [chapter 11](https://mdl-language.readthedocs.io/en/latest/11-input-output/)
+describe `FLOAD` as reading and evaluating a file's MDL expressions. It
+does not print each expression value. The pinned Confusion REPL, run locally
+with a disposable `/tmp` source file, returned `"DONE"` from a successful
+absolute-path `FLOAD`, executed the same file again on a second call, and
+preserved an earlier `SETG` when a later form failed. A missing file printed
+`Couldn't open file in FLOAD` to stderr; that reference process entered a new
+error level, so process exit code 0 was **not** evidence of success. A
+non-STRING argument printed `NAME1 arg to OPEN/CHANNEL must be string`.
+
+For the local loader slice, `FLOAD` accepts a STRING path, executes forms in
+source order in the active MDL session, and returns the STRING `"DONE"` after
+success. Repeated loads execute again. A failed load retains earlier completed
+side effects and reports them. The local API rejects failures with structured
+diagnostics; it does not emulate Confusion's interactive error level. Paths
+are resolved relative to the containing file for nested loads and the
+authorized root for entry loads. A Confusion probe with an absolute outer
+file and relative inner file failed to find the inner file when the process
+working directory differed; source-relative resolution is therefore a
+documented deliberate security/usability deviation. All resolved files must
+remain under one explicit root; symlink escapes, traversal and cycles fail.
+This restricted path policy is a local harness boundary, not a historical MDL
+filesystem claim. No network endpoint is provided.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in
