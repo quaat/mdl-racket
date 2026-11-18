@@ -1,5 +1,13 @@
 # Test strategy, reference capture, and parity contract
 
+The M2 G0 audit is reproducible with
+`racket scripts/audit_source_readiness.rkt --output artifacts/m2/source-readiness.json`.
+Its JSON separates independent compile probes from sequential execution
+probes; `PASS` for the command means the audit completed, not that source
+execution succeeded. See [`SOURCE-READINESS.md`](evidence/M2/SOURCE-READINESS.md)
+for file hashes, first failures, baseline commands, and the Racket 7.9/8.10
+check-count investigation.
+
 ## Test layers
 
 1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST,

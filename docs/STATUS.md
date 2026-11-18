@@ -1,5 +1,18 @@
 # Status — 2026-11-18 (M2 macro slice locally verified)
 
+## M2 source execution audit (G0)
+
+**G0 PASS; M2 integrated gate NOT RUN.** The baseline on
+`36df3cefccfb9e382cef113752dcd16457e1e95c` reproduces 513 local Racket
+checks, 13 Python tests, 36 parsed source files, the native build, capture and
+probe. The 508 count on Racket 8.10 is a RackUnit nested-check reporting
+difference, verified with a deliberately failing nested assertion in a
+disposable copy. First actual source barriers are `FLOAD`, `#DECL`, the
+native `MUDDLE` global, and source ordering. See
+[`SOURCE-READINESS.md`](evidence/M2/SOURCE-READINESS.md) and its JSON inventory.
+Next: a controlled source loader and shared MDL session (G1). Original source
+execution and gameplay have not been demonstrated.
+
 | Gate | State | Evidence / limitation |
 |---|---|---|
 | Source SHA verification | **PASS** | `make sources` verified both locked commits and clean upstream trees; see `artifacts/environment/sources.json` |

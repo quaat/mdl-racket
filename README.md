@@ -9,6 +9,14 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
+The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
+passes: the baseline and pinned source are reproducible, and the first
+historical load barriers are identified. Run
+`racket scripts/audit_source_readiness.rkt` to reproduce its compile and
+execution probes. `FLOAD`, declarations such as `#DECL`, the native `MUDDLE`
+global, and full source loading remain unsupported. G1 is the next loader
+slice; M2's integrated gate and game execution remain unverified.
+
 ## Goals
 
 1. Execute original MDL game code, not a newly designed text-adventure engine.
