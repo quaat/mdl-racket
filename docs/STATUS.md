@@ -1,4 +1,4 @@
-# Status — 2026-11-19 (M2 G1 review follow-up)
+# Status — 2026-11-19 (M2 historical VFLOAD slice under review)
 
 ## M2 source execution audit (G0)
 
@@ -38,6 +38,23 @@ have focused regressions and local fixes; see the same report for validation.
 The current suite reports 568 Racket checks and 13 Python tests.
 G1 remains a local slice PASS while the PR is under review. G2 has a separate
 stacked PR #43; the integrated M2 gate remains open.
+
+## M2 historical VFLOAD partial-source probe (G2)
+
+**G2 PASS locally; integrated M2 G3 NOT RUN.** The test verifies the pinned
+`77loadall.mud` SHA256, copies its bytes unchanged into a disposable
+authorized root, executes only its first `DEFINE VFLOAD`, and invokes that
+original reconstructed-source definition on a controlled file. The loader
+explicitly reports PARTIAL (one completed, 12 unexecuted forms); the call
+prints `<fixture-path> loaded`, returns empty FALSE and installs the fixture's
+global value. Six focused pinned Confusion cases corroborate the relevant
+output and state. See [`HISTORICAL-VFLOAD.md`](evidence/M2/HISTORICAL-VFLOAD.md).
+`PRINTSTRING` follows the manual's count return while Confusion returns the
+buffer, a recorded deviation that does not affect VFLOAD's final value.
+The full source sequence remains blocked at `#DECL`; the next slice must
+implement verified declaration semantics. No gameplay is claimed.
+The [M2 source execution inventory](evidence/M2/SOURCE-EXECUTION.md) keeps
+the integrated G3 gate at NOT RUN.
 
 | Gate | State | Evidence / limitation |
 |---|---|---|

@@ -24,6 +24,8 @@ jobs:
         run: |
           make sources
           make check-source
+      - name: Execute pinned historical VFLOAD definition slice
+        run: make test-historical
       - name: Build and capture native reference
         run: |
           make reference-build

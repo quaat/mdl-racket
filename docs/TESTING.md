@@ -21,6 +21,17 @@ it exits nonzero on actual source execution failure and writes JSON in both
 cases. See [`SOURCE-LOADER.md`](evidence/M2/SOURCE-LOADER.md) for reference
 probes, exact pinned-source run and known deviations.
 
+The G2 source-backed probe is `make test-historical`, which first verifies
+the pinned source checkouts and then runs
+`racket tests/historical_vfload_test.rkt`. It verifies the actual
+`77loadall.mud` SHA256, copies exact bytes into a disposable authorized root,
+loads only its first definition with a PARTIAL report, invokes `VFLOAD`, and
+checks output, return, global state and invalid calls. The native reference
+workflow runs this target after source verification. Focused Confusion
+evidence is reproducible with
+`.venv/bin/python -m scripts.probe_vfload_reference` after the native build.
+See [`HISTORICAL-VFLOAD.md`](evidence/M2/HISTORICAL-VFLOAD.md).
+
 ## Test layers
 
 1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST,

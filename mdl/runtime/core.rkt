@@ -1323,6 +1323,23 @@
       (mdl-array-element-type base)
       (mdl-false '())))
 
+(define (mdl-string . pieces)
+  (unless (andmap string? pieces)
+    (error 'mdl-string "STRING expects STRING arguments; CHARACTER is unsupported"))
+  (apply string-append pieces))
+
+(define (mdl-printstring buffer)
+  (unless (string? buffer)
+    (error 'mdl-printstring "PRINTSTRING expects a STRING buffer"))
+  (display buffer)
+  ;; The MDL manual returns the number of characters printed. Pinned
+  ;; Confusion returns the original STRING; see docs/SEMANTICS.md.
+  (string-length buffer))
+
+(define (mdl-terpri)
+  (newline)
+  (mdl-false '()))
+
 (define builtin-table
   (hash "TYPE" mdl-type
         "LVAL" mdl-lval
@@ -1349,6 +1366,9 @@
         "LIST" mdl-list
         "VECTOR" mdl-vector
         "UVECTOR" mdl-uvector
+        "STRING" mdl-string
+        "PRINTSTRING" mdl-printstring
+        "TERPRI" mdl-terpri
         "LENGTH" mdl-length
         "REST" mdl-rest
         "NTH" mdl-nth

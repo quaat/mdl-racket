@@ -78,8 +78,9 @@ later semantics are already implemented.
 The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md) passes on
 2026-11-18. [G1](evidence/M2/SOURCE-LOADER.md) implements a root-restricted,
 shared-session loader with sequential top-level execution and nested `FLOAD`.
-G2 invokes an unmodified historical definition, preferably `VFLOAD`; G3
-evaluates the integrated M2 gate below.
+G2 [invokes the unmodified pinned `VFLOAD` definition](evidence/M2/HISTORICAL-VFLOAD.md)
+in an explicitly partial-source probe. G3 evaluates the integrated M2 gate
+below after the `#DECL` and subsequent source dependencies are addressed.
 The audit is not an M2 milestone pass.
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
