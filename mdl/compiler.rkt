@@ -230,16 +230,26 @@
     [(name) `(list 'name (mdl-atom ,name))]
     [else (error 'mdl-compiler "unknown formal specification ~a" spec)]))
 
+;; Atom-shaped reader tokens that constant compilation never treats as
+;; ATOM values: decimal, FLOAT, and scientific literals, octal asterisk
+;; forms (including malformed digits, which must reach mdl-constant's
+;; explicit invalid-octal error), and # reader tokens. Everything else is
+;; an atom name. PROG/REPEAT label detection shares this classification
+;; with constant compilation.
+(define (atom-node-constant-token? val)
+  (or (regexp-match? #px"^[+-]?[0-9]" val)
+      (regexp-match? #px"^\\*[0-9]+\\*$" val)
+      (string-prefix? val "#")))
+
 ;; PROG and REPEAT bodies run as ordered items: top-level ATOMs are labels
 ;; skipped in normal flow and addressed by GO; other expressions compile to
-;; thunks. Bare atom nodes also carry number and # reader tokens, which
-;; mdl-constant rejects or turns into FIX/FLOAT values; only true atom names
-;; can be labels.
+;; thunks. Bare atom nodes also carry number, octal, and # reader tokens,
+;; which constant compilation rejects or turns into FIX/FLOAT/WORD values;
+;; only true atom names can be labels.
 (define (prog-label-name n)
   (and (is-kind? n 'atom)
        (let ([val (mdl-node-value n)])
-         (and (not (regexp-match? #px"^[+-]?[0-9]+" val))
-              (not (string-prefix? val "#"))
+         (and (not (atom-node-constant-token? val))
               (atom-name n)))))
 
 (define (compile-prog-items body locals)

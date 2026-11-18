@@ -73,6 +73,16 @@
            (lambda ()
              (run "<DEFINE M2-F M2-SELF () <SETG M2-S .M2-SELF> 1> <M2-F> <RETURN 2 ,M2-S>")))
 
+;; Numeric, octal, and # reader tokens are expressions or explicit errors,
+;; never labels; other non-numeric atom names still label.
+(check-equal? (run "<PROG () 1 *10*>") 8)
+(check-equal? (run "<PROG () 2 3.5>") 3.5)
+(check-equal? (run "<PROG () *WEIRD* 5>") 5)
+(check-exn #rx"invalid octal FIX token"
+           (lambda () (compile-program (parse-mdl "<PROG () *89*>"))))
+(check-exn #rx"unsupported # reader token"
+           (lambda () (compile-program (parse-mdl "<PROG () #NOPE>"))))
+
 ;; GO: top-level ATOMs in a PROG/REPEAT body are labels and are skipped in
 ;; normal flow; GO resumes at the expression following the label in the
 ;; nearest surrounding PROG or REPEAT of the current function.
