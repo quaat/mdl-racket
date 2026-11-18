@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "name": "m2-repeat-again-finite",
+  "recorded_at": "2026-11-18T10:31:45.189667+00:00",
+  "interpreter_sha256": "1e6a668290faf9cb70aaade60bbf43f236459782c15db4c1c35150bb54aa49c0",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "repeat-return",
+      "expression": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>)>>",
+      "input": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "aux-initialized-once",
+      "expression": "<SETG M2-I 0>\n<REPEAT ((M2-N <SETG M2-I <+ ,M2-I 1>>)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN ,M2-I>)>>",
+      "input": "<SETG M2-I 0>\n<REPEAT ((M2-N <SETG M2-I <+ ,M2-I 1>>)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN ,M2-I>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "prog-bare-again",
+      "expression": "<PROG ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>) (ELSE <AGAIN>)>>",
+      "input": "<PROG ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>) (ELSE <AGAIN>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "repeat-bare-again",
+      "expression": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>) (ELSE <AGAIN>)>>",
+      "input": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>) (ELSE <AGAIN>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "nested-return",
+      "expression": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <PROG () <COND (<==? .M2-N 2> <RETURN 0>)>> <COND (<==? .M2-N 3> <RETURN .M2-N>)>>",
+      "input": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <PROG () <COND (<==? .M2-N 2> <RETURN 0>)>> <COND (<==? .M2-N 3> <RETURN .M2-N>)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:31:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

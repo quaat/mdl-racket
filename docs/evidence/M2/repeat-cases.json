@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m2-repeat-again-finite",
+  "cases": [
+    {"name": "repeat-return", "expression": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>)>>"},
+    {"name": "aux-initialized-once", "expression": "<SETG M2-I 0>\n<REPEAT ((M2-N <SETG M2-I <+ ,M2-I 1>>)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN ,M2-I>)>>"},
+    {"name": "prog-bare-again", "expression": "<PROG ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>) (ELSE <AGAIN>)>>"},
+    {"name": "repeat-bare-again", "expression": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <COND (<==? .M2-N 3> <RETURN .M2-N>) (ELSE <AGAIN>)>>"},
+    {"name": "nested-return", "expression": "<REPEAT ((M2-N 0)) <SET M2-N <+ .M2-N 1>> <PROG () <COND (<==? .M2-N 2> <RETURN 0>)>> <COND (<==? .M2-N 3> <RETURN .M2-N>)>>"}
+  ]
+}

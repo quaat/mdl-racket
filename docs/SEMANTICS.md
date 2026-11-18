@@ -50,7 +50,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | MDL vectors | VECTOR/UVECTOR shared REST views | full STRING/BYTES and growth | M1 issue #5 |
 | `OBLIST` / `ATOM` | identity-bearing values and direct lookup/insertion | dynamic reader lookup, associations, bucket geometry | M1 issue #4 |
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
-| `PROG` / `RETURN` | scoped M2 slice in progress | named activations, explicit target RETURN, AGAIN/UNWIND | M2 issue #20 |
+| `PROG` / `REPEAT` / `RETURN` / `AGAIN` | unnamed frames and bare transfers in current function | named activations, explicit targets, GO/UNWIND | M2 issues #20, #26 |
 | MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
 | `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
@@ -382,6 +382,21 @@ continues to use identity. The boundary applies to LIST, VECTOR/UVECTOR,
 FALSE payloads, and user-tagged structured values through the same recursive
 comparison. Tests belong in `tests/equality_cycle_test.rkt`; focused reference
 observations are under `docs/evidence/M2/equality-*`.
+
+## M2 issue #26 specification: unnamed REPEAT and bare AGAIN
+
+The [MDL looping chapter](https://mdl-language.readthedocs.io/en/latest/10-looping/)
+defines REPEAT as a PROG with an implicit final `<AGAIN>`. Its auxiliaries are
+bound once on entry; body restarts retain their assignments. A bare AGAIN
+restarts the nearest surrounding PROG or REPEAT in the current function,
+starting at its body without rebinding auxiliaries. A bare RETURN exits that
+same nearest frame. The optional activation name and explicit target forms
+are outside this slice and remain compile-time errors. A bare AGAIN outside
+an eligible frame, or in a called function that has only a caller's frame,
+raises an explicit runtime error. The implementation must use iteration
+without accumulating Racket stack frames across repetitions, and must unwind
+nested scopes on a transfer. Tests belong in `tests/repeat_test.rkt`; finite
+reference observations belong under `docs/evidence/M2/repeat-*`.
 
 ## M0 native Confusion observations (2026-11-17)
 

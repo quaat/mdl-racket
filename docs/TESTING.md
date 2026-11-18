@@ -35,6 +35,10 @@ identity, ownership, stale-frame rejection, and cleanup on return or error.
 Issue #23 adds bounded `tests/equality_cycle_test.rkt` checks so pre-fix
 unbounded recursion cannot hang the suite. Confusion timeout and crash cases
 are saved separately from successful observations under `docs/evidence/M2/`.
+Issue #26 adds `tests/repeat_test.rkt` for unnamed REPEAT and bare AGAIN,
+including auxiliary initialization once, PROG restart, nested RETURN,
+function ownership, stale-frame rejection, and a 1,000-step stack check.
+Focused native inputs and results are under `docs/evidence/M2/repeat-*`.
 
 ## Frozen 1977 baseline
 
