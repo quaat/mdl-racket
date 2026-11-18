@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 and M1 gates PASS on `main`; M2 first slice in progress. NOT a playable game.** This repository is a starting
+> **Status: M0 and M1 gates PASS on `main`; M2 execution-semantics slices in progress. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -122,8 +122,12 @@ The [REPEAT/AGAIN slice](docs/evidence/M2/REPEAT.md) adds unnamed `REPEAT`
 and bare `AGAIN` in the current function; auxiliaries are bound once across
 restarts. The [named activation slice](docs/evidence/M2/ACTIVATION-TARGETS.md)
 adds named `PROG`/`REPEAT` frames and explicit `RETURN`/`AGAIN` targets,
-including transfers from called functions. Function activation formals,
-`GO`, and `UNWIND` remain unsupported.
+including transfers from called functions.
+The [function formals slice](docs/evidence/M2/FORMALS.md) adds the
+historical `DEFINE` formal sections `"OPTIONAL"`, `"AUX"`, `"TUPLE"`, and
+`"ARGS"` with in-frame defaults, TUPLE-typed rest values, and historical
+arity error names. Function activation formals
+(`"NAME"`/`"ACT"`), `GO`, and `UNWIND` remain unsupported.
 Reproduce the checks with
 `make test`, `make sources`, `make check-source`,
 `make reference-build`, `make reference-capture`, and `make reference-probe`.
@@ -157,13 +161,18 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
   octal, bitwise, shift, and bit field subset.
 - Unnamed `PROG` with sequential auxiliary initialization and bare `RETURN`
   from the closest PROG in the current function.
+- `DEFINE` formal-list sections marked by strings — `"OPTIONAL"`, `"AUX"`,
+  `"TUPLE"`, and `"ARGS"` — with defaults evaluated in the growing function
+  frame, unassigned optional/auxiliary bindings, TUPLE-typed rest values
+  (TYPE and PRIMTYPE `TUPLE`), and historical arity error names.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
 
 **Not supported yet:** complete original MDL syntax, macros, dynamic `.OBLIST`
 and full type declarations, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
-explicit environments and complex function parameters, general nonlocal
+explicit environments, activation formals (`"NAME"`/`"ACT"`/`"BIND"`/`"CALL"`)
+and quoted formals, general nonlocal
 control flow, ROT, PDP-10 FLOAT bit layout, event scheduling,
 original parser, gameplay, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a

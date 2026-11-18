@@ -14,10 +14,6 @@
   (unless (is-kind? n 'atom) (unsupported n "expected an MDL atom"))
   (string-upcase (mdl-node-value n)))
 
-(define (local-id name)
-  ;; Exact symbols: don't remove punctuation in historical MDL identifiers.
-  (string->symbol (string-append "mdl-local:" (string-upcase name))))
-
 (define (mdl-constant n)
   (define val (mdl-node-value n))
   (define upper (string-upcase val))
@@ -100,23 +96,116 @@
          [args (second xs)])
     (unless (is-kind? args 'list)
       (unsupported args "DEFINE requires a parenthesized formal list"))
-    (let* ([params (mdl-node-value args)]
-           [names (and (andmap (lambda (p) (is-kind? p 'atom)) params)
-                       (map atom-name params))])
-      (unless names
-        (unsupported args "DEFINE optional/AUX/TUPLE arguments not supported in M0"))
-      (when (or (member "AUX" names) (member "OPTIONAL" names)
-                (member "TUPLE" names) (check-duplicates names))
-        (unsupported args "non-simple or duplicate DEFINE parameters"))
+    (let-values ([(required optional rest aux)
+                  (parse-formal-list args)])
+      (define names (append required
+                            (map car optional)
+                            (map car aux)
+                            (if rest (list (cdr rest)) '())))
       `(mdl-define! (mdl-atom ,fn-name)
-                    (lambda ,(map local-id names)
+                    (lambda mdl-given-args
                       (mdl-with-function-scope
                        (lambda ()
-                         (mdl-with-bindings
-                          (list ,@(map (lambda (name)
-                                         `(cons (mdl-atom ,name) ,(local-id name)))
-                                       names))
+                         (mdl-bind-function-formals
+                          (mdl-atom ,fn-name)
+                          (list ,@(map (lambda (name) `(mdl-atom ,name)) required))
+                          (list ,@(map formal-spec-expression optional))
+                          ,(if rest
+                               `(cons ',(car rest) (mdl-atom ,(cdr rest)))
+                               #f)
+                          (list ,@(map formal-spec-expression aux))
+                          mdl-given-args
                           (lambda () ,(compile-sequence (cddr xs) names))))))))))
+
+;; Historical formal lists mark sections with STRINGs: "OPT"/"OPTIONAL",
+;; "ARGS", "TUPLE", and "AUX"/"EXTRA". ATOMs are ordinary formals, and an
+;; ATOM named AUX is not a marker. Two-element LISTs give an optional or
+;; auxiliary binding its initial-value expression. Section order follows the
+;; pinned Confusion state machine: required atoms, then OPTIONAL, then one
+;; ARGS or TUPLE binding, then AUX.
+(define (formal-marker-section marker item section)
+  ;; Section transitions for the STRING markers in a formal list.
+  (case marker
+    [("OPT" "OPTIONAL")
+     (unless (eq? section 'required)
+       (unsupported item "OPTIONAL in wrong place in formal list"))
+     'optional]
+    [("ARGS" "TUPLE")
+     (unless (memq section '(required optional))
+       (unsupported item (format "~a in wrong place in formal list" marker)))
+     'rest]
+    [("AUX" "EXTRA")
+     (unless (memq section '(required optional after-rest))
+       (unsupported item "AUX in wrong place in formal list"))
+     'aux]
+    [("BIND" "CALL" "NAME" "ACT")
+     (unsupported item
+                 (format "activation formal ~a is not supported in this slice"
+                         marker))]
+    [else (unsupported item "unknown formal list marker")]))
+
+(define (parse-formal-list args-node)
+  (define required '())
+  (define optional '())
+  (define aux '())
+  (define rest #f)
+  (define seen '())
+  (define (add-name! name item)
+    (when (member name seen)
+      (unsupported item "BAD-ARGUMENT-LIST: duplicate formal argument"))
+    (set! seen (cons name seen)))
+  (let loop ([items (mdl-node-value args-node)] [section 'required])
+    (unless (null? items)
+      (define item (car items))
+      (cond
+        [(is-kind? item 'string)
+         (define marker (string-upcase (mdl-node-value item)))
+         (define next (formal-marker-section marker item section))
+         (cond
+           [(memq next '(optional aux)) (loop (cdr items) next)]
+           [else ; one ARGS or TUPLE rest binding
+            (when rest
+              (unsupported item "only one ARGS or TUPLE formal is allowed"))
+            (when (or (null? (cdr items))
+                      (not (is-kind? (cadr items) 'atom)))
+              (unsupported item "ARGS or TUPLE requires an ATOM formal"))
+            (define target (cadr items))
+            (define name (atom-name target))
+            (add-name! name target)
+            (set! rest (cons (if (string=? marker "TUPLE") 'tuple 'args) name))
+            (loop (cddr items) 'after-rest)])]
+        [(is-kind? item 'atom)
+         (define name (atom-name item))
+         (case section
+           [(required) (add-name! name item)
+                        (set! required (cons name required))]
+           [(optional) (add-name! name item)
+                        (set! optional (cons (cons name #f) optional))]
+           [(aux) (add-name! name item)
+                  (set! aux (cons (cons name #f) aux))]
+           [else (unsupported item "ATOM formal not allowed in this section")])
+         (loop (cdr items) section)]
+        [(and (is-kind? item 'list) (= (length (mdl-node-value item)) 2))
+         (unless (memq section '(optional aux))
+           (unsupported item
+                        "2-list defaults are allowed only in OPTIONAL or AUX sections"))
+         (define pair (mdl-node-value item))
+         (define name (atom-name (first pair)))
+         (add-name! name item)
+         (case section
+           [(optional) (set! optional (cons (cons name (second pair)) optional))]
+           [(aux) (set! aux (cons (cons name (second pair)) aux))])
+         (loop (cdr items) section)]
+        [(is-kind? item 'form)
+         (unsupported item "quoted formal arguments are not supported")]
+        [else (unsupported item "unsupported formal argument")])))
+  (values (reverse required) (reverse optional) rest (reverse aux)))
+
+(define (formal-spec-expression spec)
+  `(cons (mdl-atom ,(car spec))
+         ,(if (cdr spec)
+              `(lambda () ,(compile-expression (cdr spec) '()))
+              #f)))
 
 (define (compile-prog n args locals [repeat? #f])
   (define name (if repeat? "REPEAT" "PROG"))

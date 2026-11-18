@@ -207,3 +207,31 @@ probes, and the approved M1 golden comparison pass locally. Function
 activation formals, GO, UNWIND, and original game execution remain open.
 See `docs/evidence/M2/ACTIVATION-TARGETS.md` for exact commands, hashes,
 deviations, and remaining limits.
+
+## M2 local task: OPTIONAL/AUX/TUPLE/ARGS function formals
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** `DEFINE` now accepts
+historical formal-list sections marked by strings: `"OPT"`/`"OPTIONAL"`,
+`"AUX"`/`"EXTRA"`, `"ARGS"`, and `"TUPLE"`, in the reference order required
+→ OPTIONAL → one ARGS/TUPLE rest binding → AUX. Defaults evaluate left to
+right in the growing function frame; unsupplied optionals and bare AUX locals
+stay unassigned; AUX restores outer locals on return. TUPLE binds remaining
+arguments as a value with TYPE and PRIMTYPE `TUPLE` (its own primitive type;
+`TYPEPRIM TUPLE` is `TUPLE`, `REST` keeps the TUPLE type); ARGS binds them as
+a LIST. Arity failures use the historical `TOO-FEW/TOO-MANY-ARGUMENTS-SUPPLIED`
+and `BAD-ARGUMENT-LIST` error names. An ATOM named AUX is an ordinary formal.
+Malformed formal lists fail at compile time; Confusion validates them at call
+time, a documented stricter deviation. The `gh` CLI is not authenticated in
+this session, so the task record is `docs/evidence/M2/FORMALS.md` on branch
+`feat/m2-function-formals`; the GitHub issue and PR remain to be opened.
+`make test` passes 403 Racket checks and 13 Python tests (the sandboxed
+session ran the Python half under system Python 3.9 with repo-local pinned
+wheels; see the report). The 36/36 text reader sweep passes; the five-turn
+capture, 12 baseline probes, the approved M1 golden comparison, and all 69
+saved M2 success cases plus 20 expected-error observations reproduce exactly
+against the pinned binary. Twenty-four focused Confusion formals probes
+succeeded; eleven error observations are recorded separately.
+`"NAME"`/`"ACT"`/`"BIND"`/`"CALL"` activation formals, quoted formals,
+activation-name atoms before the formal list, GO, UNWIND, macros, and source
+loading remain unsupported. See `docs/evidence/M2/FORMALS.md` for commands,
+hashes, deviations, and remaining limits.

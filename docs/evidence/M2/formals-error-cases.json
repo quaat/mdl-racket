@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "m2-function-formals-errors",
+  "cases": [
+    {"name": "too-few-required", "expression": "<DEFINE M2-F (A) .A>\n<M2-F>"},
+    {"name": "too-many-required", "expression": "<DEFINE M2-F (A) .A>\n<M2-F 1 2>"},
+    {"name": "unassigned-optional-read", "expression": "<DEFINE M2-F (A \"OPTIONAL\" B) <LIST .A .B>>\n<M2-F 1>"},
+    {"name": "unassigned-opt-alias-read", "expression": "<DEFINE M2-F (A \"OPT\" B) <LIST .A .B>>\n<M2-F 1>"},
+    {"name": "unassigned-aux-read", "expression": "<DEFINE M2-F (\"AUX\" B) .B>\n<M2-F>"},
+    {"name": "tuple-after-aux", "expression": "<DEFINE M2-F (\"AUX\" B \"TUPLE\" T) 1>\n<M2-F>"},
+    {"name": "optional-after-aux", "expression": "<DEFINE M2-F (\"AUX\" B \"OPTIONAL\" C) 1>\n<M2-F>"},
+    {"name": "duplicate-formal", "expression": "<DEFINE M2-F (A \"OPTIONAL\" A) 1>\n<M2-F 1>"},
+    {"name": "two-tuples", "expression": "<DEFINE M2-F (\"TUPLE\" T \"TUPLE\" U) 1>\n<M2-F 1>"},
+    {"name": "tuple-without-atom", "expression": "<DEFINE M2-F (\"TUPLE\" \"AUX\" T) 1>\n<M2-F>"},
+    {"name": "two-list-in-required", "expression": "<DEFINE M2-F ((A 1)) .A>\n<M2-F 1>"}
+  ]
+}
