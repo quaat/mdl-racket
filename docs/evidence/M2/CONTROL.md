@@ -2,10 +2,10 @@
 
 **Local slice: PASS. M2 milestone: NOT YET PASS.** Base commit (branch
 `feat/m2-function-formals`, itself pending merge on top of the pending #28
-branch): `931545c594b932f03a4a924b031ad260d89535da`. The `gh` CLI remains
-unauthenticated in this session, so this file is the local task record
-required by `AGENTS.md` step 3; open the issue and PR against branch
-`feat/m2-control-flow` when GitHub integration is available. This slice
+branch): `931545c594b932f03a4a924b031ad260d89535da`. This slice is tracked
+by [issue #31](https://github.com/quaat/mdl-racket/issues/31) and
+[PR #33](https://github.com/quaat/mdl-racket/pull/33) from branch
+`feat/m2-control-flow`; this file remains the full task record. This slice
 implements the plan's "later control" work item: function activation
 formals, GO, and UNWIND. `sources.lock.json` pins MIT Zork
 `d94501340842e006791fce0757dc0043b8ec8916` and patched Confusion

@@ -221,9 +221,10 @@ arguments as a value with TYPE and PRIMTYPE `TUPLE` (its own primitive type;
 a LIST. Arity failures use the historical `TOO-FEW/TOO-MANY-ARGUMENTS-SUPPLIED`
 and `BAD-ARGUMENT-LIST` error names. An ATOM named AUX is an ordinary formal.
 Malformed formal lists fail at compile time; Confusion validates them at call
-time, a documented stricter deviation. The `gh` CLI is not authenticated in
-this session, so the task record is `docs/evidence/M2/FORMALS.md` on branch
-`feat/m2-function-formals`; the GitHub issue and PR remain to be opened.
+time, a documented stricter deviation. The slice is tracked by
+[issue #30](https://github.com/quaat/mdl-racket/issues/30) and
+[PR #32](https://github.com/quaat/mdl-racket/pull/32); the full task record
+is `docs/evidence/M2/FORMALS.md`.
 `make test` passes 408 Racket checks and 13 Python tests (the sandboxed
 session ran the Python half under system Python 3.9 with repo-local pinned
 wheels; see the report). The Codex review of PR #32 found PUTREST splicing
@@ -261,7 +262,8 @@ golden comparison, and all 65 saved M2 success cases plus 27 expected-error
 observations reproduce against the pinned binary. Sixteen focused Confusion
 control probes succeeded; seven error observations are recorded separately.
 `"BIND"`/`"CALL"` markers, TAG, the FSUBR `BIND`, and macros/source loading
-remain unsupported. The `gh` CLI is still unauthenticated, so the task
-record is `docs/evidence/M2/CONTROL.md` on branch `feat/m2-control-flow`;
-the GitHub issue and PR remain to be opened. See that report for commands,
-hashes, deviations, and remaining limits.
+remain unsupported. The slice is tracked by
+[issue #31](https://github.com/quaat/mdl-racket/issues/31) and
+[PR #33](https://github.com/quaat/mdl-racket/pull/33); the full task record
+is `docs/evidence/M2/CONTROL.md` with commands, hashes, deviations, and
+remaining limits.
