@@ -333,3 +333,30 @@ becomes a registered built-in type whose CHTYPE conversions fail
 explicitly. Activation formals (`"NAME"`, `"ACT"`, `"BIND"`, `"CALL"`),
 quoted formals, GO, and UNWIND remain unsupported. No upstream source, game
 rule, public license, deployed service, or GPLv3 reference code changed.
+
+## ADR-0018: Function activations, manual-based GO, and flagged-wind UNWIND
+
+**Decision:** Give every activation frame a kind. PROG/REPEAT frames are
+eligible bare targets as before; function activations created for a leading
+activation ATOM or `"NAME"`/`"ACT"` marker are only reachable by explicit
+RETURN/AGAIN, matching the reference's LASTPROG lookup. A function
+activation exists before formal binding, and explicit AGAIN to it re-runs
+the body without re-binding. Compile PROG/REPEAT bodies as ordered items
+where top-level non-numeric atom nodes are labels skipped in normal flow;
+GO resolves the nearest owned frame and jumps to the item after a label
+through a per-item escape. Implement UNWIND as a flagged dynamic-wind whose
+cleanup runs only when a transfer or an error crosses below it.
+
+**Why:** Sixteen pinned Confusion probes corroborate activation formals,
+AGAIN-without-rebinding, return-from-aux-initializer, and UNWIND transfer
+semantics. Confusion has no GO and marks TAG unimplemented, so GO follows
+the MDL manual chapter 10, the same manual-over-reference precedent as ROT.
+Confusion's `mdl_error` bypasses UNWIND frames, so its observed error path
+skips cleanups; the manual's FLOAD example documents cleanup on nonlocal
+error unwinding, and the runtime follows the manual.
+
+**Consequence:** GO has no differential reference; its tests are
+manual-derived only. TAG values, `"BIND"`/`"CALL"` markers, and the FSUBR
+`BIND` remain unsupported and fail explicitly. Bare atom nodes that carry
+number or `#` reader tokens cannot be labels. No upstream source, game rule,
+public license, deployed service, or GPLv3 reference code changed.

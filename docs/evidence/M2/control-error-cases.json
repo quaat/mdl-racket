@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "name": "m2-control-flow-errors",
+  "cases": [
+    {"name": "bare-return-no-prog", "expression": "<DEFINE M2-F M2-SELF () <RETURN 7>>\n<M2-F>"},
+    {"name": "stale-self-return", "expression": "<DEFINE M2-F M2-SELF () <SETG M2-S .M2-SELF> 1>\n<M2-F>\n<RETURN 2 ,M2-S>"},
+    {"name": "go-unbound", "expression": "<PROG () <GO M2-L> M2-L 1>"},
+    {"name": "tag-unbound", "expression": "<TAG M2-L>"},
+    {"name": "atom-after-name", "expression": "<DEFINE M2-F (\"NAME\" X A) 1>\n<M2-F>"},
+    {"name": "duplicate-with-name", "expression": "<DEFINE M2-F (A \"NAME\" A) 1>\n<M2-F 1>"},
+    {"name": "unwind-cleanup-on-error", "expression": "<SETG M2-C 0>\n<UNWIND <M2-BOOM> <SETG M2-C 1>>\n,M2-C"}
+  ]
+}

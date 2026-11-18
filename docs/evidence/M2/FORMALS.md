@@ -3,11 +3,12 @@
 **Local slice: PASS. M2 milestone: NOT YET PASS.** Base commit (branch
 `feat/m2-named-activations`, pending merge of the #28 slice):
 `c9f0df9f51fc7a61a34e00fa1c08ec4d763f9bb3`; `main`:
-`40cbebb1f6d4cb2fcf708a51e2cd98b85f95b4e8`. The `gh` CLI is not
-authenticated in this session, so this file is the local task record required
-by `AGENTS.md` step 3 instead of a new GitHub issue; open the issue and PR
-against this slice's branch `feat/m2-function-formals` when GitHub integration
-is available. `sources.lock.json` pins MIT Zork
+`40cbebb1f6d4cb2fcf708a51e2cd98b85f95b4e8`. This slice is tracked by
+[issue #30](https://github.com/quaat/mdl-racket/issues/30) and
+[PR #32](https://github.com/quaat/mdl-racket/pull/32) from branch
+`feat/m2-function-formals`, stacked on the `feat/m2-named-activations`
+branch of PR #29; this file remains the full task record required by
+`AGENTS.md` step 3. `sources.lock.json` pins MIT Zork
 `d94501340842e006791fce0757dc0043b8ec8916` and patched Confusion
 `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`; `scripts/fetch_sources.py`
 verified both upstream trees clean before the probes. This slice implements

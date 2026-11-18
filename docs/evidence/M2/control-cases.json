@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m2-control-flow",
+  "cases": [
+    {"name": "self-activation-type", "expression": "<DEFINE M2-F M2-SELF () <TYPE .M2-SELF>>\n<M2-F>"},
+    {"name": "self-return", "expression": "<DEFINE M2-F M2-SELF () <RETURN 7 .M2-SELF> 99>\n<M2-F>"},
+    {"name": "self-return-unwinds-prog", "expression": "<DEFINE M2-F M2-SELF () <PROG () <RETURN 8 .M2-SELF> 99> 77>\n<M2-F>"},
+    {"name": "self-again-restarts-body", "expression": "<SETG M2-C 0>\n<DEFINE M2-F M2-SELF () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 3> <RETURN ,M2-C .M2-SELF>) (ELSE <AGAIN .M2-SELF>)>>\n<M2-F>"},
+    {"name": "self-visible-in-aux", "expression": "<DEFINE M2-F M2-SELF (\"AUX\" (W <TYPE .M2-SELF>)) .W>\n<M2-F>"},
+    {"name": "return-from-aux-init", "expression": "<DEFINE M2-F M2-SELF (\"AUX\" (X <RETURN 5 .M2-SELF>)) 9>\n<M2-F>"},
+    {"name": "cross-function-return-to-self", "expression": "<DEFINE M2-H (A) <RETURN 12 .A>>\n<DEFINE M2-F M2-SELF () <M2-H .M2-SELF> 99>\n<M2-F>"},
+    {"name": "act-marker", "expression": "<DEFINE M2-F (A \"ACT\" X) <RETURN 7 .X> 99>\n<M2-F 1>"},
+    {"name": "name-marker-after-aux", "expression": "<DEFINE M2-F (\"AUX\" (B 1) \"NAME\" X) <RETURN 9 .X> 8>\n<M2-F>"},
+    {"name": "self-with-formal-sections", "expression": "<DEFINE M2-F M2-SELF (A \"OPTIONAL\" (B 2)) <LIST .A .B <TYPE .M2-SELF>>>\n<M2-F 5>"},
+    {"name": "self-with-tuple", "expression": "<DEFINE M2-F M2-SELF (\"TUPLE\" T) <LIST <LENGTH .T> <TYPE .M2-SELF>>>\n<M2-F 1 2 3>"},
+    {"name": "self-again-keeps-aux", "expression": "<SETG M2-C 0>\n<DEFINE M2-F M2-SELF (\"AUX\" (N 0)) <SET N <+ .N 1>> <COND (<==? .N 3> <RETURN .N .M2-SELF>) (ELSE <AGAIN .M2-SELF>)>>\n<M2-F>"},
+    {"name": "unwind-normal", "expression": "<SETG M2-C 0>\n<UNWIND 5 <SETG M2-C 1>>\n,M2-C"},
+    {"name": "unwind-cleanup-on-transfer", "expression": "<SETG M2-C 0>\n<PROG M2-OUT () <UNWIND <PROG M2-IN () <RETURN 7 .M2-OUT>> <SETG M2-C 1>> 9>\n,M2-C"},
+    {"name": "unwind-cleanup-on-again", "expression": "<SETG M2-C 0>\n<SETG M2-D 0>\n<PROG M2-OUT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 2> <RETURN ,M2-C>)> <UNWIND <PROG M2-IN () <AGAIN .M2-OUT> 1> <SETG M2-D <+ ,M2-D 1>>>>\n,M2-D"},
+    {"name": "unwind-inner-prog-normal", "expression": "<SETG M2-C 0>\n<UNWIND <PROG () <RETURN 5>> <SETG M2-C 1>>\n,M2-C"}
+  ]
+}

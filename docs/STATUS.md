@@ -221,9 +221,10 @@ arguments as a value with TYPE and PRIMTYPE `TUPLE` (its own primitive type;
 a LIST. Arity failures use the historical `TOO-FEW/TOO-MANY-ARGUMENTS-SUPPLIED`
 and `BAD-ARGUMENT-LIST` error names. An ATOM named AUX is an ordinary formal.
 Malformed formal lists fail at compile time; Confusion validates them at call
-time, a documented stricter deviation. The `gh` CLI is not authenticated in
-this session, so the task record is `docs/evidence/M2/FORMALS.md` on branch
-`feat/m2-function-formals`; the GitHub issue and PR remain to be opened.
+time, a documented stricter deviation. The slice is tracked by
+[issue #30](https://github.com/quaat/mdl-racket/issues/30) and
+[PR #32](https://github.com/quaat/mdl-racket/pull/32); the full task record
+is `docs/evidence/M2/FORMALS.md`.
 `make test` passes 408 Racket checks and 13 Python tests (the sandboxed
 session ran the Python half under system Python 3.9 with repo-local pinned
 wheels; see the report). The Codex review of PR #32 found PUTREST splicing
@@ -237,3 +238,34 @@ succeeded; eleven error observations are recorded separately.
 activation-name atoms before the formal list, GO, UNWIND, macros, and source
 loading remain unsupported. See `docs/evidence/M2/FORMALS.md` for commands,
 hashes, deviations, and remaining limits.
+
+## M2 local task: activation formals, GO, and UNWIND
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** `DEFINE` now accepts a
+function activation name ATOM between the name and the formal list (the form
+the 1977 reconstruction uses 14 times, e.g. `SEARCH-LIST SL`) plus the
+`"NAME"`/`"ACT"` markers after any formal section. The activation exists
+before formal binding, so RETURN during an AUX initializer exits the call;
+explicit RETURN/AGAIN target it from any depth, unwinding intervening PROGs;
+AGAIN re-runs the body without re-binding; bare transfers never target
+function frames. `GO` follows the MDL manual chapter 10: top-level atoms in
+PROG/REPEAT bodies are labels skipped in normal flow, and GO resumes at the
+following expression in the nearest owned frame; the pinned Confusion has no
+GO or TAG, a recorded reference deviation, and TAG values remain
+unsupported. `UNWIND` runs its cleanup when a nonlocal transfer or an error
+crosses below it and returns the guarded expression's value otherwise;
+Confusion skips the cleanup on errors, a deviation the Racket runtime does
+not copy (manual chapter 16). `make test` passes 465 Racket checks and 13
+Python tests under the documented sandbox environment after both Codex
+review fixes (PUTREST TUPLE rejection in PR #32 and octal-token label
+exclusion here); the 36/36 reader
+sweep passes; the five-turn capture, 12 baseline probes, the approved M1
+golden comparison, and all 65 saved M2 success cases plus 27 expected-error
+observations reproduce against the pinned binary. Sixteen focused Confusion
+control probes succeeded; seven error observations are recorded separately.
+`"BIND"`/`"CALL"` markers, TAG, the FSUBR `BIND`, and macros/source loading
+remain unsupported. The slice is tracked by
+[issue #31](https://github.com/quaat/mdl-racket/issues/31) and
+[PR #33](https://github.com/quaat/mdl-racket/pull/33); the full task record
+is `docs/evidence/M2/CONTROL.md` with commands, hashes, deviations, and
+remaining limits.
