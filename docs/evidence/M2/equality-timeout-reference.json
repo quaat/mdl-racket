@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "m2-cyclic-equality-timeout-observation",
+  "recorded_at": "2026-11-18T10:17:31.825370+00:00",
+  "interpreter_sha256": "a142145428f56dfc0ccde6170d5dbaf5b0ce2f94eff3f55abfdb56fac0f5a3b5",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "distinct-tail-cycles",
+      "expression": "<DEFINE M2-EQ () <SET X (1)> <SET Y (1)> <PUTREST .X .X> <PUTREST .Y .Y> <=? .X .Y>>\n<M2-EQ>",
+      "ok": false,
+      "error": "timeout after 2.0 seconds"
+    }
+  ],
+  "complete": false
+}

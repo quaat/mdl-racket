@@ -1,4 +1,4 @@
-# Status — 2026-11-17 (M2 activation hardening locally verified)
+# Status — 2026-11-18 (M2 cyclic equality hardening locally verified)
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
@@ -160,3 +160,19 @@ five-turn capture, 12 baseline probes, and approved M1 comparison pass under
 the documented build-metadata exclusions. Named/explicit activation targets
 remain unsupported. Cyclic structural equality is tracked separately in
 issue #23. See `docs/evidence/M2/ACTIVATIONS.md` for exact evidence and limits.
+
+## M2 issue #23: cyclic structural equality boundary
+
+**Local hardening slice: PASS. M2 milestone: NOT YET PASS.** `=?` now returns
+true for the same cyclic object, false when two cycles differ before a repeated
+comparison, and an explicit unsupported error when a pair of distinct
+structured objects repeats on the active comparison path. Finite acyclic
+values, including shared substructures, retain their structural result.
+`==?` identity behavior is unchanged. `make test` passes 319 Racket checks
+and 13 Python tests; source sweep remains 36/36 selected text files. Five
+focused Confusion cases succeed, while one distinct LIST-cycle probe times out
+at two seconds and one distinct VECTOR-cycle probe exits by signal 11. These
+are recorded separately, not counted as passing oracle cases. The five-turn
+capture, 12 baseline probes, and M1 approved comparison pass with documented
+build-metadata exclusions. See `docs/evidence/M2/EQUALITY.md` for exact
+commands, hashes, and unresolved semantics.

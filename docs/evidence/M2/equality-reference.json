@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "name": "m2-cyclic-equality-finite-observations",
+  "recorded_at": "2026-11-18T10:17:27.893937+00:00",
+  "interpreter_sha256": "a142145428f56dfc0ccde6170d5dbaf5b0ce2f94eff3f55abfdb56fac0f5a3b5",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "same-tail-cycle",
+      "expression": "<DEFINE M2-EQ () <SET X (1)> <PUTREST .X .X> <=? .X .X>>\n<M2-EQ>",
+      "input": "<DEFINE M2-EQ () <SET X (1)> <PUTREST .X .X> <=? .X .X>>\n<M2-EQ>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-EQ\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-EQ\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "same-element-cycle",
+      "expression": "<DEFINE M2-EQ () <SET X (1)> <PUT .X 1 .X> <=? .X .X>>\n<M2-EQ>",
+      "input": "<DEFINE M2-EQ () <SET X (1)> <PUT .X 1 .X> <=? .X .X>>\n<M2-EQ>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-EQ\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-EQ\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "same-vector-cycle",
+      "expression": "<DEFINE M2-EQ () <SET X [0]> <PUT .X 1 .X> <=? .X .X>>\n<M2-EQ>",
+      "input": "<DEFINE M2-EQ () <SET X [0]> <PUT .X 1 .X> <=? .X .X>>\n<M2-EQ>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-EQ\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-EQ\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "unequal-tail-cycles",
+      "expression": "<DEFINE M2-EQ () <SET X (1)> <SET Y (2)> <PUTREST .X .X> <PUTREST .Y .Y> <=? .X .Y>>\n<M2-EQ>",
+      "input": "<DEFINE M2-EQ () <SET X (1)> <SET Y (2)> <PUTREST .X .X> <PUTREST .Y .Y> <=? .X .Y>>\n<M2-EQ>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-EQ\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-EQ\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "shared-acyclic",
+      "expression": "<DEFINE M2-EQ () <SET X (1 2)> <SET Y <LIST .X .X>> <=? .Y <LIST .X .X>>>\n<M2-EQ>",
+      "input": "<DEFINE M2-EQ () <SET X (1 2)> <SET Y <LIST .X .X>> <=? .Y <LIST .X .X>>>\n<M2-EQ>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM2-EQ\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 18 2026 @ 11:17:18\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M2-EQ\nT\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

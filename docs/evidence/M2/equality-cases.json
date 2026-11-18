@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m2-cyclic-equality-finite-observations",
+  "cases": [
+    {"name": "same-tail-cycle", "expression": "<DEFINE M2-EQ () <SET X (1)> <PUTREST .X .X> <=? .X .X>>\n<M2-EQ>"},
+    {"name": "same-element-cycle", "expression": "<DEFINE M2-EQ () <SET X (1)> <PUT .X 1 .X> <=? .X .X>>\n<M2-EQ>"},
+    {"name": "same-vector-cycle", "expression": "<DEFINE M2-EQ () <SET X [0]> <PUT .X 1 .X> <=? .X .X>>\n<M2-EQ>"},
+    {"name": "unequal-tail-cycles", "expression": "<DEFINE M2-EQ () <SET X (1)> <SET Y (2)> <PUTREST .X .X> <PUTREST .Y .Y> <=? .X .Y>>\n<M2-EQ>"},
+    {"name": "shared-acyclic", "expression": "<DEFINE M2-EQ () <SET X (1 2)> <SET Y <LIST .X .X>> <=? .Y <LIST .X .X>>>\n<M2-EQ>"}
+  ]
+}

@@ -358,6 +358,31 @@ remove the frame and invalidate it. Existing M2 reference cases test nested
 PROGs and function boundaries; additional Racket tests cover frame identity,
 lifetime, and cleanup. Named and explicit-target activations remain unsupported.
 
+## M2 issue #23 specification: cyclic structural equality boundary
+
+The [MDL manual's equality section](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+defines `=?` by same TYPE and structural content, and `==?` by identity. Its
+[self-reference section](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/)
+shows that PUT and PUTREST can make LIST and VECTOR values cyclic, and says
+printing them may never terminate. It gives no finite `=?` result for two
+distinct cyclic structures with the same repeated content. The pinned
+Confusion oracle returns `T` for a cyclic object compared with itself,
+`#FALSE ()` when two cycles differ at their first element, but did not finish
+the comparison of two distinct equal-content LIST cycles within two seconds;
+comparing two distinct self-referencing VECTORs exited by signal 11. These
+observations are not evidence for a general cyclic equivalence rule.
+
+This slice preserves the identity result for the same cyclic object and
+ordinary structural comparison for finite, acyclic values, including shared
+substructure. It returns FALSE for cycles that differ before any repeated
+comparison pair. If comparison revisits an active pair of distinct structured
+objects, it raises an explicit unsupported-cyclic-comparison error rather
+than looping, crashing, or inventing a coinductive equivalence rule. `==?`
+continues to use identity. The boundary applies to LIST, VECTOR/UVECTOR,
+FALSE payloads, and user-tagged structured values through the same recursive
+comparison. Tests belong in `tests/equality_cycle_test.rkt`; focused reference
+observations are under `docs/evidence/M2/equality-*`.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in
