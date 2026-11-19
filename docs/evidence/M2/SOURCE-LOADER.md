@@ -139,8 +139,11 @@ exits 0 with 570 Racket checks and 13 Python tests. `make sources`,
 `make reference-capture`, `make reference-probe`, the approved M0 stable-field
 comparison, and `git diff --check` exit 0. The full historical load still
 exits 1 at the same strict `#DECL` barrier after two completed expressions.
-The new CI run is pending. This changes only the local path resolver and its
-tests; provenance, gameplay, licensing, and service exposure are unchanged.
+Both follow-up workflows passed on `88d7b393f9a98ec740e027b2dc331273164a18b4`:
+[harness run 44571160830](https://github.com/quaat/mdl-racket/actions/runs/44571160830)
+and [native run 44571160806](https://github.com/quaat/mdl-racket/actions/runs/44571160806).
+This changes only the local path resolver and its tests; provenance, gameplay,
+licensing, and service exposure are unchanged.
 
 The fixture for the successful CLI run was two unmodified test commands,
 `<SETG CLI-VALUE 7>` followed by `<+ ,CLI-VALUE 3>`. The pinned source run

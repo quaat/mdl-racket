@@ -17,8 +17,8 @@ historical load barriers are identified. Run
 existing MDL subset across files in a shared session and supports constrained
 nested `FLOAD`. Its G1 local gate passes, including review regressions for
 symlink lookup order, consecutive parent components, and interpreted session
-calls; `make test` and the pinned
-Confusion build/capture/probes pass. Reproduce its pinned-source failure with
+calls; `make test`, both CI workflows, and the pinned Confusion
+build/capture/probes pass. Reproduce its pinned-source failure with
 `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json`.
 That command exits 1 after two completed expressions, at unsupported
 `#DECL` in `81prim.mud`; game initialization is not supported. The
