@@ -139,6 +139,21 @@
        (let ([name (read-atom! c)])
          (skip-ws! c)
          (cond
+           [(string-ci=? name "#DECL")
+            ;; The pinned original source also contains a doubled
+            ;; `#DECL #DECL ((...))` payload (77act1.mud:110). Confusion's
+            ;; generic #type reader re-types the inner DECL value, a no-op,
+            ;; so extra #DECL tokens collapse into one declaration.
+            (let loop ()
+              (define next (read-atom! c))
+              (skip-ws! c)
+              (cond
+                [(string-ci=? next "#DECL") (loop)]
+                [(string=? next "") (void)]
+                [else (parse-error c "#DECL requires a parenthesized payload")]))
+            (unless (equal? (peek c) #\()
+              (parse-error c "#DECL requires a parenthesized payload"))
+            (node 'decl (mdl-node-value (read-node! c)))]
            [(equal? (peek c) #\{)
             (node 'typed (cons name (read-node! c)))]
            [(and (string-ci=? name "#FALSE") (equal? (peek c) #\())

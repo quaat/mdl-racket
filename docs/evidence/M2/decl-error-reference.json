@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "name": "m2-declaration-reference-errors",
+  "recorded_at": "2026-11-19T17:48:27.377457+00:00",
+  "interpreter_sha256": "a29c756df5c973e462a6ad2b318e28ec265934e89e72d825bc7672387317e629",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "original-msetg-conflict",
+      "expression": "<FLOAD \"81prim.mud\"> <MSETG M2-D1-TEMP 3> <MSETG M2-D1-TEMP 4>",
+      "input": "<FLOAD \"81prim.mud\"> <MSETG M2-D1-TEMP 3> <MSETG M2-D1-TEMP 4>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\nT\n\n *ERROR* \n MSETG \n M2-D1-TEMP \n ALREADY-GASSIGNED \n 3 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\nT\n\n *ERROR* \n MSETG \n M2-D1-TEMP \n ALREADY-GASSIGNED \n 3 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "original-msetg-wrong-atom",
+      "expression": "<FLOAD \"81prim.mud\"> <MSETG \"x\" 3>",
+      "input": "<FLOAD \"81prim.mud\"> <MSETG \"x\" 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Type Mismatch, 1st arg to GASSIGNED? must be atom\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

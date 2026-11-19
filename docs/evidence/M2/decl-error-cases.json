@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "m2-declaration-reference-errors",
+  "cases": [
+    {"name": "original-msetg-conflict", "expression": "<FLOAD \"81prim.mud\"> <MSETG M2-D1-TEMP 3> <MSETG M2-D1-TEMP 4>"},
+    {"name": "original-msetg-wrong-atom", "expression": "<FLOAD \"81prim.mud\"> <MSETG \"x\" 3>"}
+  ]
+}

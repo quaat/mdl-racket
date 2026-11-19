@@ -11,6 +11,7 @@
          mdl-apply-form mdl-apply-interpreted
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
+         mdl-make-declaration
          mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
          mdl-word mdl-word? mdl-word-bits
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
@@ -36,14 +37,17 @@
 ;; body label ATOM to its item index.
 (struct mdl-activation (owner escape kind
                         [restart #:mutable] [goto #:mutable]
-                        [labels #:mutable] [live? #:mutable]))
+                        [labels #:mutable] [live? #:mutable]
+                        [decl #:mutable]))
 (struct mdl-tuple-value (payload))
 ;; Interpreted definitions carry their formals and body as runtime MDL
 ;; data: a MACRO binds the raw call arguments, an interpreted FUNCTION
 ;; binds them per the historical quoted/unquoted rules. Compiled Racket
 ;; closures remain the fast path for quoted-formal-free definitions.
-(struct mdl-macro (formals body leading-act))
-(struct mdl-function (formals body leading-act))
+(struct mdl-macro (formals body leading-act decl))
+(struct mdl-function (formals body leading-act decl))
+(struct mdl-decl-value (bindings result line column) #:transparent)
+(define local-declarations (make-weak-hasheq))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
@@ -54,6 +58,104 @@
   (cond [(mdl-atom? value) value]
         [(string? value) (mdl-atom value)]
         [else (error who "expected an MDL ATOM")]))
+
+;; A declaration is parsed once when its containing definition is installed.
+;; Patterns stay as MDL values until then, so NEWTYPE names use that session's
+;; type registry. The hash is keyed by atom identity, like local frames.
+;; `origin` names the checking context in errors; the explicit DECL?
+;; predicate has no source position, so it passes #f for line/column.
+(define (decl-error origin line column message . args)
+  (if line
+      (error 'mdl-decl "~a ~a:~a: ~a" origin line column
+             (apply format message args))
+      (error 'mdl-decl "~a: ~a" origin (apply format message args))))
+
+(define (normalize-decl-pattern pattern line column
+                                 [origin "DECL"])
+  (cond
+    [(mdl-atom? pattern)
+     (cond [(string=? (mdl-atom-pname pattern) "ANY") '(any)]
+           [(hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern)
+            (list 'type pattern)]
+           [else (decl-error origin line column "unknown declaration type ~a"
+                             (mdl-atom-pname pattern))])]
+    [(mdl-form? pattern)
+     (define items (form-elements pattern))
+     (unless (and (pair? items) (mdl-atom? (car items)))
+       (decl-error origin line column "malformed declaration pattern"))
+     (case (string->symbol (mdl-atom-pname (car items)))
+       [(OR)
+        (when (null? (cdr items)) (decl-error origin line column "empty OR pattern"))
+        (cons 'or (map (lambda (item) (normalize-decl-pattern item line column origin))
+                       (cdr items)))]
+       [(PRIMTYPE)
+        (unless (and (= (length items) 2) (mdl-atom? (cadr items))
+                     (hash-has-key? (atom-space-types (current-mdl-atom-space))
+                                    (cadr items)))
+          (decl-error origin line column "PRIMTYPE requires one registered type"))
+        (list 'primtype (cadr items))]
+       [else (decl-error origin line column "unsupported declaration pattern ~a"
+                         (mdl-atom-pname (car items)))])]
+    [else (decl-error origin line column "unsupported declaration pattern")]))
+
+(define (mdl-make-declaration payload line column)
+  (define items (mdl-list->list payload))
+  (unless (and (pair? items) (even? (length items)))
+    (decl-error "DECL" line column "expected atom-list/pattern pairs"))
+  (define bindings (make-hasheq))
+  (define result #f)
+  (for ([i (in-range 0 (length items) 2)])
+    (define names (list-ref items i))
+    (unless (and (mpair? names) (pair? (mdl-list->list names)))
+      (decl-error "DECL" line column "expected a nonempty atom list"))
+    (define pattern (normalize-decl-pattern (list-ref items (add1 i)) line column))
+    (for ([name (in-list (mdl-list->list names))])
+      (unless (mdl-atom? name)
+        (decl-error "DECL" line column "declaration name must be an ATOM"))
+      (if (string=? (mdl-atom-pname name) "VALUE")
+          (begin
+            (when result (decl-error "DECL" line column "duplicate VALUE declaration"))
+            (set! result pattern))
+          (begin
+            (when (hash-has-key? bindings name)
+              (decl-error "DECL" line column "duplicate declaration for ~a"
+                          (mdl-atom-pname name)))
+            (hash-set! bindings name pattern)))))
+  (mdl-decl-value bindings result line column))
+
+(define (matches-decl? value pattern)
+  (case (car pattern)
+    [(any) #t]
+    [(type) (eq? (mdl-type value) (cadr pattern))]
+    [(primtype) (eq? (mdl-primtype value) (mdl-typeprim (cadr pattern)))]
+    [(or) (ormap (lambda (p) (matches-decl? value p)) (cdr pattern))]
+    [else (error 'mdl-decl "unknown normalized declaration pattern")]))
+
+;; The explicit chapter 14 predicate checks one value against one pattern
+;; with the same normalization as attached declarations. Pinned Confusion
+;; returns T on a match and #FALSE carrying the value and pattern otherwise.
+(define (mdl-decl? value pattern)
+  (define normalized (normalize-decl-pattern pattern #f #f "DECL?"))
+  (if (matches-decl? value normalized)
+      (mdl-atom "T")
+      (mdl-false (list value pattern))))
+
+(define (check-declared! decl name value)
+  (when (and decl (not (eq? value unassigned)))
+    (define pattern (if (eq? name 'VALUE)
+                        (mdl-decl-value-result decl)
+                        (hash-ref (mdl-decl-value-bindings decl) name #f)))
+    (when (and pattern (not (matches-decl? value pattern)))
+      (decl-error "DECL" (mdl-decl-value-line decl) (mdl-decl-value-column decl)
+                  "~a does not satisfy declaration"
+                  (if (eq? name 'VALUE) "VALUE" (mdl-atom-pname name)))))
+  value)
+
+(define (check-frame-binding! frame atom value)
+  (check-declared! (hash-ref local-declarations frame #f) atom value))
+
+(define (check-result! decl value)
+  (check-declared! decl 'VALUE value))
 
 (define (local-option atom)
   (let loop ([frames (current-mdl-locals)])
@@ -75,6 +177,7 @@
     (or (for/or ([frame (in-list frames)])
           (and (hash-has-key? frame atom) frame))
         (last frames)))
+  (check-frame-binding! target atom value)
   (hash-set! target atom value)
   value)
 
@@ -97,13 +200,15 @@
 ;; AUX binding stays unassigned, like a PROG auxiliary. TUPLE wraps its
 ;; arguments in a TUPLE-typed value; ARGS yields a LIST. Error names follow
 ;; the observed reference behavior.
-(define (mdl-bind-function-formals fn specs args activation-frame thunk)
+(define (mdl-bind-function-formals fn specs args activation-frame thunk [decl #f])
   (define frame (make-hasheq))
+  (when decl (hash-set! local-declarations frame decl))
   (define (bind! atom value)
     (require-atom 'mdl-bind-function-formals atom)
     (when (hash-has-key? frame atom)
       (error 'mdl-bind-function-formals
              "BAD-ARGUMENT-LIST: duplicate formal argument"))
+    (check-frame-binding! frame atom value)
     (hash-set! frame atom value))
   (define (spec-value spec)
     (define default (third spec))
@@ -144,7 +249,7 @@
     (unless (null? remaining)
       (error 'mdl-bind-function-formals
              "TOO-MANY-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn)))
-    (thunk)))
+    (check-result! decl (thunk))))
 
 ;; A DEFINE with an activation formal (a leading ATOM or a "NAME"/"ACT"
 ;; marker) creates a live activation for its own invocation. Explicit
@@ -152,10 +257,10 @@
 ;; AGAIN re-runs the body without re-binding formals. The frame exists
 ;; before auxiliary initialization, so RETURN during an AUX initializer
 ;; exits the whole call.
-(define (mdl-call-with-activation fn specs args body-thunk)
+(define (mdl-call-with-activation fn specs args body-thunk [decl #f])
   (let/ec escape
     (define frame (mdl-activation (current-mdl-function-owner) escape 'function
-                                 #f #f #f #t))
+                                 #f #f #f #t decl))
     (dynamic-wind
       void
       (lambda ()
@@ -170,11 +275,13 @@
                     (body-thunk)))
                 (if (eq? result restart-token)
                     (body-loop)
-                    result))))))
+                    result)))
+            decl)))
       (lambda () (set-mdl-activation-live?! frame #f)))))
 
-(define (mdl-with-aux-bindings specs thunk)
+(define (mdl-with-aux-bindings specs thunk [decl #f])
   (define frame (make-hasheq))
+  (when decl (hash-set! local-declarations frame decl))
   (parameterize ([current-mdl-locals (cons frame (current-mdl-locals))])
     (for ([entry (in-list specs)])
       (define atom (binding-atom 'mdl-with-aux-bindings (car entry)))
@@ -183,7 +290,9 @@
       ;; Evaluate before installing this binding. Earlier auxiliary bindings
       ;; are visible, while this initializer may still see an outer binding.
       (define initializer (cdr entry))
-      (hash-set! frame atom (if initializer (initializer) unassigned)))
+      (define value (if initializer (initializer) unassigned))
+      (check-frame-binding! frame atom value)
+      (hash-set! frame atom value))
     (thunk)))
 
 (define (mdl-with-function-scope thunk)
@@ -195,7 +304,7 @@
 ;; are thunks. The last expression value is the frame's normal result.
 ;; AGAIN restarts the body without re-binding auxiliaries; GO transfers
 ;; to the item after a label in the nearest owned PROG/REPEAT.
-(define (mdl-with-prog-activation items [specs '()] [repeat? #f] [name #f])
+(define (mdl-with-prog-activation items [specs '()] [repeat? #f] [name #f] [decl #f])
   (unless (vector? items)
     (error 'mdl-with-prog-activation "expected a vector of body items"))
   (define expr-count
@@ -205,7 +314,7 @@
     (error 'mdl-with-prog-activation "PROG or REPEAT requires a body expression"))
   (let/ec escape
     (define frame (mdl-activation (current-mdl-function-owner) escape 'prog
-                                 #f #f #f #t))
+                                 #f #f #f #t decl))
     (dynamic-wind
       void
       (lambda ()
@@ -240,7 +349,8 @@
                      (run-items)))
                  (if (or repeat? (eq? result restart-token))
                      (outer)
-                     result)))))
+                     (check-result! decl result))))
+             decl))
           (if name
               (mdl-with-bindings (list (cons name frame)) run)
               (run))))
@@ -271,6 +381,7 @@
 
 (define (mdl-return value [supplied implicit-activation])
   (define target (resolve-activation 'mdl-return supplied))
+  (check-result! (mdl-activation-decl target) value)
   ((mdl-activation-escape target) value))
 
 (define (mdl-again [supplied implicit-activation])
@@ -470,6 +581,7 @@
 (define (mdl-apply-interpreted fn raw-args)
   (define formals (if (mdl-macro? fn) (mdl-macro-formals fn) (mdl-function-formals fn)))
   (define body (if (mdl-macro? fn) (mdl-macro-body fn) (mdl-function-body fn)))
+  (define decl (if (mdl-macro? fn) (mdl-macro-decl fn) (mdl-function-decl fn)))
   (define leading-act (if (mdl-macro? fn) (mdl-macro-leading-act fn)
                           (mdl-function-leading-act fn)))
   (define specs (interpreted-formal-specs formals leading-act))
@@ -479,17 +591,19 @@
   (parameterize ([current-mdl-function-owner (gensym 'mdl-interpreted)])
   (let/ec escape
     (define frame (mdl-activation (current-mdl-function-owner) escape 'function
-                                   #f #f #f #t))
+                                   #f #f #f #t decl))
     (dynamic-wind
       void
       (lambda ()
         (parameterize ([current-mdl-activations
                         (cons frame (current-mdl-activations))])
           (define locals (make-hasheq))
+          (when decl (hash-set! local-declarations locals decl))
           (define (bind! atom value)
             (when (hash-has-key? locals atom)
               (error 'mdl-bind-interpreted
                      "BAD-ARGUMENT-LIST: duplicate formal argument"))
+            (check-frame-binding! locals atom value)
             (hash-set! locals atom value))
           (define remaining raw-list)
           (parameterize ([current-mdl-locals (cons locals (current-mdl-locals))])
@@ -546,7 +660,7 @@
                       [else (value-loop (cdr items) (mdl-eval (car items)))]))))
               (if (eq? result restart-token)
                   (body-loop)
-                  result)))))
+                  (check-result! decl result))))))
       (lambda () (set-mdl-activation-live?! frame #f))))))
 
 ;; The runtime evaluator over MDL data.
@@ -622,9 +736,15 @@
                (pair? body))
     (error 'mdl-eval "~a requires a parenthesized formal list" who))
   (interpreted-formal-specs formals-node leading-act) ; validation
+  (define decl (and (pair? body) (mdl-decl-value? (car body)) (car body)))
+  (define expressions (if decl (cdr body) body))
+  (when (ormap mdl-decl-value? expressions)
+    (error 'mdl-eval "#DECL must immediately follow the formal list"))
+  (when (null? expressions)
+    (error 'mdl-eval "declaration requires a body"))
   (if macro?
-      (mdl-defmac! name formals-node body leading-act)
-      (mdl-define-interpreted! name formals-node body leading-act)))
+      (mdl-defmac! name formals-node expressions leading-act decl)
+      (mdl-define-interpreted! name formals-node expressions leading-act decl)))
 
 (define (runtime-cond clauses)
   (let loop ([remaining clauses] [last (mdl-false '())])
@@ -673,7 +793,12 @@
                (or (null? (car rest-operands)) (mpair? (car rest-operands))))
     (error 'mdl-eval "PROG or REPEAT requires an auxiliary LIST and body"))
   (define aux-list (mdl-list->list (car rest-operands)))
-  (define body (cdr rest-operands))
+  (define raw-body (cdr rest-operands))
+  (define decl (and (pair? raw-body) (mdl-decl-value? (car raw-body))
+                    (car raw-body)))
+  (define body (if decl (cdr raw-body) raw-body))
+  (when (ormap mdl-decl-value? body)
+    (error 'mdl-eval "#DECL must immediately follow the auxiliary list"))
   (define names '())
   (define specs
     (for/list ([item (in-list aux-list)])
@@ -693,8 +818,8 @@
            (cons 'label item)
            (cons 'expr (lambda () (mdl-eval item)))))))
   (if name
-      (mdl-with-prog-activation items specs repeat? name)
-      (mdl-with-prog-activation items specs repeat?)))
+      (mdl-with-prog-activation items specs repeat? name decl)
+      (mdl-with-prog-activation items specs repeat? #f decl)))
 
 ;; EXPAND performs one top-level macro expansion without evaluating. The
 ;; manual returns a non-macro form unchanged; pinned Confusion evaluates
@@ -731,18 +856,18 @@
     [else (error 'mdl-apply-form "unassigned or non-applicable MDL operator ~a"
                  (mdl-atom-pname atom))]))
 
-(define (mdl-defmac! name formals body [leading-act #f])
+(define (mdl-defmac! name formals body [leading-act #f] [decl #f])
   (require-atom 'mdl-defmac name)
   (interpreted-formal-specs formals leading-act)
   (unless (eq? (global-option name) unassigned)
     (error 'mdl-defmac "Atom is already bound in DEFMAC: ~a" (mdl-atom-pname name)))
-  (hash-set! (current-mdl-globals) name (mdl-macro formals body leading-act))
+  (hash-set! (current-mdl-globals) name (mdl-macro formals body leading-act decl))
   name)
 
-(define (mdl-define-interpreted! name formals body [leading-act #f])
+(define (mdl-define-interpreted! name formals body [leading-act #f] [decl #f])
   (require-atom 'mdl-define-interpreted name)
   (interpreted-formal-specs formals leading-act)
-  (hash-set! (current-mdl-globals) name (mdl-function formals body leading-act))
+  (hash-set! (current-mdl-globals) name (mdl-function formals body leading-act decl))
   name)
 
 (define (global-option atom)
@@ -753,8 +878,30 @@
         [else unassigned]))
 
 (define (mdl-setg! name value)
-  (hash-set! (current-mdl-globals) (binding-atom 'mdl-setg name) value)
+  (define atom (binding-atom 'mdl-setg name))
+  (define globals (current-mdl-globals))
+  (define old (hash-ref globals atom unassigned))
+  (define redefine (hash-ref globals (mdl-atom "REDEFINE") unassigned))
+  (when (and (hash-has-key? (atom-space-manifests (current-mdl-atom-space)) atom)
+             (not (eq? old unassigned))
+             (not (mdl-identical? old value))
+             (or (eq? redefine unassigned) (mdl-false? redefine)))
+    (error 'mdl-setg "ATTEMPT-TO-CHANGE-MANIFEST-VARIABLE ~a"
+           (mdl-atom-pname atom)))
+  (hash-set! globals atom value)
   value)
+
+(define (mdl-gassigned? name)
+  (define atom (binding-atom 'mdl-gassigned? name))
+  (mdl-boolean (not (eq? (global-option atom) unassigned))))
+
+(define (mdl-manifest . names)
+  (for ([name (in-list names)])
+    (define atom (binding-atom 'mdl-manifest name))
+    (hash-set! (atom-space-manifests (current-mdl-atom-space)) atom #t)
+    (unless (hash-has-key? (current-mdl-globals) atom)
+      (hash-set! (current-mdl-globals) atom unassigned)))
+  (mdl-atom "T"))
 
 (define (mdl-gval name)
   (define atom (binding-atom 'mdl-gval name))
@@ -778,7 +925,7 @@
 
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
-(struct atom-space (initial root named types builtins))
+(struct atom-space (initial root named types builtins manifests))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -798,7 +945,8 @@
   (hash-set! named initial-name initial)
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
-                          ("FALSE" . "LIST") ("VECTOR" . "VECTOR")
+                          ("FALSE" . "LIST") ("DECL" . "LIST")
+                          ("VECTOR" . "VECTOR")
                           ("UVECTOR" . "UVECTOR") ("STRING" . "STRING")
                           ("FIX" . "WORD") ("FLOAT" . "WORD")
                           ("WORD" . "WORD") ("BITS" . "WORD")
@@ -811,7 +959,7 @@
     (hash-set! (oblist-value-entries initial) (car entry) type-atom)
     (hash-set! types type-atom (cdr entry))
     (hash-set! builtins type-atom #t))
-  (atom-space initial root named types builtins))
+  (atom-space initial root named types builtins (make-hasheq)))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
@@ -1070,6 +1218,7 @@
         [(mdl-tuple-value? value) "TUPLE"]
         [(mdl-macro? value) "MACRO"]
         [(mdl-function? value) "FUNCTION"]
+        [(mdl-decl-value? value) "DECL"]
         [(mdl-atom? value) "ATOM"]
         [(mdl-oblist? value) "OBLIST"]
         [(or (null? value) (mpair? value)) "LIST"]
@@ -1347,6 +1496,9 @@
         "VALUE" mdl-value
         "SET" mdl-set!
         "SETG" mdl-setg!
+        "GASSIGNED?" mdl-gassigned?
+        "MANIFEST" mdl-manifest
+        "DECL?" mdl-decl?
         "GUNASSIGN" mdl-gunassign!
         "PRIMTYPE" mdl-primtype
         "TYPEPRIM" mdl-typeprim

@@ -68,6 +68,9 @@
 
 (define (compile-data n)
   (case (mdl-node-kind n)
+    [(decl) `(mdl-make-declaration
+              (mdl-list ,@(map compile-data (mdl-node-value n)))
+              ,(mdl-node-line n) ,(mdl-node-column n))]
     [(atom) (mdl-constant n)]
     [(string) (mdl-node-value n)]
     [(list) `(mdl-list ,@(map compile-data (mdl-node-value n)))]
@@ -109,6 +112,15 @@
   (when (null? body) (error 'mdl-compiler "empty body"))
   `(begin ,@(map (lambda (n) (compile-expression n locals)) body)))
 
+(define (split-declaration owner body)
+  (define decl (and (pair? body) (is-kind? (car body) 'decl) (car body)))
+  (define expressions (if decl (cdr body) body))
+  (for ([item (in-list expressions)])
+    (when (is-kind? item 'decl)
+      (unsupported item "#DECL must immediately follow the formal or auxiliary list")))
+  (when (null? expressions) (unsupported owner "declaration requires a body"))
+  (values decl expressions))
+
 (define (compile-definition n xs)
   ;; Historical DEFINE admits an activation name ATOM between the function
   ;; name and the formal list: <DEFINE F SELF (ARGS) BODY>. The 1977
@@ -122,6 +134,8 @@
           [(and (>= (length xs) 3) (is-kind? (second xs) 'list))
            (values #f (second xs) (cddr xs))]
           [else (unsupported n "DEFINE expects a name, argument list, and body")]))
+  (define-values (decl body) (split-declaration n body-xs))
+  (define decl-expr (if decl (compile-data decl) #f))
   (define fn-name (atom-name (first xs)))
   (define specs (parse-formal-list args-node))
   ;; The leading activation atom binds before all formals, like the
@@ -139,9 +153,11 @@
       `(mdl-define-interpreted!
         (mdl-atom ,fn-name)
         ,(compile-data args-node)
-        (list ,@(map compile-data body-xs))
-        ,(if leading-act `(mdl-atom ,leading-act) #f))
-      `(mdl-define! (mdl-atom ,fn-name)
+        (list ,@(map compile-data body))
+        ,(if leading-act `(mdl-atom ,leading-act) #f)
+        ,decl-expr)
+      `(let ([definition-decl ,decl-expr])
+         (mdl-define! (mdl-atom ,fn-name)
      (lambda mdl-given-args
        (mdl-with-function-scope
         (lambda ()
@@ -150,13 +166,15 @@
                 (mdl-atom ,fn-name)
                 (list ,@(map (lambda (spec) (spec-expression spec names)) all-specs))
                 mdl-given-args
-                (lambda () ,(compile-sequence body-xs names)))
+                (lambda () ,(compile-sequence body names))
+                definition-decl)
               `(mdl-bind-function-formals
                 (mdl-atom ,fn-name)
                 (list ,@(map (lambda (spec) (spec-expression spec names)) all-specs))
                 mdl-given-args
                 #f
-                (lambda () ,(compile-sequence body-xs names))))))))))
+                (lambda () ,(compile-sequence body names))
+                definition-decl)))))))))
 
 ;; Historical formal lists mark sections with STRINGs: "OPT"/"OPTIONAL",
 ;; "ARGS", "TUPLE", "AUX"/"EXTRA", and "NAME"/"ACT" for the function's own
@@ -312,6 +330,7 @@
     (unsupported aux (format "~a requires an auxiliary LIST" name)))
   (when (null? (cdr operands))
     (unsupported n (format "~a requires a body" name)))
+  (define-values (decl body) (split-declaration n (cdr operands)))
   (define names '())
   (define specs
     (for/list ([item (in-list (mdl-node-value aux))])
@@ -332,10 +351,11 @@
   (when (and activation-name (member activation-name names))
     (unsupported n "activation name duplicates an auxiliary binding"))
   `(mdl-with-prog-activation
-    (vector ,@(compile-prog-items (cdr operands) locals))
+    (vector ,@(compile-prog-items body locals))
     (list ,@specs)
     ,repeat?
-    ,(if activation-name `(mdl-atom ,activation-name) #f)))
+    ,(if activation-name `(mdl-atom ,activation-name) #f)
+    ,(if decl (compile-data decl) #f)))
 
 (define (compile-cond n clauses locals)
   (when (null? clauses) (unsupported n "COND requires at least one clause"))
@@ -399,10 +419,12 @@
                     (values #f (second args) (cddr args))]
                    [else (unsupported n "DEFMAC expects an ATOM name, formal list, and body")]))
            (parse-formal-list formals-node)
+           (define-values (decl body) (split-declaration n body-xs))
            `(mdl-defmac! (mdl-atom ,(atom-name (first args)))
                          ,(compile-data formals-node)
-                         (list ,@(map compile-data body-xs))
-                         ,(if leading-act `(mdl-atom ,leading-act) #f))]
+                         (list ,@(map compile-data body))
+                         ,(if leading-act `(mdl-atom ,leading-act) #f)
+                         ,(if decl (compile-data decl) #f))]
           [(PROG) (compile-prog n args locals)]
           [(REPEAT) (compile-prog n args locals #t)]
           [(RETURN)
@@ -489,6 +511,7 @@
     [(uvector) `(mdl-uvector ,@(map (lambda (a) (compile-expression a locals))
                                    (mdl-node-value n)))]
     [(typed) (compile-typed n)]
+    [(decl) (compile-data n)]
     [(form) (compile-form n locals)]
     [else (unsupported n (format "unsupported MDL construct ~a" (mdl-node-kind n)))]))
 

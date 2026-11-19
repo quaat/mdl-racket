@@ -1,0 +1,290 @@
+{
+  "recorded_at": "2026-11-19T17:51:24.311976+00:00",
+  "source_commits": {
+    "mit_zork": "d94501340842e006791fce0757dc0043b8ec8916",
+    "mdlzork": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3"
+  },
+  "summary": {
+    "parsed": 36,
+    "failed": 0,
+    "non-text": 4
+  },
+  "files": [
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/act2.27",
+      "sha256": "5cace58886ed52645fcfb5d856b04944452d9646aca5b4781e75a5618cfa0da1",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/act2.27: 60 top-level forms; 3312 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/dung.56",
+      "sha256": "7078cde7f3e032f3214b50ca0d6a50eab666fd2d20615afce1b19cb2e001e0f8",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/dung.56: 571 top-level forms; 8886 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/act1.37",
+      "sha256": "4d1dd616a222f232d92f935754d31347b126bca92fb457796c0d3b13b57b2d2e",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/act1.37: 145 top-level forms; 8399 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/act1.38",
+      "sha256": "c7d9b34660a231b4b671a81b92c8c01981c7576873ede243da56282ab5549476",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/act1.38: 145 top-level forms; 8399 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/act2z.27",
+      "sha256": "0d4b2901429cd370dcb36bbf027de04d5054bd72ae914878b0fd599ac879cd9e",
+      "status": "non-text",
+      "reason": "UTF-8 decode failed at byte 5"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/act3.13",
+      "sha256": "5dd099ffe7264bca8743434e1316c067bad15f27c6e56e4d82cd34696781c376",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/act3.13: 31 top-level forms; 1479 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/defs.63",
+      "sha256": "e91de3c129dd8c66a3cecda6d21084f49887710670cf1234dde1d63fb2b139a0",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/defs.63: 93 top-level forms; 1887 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/dungz.56",
+      "sha256": "35f00e861e1331741bc45de17d5e9e03d15fbfdc0017df2802217f7aa8dbca0c",
+      "status": "non-text",
+      "reason": "UTF-8 decode failed at byte 5"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/makstr.7",
+      "sha256": "9ccd24ab07cd249e1307863bb50685d8dc530c01368a349f5ec287131336e866",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/makstr.7: 27 top-level forms; 1149 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/np.92",
+      "sha256": "357831a91ad47ac575f825166894c994fcd3f7454adc69a86a5c45c5fb78e6ca",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/np.92: 33 top-level forms; 2332 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/np.93",
+      "sha256": "e894e4b058c729caf5d981c95d6e89c6dc758d3ab44ecb260fc77a9e13ba17ef",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/np.93: 33 top-level forms; 2347 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/rooms.98",
+      "sha256": "63a6cb0cf00dc580d71109fbf3122339a3333792fe8be7b386dbfeb2a65163b5",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/rooms.98: 145 top-level forms; 8364 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/rooms.99",
+      "sha256": "3a968699355e682534cdea626b45eb8202f2970756456cd739e0f1c6b58aa1e1",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/original_source/zork/lcf/rooms.99: 145 top-level forms; 8384 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77act1.mud",
+      "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77act1.mud: 145 top-level forms; 8391 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77act2.mud",
+      "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77act2.mud: 60 top-level forms; 3312 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77act3.mud",
+      "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77act3.mud: 31 top-level forms; 1479 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77defs.mud",
+      "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77defs.mud: 96 top-level forms; 1948 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77dung.mud",
+      "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77dung.mud: 573 top-level forms; 8894 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77loadall.mud",
+      "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77loadall.mud: 13 top-level forms; 52 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77makstr.mud",
+      "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77makstr.mud: 27 top-level forms; 1149 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77np.mud",
+      "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77np.mud: 33 top-level forms; 2347 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77patch.mud",
+      "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77patch.mud: 17 top-level forms; 119 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77rooms.mud",
+      "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/77rooms.mud: 146 top-level forms; 8434 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/78melee.mud",
+      "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/78melee.mud: 37 top-level forms; 2155 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/81prim.mud",
+      "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/81prim.mud: 8 top-level forms; 526 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/81tell-repl.mud",
+      "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/81tell-repl.mud: 43 top-level forms; 661 nodes"
+    },
+    {
+      "path": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion/run.mud",
+      "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/run.mud: 2 top-level forms; 5 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/act2.27",
+      "sha256": "5cace58886ed52645fcfb5d856b04944452d9646aca5b4781e75a5618cfa0da1",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/act2.27: 60 top-level forms; 3312 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/dung.56",
+      "sha256": "7078cde7f3e032f3214b50ca0d6a50eab666fd2d20615afce1b19cb2e001e0f8",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/dung.56: 571 top-level forms; 8886 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/act1.37",
+      "sha256": "4d1dd616a222f232d92f935754d31347b126bca92fb457796c0d3b13b57b2d2e",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/act1.37: 145 top-level forms; 8399 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/act1.38",
+      "sha256": "c7d9b34660a231b4b671a81b92c8c01981c7576873ede243da56282ab5549476",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/act1.38: 145 top-level forms; 8399 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/act2z.27",
+      "sha256": "0d4b2901429cd370dcb36bbf027de04d5054bd72ae914878b0fd599ac879cd9e",
+      "status": "non-text",
+      "reason": "UTF-8 decode failed at byte 5"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/act3.13",
+      "sha256": "5dd099ffe7264bca8743434e1316c067bad15f27c6e56e4d82cd34696781c376",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/act3.13: 31 top-level forms; 1479 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/defs.63",
+      "sha256": "e91de3c129dd8c66a3cecda6d21084f49887710670cf1234dde1d63fb2b139a0",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/defs.63: 93 top-level forms; 1887 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/dungz.56",
+      "sha256": "35f00e861e1331741bc45de17d5e9e03d15fbfdc0017df2802217f7aa8dbca0c",
+      "status": "non-text",
+      "reason": "UTF-8 decode failed at byte 5"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/makstr.7",
+      "sha256": "9ccd24ab07cd249e1307863bb50685d8dc530c01368a349f5ec287131336e866",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/makstr.7: 27 top-level forms; 1149 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/np.92",
+      "sha256": "357831a91ad47ac575f825166894c994fcd3f7454adc69a86a5c45c5fb78e6ca",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/np.92: 33 top-level forms; 2332 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/np.93",
+      "sha256": "e894e4b058c729caf5d981c95d6e89c6dc758d3ab44ecb260fc77a9e13ba17ef",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/np.93: 33 top-level forms; 2347 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/rooms.98",
+      "sha256": "63a6cb0cf00dc580d71109fbf3122339a3333792fe8be7b386dbfeb2a65163b5",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/rooms.98: 145 top-level forms; 8364 nodes"
+    },
+    {
+      "path": ".cache/upstream/mit_zork/zork/lcf/rooms.99",
+      "sha256": "3a968699355e682534cdea626b45eb8202f2970756456cd739e0f1c6b58aa1e1",
+      "status": "parsed",
+      "exit_code": 0,
+      "output": "PARSED .cache/upstream/mit_zork/zork/lcf/rooms.99: 145 top-level forms; 8384 nodes"
+    }
+  ]
+}
