@@ -1,4 +1,4 @@
-# Status — 2026-11-18 (M2 macro slice locally verified)
+# Status — 2026-11-19 (M2 G1 review follow-up)
 
 ## M2 source execution audit (G0)
 
@@ -29,8 +29,15 @@ unmodified definition with controlled input; no gameplay is claimed.
 The PR #41 review follow-up fixes an indirect symlink escape and preserves
 completed forms before later reader errors. The first native CI run failed
 because the minimal image lacks `raco make`; the conditional precompile fix
-awaits rerun. The local regression suite now reports 561 Racket checks and
-13 Python tests. See the review section of `SOURCE-LOADER.md`.
+passed both the harness and native reference CI workflows on the follow-up
+commit. That follow-up reported 561 Racket checks and 13 Python tests. See
+the review section of `SOURCE-LOADER.md`.
+The second PR #41 review identified link targets containing `..` after a
+symlink and interpreted definitions rejected by `mdl-session-call`. Both now
+have focused regressions and local fixes; see the same report for validation.
+The current suite reports 568 Racket checks and 13 Python tests.
+G1 remains a local slice PASS while the PR is under review. G2 has a separate
+stacked PR #43; the integrated M2 gate remains open.
 
 | Gate | State | Evidence / limitation |
 |---|---|---|

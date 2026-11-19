@@ -13,7 +13,9 @@ The G1 loader suite is `raco test tests/loader_test.rkt` and is included in
 checks shared session state, macro/function persistence, nested/repeated
 `FLOAD`, partial execution, path containment, cycles, and structured source
 errors, including indirect symlink targets and malformed later forms after a
-completed prefix. The local CLI can be run with
+completed prefix. Review regressions also cover a symlink target with `..`
+after another symlink and session calls to compiled, interpreted, generated,
+and macro definitions. The local CLI can be run with
 `racket scripts/mdl_load.rkt --source-root ROOT --entry FILE --report REPORT`;
 it exits nonzero on actual source execution failure and writes JSON in both
 cases. See [`SOURCE-LOADER.md`](evidence/M2/SOURCE-LOADER.md) for reference

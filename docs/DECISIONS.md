@@ -450,3 +450,11 @@ probe; source-relative lookup is a documented local policy deviation. The
 loader does not roll back side effects, emulate Confusion's interactive error
 levels, expose a network evaluator, or implement full MDL filesystem semantics.
 No upstream source or GPLv3 code was copied or modified.
+
+**Review refinement (2026-11-19):** Resolve link-target components in lookup
+order, including `..` after a resolved symlink, so the authorized-root check
+uses the file that the filesystem will open. Dispatch local session calls to
+interpreted functions and macros through the existing runtime application
+path; compiled procedures continue through `mdl-apply`. These changes are
+covered by controlled loader fixtures and do not expand the filesystem root
+or add an evaluator service.

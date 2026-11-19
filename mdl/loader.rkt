@@ -82,23 +82,28 @@
   ;; Replay every target from its root, then continue with the remaining
   ;; suffix, so containment checks match the file that will be opened.
   (define (pieces path)
-    (explode-path (simplify-path (path->complete-path path) #f)))
+    (explode-path (path->complete-path path)))
   (let loop ([pending (pieces absolute)] [current #f] [hops 0])
     (cond
       [(null? pending) current]
       [else
+       (define part (car pending))
+       (when (eq? part 'up)
+         (unless current (error 'mdl-loader "parent component before path root")))
        (define next
-         (if current (build-path current (car pending)) (car pending)))
-       (if (link-exists? next)
-           (begin
-             (when (>= hops 32)
-               (error 'mdl-loader "symlink depth limit exceeded"))
-             (loop (append
-                    (pieces (path->complete-path (resolve-path next)
-                                               (path-only next)))
-                    (cdr pending))
-                   #f (add1 hops)))
-           (loop (cdr pending) next hops))])))
+         (if current (build-path current part) part))
+       (cond
+         [(eq? part 'up)
+          (loop (cdr pending) (path-only current) hops)]
+         [(link-exists? next)
+          (when (>= hops 32)
+            (error 'mdl-loader "symlink depth limit exceeded"))
+          (loop (append
+                 (pieces (path->complete-path (resolve-path next)
+                                            (path-only next)))
+                 (cdr pending))
+                #f (add1 hops))]
+         [else (loop (cdr pending) next hops)])])))
 
 (define (resolve-source session requested)
   (define base
@@ -213,4 +218,11 @@
   (call-in-session session (lambda () (mdl-gval name))))
 
 (define (mdl-session-call session name . args)
-  (call-in-session session (lambda () (apply mdl-apply name args))))
+  (call-in-session
+   session
+   (lambda ()
+     (define fn (mdl-gval name))
+     (cond
+       [(mdl-macro? fn) (mdl-eval (mdl-apply-interpreted fn args))]
+       [(mdl-function? fn) (mdl-apply-interpreted fn args)]
+       [else (apply mdl-apply name args)]))))

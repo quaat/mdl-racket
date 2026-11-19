@@ -545,6 +545,22 @@ in `docs/evidence/M2/macro-review-*`.
 
 ## M2 G1 source loading and FLOAD specification
 
+The local `mdl-session-call` API accepts MDL argument objects as call-site
+expressions. For an interpreted FUNCTION, ordinary formals evaluate those
+objects in the session and quoted formals bind them unchanged; a MACRO expands
+and evaluates its result. A compiled procedure still receives already
+evaluated values. This API follows the existing interpreted application
+behavior and is a local harness interface, not a claim about a historical MDL
+host API. Regression cases load both compiled and interpreted definitions and
+invoke them through the same session.
+
+The loader's authorized root applies to the file actually opened after
+filesystem link resolution. A link target containing a parent component is
+resolved component by component, after preceding links, matching filesystem
+lookup order. A raw requested path containing `..` remains rejected by local
+policy. Regression cases cover an in-root link target of the form
+`alias/../child.mud` where `alias` itself is a link.
+
 The [MDL manual, chapter 1](https://mdl-language.readthedocs.io/en/latest/01-basic-introduction/)
 and [chapter 11](https://mdl-language.readthedocs.io/en/latest/11-input-output/)
 describe `FLOAD` as reading and evaluating a file's MDL expressions. It

@@ -15,12 +15,14 @@ historical load barriers are identified. Run
 `racket scripts/audit_source_readiness.rkt` to reproduce its probes. The
 [G1 local source loader](docs/evidence/M2/SOURCE-LOADER.md) executes the
 existing MDL subset across files in a shared session and supports constrained
-nested `FLOAD`. Reproduce its pinned-source failure with
+nested `FLOAD`. Its G1 local gate passes, including review regressions for
+symlink lookup order and interpreted session calls; `make test` and the pinned
+Confusion build/capture/probes pass. Reproduce its pinned-source failure with
 `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json`.
 That command exits 1 after two completed expressions, at unsupported
-`#DECL` in `81prim.mud`; game initialization is not supported. G2 will invoke
-the original `VFLOAD` definition. M2's integrated gate and gameplay remain
-unverified.
+`#DECL` in `81prim.mud`; game initialization is not supported. G2's partial
+historical `VFLOAD` probe is in a separate stacked PR. M2's integrated gate
+and gameplay remain unverified.
 
 ## Goals
 
