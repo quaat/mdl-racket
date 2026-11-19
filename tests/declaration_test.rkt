@@ -75,6 +75,30 @@
 (check-equal? (run "#DECL #DECL ((X) FIX) 5") 5)
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL #DECL FIX")))
 
+;; Review-derived regressions: manifest gating, frame isolation, and macro
+;; declarations. A manifest global accepts only an ==?-identical reassignment
+;; unless .REDEFINE is true; MANIFEST before assignment does not make the
+;; global GASSIGNED?. A function's declaration never applies to another
+;; frame's bindings, and a DEFMAC's own declaration checks its bound formals.
+(check-equal? (run "<SETG M 1> <MANIFEST M> <SETG M 1>") 1)
+(check-exn #rx"ATTEMPT-TO-CHANGE-MANIFEST-VARIABLE M"
+           (lambda () (run "<SETG M 1> <MANIFEST M> <SETG M 2>")))
+(check-equal? (run "<SETG REDEFINE T> <SETG M 1> <MANIFEST M> <SETG M 2>") 2)
+(check-true (mdl-false? (run "<MANIFEST U> <GASSIGNED? U>")))
+(check-equal? (run "<DEFINE G (X) .X> <DEFINE F (X) #DECL ((X) FIX) <G \"str\">> <F 1>")
+              "str")
+(check-equal? (run "<DEFMAC ADD1M ('X) #DECL ((X) FIX) <FORM + .X 1>> <ADD1M 3>")
+              4)
+(check-exn #rx"DECL.*X"
+           (lambda ()
+             (run "<DEFMAC ADD1M ('X) #DECL ((X) FIX) <FORM + .X 1>> <ADD1M \"s\">")))
+;; An inner PROG's VALUE declaration is independent of the enclosing
+;; function's: the PROG accepts its result, and the function's own
+;; declaration then rejects it (error position is the function's #DECL).
+(check-exn #rx"DECL.*VALUE"
+           (lambda ()
+             (run "<DEFINE F () #DECL ((VALUE) FIX) <PROG () #DECL ((VALUE) STRING) <RETURN \"x\"> 1>> <F>")))
+
 ;; The original MSETG definition, verbatim from the pinned 81prim.mud
 ;; (SHA-256 8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571,
 ;; verified against the pinned file by tests/historical_decl_test.rkt in

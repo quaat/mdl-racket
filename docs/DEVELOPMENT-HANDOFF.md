@@ -17,13 +17,17 @@ evidence instead of duplicating logs. Last updated 2026-11-19 (M2-D1).
   `tests/historical_decl_test.rkt` (new, `make test-historical`),
   `tests/loader_test.rkt`, `scripts/test_racket.sh`, `Makefile`,
   `docs/SEMANTICS.md`.
-- **Tests last executed (2026-11-19, fresh):** full Racket suite 618 passed;
+- **Tests last executed (2026-11-19, fresh):** full Racket suite 626 passed;
   loader 57; `make test-historical` 23 VFLOAD + 10 declaration assertions;
-  Python 13; `git diff --check` clean.
-  Loader/historical tests need writable `/tmp` (run outside the per-command
-  sandbox); in-sandbox Racket needs `PLTCOLLECTS=":$PWD"`. The smoke CI
-  container does not provision `.cache/upstream/`, so pinned-source
-  assertions live only in `make test-historical` (reference workflow).
+  Python 13; `git diff --check` clean; PR #45 CI green on the review-fix
+  head. Loader/historical tests need writable `/tmp` (run outside the
+  per-command sandbox); in-sandbox Racket needs `PLTCOLLECTS=":$PWD"`. The
+  smoke CI container does not provision `.cache/upstream/`, so
+  pinned-source assertions live only in `make test-historical`
+  (reference workflow). Review state: PR #45 reviewed (no defects; seven
+  review-derived regressions added); Codex CLI not installed, so the review
+  ran in-session — run `/codex:setup` to restore the Codex review path.
+  Merge decision pending on the final CI rerun.
 - **First failing source construct:** `!`-splice, `81prim.mud:16:46`
   (`!.PL` in the original `PSETG`), compile stage — then `PSETG`'s compound
   `<LIST [REST ATOM]>` pattern.

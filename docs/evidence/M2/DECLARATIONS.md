@@ -124,7 +124,7 @@ reproduces Confusion because it is the comparison reference. Wrong-atom
 
 | Command | Exit | Observed result |
 |---|---:|---|
-| `raco test tests/declaration_test.rkt` | 0 | 48 checks including the doubled-`#DECL`, `DECL?`, expression-position, and original-`MSETG` fixture cases |
+| `raco test tests/declaration_test.rkt` | 0 | 56 checks including the doubled-`#DECL`, `DECL?`, expression-position, original-`MSETG` fixture, and review-regression cases |
 | `bash scripts/test_racket.sh` | 0 | 618 Racket checks passed (loader and historical tests need `/tmp` and were run outside the per-command sandbox; see environment note) |
 | `raco test tests/loader_test.rkt` (from repo root) | 0 | 57 checks passed |
 | `make test-historical` (from repo root) | 0 | 23 VFLOAD assertions plus 10 declaration assertions, including the pinned `81prim.mud` SHA verification, the FAIL-at-splice load progression, and the retained original `MSETG` execution |
@@ -168,6 +168,30 @@ Unsupported (explicit failures, not silent no-ops): compound patterns
 (`<LIST FIX>`, `[REST ATOM]`), quoted-object patterns, `SPECIAL`/
 `UNSPECIAL`, aliases, `GDECL`/`DECL-CHECK`, RSUBR declaration forms,
 non-parenthesized `#DECL` payloads other than the doubled-`#DECL` form.
+
+## Post-review regression additions
+
+The PR #45 review (Codex CLI was unavailable, so the independent pass ran
+in-session with fresh context plus targeted inline probes) found no
+defects in the slice. Fifteen review probes verified: interpreted AUX
+initializer and `SET` enforcement through the loader session, absence of
+cross-frame declaration leakage between nested calls, all manifest edges
+(identical reassignment allowed, differing reassignment rejected, the
+`.REDEFINE` override, `MANIFEST` before assignment leaving `GASSIGNED?`
+false), independent `VALUE` declarations of an inner PROG and its
+enclosing function (the function's own declaration rejects a result the
+PROG accepted, at the function's `#DECL` position), `REPEAT`
+declarations, `RETURN` to a named activation checking the function's
+result declaration, and a `DEFMAC`'s own declaration checking its bound
+formals at expansion. Six behaviors the probes confirmed but the suite
+did not yet pin were added as regressions to
+`tests/declaration_test.rkt`: the four manifest edges, cross-frame
+isolation, macro declaration acceptance/rejection, and the inner-PROG
+`VALUE` independence. One permissive corner was noted and deliberately
+left: `SETG` after `MANIFEST` on a still-unassigned global is allowed
+(the restriction only applies once a value is assigned); no historical
+source exercises it, Confusion's `MANIFEST` is a no-op, so no parity is
+claimed for it.
 
 ## Next action
 
