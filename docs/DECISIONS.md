@@ -458,6 +458,10 @@ interpreted functions and macros through the existing runtime application
 path; compiled procedures continue through `mdl-apply`. These changes are
 covered by controlled loader fixtures and do not expand the filesystem root
 or add an evaluator service.
+Each consecutive parent component is applied to the already resolved path;
+the third PR #41 review found that `path-only` retained a trailing separator
+and failed to ascend on the second parent component. The resolver now
+simplifies one parent step at a time after preceding symlinks are resolved.
 
 ## ADR-0022: Explicit partial-source historical probe and narrow text output
 

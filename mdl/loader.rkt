@@ -94,7 +94,7 @@
          (if current (build-path current part) part))
        (cond
          [(eq? part 'up)
-          (loop (cdr pending) (path-only current) hops)]
+          (loop (cdr pending) (simplify-path next #f) hops)]
          [(link-exists? next)
           (when (>= hops 32)
             (error 'mdl-loader "symlink depth limit exceeded"))
