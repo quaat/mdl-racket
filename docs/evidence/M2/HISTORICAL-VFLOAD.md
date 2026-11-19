@@ -71,15 +71,15 @@ unsupported. The [semantic ledger](../../SEMANTICS.md) specifies the slice.
 
 ## Validation and boundary
 
-Base loader review-fix commit: `d654560ea4ede4311618539db7d7e36706032469`
+Base loader review-fix commit: `84da803a774f5f6658d04b01baf8587f95f24821`
 (G1 PR #41). Racket 7.9 [bc], Python 3.13.0, pinned native Confusion and
 BDW GC 8.0.4 were used locally.
 
 | Command | Exit | Result |
 |---|---:|---|
 | `racket tests/historical_vfload_test.rkt` before prefix and I/O implementation | 1 | Loader rejected `#:max-expressions` (expected red) |
-| `make test-historical` after implementation | 0 | Source SHAs verified; 21 historical probe assertions pass |
-| `make test` | 0 | 561 Racket checks, 13 Python tests |
+| `make test-historical` after review fixes | 0 | Source SHAs verified; 23 historical probe assertions pass |
+| `make test` | 0 | 568 Racket checks, 13 Python tests |
 | `.venv/bin/python -m scripts.probe_vfload_reference` | 0 | Six focused Confusion observations saved |
 | `make check-source` | 0 | 36 text files parsed, four non-text files excluded, zero failures; generated M0 sweep restored |
 | `make reference-build` | 0 | Pinned native build, with `_XOPEN_SOURCE` redefinition warning |
@@ -92,6 +92,31 @@ The native five-turn input was `west`, `open mailbox`, `take leaflet`,
 `inventory`, `score`; no RNG seed was set. The approved golden was not changed.
 The digest-pinned Racket 8.10 CI container test result will be recorded on
 the review PR; local results alone do not imply CI PASS.
+
+### PR #43 review follow-up (2026-11-19)
+
+The first native CI run on `b9d165e` failed at `make test-historical` because
+the minimal Racket image did not have `compatibility-lib`, which provides
+`racket/mpair` for the runtime. The workflow now installs that library before
+the historical probe. The first code review also found that the local
+`raises` helper accepted its own `expected failure` exception as a valid
+failure. A new self-check first exited 1 with `expected #t, got #f`; the
+helper now records only exceptions thrown by the tested call and raises its
+own assertion afterward. The FIX-path, missing-file, STRING and PRINTSTRING
+negative cases therefore detect unexpected success.
+
+After rebasing on the corrected G1 loader, `make test-historical` exits 0
+with 23 assertions, `make test` exits 0 with 568 Racket checks and 13 Python
+tests, `make check-source` exits 0 with 36 parsed text files, and the native
+build, five-turn capture, 12 primitive probes and six focused VFLOAD probes
+all exit 0. The full-load diagnostic still exits 1 at `81prim.mud` form 2
+`#DECL` after two completed expressions, as expected. The approved M0
+golden's stable fields still match after the documented capture/build
+metadata exclusions. The rebuilt local Confusion binary has SHA256
+`9d8a07bd0bb88ff89cceb6b257e4752174a1a5831540a531db514e6880a4c305`;
+the six-case reference JSON records that binary and unchanged observations.
+No RNG seed was set for the fixed five-turn input sequence. The new CI run
+for this follow-up commit is pending and must be recorded on PR #43.
 
 The reference result is a partial source-execution slice. The full
 `77loadall.mud` still reaches `81prim.mud` and stops on its unsupported

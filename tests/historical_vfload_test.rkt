@@ -15,9 +15,18 @@
     (error 'historical-vfload "expected ~s, got ~s" expected actual)))
 (define (raises predicate thunk)
   (set! checks (add1 checks))
-  (with-handlers ([predicate values])
-    (thunk)
-    (error 'historical-vfload "expected failure")))
+  (define raised?
+    (with-handlers ([predicate (lambda (_) #t)])
+      (thunk)
+      #f))
+  (unless raised? (error 'historical-vfload "expected failure")))
+(check
+ (with-handlers ([exn:fail?
+                  (lambda (e)
+                    (regexp-match? #rx"expected failure" (exn-message e)))])
+   (raises exn:fail? void)
+   #f)
+ #t)
 (define sha-tool (find-executable-path "sha256sum"))
 (unless sha-tool (error 'historical-vfload "sha256sum is required"))
 (define-values (proc stdout stdin stderr)

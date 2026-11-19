@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_file": "77loadall.mud",
   "source_sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
-  "interpreter_sha256": "b204ba8a1102dda490c97c890411ae36a62b171e5fbe743b7ab91ff00f348480",
+  "interpreter_sha256": "9d8a07bd0bb88ff89cceb6b257e4752174a1a5831540a531db514e6880a4c305",
   "protocol": "one local Confusion REPL process per case; each input ends with <QUIT>; TEMP_ROOT denotes a disposable source directory",
   "fixture_source": "<SETG HISTORICAL-RESULT 27>\n",
   "cases": [

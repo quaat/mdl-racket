@@ -27,7 +27,12 @@ the pinned source checkouts and then runs
 `77loadall.mud` SHA256, copies exact bytes into a disposable authorized root,
 loads only its first definition with a PARTIAL report, invokes `VFLOAD`, and
 checks output, return, global state and invalid calls. The native reference
-workflow runs this target after source verification. Focused Confusion
+workflow installs `compatibility-lib` for the runtime's `racket/mpair` import,
+then runs this target after source verification. Its negative-call helper has
+a self-check that rejects unexpected success. The initial PR #43 native run
+failed on the missing library; see the
+[`review evidence`](evidence/M2/HISTORICAL-VFLOAD.md#pr-43-review-follow-up-2026-11-19).
+Focused Confusion
 evidence is reproducible with
 `.venv/bin/python -m scripts.probe_vfload_reference` after the native build.
 See [`HISTORICAL-VFLOAD.md`](evidence/M2/HISTORICAL-VFLOAD.md).
