@@ -55,10 +55,11 @@ The full source sequence remains blocked at `#DECL`; the next slice must
 implement verified declaration semantics. No gameplay is claimed.
 The [M2 source execution inventory](evidence/M2/SOURCE-EXECUTION.md) keeps
 the integrated G3 gate at NOT RUN.
-PR #43's first native CI run failed before reference capture because the
-minimal Racket image lacked `compatibility-lib` for `racket/mpair`. The review
+PR #43's first two native CI runs failed before reference capture because the
+minimal Racket image lacked `compatibility-lib` for `racket/mpair`, then
+`rackunit-lib` for the runtime's test submodule. The review
 also found that a negative-test helper accepted its own assertion exception.
-Both have follow-up fixes: the workflow installs the library, and a
+Both have follow-up fixes: the workflow installs both libraries, and a
 failing-then-passing helper self-check makes wrong-type tests meaningful.
 Local G2 validation now reports 23 historical assertions, 568 Racket checks,
 13 Python tests, and matching reference output; follow-up CI is pending.

@@ -97,8 +97,11 @@ the review PR; local results alone do not imply CI PASS.
 
 The first native CI run on `b9d165e` failed at `make test-historical` because
 the minimal Racket image did not have `compatibility-lib`, which provides
-`racket/mpair` for the runtime. The workflow now installs that library before
-the historical probe. The first code review also found that the local
+`racket/mpair` for the runtime. The next native run on `4291b1d` installed
+that library and reached a second missing module: `rackunit` from the
+runtime's test submodule at `mdl/runtime/core.rkt:1411:11`. The workflow now
+installs both `compatibility-lib` and `rackunit-lib` before the historical
+probe. The first code review also found that the local
 `raises` helper accepted its own `expected failure` exception as a valid
 failure. A new self-check first exited 1 with `expected #t, got #f`; the
 helper now records only exceptions thrown by the tested call and raises its
@@ -115,8 +118,8 @@ golden's stable fields still match after the documented capture/build
 metadata exclusions. The rebuilt local Confusion binary has SHA256
 `9d8a07bd0bb88ff89cceb6b257e4752174a1a5831540a531db514e6880a4c305`;
 the six-case reference JSON records that binary and unchanged observations.
-No RNG seed was set for the fixed five-turn input sequence. The new CI run
-for this follow-up commit is pending and must be recorded on PR #43.
+No RNG seed was set for the fixed five-turn input sequence. The next CI run
+for this dependency correction is pending and must be recorded on PR #43.
 
 The reference result is a partial source-execution slice. The full
 `77loadall.mud` still reaches `81prim.mud` and stops on its unsupported

@@ -24,8 +24,8 @@ That command exits 1 after two completed expressions, at unsupported
 [G2 partial-source probe](docs/evidence/M2/HISTORICAL-VFLOAD.md) verifies
 the pinned source hash and invokes the unmodified reconstructed `VFLOAD`
 definition on a controlled file with matching Confusion output and state.
-Its local gate passes; the initial native CI run failed on a missing Racket
-library and the corrected workflow is awaiting a new run. Run
+Its local gate passes; two native CI attempts exposed missing Racket libraries,
+and the corrected workflow is awaiting a new run. Run
 `make test-historical` to reproduce the probe. The loader reports the 12
 unexecuted forms explicitly. M2's integrated gate and gameplay remain
 unverified; `#DECL` is the next source dependency.
