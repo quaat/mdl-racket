@@ -1,4 +1,4 @@
-# Status — 2026-11-19 (M2 G1 review follow-up)
+# Status — 2026-11-19 (M2 historical VFLOAD slice under review)
 
 ## M2 source execution audit (G0)
 
@@ -42,6 +42,35 @@ Both follow-up workflows passed on `88d7b39`: harness run 44571160830 and
 native reference run 44571160806. G1 remains a local slice PASS while the
 PR is under review. G2 has a separate stacked PR #43; the integrated M2
 gate remains open.
+
+## M2 historical VFLOAD partial-source probe (G2)
+
+**G2 PASS locally; integrated M2 G3 NOT RUN.** The test verifies the pinned
+`77loadall.mud` SHA256, copies its bytes unchanged into a disposable
+authorized root, executes only its first `DEFINE VFLOAD`, and invokes that
+original reconstructed-source definition on a controlled file. The loader
+explicitly reports PARTIAL (one completed, 12 unexecuted forms); the call
+prints `<fixture-path> loaded`, returns empty FALSE and installs the fixture's
+global value. Six focused pinned Confusion cases corroborate the relevant
+output and state. See [`HISTORICAL-VFLOAD.md`](evidence/M2/HISTORICAL-VFLOAD.md).
+`PRINTSTRING` follows the manual's count return while Confusion returns the
+buffer, a recorded deviation that does not affect VFLOAD's final value.
+The full source sequence remains blocked at `#DECL`; the next slice must
+implement verified declaration semantics. No gameplay is claimed.
+The [M2 source execution inventory](evidence/M2/SOURCE-EXECUTION.md) keeps
+the integrated G3 gate at NOT RUN.
+PR #43's first two native CI runs failed before reference capture because the
+minimal Racket image lacked `compatibility-lib` for `racket/mpair`, then
+`rackunit-lib` for the runtime's test submodule. The review
+also found that a negative-test helper accepted its own assertion exception.
+Both have follow-up fixes: the workflow installs both libraries, and a
+failing-then-passing helper self-check makes wrong-type tests meaningful.
+The dependency correction passed both workflows on `b4b2809`. After merging
+the latest G1 path fix, local G2 validation reports 23 historical assertions,
+570 Racket checks, 13 Python tests, and matching reference output; the
+combined branch's [harness run 44571763597](https://github.com/quaat/mdl-racket/actions/runs/44571763597)
+and [native run 44571763652](https://github.com/quaat/mdl-racket/actions/runs/44571763652)
+also passed.
 
 | Gate | State | Evidence / limitation |
 |---|---|---|

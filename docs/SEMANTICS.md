@@ -589,6 +589,28 @@ remain under one explicit root; symlink escapes, traversal and cycles fail.
 This restricted path policy is a local harness boundary, not a historical MDL
 filesystem claim. No network endpoint is provided.
 
+## M2 G2 STRING, PRINTSTRING, and TERPRI specification
+
+The [MDL manual, chapter 7](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/)
+defines `STRING` as concatenating evaluated STRING or CHARACTER arguments;
+zero arguments yield an empty STRING. This slice supports STRING arguments
+only, because CHARACTER values are not implemented. It rejects any other
+type explicitly. The unmodified `VFLOAD` definition needs two STRING
+arguments: the file name and `" loaded"`.
+
+The [manual, chapter 11](https://mdl-language.readthedocs.io/en/latest/11-input-output/)
+states that `PRINTSTRING` outputs the supplied STRING and returns the number
+of characters written; `TERPRI` emits a newline and returns empty FALSE.
+This slice supports only the default output destination and the full STRING;
+explicit CHANNEL and count arguments remain unsupported. Pinned Confusion
+returned the original STRING from `<PRINTSTRING "abc">` after outputting
+`abc`, contrary to the manual's count. The Racket implementation follows
+the manual's return value; this deviation is observable but does not affect
+`VFLOAD`, which discards the `PRINTSTRING` result. Pinned Confusion returned
+empty FALSE from `<TERPRI>` and emitted a line feed on the local Unix build.
+The Racket default output port likewise emits a line feed; MDL's documented
+terminal carriage-return/line-feed convention remains unmodeled.
+
 ## M0 native Confusion observations (2026-11-17)
 
 The exact inputs and complete stdout/stderr for these observations are in

@@ -121,7 +121,8 @@
            "source path escapes authorized root"))
   canonical)
 
-(define (load-internal! session requested)
+(define (load-internal! session requested [max-expressions #f]
+                        [skipped-box (box 0)])
   (define path
     (with-handlers ([exn:fail:mdl-load? raise]
                     [exn:fail?
@@ -145,70 +146,91 @@
         (file->string path)))
     (define next-node (make-mdl-node-reader source #:source file))
     (let loop ([index 1])
-      (define node
-        (with-handlers ([exn:fail:mdl-reader?
-                         (lambda (e)
-                           (fail! session "reader" "parse" file index
-                                  (mdl-node 'file #f
-                                            (exn:fail:mdl-reader-line e)
-                                            (exn:fail:mdl-reader-column e))
-                                  (exn-message e)))]
-                        [exn:fail?
-                         (lambda (e)
-                           (fail! session "reader" "parse" file index #f
-                                  (exn-message e)))])
-          (next-node)))
-      (when node
-      (define compiled
-        (with-handlers ([exn:fail:mdl-compiler?
-                         (lambda (e)
-                           (fail! session "compiler" "compile" file index
-                                  (exn:fail:mdl-compiler-node e)
-                                  (exn-message e)))]
-                        [exn:fail?
-                         (lambda (e)
-                           (fail! session "compiler" "compile" file index node
-                                  (exn-message e)))])
-          (compile-expression node)))
-      (with-handlers ([exn:fail:mdl-load?
-                       (lambda (e)
-                         (record! session
-                                  (hash-set
-                                   (diagnostic session "nested-load" "execute"
-                                               file index node (exn-message e))
-                                   'status "FAIL"))
-                         (raise e))]
-                      [exn:fail?
-                       (lambda (e)
-                         (fail! session "runtime" "execute" file index node
-                                (exn-message e)))])
-        (eval compiled)
-        (record! session
-                 (hash 'status "PASS" 'file file 'expression_index index
-                       'line (mdl-node-line node) 'column (mdl-node-column node)
-                       'construct (construct-name node)
-                       'load_chain (chain-names session))))
-      (loop (add1 index))))
-    "DONE"))
+      (if (and max-expressions (> index max-expressions))
+          (let ([total
+                 ;; Counting skipped forms is diagnostic only. An explicit
+                 ;; prefix never evaluates or requires the remaining forms.
+                 (with-handlers ([exn:fail? (lambda (_) #f)])
+                   (length (parse-mdl source #:source file)))])
+            (set-box! skipped-box (and total (- total max-expressions)))
+            (if (and total (= total max-expressions)) "DONE" "PARTIAL"))
+          (let ([node
+                 (with-handlers ([exn:fail:mdl-reader?
+                                  (lambda (e)
+                                    (fail! session "reader" "parse" file index
+                                           (mdl-node 'file #f
+                                                     (exn:fail:mdl-reader-line e)
+                                                     (exn:fail:mdl-reader-column e))
+                                           (exn-message e)))]
+                                 [exn:fail?
+                                  (lambda (e)
+                                    (fail! session "reader" "parse" file index #f
+                                           (exn-message e)))])
+                   (next-node))])
+            (if (not node)
+                "DONE"
+                (let ([compiled
+                       (with-handlers ([exn:fail:mdl-compiler?
+                                        (lambda (e)
+                                          (fail! session "compiler" "compile"
+                                                 file index
+                                                 (exn:fail:mdl-compiler-node e)
+                                                 (exn-message e)))]
+                                       [exn:fail?
+                                        (lambda (e)
+                                          (fail! session "compiler" "compile"
+                                                 file index node (exn-message e)))])
+                         (compile-expression node))])
+                  (with-handlers ([exn:fail:mdl-load?
+                                   (lambda (e)
+                                     (record! session
+                                              (hash-set
+                                               (diagnostic session "nested-load"
+                                                           "execute" file index node
+                                                           (exn-message e))
+                                               'status "FAIL"))
+                                     (raise e))]
+                                  [exn:fail?
+                                   (lambda (e)
+                                     (fail! session "runtime" "execute" file
+                                            index node (exn-message e)))])
+                    (eval compiled)
+                    (record! session
+                             (hash 'status "PASS" 'file file
+                                   'expression_index index
+                                   'line (mdl-node-line node)
+                                   'column (mdl-node-column node)
+                                   'construct (construct-name node)
+                                   'load_chain (chain-names session))))
+                  (loop (add1 index)))))))))
 
-(define (mdl-session-load! session entry)
+(define (mdl-session-load! session entry #:max-expressions [max-expressions #f])
   (unless (mdl-session? session)
     (raise-argument-error 'mdl-session-load! "mdl-session?" session))
   (unless (string? entry)
     (raise-argument-error 'mdl-session-load! "string?" entry))
+  (when (and max-expressions
+             (not (exact-positive-integer? max-expressions)))
+    (raise-argument-error 'mdl-session-load!
+                          "exact-positive-integer?" max-expressions))
   (set-box! (mdl-session-events session) '())
   (call-in-session session
     (lambda ()
       (parameterize ([current-load-chain '()])
         (define failure #f)
+        (define result #f)
+        (define skipped (box 0))
         (with-handlers ([exn:fail:mdl-load?
                          (lambda (e)
                            (set! failure (exn:fail:mdl-load-diagnostic e))
                            (void))])
-          (load-internal! session entry))
+          (set! result (load-internal! session entry max-expressions skipped)))
         (define events (reverse (unbox (mdl-session-events session))))
-        (hash 'status (if failure "FAIL" "PASS")
+        (hash 'status (cond [failure "FAIL"]
+                            [(equal? result "PARTIAL") "PARTIAL"]
+                            [else "PASS"])
               'entry entry
+              'skipped_expressions (unbox skipped)
               'completed_expressions
               (length (filter (lambda (e) (equal? (hash-ref e 'status) "PASS")) events))
               'events events

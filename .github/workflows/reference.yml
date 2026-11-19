@@ -24,6 +24,10 @@ jobs:
         run: |
           make sources
           make check-source
+      - name: Install Racket runtime test libraries
+        run: raco pkg install --auto --no-docs compatibility-lib rackunit-lib
+      - name: Execute pinned historical VFLOAD definition slice
+        run: make test-historical
       - name: Build and capture native reference
         run: |
           make reference-build

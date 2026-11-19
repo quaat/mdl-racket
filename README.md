@@ -21,9 +21,19 @@ calls; `make test`, both CI workflows, and the pinned Confusion
 build/capture/probes pass. Reproduce its pinned-source failure with
 `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json`.
 That command exits 1 after two completed expressions, at unsupported
-`#DECL` in `81prim.mud`; game initialization is not supported. G2's partial
-historical `VFLOAD` probe is in a separate stacked PR. M2's integrated gate
-and gameplay remain unverified.
+`#DECL` in `81prim.mud`; game initialization is not supported. The
+[G2 partial-source probe](docs/evidence/M2/HISTORICAL-VFLOAD.md) verifies
+the pinned source hash and invokes the unmodified reconstructed `VFLOAD`
+definition on a controlled file with matching Confusion output and state.
+Its local gate passes; after two native CI failures for missing Racket
+libraries, both workflows passed on the corrected dependency commit. The
+latest G1 path fix is merged and passes locally, with combined-branch CI
+also passing. Run
+`make test-historical` to reproduce the probe. The loader reports the 12
+unexecuted forms explicitly. M2's integrated gate and gameplay remain
+unverified; `#DECL` is the next source dependency.
+The [M2 source execution inventory](docs/evidence/M2/SOURCE-EXECUTION.md)
+lists the loaded, invoked, blocked, and untested definitions separately.
 
 ## Goals
 

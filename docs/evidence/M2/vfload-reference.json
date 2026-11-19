@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "source_file": "77loadall.mud",
+  "source_sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+  "interpreter_sha256": "9d8a07bd0bb88ff89cceb6b257e4752174a1a5831540a531db514e6880a4c305",
+  "protocol": "one local Confusion REPL process per case; each input ends with <QUIT>; TEMP_ROOT denotes a disposable source directory",
+  "fixture_source": "<SETG HISTORICAL-RESULT 27>\n",
+  "cases": [
+    {
+      "name": "string_concat",
+      "expression": "<STRING \"ab\" \"cd\">",
+      "input": "<STRING \"ab\" \"cd\">\n<QUIT>\n",
+      "exit_code": 0,
+      "stderr": "",
+      "result_output": "\"abcd\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "printstring",
+      "expression": "<PRINTSTRING \"abc\">",
+      "input": "<PRINTSTRING \"abc\">\n<QUIT>\n",
+      "exit_code": 0,
+      "stderr": "",
+      "result_output": "abc\"abc\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "terpri",
+      "expression": "<TERPRI>",
+      "input": "<TERPRI>\n<QUIT>\n",
+      "exit_code": 0,
+      "stderr": "",
+      "result_output": "\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "vfload_success",
+      "expression": "<DEFINE VFLOAD (X) <FLOAD .X> <PRINTSTRING <STRING .X \" loaded\">> <TERPRI>>\n<VFLOAD \"<TEMP_ROOT>/controlled.mud\">\n,HISTORICAL-RESULT",
+      "input": "<DEFINE VFLOAD (X) <FLOAD .X> <PRINTSTRING <STRING .X \" loaded\">> <TERPRI>>\n<VFLOAD \"<TEMP_ROOT>/controlled.mud\">\n,HISTORICAL-RESULT\n<QUIT>\n",
+      "exit_code": 0,
+      "stderr": "",
+      "result_output": "VFLOAD\n<TEMP_ROOT>/controlled.mud loaded\n#FALSE ()\n27\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "vfload_invalid_type",
+      "expression": "<DEFINE VFLOAD (X) <FLOAD .X> <PRINTSTRING <STRING .X \" loaded\">> <TERPRI>>\n<VFLOAD 5>",
+      "input": "<DEFINE VFLOAD (X) <FLOAD .X> <PRINTSTRING <STRING .X \" loaded\">> <TERPRI>>\n<VFLOAD 5>\n<QUIT>\n",
+      "exit_code": 0,
+      "stderr": "NAME1 arg to OPEN/CHANNEL must be string\n",
+      "result_output": "VFLOAD\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "vfload_missing_file",
+      "expression": "<DEFINE VFLOAD (X) <FLOAD .X> <PRINTSTRING <STRING .X \" loaded\">> <TERPRI>>\n<VFLOAD \"<TEMP_ROOT>/missing.mud\">",
+      "input": "<DEFINE VFLOAD (X) <FLOAD .X> <PRINTSTRING <STRING .X \" loaded\">> <TERPRI>>\n<VFLOAD \"<TEMP_ROOT>/missing.mud\">\n<QUIT>\n",
+      "exit_code": 0,
+      "stderr": "Couldn't open file in FLOAD\n",
+      "result_output": "VFLOAD\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ]
+}

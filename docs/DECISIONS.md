@@ -462,3 +462,27 @@ Each consecutive parent component is applied to the already resolved path;
 the third PR #41 review found that `path-only` retained a trailing separator
 and failed to ascend on the second parent component. The resolver now
 simplifies one parent step at a time after preceding symlinks are resolved.
+
+## ADR-0022: Explicit partial-source historical probe and narrow text output
+
+**Decision:** Permit the loader to execute a positive number of initial
+top-level expressions only when explicitly requested with
+`#:max-expressions`; report `PARTIAL` and the exact skipped count. Use this
+to install the first byte-for-byte original `VFLOAD` definition from the
+pinned reconstructed `77loadall.mud` in a disposable authorized root.
+Implement only STRING concatenation of STRING values, one-buffer/default-port
+PRINTSTRING, and no-argument/default-port TERPRI. Follow the manual's
+PRINTSTRING count return and empty-FALSE TERPRI return.
+
+**Why:** Full `77loadall.mud` immediately enters `81prim.mud` and stops on
+unsupported `#DECL`, so a clearly labeled prefix probe is necessary to
+exercise an authentic definition now. The MDL manual and six pinned Confusion
+probes support the required text behavior. Confusion returns the STRING from
+PRINTSTRING, contrary to the manual's count; `VFLOAD` discards that result.
+
+**Consequence:** G2 can verify original reconstructed-source function
+invocation, output, return value and state changes without pretending that
+the remaining 12 expressions ran. CHARACTER values, explicit CHANNEL/count
+I/O, historical CRLF terminal behavior, declarations and game bootstrap
+remain unsupported. No upstream or game source changed, and no GPLv3 code
+was copied into the runtime.
