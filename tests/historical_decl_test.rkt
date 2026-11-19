@@ -59,7 +59,19 @@
    (define report (mdl-session-load! session "81prim.mud"))
    (check (hash-ref report 'status) "FAIL")
    (check (hash-ref report 'completed_expressions) 2)
-   (check (hash-ref (hash-ref report 'failure) 'construct) "splice")
+   ;; Since D2 (SEGMENT evaluation, issue #46) the PSETG definition
+   ;; compiles past the former splice barrier at 16:46 and fails at the
+   ;; execute stage instead: its compound DECL pattern <LIST [REST ATOM]>
+   ;; waits on a later slice, so the install-time declaration check for
+   ;; the definition at 10:1 reports the unsupported compound pattern.
+   (define failure (hash-ref report 'failure))
+   (check (hash-ref failure 'stage) "execute")
+   (check (hash-ref failure 'construct) "DEFINE")
+   (check (hash-ref failure 'line) 10)
+   (check (hash-ref failure 'column) 1)
+   (check (string-contains? (hash-ref failure 'exception)
+                            "unsupported declaration pattern LIST")
+          #t)
    ;; The original MSETG definition, from the pinned bytes, is retained.
    (check-exn-verb
     (lambda () (mdl-session-call session "MSETG" "bad" 3))
