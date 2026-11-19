@@ -79,6 +79,15 @@ Three items were added by the recovering session, each observed red first:
    `#DECL requires a parenthesized payload` on `act1.37`, `act1.38`,
    `77act1.mud`, and their MIT counterparts (5 files, observed 2026-11-19);
    after the reader fix, all 36 selected text files parse again.
+4. PR #45's first CI run failed the smoke workflow: the declaration test
+   asserted the pinned-source load progression, but the smoke container
+   does not provision `.cache/upstream/`. The pinned-file acceptance
+   (SHA verification, FAIL-at-splice progression, retained `MSETG`) moved to
+   `tests/historical_decl_test.rkt` in the `make test-historical` suite,
+   which `reference.yml` runs after `make sources`; the smoke-visible
+   `tests/declaration_test.rkt` now pins the same original `MSETG` source
+   text as a session fixture (file copy, full load PASS, execution and
+   wrong-atom rejection) so both gates exercise the D1 acceptance.
 
 ## Reference validation
 
@@ -115,10 +124,10 @@ reproduces Confusion because it is the comparison reference. Wrong-atom
 
 | Command | Exit | Observed result |
 |---|---:|---|
-| `raco test tests/declaration_test.rkt` | 0 | 50 checks including the doubled-`#DECL`, `DECL?`, and expression-position cases |
-| `bash scripts/test_racket.sh` | 0 | 620 Racket checks passed (loader and historical tests need `/tmp` and were run outside the per-command sandbox; see environment note) |
+| `raco test tests/declaration_test.rkt` | 0 | 48 checks including the doubled-`#DECL`, `DECL?`, expression-position, and original-`MSETG` fixture cases |
+| `bash scripts/test_racket.sh` | 0 | 618 Racket checks passed (loader and historical tests need `/tmp` and were run outside the per-command sandbox; see environment note) |
 | `raco test tests/loader_test.rkt` (from repo root) | 0 | 57 checks passed |
-| `racket tests/historical_vfload_test.rkt` (from repo root) | 0 | 23 assertions passed |
+| `make test-historical` (from repo root) | 0 | 23 VFLOAD assertions plus 10 declaration assertions, including the pinned `81prim.mud` SHA verification, the FAIL-at-splice load progression, and the retained original `MSETG` execution |
 | Python tests (`tests/test_harness.py`, `test_fetch_sources.py`, `test_reference_pty.py`, `test_probe.py`) | 0 | 13 passed |
 | `racket scripts/mdl_load.rkt --source-root .../patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json` | 0 | `MDL source load FAIL: 3 completed expressions`; new blocker is the `!`-splice construct at `81prim.mud:16:46` (compile stage, `unsupported MDL construct splice`) — the loader stops explicitly by design |
 | `scripts.mdl_probe --cases docs/evidence/M2/decl-cases.json` | 0 | 11/11 successful probes |

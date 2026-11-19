@@ -1,5 +1,5 @@
 #lang racket/base
-(require rackunit racket/list racket/runtime-path
+(require rackunit racket/file racket/list
          "../mdl/parser.rkt" "../mdl/compiler.rkt"
          "../mdl/runtime/core.rkt" "../mdl/loader.rkt")
 
@@ -75,23 +75,35 @@
 (check-equal? (run "#DECL #DECL ((X) FIX) 5") 5)
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL #DECL FIX")))
 
-;; The complete original file is attempted. Its first definition is retained
-;; after the later, independently reported splice failure.
-(define-runtime-path repo-root "..")
-(define historical-root
-  (build-path repo-root ".cache" "upstream" "mdlzork" "mdlzork_771212"
-              "patched_confusion"))
-(define historical-session (make-mdl-session historical-root))
-(define historical-report (mdl-session-load! historical-session "81prim.mud"))
-(check-equal? (hash-ref historical-report 'status) "FAIL")
-(check-equal? (hash-ref historical-report 'completed_expressions) 2)
-(check-equal? (hash-ref (hash-ref historical-report 'failure) 'construct) "splice")
+;; The original MSETG definition, verbatim from the pinned 81prim.mud
+;; (SHA-256 8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571,
+;; verified against the pinned file by tests/historical_decl_test.rkt in
+;; the make test-historical suite). Installing and executing this exact
+;; source text through the shared-session loader is the D1 acceptance; the
+;; pinned-file load progression is asserted there, not here, because the
+;; smoke suite does not provision the upstream sources.
+(define msetg-source
+  (string-append
+   "<DEFINE MSETG (FOO BAR)\n"
+   "        #DECL ((FOO) ATOM (BAR) ANY)\n"
+   "        <COND (<AND <GASSIGNED? .FOO> <N=? .BAR ,.FOO>>\n"
+   "               <ERROR MSETG .FOO ALREADY-GASSIGNED ,.FOO>)\n"
+   "              (ELSE\n"
+   "               <SETG .FOO .BAR>\n"
+   "               <MANIFEST .FOO>)>>\n"))
+(define original-root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
+(define original-path (build-path original-root "msetg.mud"))
+(call-with-output-file original-path #:exists 'truncate/replace
+  (lambda (out) (display msetg-source out)))
+(define original-session (make-mdl-session original-root))
+(check-equal? (hash-ref (mdl-session-load! original-session "msetg.mud") 'status)
+              "PASS")
 (check-exn #rx"DECL.*FOO"
-           (lambda () (mdl-session-call historical-session "MSETG" "bad" 3)))
-(define historical-atom (mdl-session-call historical-session "ATOM" "M2-D1-TEMP"))
+           (lambda () (mdl-session-call original-session "MSETG" "bad" 3)))
+(define original-atom (mdl-session-call original-session "ATOM" "M2-D1-TEMP"))
 (check-equal? (mdl-atom-pname
-               (mdl-session-call historical-session "MSETG" historical-atom 3))
+               (mdl-session-call original-session "MSETG" original-atom 3))
               "T")
-(check-equal? (mdl-session-global historical-session historical-atom) 3)
+(check-equal? (mdl-session-global original-session original-atom) 3)
 
 (displayln "declaration tests passed")

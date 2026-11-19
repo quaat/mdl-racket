@@ -14,11 +14,16 @@ evidence instead of duplicating logs. Last updated 2026-11-19 (M2-D1).
   doubled `#DECL #DECL` source form; expression-position `#DECL`.
 - **Changed files:** `mdl/parser.rkt`, `mdl/compiler.rkt`,
   `mdl/runtime/core.rkt`, `tests/declaration_test.rkt` (new),
-  `tests/loader_test.rkt`, `scripts/test_racket.sh`, `docs/SEMANTICS.md`.
-- **Tests last executed (2026-11-19, fresh):** full Racket suite 620 passed;
-  loader 57; historical VFLOAD 23; Python 13; `git diff --check` clean.
+  `tests/historical_decl_test.rkt` (new, `make test-historical`),
+  `tests/loader_test.rkt`, `scripts/test_racket.sh`, `Makefile`,
+  `docs/SEMANTICS.md`.
+- **Tests last executed (2026-11-19, fresh):** full Racket suite 618 passed;
+  loader 57; `make test-historical` 23 VFLOAD + 10 declaration assertions;
+  Python 13; `git diff --check` clean.
   Loader/historical tests need writable `/tmp` (run outside the per-command
-  sandbox); in-sandbox Racket needs `PLTCOLLECTS=":$PWD"`.
+  sandbox); in-sandbox Racket needs `PLTCOLLECTS=":$PWD"`. The smoke CI
+  container does not provision `.cache/upstream/`, so pinned-source
+  assertions live only in `make test-historical` (reference workflow).
 - **First failing source construct:** `!`-splice, `81prim.mud:16:46`
   (`!.PL` in the original `PSETG`), compile stage — then `PSETG`'s compound
   `<LIST [REST ATOM]>` pattern.
