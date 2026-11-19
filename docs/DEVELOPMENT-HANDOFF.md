@@ -7,18 +7,28 @@ D2 in progress).
 - **Milestone / gate:** M2. G0/G1/G2 PASS and **M2-D1 merged**; integrated
   M3-style gate NOT RUN. M2 milestone NOT YET PASS.
 - **Active issues/PRs:** [issue #46](https://github.com/quaat/mdl-racket/issues/46)
-  (SEGMENT/`!`-splice, D2) on branch `feat/m2-segment` (in progress);
+  (SEGMENT/`!`-splice, D2) on branch `feat/m2-segment` — reference evidence
+  recorded and committed (`c015e8a`), Flash implementation in progress in a
+  worktree on branch `feat/m2-segment-impl`;
+  [issue #48](https://github.com/quaat/mdl-racket/issues/48) (D3 structured
+  declaration patterns, after D2);
   [PR #47](https://github.com/quaat/mdl-racket/pull/47) (Flash subagent
-  definitions) green and pending merge; issue #44 **closed** (D1 merged).
+  definitions) green, **pending maintainer merge decision**; issue #44
+  **closed** (D1 merged).
 - **Latest integrated commit:** `f87d160` on `main` (merge of PR #45,
   declarations; post-merge CI green, run 44615298096). Local `main` is
   up to date.
-- **D2 state (in progress):** reference investigation delegated to the
-  `glm-5.3-flash:cloud` subagent (scoped headless launch, user-approved) to
-  record Confusion SEGMENT probes under `docs/evidence/M2/segment-*`; the
-  cases/reference files and `SEGMENTS.md` note are the deliverable. Next:
-  failing Racket tests, then the smallest compiler/runtime change
-  (parser `splice` node exists; compiler rejects it at `81prim.mud:16:46`).
+- **D2 state (in progress):** Confusion reference evidence recorded by the
+  `glm-5.3-flash:cloud` reference-investigator subagent (18 success + 10
+  error observations; independently reproduced byte-for-byte by the main
+  session before commit `c015e8a`; see
+  `docs/evidence/M2/SEGMENTS.md`). Key semantics: left-to-right element
+  evaluation with splice flattening, LIST tail-sharing for final LIST
+  segments (observable via PUT), no re-evaluation of FORM-argument splices,
+  quoted segments stay data, `ILLEGAL-SEGMENT` errors for standalone and
+  non-structured results, `![` is UVECTOR syntax not segment syntax.
+  Flash implementer now working tests-first on `feat/m2-segment-impl`
+  (worktree).
 - **Flash subagent routing (verified 2026-11-19):** provider accepts
   `glm-5.3-flash:cloud` (added to the Ollama Claude integration model list;
   backup at `~/.ollama/config.json.bak-20261119`); a headless
