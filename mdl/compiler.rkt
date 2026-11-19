@@ -66,6 +66,22 @@
           [else (unsupported n "#WORD requires a decimal or octal integer")]))
   `(mdl-word ,bits))
 
+;; A splice node compiles to a runtime SEGMENT object in data positions
+;; (quoted structures, interpreted bodies, raw call arguments) and to a
+;; splice marker inside structures being evaluated. The mark's payload is
+;; the segment position, retained for diagnostics.
+(define (splice-element? n) (is-kind? n 'splice))
+
+(define (compile-splice-data n)
+  (define payload (mdl-node-value n))
+  (case (mdl-node-kind payload)
+    [(local global form quote)
+     `(mdl-make-segment ,(compile-data payload)
+                        ,(mdl-node-line n) ,(mdl-node-column n))]
+    [else (unsupported n "unsupported SEGMENT notation")]))
+
+(define current-structured-context (make-parameter #f))
+
 (define (compile-data n)
   (case (mdl-node-kind n)
     [(decl) `(mdl-make-declaration
@@ -73,9 +89,16 @@
               ,(mdl-node-line n) ,(mdl-node-column n))]
     [(atom) (mdl-constant n)]
     [(string) (mdl-node-value n)]
+    [(splice) (compile-splice-data n)]
     [(list) `(mdl-list ,@(map compile-data (mdl-node-value n)))]
     [(vector) `(mdl-vector ,@(map compile-data (mdl-node-value n)))]
-    [(uvector) `(mdl-uvector ,@(map compile-data (mdl-node-value n)))]
+    ;; SEGMENT objects in unevaluated UVECTOR data are placeholders, so data
+    ;; construction must not enforce element uniformity; the runtime
+    ;; evaluator does that when the data is evaluated.
+    [(uvector)
+     (if (ormap splice-element? (mdl-node-value n))
+         `(mdl-data-uvector ,@(map compile-data (mdl-node-value n)))
+         `(mdl-uvector ,@(map compile-data (mdl-node-value n))))]
     [(false) `(mdl-false (mdl-list ,@(map compile-data (mdl-node-value n))))]
     [(form) `(mdl-make-form
               (mdl-list ,@(map compile-data (mdl-node-value n))))]
@@ -477,7 +500,11 @@
            `(mdl-apply-form ,op
                             (lambda () (list ,@(map compile-data args)))
                             (list ,@(map (lambda (a)
-                                           `(lambda () ,(compile-expression a locals)))
+                                           ;; Call arguments assemble spliced
+                                           ;; elements like the reference's list
+                                           ;; assembly, so a SEGMENT is legal here.
+                                           (parameterize ([current-structured-context #t])
+                                             `(lambda () ,(compile-expression a locals))))
                                          args)))]))))
 
 (define (compile-expression n [locals '()])
@@ -492,11 +519,31 @@
               body
               `(let ,(reverse (unbox literals)) ,body))))))
 
+;; Structures whose elements include a SEGMENT compile every element to a
+;; thunk handled by the runtime splice constructors: elements evaluate in
+;; strict left-to-right order and SEGMENT payloads contribute their elements
+;; (chapter 7.5.2), the last one by reference for LIST construction.
+(define (compile-spliced-structure n spliced-constructor plain-constructor locals)
+  (define elements (mdl-node-value n))
+  (if (ormap splice-element? elements)
+      `(,spliced-constructor
+        ,@(for/list ([element (in-list elements)])
+            (parameterize ([current-structured-context #t])
+              `(lambda () ,(compile-expression element locals)))))
+      `(,plain-constructor ,@(map (lambda (e) (compile-expression e locals)) elements))))
+
 (define (compile-expression/body n locals)
   (case (mdl-node-kind n)
     [(atom) (mdl-constant n)]
     [(false) (retain-literal n)]
     [(string) (mdl-node-value n)]
+    [(splice)
+     ;; A SEGMENT only exists at a structured-evaluation position; the
+     ;; reference breaks with ILLEGAL-SEGMENT anywhere else.
+     (unless (current-structured-context)
+       (unsupported n "SEGMENT outside a structured construction"))
+     `(mdl-splice-result ,(compile-expression (mdl-node-value n) locals)
+                         ,(mdl-node-line n) ,(mdl-node-column n))]
     [(local)
      `(mdl-lval (mdl-atom ,(string-upcase (mdl-node-value n))))]
     [(global)
@@ -504,12 +551,9 @@
                      `(mdl-atom ,(string-upcase (mdl-node-value n)))
                      (compile-expression (mdl-node-value n) locals)))]
     [(quote) (compile-quote (mdl-node-value n))]
-    [(list) `(mdl-list ,@(map (lambda (a) (compile-expression a locals))
-                              (mdl-node-value n)))]
-    [(vector) `(mdl-vector ,@(map (lambda (a) (compile-expression a locals))
-                                 (mdl-node-value n)))]
-    [(uvector) `(mdl-uvector ,@(map (lambda (a) (compile-expression a locals))
-                                   (mdl-node-value n)))]
+    [(list) (compile-spliced-structure n 'mdl-splice-list 'mdl-list locals)]
+    [(vector) (compile-spliced-structure n 'mdl-splice-vector 'mdl-vector locals)]
+    [(uvector) (compile-spliced-structure n 'mdl-splice-uvector 'mdl-uvector locals)]
     [(typed) (compile-typed n)]
     [(decl) (compile-data n)]
     [(form) (compile-form n locals)]
