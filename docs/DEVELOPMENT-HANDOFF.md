@@ -6,11 +6,15 @@ D2 in progress).
 
 - **Milestone / gate:** M2. G0/G1/G2 PASS and **M2-D1 merged**; integrated
   M3-style gate NOT RUN. M2 milestone NOT YET PASS.
-- **Active issues/PRs:** [issue #46](https://github.com/quaat/mdl-racket/issues/46)
-  (SEGMENT/`!`-splice, D2) — implemented and verified on branch
-  `feat/m2-segment` (merge `b0af6b8`), PR pending;
+- **Active issues/PRs:** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
+  (D2 SEGMENT, branch `feat/m2-segment`, head `a955ed1`) — implemented,
+  verified, CI green on all three checks, independent review in progress,
+  merge gated on review + maintainer approval;
   [issue #48](https://github.com/quaat/mdl-racket/issues/48) (D3 structured
-  declaration patterns, the current blocker);
+  declaration patterns, the current load blocker) — reference evidence
+  recorded, verified, and committed on stacked branch
+  `feat/m2-decl-patterns` (`325bc09`), implementation held until the D2
+  review lands (shared `mdl/runtime/core.rkt` ownership);
   [PR #47](https://github.com/quaat/mdl-racket/pull/47) (Flash subagent
   definitions) green, **pending maintainer merge decision**; issue #44
   **closed** (D1 merged).
@@ -63,10 +67,16 @@ D2 in progress).
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
   `DECL?` false payload follows Confusion (`#FALSE (value pattern)`).
-- **Exact next action:** push `feat/m2-segment`, open the D2 PR
-  referencing issue #46, run CI, obtain review, merge per policy; then the
-  D3 `[REST ...]` declaration-pattern slice (issue #48, Flash implementer),
-  then retry the full `77loadall.mud` load and record the next blocker.
+- **Exact next action:** resolve the D2 independent-review findings on
+  PR #49 (regression tests for anything real), then merge with maintainer
+  approval; then launch the D3 Flash implementer on
+  `feat/m2-decl-patterns` (the `[REST ...]` structured-pattern slice,
+  issue #48 — Confusion's DECL? implements the subset, so the reference
+  backing is direct), then retry the full `77loadall.mud` load and record
+  the next blocker. Key D3 reference facts: the PSETG pattern accepts (),
+  (A), (A B) and rejects (A 1) with #FALSE (1 ATOM); overall-type
+  mismatches return bare #FALSE () while element mismatches carry
+  (value pattern) — see docs/evidence/M2/DECLARATION-PATTERNS.md.
 - **Full evidence:** `docs/evidence/M2/DECLARATIONS.md` (D1 slice),
   `docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md` (recovery),
   `docs/evidence/M2/SOURCE-EXECUTION.md` (live execution inventory),
