@@ -556,7 +556,13 @@
     [(uvector) (compile-spliced-structure n 'mdl-splice-uvector 'mdl-uvector locals)]
     [(typed) (compile-typed n)]
     [(decl) (compile-data n)]
-    [(form) (compile-form n locals)]
+    ;; Entering a FORM resets the structured context: only the form's own
+    ;; argument positions (re-established by compile-apply and the spliced
+    ;; structure constructors) may splice, so a bare SEGMENT nested in an
+    ;; FSUBR body or a sibling element stays an explicit compile error
+    ;; instead of laundering a splice marker into a call (PR #49 review).
+    [(form) (parameterize ([current-structured-context #f])
+              (compile-form n locals))]
     [else (unsupported n (format "unsupported MDL construct ~a" (mdl-node-kind n)))]))
 
 (define (compile-program nodes)

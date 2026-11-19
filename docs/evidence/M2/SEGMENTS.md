@@ -243,3 +243,48 @@ commits `81d8286` tests-then `006674d` implementation), tracked by
   reader makes it part of an atom name; ours rejects the splice); compiled
   standalone `!X` (explicit compile error; the interpreted path reproduces
   the reference's `ILLEGAL-SEGMENT` message); GDECL and global declarations.
+
+## Independent review outcome (PR #49)
+
+A fresh-context review of the full diff (plus direct Confusion probes for
+cases the recorded evidence did not cover) returned REQUEST_CHANGES with
+two verified blocking defects and one coverage gap; all were fixed with
+regression tests on `feat/m2-segment` before merge consideration:
+
+1. **P1-1 (fixed):** `segment-elements` returned raw mpair chains for
+   FALSE and TUPLE payloads — crashing every consumer with host contract
+   violations (`(1 !,TP 2)` with a TUPLE, `(1 !,FZ 2)` with `#FALSE (1 2)`)
+   — and rejected NEWTYPE-wrapped LIST-primtype values as nonstructured,
+   while the reference splices both (fresh probes: `(1 1 2 2)`). Fixed by
+   converting FALSE/TUPLE payloads with `mdl-list->list` and unwrapping
+   typed values to their base before matching; regressions pin all three.
+2. **P2-2 (fixed):** the compiled `current-structured-context` leaked
+   across compilation nesting, so a bare segment in an FSUBR body nested
+   inside a spliced structure or call argument compiled silently and
+   laundered a splice marker into a call (`<ID <PROG () !.X>>` returned 1)
+   where the reference raises ILLEGAL-SEGMENT. Fixed by resetting the
+   context when compiling a FORM; the wrappers re-establish it at each
+   legitimate structured position, so nothing the reference accepts is
+   rejected. Regressions pin both laundered cases as explicit compile
+   errors.
+3. **P2-3 (fixed):** the "interpreted twins" were in fact compiled
+   closures (no quoted formals), leaving the interpreted splice machinery
+   untested. Genuine interpreted twins (quoted-formal DEFINEs through the
+   shared-session loader) now pin interpreted splice assembly, PUT-based
+   tail sharing (the earlier structural-equality check was vacuous), and
+   non-final copy stability across a later mutation.
+4. **P3-4 (fixed by decision):** segments in MACRO call arguments were
+   eagerly expanded — an undocumented deviation. The reference passes
+   macro arguments entirely raw; MACROs are now excluded from segment
+   expansion and a regression pins a segment binding raw in a macro call.
+5. **P3-5/P3-6/P3-7:** the UVECTOR error symbol inconsistency was fixed;
+   the quoted-UVECTOR-placeholder PUT consequence and the ordinary-form
+   `A!>` reader error (both matching or bounded by the reference) are
+   documented in `docs/SEMANTICS.md`; the near-duplicate assembly walkers
+   are noted as future consolidation, deliberately not churned in this
+   slice.
+
+Verification after the fixes (main session, fresh): full suite 716 Racket
+checks (segment suite 94), loader 57, historical 23 + 14, Python 13,
+`git diff --check` clean; the pinned load still completes three
+expressions and stops at the D3 declaration-pattern barrier.
