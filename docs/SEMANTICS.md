@@ -711,12 +711,24 @@ re-evaluated. A UVECTOR construction enforces uniform element types
 A LIST-valued segment in the **final** position of a LIST construction
 shares the payload's tail cells instead of copying them, so mutation
 (`PUT`) through either name is visible in both; non-final segments, and
-all VECTOR/UVECTOR constructions, copy. Segments in quoted structures stay
+all VECTOR/UVECTOR constructions, copy. FALSE and TUPLE payloads and
+NEWTYPE-wrapped (typed) structured values splice their elements like the
+reference's structure walker. Segments in quoted structures stay
 unevaluated SEGMENT data that prints back in its original notation, and a
 plain element whose value happens to be a SEGMENT object is stored as a
-value, not re-spliced. `![`/`!]` remain UVECTOR delimiters, not segment
-notation. The pinned interpreter's own `#UVECTOR [...]` input crashes it;
-that syntax stays an explicit unsupported construct here.
+value, not re-spliced. MACRO call arguments are never segment-expanded:
+a segment in a macro call binds as the SEGMENT object, exactly like the
+pinned reference's raw-argument MACRO branch. `![`/`!]` remain UVECTOR
+delimiters, not segment notation. The pinned interpreter's own
+`#UVECTOR [...]` input crashes it; that syntax stays an explicit
+unsupported construct here. Two reader consequences of the `!>` close
+match the reference: a trailing `!>` inside an ordinary (non-segment)
+form such as `<FOO A!>` is now a reader error, and a quoted UVECTOR
+containing a segment placeholder (`'![1 !.X]`) evaluates to a
+uniformity-unchecked data object whose `PUT` raises a type error even at
+non-segment slots — the reference instead rejects such reads outright
+(`TYPES-DIFFER-IN-UNIFORM-VECTOR`), which is acceptable only because no
+historical source constructs one.
 
 Recorded deviations from the pinned reference (evidence in
 `docs/evidence/M2/SEGMENTS.md`): the reference's interpreted FUNCTION

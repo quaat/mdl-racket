@@ -187,6 +187,25 @@
 (check-exn #rx"ILLEGAL-SEGMENT: Segment evaluated to nonstructured type"
            (lambda () (run "<SET A 'FOO> (1 !.A 2)")))
 
+;; --- review regressions (PR #49 independent review) ------------------------
+;; FALSE, TUPLE, and typed LIST-primtype payloads splice their elements
+;; like the pinned reference; the pre-review walkers returned raw mpair
+;; chains (crashing consumers) or rejected typed values (review P1-1).
+(check-equal? (render (run "<SETG FZ #FALSE (1 2)> (1 !,FZ 2)")) "(1 1 2 2)")
+(check-equal? (render (run "<DEFINE TT (\"TUPLE\" T) .T> <SETG TP <TT 1 2>> (1 !,TP 2)"))
+              "(1 1 2 2)")
+(check-equal? (render (run "<NEWTYPE NTL LIST> <SETG NT <CHTYPE (1 2) NTL>> (1 !,NT 2)"))
+              "(1 1 2 2)")
+(check-equal? (render (run "<SETG EF #FALSE ()> (1 !,EF 2)")) "(1 2)")
+;; A bare segment nested in a sibling position must not inherit the
+;; structured context (review P2-2); it is an explicit compile error, like
+;; the reference's runtime ILLEGAL-SEGMENT.
+(check-exn #rx"SEGMENT outside a structured construction"
+           (lambda () (run "<SET X '(1)> <SET Y '(2)> (!.X <PROG () !.Y>)")))
+(check-exn #rx"SEGMENT outside a structured construction"
+           (lambda ()
+             (run "<SET X '(1)> <DEFINE ID (X) .X> <SETG Q <ID <PROG () !.X>>>")))
+
 ;; --- interpreted twins through the shared-session loader -------------------
 (define scratch-root
   (let ([p (make-temporary-file "mdl-segment-test~a" #f (find-system-path 'temp-dir))])
@@ -288,6 +307,39 @@
      (check-true (string-contains? (hash-ref (failure report) 'exception)
                                    "unsupported declaration pattern LIST"))
      (check-exn exn:fail? (lambda () (mdl-session-call psetg-session "PSETG" "A" 1))))
+
+   ;; Review P2-3: genuine interpreted twins — quoted formals force the
+   ;; interpreted FUNCTION path, exercising mdl-eval's splice assembly,
+   ;; interpreted tail sharing (PUT-observable, not structural equality),
+   ;; non-final copying, and macro raw-argument semantics.
+   (put "twins.mud" (string-append
+                     "<SETG ARF2 '(B 3 4)>\n"
+                     "<SETG ZOP2 '![2 3 4]>\n"
+                     "<DEFINE INEST ('X) ( !,ARF2 !,ZOP2)>\n"
+                     "<DEFINE ISHARED ('X) (1 2 !,ARF2)>\n"
+                     "<DEFINE ICAT ('X) (1 !,ARF2 2)>\n"))
+   (check-equal? (status (mdl-session-load! session "twins.mud")) "PASS")
+   ;; two adjacent GVAL segments: ARF2's and ZOP2's elements both splice
+   (check-equal? (render (mdl-session-call session "INEST" 0)) "(B 3 4 2 3 4)")
+   (define shared-tail (mdl-session-call session "ISHARED" 0))
+   (check-equal? (render shared-tail) "(1 2 B 3 4)")
+   (define arf2 (mdl-session-global session "ARF2"))
+   (mdl-session-call session "PUT" arf2 1 "BOWOW")
+   ;; interpreted sharing: the PUT through ARF2 is visible in the built list
+   (check-equal? (render shared-tail) "(1 2 \"BOWOW\" 3 4)")
+   ;; interpreted non-final segment copies: later mutation is NOT visible
+   (define copied (mdl-session-call session "ICAT" 0))
+   (check-equal? (render copied) "(1 \"BOWOW\" 3 4 2)")
+   (mdl-session-call session "PUT" arf2 1 "WOOF")
+   (check-equal? (render copied) "(1 \"BOWOW\" 3 4 2)")
+   ;; Review P3-4: macro call arguments stay raw; a segment in a macro call
+   ;; binds as the SEGMENT object, not as its spliced elements (the pinned
+   ;; reference passes macro arguments unexpanded).
+   (put "macros.mud" "<DEFMAC QX ('X) <FORM QUOTE .X>>\n")
+   (check-equal? (status (mdl-session-load! session "macros.mud")) "PASS")
+   (put "macrocall.mud" "<SETG AVAL '(9)>\n<SETG MACQ <QX !,AVAL>>\n")
+   (check-equal? (status (mdl-session-load! session "macrocall.mud")) "PASS")
+   (check-true (mdl-segment? (mdl-session-global session "MACQ")))
 
    (displayln "loader segment tests passed"))
  (lambda () (delete-directory/files scratch-root)))

@@ -453,13 +453,17 @@
          "ILLEGAL-SEGMENT: Attempt to evaluate segment outside structured type"))
 
 ;; The elements one SEGMENT contributes, mirroring the reference's structure
-;; walker: LIST, FORM, FALSE, and TUPLE payloads, VECTORs and UVECTORs by
-;; element, and STRINGs as CHARACTER values.
+;; walker (macros.cpp:2447-2470): LIST, FALSE, FORM, and TUPLE payloads,
+;; VECTORs and UVECTORs by element, and STRINGs as CHARACTER values. FALSE
+;; and TUPLE payloads and every LIST-primtype chain are stored as mpairs,
+;; so they convert to Racket lists here; NEWTYPE-wrapped (typed) structures
+;; unwrap to their base before matching, like the reference's walker.
 (define (segment-elements value)
   (cond
-    [(mdl-false? value) (mdl-false-value-payload value)]
+    [(mdl-typed-value? value) (segment-elements (mdl-base value))]
+    [(mdl-false? value) (mdl-list->list (mdl-false-value-payload value))]
     [(mdl-form? value) (form-elements value)]
-    [(mdl-tuple-value? value) (mdl-tuple-value-payload value)]
+    [(mdl-tuple-value? value) (mdl-list->list (mdl-tuple-value-payload value))]
     [(or (null? value) (mpair? value)) (mdl-list->list value)]
     [(mdl-array? value)
      (for/list ([i (in-range (mdl-array-length value))])
@@ -572,7 +576,8 @@
             (error 'mdl-splice-uvector
                    "TYPES-DIFFER-IN-UNIFORM-VECTOR: UVECTOR elements must have one permitted TYPE")))
         (when (string=? (mdl-type-name (car items)) "STRING")
-          (error 'mdl-uvector "UVECTOR elements must have one permitted TYPE"))
+          (error 'mdl-splice-uvector
+                 "UVECTOR elements must have one permitted TYPE"))
         (mdl-array 'UVECTOR (list->vector items) 0 (length items) element-type))))
 
 (define (build-spliced-uvector units)
@@ -801,7 +806,17 @@
   (define specs (interpreted-formal-specs formals leading-act))
   ;; Raw arguments may carry SEGMENT objects; expand them (in order) at the
   ;; call level so spliced elements are values, never re-evaluated.
-  (define raw-list (expand-arg-items raw-args))
+  ;; FUNCTION call arguments assemble spliced elements (see expand-arg-items);
+  ;; MACRO call arguments stay entirely raw, like the reference's MACRO
+  ;; branch, which never evaluates or expands the argument list — a SEGMENT
+  ;; in a macro call binds as the SEGMENT object (PR #49 review).
+  (define raw-list
+    (if (mdl-macro? fn)
+        (map (lambda (item) (cons 'raw item))
+             (if (or (null? raw-args) (mpair? raw-args))
+                 (mdl-list->list raw-args)
+                 raw-args))
+        (expand-arg-items raw-args)))
   (define (arg-value entry evaluate)
     ;; entry: (cons 'value v) for a spliced element, or (cons 'raw data) for
     ;; a plain argument (evaluated in the caller only when asked).
