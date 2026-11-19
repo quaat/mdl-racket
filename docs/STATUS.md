@@ -68,7 +68,9 @@ failing-then-passing helper self-check makes wrong-type tests meaningful.
 The dependency correction passed both workflows on `b4b2809`. After merging
 the latest G1 path fix, local G2 validation reports 23 historical assertions,
 570 Racket checks, 13 Python tests, and matching reference output; the
-combined branch's CI rerun is pending.
+combined branch's [harness run 44571763597](https://github.com/quaat/mdl-racket/actions/runs/44571763597)
+and [native run 44571763652](https://github.com/quaat/mdl-racket/actions/runs/44571763652)
+also passed.
 
 | Gate | State | Evidence / limitation |
 |---|---|---|

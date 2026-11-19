@@ -28,7 +28,7 @@ definition on a controlled file with matching Confusion output and state.
 Its local gate passes; after two native CI failures for missing Racket
 libraries, both workflows passed on the corrected dependency commit. The
 latest G1 path fix is merged and passes locally, with combined-branch CI
-pending. Run
+also passing. Run
 `make test-historical` to reproduce the probe. The loader reports the 12
 unexecuted forms explicitly. M2's integrated gate and gameplay remain
 unverified; `#DECL` is the next source dependency.

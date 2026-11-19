@@ -90,8 +90,8 @@ BDW GC 8.0.4 were used locally.
 
 The native five-turn input was `west`, `open mailbox`, `take leaflet`,
 `inventory`, `score`; no RNG seed was set. The approved golden was not changed.
-The digest-pinned Racket 8.10 CI container test result will be recorded on
-the review PR; local results alone do not imply CI PASS.
+The digest-pinned Racket 8.10 CI container results are recorded below;
+local results alone do not imply CI PASS.
 
 ### PR #43 review follow-up (2026-11-19)
 
@@ -123,7 +123,10 @@ correction passed [harness CI run 44570235523](https://github.com/quaat/mdl-rack
 and [native CI run 44570235452](https://github.com/quaat/mdl-racket/actions/runs/44570235452)
 on `b4b28099b59697dce7dc1cfb31f68a2016953a1d`. The latest G1
 consecutive-parent correction is merged into this branch and passes locally;
-the combined branch's new CI run is pending.
+the combined branch's
+[harness run 44571763597](https://github.com/quaat/mdl-racket/actions/runs/44571763597)
+and [native run 44571763652](https://github.com/quaat/mdl-racket/actions/runs/44571763652)
+both passed on `3fd25cbc8202ad62549062e0dfc20425331d7999`.
 
 The reference result is a partial source-execution slice. The full
 `77loadall.mud` still reaches `81prim.mud` and stops on its unsupported
