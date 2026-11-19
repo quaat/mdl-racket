@@ -125,6 +125,23 @@ above. The fixes change local path handling and invocation dispatch, with no
 upstream source, game-rule, license, or network-service change. The original
 source remains blocked at `#DECL`; G2 and integrated M2 remain separate.
 
+### Third PR #41 review follow-up (2026-11-19)
+
+The review of `84da803` identified a second parent-component defect:
+`path-only` can retain a directory with a trailing separator, so two `..`
+components after a link target ascended only once. The regression
+`two-parents.mud -> sub/deep/../../child.mud` first exited 1: it loaded
+`sub/child.mud` and observed 17 instead of root `child.mud` and 99. The
+resolver now simplifies each parent step against the already resolved
+component path. The focused suite exits 0 with 57 checks, and `make test`
+exits 0 with 570 Racket checks and 13 Python tests. `make sources`,
+`make check-source` (36 parsed text files), `make reference-build`,
+`make reference-capture`, `make reference-probe`, the approved M0 stable-field
+comparison, and `git diff --check` exit 0. The full historical load still
+exits 1 at the same strict `#DECL` barrier after two completed expressions.
+The new CI run is pending. This changes only the local path resolver and its
+tests; provenance, gameplay, licensing, and service exposure are unchanged.
+
 The fixture for the successful CLI run was two unmodified test commands,
 `<SETG CLI-VALUE 7>` followed by `<+ ,CLI-VALUE 3>`. The pinned source run
 completed the original `VFLOAD` definition and the first STRING expression

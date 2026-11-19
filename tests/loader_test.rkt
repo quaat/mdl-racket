@@ -100,6 +100,10 @@
                                 (build-path root "ordered-link.mud"))
    (check-equal? (status (mdl-session-load! session "ordered-link.mud")) "PASS")
    (check-equal? (mdl-session-global session "LINK-ORDER") 17)
+   (make-file-or-directory-link "sub/deep/../../child.mud"
+                                (build-path root "two-parents.mud"))
+   (check-equal? (status (mdl-session-load! session "two-parents.mud")) "PASS")
+   (check-equal? (mdl-session-global session "LINK-ORDER") 99)
    (put "cycle-a.mud" "<FLOAD \"cycle-b.mud\">\n")
    (put "cycle-b.mud" "<FLOAD \"cycle-a.mud\">\n")
    (define cycle (mdl-session-load! session "cycle-a.mud"))

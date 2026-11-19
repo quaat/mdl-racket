@@ -35,7 +35,9 @@ the review section of `SOURCE-LOADER.md`.
 The second PR #41 review identified link targets containing `..` after a
 symlink and interpreted definitions rejected by `mdl-session-call`. Both now
 have focused regressions and local fixes; see the same report for validation.
-The current suite reports 568 Racket checks and 13 Python tests.
+The third review found a consecutive-parent path bug. Its regression failed
+with the wrong child file and now passes; the current suite reports 570
+Racket checks and 13 Python tests. The new CI run is pending.
 G1 remains a local slice PASS while the PR is under review. G2 has a separate
 stacked PR #43; the integrated M2 gate remains open.
 

@@ -14,7 +14,8 @@ checks shared session state, macro/function persistence, nested/repeated
 `FLOAD`, partial execution, path containment, cycles, and structured source
 errors, including indirect symlink targets and malformed later forms after a
 completed prefix. Review regressions also cover a symlink target with `..`
-after another symlink and session calls to compiled, interpreted, generated,
+after another symlink, consecutive parent components in a link target, and
+session calls to compiled, interpreted, generated,
 and macro definitions. The local CLI can be run with
 `racket scripts/mdl_load.rkt --source-root ROOT --entry FILE --report REPORT`;
 it exits nonzero on actual source execution failure and writes JSON in both

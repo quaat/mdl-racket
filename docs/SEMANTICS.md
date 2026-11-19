@@ -560,6 +560,9 @@ resolved component by component, after preceding links, matching filesystem
 lookup order. A raw requested path containing `..` remains rejected by local
 policy. Regression cases cover an in-root link target of the form
 `alias/../child.mud` where `alias` itself is a link.
+Consecutive parent components in a link target must each ascend one directory;
+the regression `sub/deep/../../child.mud` distinguishes the root child from
+`sub/child.mud`.
 
 The [MDL manual, chapter 1](https://mdl-language.readthedocs.io/en/latest/01-basic-introduction/)
 and [chapter 11](https://mdl-language.readthedocs.io/en/latest/11-input-output/)
