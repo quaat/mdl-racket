@@ -44,9 +44,14 @@ See [`HISTORICAL-VFLOAD.md`](evidence/M2/HISTORICAL-VFLOAD.md).
 1. `make test-racket`: reader, bootstrap compiler, FALSE, atom/OBLIST,
    mutable sequences, type constructors, local/global bindings, the
    documented 36-bit FIX/WORD subset, and scoped M2 execution semantics
-   (PROG/REPEAT/RETURN/AGAIN activations and function formals) on the
-   explicitly supported subset. The target refreshes the linked `#lang mdl`
-   module before tests so changed runtime exports are visible.
+   (PROG/REPEAT/RETURN/AGAIN activations and function formals), chapter-14
+   `#DECL` declaration checking with `DECL?`, and chapter-7 SEGMENT (`!`
+   splice) evaluation with LIST-tail sharing, on the explicitly supported
+   subset. The target refreshes the linked `#lang mdl` module before tests
+   so changed runtime exports are visible. Stale bytecode under the
+   gitignored `compiled/` directories produces `instantiate-linket`
+   dependency errors after module interface changes; delete those
+   directories and rerun.
 2. `python -m pytest -q tests/test_harness.py`: source lock, reference
    interchange format, exact comparator and transcript normalization.
 3. `racket scripts/mdl_check.rkt ...`: syntax parse coverage on pinned

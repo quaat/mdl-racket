@@ -7,18 +7,17 @@ D2 in progress).
 - **Milestone / gate:** M2. G0/G1/G2 PASS and **M2-D1 merged**; integrated
   M3-style gate NOT RUN. M2 milestone NOT YET PASS.
 - **Active issues/PRs:** [issue #46](https://github.com/quaat/mdl-racket/issues/46)
-  (SEGMENT/`!`-splice, D2) on branch `feat/m2-segment` — reference evidence
-  recorded and committed (`c015e8a`), Flash implementation in progress in a
-  worktree on branch `feat/m2-segment-impl`;
+  (SEGMENT/`!`-splice, D2) — implemented and verified on branch
+  `feat/m2-segment` (merge `b0af6b8`), PR pending;
   [issue #48](https://github.com/quaat/mdl-racket/issues/48) (D3 structured
-  declaration patterns, after D2);
+  declaration patterns, the current blocker);
   [PR #47](https://github.com/quaat/mdl-racket/pull/47) (Flash subagent
   definitions) green, **pending maintainer merge decision**; issue #44
   **closed** (D1 merged).
 - **Latest integrated commit:** `f87d160` on `main` (merge of PR #45,
   declarations; post-merge CI green, run 44615298096). Local `main` is
   up to date.
-- **D2 state (in progress):** Confusion reference evidence recorded by the
+- **D2 state (implemented, main-session-verified):** Confusion reference evidence recorded by the
   `glm-5.3-flash:cloud` reference-investigator subagent (18 success + 10
   error observations; independently reproduced byte-for-byte by the main
   session before commit `c015e8a`; see
@@ -27,8 +26,16 @@ D2 in progress).
   segments (observable via PUT), no re-evaluation of FORM-argument splices,
   quoted segments stay data, `ILLEGAL-SEGMENT` errors for standalone and
   non-structured results, `![` is UVECTOR syntax not segment syntax.
-  Flash implementer now working tests-first on `feat/m2-segment-impl`
-  (worktree).
+  The Flash implementer produced `feat/m2-segment-impl` (tests `81d8286`,
+  implementation `006674d`); the main agent reviewed the full diff, merged
+  it (`b0af6b8`), and freshly re-ran all suites green: 701 Racket checks,
+  loader 57, historical 23 + 14 assertions, reader sweep 36/36. The pinned
+  load now completes **three expressions** and fails at the D3 barrier
+  (`DECL 11:9: unsupported declaration pattern LIST` in `PSETG`).
+  Architect decisions recorded in `docs/SEMANTICS.md`: interpreted
+  call-argument splicing follows the manual over the reference's
+  non-splicing interpreted path; eager interpreted segment-payload
+  evaluation is a recorded, unobserved-case divergence.
 - **Flash subagent routing (verified 2026-11-19):** provider accepts
   `glm-5.3-flash:cloud` (added to the Ollama Claude integration model list;
   backup at `~/.ollama/config.json.bak-20261119`); a headless
@@ -49,19 +56,17 @@ D2 in progress).
   sandbox); in-sandbox Racket needs `PLTCOLLECTS=":$PWD"`; the smoke CI
   container does not provision `.cache/upstream/`, so pinned-source
   assertions live only in `make test-historical` (reference workflow).
-- **First failing source construct:** `!`-splice, `81prim.mud:16:46`
-  (`!.PL` in the original `PSETG`), compile stage — then `PSETG`'s compound
-  `<LIST [REST ATOM]>` declaration pattern.
+- **First failing source construct:** the compound declaration pattern
+  `<LIST [REST ATOM]>` in `PSETG` (`81prim.mud:11:9`, runtime stage,
+  expression 3) — the `!`-splice at 16:46 now compiles (D2).
 - **Known semantic decisions:** see `docs/SEMANTICS.md` (M2 D1 section) and
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
   `DECL?` false payload follows Confusion (`#FALSE (value pattern)`).
-- **Exact next action:** verify the Flash investigator's SEGMENT reference
-  evidence, commit it on `feat/m2-segment`, delegate tests-first SEGMENT
-  implementation to the Flash implementer in a worktree, review and run the
-  full suites locally, PR, CI, review, then merge per policy. After D2:
-  the `[REST ...]` declaration-pattern slice (D3, new issue), then retry the
-  full `77loadall.mud` load and record the next actual blocker.
+- **Exact next action:** push `feat/m2-segment`, open the D2 PR
+  referencing issue #46, run CI, obtain review, merge per policy; then the
+  D3 `[REST ...]` declaration-pattern slice (issue #48, Flash implementer),
+  then retry the full `77loadall.mud` load and record the next blocker.
 - **Full evidence:** `docs/evidence/M2/DECLARATIONS.md` (D1 slice),
   `docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md` (recovery),
   `docs/evidence/M2/SOURCE-EXECUTION.md` (live execution inventory),
