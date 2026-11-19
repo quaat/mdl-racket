@@ -636,3 +636,57 @@ The MDL manual sections on
 and [looping](https://mdl-language.readthedocs.io/en/latest/10-looping/)
 provide the historical interpretation for future M1 tests. Confusion results
 are not by themselves proof of exact original MDL semantics.
+## M2 D1 specification: local `#DECL` checking
+
+Chapter 14 of *The MDL Programming Language* defines `#DECL` as a DECL-typed
+value whose atom/pattern pairs may occur immediately after the formal or
+auxiliary list of `FUNCTION`, `PROG`, or `REPEAT`. `DEFINE` and `DEFMAC` use
+the same function body position. `VALUE` denotes the result. Checking is on
+initially: bound arguments, initialized locals, each later `SET`, and normal
+or explicit results must satisfy the associated pattern. An unassigned
+optional or auxiliary slot remains unassigned until set. A failed check must
+not change the slot. Checks belong to the owning local frame, including
+nested calls and nonlocal returns.
+
+This slice supports type atoms registered in the current MDL type space,
+`ANY`, `<OR ...>`, and `<PRIMTYPE type>`. Type matching compares MDL `TYPE`;
+primitive matching compares `PRIMTYPE`. The required names include ATOM,
+FIX, FLOAT, STRING, FALSE, LIST, VECTOR, UVECTOR, WORD, and registered
+`NEWTYPE` names. A `#DECL` payload must have alternating nonempty atom lists
+and patterns. A declaration may appear only in the first body position.
+Unknown type names, malformed pairs, compound structure/repetition patterns,
+quoted-object patterns, aliases, and SPECIAL/UNSPECIAL modifiers fail
+explicitly pending separate reference-backed slices. They are never treated
+as `ANY`. The reader retains the declaration's line and column; the runtime
+uses that position in declaration errors.
+
+`#DECL` also evaluates to a DECL-typed value in any expression position
+(`<TYPE #DECL ((X) FIX)>` is `DECL`), and the explicit `<DECL? value
+pattern>` predicate checks one value against one pattern with the same
+normalization as attached declarations. Pinned Confusion returns `T` on a
+match and `#FALSE` carrying the value and pattern otherwise; this
+implementation reproduces both. `DECL?` reports malformed or unknown
+patterns as explicit errors prefixed `DECL?` rather than as `#FALSE`.
+
+The pinned Confusion build accepts a DECL object and its explicit `DECL?`
+predicate checks simple patterns, but it does not enforce attached function
+declarations: wrong arguments, `SET`, and results all pass in observed probes.
+Its `mdl_decl.cpp` labels checking work in progress, and the only call to
+`mdl_check_decl` is its explicit `DECL?` operation. We follow the manual's
+enforcement semantics and record this as a reference deviation rather than
+copying the reference's missing checks. Reference success, errors, and
+source hashes belong in `docs/evidence/M2/DECLARATIONS.md`.
+
+The original `MSETG` first tests `GASSIGNED?`, then `SETG`s and `MANIFEST`s
+an atom on the first assignment. The manual says `GASSIGNED?` is true only
+when a global value is assigned. `MANIFEST` marks global slots as constants
+and returns `T`; with declaration checking enabled, a later `SETG` may change
+an assigned manifest value only to an identical (`==?`) value or when
+`.REDEFINE` is true. This slice needs first-assignment success and preserves
+the manifest restriction. Confusion's pinned source accepts `FLOAD
+"81prim.mud"` and the first `<MSETG M2-TEMP 3>` returns `T`, leaving the
+global at `3`. A second equivalent call returns `T`; conflicting reassignment
+enters its explicit `ERROR MSETG ... ALREADY-GASSIGNED` branch. Confusion
+does not have active local declaration checking, so its wrong-FOO error comes
+from `GASSIGNED?`, while the Racket implementation rejects at the declaration
+binding boundary.

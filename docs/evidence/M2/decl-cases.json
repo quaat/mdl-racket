@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "m2-declaration-reference-successes",
+  "cases": [
+    {"name": "decl-object", "expression": "<TYPE #DECL ((X) FIX)>"},
+    {"name": "explicit-fix-yes", "expression": "<DECL? 3 FIX>"},
+    {"name": "explicit-fix-no", "expression": "<DECL? \"x\" FIX>"},
+    {"name": "explicit-or", "expression": "<DECL? \"x\" '<OR FIX STRING>>"},
+    {"name": "explicit-primtype", "expression": "<DECL? 3 '<PRIMTYPE WORD>>"},
+    {"name": "attached-good", "expression": "<DEFINE F (X) #DECL ((X) FIX) .X> <F 1>"},
+    {"name": "attached-bad-argument", "expression": "<DEFINE F (X) #DECL ((X) FIX) .X> <F \"x\">"},
+    {"name": "attached-bad-set", "expression": "<DEFINE F (X) #DECL ((X) FIX) <SET X \"x\"> .X> <F 1>"},
+    {"name": "attached-bad-result", "expression": "<DEFINE F (X) #DECL ((X) FIX (VALUE) STRING) .X> <F 1>"},
+    {"name": "original-msetg-good", "expression": "<FLOAD \"81prim.mud\"> <MSETG M2-D1-TEMP 3> ,M2-D1-TEMP"},
+    {"name": "original-msetg-repeat", "expression": "<FLOAD \"81prim.mud\"> <MSETG M2-D1-TEMP 3> <MSETG M2-D1-TEMP 3>"}
+  ]
+}

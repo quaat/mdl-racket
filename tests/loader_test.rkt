@@ -58,12 +58,12 @@
    (check-equal? (hash-ref (failure partial) 'column) 1)
    (check-equal? (hash-ref (failure partial) 'construct) "UNSUPPORTED-OP")
 
-   (put "bad-compile.mud" "<SETG BEFORE 1>\n#DECL\n<SETG BEFORE 2>\n")
+   (put "bad-compile.mud" "<SETG BEFORE 1>\n#UNKNOWN\n<SETG BEFORE 2>\n")
    (define bad-compile (mdl-session-load! session "bad-compile.mud"))
    (check-equal? (hash-ref (failure bad-compile) 'stage) "compile")
    (check-equal? (mdl-session-global session "BEFORE") 1)
    (check-equal? (hash-ref bad-compile 'completed_expressions) 1)
-   (check-equal? (hash-ref (failure bad-compile) 'construct) "#DECL")
+   (check-equal? (hash-ref (failure bad-compile) 'construct) "#UNKNOWN")
    (check-equal? (hash-ref (failure bad-compile) 'line) 2)
 
    (define missing (mdl-session-load! session "missing.mud"))

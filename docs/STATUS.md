@@ -387,3 +387,34 @@ commands, and limitations are in
 [PR #37](https://github.com/quaat/mdl-racket/pull/37). No MDL semantics or
 upstream source changed. Source loading and original game execution remain
 the next M2 work.
+
+## M2 issue #44: `#DECL` local declarations
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** The declaration slice
+implements chapter-14 `#DECL` for `DEFINE`, `DEFMAC`, `PROG`, and `REPEAT`
+in both compiled and interpreted paths: bound formals, OPTIONAL/AUX
+initializers, later `SET`s, and normal or explicit results are checked
+against `ANY`, registered type atoms, `<OR ...>`, and `<PRIMTYPE type>`
+patterns, with strict explicit rejection of everything else. `DECL?`,
+`GASSIGNED?`, and `MANIFEST` are added; `SETG` refuses to change an assigned
+manifest except to an `==?`-identical value or when `.REDEFINE` is true.
+The reader accepts the doubled `#DECL #DECL` form that the original
+`77act1.mud:110` requires (Confusion's generic `#`-typecode reading makes
+it a re-typing no-op). The unmodified original `MSETG` now installs and
+executes (`<MSETG M2-D1-TEMP 3>` returns `T`, leaving the global at `3`);
+the `77loadall.mud` load advances past the `#DECL` barrier and stops
+explicitly at the next construct, the `!`-splice in the original `PSETG`
+(`81prim.mud:16:46`). `make test` passes 620 Racket checks and 13 Python
+tests; the selected text sweep still parses 36/36 files. Thirteen pinned
+Confusion observations back the semantics: eleven success cases exit zero
+and the two deliberate `MSETG` error cases match their saved outputs.
+Pinned Confusion does not enforce attached declarations; this slice
+follows the manual instead and records that deviation. Full details,
+commands, and hashes are in
+[`docs/evidence/M2/DECLARATIONS.md`](evidence/M2/DECLARATIONS.md), tracked
+by [issue #44](https://github.com/quaat/mdl-racket/issues/44). The
+session recovery record is in
+[`docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md`](evidence/M2/SESSION-RECOVERY-2026-11-19.md).
+The `!`-splice read construct, the `[REST ...]` declaration patterns,
+general APPLY/DISPATCH, and original game execution remain open. The first
+unmet **milestone** gate is still M2.
