@@ -1,4 +1,4 @@
-# Status — 2026-11-19 (M2 historical VFLOAD slice under review)
+# Status — 2026-11-19 (M2 declarations merged; SEGMENT slice open)
 
 ## M2 source execution audit (G0)
 
@@ -7,10 +7,12 @@
 checks, 13 Python tests, 36 parsed source files, the native build, capture and
 probe. The 508 count on Racket 8.10 is a RackUnit nested-check reporting
 difference, verified with a deliberately failing nested assertion in a
-disposable copy. First actual source barriers are `FLOAD`, `#DECL`, the
-native `MUDDLE` global, and source ordering. See
+disposable copy. The first actual source barriers were `FLOAD`, `#DECL`, the
+native `MUDDLE` global, and source ordering; `FLOAD` (G1/G2) and `#DECL`
+(M2-D1, PR #45) are now cleared, and the current blocker is the `!`-splice in
+the original `PSETG` (issue #46). See
 [`SOURCE-READINESS.md`](evidence/M2/SOURCE-READINESS.md) and its JSON inventory.
-Next: a controlled source loader and shared MDL session (G1). Original source
+Next: the SEGMENT slice (issue #46). Original source
 execution and gameplay have not been demonstrated.
 
 ## M2 shared-session source loader (G1)
