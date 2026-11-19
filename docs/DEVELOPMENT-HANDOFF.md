@@ -7,9 +7,11 @@ D2 in progress).
 - **Milestone / gate:** M2. G0/G1/G2 PASS and **M2-D1 merged**; integrated
   M3-style gate NOT RUN. M2 milestone NOT YET PASS.
 - **Active issues/PRs:** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
-  (D2 SEGMENT, branch `feat/m2-segment`, head `a955ed1`) — implemented,
-  verified, CI green on all three checks, independent review in progress,
-  merge gated on review + maintainer approval;
+  (D2 SEGMENT, branch `feat/m2-segment`, head `e26f3a8`) — independent
+  review returned REQUEST_CHANGES (two verified semantic defects + a
+  coverage gap); all findings fixed with regression tests and pushed;
+  716 Racket checks green locally; CI re-running on the fix head; merge
+  gated on green CI + maintainer approval;
   [issue #48](https://github.com/quaat/mdl-racket/issues/48) (D3 structured
   declaration patterns, the current load blocker) — reference evidence
   recorded, verified, and committed on stacked branch
@@ -67,9 +69,8 @@ D2 in progress).
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
   `DECL?` false payload follows Confusion (`#FALSE (value pattern)`).
-- **Exact next action:** resolve the D2 independent-review findings on
-  PR #49 (regression tests for anything real), then merge with maintainer
-  approval; then launch the D3 Flash implementer on
+- **Exact next action:** confirm CI green on PR #49 head `e26f3a8`, then
+  merge with maintainer approval; then launch the D3 Flash implementer on
   `feat/m2-decl-patterns` (the `[REST ...]` structured-pattern slice,
   issue #48 — Confusion's DECL? implements the subset, so the reference
   backing is direct), then retry the full `77loadall.mud` load and record
