@@ -17,6 +17,7 @@ and patched variant must never be conflated in claims of fidelity.
 mdl/parser.rkt           MDL lexical reader -> source-located AST
 mdl/compiler.rkt         small bootstrap translation subset (fail closed)
 mdl/runtime/core.rkt     small bootstrap runtime (NOT a faithful full MDL VM)
+mdl/loader.rkt           root-restricted, shared-session local source loader
 mdl/lang/reader.rkt      #lang mdl custom language reader
 mdl/lang/main.rkt        core Racket bindings for generated code
 scripts/fetch_sources.py  pinned immutable upstream checkouts
@@ -24,6 +25,7 @@ scripts/build_confusion.sh native reference build
 scripts/reference_runner.py interactive PTY capture
 scripts/compare_transcripts.py strict diff oracle
 scripts/mdl_check.rkt   source parser coverage command
+scripts/mdl_load.rkt    local source execution and JSON diagnostic command
 sources.lock.json       exact Git commits of both upstream repos
 tests/                  offline Python + Racket tests, scenario corpus
 artifacts/              local logs/transcripts/checkpoints (gitignored)
@@ -35,8 +37,10 @@ docs/evidence/           curated milestone reports committed to Git
 `mdl/parser.rkt` and `mdl/compiler.rkt` are intentionally independent from
 Confusion. The native reference is an **oracle**, not a linked library. Future
 Racket sessions must have independent global state, a stable game-state format,
-and explicit I/O boundaries. Bootstrap `current-mdl-globals` is process-local
-and not adequate for production player isolation.
+and explicit I/O boundaries. The G1 loader now creates separate parameterized
+globals, root local frames, and atom/type spaces per local session. This is a
+testable source execution boundary, not a production player service or a
+resource-isolated game process.
 
 `#lang mdl` uses a custom reader to create a Racket module. Parsing a source
 file does not imply that the compiler understands all its forms. The M0

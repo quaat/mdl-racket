@@ -1,4 +1,4 @@
-# Status — 2026-11-18 (M2 macro slice locally verified)
+# Status — 2026-11-19 (M2 G1 review follow-up)
 
 ## M2 source execution audit (G0)
 
@@ -12,6 +12,36 @@ native `MUDDLE` global, and source ordering. See
 [`SOURCE-READINESS.md`](evidence/M2/SOURCE-READINESS.md) and its JSON inventory.
 Next: a controlled source loader and shared MDL session (G1). Original source
 execution and gameplay have not been demonstrated.
+
+## M2 shared-session source loader (G1)
+
+**G1 PASS locally; M2 integrated gate NOT RUN.** A root-restricted local
+loader compiles and executes top-level forms in order, shares MDL state across
+files, and routes nested `FLOAD` through the same session. Controlled fixture
+tests cover ordering, definitions/macros, fresh-session isolation,
+partial failure, missing files, traversal, symlink escape, cycles, repeated
+loads and source diagnostics. The original `77loadall.mud` now executes its
+`VFLOAD` definition and begins `81prim.mud`; it stops on the genuine
+unsupported `#DECL` at line 3:9. See
+[`SOURCE-LOADER.md`](evidence/M2/SOURCE-LOADER.md) and the structured
+[load report](evidence/M2/source-load-first-barrier.json). G2 must invoke the
+unmodified definition with controlled input; no gameplay is claimed.
+The PR #41 review follow-up fixes an indirect symlink escape and preserves
+completed forms before later reader errors. The first native CI run failed
+because the minimal image lacks `raco make`; the conditional precompile fix
+passed both the harness and native reference CI workflows on the follow-up
+commit. That follow-up reported 561 Racket checks and 13 Python tests. See
+the review section of `SOURCE-LOADER.md`.
+The second PR #41 review identified link targets containing `..` after a
+symlink and interpreted definitions rejected by `mdl-session-call`. Both now
+have focused regressions and local fixes; see the same report for validation.
+The third review found a consecutive-parent path bug. Its regression failed
+with the wrong child file and now passes; the current suite reports 570
+Racket checks and 13 Python tests.
+Both follow-up workflows passed on `88d7b39`: harness run 44571160830 and
+native reference run 44571160806. G1 remains a local slice PASS while the
+PR is under review. G2 has a separate stacked PR #43; the integrated M2
+gate remains open.
 
 | Gate | State | Evidence / limitation |
 |---|---|---|

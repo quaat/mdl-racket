@@ -6,13 +6,11 @@ development. Inspect the relevant source and tests. The first unmet milestone
 is M2; M0 and M1 passed. The prior M2 macro and CI slices are merged.
 
 The [G0 source-readiness report](evidence/M2/SOURCE-READINESS.md) identifies
-the actual historical load barriers. Begin with G1: build a root-restricted
-source loader and shared MDL session, compile and execute top-level forms in
-order, route nested `FLOAD` through the same context, and report partial
-execution with file/line/expression/load-chain diagnostics. Add regression
-tests before changing behavior. Next, G2 should invoke an unmodified pinned
-historical definition through that loader; the `VFLOAD` definition in
-`77loadall.mud` is the first candidate. `#DECL` requires researched semantics
+the actual historical load barriers. [G1](evidence/M2/SOURCE-LOADER.md) adds
+the local source loader and shared MDL session. Begin G2 by invoking an
+unmodified pinned historical definition through that loader; the `VFLOAD`
+definition in `77loadall.mud` is the first candidate. `#DECL` requires
+researched semantics
 and must not be silently ignored. The integrated M2 gate remains open until
 coherent original definitions are executed and verified.
 
