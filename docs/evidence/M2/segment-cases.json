@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "name": "m2-segment-reference-successes",
+  "cases": [
+    {"name": "list-splice-lval", "expression": "<SET ARF '(B 3 4)> <SET ZOP '![2 3 4]> (.ARF !.ZOP)"},
+    {"name": "manual-unquoted-arf", "expression": "<SET ARF (B 3 4)> <SET ZOP '![2 3 4]> (.ARF !.ZOP)"},
+    {"name": "gval-splice", "expression": "<SETG GSEG '![7 8 9]> (!,GSEG)"},
+    {"name": "form-segment-explicit-bang", "expression": "<SET ARF '(B 3 4)> (!<REST .ARF!>)"},
+    {"name": "form-segment-implicit-bang", "expression": "<SET ARF '(B 3 4)> (!<REST .ARF>)"},
+    {"name": "subr-arg-splice", "expression": "<SET A '![1 2 3 4]> <+ !.A 5>"},
+    {"name": "vector-splice", "expression": "<SET ZOP '![2 3 4]> [1 !.ZOP]"},
+    {"name": "vector-nested-segments", "expression": "<SET ZOP '![2 3 4]> <SET ARF '(B 3 4)> [1 !.ZOP !<REST .ARF>]"},
+    {"name": "uvector-uniform-splice", "expression": "<SET ZOP '![2 3 4]> <SET ARF '(B 3 4)> ![!.ZOP !<REST .ARF>!]"},
+    {"name": "splice-order-side-effects", "expression": "<DEFINE F (I) <PRINT .I> ![.I]> (1 !<F 10> 20 !<F 30>)"},
+    {"name": "list-tail-sharing-final", "expression": "<SET ARF '(B 3 4)> <SET DOG (1 2 !.ARF)> <PUT .ARF 1 \"BOWOW\"> (.ARF .DOG)"},
+    {"name": "nonfinal-segment-copies", "expression": "<SET ARF '(B 3 4)> <SET CAT (1 !.ARF 2)> <PUT .ARF 1 \"BOWOW\"> (.ARF .CAT)"},
+    {"name": "empty-segment-quoted", "expression": "(1 !'() 2)"},
+    {"name": "empty-segment-lval", "expression": "<SET E '()> (1 !.E 2)"},
+    {"name": "string-splice", "expression": "<SET S \"STRUNG.\"> (!.S)"},
+    {"name": "quoted-segment-unevaluated", "expression": "<SET X '![9 9]> <SET A '![5 5]> '(1 !.X !.A)"},
+    {"name": "quoted-segment-prog", "expression": "<SET X '![9 9]> '<PROG () !.X>"},
+    {"name": "nested-segments-list", "expression": "<SET ZOP '![2 3 4]> <SET ARF '(B 3 4)> (!.ZOP !<REST .ARF>)"}
+  ]
+}
