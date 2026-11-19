@@ -71,7 +71,7 @@ unsupported. The [semantic ledger](../../SEMANTICS.md) specifies the slice.
 
 ## Validation and boundary
 
-Base loader review-fix commit: `84da803a774f5f6658d04b01baf8587f95f24821`
+Base loader review-fix commit: `88d7b393f9a98ec740e027b2dc331273164a18b4`
 (G1 PR #41). Racket 7.9 [bc], Python 3.13.0, pinned native Confusion and
 BDW GC 8.0.4 were used locally.
 
@@ -79,7 +79,7 @@ BDW GC 8.0.4 were used locally.
 |---|---:|---|
 | `racket tests/historical_vfload_test.rkt` before prefix and I/O implementation | 1 | Loader rejected `#:max-expressions` (expected red) |
 | `make test-historical` after review fixes | 0 | Source SHAs verified; 23 historical probe assertions pass |
-| `make test` | 0 | 568 Racket checks, 13 Python tests |
+| `make test` | 0 | 570 Racket checks, 13 Python tests after latest G1 merge |
 | `.venv/bin/python -m scripts.probe_vfload_reference` | 0 | Six focused Confusion observations saved |
 | `make check-source` | 0 | 36 text files parsed, four non-text files excluded, zero failures; generated M0 sweep restored |
 | `make reference-build` | 0 | Pinned native build, with `_XOPEN_SOURCE` redefinition warning |
@@ -108,8 +108,8 @@ helper now records only exceptions thrown by the tested call and raises its
 own assertion afterward. The FIX-path, missing-file, STRING and PRINTSTRING
 negative cases therefore detect unexpected success.
 
-After rebasing on the corrected G1 loader, `make test-historical` exits 0
-with 23 assertions, `make test` exits 0 with 568 Racket checks and 13 Python
+After bringing in the corrected G1 loader, `make test-historical` exits 0
+with 23 assertions, `make test` exits 0 with 570 Racket checks and 13 Python
 tests, `make check-source` exits 0 with 36 parsed text files, and the native
 build, five-turn capture, 12 primitive probes and six focused VFLOAD probes
 all exit 0. The full-load diagnostic still exits 1 at `81prim.mud` form 2
@@ -118,8 +118,12 @@ golden's stable fields still match after the documented capture/build
 metadata exclusions. The rebuilt local Confusion binary has SHA256
 `9d8a07bd0bb88ff89cceb6b257e4752174a1a5831540a531db514e6880a4c305`;
 the six-case reference JSON records that binary and unchanged observations.
-No RNG seed was set for the fixed five-turn input sequence. The next CI run
-for this dependency correction is pending and must be recorded on PR #43.
+No RNG seed was set for the fixed five-turn input sequence. The dependency
+correction passed [harness CI run 44570235523](https://github.com/quaat/mdl-racket/actions/runs/44570235523)
+and [native CI run 44570235452](https://github.com/quaat/mdl-racket/actions/runs/44570235452)
+on `b4b28099b59697dce7dc1cfb31f68a2016953a1d`. The latest G1
+consecutive-parent correction is merged into this branch and passes locally;
+the combined branch's new CI run is pending.
 
 The reference result is a partial source-execution slice. The full
 `77loadall.mud` still reaches `81prim.mud` and stops on its unsupported

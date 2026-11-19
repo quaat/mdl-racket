@@ -63,8 +63,10 @@ minimal Racket image lacked `compatibility-lib` for `racket/mpair`, then
 also found that a negative-test helper accepted its own assertion exception.
 Both have follow-up fixes: the workflow installs both libraries, and a
 failing-then-passing helper self-check makes wrong-type tests meaningful.
-Local G2 validation now reports 23 historical assertions, 568 Racket checks,
-13 Python tests, and matching reference output; follow-up CI is pending.
+The dependency correction passed both workflows on `b4b2809`. After merging
+the latest G1 path fix, local G2 validation reports 23 historical assertions,
+570 Racket checks, 13 Python tests, and matching reference output; the
+combined branch's CI rerun is pending.
 
 | Gate | State | Evidence / limitation |
 |---|---|---|
