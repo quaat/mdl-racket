@@ -75,6 +75,39 @@ Do not implement the whole language in one PR. Preferred vertical slices:
 reader -> semantic primitive -> reference probe -> property test -> translation
 -> differential validation. See `docs/PLAN.md` for acceptance gates.
 
+## Model routing and subagent delegation
+
+This project uses a two-tier model split. It applies to every session and
+subagent working in this repository:
+
+- **GLM-5.3 (the main session model) does orchestration and detailed
+  planning:** reading and maintaining `docs/STATUS.md`,
+  `docs/PLAN.md`, and `docs/DEVELOPMENT-HANDOFF.md`; choosing the next
+  slice and its acceptance criteria; architecture and integration
+  decisions; semantic adjudications (manual vs. reference conflicts);
+  verification and evidence review; issue/PR management; and merging.
+  The main session is accountable for every merged change, whatever
+  wrote it.
+- **GLM-5.3-Flash implements bounded feature slices** through the
+  project's subagent definitions in `.claude/agents/`
+  (`mdl-reference-investigator` for read-only Confusion probe recording,
+  `mdl-segment-implementer`, `mdl-declaration-implementer` for
+  worktree-isolated, tests-first implementation). All three pin
+  `model: glm-5.3-flash:cloud` in their frontmatter.
+- **Any new implementer/investigator subagent definition must set
+  `model: glm-5.3-flash:cloud`** in its `.claude/agents/*.md` frontmatter
+  and stay scoped to one issue or bounded task. Do not route
+  implementation subagents to the orchestration model, and do not let
+  the main session do bounded slice implementation that a Flash
+  subagent has the context to do.
+- Subagents work in isolated worktrees or non-overlapping scopes. Two
+  agents must never concurrently edit `mdl/runtime/core.rkt`
+  (or any single file) without coordination. The main session reviews
+  every subagent diff in full, re-runs the suites, and merges.
+- Changes affecting equality, association storage, declarations, shared
+  mutation, or control flow always get an independent review of the
+  implementation and its invariants — not just passing tests.
+
 ## Escalation policy
 
 Do not request routine confirmations when a safe, reversible choice is obvious.
