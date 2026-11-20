@@ -950,3 +950,29 @@ Tests must first fail for unassigned `ERROR`, then pass for zero and
 multiple arguments, evaluation side effects, and the exact source-defined
 MSETG conflicting-repeat path. No error branch may be converted into a
 FALSE or ignored form.
+
+## M2 G3 corrective primitive: `MEMQ` (issue #63)
+
+The [MDL manual chapter 8](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+defines `MEMQ` as `MEMBER` using `==?` identity. It returns the `REST`
+view beginning at the first identical element, or `#FALSE ()` on a miss.
+Pinned Confusion confirms LIST hit `(B C)`, miss `#FALSE ()`, structurally
+equal but distinct LIST miss, mutable LIST tail aliasing, VECTOR `[2 3]`,
+UVECTOR `![2 3!]`, and original `PSETG` returning `3` with `PURE-LIST`
+`(G3-P)`. Reference data: `evidence/M2/memq-*`.
+
+For this corrective slice, scan LIST/VECTOR/UVECTOR left-to-right using
+`mdl-identical?`; return `mdl-rest` at the matching zero-based offset to
+preserve aliasing and primitive structure kind. Reject non-structured
+second arguments explicitly. The one-argument reference crashes with
+signal 11, so the Racket runtime must raise a deliberate arity error
+rather than reproducing that crash. A three-argument call reports too many
+arguments in Confusion. STRING/other structured MEMQ requires a separate
+reference-backed representation decision if reached; never return a false
+miss merely because that representation is unsupported. Tests must cover
+the first match, miss, identity versus structural equality, aliasing,
+sequence kinds, arity/type boundaries, and exact-source PSETG.
+The implemented slice passes these tests and the exact-source PSETG
+first/repeat paths. `MEMQ` on STRING still raises an explicit unsupported
+error; see `evidence/M2/MEMQ.md`. G3 now fails at original FLAGWORD's
+unassigned `MAPF`, rather than at PSETG.

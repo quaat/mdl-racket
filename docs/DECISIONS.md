@@ -592,3 +592,19 @@ completed function call.
 
 **Consequence:** Issue #63 is the next focused M2 correction. M3 `EMPTY?`
 waits for a new G3 decision. Evidence: `evidence/M2/G3-GATE.md`.
+
+## ADR-0027: Use MDL identity and REST views for MEMQ
+
+**Decision (2026-11-20, issue #63):** MEMQ searches supported structured
+values left-to-right with `mdl-identical?` (`==?`) and returns the
+`mdl-rest` view from the first hit. A miss returns FALSE. This preserves
+LIST tail aliasing and VECTOR/UVECTOR kind in the pinned reference cases.
+One-argument MEMQ raises an explicit arity error locally; pinned Confusion
+crashes with signal 11 on that probe. STRING MEMQ remains an explicit
+unsupported error until mutable STRING REST semantics are established.
+
+**Consequence:** Original PSETG first/repeat calls pass and keep one
+PURE-LIST entry. The current G3 run fails next at original FLAGWORD's
+unassigned MAPF (issue #65), after 52 passing assertions. Evidence:
+`evidence/M2/MEMQ.md` and `evidence/M2/G3-GATE.md`. No upstream,
+license, or service boundary changes.

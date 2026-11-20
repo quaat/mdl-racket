@@ -21,16 +21,18 @@ GET, SEGMENT, identity, and indexed PUT. The unchanged
 `77loadall.mud` chain completes 24 expressions, including all of
 `81prim.mud` and the original `RAPPLIC` declaration property in
 `77defs.mud`; it stops at `EMPTY?` inside source-defined `NEWSTRUC` in
-`77defs.mud` expression 15. A separate pre-merge G3 run found the original
+`77defs.mud` expression 15. An earlier pre-merge G3 run found the original
 MSETG repeat path blocked by missing `N=?` ([issue #57](https://github.com/quaat/mdl-racket/issues/57));
+stacked corrections now advance the G3 failure to original FLAGWORD's
+missing `MAPF` ([issue #65](https://github.com/quaat/mdl-racket/issues/65)).
 **M2 is not closed and no Racket game boot or gameplay parity is claimed.**
 Reproduce with `make test`,
 `make test-historical`, and the loader command below. See
 [D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
 [current status](docs/STATUS.md). Both PR workflows passed on corrected D5
 head `e6d295d`; its latest Codex review is pending. The next actions are
-D5 final-head review/approval and a current-head G3 run of the stacked
-`N=?`, computed-global, and `ERROR` corrections.
+D5 final-head review/approval and the focused `MAPF` correction after the
+current-head G3 run.
 Historical progress notes below preserve
 their original slice-level context.
 
@@ -59,13 +61,23 @@ Confusion outputs and the non-resumable Racket deviation are in
 [ERROR evidence](docs/evidence/M2/ERROR.md). Integrated G3 remains FAIL
 at the next source-backed dependency; no game boot or gameplay parity is claimed.
 
-**Current-head G3 run:** `make test-m2-g3` exits 2 after 48 passing
+**Earlier current-head G3 run:** `make test-m2-g3` exits 2 after 48 passing
 integrated assertions because original `PSETG` reaches unassigned `MEMQ`
 after its initial side effects. Original MSETG first/equal/conflict paths
 pass. The exact-source chain still stops at `EMPTY?` after 24 expressions;
 G3 and M2 remain **FAIL**. Reproduce with `make test-m2-g3`; see
 [G3 evidence](docs/evidence/M2/G3-GATE.md). Next correction: issue #63
 `MEMQ`, followed by a fresh G3 run. M3 remains unstarted.
+
+**Current MEMQ/G3 result:** Original `PSETG` first/repeat calls now pass
+using `==?` membership and shared REST views. `make test` exits 0 with
+903 Racket checks and 13 Python tests; `make test-historical` exits 0
+with VFLOAD 23, DECL 21, MSETG, and PSETG probes. `make test-m2-g3`
+exits **2** after 52 passing integrated assertions: original `FLAGWORD`
+reaches unsupported `MAPF`, while pinned Confusion returns `1` for its
+empty-TUPLE call. G3 and M2 remain **FAIL**; M3 is unstarted. Reproduce
+with those make targets; see [MEMQ evidence](docs/evidence/M2/MEMQ.md)
+and [updated G3 evidence](docs/evidence/M2/G3-GATE.md). Next: issue #65.
 
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
 passes: the baseline and pinned source are reproducible, and the first

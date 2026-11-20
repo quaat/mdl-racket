@@ -96,6 +96,10 @@ the integrated G3 branch required a current-head run and gate decision.
 That run now fails at original PSETG's unassigned `MEMQ` after 48 passing
 integrated assertions ([issue #63](https://github.com/quaat/mdl-racket/issues/63)).
 G3 remains FAIL; M3 is still gated.
+The MEMQ slice passes original PSETG first/repeat calls; a fresh G3 run
+passes 52 assertions, then original FLAGWORD reaches missing `MAPF`
+([issue #65](https://github.com/quaat/mdl-racket/issues/65)). G3 still
+FAIL; `EMPTY?` remains deferred.
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,

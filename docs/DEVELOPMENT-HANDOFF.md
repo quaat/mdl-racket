@@ -14,6 +14,16 @@ passes. `make test` passes 888 Racket and 13 Python checks;
 still needs a current-head run, so G3 remains FAIL and M3 is not started.
 Next: update and rerun G3, then act only on its observed first failure.
 
+**Latest M2 correction (issue #63):** `feat/m2-memq` implements `MEMQ`
+for LIST, VECTOR, UVECTOR and list-primitive structured values with
+`==?` identity and REST aliasing. Eight clean Confusion cases and three
+deliberate error cases (including one reference segfault) are saved in
+`docs/evidence/M2/memq-*`. `make test` passes 903 Racket and 13 Python
+checks; `make test-historical` passes VFLOAD 23, DECL 21, MSETG, PSETG.
+The updated G3 test passes 52 assertions then exits 2: original FLAGWORD
+reaches unassigned `MAPF` (issue #65). See `docs/evidence/M2/MEMQ.md`
+and `G3-GATE.md`. G3 FAIL; M3 unstarted.
+
 **Current G3 rerun:** `feat/m2-g3-current` carries the saved integration
 test onto `3589652`. `make test-m2-g3` exits 2 after 48 passing assertions;
 original MSETG first/equal/conflict paths pass, while original PSETG
@@ -76,7 +86,8 @@ explicit maintainer approval; do not begin M3 EMPTY?.
   enforce DECL associations; GETPROP/PUTPROP and chapter 13.4 machinery
   explicitly unimplemented. See ADR-0023 and the M2 D5 section of
   `docs/SEMANTICS.md`.
-- **Exact next action:** rerun G3 on the stacked `ERROR` head; merge D5
+- **Exact next action:** implement issue #65 MAPF against the pinned
+  reference, then rerun G3; merge D5
   only after explicit
   maintainer approval and final-head review. M3 `EMPTY?` waits for G3.
 - **Active issues/PRs (historical, D2/D3 era — superseded by the header

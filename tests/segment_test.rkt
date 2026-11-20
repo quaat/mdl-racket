@@ -293,10 +293,9 @@
    ;; definition from the pinned 81prim.mud installs its <LIST [REST ATOM]>
    ;; declaration, so the definition installs and invoking it fails on its
    ;; body: this trimmed two-line body evaluates the segment !.PL while its
-   ;; PL auxiliary is still unassigned (the pinned definition initializes PL
-   ;; through its PURE-LIST COND first, and when invoked stops explicitly at
-   ;; <MEMQ .FOO .PL>; see tests/declaration_pattern_test.rkt). No
-   ;; PSETG-execution primitives are implemented in this slice by scope.
+   ;; PL auxiliary is still unassigned. The pinned definition initializes PL
+   ;; through its PURE-LIST COND first; see tests/declaration_pattern_test.rkt.
+   ;; This trimmed body deliberately omits that initialization.
    (put "psetg.mud" (string-append
                      "<DEFINE PSETG (FOO BAR \"AUX\" PL)\n"
                      "        #DECL ((FOO) ATOM (PL) <LIST [REST ATOM]>)\n"

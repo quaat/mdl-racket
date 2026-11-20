@@ -245,19 +245,16 @@
    ;; The declaration now normalizes at install time: the load PASSes.
    (check-equal? (status (mdl-session-load! session "psetg.mud")) "PASS")
    ;; Invoking the installed PSETG with a valid ATOM argument advances through
-   ;; <SETG .FOO .BAR> (the global is set) and the first-call PURE-LIST
-   ;; initialization, then stops explicitly at <MEMQ ...>: no MEMQ primitive
-   ;; exists in this slice, by scope; adding it belongs to the PSETG slice.
-   ;; First call: PURE-LIST unassigned, so PL becomes () and PURE-LIST ().
+   ;; SETG and completes its MEMQ-backed PURE-LIST update.
    (define psetg-atom (mdl-session-call session "ATOM" "M2-D3-LVAL"))
-   (check-exn #rx"unassigned or non-applicable MDL operator MEMQ"
-              (lambda () (mdl-session-call session "PSETG" psetg-atom 3)))
+   (check-equal? (mdl-session-call session "PSETG" psetg-atom 3) 3)
    (check-equal? (mdl-session-global session psetg-atom) 3)
-   (check-equal? (mdl-session-global session "PURE-LIST") '())
-   ;; Second call: PURE-LIST is GASSIGNED, so PL binds (,PURE-LIST) = ()
-   ;; and the same MEMQ stop is reached again.
-   (check-exn #rx"unassigned or non-applicable MDL operator MEMQ"
-              (lambda () (mdl-session-call session "PSETG" psetg-atom 4)))
+   (check-equal? (mdl-list->list (mdl-session-global session "PURE-LIST"))
+                 (list psetg-atom))
+   ;; The repeat call updates the value without duplicating membership.
+   (check-equal? (mdl-session-call session "PSETG" psetg-atom 4) 4)
+   (check-equal? (mdl-list->list (mdl-session-global session "PURE-LIST"))
+                 (list psetg-atom))
    (check-equal? (mdl-session-global session psetg-atom) 4))
  (lambda () (delete-directory/files scratch-root)))
 

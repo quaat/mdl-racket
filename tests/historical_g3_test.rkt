@@ -5,7 +5,7 @@
 ;; property, shared globals, mutation aliasing, and session independence.
 ;; Run from the repository root via make test-m2-g3, which fetches the pinned
 ;; sources first. This gate currently exits nonzero after all observations
-;; because original PSETG still reaches unsupported MEMQ.
+;; because original FLAGWORD still reaches unsupported MAPF.
 (require racket/file racket/list racket/path racket/port racket/string rackunit
          "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
 
@@ -165,16 +165,22 @@
 
    ;; --- Original PSETG (81prim.mud expression 3) --------------------------
 
-   ;; PSETG's dependencies are PARTIALLY available: its SETG path runs (the
-   ;; global is assigned and the PURE-LIST global is initialized by the
-   ;; original function body) before it stops explicitly at the unassigned
-   ;; MEMQ primitive. This partial state is the documented G3 boundary.
+   ;; PSETG completes through MEMQ and preserves PURE-LIST membership on a
+   ;; repeated call; these are exact original-source paths.
    (define psetg-atom (mdl-session-atom session "G3-P"))
-   (check-exn-verb
-    (lambda () (mdl-session-call session "PSETG" psetg-atom 3))
-    #rx"unassigned or non-applicable MDL operator MEMQ")
+   (check (mdl-session-call session "PSETG" psetg-atom 3) 3)
    (check (mdl-session-global session psetg-atom) 3)
-   (check (render session (mdl-session-global session "PURE-LIST")) "()")
+   (check (render session (mdl-session-global session "PURE-LIST")) "(G3-P)")
+   (check (mdl-session-call session "PSETG" psetg-atom 4) 4)
+   (check (mdl-session-global session psetg-atom) 4)
+   (check (render session (mdl-session-global session "PURE-LIST")) "(G3-P)")
+
+   ;; The next installed original definition needed for M2's MAPF build
+   ;; surface is FLAGWORD. Pinned Confusion returns 1 for this empty-TUPLE
+   ;; call; the current Racket runtime must fail explicitly at MAPF.
+   (check-exn-verb
+    (lambda () (mdl-session-call session "FLAGWORD"))
+    #rx"unassigned or non-applicable MDL operator MAPF")
 
    ;; --- Original RAPPLIC declaration property (77defs.mud:5) -------------
 
@@ -252,4 +258,4 @@
 
 (displayln (format "historical G3 integrated observations passed: ~a assertions" checks))
 (error 'historical-g3
-       "G3 FAIL: original PSETG requires unsupported MEMQ")
+       "G3 FAIL: original FLAGWORD requires unsupported MAPF")

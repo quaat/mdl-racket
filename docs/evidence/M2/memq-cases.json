@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-memq-reference",
+  "cases": [
+    {"name": "list-hit", "expression": "<MEMQ 'B '(A B C)>"},
+    {"name": "list-miss", "expression": "<MEMQ 'X '(A B C)>"},
+    {"name": "identity-not-structural", "expression": "<MEMQ '(1) '((1) (2))>"},
+    {"name": "list-tail-alias", "expression": "<SET L '(A B C)> <PUT <MEMQ 'B .L> 1 'X> .L"},
+    {"name": "vector-hit", "expression": "<MEMQ 2 '[1 2 3]>"},
+    {"name": "uvector-hit", "expression": "<MEMQ 2 '![1 2 3!]>"},
+    {"name": "original-psetg", "expression": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3> ,PURE-LIST"},
+    {"name": "original-psetg-repeat", "expression": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3> <PSETG G3-P 4> ,PURE-LIST"}
+  ]
+}

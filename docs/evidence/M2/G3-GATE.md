@@ -1,13 +1,14 @@
 # M2 G3 integrated execution gate — branch-level FAIL
 
-**Decision (2026-11-20): FAIL on `feat/m2-g3-current`; M2 remains open.**
+**Decision (2026-11-20): FAIL on `feat/m2-memq`; M2 remains open.**
 This current-head pre-merge evaluation includes D5 PR #54 and the stacked
-`N=?` (#59), computed-global (#61), and `ERROR` (#62) corrections through
-`3589652`. It is not a mainline milestone result. The exact original
-`MSETG` from `81prim.mud` now succeeds on first/equal calls and raises
-`ALREADY-GASSIGNED` on conflict. The first unmet integrated path is the
-original `PSETG`: its invocation reaches unassigned `MEMQ` after side
-effects. A focused correction is [issue #63](https://github.com/quaat/mdl-racket/issues/63);
+`N=?` (#59), computed-global (#61), `ERROR` (#62), and MEMQ correction
+after gate commit `d9472a3`. It is not a mainline milestone result. The
+exact original `MSETG` from `81prim.mud` succeeds on first/equal calls
+and raises `ALREADY-GASSIGNED` on conflict. Original `PSETG` now succeeds
+on first/repeat calls with one PURE-LIST membership. The next unmet M2
+build path is original `FLAGWORD`, whose empty-TUPLE call reaches
+unassigned `MAPF`. A focused correction is [issue #65](https://github.com/quaat/mdl-racket/issues/65);
 gate tracking is [issue #56](https://github.com/quaat/mdl-racket/issues/56).
 PR #54 remains open pending explicit maintainer merge approval. No M3 work
 has started.
@@ -29,7 +30,8 @@ unreached MAPF or indirect application surface.
 | VFLOAD return, output, global state | PASS | Same loaded VFLOAD invokes controlled one-form file; returns FALSE, prints `g3-controlled.mud loaded`, assigns `G3-VF=17`. |
 | Original MSETG first call and declaration rejection | PASS | Fresh atom/FIX returns T, assigns/manifest global; non-ATOM first argument raises DECL error. |
 | Original MSETG equal repeat and conflict | PASS for tested paths | Equal repeat returns T; conflict raises `MSETG G3-TEMP ALREADY-GASSIGNED 3` and preserves the old value. Pinned Confusion agrees on the path and arguments. |
-| PSETG installation and invocation | BLOCKED for completion | Original definition installs; invocation assigns the target and initializes `PURE-LIST`, then explicitly fails at unassigned `MEMQ`. Confusion returns 3 and records `(G3-P)`. This cannot be counted as parity. |
+| PSETG installation and invocation | PASS for tested paths | Original definition installs; first/repeat calls return 3/4, update the target, and keep `PURE-LIST` at `(G3-P)`, matching pinned Confusion. |
+| FLAGWORD empty-TUPLE call | **FAIL** | Original definition reaches unassigned `MAPF`; pinned Confusion returns 1 for the same call. |
 | RAPPLIC property and declaration consultation | PASS | Original 77defs PUT stores `<OR ATOM FALSE NOFFSET>`; GET, TYPE/PRIMTYPE, GASSIGNED?, DECL? hit and diagnostic miss checked in same session. |
 | Original DEFMAC expansion | PASS for TRNN | `EXPAND` of original TRNN yields `<N==? <CHTYPE <ANDB 2 <OFLAGS OBJ>> FIX> 0>`, matching pinned Confusion; execution of OFLAGS is outside reached subset. |
 | Local binding, nested function/control path | PASS for reached paths | Original VFLOAD uses local X, nested FLOAD/PRINTSTRING/TERPRI; MSETG uses local formals, COND/AND, SETG/MANIFEST. Broad continuation behavior remains NOT RUN. |
@@ -39,8 +41,8 @@ unreached MAPF or indirect application surface.
 | Full M2 build surface | NOT RUN / unsupported | MAPF, indirect APPLY/DISPATCH, broader activation and continuation paths are not established by this scenario. Their absence cannot be silently treated as a gate pass. |
 
 The dedicated test is `tests/historical_g3_test.rkt` via `make test-m2-g3`.
-Its 48 assertions verify the reached behavior, including expected unsupported
-MEMQ, then it **intentionally exits nonzero** with the explicit G3 FAIL.
+Its 52 assertions verify the reached behavior, including expected unsupported
+MAPF, then it **intentionally exits nonzero** with the explicit G3 FAIL.
 Checks for expected errors reject unexpected success; source hashes, exact
 report status/count/diagnostic, and reference outputs reject changed or
 malformed observations. The Racket `mdl-session-atom` helper obtains the same
@@ -77,11 +79,12 @@ only `captured_at`, engine hash, and the Confusion build-time banner.
 
 ## Commands and observed results
 
-**Current stacked head `3589652` plus this uncommitted gate test:**
-`make test-m2-g3` exited **2**: 48 integrated assertions passed, followed
-by explicit `G3 FAIL: original PSETG requires unsupported MEMQ`. The
-preceding `make test` on `3589652` exited 0 (888 Racket checks, 13 Python);
-`make test-historical` exited 0 (VFLOAD, DECL, MSETG equal/conflict).
+**Current MEMQ branch after gate commit `d9472a3`:**
+`make test-m2-g3` exited **2**: 52 integrated assertions passed, followed
+by explicit `G3 FAIL: original FLAGWORD requires unsupported MAPF`.
+`make test` exited 0 (903 Racket checks, 13 Python);
+`make test-historical` exited 0 (VFLOAD 23, DECL 21, MSETG equal/conflict,
+PSETG first/repeat).
 The saved G3 reference cases and source SHA checks are unchanged. The
 table below preserves the **initial D5-only gate run** at `ae0984f` and
 must not be read as current-head results.
@@ -115,8 +118,9 @@ cycle deviation remain as documented in `ATOM-PROPS.md`.
 
 ## Blocker and next action
 
-The current root cause is absent `MEMQ`, used by the original PSETG. The
-previous MSETG gaps are corrected on stacked PRs. **Recommended next action:**
-implement and review reference-backed `MEMQ` in issue #63, then rerun G3
-on that head. PR #54 still requires maintainer authorization before merge.
+The current root cause is absent `MAPF`, used by the original FLAGWORD.
+The previous MSETG and PSETG gaps are corrected on stacked branches.
+**Recommended next action:** implement and review reference-backed `MAPF`
+in issue #65, then rerun G3 on that head. PR #54 still requires maintainer
+authorization before merge.
 Do not start M3 `EMPTY?` while this gate fails.
