@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "name": "d5-final-local-review",
+  "recorded_at": "2026-11-20T14:32:31.731877+00:00",
+  "interpreter_sha256": "1d540d2df348479d4740290d4190533b71d94a8308193811b96e52898798b886",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "subr-association",
+      "expression": "<PUT ,+ REVIEW-P 9> <GET ,+ REVIEW-P>",
+      "input": "<PUT ,+ REVIEW-P 9> <GET ,+ REVIEW-P>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#SUBR *0000000000000000000117*\n9\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#SUBR *0000000000000000000117*\n9\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "subr-type",
+      "expression": "<TYPE ,+>",
+      "input": "<TYPE ,+>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "SUBR\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "subr-fix-indicator",
+      "expression": "<PUT ,+ 7 9> <GET ,+ 7>",
+      "input": "<PUT ,+ 7 9> <GET ,+ 7>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#SUBR *0000000000000000000117*\n9\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#SUBR *0000000000000000000117*\n9\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "subr-fix-removal",
+      "expression": "<PUT ,+ 7 9> <PUT ,+ 7> <GET ,+ 7>",
+      "input": "<PUT ,+ 7 9> <PUT ,+ 7> <GET ,+ 7>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#SUBR *0000000000000000000117*\n#SUBR *0000000000000000000117*\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#SUBR *0000000000000000000117*\n#SUBR *0000000000000000000117*\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "function-association",
+      "expression": "<SETG REVIEW-FN <FUNCTION (X) .X>> <PUT ,REVIEW-FN REVIEW-P 7> <GET ,REVIEW-FN REVIEW-P>",
+      "input": "<SETG REVIEW-FN <FUNCTION (X) .X>> <PUT ,REVIEW-FN REVIEW-P 7> <GET ,REVIEW-FN REVIEW-P>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FUNCTION ((X) .X)\n#FUNCTION ((X) .X)\n7\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FUNCTION ((X) .X)\n#FUNCTION ((X) .X)\n7\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "function-fix-get",
+      "expression": "<SETG REVIEW-FN <FUNCTION (X) .X>> <GET ,REVIEW-FN 1>",
+      "input": "<SETG REVIEW-FN <FUNCTION (X) .X>> <GET ,REVIEW-FN 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FUNCTION ((X) .X)\n(X)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FUNCTION ((X) .X)\n(X)\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}
