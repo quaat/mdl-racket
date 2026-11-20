@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "name": "m2-muddle-global-reference-successes",
+  "cases": [
+    {"name": "muddle-gval", "expression": ",MUDDLE"},
+    {"name": "muddle-type", "expression": "<TYPE ,MUDDLE>"},
+    {"name": "muddle-ltest", "expression": "<L? ,MUDDLE 100>"},
+    {"name": "defs-line1-and-short-circuits", "expression": "<AND <L? ,MUDDLE 100> <USE \"LSRTNS\">>"},
+    {"name": "rapplic-gassigned-false-fresh", "expression": "<GASSIGNED? RAPPLIC>"},
+    {"name": "defs-line3-put-decl-unassigned-atom", "expression": "<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>"},
+    {"name": "memq-first-hit", "expression": "<MEMQ 'A '(A B)>"},
+    {"name": "memq-second-hit", "expression": "<MEMQ 'B '(A B)>"},
+    {"name": "memq-miss", "expression": "<MEMQ 1 '(A B)>"},
+    {"name": "memq-result-type", "expression": "<TYPE <MEMQ 'A '(A B)>>"},
+    {"name": "fload-chain-completion", "expression": "<FLOAD \"77loadall.mud\">"},
+    {"name": "fload-chain-rapplic-gassigned-after", "expression": "<FLOAD \"77loadall.mud\"> <GASSIGNED? RAPPLIC>"}
+  ]
+}
