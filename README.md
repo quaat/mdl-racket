@@ -10,7 +10,7 @@
 > versions and original input/time/randomness.
 
 **Current M2 status (2026-11-20):** D1–D4 are merged on `main`
-(`419fc5c`). On the stacked `feat/m2-mapf` branch, the hash-verified
+(`419fc5c`). On the stacked PR #70 head, the hash-verified
 original definitions now pass the [G3 integrated execution gate](docs/evidence/M2/G3-GATE-MAPF.md):
 `make test-m2-g3` exits 0 after 59 assertions, including original VFLOAD,
 MSETG, PSETG, FLAGWORD, RAPPLIC properties, macro expansion, aliasing,
@@ -21,8 +21,9 @@ The full `77loadall.mud` chain still stops at `EMPTY?` in original
 APPLY/DISPATCH now has a reference-backed correction in
 [issue #69](docs/evidence/M2/INDIRECT-APPLY.md), and the
 [M2 requirements audit](docs/evidence/M2/REQUIREMENTS-AUDIT.md) records
-the tested surface and deviations. Required CI, review, authorization and
-mainline verification remain. PR #54
+the tested surface and deviations. The implementation commit passed both
+required CI workflows; see the [branch acceptance report](docs/evidence/M2/BRANCH-ACCEPTANCE.md).
+Final review, authorization and mainline verification remain. PR #54
 remains unmerged pending explicit maintainer authorization. No Racket game
 boot or gameplay parity is claimed. Reproduce with `make test`,
 `make test-historical`, `make test-m2-g3`, or `make m2-check` after

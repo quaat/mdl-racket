@@ -1,4 +1,4 @@
-# Status — 2026-11-20 (branch G3 PASS; M2 audit recorded)
+# Status — 2026-11-20 (branch G3 PASS; M2 mainline NOT RUN)
 
 ## Current state (2026-11-20)
 
@@ -6,7 +6,8 @@
   `feat/m2-mapf` branch (59 exact-source integrated assertions, exit 0).
   This is a branch result, not an M2 mainline acceptance. The requirements
   audit and indirect APPLY/DISPATCH correction are on the child branch
-  `feat/m2-indirect-apply`; M2 is not closed.
+  `feat/m2-indirect-apply` in [PR #70](https://github.com/quaat/mdl-racket/pull/70);
+  M2 is not closed.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -34,7 +35,7 @@
 - **Open issues/PRs:** #53/PR #54 (D5), #56/PR #64 (G3), #57/PR #59
   (`N=?`), #58/PR #61 (computed global), #60/PR #62 (`ERROR`), #63
   /PR #66 (`MEMQ`), #65/PR #68 (`MAPF`), #67 (D5 review fix), and #69
-  (indirect APPLY). Issue #11 is closed as completed. The D5 SUBR
+  /PR #70 (indirect APPLY). Issue #11 is closed as completed. The D5 SUBR
   association correction passed final-head CI; its independent report is
   [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). The hosted review
   service declined a prior request due to its usage limit. Maintainer
@@ -56,7 +57,10 @@ indirect APPLY and computed FORM dispatch on the child branch; 15 clean
 Confusion cases and nine deliberate errors are in
 [INDIRECT-APPLY.md](evidence/M2/INDIRECT-APPLY.md). `make test` passes
 986 Racket checks and 13 Python tests; historical and G3 targets pass.
-Child-branch CI and mainline verification remain pending.
+The implementation head `3622b22` passed both required CI workflows;
+[branch acceptance evidence](evidence/M2/BRANCH-ACCEPTANCE.md) records
+exact runs and limitations. Final-head review, authorization, and mainline
+verification remain pending.
 
 ## Earlier checkpoints (retained for provenance)
 - **Earlier N=? local slice:** `make test` 879 Racket checks and 13 Python tests;

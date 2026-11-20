@@ -14,7 +14,9 @@ still exits 1 at EMPTY? after 24 forms. See
 reference-backed indirect APPLY/DISPATCH correction and the
 `REQUIREMENTS-AUDIT.md` matrix are now on the child branch. `make test`
 passes 986 Racket and 13 Python checks; `make test-historical` and G3
-pass. Both PR #68 workflows are green; child-branch CI is pending.
+pass. Both PR #68 workflows are green; PR #70's implementation head
+`3622b22` also passed both required workflows. See
+`docs/evidence/M2/BRANCH-ACCEPTANCE.md` for exact runs and limits.
 **M2 is not closed**: obtain final-head review and authorization, and
 verify the integrated result on main.
 PR #54 remains unmerged; do not begin M3. User untracked files
