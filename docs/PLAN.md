@@ -79,9 +79,10 @@ The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md) passes on
 2026-11-18. [G1](evidence/M2/SOURCE-LOADER.md) implements a root-restricted,
 shared-session loader with sequential top-level execution and nested `FLOAD`.
 G2 [invokes the unmodified pinned `VFLOAD` definition](evidence/M2/HISTORICAL-VFLOAD.md)
-in an explicitly partial-source probe. G3 evaluates the integrated M2 gate
-below after the `#DECL` and subsequent source dependencies are addressed.
-The audit is not an M2 milestone pass.
+in an explicitly partial-source probe. A pre-merge G3 run on the D5 head
+found the original MSETG's required repeat path blocked by missing `N=?`
+([issue #57](https://github.com/quaat/mdl-racket/issues/57)); M2 remains
+open. This observation does not change the integrated gate below.
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,

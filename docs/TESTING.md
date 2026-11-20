@@ -2,16 +2,17 @@
 
 ## Current M2 D5 and G3 checkpoint (2026-11-20)
 
-On `feat/m2-atom-props`, `make test` runs 864 Racket checks and 13 Python
-tests, including `tests/atom_props_test.rkt` (61 focused checks).
+On `feat/m2-atom-props`, `make test` runs 866 Racket checks and 13 Python
+tests, including `tests/atom_props_test.rkt` (63 focused checks).
 `make test-historical` verifies the 23 assertion original VFLOAD and 20
 assertion original DECL probes. D5 reference cases are in
 `evidence/M2/atom-props-{cases,reference}.json` and the corresponding
 `atom-props-error-*` files; independent review cases are in
-`atom-props-review-*`. The unchanged `77loadall.mud` load exits 1 after
+`atom-props-review-*` and four clean `character-review-*` cases. The
+unchanged `77loadall.mud` load exits 1 after
 24 completed expressions at `EMPTY?` in `77defs.mud` expression 15.
-M2 G3 has not passed; its preparation remains separate work until D5
-review and merge. Reproduce with `make test`,
+M2 G3 has not passed: a separate pre-merge integration run found missing
+`N=?` in original MSETG's repeat path (issue #57). Reproduce D5 with `make test`,
 `make test-historical`, and the loader command below. Earlier sections
 retain their slice-era context.
 

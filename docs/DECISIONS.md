@@ -526,5 +526,9 @@ association garbage collection; a weak table honoring the full MDL
 take precedence over DECL associations, aliases can chain, and a cycle
 raises an explicit error (the pinned reference loops on the tested cycle).
 Indexed STRING GET returns CHARACTER and mutable STRING PUT accepts one.
+Final-head review established that STRING GET and SEGMENT extraction must
+produce `==?` CHARACTER values; both now share the typed CHARACTER
+representation, and PUT accepts it. Four pinned Confusion cases are in
+`evidence/M2/character-review-*`.
 `SETG` intentionally does not enforce DECL associations. Reader behavior
 and printing remain unchanged; each fresh session starts property-free.

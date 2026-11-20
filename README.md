@@ -12,20 +12,25 @@
 **Current M2 status (2026-11-20):** D1–D4 are merged on `main`
 (`419fc5c`); D5 atom properties are in [PR #54](https://github.com/quaat/mdl-racket/pull/54)
 on `feat/m2-atom-props` for review.
-The D5 branch passes `make test` (864 Racket checks, 13 Python tests),
+The D5 branch passes `make test` (866 Racket checks, 13 Python tests),
 `make test-historical` (23 VFLOAD and 20 DECL assertions), and pinned
 Confusion association probes (18 original plus 11 review cases; eight
-separate deliberate-error/timeout observations). The unchanged
+separate deliberate-error/timeout observations). A final-head CHARACTER
+review adds four clean Confusion probes and two regressions for STRING
+GET, SEGMENT, identity, and indexed PUT. The unchanged
 `77loadall.mud` chain completes 24 expressions, including all of
 `81prim.mud` and the original `RAPPLIC` declaration property in
 `77defs.mud`; it stops at `EMPTY?` inside source-defined `NEWSTRUC` in
-`77defs.mud` expression 15. **M2 G3 is NOT RUN; no Racket game boot or
-gameplay parity is claimed.** Reproduce with `make test`,
+`77defs.mud` expression 15. A separate pre-merge G3 run found the original
+MSETG repeat path blocked by missing `N=?` ([issue #57](https://github.com/quaat/mdl-racket/issues/57));
+**M2 is not closed and no Racket game boot or gameplay parity is claimed.**
+Reproduce with `make test`,
 `make test-historical`, and the loader command below. See
 [D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
-[current status](docs/STATUS.md). Both PR workflows passed on the D5 code
-head; the next action is maintainer review and merge,
-then an integrated G3 gate audit. Historical progress notes below preserve
+[current status](docs/STATUS.md). Both PR workflows passed on the prior D5
+head; the corrected head requires its own CI result before merge. The next
+actions are D5 review and an issue #57 correction before G3 can pass.
+Historical progress notes below preserve
 their original slice-level context.
 
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)

@@ -836,6 +836,12 @@ deliberate-error Confusion observations):
   (`TYPE` CHARACTER, `PRIMTYPE` WORD); a mutable STRING accepts that
   CHARACTER through indexed PUT. Immutable host string literals remain an
   explicit mutation limit.
+  Final-head review probes show that a STRING element retrieved by GET and
+  the same element produced by STRING SEGMENT expansion are `==?` in pinned
+  Confusion; indexed PUT accepts either. Both paths must use one CHARACTER
+  value representation, with WORD primtype and code-point identity. The
+  cases and red-to-green test are in `evidence/M2/character-review-*` and
+  `tests/atom_props_test.rkt`.
 - Associations live in a session-owned list searched with `mdl-identical?`
   for **both** item and indicator. A weak `eq?` table was rejected after
   reference-backed regressions showed misses for separately constructed

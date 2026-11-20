@@ -365,3 +365,36 @@ expected after **24** completed expressions, at `77defs.mud` expression
 `NEWSTRUC`. This is the next source-backed dependency; no source form was
 skipped. Neither upstream checkout was edited. The work adds no network
 evaluator and copies no GPLv3 Confusion code into the MIT-0 runtime.
+
+## Final-head review: CHARACTER consistency (2026-11-20)
+
+The requested Codex review of `ae0984f` found a third D5 issue: STRING
+SEGMENT expansion generated a typed CHARACTER with a numeric code point,
+while indexed STRING GET returned a host Racket character. Both reported
+MDL TYPE CHARACTER, but `==?` said false and indexed PUT rejected the
+SEGMENT-produced value. Four new pinned Confusion probes in
+`character-review-{cases,reference}.json` exited 0 with empty stderr:
+
+| Case | Reference result output |
+|---|---|
+| `put-segment-character` | `"ab"`, `"xy"`, `"xb"`, `"xb"` |
+| `get-and-segment-character-identity` | `"xy"`, `T` |
+| `get-and-segment-character-type` | `"xy"`, `CHARACTER`, `CHARACTER`, `WORD` |
+| `put-get-character-roundtrip` | `"ab"`, `"xb"`, `"xb"` |
+
+The new regression first failed with `mdl-put: Error in PUT: Strings may
+only contain CHARACTER type` after 54 passing focused checks. The fix
+normalizes indexed GET to the existing typed CHARACTER representation,
+accepts its code point in STRING PUT, and preserves CHARACTER identity
+with SEGMENT results. This review correction changes no pinned source,
+license boundary, or game behavior claim.
+
+After the correction, `TMPDIR=/tmp raco test tests/atom_props_test.rkt
+tests/segment_test.rkt tests/sequence_test.rkt` exited 0 (190 checks),
+`make test` exited 0 (866 Racket checks, 13 Python tests), and
+`make test-historical` exited 0 (VFLOAD 23, DECL 20). The unchanged
+`77loadall.mud` loader still exits 1 after 24 completed expressions at
+the expected `EMPTY?` barrier. `git diff --check` exited 0. The four
+reference cases were recorded after `make reference-build` exited 0;
+binary SHA-256 at probe time was
+`987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475`.

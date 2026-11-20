@@ -1,6 +1,9 @@
-# M2 source execution inventory — integrated G3 still open
+# M2 source execution inventory — pre-merge G3 FAIL
 
-**G3 NOT RUN.** Current state (2026-11-20, D5 PR #54 head `a6df917`,
+**Pre-merge G3 FAIL** at original MSETG's missing `N=?` repeat path
+([issue #57](https://github.com/quaat/mdl-racket/issues/57)); its dedicated
+branch/report is separate from this D5 PR. Current state (2026-11-20,
+D5 PR #54 prior head `ae0984f`,
 `main` `419fc5c`): slices D1–D4 are merged (`#DECL`
 declarations, SEGMENT evaluation, structured declaration patterns, the
 `MUDDLE` interpreter global) and D5 atom-property `PUT`/`GET`
@@ -33,10 +36,12 @@ The source lock is MITDDC/zork
 `d94501340842e006791fce0757dc0043b8ec8916` and heasm66/mdlzork
 `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`. The archive, playable
 reconstruction, and Racket runtime remain distinct. No game boot, parser
-command, puzzle behavior, RNG parity, or integrated M2 state invariant has
-been demonstrated from original source execution.
+command, puzzle behavior, RNG parity, or the full integrated M2 state
+contract has been demonstrated from original source execution. The
+pre-merge G3 subset has 48 checked observations, but its gate is FAIL.
 
-The first required action after D5 merges is the `EMPTY?` primitive
+The next M2 action is the focused `N=?` correction and a G3 rerun. After
+the M2 gate is settled, the next sequential loader dependency is `EMPTY?`
 (called by the original `NEWSTRUC`/`MAPF` bootstraps at the current
 barrier, `77defs.mud` expression 15), followed by whatever construct
 actual source execution surfaces next. `MEMQ` remains a known candidate

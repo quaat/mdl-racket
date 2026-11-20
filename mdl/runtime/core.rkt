@@ -733,7 +733,7 @@
        (mdl-nth value (add1 i)))]
     [(string? value)
      (for/list ([ch (in-string value)])
-       (mdl-typed-value (mdl-atom "CHARACTER") (char->integer ch)))]
+       (mdl-character ch))]
     [else
      (error 'mdl-segment
             "ILLEGAL-SEGMENT: Segment evaluated to nonstructured type")]))
@@ -1736,6 +1736,24 @@
 (define (mdl-base value)
   (if (mdl-typed-value? value) (mdl-typed-value-value value) value))
 
+;; STRING extraction and SEGMENT expansion must expose the same MDL
+;; CHARACTER value. A host character remains accepted at the API boundary,
+;; but source-visible extraction uses the typed WORD representation.
+(define (mdl-character ch)
+  (mdl-typed-value (mdl-atom "CHARACTER") (char->integer ch)))
+
+(define (mdl-character-code value)
+  (cond
+    [(char? value) (char->integer value)]
+    [(and (mdl-typed-value? value)
+          (eq? (mdl-typed-value-type value) (mdl-atom "CHARACTER")))
+     (define code (mdl-base value))
+     (and (exact-integer? code)
+          (<= 0 code #x10ffff)
+          (not (<= #xd800 code #xdfff))
+          code)]
+    [else #f]))
+
 (define (mdl-type-name value)
   (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
         [(mdl-activation? value) "ACTIVATION"]
@@ -1825,7 +1843,7 @@
   (define base (mdl-base value))
   (cond [(mdl-array? base)
          (vector-ref (mdl-array-storage base) (+ (mdl-array-start base) (sub1 index)))]
-        [(string? base) (string-ref base (sub1 index))]
+        [(string? base) (mdl-character (string-ref base (sub1 index)))]
         [else (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth)
                                    (sub1 index) 'mdl-nth))]))
 
@@ -1915,11 +1933,12 @@
   (define base (mdl-base value))
   (cond
     [(string? base)
-     (unless (char? item)
+     (define code (mdl-character-code item))
+     (unless code
        (error 'mdl-put "Error in PUT: Strings may only contain CHARACTER type"))
      (when (immutable? base)
        (error 'mdl-put "immutable STRING literal cannot be mutated"))
-     (string-set! base (sub1 index) item)]
+     (string-set! base (sub1 index) (integer->char code))]
     [(mdl-array? base)
      (when (and (eq? (mdl-array-kind base) 'UVECTOR)
                 (not (eq? (mdl-type item) (mdl-array-element-type base))))
@@ -1972,7 +1991,11 @@
   head)
 
 (define (mdl-identical? left right)
-  (cond [(and (mdl-typed-value? left) (mdl-typed-value? right))
+  (define left-character (mdl-character-code left))
+  (define right-character (mdl-character-code right))
+  (cond [(and left-character right-character)
+         (= left-character right-character)]
+        [(and (mdl-typed-value? left) (mdl-typed-value? right))
          (and (eq? (mdl-typed-value-type left) (mdl-typed-value-type right))
               (mdl-identical? (mdl-base left) (mdl-base right)))]
         [(or (mdl-typed-value? left) (mdl-typed-value? right)) #f]

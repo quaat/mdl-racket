@@ -2,17 +2,19 @@
 
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-20 (D4 merged,
-D5 reviewed locally on branch, G3 open).
+D5 final-head review correction in progress, pre-merge G3 FAIL).
 
 - **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), D4
   (PR #52), and the agent definitions (PR #47) are all **merged into
   `main`** (current main `419fc5c`); issues #44/#46/#48/#51 closed.
-  Integrated G3 gate NOT RUN. M2 milestone NOT YET PASS.
+  Pre-merge G3 FAIL at original MSETG's missing `N=?` repeat path;
+  M2 milestone NOT PASS (issues #56/#57).
 - **Active issues/PRs:** issue **#53** and [PR #54](https://github.com/quaat/mdl-racket/pull/54)
   (D5 atom-property `PUT`/`GET`) —
   reference evidence, implementation, focused tests, and independent review
   fixes are on `feat/m2-atom-props` (base `419fc5c`, code head
-  `a6df917`). Both PR workflows passed on that head. Issue
+  `ae0984f` before the CHARACTER correction). Both PR workflows passed
+  on that prior head; CI on the corrected head is required. Issue
   #11 was closed as completed on 2026-11-20.
 - **D5 state (implemented, main-session-verified on
   `feat/m2-atom-props`):** Confusion reference evidence (18 success + 6
@@ -21,7 +23,10 @@ D5 reviewed locally on branch, G3 open).
   (`tests/atom_props_test.rkt`, commit `a3ce79f`). Independent review found
   the weak `eq?` item-key mismatch, structured two-arg PUT dispatch, and
   DECL alias/precedence gaps; review regressions and pinned Confusion
-  evidence are under `atom-props-review-*`. Fresh suites: 864
+  evidence are under `atom-props-review-*`. A further final-head review
+  found inconsistent CHARACTER extraction from STRING GET versus SEGMENT;
+  four clean Confusion probes and two red-to-green tests now cover the fix.
+  Fresh suites: 866
   Racket checks, 13 Python tests, `make test-historical` green
   (VFLOAD 23 + DECL 20 assertions). The pinned `77loadall.mud` load
   completes **twenty-four expressions** — `81prim.mud` in full plus
@@ -36,11 +41,10 @@ D5 reviewed locally on branch, G3 open).
   enforce DECL associations; GETPROP/PUTPROP and chapter 13.4 machinery
   explicitly unimplemented. See ADR-0023 and the M2 D5 section of
   `docs/SEMANTICS.md`.
-- **Exact next action:** obtain maintainer review of PR #54, merge only
-  after approval and final-head CI, then evaluate
-  the integrated M2 G3 gate; then the `EMPTY?` slice for the original
-  `NEWSTRUC` (create the issue from the recorded barrier at
-  `77defs.mud` expression 15, delegate to the Flash implementer).
+- **Exact next action:** push the CHARACTER correction to PR #54 and
+  verify final-head CI/review; merge only after explicit maintainer
+  approval. Implement focused `N=?` issue #57 and rerun G3 before M3
+  `EMPTY?` work.
 - **Active issues/PRs (historical, D2/D3 era — superseded by the header
   above):** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
   (D2 SEGMENT) and

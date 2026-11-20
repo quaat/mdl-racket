@@ -1,8 +1,9 @@
-# Status — 2026-11-20 (M2 D1–D4 merged; D5 under review; G3 open)
+# Status — 2026-11-20 (D5 under review; pre-merge G3 FAIL)
 
 ## Current state (2026-11-20)
 
-- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; integrated G3 NOT RUN.
+- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL at
+  original MSETG's missing `N=?` repeat path (issue #57).
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -10,7 +11,9 @@
   atom-property `PUT`/`GET` associations, session-owned `==?`-identity
   association space, `DECL?` consultation of `DECL` associations, and
   independent-review fixes for WORD/REST identity, alias chains, and
-  structured/STRING dispatch. Fresh local suites: **864 Racket checks, 13
+  structured/STRING dispatch. A final-head review correction unifies
+  CHARACTER values from STRING GET and SEGMENT expansion (four clean
+  Confusion cases, two new regressions). Fresh local suites: **866 Racket checks, 13
   Python tests**, `make test-historical` green; the pinned `77loadall.mud`
   load completes **twenty-four**
   expressions.
@@ -23,10 +26,12 @@
   installed `PSETG`. Actual source execution sets priority.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
-- **Open issues/PRs:** #53 and PR #54 (D5). Issue #11 is closed as
-  completed. Both PR workflows passed on code head `a6df917`; maintainer
-  review and merge are pending.
-- **Not demonstrated:** integrated M2 state invariants, game boot,
+- **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57 (`N=?`). Issue
+  #11 is closed as completed. Both PR workflows passed on prior D5 head
+  `ae0984f`; the CHARACTER correction requires final-head CI. A fresh
+  Codex review of `ae0984f` raised that finding; maintainer approval and
+  merge are pending.
+- **Not demonstrated:** full integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 
 

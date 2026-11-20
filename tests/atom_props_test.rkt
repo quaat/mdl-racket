@@ -39,6 +39,9 @@
              (string-join (map render-final (mdl-false-payload value)) " "))]
     [(string? value) (format "~s" value)]
     [(char? value) (format "!\\~a" value)]
+    [(and (mdl-atom? (mdl-type value))
+          (string=? (mdl-atom-pname (mdl-type value)) "CHARACTER"))
+     (format "!\\~a" (integer->char (mdl-base value)))]
     [(or (null? value) (mpair? value))
      (format "(~a)" (string-join (map render-final (mdl-list->list value)) " "))]
     [(mdl-form? value)
@@ -175,6 +178,14 @@
 (check-equal? (run "<GET \"ab\">") "!\\a")
 (check-equal? (run "<SET S <STRING \"ab\">> <PUT .S 1 <GET \"xy\" 1>> .S")
               "\"xb\"")
+;; Final-head review: STRING segment extraction and indexed GET must yield
+;; the same CHARACTER identity; PUT must accept either source path.
+(check-equal?
+ (run "<SET S <STRING \"ab\">> <SET C \"xy\"> <PUT .S 1 <NTH (!.C) 1>> .S")
+ "\"xb\"")
+(check-equal?
+ (run "<SET C \"xy\"> <==? <GET .C 1> <NTH (!.C) 1>>")
+ "T")
 ;; GETPROP/PUTPROP stay out of scope: explicit unassigned-operator failure
 ;; (the task's strict-failure rule; the reference implements them, but the
 ;; pinned sources never call them).
