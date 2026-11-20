@@ -112,9 +112,14 @@
       [(null? rest) (list 'structure type-atom (reverse required) rest-spec)]
       [(mdl-array? (car rest))
        ;; The `[...]` repetition construction: an NTH count, [OPT ...], or
-       ;; [REST ...]. Classify it first so a misplaced bracket still reports
-       ;; its own unsupported kind explicitly.
+       ;; [REST ...]. Only a VECTOR-typed bracket is a repetition
+       ;; construction (the reference treats MDL_TYPE_VECTOR only,
+       ;; mdl_decl.cpp:169); a UVECTOR bracket (![...]) is an explicit
+       ;; error, never a silently-accepted repetition (PR #50 review).
        (define bracket (car rest))
+       (unless (eq? (mdl-array-kind bracket) 'VECTOR)
+         (decl-error origin line column
+                     "declaration repetition bracket must be a VECTOR"))
        (define bracket-items (decl-bracket-items bracket))
        (define first-item (and (pair? bracket-items) (car bracket-items)))
        (define kind
@@ -124,11 +129,18 @@
                [(and (mdl-atom? first-item)
                      (or (string=? (mdl-atom-pname first-item) "OPT")
                          (string=? (mdl-atom-pname first-item) "OPTIONAL"))) 'opt]
-               [else 'nth]))
+               [(exact-integer? first-item) 'nth]
+               [else 'stray]))
        (case kind
          [(empty)
           (decl-error origin line column
                       "a repetition bracket requires at least one element pattern")]
+         [(stray)
+          ;; A bracket whose first item names neither a repetition keyword
+          ;; nor a FIX count: report its shape, not a false NTH (PR #50
+          ;; review).
+          (decl-error origin line column
+                      "declaration repetition bracket must start with REST, OPT, or a FIX count")]
          [(rest)
           (unless (and (null? (cdr rest)) (not rest-spec))
             (decl-error origin line column
@@ -222,8 +234,11 @@
 ;; `<OR ...>` the last alternative that failed (mdl_decl.cpp returns the
 ;; last comparison's FALSE unchanged).
 (define (decl-failure-leaf pattern)
+  ;; Only patterns whose failure is a plain #f (simple type atoms) carry a
+  ;; leaf for the (element pattern) payload; PRIMTYPE and structure
+  ;; failures are records (bare #FALSE ()), so they never reach here.
   (case (car pattern)
-    [(type primtype structure) (cadr pattern)]
+    [(type) (cadr pattern)]
     [(or) (decl-failure-leaf (last (cdr pattern)))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
@@ -247,15 +262,20 @@
   (case (car pattern)
     [(any) #t]
     [(type) (eq? (mdl-type value) (cadr pattern))]
-    [(primtype) (eq? (mdl-primtype value) (mdl-typeprim (cadr pattern)))]
+    ;; The reference's PRIMTYPE check returns the plain FALSE, so a failing
+    ;; <PRIMTYPE ...> surfaces as a bare #FALSE () — the (list 'type)
+    ;; record — wherever it fails (PR #50 review).
+    [(primtype)
+     (if (eq? (mdl-primtype value) (mdl-typeprim (cadr pattern))) #t (list 'type))]
     [(or)
      ;; Any alternative may match; on failure the reference keeps the last
      ;; comparison's result (the last alternative's record for structured
-     ;; children, a plain #f for simple ones).
+     ;; children, a plain #f for simple ones). Alternatives consume
+     ;; traversal budget like structure levels (PR #50 review).
      (let loop ([alts (cdr pattern)] [failed #f])
        (cond [(null? alts) failed]
              [else
-              (define m (decl-match value (car alts) budget))
+              (define m (decl-match value (car alts) (sub1 budget)))
               (cond [(eq? m #t) #t]
                     [else (loop (cdr alts) m)])]))]
     [(structure) (decl-match-structure value pattern (sub1 budget))]
@@ -267,26 +287,64 @@
 ;; `[REST pat ...]` (if any) repeats cyclically over all remaining elements.
 ;; Undeclared elements beyond the declared patterns are allowed (manual
 ;; chapter 14), and an empty value fails only a nonempty required prefix.
+;; The required prefix is walked in place: a prefix-only pattern matches
+;; the prefix of a cyclic LIST like the reference, which walks by
+;; NTH/REST incrementally. Only the REST tail materializes through
+;; mdl-list->list, whose cycle check is the documented safety deviation
+;; (the reference's REST loop would not terminate on a cyclic value).
+;; Arrays cannot be cyclic; their element references are read by index.
 (define (decl-match-structure value pattern budget)
   (define type-atom (cadr pattern))
   (if (not (eq? (mdl-type value) type-atom))
       (list 'type)
-      (let* ([elements (decl-structured-elements value)]
-             [required (caddr pattern)])
-        (let loop ([els elements] [pats required])
+      (let ([required (caddr pattern)]
+            [rest-spec (cadddr pattern)])
+        (cond
+          [(mdl-tuple-value? value)
+           (decl-match-chain (mdl-tuple-value-payload value) required rest-spec budget)]
+          [(or (null? value) (mpair? value))
+           (decl-match-chain value required rest-spec budget)]
+          [(mdl-array? value)
+           (decl-match-sequence
+            (for/list ([i (in-range (mdl-array-length value))])
+              (mdl-nth value (add1 i)))
+            required rest-spec budget)]
+          [else (error 'mdl-decl "unsupported structured value")]))))
+
+;; Required-prefix walking over a LIST-primtype chain: consumes at most
+;; (length required) cells in place, so a cyclic chain never runs away
+;; while patterns remain; only the REST tail is materialized (cycle-guarded).
+(define (decl-match-chain chain required rest-spec budget)
+  (let loop ([cursor chain] [pats required])
     (cond
       [(null? pats)
-       (define rest-spec (cadddr pattern))
-       (cond [(not rest-spec) #t]
-             [(null? els) #t]
-             [else (decl-match-rest els rest-spec budget)])]
+       (if rest-spec
+           (decl-match-rest (mdl-list->list cursor) rest-spec budget)
+           #t)]
+      [(null? cursor) (list 'short)]
+      [else
+       (define m (decl-match (mcar cursor) (car pats) budget))
+       (cond
+         [(eq? m #t) (loop (mcdr cursor) (cdr pats))]
+         [(eq? m #f) (list 'element (mcar cursor) (decl-failure-leaf (car pats)))]
+         [else m])])))
+
+;; Required-prefix matching over an extracted array-element sequence
+;; (arrays are finite; the reference walks them by NTH similarly).
+(define (decl-match-sequence elements required rest-spec budget)
+  (let loop ([els elements] [pats required])
+    (cond
+      [(null? pats)
+       (if (or (not rest-spec) (null? els))
+           #t
+           (decl-match-rest els rest-spec budget))]
       [(null? els) (list 'short)]
       [else
        (define m (decl-match (car els) (car pats) budget))
        (cond
          [(eq? m #t) (loop (cdr els) (cdr pats))]
          [(eq? m #f) (list 'element (car els) (decl-failure-leaf (car pats)))]
-         [else m])])))))
+         [else m])])))
 
 ;; `[REST pat ... pat]` repetition: the sequence restarts after each period
 ;; (the recorded rest-multi-pattern and Confusion's REST loop), and the

@@ -285,3 +285,54 @@ review-fixed D2 head.
   `<<PRIMTYPE struc> elts>` / `<<OR struc ...> elts>` compositions,
   empty `<struc>` (manual BNF wins over the reference's acceptance),
   NEWTYPE heads with elements, GDECL and global declarations.
+
+## Independent review outcome (PR #50)
+
+A fresh-context review (with direct probes against both this
+implementation and the pinned reference for cases the recorded evidence
+did not cover) returned REQUEST_CHANGES with three verified divergences
+and three polish findings; all were fixed on `feat/m2-decl-patterns`
+with regression tests:
+
+1. **P2-1 (fixed):** a UVECTOR bracket (`![REST FIX]`) was silently
+   accepted as the repetition construction — the reference errors
+   (only MDL_TYPE_VECTOR is a bracket, `mdl_decl.cpp:169`). Brackets now
+   require VECTOR kind; a UVECTOR bracket is an explicit error.
+   Regressions pin both positions.
+2. **P2-2 (fixed):** a failing `<PRIMTYPE ...>` check reported
+   `#FALSE (element atom)` where the reference returns its plain FALSE
+   (`mdl_decl.cpp:104`) — both as a structured element (including as an
+   `<OR>`'s last alternative) and at `DECL?`'s top level (the D1-era
+   top-level case had the same divergence, unprobed until the review).
+   PRIMTYPE failures now yield the bare `#FALSE ()` record.
+3. **P2-3 (fixed):** eager whole-value traversal rejected cyclic values
+   even for prefix-only patterns, where the reference walks
+   incrementally by NTH/REST and matches the prefix. The required prefix
+   is now walked cell by cell in place (nothing duplicated or mutated);
+   only the `[REST ...]` tail materializes through the cycle-checked
+   conversion, and that explicit cyclic error stays the documented
+   safety deviation (the reference's REST loop would hang instead).
+4. **P3-4 (fixed):** `<OR ...>` alternatives now consume traversal
+   budget, so a pathological nested pattern reports the documented
+   limit; a regression drives a 250-deep OR past the 200 budget.
+5. **P3-5 (fixed):** a repetition bracket starting with neither a
+   keyword nor a FIX count reports its shape ("must start with REST,
+   OPT, or a FIX count") instead of a false "unsupported pattern NTH".
+6. **P3-6 (fixed):** `decl-match-structure` reindented; the unreachable
+   PRIMTYPE/structure branches of `decl-failure-leaf` removed with a
+   comment stating which failures carry leaves.
+
+Verified clean by the review: the cyclic REST indexing matches the
+reference's per-period restart including the `(B FIX)` partial-period
+payload; failure-record propagation through nesting, all pinned
+payloads, and the cross-type rejections match the reference by probe;
+no hangs on any reachable value/pattern pair; attach integration
+(bind/SET/VALUE, compiled and interpreted) matches; the historical
+chain assertion reproduces byte-identically; docs and evidence match
+the code except where corrected above.
+
+Verification after the fixes (main session, fresh): declaration-pattern
+suite 84 checks, full suite green (see commands below), historical
+probes pass, `git diff --check` clean; the pinned load still completes
+ten expressions with `81prim.mud` in full and stops at the `MUDDLE`
+global.

@@ -763,16 +763,24 @@ existing `<OR ...>` (the last failing alternative is the reported leaf
 pattern, mirroring the reference's returned FALSE).
 
 `DECL?` gains the reference's payload distinction: an overall TYPE
-mismatch returns bare `#FALSE ()`, while a structured element mismatch
-returns `#FALSE (element pattern)` carrying the offending element and
-the element pattern's leaf; simple-pattern failures keep the D1
-`#FALSE (value pattern)` payload. Attached declarations and `DECL?`
-share one matcher, so they agree by construction.
+mismatch — and likewise a failing `<PRIMTYPE ...>` check, which the
+reference returns as its plain FALSE — yields bare `#FALSE ()`, while a
+structured element mismatch returns `#FALSE (element pattern)` carrying
+the offending element and the simple type-atom leaf; simple-pattern
+failures keep the D1 `#FALSE (value pattern)` payload. Attached
+declarations and `DECL?` share one matcher, so they agree by
+construction.
 
-Traversal is bounded: one nesting-budget unit per structured pattern
-level (`decl-match-max-depth` 200), with an explicit error naming the
-limit; cyclic LIST/TUPLE chains surface the reader's explicit cyclic
-error; checked values are never copied or mutated.
+Traversal is bounded and in place: one nesting-budget unit per
+structured pattern level and per `<OR ...>` alternative
+(`decl-match-max-depth` 200), with an explicit error naming the limit.
+The required prefix of a LIST-primtype value is walked cell by cell
+(arrays are read by indexed reference), so nothing is duplicated or
+mutated — and a prefix-only pattern matches the prefix of a cyclic LIST
+like the reference's incremental walk. Only the `[REST ...]` tail
+materializes through the cycle-checked conversion, whose explicit
+cyclic error is a recorded safety deviation: the reference's REST loop
+would not terminate on a cyclic value at all.
 
 Recorded deviations from the pinned reference (evidence in
 `docs/evidence/M2/DECLARATION-PATTERNS.md`): the empty `<LIST>` pattern is

@@ -261,4 +261,38 @@
    (check-equal? (mdl-session-global session psetg-atom) 4))
  (lambda () (delete-directory/files scratch-root)))
 
+;; --- review regressions (PR #50 independent review) -------------------------
+;; A UVECTOR bracket (![...]) is not a repetition construction: the reference
+;; errors DECL-ELEMENT-NOT-FORM-OR-ATOM; it must be an explicit error here
+;; (review P2-1 - it was silently accepted as [REST ...]).
+(check-exn #rx"repetition bracket must be a VECTOR"
+           (lambda () (run "<DECL? (1 2) '<LIST ![REST FIX]>>")))
+(check-exn #rx"repetition bracket must be a VECTOR"
+           (lambda () (run "<DECL? [1 2] '<VECTOR ![REST FIX]>>")))
+;; A failing <PRIMTYPE ...> check is the reference's plain FALSE: both as a
+;; structured element and at the top level, the payload is bare #FALSE ()
+;; (review P2-2 - it carried (element atom) instead).
+(check-equal? (mdl-false-payload (run "<DECL? (1) '<LIST <PRIMTYPE ATOM>>>")) '())
+(check-equal? (mdl-false-payload (run "<DECL? 1 '<PRIMTYPE LIST>>")) '())
+(check-equal? (mdl-false-payload
+               (run "<DECL? (1) '<LIST [REST <OR ATOM <PRIMTYPE ATOM>>]>>"))
+              '())
+;; A prefix-only structured pattern consumes only its prefix, so it matches
+;; the prefix of a cyclic LIST like the reference (review P2-3 - the eager
+;; traversal rejected the value); the REST loop keeps the explicit cycle
+;; error as the documented safety deviation.
+(check-equal? (mdl-atom-pname
+               (run "<SET L '(1 2)> <PUTREST .L .L> <DECL? .L '<LIST FIX>>"))
+              "T")
+(check-exn #rx"cyclic"
+           (lambda () (run "<SET L '(1 2)> <PUTREST .L .L> <DECL? .L '<LIST [REST FIX]>>")))
+;; OR alternatives consume traversal budget too, so a pathological nested
+;; pattern reports the documented limit instead of running unbounded
+;; (review P3-4).
+(let ([deep-or
+       (let build ([n 250] [acc "FIX"])
+         (if (zero? n) acc (build (sub1 n) (string-append "<OR " acc ">"))))])
+  (check-exn #rx"traversal limit"
+             (lambda () (run (string-append "<DECL? 1 '" deep-or ">")))))
+
 (displayln "declaration pattern tests passed")
