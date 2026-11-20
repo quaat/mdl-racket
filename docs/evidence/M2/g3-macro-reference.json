@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-original-macro-expansion",
+  "recorded_at": "2026-11-20T09:22:39.235993+00:00",
+  "interpreter_sha256": "987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "g3-expand-trnn",
+      "expression": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <EXPAND '<TRNN OBJ 2>>",
+      "input": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <EXPAND '<TRNN OBJ 2>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\n\"DONE\"\n<N==? <CHTYPE <ANDB 2 <OFLAGS OBJ>> FIX> 0>\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\n\"DONE\"\n<N==? <CHTYPE <ANDB 2 <OFLAGS OBJ>> FIX> 0>\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}
