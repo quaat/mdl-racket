@@ -44,9 +44,14 @@
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL")))
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL FIX")))
 (check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) #DECL ((X) <OR>) .X>")))
-(check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) #DECL ((X) <LIST FIX>) .X>")))
+;; D3 (issue #48): structured <LIST ...> patterns normalize and match; the
+;; remaining explicit failures cover patterns still out of scope (SPECIAL
+;; wrappers here, see tests/declaration_pattern_test.rkt for the others).
+(check-equal? (mdl-list->list
+               (run "<DEFINE F (X) #DECL ((X) <LIST FIX>) .X> <F (1)>"))
+              '(1))
 (check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) #DECL ((X) UNKNOWN-TYPE) .X>")))
-(check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) 1 #DECL ((X) FIX) .X>")))
+(check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X>")))
 
 ;; #DECL is a DECL-typed value in any expression position, like the
 ;; reference's <TYPE #DECL ((X) FIX)> probe returning DECL.

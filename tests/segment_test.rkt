@@ -289,9 +289,14 @@
      (check-equal? (hash-ref (failure report) 'construct) "splice")
      (check-equal? (hash-ref report 'completed_expressions) 1))
 
-   ;; The PSETG definition from the pinned 81prim.mud gets past the splice
-   ;; compile barrier: loading the exact definition now reaches the execute
-   ;; stage and fails on its compound DECL pattern, a later slice.
+   ;; Since D3 (structured declaration patterns, issue #48) the PSETG
+   ;; definition from the pinned 81prim.mud installs its <LIST [REST ATOM]>
+   ;; declaration, so the definition installs and invoking it fails on its
+   ;; body: this trimmed two-line body evaluates the segment !.PL while its
+   ;; PL auxiliary is still unassigned (the pinned definition initializes PL
+   ;; through its PURE-LIST COND first, and when invoked stops explicitly at
+   ;; <MEMQ .FOO .PL>; see tests/declaration_pattern_test.rkt). No
+   ;; PSETG-execution primitives are implemented in this slice by scope.
    (put "psetg.mud" (string-append
                      "<DEFINE PSETG (FOO BAR \"AUX\" PL)\n"
                      "        #DECL ((FOO) ATOM (PL) <LIST [REST ATOM]>)\n"
@@ -299,14 +304,11 @@
                      "        <SETG PURE-LIST <SET PL (.FOO !.PL)>>\n"
                      "        .BAR>\n"))
    (define psetg-session (make-mdl-session scratch-root))
-   (let ([report (mdl-session-load! psetg-session "psetg.mud")])
-     (check-equal? (status report) "FAIL")
-     (check-equal? (hash-ref (failure report) 'stage) "execute")
-     (check-equal? (hash-ref (failure report) 'construct) "DEFINE")
-     (check-equal? (hash-ref (failure report) 'line) 1)
-     (check-true (string-contains? (hash-ref (failure report) 'exception)
-                                   "unsupported declaration pattern LIST"))
-     (check-exn exn:fail? (lambda () (mdl-session-call psetg-session "PSETG" "A" 1))))
+   (check-equal? (status (mdl-session-load! psetg-session "psetg.mud")) "PASS")
+   (check-exn #rx"unassigned MDL local PL"
+              (lambda ()
+                (define psetg-atom (mdl-session-call psetg-session "ATOM" "P2"))
+                (mdl-session-call psetg-session "PSETG" psetg-atom 1)))
 
    ;; Review P2-3: genuine interpreted twins — quoted formals force the
    ;; interpreted FUNCTION path, exercising mdl-eval's splice assembly,

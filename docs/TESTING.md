@@ -46,8 +46,9 @@ See [`HISTORICAL-VFLOAD.md`](evidence/M2/HISTORICAL-VFLOAD.md).
    documented 36-bit FIX/WORD subset, and scoped M2 execution semantics
    (PROG/REPEAT/RETURN/AGAIN activations and function formals), chapter-14
    `#DECL` declaration checking with `DECL?`, and chapter-7 SEGMENT (`!`
-   splice) evaluation with LIST-tail sharing, on the explicitly supported
-   subset. The target refreshes the linked `#lang mdl` module before tests
+   splice) evaluation with LIST-tail sharing, and chapter-14 structured
+   declaration patterns (`<struc [REST ...]>` with bounded traversal), on
+   the explicitly supported subset. The target refreshes the linked `#lang mdl` module before tests
    so changed runtime exports are visible. Stale bytecode under the
    gitignored `compiled/` directories produces `instantiate-linket`
    dependency errors after module interface changes; delete those

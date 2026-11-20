@@ -22,7 +22,8 @@
          mdl-word mdl-word? mdl-word-bits
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          current-mdl-atom-space make-mdl-atom-space
-         mdl-false mdl-false? mdl-false-payload)
+         mdl-false mdl-false? mdl-false-payload
+         decl-match-max-depth)
 
 (struct mdl-false-value (payload) #:transparent)
 (define empty-mdl-false (mdl-false-value '()))
@@ -76,6 +77,96 @@
              (apply format message args))
       (error 'mdl-decl "~a: ~a" origin (apply format message args))))
 
+;; Nesting budget for structured declaration pattern traversal (issue #48):
+;; cyclic or over-deep structures raise an explicit error naming this limit
+;; instead of recursing indefinitely.
+(define decl-match-max-depth 200)
+
+;; The structured declaration types of this slice (issue #48) are the head
+;; ATOMs LIST, VECTOR, UVECTOR, and TUPLE of the `<struc elts>` pattern
+;; construction. Anything else -- NEWTYPE names with element patterns,
+;; BYTES, TEMPLATE-like heads -- stays an explicit unsupported-pattern error
+;; for a later slice.
+
+(define (decl-bracket-items bracket)
+  ;; The `[...]` repetition construction reads as a VECTOR literal inside the
+  ;; pattern; its items are the NTH/OPT/REST specification.
+  (for/list ([i (in-range (mdl-array-length bracket))])
+    (mdl-nth bracket (add1 i))))
+
+;; Normalizes `<struc elts>`: (structure TYPE-ATOM required-pats rest-spec).
+;; required-pats is a list of normalized patterns; rest-spec is #f or the
+;; list of normalized patterns of the trailing `[REST pat ... pat]`.
+(define (normalize-decl-structure items line column origin)
+  (define type-atom (car items))
+  (define raw-elements (cdr items))
+  (when (null? raw-elements)
+    ;; Confusion reads the empty `<struc>` and matches any value of the TYPE,
+    ;; but the manual BNF (`elts ::= pat | pat elts | ...`) requires at least
+    ;; one element pattern: recorded deviation, rejected here.
+    (decl-error origin line column
+                "structured declaration pattern <~a> requires at least one element pattern"
+                (mdl-atom-pname type-atom)))
+  (let loop ([rest raw-elements] [required '()] [rest-spec #f])
+    (cond
+      [(null? rest) (list 'structure type-atom (reverse required) rest-spec)]
+      [(mdl-array? (car rest))
+       ;; The `[...]` repetition construction: an NTH count, [OPT ...], or
+       ;; [REST ...]. Only a VECTOR-typed bracket is a repetition
+       ;; construction (the reference treats MDL_TYPE_VECTOR only,
+       ;; mdl_decl.cpp:169); a UVECTOR bracket (![...]) is an explicit
+       ;; error, never a silently-accepted repetition (PR #50 review).
+       (define bracket (car rest))
+       (unless (eq? (mdl-array-kind bracket) 'VECTOR)
+         (decl-error origin line column
+                     "declaration repetition bracket must be a VECTOR"))
+       (define bracket-items (decl-bracket-items bracket))
+       (define first-item (and (pair? bracket-items) (car bracket-items)))
+       (define kind
+         (cond [(not first-item) 'empty]
+               [(and (mdl-atom? first-item)
+                     (string=? (mdl-atom-pname first-item) "REST")) 'rest]
+               [(and (mdl-atom? first-item)
+                     (or (string=? (mdl-atom-pname first-item) "OPT")
+                         (string=? (mdl-atom-pname first-item) "OPTIONAL"))) 'opt]
+               [(exact-integer? first-item) 'nth]
+               [else 'stray]))
+       (case kind
+         [(empty)
+          (decl-error origin line column
+                      "a repetition bracket requires at least one element pattern")]
+         [(stray)
+          ;; A bracket whose first item names neither a repetition keyword
+          ;; nor a FIX count: report its shape, not a false NTH (PR #50
+          ;; review).
+          (decl-error origin line column
+                      "declaration repetition bracket must start with REST, OPT, or a FIX count")]
+         [(rest)
+          (unless (and (null? (cdr rest)) (not rest-spec))
+            (decl-error origin line column
+                        "only one [REST ...] repetition is allowed, and it must be last"))
+          (when (null? (cdr bracket-items))
+            (decl-error origin line column
+                        "[REST ...] requires at least one element pattern"))
+          (loop '() required
+                (map (lambda (item)
+                       (normalize-decl-pattern item line column origin))
+                     (cdr bracket-items)))]
+         [(opt)
+          ;; `[OPT pat ...]` is a later slice (the reference computes its
+          ;; results but pollutes stderr with its own leftover probes).
+          (decl-error origin line column "unsupported declaration pattern OPT")]
+         [(nth)
+          ;; `[fix pat ... pat]` repetition: a later slice (the reference
+          ;; implements it, including its non-positive-count BAD-TYPE-
+          ;; SPECIFICATION4 error).
+          (decl-error origin line column "unsupported declaration pattern NTH")])]
+      [else
+       (loop (cdr rest)
+             (cons (normalize-decl-pattern (car rest) line column origin)
+                   required)
+             rest-spec)])))
+
 (define (normalize-decl-pattern pattern line column
                                  [origin "DECL"])
   (cond
@@ -100,6 +191,8 @@
                                     (cadr items)))
           (decl-error origin line column "PRIMTYPE requires one registered type"))
         (list 'primtype (cadr items))]
+       [(LIST VECTOR UVECTOR TUPLE)
+        (normalize-decl-structure items line column origin)]
        [else (decl-error origin line column "unsupported declaration pattern ~a"
                          (mdl-atom-pname (car items)))])]
     [else (decl-error origin line column "unsupported declaration pattern")]))
@@ -129,22 +222,163 @@
             (hash-set! bindings name pattern)))))
   (mdl-decl-value bindings result line column))
 
-(define (matches-decl? value pattern)
+;; Structured pattern matching (issue #48). `decl-match` returns #t on a
+;; match, #f on a simple failure (DECL? then keeps the D1 (value pattern)
+;; payload), or one of the structured failure records:
+;;   (list 'type)               overall TYPE mismatch -> bare #FALSE ()
+;;   (list 'short)              value ran out below its required prefix
+;;   (list 'element elem leaf)  an element mismatch: the offending ELEMENT
+;;                              and the leaf pattern to report
+;; A `leaf` is the MDL value the reference carries in a `#FALSE (value
+;; pattern)` element payload: the element-pattern ATOM itself, or for an
+;; `<OR ...>` the last alternative that failed (mdl_decl.cpp returns the
+;; last comparison's FALSE unchanged).
+(define (decl-failure-leaf pattern)
+  ;; Only patterns whose failure is a plain #f (simple type atoms) carry a
+  ;; leaf for the (element pattern) payload; PRIMTYPE and structure
+  ;; failures are records (bare #FALSE ()), so they never reach here.
+  (case (car pattern)
+    [(type) (cadr pattern)]
+    [(or) (decl-failure-leaf (last (cdr pattern)))]
+    [else (error 'mdl-decl "unknown normalized declaration pattern")]))
+
+;; The elements of a structured value, read without copying: arrays by
+;; mdl-nth, LIST/FALSE/TUPLE payload chains via mdl-list->list on the fly
+;; (which raises the explicit "cyclic LIST" error on a self-referential
+;; chain rather than looping forever).
+(define (decl-structured-elements value)
+  (cond
+    [(mdl-tuple-value? value) (mdl-list->list (mdl-tuple-value-payload value))]
+    [(mdl-array? value)
+     (for/list ([i (in-range (mdl-array-length value))])
+       (mdl-nth value (add1 i)))]
+    [(or (null? value) (mpair? value)) (mdl-list->list value)]
+    [else (error 'mdl-decl "unsupported structured value ~a" value)]))
+
+(define (decl-match value pattern [budget decl-match-max-depth])
+  (when (<= budget 0)
+    (error 'mdl-decl "declaration pattern nesting exceeds traversal limit ~a"
+           decl-match-max-depth))
   (case (car pattern)
     [(any) #t]
     [(type) (eq? (mdl-type value) (cadr pattern))]
-    [(primtype) (eq? (mdl-primtype value) (mdl-typeprim (cadr pattern)))]
-    [(or) (ormap (lambda (p) (matches-decl? value p)) (cdr pattern))]
+    ;; The reference's PRIMTYPE check returns the plain FALSE, so a failing
+    ;; <PRIMTYPE ...> surfaces as a bare #FALSE () — the (list 'type)
+    ;; record — wherever it fails (PR #50 review).
+    [(primtype)
+     (if (eq? (mdl-primtype value) (mdl-typeprim (cadr pattern))) #t (list 'type))]
+    [(or)
+     ;; Any alternative may match; on failure the reference keeps the last
+     ;; comparison's result (the last alternative's record for structured
+     ;; children, a plain #f for simple ones). Alternatives consume
+     ;; traversal budget like structure levels (PR #50 review).
+     (let loop ([alts (cdr pattern)] [failed #f])
+       (cond [(null? alts) failed]
+             [else
+              (define m (decl-match value (car alts) (sub1 budget)))
+              (cond [(eq? m #t) #t]
+                    [else (loop (cdr alts) m)])]))]
+    [(structure) (decl-match-structure value pattern (sub1 budget))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
+
+;; `<struc elts>` matching: the value's MDL TYPE must equal the pattern's
+;; type ATOM (a STRING is LIST-primtype but is not a LIST here), then each
+;; required element pattern applies positionally and the trailing
+;; `[REST pat ...]` (if any) repeats cyclically over all remaining elements.
+;; Undeclared elements beyond the declared patterns are allowed (manual
+;; chapter 14), and an empty value fails only a nonempty required prefix.
+;; The required prefix is walked in place: a prefix-only pattern matches
+;; the prefix of a cyclic LIST like the reference, which walks by
+;; NTH/REST incrementally. Only the REST tail materializes through
+;; mdl-list->list, whose cycle check is the documented safety deviation
+;; (the reference's REST loop would not terminate on a cyclic value).
+;; Arrays cannot be cyclic; their element references are read by index.
+(define (decl-match-structure value pattern budget)
+  (define type-atom (cadr pattern))
+  (if (not (eq? (mdl-type value) type-atom))
+      (list 'type)
+      (let ([required (caddr pattern)]
+            [rest-spec (cadddr pattern)])
+        (cond
+          [(mdl-tuple-value? value)
+           (decl-match-chain (mdl-tuple-value-payload value) required rest-spec budget)]
+          [(or (null? value) (mpair? value))
+           (decl-match-chain value required rest-spec budget)]
+          [(mdl-array? value)
+           (decl-match-sequence
+            (for/list ([i (in-range (mdl-array-length value))])
+              (mdl-nth value (add1 i)))
+            required rest-spec budget)]
+          [else (error 'mdl-decl "unsupported structured value")]))))
+
+;; Required-prefix walking over a LIST-primtype chain: consumes at most
+;; (length required) cells in place, so a cyclic chain never runs away
+;; while patterns remain; only the REST tail is materialized (cycle-guarded).
+(define (decl-match-chain chain required rest-spec budget)
+  (let loop ([cursor chain] [pats required])
+    (cond
+      [(null? pats)
+       (if rest-spec
+           (decl-match-rest (mdl-list->list cursor) rest-spec budget)
+           #t)]
+      [(null? cursor) (list 'short)]
+      [else
+       (define m (decl-match (mcar cursor) (car pats) budget))
+       (cond
+         [(eq? m #t) (loop (mcdr cursor) (cdr pats))]
+         [(eq? m #f) (list 'element (mcar cursor) (decl-failure-leaf (car pats)))]
+         [else m])])))
+
+;; Required-prefix matching over an extracted array-element sequence
+;; (arrays are finite; the reference walks them by NTH similarly).
+(define (decl-match-sequence elements required rest-spec budget)
+  (let loop ([els elements] [pats required])
+    (cond
+      [(null? pats)
+       (if (or (not rest-spec) (null? els))
+           #t
+           (decl-match-rest els rest-spec budget))]
+      [(null? els) (list 'short)]
+      [else
+       (define m (decl-match (car els) (car pats) budget))
+       (cond
+         [(eq? m #t) (loop (cdr els) (cdr pats))]
+         [(eq? m #f) (list 'element (car els) (decl-failure-leaf (car pats)))]
+         [else m])])))
+
+;; `[REST pat ... pat]` repetition: the sequence restarts after each period
+;; (the recorded rest-multi-pattern and Confusion's REST loop), and the
+;; value may end at any point.
+(define (decl-match-rest els pats budget)
+  (let loop ([rest els] [i 0])
+    (cond
+      [(null? rest) #t]
+      [else
+       (define pat (list-ref pats (remainder i (length pats))))
+       (define m (decl-match (car rest) pat budget))
+       (cond
+         [(eq? m #t) (loop (cdr rest) (add1 i))]
+         [(eq? m #f) (list 'element (car rest) (decl-failure-leaf pat))]
+         [else m])])))
+
+(define (matches-decl? value pattern [budget decl-match-max-depth])
+  (eq? (decl-match value pattern budget) #t))
 
 ;; The explicit chapter 14 predicate checks one value against one pattern
 ;; with the same normalization as attached declarations. Pinned Confusion
-;; returns T on a match and #FALSE carrying the value and pattern otherwise.
+;; (declaration-pattern-reference.json) returns T on a match, a bare #FALSE
+;; () on an overall TYPE mismatch, and #FALSE carrying the offending ELEMENT
+;; and its element pattern on a structured element mismatch; simple-pattern
+;; failures keep the D1 #FALSE (value pattern) payload.
 (define (mdl-decl? value pattern)
   (define normalized (normalize-decl-pattern pattern #f #f "DECL?"))
-  (if (matches-decl? value normalized)
-      (mdl-atom "T")
-      (mdl-false (list value pattern))))
+  (define result (decl-match value normalized decl-match-max-depth))
+  (cond
+    [(eq? result #t) (mdl-atom "T")]
+    [(eq? result #f) (mdl-false (list value pattern))]
+    [(eq? (car result) 'element)
+     (mdl-false (list (cadr result) (caddr result)))]
+    [else (mdl-false '())]))
 
 (define (check-declared! decl name value)
   (when (and decl (not (eq? value unassigned)))

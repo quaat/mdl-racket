@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "name": "m2-declaration-pattern-reference-errors",
+  "cases": [
+    {"name": "wrong-type-value-vs-structured-pattern", "expression": "<DECL? 1 '<LIST [REST ATOM]>>"},
+    {"name": "empty-structure-pattern", "expression": "<DECL? () '<LIST>>"},
+    {"name": "opt-empty-list", "expression": "<DECL? () '<LIST [OPT ATOM]>>"},
+    {"name": "opt-first-non-atom", "expression": "<DECL? (1) '<LIST [OPT ATOM]>>"},
+    {"name": "opt-then-rest", "expression": "<DECL? (1 2) '<LIST [OPT FIX] [REST FIX]>>"},
+    {"name": "nth-zero-repetition", "expression": "<DECL? (1) '<LIST [0 FIX]>>"},
+    {"name": "special-wrapper", "expression": "<DECL? 3 '<SPECIAL FIX>>"},
+    {"name": "unspecial-wrapper", "expression": "<DECL? 3 '<UNSPECIAL FIX>>"},
+    {"name": "primtype-structured-composition", "expression": "<DECL? (1 A) '<<PRIMTYPE LIST> [REST FIX ATOM]>>"},
+    {"name": "or-of-structures-composition", "expression": "<DECL? (1 2) '<<OR LIST VECTOR> [REST FIX]>>"},
+    {"name": "compound-name-any", "expression": "<DECL? \"s\" 'ANY>"},
+    {"name": "compound-name-any-in-rest", "expression": "<DECL? (1 2 3) '<LIST [REST ANY]>>"},
+    {"name": "compound-name-structured-unquoted", "expression": "<DECL? [1 2] STRUCTURED>"},
+    {"name": "cycle-attempt-gloc", "expression": "<SET L '(1 2 3)> <PUT <REST .L 2> 1 <GLOC L>>"}
+  ]
+}

@@ -744,3 +744,52 @@ a segment payload and a later plain argument of the same interpreted call
 both have side effects. No reference observation pins that case, and no
 historical source exercises it; it stays a recorded divergence pending a
 source-backed need.
+
+## M2 D3 specification: structured declaration patterns
+
+Chapter 14's `<struc elts>` construction extends the M2 D1 pattern
+language: a pattern `<LIST elts...>`, `<VECTOR elts...>`,
+`<UVECTOR elts...>`, or `<TUPLE elts...>` matches a value whose MDL TYPE
+is that structure type (a STRING is LIST-primtype but is **not** matched
+by `<LIST ...>`), whose leading elements satisfy the declared element
+patterns positionally, and whose remaining elements all satisfy the
+trailing `[REST pat ... pat]` repetition — zero or more, last position
+only, one repetition only. Multi-pattern `[REST p1 p2]` sequences repeat
+cyclically over the remaining elements (recorded reference case
+`rest-multi-pattern`); an empty repetition bracket, a misplaced
+repetition, `[OPT ...]`, and NTH `[fix pat ...]` repetitions are explicit
+normalization errors in this slice. Element patterns nest, including the
+existing `<OR ...>` (the last failing alternative is the reported leaf
+pattern, mirroring the reference's returned FALSE).
+
+`DECL?` gains the reference's payload distinction: an overall TYPE
+mismatch — and likewise a failing `<PRIMTYPE ...>` check, which the
+reference returns as its plain FALSE — yields bare `#FALSE ()`, while a
+structured element mismatch returns `#FALSE (element pattern)` carrying
+the offending element and the simple type-atom leaf; simple-pattern
+failures keep the D1 `#FALSE (value pattern)` payload. Attached
+declarations and `DECL?` share one matcher, so they agree by
+construction.
+
+Traversal is bounded and in place: one nesting-budget unit per
+structured pattern level and per `<OR ...>` alternative
+(`decl-match-max-depth` 200), with an explicit error naming the limit.
+The required prefix of a LIST-primtype value is walked cell by cell
+(arrays are read by indexed reference), so nothing is duplicated or
+mutated — and a prefix-only pattern matches the prefix of a cyclic LIST
+like the reference's incremental walk. Only the `[REST ...]` tail
+materializes through the cycle-checked conversion, whose explicit
+cyclic error is a recorded safety deviation: the reference's REST loop
+would not terminate on a cyclic value at all.
+
+Recorded deviations from the pinned reference (evidence in
+`docs/evidence/M2/DECLARATION-PATTERNS.md`): the empty `<LIST>` pattern is
+rejected here because the manual's BNF requires at least one element
+pattern, while Confusion accepts it and matches any value of the TYPE;
+`DECL?` keeps a strict two-operand arity where Confusion silently
+ignores surplus operands spliced into its call; structured pattern heads
+are restricted to LIST/VECTOR/UVECTOR/TUPLE where Confusion accepts any
+NEWTYPE with a structured PRIMTYPE — extended only when a historical
+source needs it. Confusion's broken `ANY`/`STRUCTURED` compound names
+are not reproduced; `ANY` as a simple pattern keeps its manual semantics
+from D1.

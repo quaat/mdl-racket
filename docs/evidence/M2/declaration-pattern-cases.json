@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "m2-declaration-pattern-reference-successes",
+  "cases": [
+    {"name": "list-empty-vs-rest-atom", "expression": "<DECL? () '<LIST [REST ATOM]>>"},
+    {"name": "list-atoms-vs-rest-atom", "expression": "<DECL? (A B) '<LIST [REST ATOM]>>"},
+    {"name": "list-nonatom-vs-rest-atom", "expression": "<DECL? (A 1) '<LIST [REST ATOM]>>"},
+    {"name": "string-vs-list-pattern", "expression": "<DECL? \"s\" '<LIST [REST ATOM]>>"},
+    {"name": "list-fixes-vs-rest-fix", "expression": "<DECL? (1 2 3) '<LIST [REST FIX]>>"},
+    {"name": "list-prefix-plus-rest-good", "expression": "<DECL? (1 A B) '<LIST FIX [REST ATOM]>>"},
+    {"name": "list-prefix-plus-rest-missing-prefix", "expression": "<DECL? (A B) '<LIST FIX [REST ATOM]>>"},
+    {"name": "vector-rest-fix-good", "expression": "<DECL? [1 2] '<VECTOR [REST FIX]>>"},
+    {"name": "vector-rest-fix-bad", "expression": "<DECL? [1 A] '<VECTOR [REST FIX]>>"},
+    {"name": "uvector-rest-fix-good", "expression": "<DECL? ![1 2] '<UVECTOR [REST FIX]>>"},
+    {"name": "nested-or-in-rest-good", "expression": "<DECL? (1 A) '<LIST [REST <OR FIX ATOM>]>>"},
+    {"name": "nested-or-in-rest-bad", "expression": "<DECL? (1 \"s\") '<LIST [REST <OR FIX ATOM>]>>"},
+    {"name": "rest-multi-pattern", "expression": "<DECL? (1 A 2 B) '<LIST [REST FIX ATOM]>>"},
+    {"name": "psetg-empty-list", "expression": "<DECL? () '<LIST [REST ATOM]>>"},
+    {"name": "psetg-single-atom", "expression": "<DECL? (A) '<LIST [REST ATOM]>>"},
+    {"name": "psetg-two-atoms", "expression": "<DECL? (A B) '<LIST [REST ATOM]>>"},
+    {"name": "psetg-non-atom-element", "expression": "<DECL? (A 1) '<LIST [REST ATOM]>>"},
+    {"name": "attached-compound-decl-good", "expression": "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) .P> <F (A B)>"},
+    {"name": "attached-compound-decl-empty", "expression": "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) .P> <F ()>"},
+    {"name": "nth-repeat-two-fixes", "expression": "<DECL? (1 2 3 4) '<LIST [2 FIX] [REST FIX]>>"},
+    {"name": "segment-exact-pattern-good", "expression": "<DECL? (1 2) !<LIST FIX FIX>>"},
+    {"name": "segment-exact-pattern-extra", "expression": "<DECL? (1 2 3) !<LIST FIX FIX>>"}
+  ]
+}
