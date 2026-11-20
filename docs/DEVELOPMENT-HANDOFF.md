@@ -81,15 +81,23 @@ D2 in progress).
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
   `DECL?` false payload follows Confusion (`#FALSE (value pattern)`).
-- **Exact next action:** confirm CI green on PR #49 head `e26f3a8`, then
-  merge with maintainer approval; then launch the D3 Flash implementer on
-  `feat/m2-decl-patterns` (the `[REST ...]` structured-pattern slice,
-  issue #48 — Confusion's DECL? implements the subset, so the reference
-  backing is direct), then retry the full `77loadall.mud` load and record
-  the next blocker. Key D3 reference facts: the PSETG pattern accepts (),
-  (A), (A B) and rejects (A 1) with #FALSE (1 ATOM); overall-type
-  mismatches return bare #FALSE () while element mismatches carry
-  (value pattern) — see docs/evidence/M2/DECLARATION-PATTERNS.md.
+- **D4 state (reference evidence recorded, verified, committed `9cdb8e3`
+  on stacked branch `feat/m2-muddle`):** `MUDDLE` is the FIX `101`,
+  interpreter-supplied — the 77defs.mud:1 guard `<L? ,MUDDLE 100>` is
+  false, `AND` short-circuits, and `USE` (unbound in the reference) never
+  runs; `RAPPLIC` stays unassigned through the whole chain (77defs.mud:3
+  PUTs the DECL *property* on the atom — the next-next dependency is
+  atom-property PUT); `MEMQ` returns the tail sublist on identity match,
+  `#FALSE ()` on miss. **The pinned reference loads the entire 12-file
+  `77loadall.mud` chain to completion with zero errors — that full-chain
+  transcript is the concrete parity target for the M2 gate.** Current
+  parity gap: 10 completed expressions vs the reference's full DONE.
+- **Exact next action:** land D3 (PR #50: CI + independent review +
+  maintainer approval), then the D4 implementation on `feat/m2-muddle`
+  (bind `MUDDLE := 101` as a reference-backed session default, advance
+  the chain, record the next blocker — likely atom-property PUT at
+  77defs.mud:3, then `MEMQ` for PSETG execution). Obtain maintainer
+  merge decisions for PR #47 and PR #49 when ready.
 - **Full evidence:** `docs/evidence/M2/DECLARATIONS.md` (D1 slice),
   `docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md` (recovery),
   `docs/evidence/M2/SOURCE-EXECUTION.md` (live execution inventory),
