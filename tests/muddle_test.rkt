@@ -39,9 +39,15 @@
    (put "use.mud" "<USE \"LSRTNS\">\n")
    (check-equal? (hash-ref (mdl-session-load! session "use.mud") 'status) "FAIL")
    (check-equal? (hash-ref (hash-ref (mdl-session-load! session "use.mud") 'failure) 'construct) "USE")
-   ;; GASSIGNED? is true: the global is assigned, not merely named.
-   (put "gass.mud" "<GASSIGNED? MUDDLE>\n")
-   (check-equal? (hash-ref (mdl-session-load! session "gass.mud") 'status) "PASS"))
+   ;; GASSIGNED? is true: the global is assigned, not merely named (an
+   ;; unassigned global would return #FALSE () without erroring, so the
+   ;; result value is asserted, not just the load status).
+   (check-equal? (mdl-atom-pname (mdl-session-call session "GASSIGNED?" "MUDDLE"))
+                 "T")
+   ;; And its TYPE is FIX, asserted directly (review P3-b).
+   (check-equal? (mdl-atom-pname (mdl-session-call session "TYPE"
+                                                   (mdl-session-call session "GVAL" "MUDDLE")))
+                 "FIX"))
  (lambda () (delete-directory/files scratch-root)))
 
 (displayln "muddle tests passed")

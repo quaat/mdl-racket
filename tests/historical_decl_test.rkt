@@ -42,14 +42,13 @@
 (check sha-error "")
 (check (car (string-split sha-output)) expected-sha)
 
-;; The complete original file now attempts cleanly: since D3 (structured
+;; The complete original file now loads in full: since D3 (structured
 ;; declaration patterns, issue #48) the PSETG declaration <LIST [REST ATOM]>
 ;; at 11:9 normalizes at install time, so all eight expressions of
-;; 81prim.mud load, and the file's load stops... nowhere: 81prim.mud loads
-;; in full. The D3-relevant chain failure moved downstream: driving the
-;; pinned 77loadall.mud entry stops at 77defs.mud expression 1, whose
-;; <AND <L? ,MUDDLE 100> ...> needs the unassigned global MUDDLE - a
-;; non-declaration runtime blocker for a later slice.
+;; 81prim.mud load. Since D4 (issue #51) the 77loadall.mud chain passes the
+;; 77defs.mud:1 MUDDLE guard (short-circuits with ,MUDDLE = 101) and now
+;; stops at 77defs.mud expression 3's atom-property PUT - the assertions
+;; below pin both the full 81prim load and the new chain barrier.
 (define root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
 (dynamic-wind
  void
