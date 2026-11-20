@@ -13,7 +13,9 @@
   independent-review fixes for WORD/REST identity, alias chains, and
   structured/STRING dispatch. A final-head review correction unifies
   CHARACTER values from STRING GET and SEGMENT expansion (four clean
-  Confusion cases, two new regressions). Fresh local suites: **866 Racket checks, 13
+  Confusion cases, two new regressions). An independent local final-head
+  review corrected FIX-indicator associations on native SUBRs (issue #67;
+  two red-to-green regressions). Fresh local suites: **868 Racket checks, 13
   Python tests**, `make test-historical` green; the pinned `77loadall.mud`
   load completes **twenty-four**
   expressions.
@@ -29,8 +31,10 @@
 - **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57 (`N=?`). Issue
   #11 is closed as completed. Both PR workflows passed on prior D5 head
   `ae0984f`; the CHARACTER correction requires final-head CI. A fresh
-  Codex review of `ae0984f` raised that finding; maintainer approval and
-  merge are pending.
+  Codex review of `ae0984f` raised that finding; the later hosted final-head
+  review request hit a usage limit. Local review report:
+  [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). Final-head CI and
+  maintainer approval are pending; no merge is authorized.
 - **Not demonstrated:** full integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 

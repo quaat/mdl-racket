@@ -2,7 +2,8 @@
 
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-20 (D4 merged,
-D5 final-head review correction in progress, pre-merge G3 FAIL).
+D5 independent local final-head review correction in progress,
+pre-merge G3 FAIL).
 
 - **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), D4
   (PR #52), and the agent definitions (PR #47) are all **merged into
@@ -26,7 +27,9 @@ D5 final-head review correction in progress, pre-merge G3 FAIL).
   evidence are under `atom-props-review-*`. A further final-head review
   found inconsistent CHARACTER extraction from STRING GET versus SEGMENT;
   four clean Confusion probes and two red-to-green tests now cover the fix.
-  Fresh suites: 866
+  An independent local final-head review fixed the native-SUBR FIX
+  association dispatch (issue #67); see `docs/evidence/M2/D5-FINAL-REVIEW.md`.
+  Fresh suites: 868
   Racket checks, 13 Python tests, `make test-historical` green
   (VFLOAD 23 + DECL 20 assertions). The pinned `77loadall.mud` load
   completes **twenty-four expressions** — `81prim.mud` in full plus

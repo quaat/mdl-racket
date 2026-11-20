@@ -532,3 +532,11 @@ representation, and PUT accepts it. Four pinned Confusion cases are in
 `evidence/M2/character-review-*`.
 `SETG` intentionally does not enforce DECL associations. Reader behavior
 and printing remain unchanged; each fresh session starts property-free.
+
+**Final-head local review (#67):** A native SUBR is represented here as a
+Racket procedure but is an unstructured MDL association item. A FIX
+indicator on that item must use association storage without asking for
+the host procedure's unsupported MDL primtype. Pinned Confusion returns
+`9` from `<PUT ,+ 7 9> <GET ,+ 7>` and returns FALSE after two-argument
+removal. The narrow dispatch guard and red-to-green tests are recorded in
+`evidence/M2/D5-FINAL-REVIEW.md`; structured FIX indexing is unchanged.

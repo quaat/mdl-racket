@@ -12,7 +12,7 @@
 **Current M2 status (2026-11-20):** D1–D4 are merged on `main`
 (`419fc5c`); D5 atom properties are in [PR #54](https://github.com/quaat/mdl-racket/pull/54)
 on `feat/m2-atom-props` for review.
-The D5 branch passes `make test` (866 Racket checks, 13 Python tests),
+The D5 branch passes `make test` (868 Racket checks, 13 Python tests),
 `make test-historical` (23 VFLOAD and 20 DECL assertions), and pinned
 Confusion association probes (18 original plus 11 review cases; eight
 separate deliberate-error/timeout observations). A final-head CHARACTER
@@ -28,8 +28,11 @@ Reproduce with `make test`,
 `make test-historical`, and the loader command below. See
 [D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
 [current status](docs/STATUS.md). Both PR workflows passed on the prior D5
-head; the corrected head requires its own CI result before merge. The next
-actions are D5 review and an issue #57 correction before G3 can pass.
+head; the issue #67 SUBR association correction requires final-head CI.
+An independent local final-head review found and fixed that P2 issue;
+see [review report](docs/evidence/M2/D5-FINAL-REVIEW.md). D5 still awaits
+maintainer merge authorization. The dependent G3 stack currently fails
+at original `FLAGWORD`'s unsupported `MAPF` (issue #65).
 Historical progress notes below preserve
 their original slice-level context.
 

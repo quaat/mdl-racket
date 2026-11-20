@@ -1901,7 +1901,10 @@
 ;; (mdl_primtype_structured(arg->pt) && FIX/OFFSET indicator); OFFSET
 ;; indicators are out of this slice's scope and stay on the association path.
 (define (mdl-structured-primtype? value)
-  (and (member (mdl-atom-pname (mdl-primtype value))
+  (and ;; Native SUBRs are represented as host procedures; they are
+       ;; unstructured MDL items and may carry FIX-keyed associations.
+       (not (procedure? value))
+       (member (mdl-atom-pname (mdl-primtype value))
                '("LIST" "VECTOR" "UVECTOR" "TUPLE" "STRING"))
        #t))
 
