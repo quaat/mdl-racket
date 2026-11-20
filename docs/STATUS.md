@@ -16,7 +16,9 @@
   independent-review fixes for WORD/REST identity, alias chains, and
   structured/STRING dispatch. A final-head review correction unifies
   CHARACTER values from STRING GET and SEGMENT expansion (four clean
-  Confusion cases, two new regressions). Fresh local suites: **866 Racket checks, 13
+  Confusion cases, two new regressions). An independent local final-head
+  review corrected FIX-indicator associations on native SUBRs (issue #67;
+  two red-to-green regressions). Fresh local suites: **868 Racket checks, 13
   Python tests**, `make test-historical` green; the pinned `77loadall.mud`
   load completes **twenty-four**
   expressions.
@@ -31,11 +33,12 @@
   12-file chain to `DONE`.
 - **Open issues/PRs:** #53/PR #54 (D5), #56/PR #64 (G3), #57/PR #59
   (`N=?`), #58/PR #61 (computed global), #60/PR #62 (`ERROR`), #63
-  (`MEMQ`), and #65 (`MAPF`). Issue
-  #11 is closed as completed. Both PR workflows passed on corrected D5
-  head `e6d295d`; the requested final-head Codex review was declined
-  because of the review service's usage limit. Earlier review findings
-  are resolved. Maintainer approval and merge are pending.
+  /PR #66 (`MEMQ`), #65 (`MAPF`), and #67 (D5 review fix). Issue #11 is
+  closed as completed. The D5 SUBR association correction requires
+  final-head CI; its independent local report is
+  [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). The hosted review
+  service declined a prior request due to its usage limit. Maintainer
+  approval and merge are pending; no merge is authorized.
 - **Earlier N=? local slice:** `make test` 879 Racket checks and 13 Python tests;
   focused `neq_test.rkt` 13 checks. Original MSETG advanced from `N=?`
   to `,.FOO`; see [evidence](evidence/M2/NEQ.md). The next action is

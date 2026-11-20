@@ -95,6 +95,10 @@
 (check-equal? (run "<PUT 5 DECL 'FIX>") "5")
 (check-equal? (run "<PUT 5 DECL 'FIX> <GET 5 DECL>") "FIX")
 (check-equal? (run "<PUT 5 DECL 'FIX> <TYPE <GET 5 DECL>>") "ATOM")
+;; Final-head local review (#67): a SUBR is an unstructured association item.
+;; Its FIX indicator must not force host-procedure PRIMTYPE dispatch.
+(check-equal? (run "<PUT ,+ 7 9> <GET ,+ 7>") "9")
+(check-equal? (run "<PUT ,+ 7 9> <PUT ,+ 7> <GET ,+ 7>") "#FALSE ()")
 ;; Chapter 13 keys are selected by MDL ==?, including equal WORD values,
 ;; large FIXes, and independently constructed views of the same array tail.
 ;; All five observations were reproduced in pinned Confusion on 2026-11-20.

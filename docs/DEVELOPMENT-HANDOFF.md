@@ -49,6 +49,11 @@ original MSETG advances to a distinct `,.FOO` computed-global reader
 failure (issue #58). G3 remains FAIL. D5 PR #54 remains unmerged pending
 explicit maintainer approval; do not begin M3 EMPTY?.
 
+**D5 local review update (issue #67):** The native SUBR FIX-indicator
+association bug is fixed and documented in
+`docs/evidence/M2/D5-FINAL-REVIEW.md`. Its final-head CI and maintainer
+approval remain pending.
+
 - **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), D4
   (PR #52), and the agent definitions (PR #47) are all **merged into
   `main`** (current main `419fc5c`); issues #44/#46/#48/#51 closed.
@@ -72,7 +77,9 @@ explicit maintainer approval; do not begin M3 EMPTY?.
   evidence are under `atom-props-review-*`. A further final-head review
   found inconsistent CHARACTER extraction from STRING GET versus SEGMENT;
   four clean Confusion probes and two red-to-green tests now cover the fix.
-  Fresh suites: 866
+  An independent local final-head review fixed the native-SUBR FIX
+  association dispatch (issue #67); see `docs/evidence/M2/D5-FINAL-REVIEW.md`.
+  Fresh suites: 868
   Racket checks, 13 Python tests, `make test-historical` green
   (VFLOAD 23 + DECL 20 assertions). The pinned `77loadall.mud` load
   completes **twenty-four expressions** — `81prim.mud` in full plus
