@@ -420,6 +420,27 @@ session recovery record is in
 General APPLY/DISPATCH and original game execution remain open. The
 first unmet **milestone** gate is still M2.
 
+## M2 issue #51: the interpreter-supplied MUDDLE global
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** The interpreter bound
+its version number as a startup global; the pinned reference binds
+`MUDDLE` to the FIX `101`, and every fresh shared-session loader session
+now seeds it identically (interned in that session's atom space). With
+that value the `77defs.mud:1` guard `<L? ,MUDDLE 100>` is FALSE, the
+`<AND ...>` short-circuits, and `USE` — unbound in the reference — stays
+an explicit error. The pinned `77loadall.mud` chain completes **twelve**
+expressions (up from ten) and now stops at `77defs.mud` expression 3:
+`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` fails on the missing
+atom-property `PUT` — the next source dependency. The reference itself
+loads the entire chain to `DONE` (recorded in the D4 reference evidence),
+which is the concrete parity target for the remaining M2 work. `make
+test` passes 802 Racket checks and 13 Python tests. Full details,
+commands, and hashes are in
+[`docs/evidence/M2/MUDDLE.md`](evidence/M2/MUDDLE.md), tracked by
+[issue #51](https://github.com/quaat/mdl-racket/issues/51). Atom-property
+`PUT`, the `MEMQ` primitive, general APPLY/DISPATCH, and original game
+execution remain open. The first unmet **milestone** gate is still M2.
+
 ## M2 issue #48: structured declaration patterns
 
 **Local slice: PASS. M2 milestone: NOT YET PASS.** The structured

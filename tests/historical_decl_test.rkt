@@ -94,16 +94,21 @@
    (define chain-report
      (mdl-session-load! chain-session "77loadall.mud"))
    (check (hash-ref chain-report 'status) "FAIL")
-   (check (hash-ref chain-report 'completed_expressions) 10)
+   ;; Since D4 (the interpreter-supplied MUDDLE global, issue #51) the
+   ;; 77defs.mud:1 guard <L? ,MUDDLE 100> is false with ,MUDDLE = 101, so the
+   ;; AND short-circuits and the chain advances past it; the next blocker is
+   ;; 77defs.mud expression 3, <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>,
+   ;; whose atom-property PUT form is a later slice.
+   (check (hash-ref chain-report 'completed_expressions) 12)
    (define failure (hash-ref chain-report 'failure))
    (check (hash-ref failure 'file) "77defs.mud")
-   (check (hash-ref failure 'expression_index) 1)
+   (check (hash-ref failure 'expression_index) 3)
    (check (hash-ref failure 'stage) "execute")
-   (check (hash-ref failure 'construct) "AND")
-   (check (hash-ref failure 'line) 1)
+   (check (hash-ref failure 'construct) "PUT")
+   (check (hash-ref failure 'line) 5)
    (check (hash-ref failure 'column) 1)
    (check (string-contains? (hash-ref failure 'exception)
-                            "unassigned MDL global MUDDLE")
+                            "index out of range")
           #t))
  (lambda ()
    (with-handlers ([exn:fail? void])

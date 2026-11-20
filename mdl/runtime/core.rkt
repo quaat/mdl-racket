@@ -2,6 +2,7 @@
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list)
 (provide current-mdl-globals current-mdl-locals
+         mdl-interpreter-version
          mdl-setg! mdl-gval mdl-define!
          mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings mdl-type
          mdl-bind-function-formals mdl-call-with-activation
@@ -1360,6 +1361,15 @@
         [(eq? atom (mdl-atom (mdl-atom-pname atom)))
          (hash-ref builtin-table (mdl-atom-pname atom) unassigned)]
         [else unassigned]))
+
+;; Interpreter-supplied globals bound in every fresh MDL session, like the
+;; historical interpreter's startup environment. The pinned reference binds
+;; MUDDLE, the interpreter version, to the FIX 101 (issue #51 evidence
+;; muddle-reference.json, interpreter SHA a29c756df5c9...7317e629): with that
+;; value the 77defs.mud:1 guard <L? ,MUDDLE 100> is FALSE and its <AND ...>
+;; short-circuits without evaluating USE (unbound in the reference). Changing
+;; the value requires new reference evidence, not a source edit.
+(define mdl-interpreter-version 101)
 
 (define (mdl-setg! name value)
   (define atom (binding-atom 'mdl-setg name))

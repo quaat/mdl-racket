@@ -793,3 +793,17 @@ NEWTYPE with a structured PRIMTYPE — extended only when a historical
 source needs it. Confusion's broken `ANY`/`STRUCTURED` compound names
 are not reproduced; `ANY` as a simple pattern keeps its manual semantics
 from D1.
+
+## M2 D4 specification: the interpreter-supplied MUDDLE global
+
+The historical interpreter bound its version number as a startup global.
+The pinned reference binds `MUDDLE` to the FIX `101` (issue #51 evidence
+`muddle-reference.json`, interpreter SHA
+`a29c756df5c973e462a6ad2b318e28ec265934e89e72d825bc7672387317e629`), and
+every fresh shared-session loader session seeds it identically, interned
+in that session's atom space. With that value the `77defs.mud:1` guard
+`<L? ,MUDDLE 100>` is FALSE and its `<AND ...>` short-circuits without
+evaluating `USE` — which is unbound in the reference and stays an
+explicit error here. Changing the value requires new reference evidence,
+not a source edit; the reference's own environment is the reproducible
+baseline for the original 1977 version number.

@@ -4,8 +4,10 @@ Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-19 (post-D1 merge,
 D2 in progress).
 
-- **Milestone / gate:** M2. G0/G1/G2 PASS and **M2-D1 merged**; integrated
-  M3-style gate NOT RUN. M2 milestone NOT YET PASS.
+- **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), and
+  the agent definitions (PR #47) are all **merged into `main`** (current
+  main `89ab9cd`, post-merge CI green); issues #44/#46/#48 closed.
+  Integrated M3-style gate NOT RUN. M2 milestone NOT YET PASS.
 - **Active issues/PRs:** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
   (D2 SEGMENT) — review findings fixed, CI green on head `c4a1d63`,
   **awaiting maintainer merge decision**;
@@ -81,23 +83,24 @@ D2 in progress).
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
   `DECL?` false payload follows Confusion (`#FALSE (value pattern)`).
-- **D4 state (reference evidence recorded, verified, committed `9cdb8e3`
-  on stacked branch `feat/m2-muddle`):** `MUDDLE` is the FIX `101`,
-  interpreter-supplied — the 77defs.mud:1 guard `<L? ,MUDDLE 100>` is
-  false, `AND` short-circuits, and `USE` (unbound in the reference) never
-  runs; `RAPPLIC` stays unassigned through the whole chain (77defs.mud:3
-  PUTs the DECL *property* on the atom — the next-next dependency is
-  atom-property PUT); `MEMQ` returns the tail sublist on identity match,
-  `#FALSE ()` on miss. **The pinned reference loads the entire 12-file
-  `77loadall.mud` chain to completion with zero errors — that full-chain
-  transcript is the concrete parity target for the M2 gate.** Current
-  parity gap: 10 completed expressions vs the reference's full DONE.
-- **Exact next action:** land D3 (PR #50: CI + independent review +
-  maintainer approval), then the D4 implementation on `feat/m2-muddle`
-  (bind `MUDDLE := 101` as a reference-backed session default, advance
-  the chain, record the next blocker — likely atom-property PUT at
-  77defs.mud:3, then `MEMQ` for PSETG execution). Obtain maintainer
-  merge decisions for PR #47 and PR #49 when ready.
+- **D4 state (implemented and verified on `feat/m2-muddle`, main-agent
+  change):** `MUDDLE` seeded as FIX `101` per the reference, interned in
+  each session's atom space; the chain completes **twelve** expressions
+  and stops at `77defs.mud` expression 3 (`<PUT RAPPLIC DECL '...>>` —
+  atom-property PUT, the next dependency). Fresh suites: 802 Racket
+  checks (muddle suite 9), loader 57, historical 23 + 20, Python 13,
+  `git diff --check` clean. **The pinned reference loads the entire
+  12-file chain to `DONE` — the concrete parity target.**
+- **First failing source construct:** atom-property `PUT` at
+  `77defs.mud` expression 3 (`<PUT RAPPLIC DECL '<OR ATOM FALSE
+  NOFFSET>>`, execute stage, 5:1) — the chain is at twelve completed
+  expressions.
+- **Exact next action:** commit and push the D4 branch, open the D4 PR
+  referencing issue #51, run CI and independent review; then create the
+  atom-property PUT issue (chapter 13: atom properties/associations —
+  probe Confusion for `PUT`/`GET`/`GETPROP` on atoms), delegate to the
+  Flash implementer, and advance toward the reference's full-chain
+  `DONE` parity target.
 - **Full evidence:** `docs/evidence/M2/DECLARATIONS.md` (D1 slice),
   `docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md` (recovery),
   `docs/evidence/M2/SOURCE-EXECUTION.md` (live execution inventory),

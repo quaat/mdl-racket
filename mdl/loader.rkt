@@ -66,6 +66,12 @@
                  (make-mdl-atom-space) loader-namespace (box '())))
   (call-in-session session
     (lambda ()
+      ;; Interpreter-supplied globals (MUDDLE, issue #51) intern in THIS
+      ;; session's atom space, so they must be seeded with the session's
+      ;; space current — interning earlier would produce a different atom
+      ;; identity than later GVAL lookups.
+      (hash-set! (current-mdl-globals)
+                 (mdl-atom "MUDDLE") mdl-interpreter-version)
       (mdl-define! "FLOAD"
                    (lambda (name)
                      (unless (string? name)
