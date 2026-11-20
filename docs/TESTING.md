@@ -1,6 +1,20 @@
 # Test strategy, reference capture, and parity contract
 
-## Current M2 D5 and G3 checkpoint (2026-11-20)
+## Current M2 branch checkpoint (2026-11-20)
+
+Run `make test` for the offline Racket and Python suites,
+`make test-historical` for hash-verified original definitions, and
+`make test-m2-g3` for the same-session G3 gate. The latter now exits 0
+with 59 assertions on `feat/m2-mapf`; the exact source hashes, reference
+cases, and distinct full-loader EMPTY? barrier are in
+[`G3-GATE-MAPF.md`](evidence/M2/G3-GATE-MAPF.md). Focused MAPF controls,
+interpreted FUNCTION application, TYPE?, and startup OBLIST association
+cases are in [`MAPF.md`](evidence/M2/MAPF.md). `make test` passes 958
+Racket checks and 13 Python tests. The native reference job
+provisions pinned sources and runs G3; the fast smoke job remains offline.
+M2 mainline acceptance remains pending.
+
+## Earlier M2 D5 and G3 checkpoints (retained for provenance)
 
 On `feat/m2-atom-props`, `make test` runs 868 Racket checks and 13 Python
 tests, including `tests/atom_props_test.rkt` (65 focused checks).

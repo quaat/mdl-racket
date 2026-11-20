@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m2-mapf-deliberate-errors",
+  "cases": [
+    {"name": "mapret-outside", "expression": "<MAPRET 1>"},
+    {"name": "mapstop-outside", "expression": "<MAPSTOP 1>"},
+    {"name": "mapleave-outside", "expression": "<MAPLEAVE 1>"},
+    {"name": "non-structure", "expression": "<MAPF ,LIST ,+ 7>"},
+    {"name": "non-applicable-loop", "expression": "<MAPF ,LIST 7 '(1 2)>"}
+  ]
+}

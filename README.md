@@ -10,32 +10,20 @@
 > versions and original input/time/randomness.
 
 **Current M2 status (2026-11-20):** D1–D4 are merged on `main`
-(`419fc5c`); D5 atom properties are in [PR #54](https://github.com/quaat/mdl-racket/pull/54)
-on `feat/m2-atom-props` for review.
-The D5 branch passes `make test` (868 Racket checks, 13 Python tests),
-`make test-historical` (23 VFLOAD and 20 DECL assertions), and pinned
-Confusion association probes (18 original plus 11 review cases; eight
-separate deliberate-error/timeout observations). A final-head CHARACTER
-review adds four clean Confusion probes and two regressions for STRING
-GET, SEGMENT, identity, and indexed PUT. The unchanged
-`77loadall.mud` chain completes 24 expressions, including all of
-`81prim.mud` and the original `RAPPLIC` declaration property in
-`77defs.mud`; it stops at `EMPTY?` inside source-defined `NEWSTRUC` in
-`77defs.mud` expression 15. An earlier pre-merge G3 run found the original
-MSETG repeat path blocked by missing `N=?` ([issue #57](https://github.com/quaat/mdl-racket/issues/57));
-stacked corrections now advance the G3 failure to original FLAGWORD's
-missing `MAPF` ([issue #65](https://github.com/quaat/mdl-racket/issues/65)).
-**M2 is not closed and no Racket game boot or gameplay parity is claimed.**
-Reproduce with `make test`,
-`make test-historical`, and the loader command below. See
-[D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
-[current status](docs/STATUS.md). The issue #67 SUBR association correction
-requires final-head CI.
-An independent local final-head review found and fixed that P2 issue;
-see [review report](docs/evidence/M2/D5-FINAL-REVIEW.md). D5 still awaits
-maintainer merge authorization. The requested hosted final-head Codex
-review was declined by the service's usage limit. G3 now reaches original
-`FLAGWORD`'s unsupported `MAPF` (issue #65), the next focused correction.
+(`419fc5c`). On the stacked `feat/m2-mapf` branch, the hash-verified
+original definitions now pass the [G3 integrated execution gate](docs/evidence/M2/G3-GATE-MAPF.md):
+`make test-m2-g3` exits 0 after 59 assertions, including original VFLOAD,
+MSETG, PSETG, FLAGWORD, RAPPLIC properties, macro expansion, aliasing,
+failure propagation and session isolation. Focused MAPF, TYPE?, and startup
+OBLIST association cases are documented in [MAPF evidence](docs/evidence/M2/MAPF.md).
+The full `77loadall.mud` chain still stops at `EMPTY?` in original
+`NEWSTRUC` after 24 completed expressions. **M2 is not closed:** the
+indirect APPLY/DISPATCH and broader continuation surface must pass the
+requirements audit, required CI, review and mainline verification. PR #54
+remains unmerged pending explicit maintainer authorization. No Racket game
+boot or gameplay parity is claimed. Reproduce with `make test`,
+`make test-historical`, `make test-m2-g3`, and the loader command below.
+See [current status](docs/STATUS.md).
 Historical progress notes below preserve
 their original slice-level context.
 

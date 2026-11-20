@@ -986,3 +986,73 @@ The implemented slice passes these tests and the exact-source PSETG
 first/repeat paths. `MEMQ` on STRING still raises an explicit unsupported
 error; see `evidence/M2/MEMQ.md`. G3 now fails at original FLAGWORD's
 unassigned `MAPF`, rather than at PSETG.
+## M2 MAPF, FUNCTION literals, and map control (issue #65)
+
+The [MDL manual, chapter 10.2–10.3](https://mdl-language.readthedocs.io/en/latest/10-looping/)
+defines `<MAPF finalf loopf s1 ... sN>` as a simultaneous left-to-right
+walk over structured arguments, ending when the first input is exhausted.
+Each step applies the already evaluated `loopf` to the current first
+elements. A true applicable `finalf` receives the recorded results as
+already evaluated arguments; a FALSE `finalf` discards them and returns
+the last loop value, or `#FALSE ()` if the loop never ran. With no input
+structures, the loop continues until explicit map control exits it.
+
+The pinned Confusion results in `evidence/M2/mapf-reference.json` confirm
+LIST, VECTOR, UVECTOR, differing lengths, empty inputs, scalar and
+structured final values, interpreted FUNCTION literals and values,
+outer local access, nested MAPF, indexed applicable `1`, and preservation
+of LIST/VECTOR elements passed to interpreted loop functions. A FUNCTION
+literal has formal bindings, optional AUX/defaults and a body; its #DECL
+is checked at the same boundaries as an interpreted DEFINE. MAPF must
+invoke an already evaluated applicable with already evaluated elements;
+evaluating those elements again changes structure contents and is wrong.
+
+`MAPRET` ends the current loop-function invocation and adds zero or more
+arguments to the final argument stream. `MAPSTOP` does the same and then
+invokes `finalf` immediately. `MAPLEAVE` exits the MAPF directly, discards
+the collected values, and returns its argument (or T if omitted). The
+reference shows nested map control targets the current map; outside a
+live map these operations error (`evidence/M2/mapf-error-reference.json`).
+The runtime must discard map control state on ordinary and abnormal exits.
+The additional bounded control corpus (`evidence/M2/mapf-control-reference.json`)
+shows a pinned Confusion quirk: with FALSE `finalf`, a MAPRET or MAPSTOP
+transfer returns the current first input element, even if control supplied
+another value. The runtime follows that observed behavior. It also confirms
+left-to-right steps, interpreted final functions, declaration checking,
+MAPLEAVE default T, and UNWIND cleanup on nonlocal exit. A FUNCTION value
+used after its defining PROG has returned does not capture the expired
+local binding in Confusion (`mapf-function-context-reference.json`), so
+the Racket runtime does not claim implicit lexical closure capture.
+
+The original `81prim.mud` `FLAGWORD` initializes `TOT=1`, `CNT=1`, then
+uses `MAPF <>` over tuple `FS` with an inline FUNCTION. On an ATOM it may
+call the original MSETG, doubles TOT, increments CNT, and checks for
+overflow. The function result is discarded by FALSE finalf. The return
+is CNT: no arguments give 1, one FALSE or ATOM gives 2, and FALSE plus
+ATOM gives 3 in the recorded native cases. No source substitution is used.
+
+### G3 follow-on: TYPE?
+
+The original FLAGWORD inline FUNCTION calls `<TYPE? .F ATOM>`. The MDL
+Primer section 7.3 describes the predicate as returning the object's TYPE
+on a candidate hit and FALSE otherwise. Pinned Confusion evidence in
+`evidence/M2/typeq-reference.json` confirms ATOM/FIX/FALSE and user-defined
+TYPE hits, misses, a late candidate hit, and a no-candidate miss. It also
+returns FALSE for numeric or unregistered candidate values; the only
+observed deliberate error is a missing value argument
+(`evidence/M2/typeq-error-reference.json`). Implement this as evaluated
+argument comparison with the actual TYPE atom, without coercing candidate
+values or treating a non-hit as an exception.
+
+### G3 follow-on: startup OBLIST associations
+
+After TYPE?, original FLAGWORD calls `<LOOKUP "GROUP-GLUE" <GET INITIAL OBLIST>>`.
+Pinned Confusion initializes the reciprocal `OBLIST` associations for
+INITIAL/ROOT and their OBLIST values before source execution
+(`macros.cpp`, `mdl_interp_init`; observed in
+`evidence/M2/get-initial-oblist-reference.json`). Thus GET on INITIAL
+with indicator OBLIST yields the initial OBLIST, and GROUP-GLUE lookup
+there returns FALSE. An ordinary ATOM has no such association. Seed these
+specific associations in each fresh Racket session's atom space so the
+original source can observe the same startup state; leave general GET
+dispatch and user associations intact.

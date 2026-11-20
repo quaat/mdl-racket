@@ -1,12 +1,11 @@
-# Status — 2026-11-20 (D5 under review; G3 FAIL at original FLAGWORD/MAPF)
+# Status — 2026-11-20 (branch G3 PASS; M2 audit in progress)
 
 ## Current state (2026-11-20)
 
-- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL.
-  Stacked corrections for `N=?`, `,.FOO`, and `ERROR` pass focused and
-  hash-verified original-MSETG tests. MEMQ now lets original PSETG pass;
-  the current-head G3 rerun fails at original FLAGWORD's missing `MAPF`.
-  M2 cannot pass.
+- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; G3 PASS on the stacked
+  `feat/m2-mapf` branch (59 exact-source integrated assertions, exit 0).
+  This is a branch result, not an M2 mainline acceptance. The requirements
+  audit and indirect APPLY/DISPATCH work remain; M2 is not closed.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -26,9 +25,9 @@
   inside the original source-defined `NEWSTRUC`, executing
   `77defs.mud` expression 15 `<NEWSTRUC ROOM VECTOR ...>` (line 37,
   execute stage).
-- **Known candidates next:** `MAPF` for executing original `FLAGWORD`
-  within G3 (issue #65). The sequential full-load barrier is still
-  `EMPTY?` inside `NEWSTRUC`; M3 waits for G3.
+- **Next M2 task:** audit and correct indirect APPLY/DISPATCH and any
+  remaining continuation gaps before final M2 acceptance. The sequential
+  full-load barrier remains `EMPTY?` inside `NEWSTRUC`; M3 waits for M2.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
 - **Open issues/PRs:** #53/PR #54 (D5), #56/PR #64 (G3), #57/PR #59
@@ -39,6 +38,18 @@
   [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). The hosted review
   service declined a prior request due to its usage limit. Maintainer
   approval and merge are pending; no merge is authorized.
+
+**Latest branch G3 result:** [G3-GATE-MAPF.md](evidence/M2/G3-GATE-MAPF.md)
+records the 59-assertion PASS with original FLAGWORD no-arg, FALSE,
+ATOM, FALSE+ATOM and deliberate repeat-conflict paths. `make test-historical`
+passes VFLOAD 23, DECL 21, MSETG, and PSETG. The complete loader remains
+FAIL at `77defs.mud` expression 15 after 24 completed forms, with no skipped
+forms. `make test` passes 958 Racket checks and 13 Python tests; native
+reference probe and five-turn capture also pass. MAPF's differential corpus and known limits are in
+[MAPF.md](evidence/M2/MAPF.md). Final-head CI and mainline verification
+remain pending.
+
+## Earlier checkpoints (retained for provenance)
 - **Earlier N=? local slice:** `make test` 879 Racket checks and 13 Python tests;
   focused `neq_test.rkt` 13 checks. Original MSETG advanced from `N=?`
   to `,.FOO`; see [evidence](evidence/M2/NEQ.md). The next action is

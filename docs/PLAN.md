@@ -75,31 +75,16 @@ later semantics are already implemented.
 
 ## M2 — Execution semantics and MDL compilation (CURRENT)
 
-The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md) passes on
-2026-11-18. [G1](evidence/M2/SOURCE-LOADER.md) implements a root-restricted,
-shared-session loader with sequential top-level execution and nested `FLOAD`.
-G2 [invokes the unmodified pinned `VFLOAD` definition](evidence/M2/HISTORICAL-VFLOAD.md)
-in an explicitly partial-source probe. A pre-merge G3 run on the D5 head
-found the original MSETG's required repeat path blocked by missing `N=?`
-([issue #57](https://github.com/quaat/mdl-racket/issues/57)); M2 remains
-open. This observation does not change the integrated gate below.
-The focused `N=?` correction on `feat/m2-structural-neq` passes primitive
-tests but exposes the next original-MSETG reader gap at `,.FOO` ([issue
-#58](https://github.com/quaat/mdl-racket/issues/58)); G3 is still FAIL.
-The reader correction now passes the pinned computed-global probes and the
-original MSETG equal-repeat path; the conflicting-repeat path reaches the
-separate unassigned `ERROR` primitive. G3 remains FAIL pending that
-source-backed correction ([issue #60](https://github.com/quaat/mdl-racket/issues/60))
-and a fresh integrated run.
-The `ERROR` slice now passes focused and original-MSETG conflict tests;
-the integrated G3 branch required a current-head run and gate decision.
-That run now fails at original PSETG's unassigned `MEMQ` after 48 passing
-integrated assertions ([issue #63](https://github.com/quaat/mdl-racket/issues/63)).
-G3 remains FAIL; M3 is still gated.
-The MEMQ slice passes original PSETG first/repeat calls; a fresh G3 run
-passes 52 assertions, then original FLAGWORD reaches missing `MAPF`
-([issue #65](https://github.com/quaat/mdl-racket/issues/65)). G3 still
-FAIL; `EMPTY?` remains deferred.
+The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md),
+[G1 shared-session source loader](evidence/M2/SOURCE-LOADER.md), and
+[G2 original VFLOAD probe](evidence/M2/HISTORICAL-VFLOAD.md) pass.
+On the stacked `feat/m2-mapf` branch, [G3 original-definition execution](evidence/M2/G3-GATE-MAPF.md)
+passes 59 assertions. This is a branch result; M2 still requires the
+indirect APPLY/DISPATCH and continuation audit, required CI and review,
+authorized integration, and mainline verification. The complete historical
+loader separately stops at `EMPTY?` after 24 completed forms. Prior FAIL
+decisions and their exact blockers remain in [the dated G3 report](evidence/M2/G3-GATE.md)
+and [status history](STATUS.md).
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-original-flagword-deliberate-error",
+  "cases": [
+    {"name": "repeated-atom-conflict", "expression": "<FLOAD \"81prim.mud\"> <FLAGWORD 'FW-C 'FW-C>"}
+  ]
+}

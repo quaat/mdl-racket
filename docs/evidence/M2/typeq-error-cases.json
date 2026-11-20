@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "m2-typeq-deliberate-errors",
+  "cases": [
+    {"name": "no-value", "expression": "<TYPE?>"},
+    {"name": "non-atom-candidate", "expression": "<TYPE? 3 4>"},
+    {"name": "unknown-type-candidate", "expression": "<TYPE? 3 XYZZY-TYPE>"}
+  ]
+}

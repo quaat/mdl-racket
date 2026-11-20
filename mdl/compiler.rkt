@@ -430,6 +430,21 @@
              [args (cdr xs)])
         (case (string->symbol op)
           [(DEFINE) (compile-definition n args)]
+          [(FUNCTION)
+           (define-values (leading-act formals-node body-xs)
+             (cond [(and (>= (length args) 3)
+                         (is-kind? (first args) 'atom)
+                         (is-kind? (second args) 'list))
+                    (values (atom-name (first args)) (second args) (cddr args))]
+                   [(and (>= (length args) 2) (is-kind? (first args) 'list))
+                    (values #f (first args) (cdr args))]
+                   [else (unsupported n "FUNCTION expects a formal LIST and body")]))
+           (parse-formal-list formals-node)
+           (define-values (decl body) (split-declaration n body-xs))
+           `(mdl-function-literal ,(compile-data formals-node)
+                                  (list ,@(map compile-data body))
+                                  ,(if leading-act `(mdl-atom ,leading-act) #f)
+                                  ,(if decl (compile-data decl) #f))]
           [(DEFMAC)
            (unless (and (pair? args) (is-kind? (first args) 'atom))
              (unsupported n "First argument of DEFMAC must be an atom"))

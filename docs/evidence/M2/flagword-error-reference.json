@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-original-flagword-deliberate-error",
+  "recorded_at": "2026-11-20T19:55:13.624786+00:00",
+  "interpreter_sha256": "1d540d2df348479d4740290d4190533b71d94a8308193811b96e52898798b886",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "repeated-atom-conflict",
+      "expression": "<FLOAD \"81prim.mud\"> <FLAGWORD 'FW-C 'FW-C>",
+      "input": "<FLOAD \"81prim.mud\"> <FLAGWORD 'FW-C 'FW-C>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\n\n *ERROR* \n MSETG \n FW-C \n ALREADY-GASSIGNED \n 1 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\n\n *ERROR* \n MSETG \n FW-C \n ALREADY-GASSIGNED \n 1 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

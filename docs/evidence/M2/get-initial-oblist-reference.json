@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "name": "m2-flagword-get-initial-oblist-reference",
+  "recorded_at": "2026-11-20T19:49:21.651099+00:00",
+  "interpreter_sha256": "1d540d2df348479d4740290d4190533b71d94a8308193811b96e52898798b886",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "initial-oblist",
+      "expression": "<GET INITIAL OBLIST>",
+      "input": "<GET INITIAL OBLIST>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "root-oblist",
+      "expression": "<GET ROOT OBLIST>",
+      "input": "<GET ROOT OBLIST>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![(ASOC FUNCTION) (COPYING PRINT TOP QUOTE) (GETBITS 0? CHTYPE) (INITIAL) (GET) () (SAVE MAPRET) (PCODE PARSE ISTRING) (STRUCTURED?) (FUNCT EXPAND) (FLATSIZE AGAIN) (CLOSE MOD) (TFFRAME FILE-LENGTH RETURN) (TEMPLATE CONS) (QUICK-ENTRY ACTIVATION READSTRING) (MEMBER) (CODE) (VALUE) (LIST) (XORB) (UNBOUND PRINTTYPE) (OPEN RANDOM N==?) (SEGMENT FIX ASSIGNED?) () (QUIT PRINTSTRING) (CLOSURE LOCA BLOCK SORT) (LOCB AND? TYPEPRIM GVAL) (SNAME) (LOCD WARRANTY EQVB FORM) (LSH ANDB PRINTB GETPROP) (LENGTH) (GBOUND?) (LOCAS DECL? UNPARSE) () (SPLICE DISMISS INSERT) (FREEZE TERPRI G? EVALTYPE) (LOCL TYPE?) () (ROOT BIND LVAL) (IHEADER GC REP UTYPE) (UNWIND IUVECTOR) (PRIMTYPE-C READCHR MAPLEAVE) (LOCR *) (LOSE LOCS GDECL +) (LOCT CRLF SPNAME MAPF) (LOCU SAVE-EVAL -) (TOPLEVEL OBLIST LOCV SLEEP AND ALLTYPES) (/) (GUNASSIGN) (SUBR READA HANDLER MEMQ) (READB VECTOR BOUND?) (TYPE-C ATOM) (COMMENT LOAD OR? =? APPLYTYPE) (ENABLE TIME APPLICABLE?) (FSUBR ASCII) (ILLEGAL GETTIMEDATE ORB LISTEN BACK TYPE) (DISABLE MAPR) (TAG ON FLOAD N=? STRING) (INTERNAL-LIST BLOAT MOBLIST) (LENGTH?) (DECL ILIST) (OR NEWTYPE) () (RESTORE REMOVE OBLIST?) (INTERRUPTS) (PUTBITS) (INT-LEVEL RETRY DEFINE) (GETTIMEOFDAY ACCESS) (EVENT NOT) (QUICK-RSUBR LINK PRIN1 EMPTY?) (NEXTCHR IFORM) (TYPE-W ARGS) (TUPLE GASSIGNED?) (RESET FLOAT) () (LAST-OUT FFRAME DEFMAC) (PUTREST) (ENDBLOCK) (PROCESS CHANNEL L=? L? PUT) (MONAD? G=?) (LOGOUT) (==?) () (ERROR EVAL) (T MUDDLE FALSE BITS SET) (RSUBR-ENTRY UVECTOR) (APPLY) (PRINC) (DEFAULT CHUTYPE) (OFFSET READ) (INCHAN IMAGE) (MANIFEST STRCOMP) (OUTCHAN STORAGE PUTPROP REPEAT) (PNAME MIN 1? SETG) (ENVIRONMENT VALID-TYPE?) (INTERNAL-TYPE REST) (FRAME FILE-EXISTS? LOOKUP MAX) (OPT) (REDEFINE MACRO) (RSUBR CHARACTER SUBSTRUC NTH PRIMTYPE) (OFF MAPSTOP) (BYTES WORD IVECTOR COND) (ERRET ABS PROG)!]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![(ASOC FUNCTION) (COPYING PRINT TOP QUOTE) (GETBITS 0? CHTYPE) (INITIAL) (GET) () (SAVE MAPRET) (PCODE PARSE ISTRING) (STRUCTURED?) (FUNCT EXPAND) (FLATSIZE AGAIN) (CLOSE MOD) (TFFRAME FILE-LENGTH RETURN) (TEMPLATE CONS) (QUICK-ENTRY ACTIVATION READSTRING) (MEMBER) (CODE) (VALUE) (LIST) (XORB) (UNBOUND PRINTTYPE) (OPEN RANDOM N==?) (SEGMENT FIX ASSIGNED?) () (QUIT PRINTSTRING) (CLOSURE LOCA BLOCK SORT) (LOCB AND? TYPEPRIM GVAL) (SNAME) (LOCD WARRANTY EQVB FORM) (LSH ANDB PRINTB GETPROP) (LENGTH) (GBOUND?) (LOCAS DECL? UNPARSE) () (SPLICE DISMISS INSERT) (FREEZE TERPRI G? EVALTYPE) (LOCL TYPE?) () (ROOT BIND LVAL) (IHEADER GC REP UTYPE) (UNWIND IUVECTOR) (PRIMTYPE-C READCHR MAPLEAVE) (LOCR *) (LOSE LOCS GDECL +) (LOCT CRLF SPNAME MAPF) (LOCU SAVE-EVAL -) (TOPLEVEL OBLIST LOCV SLEEP AND ALLTYPES) (/) (GUNASSIGN) (SUBR READA HANDLER MEMQ) (READB VECTOR BOUND?) (TYPE-C ATOM) (COMMENT LOAD OR? =? APPLYTYPE) (ENABLE TIME APPLICABLE?) (FSUBR ASCII) (ILLEGAL GETTIMEDATE ORB LISTEN BACK TYPE) (DISABLE MAPR) (TAG ON FLOAD N=? STRING) (INTERNAL-LIST BLOAT MOBLIST) (LENGTH?) (DECL ILIST) (OR NEWTYPE) () (RESTORE REMOVE OBLIST?) (INTERRUPTS) (PUTBITS) (INT-LEVEL RETRY DEFINE) (GETTIMEOFDAY ACCESS) (EVENT NOT) (QUICK-RSUBR LINK PRIN1 EMPTY?) (NEXTCHR IFORM) (TYPE-W ARGS) (TUPLE GASSIGNED?) (RESET FLOAT) () (LAST-OUT FFRAME DEFMAC) (PUTREST) (ENDBLOCK) (PROCESS CHANNEL L=? L? PUT) (MONAD? G=?) (LOGOUT) (==?) () (ERROR EVAL) (T MUDDLE FALSE BITS SET) (RSUBR-ENTRY UVECTOR) (APPLY) (PRINC) (DEFAULT CHUTYPE) (OFFSET READ) (INCHAN IMAGE) (MANIFEST STRCOMP) (OUTCHAN STORAGE PUTPROP REPEAT) (PNAME MIN 1? SETG) (ENVIRONMENT VALID-TYPE?) (INTERNAL-TYPE REST) (FRAME FILE-EXISTS? LOOKUP MAX) (OPT) (REDEFINE MACRO) (RSUBR CHARACTER SUBSTRUC NTH PRIMTYPE) (OFF MAPSTOP) (BYTES WORD IVECTOR COND) (ERRET ABS PROG)!]\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "ordinary-oblist",
+      "expression": "<GET FOO OBLIST>",
+      "input": "<GET FOO OBLIST>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "lookup-group-glue",
+      "expression": "<LOOKUP \"GROUP-GLUE\" <GET INITIAL OBLIST>>",
+      "input": "<LOOKUP \"GROUP-GLUE\" <GET INITIAL OBLIST>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "oblist?-initial",
+      "expression": "<OBLIST? INITIAL>",
+      "input": "<OBLIST? INITIAL>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![(ASOC FUNCTION) (COPYING PRINT TOP QUOTE) (GETBITS 0? CHTYPE) (INITIAL) (GET) () (SAVE MAPRET) (PCODE PARSE ISTRING) (STRUCTURED?) (FUNCT EXPAND) (FLATSIZE AGAIN) (CLOSE MOD) (TFFRAME FILE-LENGTH RETURN) (TEMPLATE CONS) (QUICK-ENTRY ACTIVATION READSTRING) (MEMBER) (CODE) (VALUE) (LIST) (XORB) (UNBOUND PRINTTYPE) (OPEN RANDOM N==?) (SEGMENT FIX ASSIGNED?) () (QUIT PRINTSTRING) (CLOSURE LOCA BLOCK SORT) (LOCB AND? TYPEPRIM GVAL) (SNAME) (LOCD WARRANTY EQVB FORM) (LSH ANDB PRINTB GETPROP) (LENGTH) (GBOUND?) (LOCAS DECL? UNPARSE) () (SPLICE DISMISS INSERT) (FREEZE TERPRI G? EVALTYPE) (LOCL TYPE?) () (ROOT BIND LVAL) (IHEADER GC REP UTYPE) (UNWIND IUVECTOR) (PRIMTYPE-C READCHR MAPLEAVE) (LOCR *) (LOSE LOCS GDECL +) (LOCT CRLF SPNAME MAPF) (LOCU SAVE-EVAL -) (TOPLEVEL OBLIST LOCV SLEEP AND ALLTYPES) (/) (GUNASSIGN) (SUBR READA HANDLER MEMQ) (READB VECTOR BOUND?) (TYPE-C ATOM) (COMMENT LOAD OR? =? APPLYTYPE) (ENABLE TIME APPLICABLE?) (FSUBR ASCII) (ILLEGAL GETTIMEDATE ORB LISTEN BACK TYPE) (DISABLE MAPR) (TAG ON FLOAD N=? STRING) (INTERNAL-LIST BLOAT MOBLIST) (LENGTH?) (DECL ILIST) (OR NEWTYPE) () (RESTORE REMOVE OBLIST?) (INTERRUPTS) (PUTBITS) (INT-LEVEL RETRY DEFINE) (GETTIMEOFDAY ACCESS) (EVENT NOT) (QUICK-RSUBR LINK PRIN1 EMPTY?) (NEXTCHR IFORM) (TYPE-W ARGS) (TUPLE GASSIGNED?) (RESET FLOAT) () (LAST-OUT FFRAME DEFMAC) (PUTREST) (ENDBLOCK) (PROCESS CHANNEL L=? L? PUT) (MONAD? G=?) (LOGOUT) (==?) () (ERROR EVAL) (T MUDDLE FALSE BITS SET) (RSUBR-ENTRY UVECTOR) (APPLY) (PRINC) (DEFAULT CHUTYPE) (OFFSET READ) (INCHAN IMAGE) (MANIFEST STRCOMP) (OUTCHAN STORAGE PUTPROP REPEAT) (PNAME MIN 1? SETG) (ENVIRONMENT VALID-TYPE?) (INTERNAL-TYPE REST) (FRAME FILE-EXISTS? LOOKUP MAX) (OPT) (REDEFINE MACRO) (RSUBR CHARACTER SUBSTRUC NTH PRIMTYPE) (OFF MAPSTOP) (BYTES WORD IVECTOR COND) (ERRET ABS PROG)!]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![(ASOC FUNCTION) (COPYING PRINT TOP QUOTE) (GETBITS 0? CHTYPE) (INITIAL) (GET) () (SAVE MAPRET) (PCODE PARSE ISTRING) (STRUCTURED?) (FUNCT EXPAND) (FLATSIZE AGAIN) (CLOSE MOD) (TFFRAME FILE-LENGTH RETURN) (TEMPLATE CONS) (QUICK-ENTRY ACTIVATION READSTRING) (MEMBER) (CODE) (VALUE) (LIST) (XORB) (UNBOUND PRINTTYPE) (OPEN RANDOM N==?) (SEGMENT FIX ASSIGNED?) () (QUIT PRINTSTRING) (CLOSURE LOCA BLOCK SORT) (LOCB AND? TYPEPRIM GVAL) (SNAME) (LOCD WARRANTY EQVB FORM) (LSH ANDB PRINTB GETPROP) (LENGTH) (GBOUND?) (LOCAS DECL? UNPARSE) () (SPLICE DISMISS INSERT) (FREEZE TERPRI G? EVALTYPE) (LOCL TYPE?) () (ROOT BIND LVAL) (IHEADER GC REP UTYPE) (UNWIND IUVECTOR) (PRIMTYPE-C READCHR MAPLEAVE) (LOCR *) (LOSE LOCS GDECL +) (LOCT CRLF SPNAME MAPF) (LOCU SAVE-EVAL -) (TOPLEVEL OBLIST LOCV SLEEP AND ALLTYPES) (/) (GUNASSIGN) (SUBR READA HANDLER MEMQ) (READB VECTOR BOUND?) (TYPE-C ATOM) (COMMENT LOAD OR? =? APPLYTYPE) (ENABLE TIME APPLICABLE?) (FSUBR ASCII) (ILLEGAL GETTIMEDATE ORB LISTEN BACK TYPE) (DISABLE MAPR) (TAG ON FLOAD N=? STRING) (INTERNAL-LIST BLOAT MOBLIST) (LENGTH?) (DECL ILIST) (OR NEWTYPE) () (RESTORE REMOVE OBLIST?) (INTERRUPTS) (PUTBITS) (INT-LEVEL RETRY DEFINE) (GETTIMEOFDAY ACCESS) (EVENT NOT) (QUICK-RSUBR LINK PRIN1 EMPTY?) (NEXTCHR IFORM) (TYPE-W ARGS) (TUPLE GASSIGNED?) (RESET FLOAT) () (LAST-OUT FFRAME DEFMAC) (PUTREST) (ENDBLOCK) (PROCESS CHANNEL L=? L? PUT) (MONAD? G=?) (LOGOUT) (==?) () (ERROR EVAL) (T MUDDLE FALSE BITS SET) (RSUBR-ENTRY UVECTOR) (APPLY) (PRINC) (DEFAULT CHUTYPE) (OFFSET READ) (INCHAN IMAGE) (MANIFEST STRCOMP) (OUTCHAN STORAGE PUTPROP REPEAT) (PNAME MIN 1? SETG) (ENVIRONMENT VALID-TYPE?) (INTERNAL-TYPE REST) (FRAME FILE-EXISTS? LOOKUP MAX) (OPT) (REDEFINE MACRO) (RSUBR CHARACTER SUBSTRUC NTH PRIMTYPE) (OFF MAPSTOP) (BYTES WORD IVECTOR COND) (ERRET ABS PROG)!]\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "oblist?-foo",
+      "expression": "<OBLIST? FOO>",
+      "input": "<OBLIST? FOO>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![() () () () () () () () () () () () () () () () (FOO)!]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![() () () () () () () () () () () () () () () () (FOO)!]\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

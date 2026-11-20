@@ -616,3 +616,31 @@ PURE-LIST entry. The current G3 run fails next at original FLAGWORD's
 unassigned MAPF (issue #65), after 52 passing assertions. Evidence:
 `evidence/M2/MEMQ.md` and `evidence/M2/G3-GATE.md`. No upstream,
 license, or service boundary changes.
+
+## ADR-0028: Invoke evaluated MAPF elements directly and preserve map control
+
+**Decision (2026-11-20, issue #65):** MAPF traverses supported MDL
+structures by index until the first is exhausted. An internal application
+path passes already evaluated element values directly to native procedures
+or interpreted FUNCTIONs, including LIST/VECTOR values, without evaluating
+their contents again. Inline `<FUNCTION ...>` creates an interpreted
+FUNCTION value. MAPRET, MAPSTOP, and MAPLEAVE use scoped escape
+continuations; dynamic parameter restoration and existing activation
+cleanup remove map context on exits and exceptions. Pinned Confusion's
+FALSE-final MAPRET/MAPSTOP result is the current first input, as recorded
+in `evidence/M2/mapf-control-reference.json`, even when explicit control
+values differ. An integer applicable selects that index from its one
+structured argument.
+
+**G3 follow-ons:** Add the observed TYPE? predicate and seed the native
+reference's four reciprocal INITIAL/ROOT OBLIST associations in each fresh
+atom space. These are required by the original FLAGWORD path and are
+covered by separate red-to-green tests. The previous D5 association
+dispatch is unchanged for ordinary items.
+
+**Consequence:** The branch-level G3 original-definition scenario passes
+59 assertions, including FLAGWORD no-arg, FALSE, ATOM, mixed, and
+deliberate error paths. The complete source loader still stops at EMPTY?
+after 24 forms. M2 mainline acceptance remains gated by the requirements
+audit, CI/review, and authorized integration. No upstream, license, or
+network service boundary changes.
