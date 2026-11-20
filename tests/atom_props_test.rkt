@@ -38,6 +38,7 @@
      (format "#FALSE (~a)"
              (string-join (map render-final (mdl-false-payload value)) " "))]
     [(string? value) (format "~s" value)]
+    [(char? value) (format "!\\~a" value)]
     [(or (null? value) (mpair? value))
      (format "(~a)" (string-join (map render-final (mdl-list->list value)) " "))]
     [(mdl-form? value)
@@ -91,11 +92,21 @@
 (check-equal? (run "<PUT 5 DECL 'FIX>") "5")
 (check-equal? (run "<PUT 5 DECL 'FIX> <GET 5 DECL>") "FIX")
 (check-equal? (run "<PUT 5 DECL 'FIX> <TYPE <GET 5 DECL>>") "ATOM")
+;; Chapter 13 keys are selected by MDL ==?, including equal WORD values,
+;; large FIXes, and independently constructed views of the same array tail.
+;; All five observations were reproduced in pinned Confusion on 2026-11-20.
+(check-equal? (run "<PUT <CHTYPE 1 WORD> P 'X> <GET <CHTYPE 1 WORD> P>") "X")
+(check-equal? (run "<PUT X <CHTYPE 1 WORD> 'Y> <GET X <CHTYPE 1 WORD>>") "Y")
+(check-equal? (run "<PUT 4294967295 P 'X> <GET 4294967295 P>") "X")
+(check-equal? (run "<SET V '[1 2 3]> <PUT <REST .V 1> P 'X> <GET <REST .V 1> P>") "X")
+(check-equal? (run "<SET V '![1 2 3]> <PUT <REST .V 1> P 'X> <GET <REST .V 1> P>") "X")
 ;; Removal via two-argument PUT; the item is echoed (association-remove-
 ;; two-arg-put), and the property is gone afterwards.
 (check-equal? (run "<PUT RAPPLIC P 'V> <PUT RAPPLIC P>") "RAPPLIC")
 (check-equal? (run "<PUT RAPPLIC P 'V> <PUT RAPPLIC P> <GET RAPPLIC P>")
               "#FALSE ()")
+(check-exn #rx"TOO-FEW-ARGUMENTS-SUPPLIED"
+           (lambda () (run "<PUT '(1 2) 1>")))
 ;; Identity-keyed retrieval: a fresh (1 2 3) LIST misses .L's association.
 (check-equal? (run "<SET L (1 2 3)> <PUT .L FOO 'VAL> <GET .L FOO>") "VAL")
 (check-equal? (run "<SET L (1 2 3)> <PUT .L FOO 'VAL> <GET (1 2 3) FOO>")
@@ -121,6 +132,18 @@
  (run "<NEWTYPE NOFFSET WORD> <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>> \
 <DECL? 3 RAPPLIC>")
  "#FALSE (3 NOFFSET)")
+;; Alias chains are traversed to a registered TYPE, while a registered TYPE
+;; keeps its intrinsic meaning even if an association is attached to it.
+(check-equal? (run "<PUT A DECL 'B> <PUT B DECL 'FIX> <DECL? 3 A>") "T")
+(check-equal? (run "<PUT A DECL 'B> <PUT B DECL 'FIX> <DECL? \"x\" A>")
+              "#FALSE (\"x\" FIX)")
+(check-equal? (run "<PUT FIX DECL 'STRING> <DECL? 3 FIX>") "T")
+(check-exn #rx"cyclic.*DECL"
+           (lambda () (run "<PUT A DECL 'B> <PUT B DECL 'A> <DECL? 3 A>")))
+;; The same alias normalization is used by attached declarations.
+(check-equal? (run "<PUT A DECL 'FIX> <DEFINE F (X) #DECL ((X) A) .X> <F 3>") "3")
+(check-exn #rx"DECL.*X"
+           (lambda () (run "<PUT A DECL 'FIX> <DEFINE F (X) #DECL ((X) A) .X> <F \"x\">")))
 ;; SETG ignores the atom's DECL property (setg-ignores-atom-decl).
 (check-equal? (run "<PUT SOMETHING DECL 'FIX> <SETG SOMETHING \"str\"> ,SOMETHING")
               "\"str\"")
@@ -143,6 +166,15 @@
 ;; PUT into a STRING requires CHARACTER elements.
 (check-exn #rx"Strings may only contain CHARACTER type"
            (lambda () (run "<PUT \"ab\" 1 3>")))
+;; GET on a STRING or one-argument structured object follows NTH; the
+;; CHARACTER result can be stored into a mutable STRING built by STRING.
+(check-equal? (run "<GET \"ab\" 1>") "!\\a")
+(check-equal? (run "<TYPE <GET \"ab\" 1>>") "CHARACTER")
+(check-equal? (run "<PRIMTYPE <GET \"ab\" 1>>") "WORD")
+(check-equal? (run "<GET '(1 2)>") "1")
+(check-equal? (run "<GET \"ab\">") "!\\a")
+(check-equal? (run "<SET S <STRING \"ab\">> <PUT .S 1 <GET \"xy\" 1>> .S")
+              "\"xb\"")
 ;; GETPROP/PUTPROP stay out of scope: explicit unassigned-operator failure
 ;; (the task's strict-failure rule; the reference implements them, but the
 ;; pinned sources never call them).

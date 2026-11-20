@@ -1,7 +1,7 @@
 # M2 source execution inventory — integrated G3 still open
 
 **G3 NOT RUN.** Current state (2026-11-20, D5 branch `feat/m2-atom-props`
-at `a3ce79f`, `main` `419fc5c`): slices D1–D4 are merged (`#DECL`
+with review fixes after `32a462d`, `main` `419fc5c`): slices D1–D4 are merged (`#DECL`
 declarations, SEGMENT evaluation, structured declaration patterns, the
 `MUDDLE` interpreter global) and D5 atom-property `PUT`/`GET`
 associations are implemented on this branch ([issue
@@ -23,7 +23,7 @@ record. The current barrier is reproduced with
 
 | Source | Definitions loaded | Invoked and verified | Blocked or untested |
 |---|---|---|---|
-| Pinned reconstructed `77loadall.mud` SHA256 `389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa` | `VFLOAD` from byte-exact first form in an explicit PARTIAL probe | `VFLOAD` on a one-form controlled file; output, empty FALSE return and global value verified against pinned Confusion | Remaining 12 forms deliberately unexecuted in the probe; full load enters `81prim.mud` and stops at form 3 |
+| Pinned reconstructed `77loadall.mud` SHA256 `389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa` | `VFLOAD` from byte-exact first form in an explicit PARTIAL probe; the full chain executes its first two top-level forms | `VFLOAD` on a one-form controlled file; output, empty FALSE return and global value verified against pinned Confusion; full chain loads `81prim.mud` before entering `77defs.mud` | The G2 probe deliberately left 12 forms unexecuted; the current full-chain failure is downstream at `77defs.mud` expression 15 |
 | Pinned reconstructed `81prim.mud` SHA256 `8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571` | **All eight forms load** (D2+D3): `MSETG` and `PSETG` install with their original declarations | `MSETG` invoked with a fresh ATOM and FIX `3`: returns `T`, leaves the global at `3`, sets its manifest, and rejects a non-ATOM first argument at the declaration boundary; `PSETG` invoked with a valid ATOM advances through its `SETG` and `PURE-LIST` initialization and stops explicitly at `<MEMQ .FOO .PL>` (no `MEMQ` primitive yet) | None within this file; the chain's next blocker is downstream in `77defs.mud` |
 | Pinned reconstructed `77defs.mud` | Expressions 1–14 execute in the shared session (D5): `<NEWTYPE NOFFSET WORD>`, the `<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` declaration property (stored without global assignment; `DECL?` consults it), and DEFMAC forms `TRNN`/`RTRNN`/`RTRZ`/`TRC`/`TRZ`/`TRO`/`RTRO` | The `RAPPLIC` `DECL` association is installed and read back byte-exactly; `TYPE`/`PRIMTYPE` of the atom are unchanged | Expression 15 `<NEWSTRUC ROOM VECTOR ...>` (line 37) fails in `execute` at `EMPTY?` inside the original `NEWSTRUC` bootstrap; expressions 16+ untested |
 | `77makstr.mud`, `77patch.mud`, later files | None in a coherent session | None | Independent first barriers are listed in [`SOURCE-READINESS.md`](SOURCE-READINESS.md); full load has not reached them |

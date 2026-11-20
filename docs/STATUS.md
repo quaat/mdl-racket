@@ -1,15 +1,17 @@
-# Status — 2026-11-20 (M2 D1–D4 merged; D5 atom properties on branch; G3 open)
+# Status — 2026-11-20 (M2 D1–D4 merged; D5 under review; G3 open)
 
 ## Current state (2026-11-20)
 
 - **Milestone:** M2. **Gates:** G0/G1/G2 PASS; integrated G3 NOT RUN.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
-- **On branch `feat/m2-atom-props` (D5, issue #53, ahead of origin):**
+- **On branch `feat/m2-atom-props` (D5, issue #53):**
   atom-property `PUT`/`GET` associations, session-owned `==?`-identity
-  association space, `DECL?` consultation of `DECL` associations. Fresh
-  suites: 735 Racket checks, 13 Python tests, `make test-historical`
-  green; the pinned `77loadall.mud` load completes **twenty-four**
+  association space, `DECL?` consultation of `DECL` associations, and
+  independent-review fixes for WORD/REST identity, alias chains, and
+  structured/STRING dispatch. Fresh local suites: **864 Racket checks, 13
+  Python tests**, `make test-historical` green; the pinned `77loadall.mud`
+  load completes **twenty-four**
   expressions.
 - **First failing source construct:** `EMPTY?` (unassigned primitive)
   inside the original source-defined `NEWSTRUC`, executing
@@ -20,8 +22,8 @@
   installed `PSETG`. Actual source execution sets priority.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
-- **Open issues:** #53 (D5, this branch); #11 recorded complete but not
-  yet closed. No open PRs at last check.
+- **Open issues:** #53 (D5). Issue #11 is closed as completed. No open PRs
+  at the last GitHub check; D5 PR publication is the next workflow step.
 - **Not demonstrated:** integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 
@@ -534,9 +536,11 @@ FIX indicator is the element store; every other combination — including
 FIX indicators on non-structured items — is an association;
 two-argument PUT removes and echoes the item; one-argument PUT is
 TOO-FEW-ARGUMENTS-SUPPLIED; three-argument GET on a structure errors).
-Associations match by `==?` identity via `mdl-identical?` in a weak
-`eq?` table owned by the session's atom space — fresh sessions start
-property-free. `DECL?` consults an atom's `DECL` association through
+Associations match by `==?` identity via `mdl-identical?` on both item
+and indicator in a session-owned entry list — fresh sessions start
+property-free. A weak `eq?` table failed review regressions for WORDs and
+array REST views; the corrected store retains keys until removal or session
+end, a documented GC-lifetime deviation. `DECL?` consults an atom's `DECL` association through
 the existing D1/D3 matcher and carries the resolved leaf in the `#FALSE`
 payload; `SETG` deliberately does not enforce it. `GETPROP`/`PUTPROP`
 and chapter 13.4 machinery remain explicit unimplemented failures.
@@ -544,9 +548,10 @@ The historical `77defs.mud` expression 3
 `<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` now executes; the pinned
 load advances from twelve to **twenty-four completed expressions** and
 stops at `77defs.mud` expression 15 (`EMPTY?` inside the original
-`NEWSTRUC`). `make test` passes 735 Racket checks and 13 Python tests.
-Eighteen pinned Confusion success cases and six deliberate-error
-observations back the semantics; the two manual-vs-reference conflicts
+`NEWSTRUC`). `make test` passes 864 Racket checks and 13 Python tests.
+Eighteen initial and eleven review-derived pinned Confusion success cases,
+plus six initial deliberate errors, one review-derived error and one bounded
+alias-cycle timeout back the semantics; the two manual-vs-reference conflicts
 (removal returns the item, not the previous value; augmented `#FALSE
 (leaf)` DECL? misses) are adjudicated toward the reference in
 [`docs/evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md) and ADR-0023.

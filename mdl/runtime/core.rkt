@@ -168,6 +168,8 @@
                    required)
              rest-spec)])))
 
+(define current-decl-alias-path (make-parameter '()))
+
 (define (normalize-decl-pattern pattern line column
                                  [origin "DECL"])
   (cond
@@ -175,8 +177,17 @@
      (cond [(string=? (mdl-atom-pname pattern) "ANY") '(any)]
            [(hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern)
             (list 'type pattern)]
-           [else (decl-error origin line column "unknown declaration type ~a"
-                             (mdl-atom-pname pattern))])]
+           [else
+            (define associated (association-lookup pattern (mdl-atom "DECL")))
+            (unless associated
+              (decl-error origin line column "unknown declaration type ~a"
+                          (mdl-atom-pname pattern)))
+            (when (memq pattern (current-decl-alias-path))
+              (decl-error origin line column "cyclic DECL association at ~a"
+                          (mdl-atom-pname pattern)))
+            (parameterize ([current-decl-alias-path
+                            (cons pattern (current-decl-alias-path))])
+              (normalize-decl-pattern (cdr associated) line column origin))])]
     [(mdl-form? pattern)
      (define items (form-elements pattern))
      (unless (and (pair? items) (mdl-atom? (car items)))
@@ -381,14 +392,12 @@
 ;; properties in this slice. SETG likewise ignores them (the recorded
 ;; setg-ignores-atom-decl case, consistent with D1's non-enforcement).
 (define (mdl-decl? value pattern)
-  (define decl-property
+  (define resolved?
     (and (mdl-atom? pattern)
+         (not (hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern))
          (association-lookup pattern (mdl-atom "DECL"))))
-  (define resolved-pattern
-    (if decl-property (cdr decl-property) pattern))
-  (define resolved? (not (eq? resolved-pattern pattern)))
   (define normalized
-    (normalize-decl-pattern resolved-pattern #f #f "DECL?"))
+    (normalize-decl-pattern pattern #f #f "DECL?"))
   (define result (decl-match value normalized decl-match-max-depth))
   (cond
     [(eq? result #t) (mdl-atom "T")]
@@ -1474,9 +1483,10 @@
     (hash-set! types type-atom (cdr entry))
     (hash-set! builtins type-atom #t))
   (atom-space initial root named types builtins (make-hasheq)
-              ;; Association (property) storage, keyed by item identity;
-              ;; weak so a dropped item can be collected (issue #53).
-              (make-weak-hasheq)))
+              ;; Session-owned association entries. Key comparison must use
+              ;; mdl-identical?, which is broader than Racket eq? for WORDs
+              ;; and independently constructed REST views.
+              (box '())))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
@@ -1742,6 +1752,7 @@
         [(mdl-array? value) (symbol->string (mdl-array-kind value))]
         [(exact-integer? value) (check-fix 'mdl-type value) "FIX"]
         [(and (real? value) (inexact? value)) "FLOAT"]
+        [(char? value) "CHARACTER"]
         [(string? value) "STRING"]
         [else (error 'mdl-type "unsupported MDL type ~a" value)]))
 
@@ -1779,7 +1790,7 @@
 (define (mdl-length value)
   (define base (mdl-base value))
   (cond [(mdl-array? base) (mdl-array-length base)]
-        [(string? value) (string-length value)]
+        [(string? base) (string-length base)]
         [else (length (mdl-list->list (mdl-list-head value 'mdl-length)))]))
 
 (define (mdl-rest value [offset 1])
@@ -1812,9 +1823,11 @@
 (define (mdl-nth value [index 1])
   (mdl-check-index 'mdl-nth value index)
   (define base (mdl-base value))
-  (if (mdl-array? base)
-      (vector-ref (mdl-array-storage base) (+ (mdl-array-start base) (sub1 index)))
-      (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth) (sub1 index) 'mdl-nth))))
+  (cond [(mdl-array? base)
+         (vector-ref (mdl-array-storage base) (+ (mdl-array-start base) (sub1 index)))]
+        [(string? base) (string-ref base (sub1 index))]
+        [else (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth)
+                                   (sub1 index) 'mdl-nth))]))
 
 ;; Association (property) storage (issue #53, D5; manual chapter 13). A PUT
 ;; whose dispatch does not reach the element store pairs the evaluated value
@@ -1827,41 +1840,39 @@
 ;; the atom space, so every session starts property-free; associations never
 ;; touch GVAL assignment (the recorded ,RAPPLIC UNBOUND-VARIABLE case) and
 ;; have no printed representation (no #ASOC output in the pinned build).
+;; Strong item/indicator references are a documented garbage-collection
+;; deviation until a weak store honoring MDL ==? can be established.
 (define (mdl-association-table)
   (atom-space-associations (current-mdl-atom-space)))
 
-(define (association-bucket item)
-  (hash-ref (mdl-association-table) item '()))
+;; Entries are (item indicator value). Lookup compares both keys using MDL
+;; ==? and returns an (indicator . value) pair; the pair itself distinguishes
+;; a stored FALSE value from an absent association.
+(define (same-association? entry item indicator)
+  (and (mdl-identical? (first entry) item)
+       (mdl-identical? (second entry) indicator)))
 
-;; Bucket entries are (indicator . value) pairs found by scanning with
-;; mdl-identical?, so FIX 5 items and equal WORD-typed values match without
-;; relying on hash equality; overwrite keeps the latest pair
-;; (overwrite-latest-wins).
 (define (association-lookup item indicator)
-  (for/first ([entry (in-list (association-bucket item))]
-              #:when (mdl-identical? (car entry) indicator))
-    entry))
+  (for/first ([entry (in-list (unbox (mdl-association-table)))]
+              #:when (same-association? entry item indicator))
+    (cons (second entry) (third entry))))
 
 (define (mdl-put-association! item indicator value)
-  (define replaced
-    (for/list ([entry (in-list (association-bucket item))]
-               #:unless (mdl-identical? (car entry) indicator))
-      entry))
-  (hash-set! (mdl-association-table) item
-             (cons (cons indicator value) replaced))
+  (set-box! (mdl-association-table)
+            (cons (list item indicator value)
+                  (for/list ([entry (in-list (unbox (mdl-association-table)))]
+                             #:unless (same-association? entry item indicator))
+                    entry)))
   item)
 
 ;; Two-argument PUT is the documented removal (manual 13.1.3); the pinned
 ;; build echoes the item, not the old value
 ;; (association-remove-two-arg-put).
 (define (mdl-remove-association! item indicator)
-  (define kept
-    (for/list ([entry (in-list (association-bucket item))]
-               #:unless (mdl-identical? (car entry) indicator))
-      entry))
-  (if (null? kept)
-      (hash-remove! (mdl-association-table) item)
-      (hash-set! (mdl-association-table) item kept))
+  (set-box! (mdl-association-table)
+            (for/list ([entry (in-list (unbox (mdl-association-table)))]
+                       #:unless (same-association? entry item indicator))
+              entry))
   item)
 
 ;; PUT/GET dispatch on structured primtypes: a FIX indicator on one of these
@@ -1883,6 +1894,8 @@
     [(1) (error 'mdl-put "TOO-FEW-ARGUMENTS-SUPPLIED")]
     [(2)
      (define item (car args))
+     (when (and (exact-integer? (cadr args)) (mdl-structured-primtype? item))
+       (error 'mdl-put "TOO-FEW-ARGUMENTS-SUPPLIED"))
      (mdl-remove-association! item (cadr args))
      item]
     [(3)
@@ -1899,19 +1912,23 @@
 (define (mdl-put-element! value index item)
   (unless (and (exact-integer? index) (>= index 1) (<= index (mdl-length value)))
     (error 'mdl-put "PUT index too large"))
-  (when (string? (mdl-base value))
-    (error 'mdl-put "Error in PUT: Strings may only contain CHARACTER type"))
   (define base (mdl-base value))
-  (if (mdl-array? base)
-      (begin
-        (when (and (eq? (mdl-array-kind base) 'UVECTOR)
-                   (not (eq? (mdl-type item)
-                             (mdl-array-element-type base))))
-          (error 'mdl-put "UVECTOR PUT type violation"))
-        (vector-set! (mdl-array-storage base)
-                     (+ (mdl-array-start base) (sub1 index)) item))
-      (set-mcar! (mdl-list-tail (mdl-list-head value 'mdl-put)
-                                 (sub1 index) 'mdl-put) item))
+  (cond
+    [(string? base)
+     (unless (char? item)
+       (error 'mdl-put "Error in PUT: Strings may only contain CHARACTER type"))
+     (when (immutable? base)
+       (error 'mdl-put "immutable STRING literal cannot be mutated"))
+     (string-set! base (sub1 index) item)]
+    [(mdl-array? base)
+     (when (and (eq? (mdl-array-kind base) 'UVECTOR)
+                (not (eq? (mdl-type item) (mdl-array-element-type base))))
+       (error 'mdl-put "UVECTOR PUT type violation"))
+     (vector-set! (mdl-array-storage base)
+                  (+ (mdl-array-start base) (sub1 index)) item)]
+    [else
+     (set-mcar! (mdl-list-tail (mdl-list-head value 'mdl-put)
+                                (sub1 index) 'mdl-put) item)])
   value)
 
 ;; GET (manual 13.1, inverse of PUT): a FIX indicator on a structured item
@@ -1920,14 +1937,17 @@
 ;; stored value, the exp value on a miss (get-exp-fallback), or #FALSE ()
 ;; (get-missing-property-false). Only the two-argument form and this one
 ;; optional exp exist in the pinned sources (grep evidence in ATOM-PROPS.md).
-(define (mdl-get item indicator [exp unassigned])
+(define (mdl-get item [indicator unassigned] [exp unassigned])
+  (when (and (eq? indicator unassigned) (not (mdl-structured-primtype? item)))
+    (error 'mdl-get "GET requires an indicator for non-structured item"))
+  (define selector (if (eq? indicator unassigned) 1 indicator))
   (cond
-    [(and (exact-integer? indicator) (mdl-structured-primtype? item))
+    [(and (exact-integer? selector) (mdl-structured-primtype? item))
      (unless (eq? exp unassigned)
        (error 'mdl-get "No EXP allowed for GET on structure"))
-     (mdl-nth item indicator)]
+     (mdl-nth item selector)]
     [else
-     (let ([found (association-lookup item indicator)])
+     (let ([found (association-lookup item selector)])
        (cond
          [found (cdr found)]
          [(not (eq? exp unassigned)) exp]

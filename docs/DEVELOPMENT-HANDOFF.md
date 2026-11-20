@@ -2,22 +2,25 @@
 
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-20 (D4 merged,
-D5 implemented on branch, G3 open).
+D5 reviewed locally on branch, G3 open).
 
 - **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), D4
   (PR #52), and the agent definitions (PR #47) are all **merged into
   `main`** (current main `419fc5c`); issues #44/#46/#48/#51 closed.
   Integrated G3 gate NOT RUN. M2 milestone NOT YET PASS.
 - **Active issues/PRs:** issue **#53** (D5 atom-property `PUT`/`GET`) —
-  reference evidence, implementation, and focused tests complete on local
-  branch `feat/m2-atom-props` (`a3ce79f`, ahead of origin), PR to open;
-  issue #11's acceptance criteria are satisfied but it is not yet closed.
-  No other open PRs.
+  reference evidence, implementation, focused tests, and independent review
+  fixes are on `feat/m2-atom-props` (base `419fc5c`, prior D5 head
+  `32a462d`). PR to open; no open PRs at the last GitHub check. Issue
+  #11 was closed as completed on 2026-11-20.
 - **D5 state (implemented, main-session-verified on
   `feat/m2-atom-props`):** Confusion reference evidence (18 success + 6
   deliberate-error observations; `docs/evidence/M2/ATOM-PROPS.md`) plus
   the implementation (commit `676f488`) and focused tests
-  (`tests/atom_props_test.rkt`, commit `a3ce79f`). Fresh suites: 735
+  (`tests/atom_props_test.rkt`, commit `a3ce79f`). Independent review found
+  the weak `eq?` item-key mismatch, structured two-arg PUT dispatch, and
+  DECL alias/precedence gaps; review regressions and pinned Confusion
+  evidence are under `atom-props-review-*`. Fresh suites: 864
   Racket checks, 13 Python tests, `make test-historical` green
   (VFLOAD 23 + DECL 20 assertions). The pinned `77loadall.mud` load
   completes **twenty-four expressions** — `81prim.mud` in full plus
@@ -27,13 +30,13 @@ D5 implemented on branch, G3 open).
   the original source-defined `NEWSTRUC` calls the unassigned `EMPTY?`
   primitive (execute stage). Architect decisions: follow the reference
   over the manual where they conflict (removal returns the item;
-  augmented `#FALSE (leaf)` DECL? misses); weak-item/strong-value
-  association table owned by the session atom space; `SETG` does not
+  augmented `#FALSE (leaf)` DECL? misses); session-owned strong-reference
+  association entries compared with MDL `==?` on both keys; `SETG` does not
   enforce DECL associations; GETPROP/PUTPROP and chapter 13.4 machinery
   explicitly unimplemented. See ADR-0023 and the M2 D5 section of
   `docs/SEMANTICS.md`.
-- **Exact next action:** push `feat/m2-atom-props`, open the D5 PR
-  referencing issue #53, run CI and independent review; then evaluate
+- **Exact next action:** commit and push the D5 review fixes, open the D5 PR
+  referencing issue #53, and run CI; then evaluate
   the integrated M2 G3 gate; then the `EMPTY?` slice for the original
   `NEWSTRUC` (create the issue from the recorded barrier at
   `77defs.mud` expression 15, delegate to the Flash implementer).

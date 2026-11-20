@@ -490,13 +490,17 @@ was copied into the runtime.
 ## ADR-0023: Session-owned ==?-identity association space
 
 **Decision:** Implement MDL atom-property associations (D5, issue #53) as
-a weak `eq?`-keyed table owned by the session's atom space, keyed by the
-*item* with indicators matched by `mdl-identical?` (`==?`), preserving the
-stored value's exact identity. `PUT` and `GET` dispatch by the pinned
+a session-owned entry list. Both item and indicator are matched by
+`mdl-identical?` (`==?`), preserving the stored value's exact identity.
+An independent review found that the initial weak `eq?` table missed
+equal WORD values and separately constructed VECTOR/UVECTOR REST views;
+five Confusion-backed identity regressions now cover these keys. `PUT`
+and `GET` dispatch by the pinned
 reference's classification: structured item + FIX indicator keeps the
 existing element store; every other combination is an association
 (including FIX indicators on non-structured items); two-argument PUT
-removes the association and echoes the item. `DECL?` consults an atom's
+removes an association and echoes the item, but a structured item with a
+FIX selector raises TOO-FEW-ARGUMENTS-SUPPLIED. `DECL?` consults an atom's
 `DECL` association through the existing D1/D3 declaration matcher,
 carrying the resolved leaf in the `#FALSE` payload. `GETPROP`/`PUTPROP`
 and chapter 13.4 machinery stay explicit unimplemented failures.
@@ -515,9 +519,12 @@ both adjudications because it is the executable parity target.
 **Consequence:** The chain advances past the historical `RAPPLIC` barrier
 to twenty-four completed expressions; the new first barrier is `EMPTY?`
 inside the original `NEWSTRUC` (`77defs.mud` expression 15). Associations
-are strong-reference on the value side: an entry for an unreachable item
-stays alive as long as the atom space lives (a recorded deviation from
-ideal GC semantics, accepted to avoid duplicating Racket's weak boxes in
-the runtime). `SETG` intentionally does not enforce DECL associations.
-No equality semantics, reader behavior, or printing changed; each fresh
-session starts property-free.
+hold strong references to item, indicator, and value until removal or
+session termination. This is a recorded deviation from historical
+association garbage collection; a weak table honoring the full MDL
+`==?` equivalence needs separate design and testing. Registered type atoms
+take precedence over DECL associations, aliases can chain, and a cycle
+raises an explicit error (the pinned reference loops on the tested cycle).
+Indexed STRING GET returns CHARACTER and mutable STRING PUT accepts one.
+`SETG` intentionally does not enforce DECL associations. Reader behavior
+and printing remain unchanged; each fresh session starts property-free.

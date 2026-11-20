@@ -831,11 +831,19 @@ deliberate-error Confusion observations):
   stored value, the evaluated optional exp on a miss, or `#FALSE ()`.
   Retrieval preserves the stored object's exact identity (a quoted FORM
   comes back as the same FORM, `<OR ATOM FALSE NOFFSET>`).
-- Associations live in a weak `eq?` table inside the session's atom space:
-  each `make-mdl-session` starts property-free, and two sessions never
-  share associations. The strong-reference lifetime deviation (a stored
-  value keeps an unreachable item's entry alive while the atom space
-  lives) is accepted; weak keys bound the item's entry by identity.
+  A structured item without an indicator selects its first element, as
+  pinned Confusion does. Indexed STRING retrieval returns a CHARACTER
+  (`TYPE` CHARACTER, `PRIMTYPE` WORD); a mutable STRING accepts that
+  CHARACTER through indexed PUT. Immutable host string literals remain an
+  explicit mutation limit.
+- Associations live in a session-owned list searched with `mdl-identical?`
+  for **both** item and indicator. A weak `eq?` table was rejected after
+  reference-backed regressions showed misses for separately constructed
+  equal WORD values and VECTOR/UVECTOR REST views of the same storage.
+  Entries hold strong references to item, indicator, and value until
+  removed or the session ends. This differs from the manual's association
+  garbage collection when keys become unreachable; key lifetime remains
+  unsupported until a weak store with MDL `==?` equivalence is proven.
 - `DECL?` consults an atom's `DECL` association when the atom names a type
   (the `77defs.mud:5` `<PUT RAPPLIC DECL ...>` NEWTYPE-annotation
   mechanism): the stored pattern is normalized by the existing D1/D3
@@ -845,6 +853,13 @@ deliberate-error Confusion observations):
   NOT enforce an atom's DECL association; the property only feeds `DECL?`.
   PUTting a property never assigns the atom as a global and never changes
   its TYPE or PRIMTYPE.
+  Registered TYPE atoms retain their intrinsic meaning even if they carry
+  a `DECL` association. Unregistered alias atoms follow successive `DECL`
+  associations until a pattern is reached; cycles raise a bounded explicit
+  error (pinned Confusion loops on an A-to-B-to-A cycle in a timed probe).
+  The same normalization applies to attached `#DECL` patterns.
+  Two-argument PUT on a structured item with a FIX indicator is a
+  TOO-FEW-ARGUMENTS-SUPPLIED error, not association removal.
 - `GETPROP`/`PUTPROP` and the chapter 13.4 examination machinery
   (`ASSOCIATIONS`, `NEXT`, `ITEM`, `INDICATOR`, `AVALUE`, `#ASOC`
   printing) remain explicit unimplemented failures — the pinned load set
