@@ -88,7 +88,7 @@
 ;; BYTES, TEMPLATE-like heads -- stays an explicit unsupported-pattern error
 ;; for a later slice.
 
-(define (decl-bracket-items bracket line column origin)
+(define (decl-bracket-items bracket)
   ;; The `[...]` repetition construction reads as a VECTOR literal inside the
   ;; pattern; its items are the NTH/OPT/REST specification.
   (for/list ([i (in-range (mdl-array-length bracket))])
@@ -115,7 +115,7 @@
        ;; [REST ...]. Classify it first so a misplaced bracket still reports
        ;; its own unsupported kind explicitly.
        (define bracket (car rest))
-       (define bracket-items (decl-bracket-items bracket line column origin))
+       (define bracket-items (decl-bracket-items bracket))
        (define first-item (and (pair? bracket-items) (car bracket-items)))
        (define kind
          (cond [(not first-item) 'empty]
