@@ -30,7 +30,8 @@ Reproduce with `make test`,
 `make test-historical`, and the loader command below. See
 [D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
 [current status](docs/STATUS.md). Both PR workflows passed on corrected D5
-head `e6d295d`; its latest Codex review is pending. The next actions are
+head `e6d295d`; the requested final-head Codex review was declined by
+the review service's usage limit. The next actions are
 D5 final-head review/approval and the focused `MAPF` correction after the
 current-head G3 run.
 Historical progress notes below preserve

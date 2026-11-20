@@ -33,8 +33,9 @@
   (`N=?`), #58/PR #61 (computed global), #60/PR #62 (`ERROR`), #63
   (`MEMQ`), and #65 (`MAPF`). Issue
   #11 is closed as completed. Both PR workflows passed on corrected D5
-  head `e6d295d`; a fresh Codex review of that head is pending. Earlier
-  review findings are resolved. Maintainer approval and merge are pending.
+  head `e6d295d`; the requested final-head Codex review was declined
+  because of the review service's usage limit. Earlier review findings
+  are resolved. Maintainer approval and merge are pending.
 - **Earlier N=? local slice:** `make test` 879 Racket checks and 13 Python tests;
   focused `neq_test.rkt` 13 checks. Original MSETG advanced from `N=?`
   to `,.FOO`; see [evidence](evidence/M2/NEQ.md). The next action is

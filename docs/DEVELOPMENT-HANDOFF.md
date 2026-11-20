@@ -58,8 +58,9 @@ explicit maintainer approval; do not begin M3 EMPTY?.
   (D5 atom-property `PUT`/`GET`) —
   reference evidence, implementation, focused tests, and independent review
   fixes are on `feat/m2-atom-props` (base `419fc5c`, head `e6d295d`).
-  Both PR workflows passed on that corrected head; a fresh Codex review
-  is pending. Issue
+  Both PR workflows passed on that corrected head; the requested
+  final-head Codex review was declined by the service's usage limit.
+  Issue
   #11 was closed as completed on 2026-11-20.
 - **D5 state (implemented, main-session-verified on
   `feat/m2-atom-props`):** Confusion reference evidence (18 success + 6

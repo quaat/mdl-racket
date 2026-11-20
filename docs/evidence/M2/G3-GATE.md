@@ -12,6 +12,10 @@ unassigned `MAPF`. A focused correction is [issue #65](https://github.com/quaat/
 gate tracking is [issue #56](https://github.com/quaat/mdl-racket/issues/56).
 PR #54 remains open pending explicit maintainer merge approval. No M3 work
 has started.
+The requested external Codex review of D5 final head `e6d295d` was
+declined by the review service's usage limit; both PR workflows passed,
+and the three earlier review threads are resolved. A final-head external
+review is therefore still unavailable.
 
 ## Preserved gate contract and checklist
 
