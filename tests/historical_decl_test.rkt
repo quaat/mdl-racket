@@ -42,8 +42,14 @@
 (check sha-error "")
 (check (car (string-split sha-output)) expected-sha)
 
-;; The complete original file is attempted. Its first definition is retained
-;; after the later, independently reported splice failure (issue #46).
+;; The complete original file now attempts cleanly: since D3 (structured
+;; declaration patterns, issue #48) the PSETG declaration <LIST [REST ATOM]>
+;; at 11:9 normalizes at install time, so all eight expressions of
+;; 81prim.mud load, and the file's load stops... nowhere: 81prim.mud loads
+;; in full. The D3-relevant chain failure moved downstream: driving the
+;; pinned 77loadall.mud entry stops at 77defs.mud expression 1, whose
+;; <AND <L? ,MUDDLE 100> ...> needs the unassigned global MUDDLE - a
+;; non-declaration runtime blocker for a later slice.
 (define root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
 (dynamic-wind
  void
@@ -57,28 +63,48 @@
    (check (file->bytes local-source) original-bytes)
    (define session (make-mdl-session root))
    (define report (mdl-session-load! session "81prim.mud"))
-   (check (hash-ref report 'status) "FAIL")
-   (check (hash-ref report 'completed_expressions) 2)
-   ;; Since D2 (SEGMENT evaluation, issue #46) the PSETG definition
-   ;; compiles past the former splice barrier at 16:46 and fails at the
-   ;; execute stage instead: its compound DECL pattern <LIST [REST ATOM]>
-   ;; waits on a later slice, so the install-time declaration check for
-   ;; the definition at 10:1 reports the unsupported compound pattern.
-   (define failure (hash-ref report 'failure))
-   (check (hash-ref failure 'stage) "execute")
-   (check (hash-ref failure 'construct) "DEFINE")
-   (check (hash-ref failure 'line) 10)
-   (check (hash-ref failure 'column) 1)
-   (check (string-contains? (hash-ref failure 'exception)
-                            "unsupported declaration pattern LIST")
-          #t)
-   ;; The original MSETG definition, from the pinned bytes, is retained.
+   (check (hash-ref report 'status) "PASS")
+   (check (hash-ref report 'completed_expressions) 8)
+   ;; The original MSETG definition, from the pinned bytes, is retained and
+   ;; executes; the PSETG definition installs with its compound declaration
+   ;; and, when invoked, stops explicitly at its <MEMQ .FOO .PL> (no MEMQ
+   ;; primitive in this slice, by scope).
    (check-exn-verb
     (lambda () (mdl-session-call session "MSETG" "bad" 3))
     #rx"DECL.*FOO")
    (define atom (mdl-session-call session "ATOM" "M2-D1-TEMP"))
    (check (mdl-atom-pname (mdl-session-call session "MSETG" atom 3)) "T")
-   (check (mdl-session-global session atom) 3))
+   (check (mdl-session-global session atom) 3)
+   (define psetg-atom (mdl-session-call session "ATOM" "M2-D3-LVAL"))
+   (check-exn-verb
+    (lambda () (mdl-session-call session "PSETG" psetg-atom 3))
+    #rx"unassigned or non-applicable MDL operator MEMQ")
+   (check (mdl-session-global session psetg-atom) 3)
+
+   ;; The pinned 77loadall chain: copy the exact bytes of the entry and the
+   ;; two files its load chain reaches, then assert the new failure exactly.
+   (define source-root
+     (build-path ".cache" "upstream" "mdlzork" "mdlzork_771212"
+                 "patched_confusion"))
+   (for ([name '("77loadall.mud" "81prim.mud" "77defs.mud")])
+     (call-with-output-file (build-path root name) #:exists 'truncate/replace
+       (lambda (out)
+         (write-bytes (file->bytes (build-path source-root name)) out))))
+   (define chain-session (make-mdl-session root))
+   (define chain-report
+     (mdl-session-load! chain-session "77loadall.mud"))
+   (check (hash-ref chain-report 'status) "FAIL")
+   (check (hash-ref chain-report 'completed_expressions) 10)
+   (define failure (hash-ref chain-report 'failure))
+   (check (hash-ref failure 'file) "77defs.mud")
+   (check (hash-ref failure 'expression_index) 1)
+   (check (hash-ref failure 'stage) "execute")
+   (check (hash-ref failure 'construct) "AND")
+   (check (hash-ref failure 'line) 1)
+   (check (hash-ref failure 'column) 1)
+   (check (string-contains? (hash-ref failure 'exception)
+                            "unassigned MDL global MUDDLE")
+          #t))
  (lambda ()
    (with-handlers ([exn:fail? void])
      (delete-directory/files root))))
