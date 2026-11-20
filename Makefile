@@ -27,6 +27,7 @@ test-historical: sources
 	@racket tests/historical_vfload_test.rkt
 	@racket tests/historical_decl_test.rkt
 	@racket tests/historical_computed_global_test.rkt
+	@racket tests/historical_error_test.rkt
 
 check-source:
 	@if raco help make >/dev/null 2>&1; then raco make scripts/mdl_check.rkt; fi

@@ -29,7 +29,8 @@ Reproduce with `make test`,
 [D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
 [current status](docs/STATUS.md). Both PR workflows passed on corrected D5
 head `e6d295d`; its latest Codex review is pending. The next actions are
-D5 approval and the issue #58 reader correction before G3 can pass.
+D5 final-head review/approval and a current-head G3 run of the stacked
+`N=?`, computed-global, and `ERROR` corrections.
 Historical progress notes below preserve
 their original slice-level context.
 
@@ -49,6 +50,14 @@ FAIL**. The full source load still stops after 24 expressions at `EMPTY?`.
 Reproduce with those two make targets and the loader command below; see
 [reader evidence](docs/evidence/M2/COMPUTED-GLOBAL.md). Next: implement
 the reference-backed `ERROR` path, then rerun G3. M3 has not started.
+
+**Stacked `ERROR` correction (issue #60):** the source-defined `MSETG`
+conflicting-repeat path raises an observable `ALREADY-GASSIGNED` exception.
+`make test` passes 888 Racket checks and 13 Python tests;
+`make test-historical` passes the original MSETG error probe too. Pinned
+Confusion outputs and the non-resumable Racket deviation are in
+[ERROR evidence](docs/evidence/M2/ERROR.md). Integrated G3 remains FAIL
+until its updated branch is run; no game boot or gameplay parity is claimed.
 
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
 passes: the baseline and pinned source are reproducible, and the first
