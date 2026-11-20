@@ -398,3 +398,13 @@ the expected `EMPTY?` barrier. `git diff --check` exited 0. The four
 reference cases were recorded after `make reference-build` exited 0;
 binary SHA-256 at probe time was
 `987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475`.
+## Independent local final-head review after hosted review limit
+
+The hosted request to review `e6d295d` was declined by the Codex review
+service's usage limit. An independent local inspection found one P2
+dispatch gap: native SUBRs are host procedures, and a FIX indicator
+incorrectly triggered `mdl-primtype` rather than association storage.
+Pinned Confusion accepts numeric SUBR association keys. Issue #67's
+red-to-green regression and narrow correction are documented in
+[`D5-FINAL-REVIEW.md`](D5-FINAL-REVIEW.md), with raw cases and output in
+`d5-final-review-*`. No upstream files were changed.

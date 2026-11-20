@@ -871,6 +871,16 @@ deliberate-error Confusion observations):
   printing) remain explicit unimplemented failures — the pinned load set
   never uses them.
 
+Final-head review of issue #53 (issue #67) adds a FIX-indicator dispatch
+case: a native SUBR is an unstructured MDL item even though the Racket
+runtime represents it as a host procedure. Pinned Confusion accepts
+`<PUT ,+ 7 9> <GET ,+ 7>` and returns `9`; a two-argument PUT removes
+that association and GET returns `#FALSE ()`. A FIX selector on this
+unstructured item must reach association storage without querying an
+unsupported host procedure's MDL primtype. Indexed FIX selectors on
+LIST/VECTOR/UVECTOR/STRING retain element dispatch. Tests must fail on
+the current D5 head and pass after the narrow dispatch correction.
+
 Deviations from the manual are adjudicated in
 [`evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md): the reference's
 augmented `#FALSE (leaf)` DECL? miss is followed over the manual's plain
