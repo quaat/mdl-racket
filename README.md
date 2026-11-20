@@ -20,9 +20,10 @@ symlink lookup order, consecutive parent components, and interpreted session
 calls; `make test`, both CI workflows, and the pinned Confusion
 build/capture/probes pass. Reproduce its pinned-source failure with
 `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json`.
-That command exits 1 after three completed expressions, at the unsupported
-compound declaration pattern `<LIST [REST ATOM]>` in `81prim.mud` (the
-original `PSETG`; its `!`-splice now compiles); game
+That command exits 1 after ten completed expressions, at the unassigned
+global `MUDDLE` in `77defs.mud` (the historical interpreter-version
+global; `81prim.mud` now loads in full, including the original `PSETG`
+with its structured declaration); game
 initialization is not supported. The
 [G2 partial-source probe](docs/evidence/M2/HISTORICAL-VFLOAD.md) verifies
 the pinned source hash and invokes the unmodified reconstructed `VFLOAD`
@@ -33,10 +34,19 @@ latest G1 path fix is merged and passes locally, with combined-branch CI
 also passing. Run
 `make test-historical` to reproduce the probe. The loader reports the 12
 unexecuted forms explicitly. M2's integrated gate and gameplay remain
-unverified; the `[REST ...]` declaration pattern is the next source dependency.
+unverified; the `MUDDLE` global (and the `MEMQ` primitive `PSETG` calls) is the next source dependency.
 The [M2 source execution inventory](docs/evidence/M2/SOURCE-EXECUTION.md)
 lists the loaded, invoked, blocked, and untested definitions separately.
 
+The [structured declaration slice](docs/evidence/M2/DECLARATION-PATTERNS.md)
+implements chapter-14 `<struc [REST ...]>` patterns for LIST, VECTOR,
+UVECTOR, and TUPLE with required element prefixes, cyclic multi-pattern
+REST repetition, nested `<OR ...>`, bounded traversal with explicit
+cycle/depth errors, and the reference's `DECL?` payload distinction
+(overall-type mismatch returns bare `#FALSE ()`; an element mismatch
+carries the offending element). Its local gate is **PASS**, verified
+against 22 pinned Confusion success observations and 14 deliberate-error
+observations.
 The [SEGMENT slice](docs/evidence/M2/SEGMENTS.md) implements chapter-7
 SEGMENT evaluation: `!.ATOM`, `!,ATOM`, and `!<FORM...>` splice their
 value's elements into LIST, VECTOR, UVECTOR, and FORM-argument construction
@@ -255,8 +265,8 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
 
 **Not supported yet:** complete original MDL syntax, compile-time macro
 expansion, dynamic `.OBLIST`,
-compound declaration patterns (`[REST ...]`, structured forms) and
-SPECIAL/UNSPECIAL, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
+SPECIAL/UNSPECIAL declaration wrappers, `[OPT ...]` and NTH
+repetitions, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
 explicit environments, the `"BIND"`/`"CALL"` activation formals, TAG values,
 and `GO` across function boundaries, general nonlocal
 control flow beyond the supported RETURN/AGAIN/GO/UNWIND subset, source

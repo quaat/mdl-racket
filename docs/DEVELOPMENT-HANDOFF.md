@@ -7,22 +7,33 @@ D2 in progress).
 - **Milestone / gate:** M2. G0/G1/G2 PASS and **M2-D1 merged**; integrated
   M3-style gate NOT RUN. M2 milestone NOT YET PASS.
 - **Active issues/PRs:** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
-  (D2 SEGMENT, branch `feat/m2-segment`, head `e26f3a8`) — independent
-  review returned REQUEST_CHANGES (two verified semantic defects + a
-  coverage gap); all findings fixed with regression tests and pushed;
-  716 Racket checks green locally; CI re-running on the fix head; merge
-  gated on green CI + maintainer approval;
-  [issue #48](https://github.com/quaat/mdl-racket/issues/48) (D3 structured
-  declaration patterns, the current load blocker) — reference evidence
-  recorded, verified, and committed on stacked branch
-  `feat/m2-decl-patterns` (`325bc09`), implementation held until the D2
-  review lands (shared `mdl/runtime/core.rkt` ownership);
+  (D2 SEGMENT) — review findings fixed, CI green on head `c4a1d63`,
+  **awaiting maintainer merge decision**;
   [PR #47](https://github.com/quaat/mdl-racket/pull/47) (Flash subagent
-  definitions) green, **pending maintainer merge decision**; issue #44
-  **closed** (D1 merged).
+  definitions) green, **awaiting maintainer merge decision**; issue #44
+  closed (D1 merged); issue #46 implemented (PR #49); issue #48 (D3
+  structured declaration patterns) **implemented and main-session-verified**
+  on stacked branch `feat/m2-decl-patterns` (Flash subagent branch
+  `feat/m2-decl-patterns-impl` merged; reference evidence `325bc09`,
+  implementation merge on top) — D3 PR to open next.
 - **Latest integrated commit:** `f87d160` on `main` (merge of PR #45,
   declarations; post-merge CI green, run 44615298096). Local `main` is
   up to date.
+- **D3 state (implemented, main-session-verified):** Confusion
+  reference evidence (22 success + 14 error observations, reproduced
+  byte-identically) plus the Flash implementer's tests-first slice,
+  merged and freshly verified by the main session: full suite 785 Racket
+  checks (declaration-pattern suite 73), loader 57, historical 23 + 20,
+  Python 13, `git diff --check` clean. **The pinned `81prim.mud` loads in
+  full** (8/8 expressions, `PSETG` installs with its
+  `<LIST [REST ATOM]>` declaration); the `77loadall.mud` chain completes
+  **10 expressions** and stops at `77defs.mud` expression 1 on the
+  unassigned global `MUDDLE` (`<AND <L? ,MUDDLE 100> ...>`, execute
+  stage) — the next source dependency, alongside the `MEMQ` primitive
+  `PSETG` invokes. Architect decisions: strict `DECL?` arity over
+  Confusion's surplus tolerance; multi-pattern REST payload derived from
+  Confusion's loop; structured heads restricted to
+  LIST/VECTOR/UVECTOR/TUPLE.
 - **D2 state (implemented, main-session-verified):** Confusion reference evidence recorded by the
   `glm-5.3-flash:cloud` reference-investigator subagent (18 success + 10
   error observations; independently reproduced byte-for-byte by the main
@@ -62,9 +73,10 @@ D2 in progress).
   sandbox); in-sandbox Racket needs `PLTCOLLECTS=":$PWD"`; the smoke CI
   container does not provision `.cache/upstream/`, so pinned-source
   assertions live only in `make test-historical` (reference workflow).
-- **First failing source construct:** the compound declaration pattern
-  `<LIST [REST ATOM]>` in `PSETG` (`81prim.mud:11:9`, runtime stage,
-  expression 3) — the `!`-splice at 16:46 now compiles (D2).
+- **First failing source construct:** the unassigned global `MUDDLE` in
+  `77defs.mud` expression 1 (`<AND <L? ,MUDDLE 100> ...>`, execute stage)
+  — `81prim.mud` now loads in full; invoking the installed `PSETG` stops
+  at `<MEMQ .FOO .PL>` (no MEMQ primitive yet).
 - **Known semantic decisions:** see `docs/SEMANTICS.md` (M2 D1 section) and
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
