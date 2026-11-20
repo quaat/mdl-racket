@@ -8,10 +8,11 @@ D5 reviewed locally on branch, G3 open).
   (PR #52), and the agent definitions (PR #47) are all **merged into
   `main`** (current main `419fc5c`); issues #44/#46/#48/#51 closed.
   Integrated G3 gate NOT RUN. M2 milestone NOT YET PASS.
-- **Active issues/PRs:** issue **#53** (D5 atom-property `PUT`/`GET`) —
+- **Active issues/PRs:** issue **#53** and [PR #54](https://github.com/quaat/mdl-racket/pull/54)
+  (D5 atom-property `PUT`/`GET`) —
   reference evidence, implementation, focused tests, and independent review
-  fixes are on `feat/m2-atom-props` (base `419fc5c`, prior D5 head
-  `32a462d`). PR to open; no open PRs at the last GitHub check. Issue
+  fixes are on `feat/m2-atom-props` (base `419fc5c`, code head
+  `a6df917`). Both PR workflows passed on that head. Issue
   #11 was closed as completed on 2026-11-20.
 - **D5 state (implemented, main-session-verified on
   `feat/m2-atom-props`):** Confusion reference evidence (18 success + 6
@@ -35,8 +36,8 @@ D5 reviewed locally on branch, G3 open).
   enforce DECL associations; GETPROP/PUTPROP and chapter 13.4 machinery
   explicitly unimplemented. See ADR-0023 and the M2 D5 section of
   `docs/SEMANTICS.md`.
-- **Exact next action:** commit and push the D5 review fixes, open the D5 PR
-  referencing issue #53, and run CI; then evaluate
+- **Exact next action:** obtain maintainer review of PR #54, merge only
+  after approval and final-head CI, then evaluate
   the integrated M2 G3 gate; then the `EMPTY?` slice for the original
   `NEWSTRUC` (create the issue from the recorded barrier at
   `77defs.mud` expression 15, delegate to the Flash implementer).

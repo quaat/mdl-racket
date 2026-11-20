@@ -5,7 +5,8 @@
 - **Milestone:** M2. **Gates:** G0/G1/G2 PASS; integrated G3 NOT RUN.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
-- **On branch `feat/m2-atom-props` (D5, issue #53):**
+- **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
+  `feat/m2-atom-props` (D5, issue #53):**
   atom-property `PUT`/`GET` associations, session-owned `==?`-identity
   association space, `DECL?` consultation of `DECL` associations, and
   independent-review fixes for WORD/REST identity, alias chains, and
@@ -22,8 +23,9 @@
   installed `PSETG`. Actual source execution sets priority.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
-- **Open issues:** #53 (D5). Issue #11 is closed as completed. No open PRs
-  at the last GitHub check; D5 PR publication is the next workflow step.
+- **Open issues/PRs:** #53 and PR #54 (D5). Issue #11 is closed as
+  completed. Both PR workflows passed on code head `a6df917`; maintainer
+  review and merge are pending.
 - **Not demonstrated:** integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 

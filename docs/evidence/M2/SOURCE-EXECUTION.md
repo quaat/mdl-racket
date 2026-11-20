@@ -1,7 +1,7 @@
 # M2 source execution inventory — integrated G3 still open
 
-**G3 NOT RUN.** Current state (2026-11-20, D5 branch `feat/m2-atom-props`
-with review fixes after `32a462d`, `main` `419fc5c`): slices D1–D4 are merged (`#DECL`
+**G3 NOT RUN.** Current state (2026-11-20, D5 PR #54 head `a6df917`,
+`main` `419fc5c`): slices D1–D4 are merged (`#DECL`
 declarations, SEGMENT evaluation, structured declaration patterns, the
 `MUDDLE` interpreter global) and D5 atom-property `PUT`/`GET`
 associations are implemented on this branch ([issue

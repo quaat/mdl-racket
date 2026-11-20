@@ -302,6 +302,11 @@ on item and indicator. This corrects key selection, but keeps both keys
 strongly reachable until removal or session end. Historical association
 garbage collection on unreachable keys remains unsupported. No weak table
 that implements the full `==?` equivalence was justified for this slice.
+The corrections are in commit `682f34a` and integrated with `main` at
+`a6df917` in [PR #54](https://github.com/quaat/mdl-racket/pull/54).
+The [Harness checks run](https://github.com/quaat/mdl-racket/actions/runs/44703960264)
+and [Native Confusion reference run](https://github.com/quaat/mdl-racket/actions/runs/44703960343)
+both concluded success on `a6df917`; maintainer review is pending.
 
 The same review found that two-argument PUT on a structured item with a FIX
 indicator erroneously removed an association; pinned Confusion raises

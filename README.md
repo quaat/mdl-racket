@@ -10,7 +10,8 @@
 > versions and original input/time/randomness.
 
 **Current M2 status (2026-11-20):** D1–D4 are merged on `main`
-(`419fc5c`); D5 atom properties are on `feat/m2-atom-props` for review.
+(`419fc5c`); D5 atom properties are in [PR #54](https://github.com/quaat/mdl-racket/pull/54)
+on `feat/m2-atom-props` for review.
 The D5 branch passes `make test` (864 Racket checks, 13 Python tests),
 `make test-historical` (23 VFLOAD and 20 DECL assertions), and pinned
 Confusion association probes (18 original plus 11 review cases; eight
@@ -22,7 +23,8 @@ separate deliberate-error/timeout observations). The unchanged
 gameplay parity is claimed.** Reproduce with `make test`,
 `make test-historical`, and the loader command below. See
 [D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
-[current status](docs/STATUS.md). The next action is D5 review and CI,
+[current status](docs/STATUS.md). Both PR workflows passed on the D5 code
+head; the next action is maintainer review and merge,
 then an integrated G3 gate audit. Historical progress notes below preserve
 their original slice-level context.
 
