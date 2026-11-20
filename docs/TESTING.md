@@ -16,6 +16,12 @@ M2 G3 has not passed: a separate pre-merge integration run found missing
 `make test-historical`, and the loader command below. Earlier sections
 retain their slice-era context.
 
+On the stacked `feat/m2-structural-neq` correction branch, `make test`
+adds 13 focused `N=?` checks (879 Racket, 13 Python total). The original
+MSETG historical probe is recorded as failing at the next reader gap
+`,.FOO`; it is reserved for issue #58, while the D5 historical target
+still passes. See [`NEQ.md`](evidence/M2/NEQ.md).
+
 The M2 G0 audit is reproducible with
 `racket scripts/audit_source_readiness.rkt --output artifacts/m2/source-readiness.json`.
 Its JSON separates independent compile probes from sequential execution

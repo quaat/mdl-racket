@@ -2,19 +2,28 @@
 
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-20 (D4 merged,
-D5 final-head review correction in progress, pre-merge G3 FAIL).
+D5 final-head review correction completed, pre-merge G3 FAIL).
+
+**Latest correction (issue #57):** `feat/m2-structural-neq` adds the
+reference-backed structural `N=?` primitive. Eight clean Confusion cases,
+three deliberate arity errors, and two bounded cyclic timeouts are in
+`docs/evidence/M2/NEQ.md`. `make test` passes 879 Racket checks and 13
+Python tests; 13 focused tests fail before and pass after. The exact
+original MSETG advances to a distinct `,.FOO` computed-global reader
+failure (issue #58). G3 remains FAIL. D5 PR #54 remains unmerged pending
+explicit maintainer approval; do not begin M3 EMPTY?.
 
 - **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), D4
   (PR #52), and the agent definitions (PR #47) are all **merged into
   `main`** (current main `419fc5c`); issues #44/#46/#48/#51 closed.
-  Pre-merge G3 FAIL at original MSETG's missing `N=?` repeat path;
-  M2 milestone NOT PASS (issues #56/#57).
+  Pre-merge G3 FAIL: `N=?` issue #57 is locally corrected, then original
+  MSETG reaches the distinct `,.FOO` reader gap (issue #58). M2 NOT PASS.
 - **Active issues/PRs:** issue **#53** and [PR #54](https://github.com/quaat/mdl-racket/pull/54)
   (D5 atom-property `PUT`/`GET`) —
   reference evidence, implementation, focused tests, and independent review
-  fixes are on `feat/m2-atom-props` (base `419fc5c`, code head
-  `ae0984f` before the CHARACTER correction). Both PR workflows passed
-  on that prior head; CI on the corrected head is required. Issue
+  fixes are on `feat/m2-atom-props` (base `419fc5c`, head `e6d295d`).
+  Both PR workflows passed on that corrected head; a fresh Codex review
+  is pending. Issue
   #11 was closed as completed on 2026-11-20.
 - **D5 state (implemented, main-session-verified on
   `feat/m2-atom-props`):** Confusion reference evidence (18 success + 6
@@ -41,10 +50,9 @@ D5 final-head review correction in progress, pre-merge G3 FAIL).
   enforce DECL associations; GETPROP/PUTPROP and chapter 13.4 machinery
   explicitly unimplemented. See ADR-0023 and the M2 D5 section of
   `docs/SEMANTICS.md`.
-- **Exact next action:** push the CHARACTER correction to PR #54 and
-  verify final-head CI/review; merge only after explicit maintainer
-  approval. Implement focused `N=?` issue #57 and rerun G3 before M3
-  `EMPTY?` work.
+- **Exact next action:** implement focused computed-global reader issue
+  #58 in a separate PR, then rerun G3; merge D5 only after explicit
+  maintainer approval and final-head review. M3 `EMPTY?` waits for G3.
 - **Active issues/PRs (historical, D2/D3 era — superseded by the header
   above):** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
   (D2 SEGMENT) and

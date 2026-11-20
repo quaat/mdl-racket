@@ -27,11 +27,17 @@ MSETG repeat path blocked by missing `N=?` ([issue #57](https://github.com/quaat
 Reproduce with `make test`,
 `make test-historical`, and the loader command below. See
 [D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
-[current status](docs/STATUS.md). Both PR workflows passed on the prior D5
-head; the corrected head requires its own CI result before merge. The next
-actions are D5 review and an issue #57 correction before G3 can pass.
+[current status](docs/STATUS.md). Both PR workflows passed on corrected D5
+head `e6d295d`; its latest Codex review is pending. The next actions are
+D5 approval and the issue #58 reader correction before G3 can pass.
 Historical progress notes below preserve
 their original slice-level context.
+
+**M2 G3 correction on `feat/m2-structural-neq`:** structural `N=?`
+passes 13 focused checks and `make test` (879 Racket, 13 Python). The
+original MSETG repeat path now reaches a separate computed-global reader
+defect at `,.FOO` ([issue #58](https://github.com/quaat/mdl-racket/issues/58));
+G3 remains FAIL and M2 remains open. See [N=? evidence](docs/evidence/M2/NEQ.md).
 
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
 passes: the baseline and pinned source are reproducible, and the first

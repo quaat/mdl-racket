@@ -83,6 +83,9 @@ in an explicitly partial-source probe. A pre-merge G3 run on the D5 head
 found the original MSETG's required repeat path blocked by missing `N=?`
 ([issue #57](https://github.com/quaat/mdl-racket/issues/57)); M2 remains
 open. This observation does not change the integrated gate below.
+The focused `N=?` correction on `feat/m2-structural-neq` passes primitive
+tests but exposes the next original-MSETG reader gap at `,.FOO` ([issue
+#58](https://github.com/quaat/mdl-racket/issues/58)); G3 is still FAIL.
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,

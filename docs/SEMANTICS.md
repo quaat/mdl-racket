@@ -879,3 +879,32 @@ source flags it as deliberate); the two-argument PUT removal echoes the
 item as the reference does (the manual's "returns the previous value"
 wording was checked — the reference returns the item; we follow the
 reference); and GET's exp is honored only on the association branch.
+
+## M2 G3 corrective slice: structural `N=?` (issue #57)
+
+The [MDL manual chapter 8](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+defines `N=?` as the Boolean complement of structural `=?` (not the
+identity complement `N==?`). On finite values it returns MDL `T` when
+the two arguments differ structurally and `#FALSE ()` when equal. The
+reference rejects fewer than two arguments with
+`TOO-FEW-ARGUMENTS-SUPPLIED` and more than two with
+`TOO-MANY-ARGUMENTS-SUPPLIED`.
+
+The original `81prim.mud` MSETG guard calls `<N=? .BAR ,.FOO>` on a
+reassignment. Pinned Confusion returns `T` from MSETG on an equal repeat,
+and raises the source's ALREADY-GASSIGNED error on a conflicting repeat.
+Racket must use its existing `mdl-equal?` relation and MDL truth values;
+the first G3 integration probe failed before implementation because `N=?`
+was unassigned. The focused tests must cover scalar, atom, separately
+allocated equal/unequal LIST and STRING, and typed values, plus these two
+original-source MSETG paths and arity errors.
+
+Two bounded cyclic Confusion `N=?` probes (self and distinct equal-content
+LIST cycles) timed out after three seconds. The existing Racket `=?`
+boundary already returns T for a cycle compared with itself and raises an
+explicit unsupported-cyclic-equality error for two distinct equal cycles.
+`N=?` follows the documented complement of that bounded relation: FALSE
+for self and the same explicit error for unsupported distinct equal cycles.
+This differs from the tested pinned Confusion timeout but prevents a hang;
+it is not evidence of general cyclic parity. Reference inputs, outputs,
+source hashes, and commands are in `evidence/M2/NEQ.md`.
