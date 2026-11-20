@@ -22,6 +22,13 @@ MSETG historical probe is recorded as failing at the next reader gap
 `,.FOO`; it is reserved for issue #58, while the D5 historical target
 still passes. See [`NEQ.md`](evidence/M2/NEQ.md).
 
+On stacked `feat/m2-computed-global`, `make test` passes 884 Racket checks
+and 13 Python tests. `make test-historical` adds a hash-verified original
+MSETG first/equal-repeat probe (exit 0); the historical conflicting-repeat
+case remains blocked by unassigned `ERROR` and is tracked as G3 FAIL.
+Reference inputs and outputs are in `computed-global-*` and the method and
+limitations are in [`COMPUTED-GLOBAL.md`](evidence/M2/COMPUTED-GLOBAL.md).
+
 The M2 G0 audit is reproducible with
 `racket scripts/audit_source_readiness.rkt --output artifacts/m2/source-readiness.json`.
 Its JSON separates independent compile probes from sequential execution

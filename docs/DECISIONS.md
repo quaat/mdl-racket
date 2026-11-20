@@ -554,3 +554,16 @@ must not invent a new equivalence rule or hang.
 cyclic boundary. The original MSETG advances from unassigned `N=?` to
 the independent computed-global reader failure at `,.FOO`; G3 remains
 FAIL. Evidence and exact commands are in `evidence/M2/NEQ.md`.
+
+## ADR-0024: Read `,.FOO` as GVAL of FOO's local value
+
+**Decision (2026-11-20, issue #58):** When comma is immediately followed
+by period, the reader creates a global node whose operand is the local
+node. This follows the MDL manual chapter 4 and three pinned Confusion
+cases. Existing `,ATOM` and `,<FORM>` paths retain their behavior.
+
+**Consequence:** The hash-verified original `MSETG` first and equal-repeat
+calls return `T` without source edits. A conflicting repeat reaches the
+separate missing `ERROR` primitive (issue #60), so integrated G3 remains
+FAIL. Evidence: `evidence/M2/COMPUTED-GLOBAL.md`. No source provenance,
+license, network exposure, or gameplay claim changes.

@@ -1,4 +1,4 @@
-# Status — 2026-11-20 (D5 under review; G3 FAIL, N=? correction)
+# Status — 2026-11-20 (D5 under review; G3 FAIL, computed global correction)
 
 ## Current state (2026-11-20)
 
@@ -36,6 +36,14 @@
   focused `neq_test.rkt` 13 checks. Original MSETG advanced from `N=?`
   to `,.FOO`; see [evidence](evidence/M2/NEQ.md). The next action is
   issue #58, then repeat G3. M3 `EMPTY?` waits for G3.
+- **Issue #58 stacked reader slice:** `,.FOO` parses as GVAL of the local
+  value FOO. `make test` passes 884 Racket checks and 13 Python tests;
+  `make test-historical` passes exact-source MSETG first/equal-repeat paths
+  alongside VFLOAD and DECL. The original conflicting-repeat path now reaches
+  unassigned `ERROR`; G3 is still FAIL. See
+  [computed-global evidence](evidence/M2/COMPUTED-GLOBAL.md). Next: probe
+  and implement `ERROR` as a separate source-backed slice (issue #60), then
+  rerun G3.
 - **Not demonstrated:** full integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 

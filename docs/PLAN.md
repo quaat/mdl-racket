@@ -86,6 +86,11 @@ open. This observation does not change the integrated gate below.
 The focused `N=?` correction on `feat/m2-structural-neq` passes primitive
 tests but exposes the next original-MSETG reader gap at `,.FOO` ([issue
 #58](https://github.com/quaat/mdl-racket/issues/58)); G3 is still FAIL.
+The reader correction now passes the pinned computed-global probes and the
+original MSETG equal-repeat path; the conflicting-repeat path reaches the
+separate unassigned `ERROR` primitive. G3 remains FAIL pending that
+source-backed correction ([issue #60](https://github.com/quaat/mdl-racket/issues/60))
+and a fresh integrated run.
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,

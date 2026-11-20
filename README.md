@@ -39,6 +39,17 @@ original MSETG repeat path now reaches a separate computed-global reader
 defect at `,.FOO` ([issue #58](https://github.com/quaat/mdl-racket/issues/58));
 G3 remains FAIL and M2 remains open. See [N=? evidence](docs/evidence/M2/NEQ.md).
 
+**Stacked reader correction (issue #58):** `,.FOO` now evaluates the local
+FOO to obtain the global atom, as in the MDL manual and pinned Confusion.
+The original `MSETG` equal-repeat path passes from hash-verified `81prim.mud`.
+`make test` passes 884 Racket checks and 13 Python tests;
+`make test-historical` passes the VFLOAD, DECL, and MSETG repeat probes.
+The conflicting-repeat path reaches unsupported `ERROR`, so **G3 remains
+FAIL**. The full source load still stops after 24 expressions at `EMPTY?`.
+Reproduce with those two make targets and the loader command below; see
+[reader evidence](docs/evidence/M2/COMPUTED-GLOBAL.md). Next: implement
+the reference-backed `ERROR` path, then rerun G3. M3 has not started.
+
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
 passes: the baseline and pinned source are reproducible, and the first
 historical load barriers are identified. Run
