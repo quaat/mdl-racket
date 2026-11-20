@@ -79,9 +79,11 @@ The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md),
 [G1 shared-session source loader](evidence/M2/SOURCE-LOADER.md), and
 [G2 original VFLOAD probe](evidence/M2/HISTORICAL-VFLOAD.md) pass.
 On the stacked `feat/m2-mapf` branch, [G3 original-definition execution](evidence/M2/G3-GATE-MAPF.md)
-passes 59 assertions. This is a branch result; M2 still requires the
-indirect APPLY/DISPATCH and continuation audit, required CI and review,
-authorized integration, and mainline verification. The complete historical
+passes 59 assertions. This is a branch result. The indirect
+APPLY/DISPATCH correction for issue #69 and the
+[requirements audit](evidence/M2/REQUIREMENTS-AUDIT.md) are recorded on a
+child branch. M2 still requires final-head CI and review, authorized
+integration, and mainline verification. The complete historical
 loader separately stops at `EMPTY?` after 24 completed forms. Prior FAIL
 decisions and their exact blockers remain in [the dated G3 report](evidence/M2/G3-GATE.md)
 and [status history](STATUS.md).

@@ -3,15 +3,20 @@
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-20.
 
-**Current checkpoint:** `feat/m2-mapf` builds on PR #66 and carries the
-D5 final-head review correction. `make test-m2-g3` passes 59 integrated
+**Current checkpoint:** `feat/m2-indirect-apply` builds on MAPF PR #68,
+which builds on PR #66 and carries the D5 final-head review correction.
+`make test-m2-g3` passes 59 integrated
 assertions against SHA-verified original 77loadall/81prim/77defs bytes.
 MAPF, TYPE?, and startup OBLIST associations permit the original FLAGWORD
 paths, including a deliberate MSETG conflict, to execute. The full loader
 still exits 1 at EMPTY? after 24 forms. See
-`docs/evidence/M2/MAPF.md` and `G3-GATE-MAPF.md`. **M2 is not closed**:
-complete indirect APPLY/DISPATCH and continuation audit, run required CI,
-obtain review and authorization, and verify integrated result on main.
+`docs/evidence/M2/MAPF.md` and `G3-GATE-MAPF.md`. Issue #69's
+reference-backed indirect APPLY/DISPATCH correction and the
+`REQUIREMENTS-AUDIT.md` matrix are now on the child branch. `make test`
+passes 986 Racket and 13 Python checks; `make test-historical` and G3
+pass. Both PR #68 workflows are green; child-branch CI is pending.
+**M2 is not closed**: obtain final-head review and authorization, and
+verify the integrated result on main.
 PR #54 remains unmerged; do not begin M3. User untracked files
 `.claude/worktrees/` and `tests/fixtures/mytest.mdl` are untouched.
 

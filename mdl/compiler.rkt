@@ -197,7 +197,12 @@
                 mdl-given-args
                 #f
                 (lambda () ,(compile-sequence body names))
-                definition-decl)))))))))
+                definition-decl)))))
+         ',(for/list ([spec (in-list specs)])
+             (if (and (eq? (first spec) 'rest)
+                      (eq? (third spec) 'args))
+                 'rest-args
+                 (first spec)))))))
 
 ;; Historical formal lists mark sections with STRINGs: "OPT"/"OPTIONAL",
 ;; "ARGS", "TUPLE", "AUX"/"EXTRA", and "NAME"/"ACT" for the function's own
@@ -421,13 +426,20 @@
                      ,value-id
                      ,(loop (cdr remaining)))))))))
 
+(define (compile-call-thunks args locals)
+  `(list ,@(map (lambda (a)
+                  (parameterize ([current-structured-context #t])
+                    `(lambda () ,(compile-expression a locals))))
+                args)))
+
 (define (compile-form n locals)
   (define xs (mdl-node-value n))
   (if (null? xs)
       '(mdl-false '())
       (let* ([op-node (car xs)]
-             [op (atom-name op-node)]
+             [op (and (is-kind? op-node 'atom) (atom-name op-node))]
              [args (cdr xs)])
+        (if (and op (not (number? (mdl-constant op-node))))
         (case (string->symbol op)
           [(DEFINE) (compile-definition n args)]
           [(FUNCTION)
@@ -514,13 +526,10 @@
           [else
            `(mdl-apply-form ,op
                             (lambda () (list ,@(map compile-data args)))
-                            (list ,@(map (lambda (a)
-                                           ;; Call arguments assemble spliced
-                                           ;; elements like the reference's list
-                                           ;; assembly, so a SEGMENT is legal here.
-                                           (parameterize ([current-structured-context #t])
-                                             `(lambda () ,(compile-expression a locals))))
-                                         args)))]))))
+                            ,(compile-call-thunks args locals))])
+        `(mdl-apply-computed ,(compile-expression op-node locals)
+                             (lambda () (list ,@(map compile-data args)))
+                             ,(compile-call-thunks args locals))))))
 
 (define (compile-expression n [locals '()])
   ;; Retain each source literal once per compiled top-level expression.

@@ -12,4 +12,4 @@ raco test mdl/runtime/core.rkt \
   tests/declaration_test.rkt tests/declaration_pattern_test.rkt tests/segment_test.rkt \
   tests/atom_props_test.rkt tests/neq_test.rkt tests/error_test.rkt \
   tests/memq_test.rkt tests/mapf_test.rkt tests/typeq_test.rkt \
-  tests/startup_oblist_assoc_test.rkt
+  tests/startup_oblist_assoc_test.rkt tests/indirect_apply_test.rkt

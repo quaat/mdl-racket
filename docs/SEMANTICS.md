@@ -1056,3 +1056,37 @@ there returns FALSE. An ordinary ATOM has no such association. Seed these
 specific associations in each fresh Racket session's atom space so the
 original source can observe the same startup state; leave general GET
 dispatch and user associations intact.
+
+## M2 indirect APPLY and computed FORM heads (issue #69)
+
+The [MDL manual section 9.10](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+defines `<APPLY object arg-1 ...>` as evaluating the applicable object
+and every argument, then applying it. It rejects FSUBR/MACRO and
+FUNCTION formals that require raw arguments, notably quoted formals and
+`"ARGS"`/`"CALL"`. A computed FORM head evaluates to an applicable
+object before argument dispatch; unlike APPLY, it may invoke an
+interpreted FUNCTION with quoted formals because the original raw
+argument forms remain available. The operator and each evaluated
+argument are visited left to right exactly once.
+
+Pinned Confusion `evidence/M2/indirect-apply-reference.json` records
+native SUBR, interpreted FUNCTION, MAPF and numeric indexed applicable
+calls; a structured LIST argument remains a value rather than being
+re-evaluated. A FIX head with one argument reads that index; with two
+arguments it writes the indexed element and returns the structure.
+The computed-head cases include local/global FUNCTION values, quoted
+formals, and a RETURN to an outer activation. The separate
+`indirect-apply-error-reference.json` records missing APPLY target,
+non-applicable target, quoted/ARGS/MACRO restrictions, and FIX excess
+arity as deliberate failures. Unknown applicable kinds must continue
+to fail explicitly.
+
+The implemented dispatcher shares evaluated-value application between
+MAPF, APPLY, computed FORM heads and the host `mdl-apply` API. A compiled
+DEFINE keeps its formal-kind metadata so APPLY also rejects its ARGS
+formal; TUPLE remains allowed. The shared-session call API now passes
+already evaluated values to interpreted FUNCTIONs without rebuilding
+structured contents. A FIX head with two arguments invokes indexed PUT
+on a structured target directly; it cannot fall through to a PUT
+association on a non-structured item. Red-to-green observations and
+remaining limits are in `evidence/M2/INDIRECT-APPLY.md`.
