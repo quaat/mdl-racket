@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "m2-segment-reference-errors",
+  "cases": [
+    {"name": "standalone-segment-form", "expression": "<SET ZOP '![2 3 4]> !<SET B 2>"},
+    {"name": "standalone-segment-lval", "expression": "<SET ZOP '![2 3 4]> !.ZOP"},
+    {"name": "segment-non-structured-value", "expression": "<SET X 5> (!.X)"},
+    {"name": "segment-atom-value", "expression": "<SET A 'FOO> (!.A)"},
+    {"name": "uvector-non-uniform", "expression": "<SET X '![2 3]> ![1 !.X \"s\"!]"},
+    {"name": "uvector-pound-shorthand", "expression": "<SET X '![2 3]> #[1 !.X]"},
+    {"name": "uvector-named-typecode", "expression": "<SET X '![2 3]> #UVECTOR [1 !.X]"},
+    {"name": "segment-trailing-bang-in-list", "expression": "<SET ARF '(B 3 4)> (!<REST .ARF>!)"},
+    {"name": "segment-trailing-bang-end", "expression": "<SET ZOP '![2 3 4]> !<SET B 2>!"},
+    {"name": "malformed-bang-in-list", "expression": "(!)"}
+  ]
+}

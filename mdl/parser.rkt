@@ -66,6 +66,10 @@
       [(delimiter? ch) (get-output-string out)]
       [(and (char=? ch #\!) (equal? (peek-next c) #\]))
        (get-output-string out)]
+      ;; `!>` terminates a SEGMENT payload (chapter 7: the trailing `!` is
+      ;; part of the close, not of the atom in front of it).
+      [(and (char=? ch #\!) (equal? (peek-next c) #\>))
+       (get-output-string out)]
       [(char=? ch #\\)
        (advance! c)
        (let ([escaped (advance! c)])
@@ -91,7 +95,12 @@
          (loop))]
       [else (write-char ch out) (loop)])))
 
-(define (read-delimited! c terminator)
+;; `segment-payload?` marks the FORM currently being read as a SEGMENT
+;; payload: `!` immediately before its closing `>` terminates it (chapter
+;; 7, the optional trailing `!` of `!<FORM...!>`), while a plain `>` also
+;; closes it. Nested forms inside the payload are read normally, so only
+;; the payload's own `>` positions accept the digraph.
+(define (read-delimited! c terminator [segment-payload? #f])
   (let loop ([acc '()])
     (skip-ws! c)
     (let ([ch (peek c)])
@@ -100,13 +109,19 @@
         [(and (eq? terminator 'uvector) (char=? ch #\!)
               (equal? (peek-next c) #\]))
          (advance! c) (advance! c) (reverse acc)]
+        [(and segment-payload? (char? terminator) (char=? terminator #\>)
+              (char? ch) (char=? ch #\!)
+              (equal? (peek-next c) #\>))
+         (advance! c) (advance! c) (reverse acc)]
         [(and (eq? terminator 'uvector) (char=? ch #\]))
          (advance! c) (reverse acc)]
         [(and (char? terminator) (char=? ch terminator))
          (advance! c) (reverse acc)]
         [else (loop (cons (read-node! c) acc))]))))
 
-(define (read-node! c)
+;; `segment-payload?` is true while reading a SEGMENT payload node, so its
+;; own FORM delimiters accept the `!>` close. Nested reads start fresh.
+(define (read-node! c [segment-payload? #f])
   (skip-ws! c)
   (let* ([line (cursor-line c)]
          [column (cursor-column c)]
@@ -114,7 +129,7 @@
     (define (node kind value) (mdl-node kind value line column))
     (unless ch (parse-error c "unexpected end of file"))
     (case ch
-      [(#\<) (advance! c) (node 'form (read-delimited! c #\>))]
+      [(#\<) (advance! c) (node 'form (read-delimited! c #\> segment-payload?))]
       [(#\() (advance! c) (node 'list (read-delimited! c #\))) ]
       [(#\[) (advance! c) (node 'vector (read-delimited! c #\]))]
       [(#\{) (advance! c) (node 'brace (read-delimited! c #\}))]
@@ -133,7 +148,7 @@
        (advance! c)
        (if (equal? (peek c) #\[)
            (begin (advance! c) (node 'uvector (read-delimited! c 'uvector)))
-           (node 'splice (read-node! c)))]
+           (node 'splice (read-node! c #t)))]
       [(#\%) (advance! c) (node 'percent (read-node! c))]
       [(#\#)
        (let ([name (read-atom! c)])

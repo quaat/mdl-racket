@@ -1,4 +1,4 @@
-# Status — 2026-11-19 (M2 historical VFLOAD slice under review)
+# Status — 2026-11-19 (M2 declarations merged; SEGMENT slice open)
 
 ## M2 source execution audit (G0)
 
@@ -7,10 +7,12 @@
 checks, 13 Python tests, 36 parsed source files, the native build, capture and
 probe. The 508 count on Racket 8.10 is a RackUnit nested-check reporting
 difference, verified with a deliberately failing nested assertion in a
-disposable copy. First actual source barriers are `FLOAD`, `#DECL`, the
-native `MUDDLE` global, and source ordering. See
+disposable copy. The first actual source barriers were `FLOAD`, `#DECL`, the
+native `MUDDLE` global, and source ordering; `FLOAD` (G1/G2) and `#DECL`
+(M2-D1, PR #45) are now cleared, and the current blocker is the `!`-splice in
+the original `PSETG` (issue #46). See
 [`SOURCE-READINESS.md`](evidence/M2/SOURCE-READINESS.md) and its JSON inventory.
-Next: a controlled source loader and shared MDL session (G1). Original source
+Next: the SEGMENT slice (issue #46). Original source
 execution and gameplay have not been demonstrated.
 
 ## M2 shared-session source loader (G1)
@@ -415,6 +417,33 @@ commands, and hashes are in
 by [issue #44](https://github.com/quaat/mdl-racket/issues/44). The
 session recovery record is in
 [`docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md`](evidence/M2/SESSION-RECOVERY-2026-11-19.md).
-The `!`-splice read construct, the `[REST ...]` declaration patterns,
-general APPLY/DISPATCH, and original game execution remain open. The first
-unmet **milestone** gate is still M2.
+The `[REST ...]` declaration patterns, general APPLY/DISPATCH, and
+original game execution remain open. The first unmet **milestone** gate is
+still M2.
+
+## M2 issue #46: SEGMENT (`!` splice) evaluation
+
+**Local slice: PASS. M2 milestone: NOT YET PASS.** The SEGMENT slice
+implements chapter-7 `!` notation: `!.ATOM`/`!,ATOM`/`!<FORM...>` segments
+splice their value's elements into LIST, VECTOR, UVECTOR, and
+FORM-argument construction in strict left-to-right order; a final
+LIST-valued segment shares the payload's tail (PUT mutation visible through
+both names), non-final segments and array constructions copy; STRING
+segments splice as CHARACTER values; quoted structures keep segments as
+unevaluated data; standalone and non-structured segment results raise the
+reference's ILLEGAL-SEGMENT, and non-uniform UVECTOR construction raises
+TYPES-DIFFER-IN-UNIFORM-VECTOR. The original `PSETG` splice now compiles:
+the pinned `77loadall.mud` load advances to **three completed expressions**
+and stops at the next actual dependency, `PSETG`'s compound
+`<LIST [REST ATOM]>` declaration pattern at runtime stage (issue #48).
+`make test` passes 701 Racket checks and 13 Python tests; the selected text
+sweep still parses 36/36 files. Eighteen pinned Confusion success cases and
+ten deliberate-error observations back the semantics, regenerated
+byte-identically before commit; the deviations (interpreted call-argument
+splicing follows the manual over the reference's interpreted path;
+eager interpreted segment-payload evaluation) are recorded in
+`docs/SEMANTICS.md`. Full details, commands, and hashes are in
+[`docs/evidence/M2/SEGMENTS.md`](evidence/M2/SEGMENTS.md), tracked by
+[issue #46](https://github.com/quaat/mdl-racket/issues/46). The
+`[REST ...]` declaration patterns, general APPLY/DISPATCH, and original
+game execution remain open. The first unmet **milestone** gate is still M2.

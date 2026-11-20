@@ -3,7 +3,7 @@
 (require racket/mpair racket/list)
 (provide current-mdl-globals current-mdl-locals
          mdl-setg! mdl-gval mdl-define!
-         mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings
+         mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings mdl-type
          mdl-bind-function-formals mdl-call-with-activation
          mdl-with-function-scope mdl-with-prog-activation
          mdl-return mdl-again mdl-go mdl-unwind
@@ -12,7 +12,13 @@
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
          mdl-make-declaration
-         mdl-vector mdl-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
+         mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
+         mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
+         mdl-length mdl-equal? mdl-identical?
+         mdl-segment mdl-segment? mdl-segment-payload mdl-segment-line
+         mdl-segment-column mdl-make-segment mdl-splice-result
+         mdl-splice-result-value mdl-splice-list mdl-splice-vector
+         mdl-splice-uvector
          mdl-word mdl-word? mdl-word-bits
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          current-mdl-atom-space make-mdl-atom-space
@@ -426,6 +432,203 @@
       (unless completed-normally? (erre-thunk) (void)))))
 
 ;; ---------------------------------------------------------------------------
+;; SEGMENT values (MDL chapter 7, `!` splice notation).
+;;
+;; `!.ATOM`, `!,ATOM`, and `!<FORM...!>` denote a SEGMENT object whose
+;; payload is the object's data; evaluating it inside a structure builds the
+;; structure by inserting the payload value's ELEMENTS (pinned Confusion
+;; macros.cpp:2704-2749). In data positions (quoted structures, raw
+;; interpreted arguments, compiled data) the payload stays unevaluated, and
+;; a compiled splice evaluates to a splice marker carrying its already
+;; evaluated payload value. Segment objects that are merely the VALUE of a
+;; plain element are stored, not re-spliced.
+(struct mdl-segment (payload line column) #:transparent)
+(struct mdl-splice-result (value line column) #:transparent)
+
+(define (mdl-make-segment payload line column)
+  (mdl-segment payload line column))
+
+(define (mdl-segment-standalone-error)
+  (error 'mdl-segment
+         "ILLEGAL-SEGMENT: Attempt to evaluate segment outside structured type"))
+
+;; The elements one SEGMENT contributes, mirroring the reference's structure
+;; walker (macros.cpp:2447-2470): LIST, FALSE, FORM, and TUPLE payloads,
+;; VECTORs and UVECTORs by element, and STRINGs as CHARACTER values. FALSE
+;; and TUPLE payloads and every LIST-primtype chain are stored as mpairs,
+;; so they convert to Racket lists here; NEWTYPE-wrapped (typed) structures
+;; unwrap to their base before matching, like the reference's walker.
+(define (segment-elements value)
+  (cond
+    [(mdl-typed-value? value) (segment-elements (mdl-base value))]
+    [(mdl-false? value) (mdl-list->list (mdl-false-value-payload value))]
+    [(mdl-form? value) (form-elements value)]
+    [(mdl-tuple-value? value) (mdl-list->list (mdl-tuple-value-payload value))]
+    [(or (null? value) (mpair? value)) (mdl-list->list value)]
+    [(mdl-array? value)
+     (for/list ([i (in-range (mdl-array-length value))])
+       (mdl-nth value (add1 i)))]
+    [(string? value)
+     (for/list ([ch (in-string value)])
+       (mdl-typed-value (mdl-atom "CHARACTER") (char->integer ch)))]
+    [else
+     (error 'mdl-segment
+            "ILLEGAL-SEGMENT: Segment evaluated to nonstructured type")]))
+
+;; A trailing SEGMENT whose value has PRIMTYPE LIST shares its storage in
+;; LIST construction instead of being copied (macros.cpp:2716-2724).
+(define (segment-shares-tail? value)
+  (eq? (mdl-primtype value) (mdl-atom "LIST")))
+(define (segment-tail-chain value)
+  (mdl-list-head value 'mdl-splice-list))
+
+;; Assemble a LIST from ordered construction units. `shared`, when given, is
+;; the trailing LIST-primtype payload whose cells are linked in place.
+(define (finish-list items shared)
+  (cond
+    [(not shared) (apply mdl-list items)]
+    [(null? items) (segment-tail-chain shared)]
+    [else
+     (define chain (apply mdl-list items))
+     (set-mcdr! (mdl-list-tail chain (sub1 (length items)) 'mdl-splice-list)
+                (segment-tail-chain shared))
+     chain]))
+
+;; Compiled construction: one thunk per element, evaluated in order; thunk
+;; results are plain values or splice markers. Only the final marker may
+;; share a LIST-primtype tail; other marker payloads contribute copied
+;; elements.
+(define (build-spliced-list units)
+  (let loop ([rest units] [acc '()])
+    (cond
+      [(null? rest) (finish-list acc #f)]
+      [else
+       (define unit ((car rest)))
+       (cond
+         [(null? (cdr rest))
+          (cond
+            [(mdl-splice-result? unit)
+             (define value (mdl-splice-result-value unit))
+             (if (segment-shares-tail? value)
+                 (finish-list acc value)
+                 (finish-list (append acc (segment-elements value)) #f))]
+            [else (finish-list (append acc (list unit)) #f)])]
+         [(mdl-splice-result? unit)
+          (loop (cdr rest)
+                (append acc (segment-elements (mdl-splice-result-value unit))))]
+         [else (loop (cdr rest) (append acc (list unit)))])])))
+
+;; Interpreted construction over raw element data: a SEGMENT object in
+;; element position is a splice (its payload evaluates here, in order); a
+;; plain element evaluates and a segment-valued result is stored as itself.
+(define (build-eval-list items)
+  (let loop ([rest items] [acc '()])
+    (cond
+      [(null? rest) (finish-list acc #f)]
+      [else
+       (define item (car rest))
+       (cond
+         [(null? (cdr rest))
+          (cond
+            [(mdl-segment? item)
+             (define value (mdl-eval (mdl-segment-payload item)))
+             (if (segment-shares-tail? value)
+                 (finish-list acc value)
+                 (finish-list (append acc (segment-elements value)) #f))]
+            [else (finish-list (append acc (list (mdl-eval item))) #f)])]
+         [(mdl-segment? item)
+          (loop (cdr rest)
+                (append acc (segment-elements (mdl-eval (mdl-segment-payload item)))))]
+         [else (loop (cdr rest) (append acc (list (mdl-eval item))))])])))
+
+;; VECTOR and UVECTOR construction always copies splice elements.
+(define (build-spliced-vector units)
+  (define (unit-items rest acc)
+    (if (null? rest)
+        acc
+        (let ([unit ((car rest))])
+          (unit-items (cdr rest)
+                      (if (mdl-splice-result? unit)
+                          (append acc (segment-elements (mdl-splice-result-value unit)))
+                          (append acc (list unit)))))))
+  (apply mdl-vector (unit-items units '())))
+
+(define (build-eval-vector items)
+  (define (item-values rest acc)
+    (if (null? rest)
+        acc
+        (let ([item (car rest)])
+          (item-values (cdr rest)
+                       (if (mdl-segment? item)
+                           (append acc (segment-elements (mdl-eval (mdl-segment-payload item))))
+                           (append acc (list (mdl-eval item))))))))
+  (apply mdl-vector (item-values items '())))
+
+;; A UVECTOR requires uniform element TYPEs. Confusion reports
+;; TYPES-DIFFER-IN-UNIFORM-VECTOR when a later element differs from the
+;; element TYPE fixed by the first (macros.cpp:2823-2835).
+(define (uniform-uvector items)
+  (if (null? items)
+      (mdl-array 'UVECTOR (vector) 0 0 #f)
+      (let ([element-type (mdl-type (car items))])
+        (for ([value (in-list items)])
+          (unless (eq? (mdl-type value) element-type)
+            (error 'mdl-splice-uvector
+                   "TYPES-DIFFER-IN-UNIFORM-VECTOR: UVECTOR elements must have one permitted TYPE")))
+        (when (string=? (mdl-type-name (car items)) "STRING")
+          (error 'mdl-splice-uvector
+                 "UVECTOR elements must have one permitted TYPE"))
+        (mdl-array 'UVECTOR (list->vector items) 0 (length items) element-type))))
+
+(define (build-spliced-uvector units)
+  (define (unit-items rest acc)
+    (if (null? rest)
+        acc
+        (let ([unit ((car rest))])
+          (unit-items (cdr rest)
+                      (if (mdl-splice-result? unit)
+                          (append acc (segment-elements (mdl-splice-result-value unit)))
+                          (append acc (list unit)))))))
+  (uniform-uvector (unit-items units '())))
+
+(define (build-eval-uvector items)
+  (define (item-values rest acc)
+    (if (null? rest)
+        acc
+        (let ([item (car rest)])
+          (item-values (cdr rest)
+                       (if (mdl-segment? item)
+                           (append acc (segment-elements (mdl-eval (mdl-segment-payload item))))
+                           (append acc (list (mdl-eval item))))))))
+  (uniform-uvector (item-values items '())))
+
+;; Compiled constructors: variadic over unit thunks, evaluated left to right.
+(define (mdl-splice-list . units) (build-spliced-list units))
+(define (mdl-splice-vector . units) (build-spliced-vector units))
+(define (mdl-splice-uvector . units) (build-spliced-uvector units))
+
+;; Expand SEGMENT objects while a call's raw arguments are read, left to
+;; right, like the reference's LIST assembly of a SUBR call: spliced
+;; elements are values and are never re-evaluated. Plain data items stay
+;; raw for formals that evaluate (or quote) them.
+(define (expand-arg-items raw-args)
+  (define items
+    (if (or (null? raw-args) (mpair? raw-args))
+        (mdl-list->list raw-args)
+        raw-args))
+  (let loop ([rest items] [acc '()])
+    (cond
+      [(null? rest) (reverse acc)]
+      [(mdl-segment? (car rest))
+       (define value (mdl-eval (mdl-segment-payload (car rest))))
+       (loop (cdr rest)
+             (foldl (lambda (element result)
+                      (cons (cons 'value element) result))
+                    acc
+                    (reverse (segment-elements value))))]
+      [else (loop (cdr rest) (cons (cons 'raw (car rest)) acc))])))
+
+;; ---------------------------------------------------------------------------
 ;; Runtime evaluation, FORM values, and macro expansion.
 ;;
 ;; Confusion evaluates every object dynamically; this runtime needs the
@@ -475,9 +678,25 @@
     [(mdl-function? fn)
      (mdl-apply-interpreted fn raw-args)]
     [(procedure? fn)
-     (apply fn (map mdl-eval raw-args))]
+     (apply fn (assemble-args raw-args (lambda (item) (mdl-eval item))))]
     [else (error 'mdl-apply-value "unassigned or non-applicable MDL operator ~a"
                  (if (mdl-atom? fn) (mdl-atom-pname fn) fn))]))
+
+;; Call arguments assemble like the reference's LIST assembly for a SUBR:
+;; items evaluate in order and SEGMENT objects contribute their elements,
+;; already evaluated and never re-evaluated.
+(define (assemble-args raw-args eval-item)
+  (define items
+    (if (or (null? raw-args) (mpair? raw-args))
+        (mdl-list->list raw-args)
+        raw-args))
+  (let loop ([rest items] [acc '()])
+    (cond
+      [(null? rest) acc]
+      [(mdl-segment? (car rest))
+       (define value (mdl-eval (mdl-segment-payload (car rest))))
+       (loop (cdr rest) (append acc (segment-elements value)))]
+      [else (loop (cdr rest) (append acc (list (eval-item (car rest)))))])))
 
 ;; Historical formal sections over runtime data, mirroring the compiled
 ;; parser: required atoms, then OPTIONAL, then one ARGS/TUPLE rest
@@ -585,7 +804,29 @@
   (define leading-act (if (mdl-macro? fn) (mdl-macro-leading-act fn)
                           (mdl-function-leading-act fn)))
   (define specs (interpreted-formal-specs formals leading-act))
-  (define raw-list (if (mpair? raw-args) (mdl-list->list raw-args) raw-args))
+  ;; Raw arguments may carry SEGMENT objects; expand them (in order) at the
+  ;; call level so spliced elements are values, never re-evaluated.
+  ;; FUNCTION call arguments assemble spliced elements (see expand-arg-items);
+  ;; MACRO call arguments stay entirely raw, like the reference's MACRO
+  ;; branch, which never evaluates or expands the argument list — a SEGMENT
+  ;; in a macro call binds as the SEGMENT object (PR #49 review).
+  (define raw-list
+    (if (mdl-macro? fn)
+        (map (lambda (item) (cons 'raw item))
+             (if (or (null? raw-args) (mpair? raw-args))
+                 (mdl-list->list raw-args)
+                 raw-args))
+        (expand-arg-items raw-args)))
+  (define (arg-value entry evaluate)
+    ;; entry: (cons 'value v) for a spliced element, or (cons 'raw data) for
+    ;; a plain argument (evaluated in the caller only when asked).
+    (if (eq? (car entry) 'value)
+        (cdr entry)
+        (if evaluate
+            (parameterize ([current-mdl-function-owner caller-owner]
+                           [current-mdl-locals caller-locals])
+              (mdl-eval (cdr entry)))
+            (cdr entry))))
   (define caller-owner (current-mdl-function-owner))
   (define caller-locals (current-mdl-locals))
   (parameterize ([current-mdl-function-owner (gensym 'mdl-interpreted)])
@@ -617,21 +858,14 @@
               (case kind
                 [(required quoted)
                  (when (null? remaining) (too-few "Too few args in function call"))
-                 (bind! name (if (eq? kind 'quoted)
-                                 (car remaining)
-                                 (parameterize ([current-mdl-function-owner caller-owner]
-                                                [current-mdl-locals caller-locals])
-                                   (mdl-eval (car remaining)))))
+                 (bind! name (arg-value (car remaining) (not (eq? kind 'quoted))))
                  (set! remaining (cdr remaining))]
                 [(optional quoted-optional)
                  (if (null? remaining)
                      (bind! name (if default (mdl-eval default) unassigned))
                      (begin
-                       (bind! name (if (eq? kind 'quoted-optional)
-                                       (car remaining)
-                                       (parameterize ([current-mdl-function-owner caller-owner]
-                                                      [current-mdl-locals caller-locals])
-                                         (mdl-eval (car remaining)))))
+                       (bind! name (arg-value (car remaining)
+                                              (not (eq? kind 'quoted-optional))))
                        (set! remaining (cdr remaining))))]
                 [(rest-tuple rest-args)
                  (bind! name (if (null? remaining)
@@ -641,8 +875,12 @@
                                       (apply mdl-list
                                              (parameterize ([current-mdl-function-owner caller-owner]
                                                             [current-mdl-locals caller-locals])
-                                               (map mdl-eval remaining))))
-                                     (apply mdl-list remaining))))
+                                               (map (lambda (entry)
+                                                      (if (eq? (car entry) 'raw)
+                                                          (mdl-eval (cdr entry))
+                                                          (cdr entry)))
+                                                    remaining))))
+                                     (apply mdl-list (map cdr remaining)))))
                  (set! remaining '())]
                 [(aux) (bind! name (if default (mdl-eval default) unassigned))]
                 [(name) (bind! name frame)]
@@ -663,20 +901,24 @@
                   (check-result! decl result))))))
       (lambda () (set-mdl-activation-live?! frame #f))))))
 
-;; The runtime evaluator over MDL data.
+;; The runtime evaluator over MDL data. A SEGMENT object evaluates only as
+;; an element of a structure being built: standalone evaluation is the
+;; reference's ILLEGAL-SEGMENT break, and a plain element whose value is a
+;; SEGMENT object is stored without re-splicing.
 (define (mdl-eval value)
   (cond
+    [(mdl-segment? value) (mdl-segment-standalone-error)]
     [(mdl-form? value) (mdl-eval-form value)]
-    [(mpair? value)
-     (apply mdl-list (map mdl-eval (mdl-list->list value)))]
+    [(or (null? value) (mpair? value))
+     (build-eval-list (mdl-list->list value))]
     [(and (mdl-array? value) (eq? (mdl-array-kind value) 'VECTOR))
-     (apply mdl-vector
-            (map mdl-eval (for/list ([i (in-range (mdl-array-length value))])
-                            (mdl-nth value (add1 i)))))]
+     (build-eval-vector
+      (for/list ([i (in-range (mdl-array-length value))])
+        (mdl-nth value (add1 i))))]
     [(and (mdl-array? value) (eq? (mdl-array-kind value) 'UVECTOR))
-     (apply mdl-uvector
-            (map mdl-eval (for/list ([i (in-range (mdl-array-length value))])
-                            (mdl-nth value (add1 i)))))]
+     (build-eval-uvector
+      (for/list ([i (in-range (mdl-array-length value))])
+        (mdl-nth value (add1 i))))]
     [else value]))
 
 (define (mdl-eval-form form)
@@ -844,6 +1086,8 @@
 ;; through the runtime evaluator at bind time, so macros and quoted
 ;; formals see raw arguments and side effects in unevaluated arguments do
 ;; not run; procedure applications evaluate the compiled thunks in order.
+;; Splice markers among the thunk results assemble into the argument list
+;; in order before the operator is applied (chapter 7.5.2).
 (define (mdl-apply-form name raw-args-thunk arg-thunks)
   (define atom (binding-atom 'mdl-apply-form name))
   (define fn (resolve-operator atom))
@@ -852,7 +1096,13 @@
      (define result (mdl-apply-interpreted fn (raw-args-thunk)))
      (if (mdl-macro? fn) (mdl-eval result) result)]
     [(procedure? fn)
-     (apply fn (map (lambda (thunk) (thunk)) arg-thunks))]
+     (define results (map (lambda (thunk) (thunk)) arg-thunks))
+     (apply fn
+            (append*
+             (for/list ([value (in-list results)])
+               (if (mdl-splice-result? value)
+                   (segment-elements (mdl-splice-result-value value))
+                   (list value)))))]
     [else (error 'mdl-apply-form "unassigned or non-applicable MDL operator ~a"
                  (mdl-atom-pname atom))]))
 
@@ -950,6 +1200,7 @@
                           ("UVECTOR" . "UVECTOR") ("STRING" . "STRING")
                           ("FIX" . "WORD") ("FLOAT" . "WORD")
                           ("WORD" . "WORD") ("BITS" . "WORD")
+                          ("CHARACTER" . "WORD")
                           ("FRAME" . "FRAME")
                           ("TUPLE" . "TUPLE")
                           ("MACRO" . "LIST")
@@ -1238,6 +1489,11 @@
               (not (eq? (mdl-type value) element-type)))
       (error 'mdl-uvector "UVECTOR elements must have one permitted TYPE")))
   (mdl-array 'UVECTOR (list->vector values) 0 (length values) element-type))
+
+;; Unevaluated UVECTOR data may contain SEGMENT placeholders; uniformity is
+;; enforced when the data is evaluated (see uniform-uvector).
+(define (mdl-data-uvector . values)
+  (mdl-array 'UVECTOR (list->vector values) 0 (length values) #f))
 
 (define (mdl-list-head value who)
   (cond [(mdl-typed-value? value) (mdl-list-head (mdl-base value) who)]

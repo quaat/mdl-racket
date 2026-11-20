@@ -690,3 +690,57 @@ enters its explicit `ERROR MSETG ... ALREADY-GASSIGNED` branch. Confusion
 does not have active local declaration checking, so its wrong-FOO error comes
 from `GASSIGNED?`, while the Racket implementation rejects at the declaration
 binding boundary.
+
+## M2 D2 specification: SEGMENT (`!` splice) evaluation
+
+Chapter 7 of *The MDL Programming Language* defines SEGMENT objects, read
+with `!`: `!.ATOM` denotes a segment of `<LVAL ATOM>`, `!,ATOM` of
+`<GVAL ATOM>`, and `!<FORM...>` (the trailing `!` optional immediately
+before the closing `>`, read as the `!>` digraph) of the FORM's value.
+Evaluating a structure — LIST, VECTOR, UVECTOR, or a FORM's argument list —
+inserts the *elements* of each segment's value at its position, evaluating
+every element in strict left-to-right order. A segment's value must be a
+structured object: LIST, FALSE, FORM, and TUPLE payloads contribute their
+elements, VECTOR and UVECTOR payloads their element sequence, and STRING
+payloads its characters as CHARACTER values. A segment evaluating to a
+non-structured value, or standing alone outside a structure evaluation, is
+the reference's `ILLEGAL-SEGMENT` error; spliced values are never
+re-evaluated. A UVECTOR construction enforces uniform element types
+(`TYPES-DIFFER-IN-UNIFORM-VECTOR`).
+
+A LIST-valued segment in the **final** position of a LIST construction
+shares the payload's tail cells instead of copying them, so mutation
+(`PUT`) through either name is visible in both; non-final segments, and
+all VECTOR/UVECTOR constructions, copy. FALSE and TUPLE payloads and
+NEWTYPE-wrapped (typed) structured values splice their elements like the
+reference's structure walker. Segments in quoted structures stay
+unevaluated SEGMENT data that prints back in its original notation, and a
+plain element whose value happens to be a SEGMENT object is stored as a
+value, not re-spliced. MACRO call arguments are never segment-expanded:
+a segment in a macro call binds as the SEGMENT object, exactly like the
+pinned reference's raw-argument MACRO branch. `![`/`!]` remain UVECTOR
+delimiters, not segment notation. The pinned interpreter's own
+`#UVECTOR [...]` input crashes it; that syntax stays an explicit
+unsupported construct here. Two reader consequences of the `!>` close
+match the reference: a trailing `!>` inside an ordinary (non-segment)
+form such as `<FOO A!>` is now a reader error, and a quoted UVECTOR
+containing a segment placeholder (`'![1 !.X]`) evaluates to a
+uniformity-unchecked data object whose `PUT` raises a type error even at
+non-segment slots — the reference instead rejects such reads outright
+(`TYPES-DIFFER-IN-UNIFORM-VECTOR`), which is acceptable only because no
+historical source constructs one.
+
+Recorded deviations from the pinned reference (evidence in
+`docs/evidence/M2/SEGMENTS.md`): the reference's interpreted FUNCTION
+application does **not** splice segments in call arguments (its argument
+binder consumes raw items), while its SUBR path does. This implementation
+follows the manual's general rule — segments splice into FORM argument
+assembly — in both the compiled and interpreted paths, per the repository's
+compiled/interpreted agreement requirement, and records the reference's
+interpreted path as the deviation. Second, interpreted call assembly
+evaluates segment payloads eagerly, before bind-time evaluation of plain
+formals, where the compiled path interleaves; this is observable only when
+a segment payload and a later plain argument of the same interpreted call
+both have side effects. No reference observation pins that case, and no
+historical source exercises it; it stays a recorded divergence pending a
+source-backed need.
