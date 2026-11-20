@@ -42,14 +42,13 @@
 (check sha-error "")
 (check (car (string-split sha-output)) expected-sha)
 
-;; The complete original file now attempts cleanly: since D3 (structured
+;; The complete original file now loads in full: since D3 (structured
 ;; declaration patterns, issue #48) the PSETG declaration <LIST [REST ATOM]>
 ;; at 11:9 normalizes at install time, so all eight expressions of
-;; 81prim.mud load, and the file's load stops... nowhere: 81prim.mud loads
-;; in full. The D3-relevant chain failure moved downstream: driving the
-;; pinned 77loadall.mud entry stops at 77defs.mud expression 1, whose
-;; <AND <L? ,MUDDLE 100> ...> needs the unassigned global MUDDLE - a
-;; non-declaration runtime blocker for a later slice.
+;; 81prim.mud load. Since D4 (issue #51) the 77loadall.mud chain passes the
+;; 77defs.mud:1 MUDDLE guard (short-circuits with ,MUDDLE = 101) and now
+;; stops at 77defs.mud expression 3's atom-property PUT - the assertions
+;; below pin both the full 81prim load and the new chain barrier.
 (define root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
 (dynamic-wind
  void
@@ -94,16 +93,21 @@
    (define chain-report
      (mdl-session-load! chain-session "77loadall.mud"))
    (check (hash-ref chain-report 'status) "FAIL")
-   (check (hash-ref chain-report 'completed_expressions) 10)
+   ;; Since D4 (the interpreter-supplied MUDDLE global, issue #51) the
+   ;; 77defs.mud:1 guard <L? ,MUDDLE 100> is false with ,MUDDLE = 101, so the
+   ;; AND short-circuits and the chain advances past it; the next blocker is
+   ;; 77defs.mud expression 3, <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>,
+   ;; whose atom-property PUT form is a later slice.
+   (check (hash-ref chain-report 'completed_expressions) 12)
    (define failure (hash-ref chain-report 'failure))
    (check (hash-ref failure 'file) "77defs.mud")
-   (check (hash-ref failure 'expression_index) 1)
+   (check (hash-ref failure 'expression_index) 3)
    (check (hash-ref failure 'stage) "execute")
-   (check (hash-ref failure 'construct) "AND")
-   (check (hash-ref failure 'line) 1)
+   (check (hash-ref failure 'construct) "PUT")
+   (check (hash-ref failure 'line) 5)
    (check (hash-ref failure 'column) 1)
    (check (string-contains? (hash-ref failure 'exception)
-                            "unassigned MDL global MUDDLE")
+                            "index out of range")
           #t))
  (lambda ()
    (with-handlers ([exn:fail? void])

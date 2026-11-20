@@ -4,8 +4,10 @@ Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-19 (post-D1 merge,
 D2 in progress).
 
-- **Milestone / gate:** M2. G0/G1/G2 PASS and **M2-D1 merged**; integrated
-  M3-style gate NOT RUN. M2 milestone NOT YET PASS.
+- **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), and
+  the agent definitions (PR #47) are all **merged into `main`** (current
+  main `89ab9cd`, post-merge CI green); issues #44/#46/#48 closed.
+  Integrated M3-style gate NOT RUN. M2 milestone NOT YET PASS.
 - **Active issues/PRs:** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
   (D2 SEGMENT) — review findings fixed, CI green on head `c4a1d63`,
   **awaiting maintainer merge decision**;
@@ -81,15 +83,24 @@ D2 in progress).
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
   `DECL?` false payload follows Confusion (`#FALSE (value pattern)`).
-- **Exact next action:** confirm CI green on PR #49 head `e26f3a8`, then
-  merge with maintainer approval; then launch the D3 Flash implementer on
-  `feat/m2-decl-patterns` (the `[REST ...]` structured-pattern slice,
-  issue #48 — Confusion's DECL? implements the subset, so the reference
-  backing is direct), then retry the full `77loadall.mud` load and record
-  the next blocker. Key D3 reference facts: the PSETG pattern accepts (),
-  (A), (A B) and rejects (A 1) with #FALSE (1 ATOM); overall-type
-  mismatches return bare #FALSE () while element mismatches carry
-  (value pattern) — see docs/evidence/M2/DECLARATION-PATTERNS.md.
+- **D4 state (implemented and verified on `feat/m2-muddle`, main-agent
+  change):** `MUDDLE` seeded as FIX `101` per the reference, interned in
+  each session's atom space; the chain completes **twelve** expressions
+  and stops at `77defs.mud` expression 3 (`<PUT RAPPLIC DECL '...>>` —
+  atom-property PUT, the next dependency). Fresh suites: 802 Racket
+  checks (muddle suite 9), loader 57, historical 23 + 20, Python 13,
+  `git diff --check` clean. **The pinned reference loads the entire
+  12-file chain to `DONE` — the concrete parity target.**
+- **First failing source construct:** atom-property `PUT` at
+  `77defs.mud` expression 3 (`<PUT RAPPLIC DECL '<OR ATOM FALSE
+  NOFFSET>>`, execute stage, 5:1) — the chain is at twelve completed
+  expressions.
+- **Exact next action:** commit and push the D4 branch, open the D4 PR
+  referencing issue #51, run CI and independent review; then create the
+  atom-property PUT issue (chapter 13: atom properties/associations —
+  probe Confusion for `PUT`/`GET`/`GETPROP` on atoms), delegate to the
+  Flash implementer, and advance toward the reference's full-chain
+  `DONE` parity target.
 - **Full evidence:** `docs/evidence/M2/DECLARATIONS.md` (D1 slice),
   `docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md` (recovery),
   `docs/evidence/M2/SOURCE-EXECUTION.md` (live execution inventory),

@@ -227,6 +227,10 @@ observations, while manual semantics win where the reference is incomplete.
   the probe tool, `complete: false` — by design)
 - `docs/evidence/M2/DECLARATION-PATTERNS.md` (this note)
 
+> Superseded by D4 (issue #51, `MUDDLE.md`): the twelve-expression
+> progression and the atom-property PUT barrier below the MUDDLE guard
+> replace the ten-expression state recorded in this D3-time evidence.
+
 ## Implementation record (D3, main-session verification)
 
 Implemented on branch `feat/m2-decl-patterns` (merge of the

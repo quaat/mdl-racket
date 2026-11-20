@@ -20,11 +20,11 @@ symlink lookup order, consecutive parent components, and interpreted session
 calls; `make test`, both CI workflows, and the pinned Confusion
 build/capture/probes pass. Reproduce its pinned-source failure with
 `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json`.
-That command exits 1 after ten completed expressions, at the unassigned
-global `MUDDLE` in `77defs.mud` (the historical interpreter-version
-global; `81prim.mud` now loads in full, including the original `PSETG`
-with its structured declaration); game
-initialization is not supported. The
+That command exits 1 after twelve completed expressions, at the
+atom-property `PUT` in `77defs.mud` (the interpreter-version global
+`MUDDLE` is bound to the reference's FIX `101` and `81prim.mud` loads in
+full, including the original `PSETG` with its structured declaration);
+game initialization is not supported. The
 [G2 partial-source probe](docs/evidence/M2/HISTORICAL-VFLOAD.md) verifies
 the pinned source hash and invokes the unmodified reconstructed `VFLOAD`
 definition on a controlled file with matching Confusion output and state.
@@ -34,10 +34,14 @@ latest G1 path fix is merged and passes locally, with combined-branch CI
 also passing. Run
 `make test-historical` to reproduce the probe. The loader reports the 12
 unexecuted forms explicitly. M2's integrated gate and gameplay remain
-unverified; the `MUDDLE` global (and the `MEMQ` primitive `PSETG` calls) is the next source dependency.
+unverified; atom-property `PUT` in `77defs.mud` is the next source dependency (then the `MEMQ` primitive `PSETG` calls).
 The [M2 source execution inventory](docs/evidence/M2/SOURCE-EXECUTION.md)
 lists the loaded, invoked, blocked, and untested definitions separately.
 
+The [MUDDLE slice](docs/evidence/M2/MUDDLE.md) binds the
+interpreter-supplied version global `MUDDLE` to the pinned reference's
+FIX `101` in every fresh session, so the `77defs.mud` version guard
+short-circuits exactly like the reference. Its local gate is **PASS**.
 The [structured declaration slice](docs/evidence/M2/DECLARATION-PATTERNS.md)
 implements chapter-14 `<struc [REST ...]>` patterns for LIST, VECTOR,
 UVECTOR, and TUPLE with required element prefixes, cyclic multi-pattern

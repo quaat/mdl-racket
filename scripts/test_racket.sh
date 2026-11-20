@@ -8,5 +8,5 @@ raco test mdl/runtime/core.rkt \
   tests/binding_test.rkt tests/word_test.rkt tests/integration_test.rkt \
   tests/prog_test.rkt tests/equality_cycle_test.rkt tests/repeat_test.rkt \
   tests/activation_target_test.rkt tests/formals_test.rkt \
-  tests/control_test.rkt tests/macro_test.rkt tests/loader_test.rkt \
+  tests/control_test.rkt tests/macro_test.rkt tests/loader_test.rkt tests/muddle_test.rkt \
   tests/declaration_test.rkt tests/declaration_pattern_test.rkt tests/segment_test.rkt
