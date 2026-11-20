@@ -20,10 +20,13 @@ symlink lookup order, consecutive parent components, and interpreted session
 calls; `make test`, both CI workflows, and the pinned Confusion
 build/capture/probes pass. Reproduce its pinned-source failure with
 `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json`.
-That command exits 1 after twelve completed expressions, at the
-atom-property `PUT` in `77defs.mud` (the interpreter-version global
-`MUDDLE` is bound to the reference's FIX `101` and `81prim.mud` loads in
-full, including the original `PSETG` with its structured declaration);
+That command exits 1 after **twenty-four** completed expressions, at the
+`EMPTY?` primitive called by the original source-defined `NEWSTRUC` in
+`77defs.mud` expression 15 (with D5's atom-property `PUT`/`GET`
+associations, `81prim.mud` loads in full — including the original
+`PSETG` with its structured declaration — and `77defs.mud` expressions
+1–14 execute, including the historical
+`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` declaration property);
 game initialization is not supported. The
 [G2 partial-source probe](docs/evidence/M2/HISTORICAL-VFLOAD.md) verifies
 the pinned source hash and invokes the unmodified reconstructed `VFLOAD`

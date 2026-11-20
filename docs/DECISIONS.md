@@ -486,3 +486,38 @@ the remaining 12 expressions ran. CHARACTER values, explicit CHANNEL/count
 I/O, historical CRLF terminal behavior, declarations and game bootstrap
 remain unsupported. No upstream or game source changed, and no GPLv3 code
 was copied into the runtime.
+
+## ADR-0023: Session-owned ==?-identity association space
+
+**Decision:** Implement MDL atom-property associations (D5, issue #53) as
+a weak `eq?`-keyed table owned by the session's atom space, keyed by the
+*item* with indicators matched by `mdl-identical?` (`==?`), preserving the
+stored value's exact identity. `PUT` and `GET` dispatch by the pinned
+reference's classification: structured item + FIX indicator keeps the
+existing element store; every other combination is an association
+(including FIX indicators on non-structured items); two-argument PUT
+removes the association and echoes the item. `DECL?` consults an atom's
+`DECL` association through the existing D1/D3 declaration matcher,
+carrying the resolved leaf in the `#FALSE` payload. `GETPROP`/`PUTPROP`
+and chapter 13.4 machinery stay explicit unimplemented failures.
+
+**Why:** `77defs.mud` expression 3
+(`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>`) and the object/OBLIST
+property forms throughout the 1977 sources require association space
+with `==?` identity (the manual's chapter 13 warning: READ-generated
+structures do not match). Eighteen success and six deliberate-error
+pinned Confusion observations (evidence: `evidence/M2/ATOM-PROPS.md`)
+fix the dispatch, return values, and error behavior. Two manual passages
+conflict with the reference — removal returns the item (not the previous
+value) and `DECL?` misses print `#FALSE (leaf)` — and the reference wins
+both adjudications because it is the executable parity target.
+
+**Consequence:** The chain advances past the historical `RAPPLIC` barrier
+to twenty-four completed expressions; the new first barrier is `EMPTY?`
+inside the original `NEWSTRUC` (`77defs.mud` expression 15). Associations
+are strong-reference on the value side: an entry for an unreachable item
+stays alive as long as the atom space lives (a recorded deviation from
+ideal GC semantics, accepted to avoid duplicating Racket's weak boxes in
+the runtime). `SETG` intentionally does not enforce DECL associations.
+No equality semantics, reader behavior, or printing changed; each fresh
+session starts property-free.

@@ -1,4 +1,30 @@
-# Status — 2026-11-19 (M2 declarations merged; SEGMENT slice open)
+# Status — 2026-11-20 (M2 D1–D4 merged; D5 atom properties on branch; G3 open)
+
+## Current state (2026-11-20)
+
+- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; integrated G3 NOT RUN.
+- **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
+  patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
+- **On branch `feat/m2-atom-props` (D5, issue #53, ahead of origin):**
+  atom-property `PUT`/`GET` associations, session-owned `==?`-identity
+  association space, `DECL?` consultation of `DECL` associations. Fresh
+  suites: 735 Racket checks, 13 Python tests, `make test-historical`
+  green; the pinned `77loadall.mud` load completes **twenty-four**
+  expressions.
+- **First failing source construct:** `EMPTY?` (unassigned primitive)
+  inside the original source-defined `NEWSTRUC`, executing
+  `77defs.mud` expression 15 `<NEWSTRUC ROOM VECTOR ...>` (line 37,
+  execute stage).
+- **Known candidates next:** the `EMPTY?` primitive (and whatever else
+  the original `NEWSTRUC` reaches), then `MEMQ` for executing the
+  installed `PSETG`. Actual source execution sets priority.
+- **Parity target:** the pinned Confusion reference loads the full
+  12-file chain to `DONE`.
+- **Open issues:** #53 (D5, this branch); #11 recorded complete but not
+  yet closed. No open PRs at last check.
+- **Not demonstrated:** integrated M2 state invariants, game boot,
+  parser, puzzle behavior, RNG parity.
+
 
 ## M2 source execution audit (G0)
 
@@ -498,3 +524,31 @@ eager interpreted segment-payload evaluation) are recorded in
 slice's close the structured declaration patterns (issue #48, recorded
 above) were the next dependency; general APPLY/DISPATCH and original game
 execution remained open.
+
+## M2 issue #53: atom-property PUT/GET associations (D5)
+
+**Local slice: PASS (branch `feat/m2-atom-props`). M2 milestone: NOT YET
+PASS.** The D5 slice implements MDL association space: `PUT` and `GET`
+dispatch exactly as the pinned reference classifies (structured item +
+FIX indicator is the element store; every other combination — including
+FIX indicators on non-structured items — is an association;
+two-argument PUT removes and echoes the item; one-argument PUT is
+TOO-FEW-ARGUMENTS-SUPPLIED; three-argument GET on a structure errors).
+Associations match by `==?` identity via `mdl-identical?` in a weak
+`eq?` table owned by the session's atom space — fresh sessions start
+property-free. `DECL?` consults an atom's `DECL` association through
+the existing D1/D3 matcher and carries the resolved leaf in the `#FALSE`
+payload; `SETG` deliberately does not enforce it. `GETPROP`/`PUTPROP`
+and chapter 13.4 machinery remain explicit unimplemented failures.
+The historical `77defs.mud` expression 3
+`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` now executes; the pinned
+load advances from twelve to **twenty-four completed expressions** and
+stops at `77defs.mud` expression 15 (`EMPTY?` inside the original
+`NEWSTRUC`). `make test` passes 735 Racket checks and 13 Python tests.
+Eighteen pinned Confusion success cases and six deliberate-error
+observations back the semantics; the two manual-vs-reference conflicts
+(removal returns the item, not the previous value; augmented `#FALSE
+(leaf)` DECL? misses) are adjudicated toward the reference in
+[`docs/evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md) and ADR-0023.
+Full details in `docs/SEMANTICS.md` (M2 D5 section). The integrated G3
+gate and original game execution remain open.

@@ -262,7 +262,19 @@ association order (manual: newest first) is therefore not observable.
    "identical to PUTPROP except..." wording and its own numeric-item
    example; both task hypotheses to the contrary were recorded as clean
    successes instead.
-5. **SETG ignores an atom's association-declared type** — no enforcement
+5. **Two-argument PUT removal returns the item, not the previous value.**
+   The manual (13.1.3 wording) says removal "returns the value that was
+   associated"; the pinned reference's `association-remove-two-arg-put`
+   observation shows `<PUT RAPPLIC P V>` → `RAPPLIC`, then
+   `<PUT RAPPLIC P>` → `RAPPLIC` (the item echoed, NOT the old value `V`),
+   then `<GET RAPPLIC P>` → `#FALSE ()` (the removal itself confirmed).
+   The same shape holds for the item/indicator used, so the manual's
+   "previous value" reading cannot be reproduced in the reference. The
+   runtime follows the reference (removal echoes the item); this is a
+   recorded manual-vs-reference adjudication, chosen because the reference
+   is the executable parity target and the pinned sources discard the
+   removal return value anyway.
+6. **SETG ignores an atom's association-declared type** — no enforcement
    beyond the DECL? predicate (which is where the DECL property is actually
    consulted in the reference).
 
