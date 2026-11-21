@@ -2457,6 +2457,15 @@
   (define actual (mdl-type (car args)))
   (if (member actual (cdr args) eq?) actual (mdl-false '())))
 
+(define (mdl-andq . args)
+  ;; mdl-dispatch-call evaluates the complete SUBR argument list before
+  ;; invoking this procedure, including arguments after the first FALSE.
+  (let loop ([remaining args])
+    (cond [(null? remaining) (mdl-atom "T")]
+          [(not (mdl-truthy? (car remaining))) (car remaining)]
+          [(null? (cdr remaining)) (car remaining)]
+          [else (loop (cdr remaining))])))
+
 (define (mdl-emptyq . args)
   (case (length args)
     [(0) (error 'mdl-emptyq "Not enough arguments to EMPTY?")]
@@ -2522,6 +2531,7 @@
 (define builtin-table
   (hash "TYPE" mdl-type
         "TYPE?" mdl-typeq
+        "AND?" mdl-andq
         "EMPTY?" mdl-emptyq
         "LENGTH?" mdl-lengthq
         "LVAL" mdl-lval

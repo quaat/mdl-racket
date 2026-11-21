@@ -1254,3 +1254,27 @@ implements the manual operation rather than making a silent no-op. Tests
 must cover strict input shape, slot creation versus assignment,
 multiple names and patterns, existing value validation, SETG
 enforcement, and source-loader advance with zero skipped forms.
+
+## M3 eager AND? (issue #80; specification before implementation)
+
+The [MDL manual §8.2.3](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+defines `AND?` as the SUBR counterpart of short-circuit FSUBR `AND`:
+every argument is evaluated, left to right, before truth is tested.
+With no arguments it returns the session's `T` atom. Otherwise it
+returns the first FALSE argument, preserving its payload and identity,
+or the final argument if all are true; FIX zero is true. The unchanged
+`77defs.mud` expression 28, line 146, wraps five `<MSETG ...>` calls
+in AND? so every global assignment must occur, even if an earlier
+argument is FALSE. A later error must still propagate after an earlier
+FALSE because argument evaluation is eager.
+
+Seven clean pinned Confusion cases in `evidence/M3/andq-reference.json`
+cover zero arguments, last-value return, zero truth, first-FALSE
+payload, eager SET side effects, and original MSETG definitions loaded
+from the unchanged `81prim.mud`. The separate deliberate-error capture
+in `andq-error-reference.json` shows `<AND? <> <ERROR ANDQ-LATE>>`
+enters the native error level; the probe marks that case `ok=false` by
+design. The existing runtime dispatcher evaluates all arguments before
+calling a SUBR. `AND?` must use that path, not compile as short-circuit
+`AND`. Tests must pin both side effects and returned MDL values before
+the runtime addition, then rerun the unchanged loader.
