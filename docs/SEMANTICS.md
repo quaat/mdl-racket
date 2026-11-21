@@ -1446,6 +1446,11 @@ expression position undergoes ordinary MDL evaluation, while quoted
 data retains the object. Syntax-sensitive constructs such as DEFINE
 must inspect the substituted object's actual type and contents; an
 opaque reference cannot be treated as an unknown formal/name token.
+If `%` yields a SEGMENT object in an evaluated structure or call-argument
+position, its payload is evaluated and spliced by the existing SEGMENT
+rules. The same object in a standalone expression is an explicit
+ILLEGAL-SEGMENT error. A read-time substitute must keep this positional
+distinction rather than always calling ordinary `mdl-eval` on SEGMENT.
 
 The original `81tell-repl.mud:46` needs `%<STRING <ASCII 10>>`. The manual's
 `ASCII` conversion is bidirectional: a FIX ASCII code becomes a CHARACTER;

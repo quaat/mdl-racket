@@ -8,14 +8,15 @@ in `sources.lock.json`: MIT Zork
 `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`.
 
 The MDL manual §17.1.1 requires `%` evaluation immediately during READ.
-Nineteen isolated [pinned Confusion cases](percent-read-reference.json)
+Twenty-two isolated [pinned Confusion cases](percent-read-reference.json)
 confirm ASCII 10 is a CHARACTER, STRING of it is a one-character newline
 STRING, read-before-eval ordering, adjacent left-to-right substitutions,
 once-only function substitution, quoted LIST identity, nested structure
 substitution, `%<>`, expression evaluation of substituted FORM/LIST values,
-and substituted DEFINE names/formals. The command
+substituted DEFINE names/formals, and SEGMENT splicing through LIST,
+VECTOR and call-argument assembly. The command
 `.venv/bin/python -m scripts.mdl_probe --cases docs/evidence/M3/percent-read-cases.json --output docs/evidence/M3/percent-read-reference.json`
-exits **0**. Seven [deliberate error observations](percent-read-errors-reference.json)
+exits **0**. Eight [deliberate error observations](percent-read-errors-reference.json)
 show ASCII out-of-range/type errors, STRING argument errors and an unbound
 read-time form. Their same probe command using `percent-read-errors-cases.json`
 exits **1 as expected** because the probe tool requires clean stderr.
@@ -40,9 +41,13 @@ PR review then found that substituted FORM/LIST expressions bypassed
 ordinary evaluation and substituted ATOMs were opaque to DEFINE's name
 and formal parser. Focused tests failed **1** before that correction
 (`EVALFORM` was a FORM and `DYNAMIC` was unbound). After the correction,
-they exit **0**, 35 focused checks. The new validator
+they exited **0** with 35 checks. A second review identified substituted
+SEGMENT splicing; a focused regression failed **1** before the correction
+and now passes in LIST, VECTOR and call-argument positions, while a
+standalone SEGMENT still errors. The suite exits **0** with 40 focused
+checks. The new validator
 case verifies distinct `read-eval` failure staging. `make test` exits **0**
-with **1,195 Racket and 23 Python** tests; `make m2-check` exits **0**
+with **1,200 Racket and 23 Python** tests; `make m2-check` exits **0**
 with G3 58, native 12-case primitives, and a five-turn reference capture.
 `make reference-build` exits **0** and reports no upstream modification.
 `git diff --check` exits **0**. Local versions: Racket 7.9 bc,

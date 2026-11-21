@@ -30,6 +30,7 @@
         (cond [(mdl-atom? value) 'atom]
               [(string? value) 'string]
               [(mdl-form? value) 'form]
+              [(mdl-segment? value) 'splice]
               [(or (null? value) (mpair? value)) 'list]
               [(mdl-array? value)
                (string->symbol (string-downcase
@@ -636,7 +637,15 @@
 (define (compile-expression/body n locals)
   (case (mdl-node-kind n)
     [(character) `(mdl-character ,(source-node-value n))]
-    [(read-value) `(mdl-eval (mdl-read-value ,(raw-node-value n)))]
+    [(read-value)
+     (if (mdl-segment? (substitution-value n))
+         (if (current-structured-context)
+             `(mdl-splice-result
+               (mdl-eval (mdl-segment-payload
+                          (mdl-read-value ,(raw-node-value n))))
+               ,(mdl-node-line n) ,(mdl-node-column n))
+             `(mdl-eval (mdl-read-value ,(raw-node-value n))))
+         `(mdl-eval (mdl-read-value ,(raw-node-value n))))]
     [(percent) (compile-data n)]
     [(atom) (mdl-constant n)]
     [(false) (retain-literal n)]

@@ -882,6 +882,8 @@ object rather than recreating it from syntax. Syntax-sensitive compiler
 paths may inspect a one-level type/content projection whose children
 still refer to the original registry objects. Ordinary expression
 positions evaluate the substituted object; data positions retain it.
+Substituted SEGMENT values enter the existing splice path in structured
+or call-argument positions and raise ILLEGAL-SEGMENT when standalone.
 Nested FLOAD inherits the same session and registry. Each new session
 owns a separate registry. Reader evaluation errors retain the percent
 location and stop

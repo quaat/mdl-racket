@@ -31,7 +31,10 @@
           "<DEFINE FORMAL (%'X) .X>\n"
           "<DEFINE FORMLIST %'(Y) .Y>\n"
           "<SETG QUOTEDFORM '%'<+ 1 2>>\n"
-          "<SETG EVALLIST %'(1 <+ 1 1>)>\n"))
+          "<SETG EVALLIST %'(1 <+ 1 1>)>\n"
+          "<SETG SPLIST (0 %'!<LIST 1 2> 3)>\n"
+          "<SETG SPVEC [0 %'!<LIST 1 2> 3]>\n"
+          "<SETG SPCALL <LIST 0 %'!<LIST 1 2> 3>>\n"))
     (define session (make-mdl-session root))
     (check-equal? (status (mdl-session-load! session "read.mud")) "PASS")
     (check-equal? (mdl-session-global session "NEWLINE") "\n")
@@ -45,6 +48,10 @@
                                      (mdl-session-global session "QUOTEDFORM")))
                   "FORM")
     (check-equal? (mdl-list->list (mdl-session-global session "EVALLIST")) '(1 2))
+    (check-equal? (mdl-list->list (mdl-session-global session "SPLIST")) '(0 1 2 3))
+    (check-equal? (mdl-session-call session "LENGTH"
+                                     (mdl-session-global session "SPVEC")) 4)
+    (check-equal? (mdl-list->list (mdl-session-global session "SPCALL")) '(0 1 2 3))
     (check-equal? (mdl-session-global session "N") 8)
     (check-equal? (mdl-list->list (mdl-session-global session "BEFORE")) '(8 4))
     (check-equal? (mdl-session-call session "NTH"
@@ -80,6 +87,11 @@
     (define bad-form (mdl-session-load! session "bad-form.mud"))
     (check-equal? (status bad-form) "FAIL")
     (check-equal? (hash-ref (failure bad-form) 'stage) "execute")
+    (put "standalone-segment.mud" "%'!<LIST 1 2>\n")
+    (define standalone (mdl-session-load! session "standalone-segment.mud"))
+    (check-equal? (status standalone) "FAIL")
+    (check-true (regexp-match? #rx"ILLEGAL-SEGMENT"
+                               (hash-ref (failure standalone) 'exception)))
     (put "unsupported.mud" "<SETG BAD %%<SETG N 99>>\n")
     (check-equal? (status (mdl-session-load! session "unsupported.mud")) "FAIL")
     (check-equal? (mdl-session-global session "N") 8)

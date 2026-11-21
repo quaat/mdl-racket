@@ -5,8 +5,8 @@
 Issue #94 adds `tests/percent_read_test.rkt` to the explicit Racket
 suite and a validator regression in `tests/test_m3_source_progress.py`.
 The focused Racket test initially exited 1 because the first `%` made
-the load fail; after independent review and correction it exits 0
-with 35 focused checks. The 19 clean pinned Confusion cases and seven
+the load fail; after two independent review corrections it exits 0
+with 40 focused checks. The 22 clean pinned Confusion cases and eight
 deliberate error observations are saved in
 `evidence/M3/percent-read-*-reference.json`. Run:
 

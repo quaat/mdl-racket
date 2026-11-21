@@ -20,6 +20,9 @@
     {"name": "substituted-formal", "expression": "<DEFINE M3D (%'X) .X> <M3D 5>"},
     {"name": "substituted-formal-list", "expression": "<DEFINE M3D %'(X) .X> <M3D 9>"},
     {"name": "quoted-substituted-form", "expression": "<SETG M3F '%'<+ 1 2>> <TYPE ,M3F>"},
-    {"name": "substituted-list-eval", "expression": "<SETG M3L %'(1 <+ 1 1>)> ,M3L"}
+    {"name": "substituted-list-eval", "expression": "<SETG M3L %'(1 <+ 1 1>)> ,M3L"},
+    {"name": "substituted-segment-list", "expression": "(0 %'!<LIST 1 2> 3)"},
+    {"name": "substituted-segment-vector", "expression": "[0 %'!<LIST 1 2> 3]"},
+    {"name": "substituted-segment-call-arguments", "expression": "<LIST 0 %'!<LIST 1 2> 3>"}
   ]
 }
