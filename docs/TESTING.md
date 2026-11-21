@@ -1,6 +1,21 @@
 # Test strategy, reference capture, and parity contract
 
-## Current M2 branch checkpoint (2026-11-20)
+## Current M2 mainline checkpoint (2026-11-21)
+
+The [mainline gate](evidence/M2/MAINLINE-GATE.md) passes at integrated
+code baseline `7d34195`. Run `make reference-build` once, then
+`make m2-check` for doctor, locked sources, reader sweep, offline tests,
+historical original-definition probes, G3, native primitive probe and
+five-turn capture. On that baseline the target exits 0 with 986 Racket
+checks, 13 Python tests and 59 G3 assertions. The direct comparison of
+the freshly rebuilt native capture to the approved M0 golden exits 2
+solely for Confusion's build timestamp; a comparison with only that line
+normalized finds zero mismatches and the game SHA matches. This does not
+compare a Racket game transcript. The complete original loader separately
+exits 1 at EMPTY? after 24 forms. Before M3 advances it, decouple the
+fixed 24-form expectation from the M2 G3 suite.
+
+## Earlier M2 branch checkpoint (2026-11-20)
 
 Run `make test` for the offline Racket and Python suites,
 `make test-historical` for hash-verified original definitions, and

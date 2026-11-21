@@ -73,19 +73,16 @@ Begin with only the FALSE/value primitive in #3. Close each issue on its own
 Confusion-backed tests and evidence; this graph is planning, not a claim that
 later semantics are already implemented.
 
-## M2 — Execution semantics and MDL compilation (CURRENT)
+## M2 — Execution semantics and MDL compilation (PASS)
 
 The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md),
 [G1 shared-session source loader](evidence/M2/SOURCE-LOADER.md), and
 [G2 original VFLOAD probe](evidence/M2/HISTORICAL-VFLOAD.md) pass.
-On the stacked `feat/m2-mapf` branch, [G3 original-definition execution](evidence/M2/G3-GATE-MAPF.md)
-passes 59 assertions. This is a branch result. The indirect
-APPLY/DISPATCH correction for issue #69 and the
-[requirements audit](evidence/M2/REQUIREMENTS-AUDIT.md) are recorded on a
-child branch. M2 still requires final-head CI and review, authorized
-integration, and mainline verification. The complete historical
-loader separately stops at `EMPTY?` after 24 completed forms. Prior FAIL
-decisions and their exact blockers remain in [the dated G3 report](evidence/M2/G3-GATE.md)
+The [mainline gate](evidence/M2/MAINLINE-GATE.md) passes at the integrated
+`main` code baseline `7d34195`, including 59 original-definition G3
+assertions and the [requirements audit](evidence/M2/REQUIREMENTS-AUDIT.md).
+The complete historical loader separately stops at `EMPTY?` after 24
+completed forms. Prior FAIL decisions remain in the [dated G3 report](evidence/M2/G3-GATE.md)
 and [status history](STATUS.md).
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
@@ -97,7 +94,13 @@ loading/linking across source files.
 source definitions, with no loss of semantic aliasing/continuations.
 
 **Tasks:** #12 control flow and activation records, #13 macros,
-#14 function application/binding, #15 source loader, #16 random/event APIs.
+#14 function application/binding, #15 source loader. The earlier task-list
+entry “#16 random/event APIs” was outside this milestone's stated Build
+and Gate; it is now explicitly assigned to
+[M3 issue #71](https://github.com/quaat/mdl-racket/issues/71), where
+unchanged game source and reference observations can define its behavior.
+See ADR-0030 in `docs/DECISIONS.md`. M2 PASS makes no claim about random
+or event runtime parity.
 
 ### M2 first slice and dependency order
 

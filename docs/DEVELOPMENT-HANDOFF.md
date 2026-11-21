@@ -1,25 +1,17 @@
 # Development handoff — MDL on Racket
 
 Durable cross-session state. Update at every meaningful checkpoint; link to
-evidence instead of duplicating logs. Last updated 2026-11-20.
+evidence instead of duplicating logs. Last updated 2026-11-21.
 
-**Current checkpoint:** `feat/m2-indirect-apply` builds on MAPF PR #68,
-which builds on PR #66 and carries the D5 final-head review correction.
-`make test-m2-g3` passes 59 integrated
-assertions against SHA-verified original 77loadall/81prim/77defs bytes.
-MAPF, TYPE?, and startup OBLIST associations permit the original FLAGWORD
-paths, including a deliberate MSETG conflict, to execute. The full loader
-still exits 1 at EMPTY? after 24 forms. See
-`docs/evidence/M2/MAPF.md` and `G3-GATE-MAPF.md`. Issue #69's
-reference-backed indirect APPLY/DISPATCH correction and the
-`REQUIREMENTS-AUDIT.md` matrix are now on the child branch. `make test`
-passes 986 Racket and 13 Python checks; `make test-historical` and G3
-pass. Both PR #68 workflows are green; PR #70's implementation head
-`3622b22` also passed both required workflows. See
-`docs/evidence/M2/BRANCH-ACCEPTANCE.md` for exact runs and limits.
-**M2 is not closed**: obtain final-head review and authorization, and
-verify the integrated result on main.
-PR #54 remains unmerged; do not begin M3. User untracked files
+**Current checkpoint:** M2 integrated on `main` at `7d34195`, with 59
+SHA-verified G3 assertions, 986 Racket checks and 13 Python tests.
+`make m2-check` and the final mainline harness workflow passed. See
+`docs/evidence/M2/MAINLINE-GATE.md` for all merge commits, command exits,
+source hashes, reference comparisons and limits. The full original loader
+still exits 1 at unassigned EMPTY? in `77defs.mud` expression 15 after 24
+completed forms. **Next:** decouple M2's fixed-loader failure assertion,
+then implement M3 EMPTY? from native evidence and advance the unchanged
+source chain. Random/event APIs are M3 issue #71. User untracked files
 `.claude/worktrees/` and `tests/fixtures/mytest.mdl` are untouched.
 
 ## Earlier checkpoints (retained for provenance)
