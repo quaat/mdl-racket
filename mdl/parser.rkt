@@ -178,7 +178,7 @@
             (node 'typed (cons name (read-node! c)))]
            [(and (string-ci=? name "#FALSE") (equal? (peek c) #\())
             (node 'false (mdl-node-value (read-node! c)))]
-           [(and (string-ci=? name "#WORD") (peek c)
+           [(and (regexp-match? #px"^#[A-Za-z]" name) (peek c)
                  (or (char-numeric? (peek c))
                      (memv (peek c) '(#\* #\- #\+))))
             (node 'typed (cons name (read-node! c)))]

@@ -30,10 +30,12 @@ The [eager AND? slice](docs/evidence/M3/ANDQ.md) reached 70 forms.
 The [quoted OPTIONAL default slice](docs/evidence/M3/QUOTED-OPTIONAL.md)
 reached 87 forms. The [APPLICABLE declaration slice](docs/evidence/M3/APPLICABLE-DECL.md)
 reached 112 and loaded `77defs.mud` in full. The current
-[`%<>` slice](docs/evidence/M3/PERCENT-EMPTY.md) reaches 136 completed,
-zero skipped forms and loads `77makstr.mud` in full. It stops at a
-three-element typed AUX formal in `81tell-repl.mud` expression 2,
-tracked in [issue #88](https://github.com/quaat/mdl-racket/issues/88).
+[`%<>` slice](docs/evidence/M3/PERCENT-EMPTY.md) reached 136 forms
+and loaded `77makstr.mud` in full. The current
+[`#PSTRING 0` typed literal slice](docs/evidence/M3/PSTRING-LITERAL.md)
+reaches 144 completed, zero skipped forms. It stops at the
+function-style `#DECL` in `81tell-repl.mud` expression 10,
+tracked in [issue #90](https://github.com/quaat/mdl-racket/issues/90).
 NEWTYPE stores and checks its optional
 declaration Pattern; GDECL installs and checks global value Patterns.
 Pinned Confusion silently omits both checks, explicit reference
@@ -41,6 +43,7 @@ deviations. Its direct `DECL?` handling of `APPLICABLE` also errors,
 while the Racket Pattern follows the MDL manual and native
 `APPLICABLE?` type observations. `ASSIGNED?` with ENV remains unsupported;
 general `%` and `%%` read macros remain unsupported;
+custom `#type` literals currently support only integer WORD data;
 full source loading, game boot and gameplay
 parity are unverified. Reproduce with `make test`, `make m2-check`, and
 `make m3-source-progress` after `make reference-build`.

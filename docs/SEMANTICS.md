@@ -1352,3 +1352,30 @@ must be designed and tested before later source uses such as
 `%<STRING <ASCII 10>>` or `%,OVISON` are admitted. Tests must fail
 first at the unsupported percent node, then cover data and expression
 positions, identity, and rejection of other percent forms.
+
+## M3 custom WORD-primtype `#type` literal (issue #88; specification before implementation)
+
+The [MDL manual §6.2–6.3.4](https://mdl-language.readthedocs.io/en/latest/06-data-types/)
+defines `#type representation` as reading a value in the TYPE's
+primitive representation and changing its TYPE to `type`. The
+unchanged `81tell-repl.mud` expression 1 registers `PSTRING` with
+`NEWTYPE PSTRING WORD`; expression 2 uses `(OBJ #PSTRING 0)` as an
+ordinary two-element AUX formal with a typed WORD default. The parser
+must read `#PSTRING 0` as one typed-literal node, and evaluation must
+produce a PSTRING value with PRIMTYPE WORD and 36-bit zero data.
+Decimal and octal integer WORD representations use the existing
+36-bit range checks. An unregistered type or a type with another
+primitive storage class must fail explicitly. This slice does not
+support custom STRING/LIST/VECTOR typed representations or FLOAT bit
+reinterpretation.
+
+Six clean pinned Confusion probes in
+`evidence/M3/pstring-literal-reference.json` confirm TYPE PSTRING,
+PRIMTYPE WORD, equality to a CHTYPEd #WORD value, and binding through
+an AUX default. Its unknown-type case enters an error. Confusion also
+accepts a PSTRING declared with LIST primitive and a FLOAT-shaped
+representation in the retained deliberate cases; the Racket slice
+keeps the manual's primitive-type safety check and integer-only WORD
+representation. Tests must demonstrate the existing split-token
+failure first, then verify reader shape, source evaluation, 36-bit
+data, AUX binding, and strict rejection of unsupported typed forms.

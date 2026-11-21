@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m3-custom-word-literal-native-reference",
+  "cases": [
+    {"name": "value", "expression": "<NEWTYPE PSTRING WORD> #PSTRING 0"},
+    {"name": "type", "expression": "<NEWTYPE PSTRING WORD> <TYPE #PSTRING 0>"},
+    {"name": "primtype", "expression": "<NEWTYPE PSTRING WORD> <PRIMTYPE #PSTRING 0>"},
+    {"name": "literal-equality", "expression": "<NEWTYPE PSTRING WORD> <=? #PSTRING 0 #PSTRING 0>"},
+    {"name": "matches-cast", "expression": "<NEWTYPE PSTRING WORD> <=? #PSTRING 0 <CHTYPE #WORD 0 PSTRING>>"},
+    {"name": "default-binding", "expression": "<NEWTYPE PSTRING WORD> <DEFINE M3PS (\"AUX\" (OBJ #PSTRING 0)) <TYPE .OBJ>> <M3PS>"}
+  ]
+}

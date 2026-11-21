@@ -820,3 +820,20 @@ zero skipped, and fully executes `77makstr.mud`; it next stops at a
 typed AUX formal in `81tell-repl.mud` expression 2. Full source load
 and game boot remain unproved. No upstream, license or service boundary
 changes.
+
+## ADR-0039: Read custom WORD-primtype `#type` literals
+
+**Decision (2026-11-21, issue #88):** Parse `#PSTRING 0` as one typed
+literal and, after `NEWTYPE PSTRING WORD`, construct a 36-bit WORD
+representation and CHTYPE it to PSTRING. The reader accepts numeric
+`#type` forms generically; the compiler supports integer WORD
+representations and leaves other primitive representations as strict
+errors. Retain custom typed literals once per compiled source
+expression. Six pinned Confusion cases confirm the source behavior.
+The Racket runtime keeps the manual's primitive-type safety check;
+pinned Confusion accepts a deliberately mismatched LIST type case.
+
+**Consequence:** The unchanged loader advances from 136 to 144 forms,
+zero skipped, then stops on function-style `#DECL` in
+`81tell-repl.mud` expression 10. Full load and game boot remain
+unproved. No upstream, license or service boundary changes.
