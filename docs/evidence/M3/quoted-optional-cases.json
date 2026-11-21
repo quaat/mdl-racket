@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m3-quoted-optional-research",
+  "cases": [
+    {"name": "default-atom", "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X 'A)) .X> <M3Q>"},
+    {"name": "explicit-raw-form", "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X 'A)) <TYPE .X>> <M3Q <ERROR NO-EVAL>>"},
+    {"name": "default-side-effect", "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X <SETG M3FLAG 1>)) .X> <M3Q> ,M3FLAG"},
+    {"name": "explicit-skips-default", "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X <SETG M3FLAG 1>)) .X> <M3Q 9> <GASSIGNED? M3FLAG>"},
+    {"name": "default-uses-earlier-local", "expression": "<DEFINE M3Q (A \"OPTIONAL\" ('X .A)) .X> <M3Q 7>"},
+    {"name": "original-default-shape", "expression": "<SETG WINNER 4> <DEFINE M3Q (\"OPTIONAL\" ('X ',WINNER)) <TYPE .X>> <M3Q>"}
+  ]
+}

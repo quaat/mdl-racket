@@ -1,5 +1,17 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 quoted OPTIONAL default checkpoint (2026-11-21)
+
+Issue #82 adds focused `DEFINE`/`DEFMAC` binding tests in
+`tests/quoted_optional_test.rkt` against six pinned Confusion cases.
+`make test` exits 0 with 1,097 Racket checks and 22 Python tests;
+`make m2-check` exits 0 with G3, primitive probes and five-turn native
+capture; `make m3-source-progress` exits 0 and reports 87 completed,
+zero skipped original forms. The full loader itself exits 1 at the
+`APPLICABLE` declaration in `77defs.mud` expression 78. See
+[evidence](evidence/M3/QUOTED-OPTIONAL.md) and
+[`source-progress-quoted-optional.json`](evidence/M3/source-progress-quoted-optional.json).
+
 ## M3 eager AND? checkpoint (2026-11-21)
 
 Issue #80 implements AND? as a SUBR with all arguments evaluated before

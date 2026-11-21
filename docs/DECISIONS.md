@@ -769,3 +769,21 @@ forms independently of that bounded test.
 completed forms with zero skips, then reaches the quoted OPTIONAL
 default in `77defs.mud` expression 61. Full load and game boot remain
 unproved. No upstream, license or service boundary changes.
+
+## ADR-0036: Bind quoted OPTIONAL defaults in the interpreted frame
+
+**Decision (2026-11-21, issue #82):** Permit a two-element OPTIONAL
+formal whose first element is a quoted ATOM. An explicit call argument
+binds raw without evaluating the default; an omitted argument evaluates
+the default once in the growing function frame. Reject the shape in AUX
+or required sections, and keep duplicate-name validation. `DEFINE` with
+quoted formals already uses the interpreted binder, so this extends its
+existing quoted OPTIONAL path rather than adding a separate evaluator.
+Six pinned Confusion cases corroborate timing, raw forms and the original
+`',WINNER` default shape.
+
+**Consequence:** The unchanged original loader advances from 70 to 87
+completed forms with zero skips, then stops at a separate `APPLICABLE`
+declaration in `77defs.mud` expression 78. Full load, initialization
+and gameplay remain unproved. No upstream, license or service boundary
+changes.

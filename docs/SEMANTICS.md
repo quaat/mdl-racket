@@ -1278,3 +1278,27 @@ design. The existing runtime dispatcher evaluates all arguments before
 calling a SUBR. `AND?` must use that path, not compile as short-circuit
 `AND`. Tests must pin both side effects and returned MDL values before
 the runtime addition, then rerun the unchanged loader.
+
+## M3 quoted OPTIONAL defaults (issue #82; specification before implementation)
+
+The [MDL manual §9.9](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+permits a two-element OPTIONAL formal whose first element is a quoted
+ATOM, for example `('X 'A)`. If a call supplies that argument, `X`
+receives the raw, unevaluated call form and its default is not evaluated.
+If omitted, the default expression is evaluated once in the new function
+frame, after earlier formals have been bound, and the resulting value
+is bound to `X`. A default can therefore read an earlier local or perform
+a side effect. The quoted form is legal only in OPTIONAL, while an
+unquoted two-element form remains legal in OPTIONAL and AUX. Malformed
+quoted names, duplicate names, and incorrect sections remain errors.
+
+The unchanged `77defs.mud` expression 61, line 338, defines `TAKE-OBJECT`
+with `('WINNER ',WINNER)` and is the first source barrier. The pinned
+Confusion reference confirms six focused cases: omitted atom default,
+raw explicit FORM without invoking `ERROR`, default side effect, skipped
+default on explicit argument, default reading an earlier local, and the
+original `',WINNER` shape returning a FORM. Save those inputs and outputs
+under `evidence/M3/`, add failing focused tests before implementation,
+then verify exact-source loader progress with zero skipped forms. This
+slice does not change quoted required formals or ordinary OPTIONAL/AUX
+binding.
