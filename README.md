@@ -9,7 +9,25 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current status (2026-11-21):** The authorized M2 stack, PRs #54, #59,
+**Current M3 checkpoint (2026-11-21, `feat/m3-read-time-percent`):**
+The scoped [issue #94](docs/evidence/M3/PERCENT-READ.md) change implements
+session-aware `%` evaluation during executable reading, `ASCII`, and
+CHARACTER arguments to `STRING`. The syntax-only parser remains free of
+MDL side effects; `%%` and mutable read tables remain unsupported.
+The unchanged source loader completes **188 original forms with zero
+skips**, fully loading `81tell-repl.mud`, then exits 1 at
+`77act1.mud` expression 10, line 78: unsupported `[3 ANY]` NTH
+declaration repetition. `make m3-source-progress` exits 0 only as a
+validated partial-load measurement. `make test` and `make m2-check`
+pass on this branch; see the [evidence](docs/evidence/M3/PERCENT-READ.md)
+for counts, native probes and reproduction commands. M0/M1/M2 remain
+PASS; the formal M3 gate remains **INCOMPLETE**. Full source load,
+initialization, interactive input, smoke parity and gameplay are unverified.
+The next task is [issue #96](https://github.com/quaat/mdl-racket/issues/96):
+probe and implement the NTH declaration Pattern without changing the
+locked source.
+
+**Previous integrated main checkpoint:** The authorized M2 stack, PRs #54, #59,
 #61, #62, #64, #66, #68 and #70, is integrated on `main` at `7d34195`.
 The [M2 mainline gate](docs/evidence/M2/MAINLINE-GATE.md) passes at its
 accepted `7d34195` baseline. The permanent M2 suite now loads a bounded,

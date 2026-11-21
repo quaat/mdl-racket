@@ -3,18 +3,42 @@
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-21.
 
-**Current checkpoint:** M2 integrated on `main` at `7d34195`, with 59
-SHA-verified G3 assertions, 986 Racket checks and 13 Python tests.
-`make m2-check` and the final mainline harness workflow passed. See
-`docs/evidence/M2/MAINLINE-GATE.md` for all merge commits, command exits,
-source hashes, reference comparisons and limits. Issue #73 now separates
-the permanent M2 prefix from full-loader progress: M2 G3 passes 58
-assertions, `make test` passes 986 Racket and 22 Python checks, and
-`make m3-source-progress` reports 24 completed and zero skipped forms at
-EMPTY? in `77defs.mud` expression 15. See `docs/evidence/M3/SOURCE-PROGRESS.md`.
-**Next:** implement M3 EMPTY? from native evidence and advance the unchanged
-source chain. Random/event APIs are M3 issue #71. User untracked files
-`.claude/worktrees/` and `tests/fixtures/mytest.mdl` are untouched.
+**Current checkpoint (2026-11-21):** M0/M1/M2 PASS on integrated `main`
+at `74effec5744a44f43ae9c6a308b2ab37013ec7b0`; M3 incomplete.
+The issue #94 branch advances the unchanged loader from 157 to 188
+original forms, zero skipped. Four files fully load (`81prim.mud`,
+`77defs.mud`, `77makstr.mud`, `81tell-repl.mud`); `77loadall.mud`
+and `77act1.mud` are partial. The first failure is in
+`77act1.mud` expression 10, line 78, unsupported NTH declaration
+Pattern. The source locks remain MIT Zork
+`d94501340842e006791fce0757dc0043b8ec8916` and Confusion
+`bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`. See
+[`SPACE-CHARACTER.md`](evidence/M3/SPACE-CHARACTER.md) and current
+`artifacts/m3/source-progress.json`. No full load, initialization,
+interactive loop or game parity has been verified.
+
+**Issue #94 branch checkpoint:** `feat/m3-read-time-percent` implements
+session-aware `%` READ evaluation and the original `ASCII`/`STRING`
+dependency. Native probes and architecture ADR-0042 preceded the change.
+`make test` exits 0 (1,200 Racket, 23 Python); `make m2-check` exits 0;
+`make m3-source-progress` exits 0 as partial progress. The unchanged
+loader exits 1 after 188 forms, zero skipped; `81tell-repl.mud` is now
+fully loaded. `77act1.mud` expression 10, line 78 fails at unsupported
+NTH declaration repetition `[3 ANY]`. See
+[`PERCENT-READ.md`](evidence/M3/PERCENT-READ.md),
+[`source-progress-percent-read.json`](evidence/M3/source-progress-percent-read.json),
+and [`COMPATIBILITY-INVENTORY.md`](evidence/M3/COMPATIBILITY-INVENTORY.md).
+Next: review/integrate issue #94, then probe the NTH declaration Pattern
+in [issue #96](https://github.com/quaat/mdl-racket/issues/96).
+The fresh HTTPS clone attempt exited 128 because DNS could not resolve
+`github.com`; the existing checkout and GitHub integration both verified
+the same main SHA. Local `gh auth status` exits 1 because its token is
+invalid; the connected GitHub integration can read issue #94. User
+untracked `.claude/worktrees/` and `tests/fixtures/mytest.mdl` remain
+untouched. Issue #67 was closed after its D5 fix and final-head evidence
+were verified integrated; issue #71 still tracks random/event APIs.
+PR #55 remains open and unmerged because its GLM-specific routing is
+separate from this runtime task.
 
 ## Earlier checkpoints (retained for provenance)
 

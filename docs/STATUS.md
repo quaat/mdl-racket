@@ -2,6 +2,20 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #94 session-aware `%` READ slice PASS on
+  `feat/m3-read-time-percent`; full M3 gate incomplete:** executable
+  reading evaluates `%` before consuming the next sibling, retaining the
+  actual substituted object per session. `ASCII` and CHARACTER-capable
+  `STRING` satisfy the original `81tell-repl.mud:46` expression. Native
+  probes confirm ordering, once-only substitution, identity and errors.
+  The unchanged loader completes 188 original forms with zero skips,
+  fully loads `81tell-repl.mud`, and exits 1 at `77act1.mud`
+  expression 10, line 78: unsupported NTH declaration Pattern
+  `[3 ANY]`. `make m3-source-progress` exits 0 as a partial-progress
+  measurement. Full load, initialization and gameplay remain unverified.
+  See [issue #94 evidence](evidence/M3/PERCENT-READ.md),
+  [next issue #96](https://github.com/quaat/mdl-racket/issues/96), and the
+  [compatibility inventory](evidence/M3/COMPATIBILITY-INVENTORY.md).
 - **Issue #92 `!\` CHARACTER reader slice PASS; full M3 gate
   incomplete:** `!\ ` now reads as a CHARACTER with code 32, distinct
   from SEGMENT syntax. Five native cases corroborate TYPE, primitive

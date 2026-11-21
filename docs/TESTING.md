@@ -1,5 +1,28 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 `%` read-time evaluation checkpoint (2026-11-21)
+
+Issue #94 adds `tests/percent_read_test.rkt` to the explicit Racket
+suite and a validator regression in `tests/test_m3_source_progress.py`.
+The focused Racket test initially exited 1 because the first `%` made
+the load fail; after two independent review corrections it exits 0
+with 40 focused checks. The 22 clean pinned Confusion cases and eight
+deliberate error observations are saved in
+`evidence/M3/percent-read-*-reference.json`. Run:
+
+```bash
+TMPDIR=/tmp raco test tests/percent_read_test.rkt
+make test
+make m2-check
+make m3-source-progress
+```
+
+The final target validates 188 original forms and zero skips but does
+not certify a complete load. Its underlying loader exits 1 at the NTH
+declaration Pattern in `77act1.mud` expression 10. A `read-eval`
+failure is now a distinct allowed report stage. See
+[`PERCENT-READ.md`](evidence/M3/PERCENT-READ.md).
+
 ## M3 `!\` CHARACTER checkpoint (2026-11-21)
 
 Issue #92 adds `tests/space_character_test.rkt` with 12 focused

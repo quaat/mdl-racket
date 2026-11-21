@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "m3-percent-read-native-reference",
+  "cases": [
+    {"name": "ascii-number-type", "expression": "<TYPE <ASCII 10>>"},
+    {"name": "ascii-number-value", "expression": "<ASCII 10>"},
+    {"name": "ascii-character-value", "expression": "<ASCII !\\A>"},
+    {"name": "string-character-type", "expression": "<TYPE <STRING <ASCII 10>>>"},
+    {"name": "string-character-length", "expression": "<LENGTH <STRING <ASCII 10>>>"},
+    {"name": "percent-string-type", "expression": "<TYPE %<STRING <ASCII 10>>>"},
+    {"name": "percent-string-length", "expression": "<LENGTH %<STRING <ASCII 10>>>"},
+    {"name": "read-before-eval", "expression": "<SETG M3N 0> <LIST <SETG M3N 5> %<+ ,M3N 1>>"},
+    {"name": "adjacent-order", "expression": "<SETG M3N 0> [%<SETG M3N <+ ,M3N 1>> %<SETG M3N <+ ,M3N 1>>]"},
+    {"name": "function-once", "expression": "<SETG M3N 0> <DEFINE M3F () %<SETG M3N <+ ,M3N 1>>> <M3F> <M3F> ,M3N"},
+    {"name": "quoted-list-identity", "expression": "<DEFINE M3F () '%<LIST 1>> <==? <M3F> <M3F>>"},
+    {"name": "nested-list", "expression": "<SETG M3N 0> (<SETG M3N 5> %<+ ,M3N 1>)"},
+    {"name": "empty-false", "expression": "<TYPE %<>>"},
+    {"name": "substituted-form-eval", "expression": "<SETG M3X %'<+ 1 2>> ,M3X"},
+    {"name": "substituted-name", "expression": "<DEFINE %'M3D (X) .X> <M3D 7>"},
+    {"name": "substituted-formal", "expression": "<DEFINE M3D (%'X) .X> <M3D 5>"},
+    {"name": "substituted-formal-list", "expression": "<DEFINE M3D %'(X) .X> <M3D 9>"},
+    {"name": "quoted-substituted-form", "expression": "<SETG M3F '%'<+ 1 2>> <TYPE ,M3F>"},
+    {"name": "substituted-list-eval", "expression": "<SETG M3L %'(1 <+ 1 1>)> ,M3L"},
+    {"name": "substituted-segment-list", "expression": "(0 %'!<LIST 1 2> 3)"},
+    {"name": "substituted-segment-vector", "expression": "[0 %'!<LIST 1 2> 3]"},
+    {"name": "substituted-segment-call-arguments", "expression": "<LIST 0 %'!<LIST 1 2> 3>"}
+  ]
+}
