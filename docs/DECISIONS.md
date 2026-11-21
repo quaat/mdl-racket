@@ -717,3 +717,21 @@ completed forms with zero skips. It then fails at three-argument NEWTYPE
 in `77defs.mud` expression 17. This is partial source execution, with no
 game boot or parity claim. The original sources, GPLv3 interpreter,
 license, and service exposure are unchanged.
+
+## ADR-0033: Preserve NEWTYPE's declaration Pattern despite reference omission
+
+**Decision (2026-11-21, issue #76):** Follow the MDL manual §14.6 for
+the optional third `NEWTYPE` argument: validate its supported syntax,
+store it under the type's `DECL` association, and check it when casting
+into the type, including same-type casts. Permit same-primitive
+redefinition to replace the Pattern. Accept the original
+`<<PRIMTYPE VECTOR> ...>` structure head, resolving forward type atoms
+when the cast occurs. Pinned Confusion reads but discards the third
+argument; its `GET` returns FALSE and an invalid cast succeeds. This is
+an explicit manual/reference divergence, not a silent no-op.
+
+**Consequence:** The unchanged original loader advances from 26 to 36
+completed forms with zero skips, then stops at `GDECL` in `77defs.mud`
+expression 27. Full source loading and game boot remain unproved.
+`GDECL` is tracked in issue #78. No upstream, licensing, or service
+boundary changes.

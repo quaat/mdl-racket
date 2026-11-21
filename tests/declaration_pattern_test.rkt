@@ -153,10 +153,11 @@
 ;; element pattern -- recorded deviation, rejected here.
 (check-exn #rx"DECL\\?: structured declaration pattern"
            (lambda () (run "<DECL? () '<LIST>>")))
-;; <<PRIMTYPE struc> elts> and <<OR struc ... struc> elts> compositions
-;; (reference: DECL-ELEMENT-NOT-FORM-OR-ATOM)
-(check-exn #rx"DECL\\?: malformed declaration pattern"
-           (lambda () (run "<DECL? (1 A) '<<PRIMTYPE LIST> [REST FIX ATOM]>>")))
+;; Issue #76 enables the manual's <<PRIMTYPE struc> elts> composition for
+;; NEWTYPE declarations. Pinned Confusion rejects this in explicit DECL?,
+;; although it silently discards a NEWTYPE third-argument declaration.
+(check-decl-true (run "<DECL? (1 A) '<<PRIMTYPE LIST> [REST FIX ATOM]>>"))
+;; <<OR struc ... struc> elts> remains malformed.
 (check-exn #rx"DECL\\?: malformed declaration pattern"
            (lambda () (run "<DECL? (1 2) '<<OR LIST VECTOR> [REST FIX]>>")))
 ;; Quoted-object element patterns (manual example [REST 'T FIX]; D1 rule)

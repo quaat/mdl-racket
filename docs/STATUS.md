@@ -2,13 +2,21 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #76 source-backed slice PASS; full M3 gate incomplete:**
+  three-argument `NEWTYPE` stores and enforces a declaration Pattern,
+  including `<<PRIMTYPE VECTOR> ...>` structure heads and same-primitive
+  redeclaration. The pinned Confusion reference ignores this third
+  argument, a documented manual/reference deviation. The unchanged loader
+  now completes 36 forms with zero skips, then stops at `GDECL` in
+  `77defs.mud` expression 27, line 139. See [evidence](evidence/M3/NEWTYPE-DECL.md)
+  and [next issue #78](https://github.com/quaat/mdl-racket/issues/78).
 - **First M3 source-backed slice PASS; full M3 gate remains incomplete:**
   issue #75 adds native-backed `EMPTY?`, bounded `LENGTH?`, current-frame
   `ASSIGNED?`, and startup `ROOT`. `make test` passes 1,046 Racket checks
   and 22 Python tests; `make m2-check` passes its G3 58 assertions and
   native probes/capture. `make m3-source-progress` measures 26 completed,
   zero skipped forms, two beyond the accepted prefix. The first remaining
-  barrier is `77defs.mud` expression 17, line 66: three-argument
+  barrier at that checkpoint was `77defs.mud` expression 17, line 66: three-argument
   `NEWTYPE`, tracked in [issue #76](https://github.com/quaat/mdl-racket/issues/76).
   See [slice evidence](evidence/M3/EMPTYQ.md). The optional
   `ASSIGNED?` ENV form, full loader, initialization, and play are not
@@ -30,7 +38,7 @@
   source-progress target. `make m2-check` now passes with 986 Racket, 22 Python and
   58 original-source G3 assertions; `make m3-source-progress` passes with
   the authentic 24-form EMPTY? report. See [M3 source progress](evidence/M3/SOURCE-PROGRESS.md).
-- **Next action:** implement EMPTY? from native evidence. Random/event APIs are tracked in
+- **Earlier next action:** implement EMPTY? from native evidence. Random/event APIs are tracked in
   [M3 issue #71](https://github.com/quaat/mdl-racket/issues/71), with no
   parity claim. The pinned Confusion reference loads the full 12-file
   chain to `DONE`.
