@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "m2-d5-character-final-review",
+  "cases": [
+    {"name": "put-segment-character", "expression": "<SET S <STRING \"ab\">> <SET C \"xy\"> <PUT .S 1 <NTH (!.C) 1>> .S"},
+    {"name": "get-and-segment-character-identity", "expression": "<SET C \"xy\"> <==? <GET .C 1> <NTH (!.C) 1>>"},
+    {"name": "get-and-segment-character-type", "expression": "<SET C \"xy\"> <TYPE <GET .C 1>> <TYPE <NTH (!.C) 1>> <PRIMTYPE <GET .C 1>>"},
+    {"name": "put-get-character-roundtrip", "expression": "<SET S <STRING \"ab\">> <PUT .S 1 <GET \"xy\" 1>> .S"}
+  ]
+}

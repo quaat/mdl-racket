@@ -1,0 +1,7 @@
+{
+  "name": "m2-d5-review-deliberate-errors",
+  "cases": [
+    {"name": "structured-two-arg-put", "expression": "<PUT '(1 2) 1>"},
+    {"name": "cyclic-decl-alias", "expression": "<PUT A DECL 'B> <PUT B DECL 'A> <DECL? 3 A>"}
+  ]
+}

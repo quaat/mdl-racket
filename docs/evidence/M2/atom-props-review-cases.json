@@ -1,0 +1,16 @@
+{
+  "name": "m2-d5-identity-and-dispatch-review",
+  "cases": [
+    {"name": "word-item-identity", "expression": "<PUT <CHTYPE 1 WORD> P 'X> <GET <CHTYPE 1 WORD> P>"},
+    {"name": "word-indicator-identity", "expression": "<PUT X <CHTYPE 1 WORD> 'Y> <GET X <CHTYPE 1 WORD>>"},
+    {"name": "large-fix-item-identity", "expression": "<PUT 4294967295 P 'X> <GET 4294967295 P>"},
+    {"name": "vector-rest-identity", "expression": "<SET V '[1 2 3]> <PUT <REST .V 1> P 'X> <GET <REST .V 1> P>"},
+    {"name": "uvector-rest-identity", "expression": "<SET V '![1 2 3]> <PUT <REST .V 1> P 'X> <GET <REST .V 1> P>"},
+    {"name": "alias-chain-hit", "expression": "<PUT A DECL 'B> <PUT B DECL 'FIX> <DECL? 3 A>"},
+    {"name": "alias-chain-miss", "expression": "<PUT A DECL 'B> <PUT B DECL 'FIX> <DECL? \"x\" A>"},
+    {"name": "registered-type-precedence", "expression": "<PUT FIX DECL 'STRING> <DECL? 3 FIX>"},
+    {"name": "indexed-string-get", "expression": "<GET \"ab\" 1> <TYPE <GET \"ab\" 1>> <PRIMTYPE <GET \"ab\" 1>>"},
+    {"name": "default-first-get", "expression": "<GET '(1 2)> <GET \"ab\">"},
+    {"name": "mutable-string-put-character", "expression": "<SET S <STRING \"ab\">> <PUT .S 1 <GET \"xy\" 1>> .S"}
+  ]
+}

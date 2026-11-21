@@ -9,6 +9,33 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
+**Current M2 status (2026-11-20):** D1–D4 are merged on `main`
+(`419fc5c`); D5 atom properties are in [PR #54](https://github.com/quaat/mdl-racket/pull/54)
+on `feat/m2-atom-props` for review.
+The D5 branch passes `make test` (868 Racket checks, 13 Python tests),
+`make test-historical` (23 VFLOAD and 20 DECL assertions), and pinned
+Confusion association probes (18 original plus 11 review cases; eight
+separate deliberate-error/timeout observations). A final-head CHARACTER
+review adds four clean Confusion probes and two regressions for STRING
+GET, SEGMENT, identity, and indexed PUT. The unchanged
+`77loadall.mud` chain completes 24 expressions, including all of
+`81prim.mud` and the original `RAPPLIC` declaration property in
+`77defs.mud`; it stops at `EMPTY?` inside source-defined `NEWSTRUC` in
+`77defs.mud` expression 15. A separate pre-merge G3 run found the original
+MSETG repeat path blocked by missing `N=?` ([issue #57](https://github.com/quaat/mdl-racket/issues/57));
+**M2 is not closed and no Racket game boot or gameplay parity is claimed.**
+Reproduce with `make test`,
+`make test-historical`, and the loader command below. See
+[D5 evidence](docs/evidence/M2/ATOM-PROPS.md) and
+[current status](docs/STATUS.md). Both PR workflows passed on the prior D5
+head; the issue #67 SUBR association correction requires final-head CI.
+An independent local final-head review found and fixed that P2 issue;
+see [review report](docs/evidence/M2/D5-FINAL-REVIEW.md). D5 still awaits
+maintainer merge authorization. The dependent G3 stack currently fails
+at original `FLAGWORD`'s unsupported `MAPF` (issue #65).
+Historical progress notes below preserve
+their original slice-level context.
+
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
 passes: the baseline and pinned source are reproducible, and the first
 historical load barriers are identified. Run
@@ -20,10 +47,13 @@ symlink lookup order, consecutive parent components, and interpreted session
 calls; `make test`, both CI workflows, and the pinned Confusion
 build/capture/probes pass. Reproduce its pinned-source failure with
 `racket scripts/mdl_load.rkt --source-root .cache/upstream/mdlzork/mdlzork_771212/patched_confusion --entry 77loadall.mud --report artifacts/m2/source-load.json`.
-That command exits 1 after twelve completed expressions, at the
-atom-property `PUT` in `77defs.mud` (the interpreter-version global
-`MUDDLE` is bound to the reference's FIX `101` and `81prim.mud` loads in
-full, including the original `PSETG` with its structured declaration);
+That command exits 1 after **twenty-four** completed expressions, at the
+`EMPTY?` primitive called by the original source-defined `NEWSTRUC` in
+`77defs.mud` expression 15 (with D5's atom-property `PUT`/`GET`
+associations, `81prim.mud` loads in full — including the original
+`PSETG` with its structured declaration — and `77defs.mud` expressions
+1–14 execute, including the historical
+`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` declaration property);
 game initialization is not supported. The
 [G2 partial-source probe](docs/evidence/M2/HISTORICAL-VFLOAD.md) verifies
 the pinned source hash and invokes the unmodified reconstructed `VFLOAD`
@@ -32,9 +62,10 @@ Its local gate passes; after two native CI failures for missing Racket
 libraries, both workflows passed on the corrected dependency commit. The
 latest G1 path fix is merged and passes locally, with combined-branch CI
 also passing. Run
-`make test-historical` to reproduce the probe. The loader reports the 12
+`make test-historical` to reproduce the probe. That G2 probe reports its 12
 unexecuted forms explicitly. M2's integrated gate and gameplay remain
-unverified; atom-property `PUT` in `77defs.mud` is the next source dependency (then the `MEMQ` primitive `PSETG` calls).
+unverified; the current sequential loader blocker is `EMPTY?` inside
+`77defs.mud`'s `NEWSTRUC`.
 The [M2 source execution inventory](docs/evidence/M2/SOURCE-EXECUTION.md)
 lists the loaded, invoked, blocked, and untested definitions separately.
 

@@ -1,5 +1,24 @@
 # Test strategy, reference capture, and parity contract
 
+## Current M2 D5 and G3 checkpoint (2026-11-20)
+
+On `feat/m2-atom-props`, `make test` runs 868 Racket checks and 13 Python
+tests, including `tests/atom_props_test.rkt` (65 focused checks).
+`make test-historical` verifies the 23 assertion original VFLOAD and 20
+assertion original DECL probes. D5 reference cases are in
+`evidence/M2/atom-props-{cases,reference}.json` and the corresponding
+`atom-props-error-*` files; independent review cases are in
+`atom-props-review-*` and four clean `character-review-*` cases. The
+independent local final-head review and SUBR FIX-indicator regressions are
+in [`D5-FINAL-REVIEW.md`](evidence/M2/D5-FINAL-REVIEW.md) and
+`d5-final-review-*`.
+unchanged `77loadall.mud` load exits 1 after
+24 completed expressions at `EMPTY?` in `77defs.mud` expression 15.
+M2 G3 has not passed: a separate pre-merge integration run found missing
+`N=?` in original MSETG's repeat path (issue #57). Reproduce D5 with `make test`,
+`make test-historical`, and the loader command below. Earlier sections
+retain their slice-era context.
+
 The M2 G0 audit is reproducible with
 `racket scripts/audit_source_readiness.rkt --output artifacts/m2/source-readiness.json`.
 Its JSON separates independent compile probes from sequential execution

@@ -807,3 +807,85 @@ evaluating `USE` — which is unbound in the reference and stays an
 explicit error here. Changing the value requires new reference evidence,
 not a source edit; the reference's own environment is the reproducible
 baseline for the original 1977 version number.
+
+## M2 D5 specification: atom-property PUT/GET associations
+
+MDL association storage pairs an arbitrary *item* with an arbitrary
+*indicator* and a value, matched by `==?` identity — never structural
+`=?`. The runtime dispatch mirrors the pinned reference (evidence:
+[`evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md), 18 success and 6
+deliberate-error Confusion observations):
+
+- `PUT` — structured item (LIST/VECTOR/UVECTOR/STRING via primtype) with a
+  FIX indicator keeps the existing index-based element store (with the
+  reference's `PUT index too large` and CHARACTER-type stderr diagnostics);
+  every other indicator on a structured item, and every indicator on a
+  non-structured item (including FIX indicators on non-structured items,
+  e.g. `<PUT 5 DECL 'FIX>`), is an association. A two-argument
+  `<PUT item indicator>` removes the association and echoes the item;
+  one-argument PUT raises TOO-FEW-ARGUMENTS-SUPPLIED. Property PUT returns
+  the item.
+- `GET` — structured item with a FIX indicator returns the element
+  (three-argument GET on a structure is the reference's error `No EXP
+  allowed for GET on structure`); an association selector returns the
+  stored value, the evaluated optional exp on a miss, or `#FALSE ()`.
+  Retrieval preserves the stored object's exact identity (a quoted FORM
+  comes back as the same FORM, `<OR ATOM FALSE NOFFSET>`).
+  A structured item without an indicator selects its first element, as
+  pinned Confusion does. Indexed STRING retrieval returns a CHARACTER
+  (`TYPE` CHARACTER, `PRIMTYPE` WORD); a mutable STRING accepts that
+  CHARACTER through indexed PUT. Immutable host string literals remain an
+  explicit mutation limit.
+  Final-head review probes show that a STRING element retrieved by GET and
+  the same element produced by STRING SEGMENT expansion are `==?` in pinned
+  Confusion; indexed PUT accepts either. Both paths must use one CHARACTER
+  value representation, with WORD primtype and code-point identity. The
+  cases and red-to-green test are in `evidence/M2/character-review-*` and
+  `tests/atom_props_test.rkt`.
+- Associations live in a session-owned list searched with `mdl-identical?`
+  for **both** item and indicator. A weak `eq?` table was rejected after
+  reference-backed regressions showed misses for separately constructed
+  equal WORD values and VECTOR/UVECTOR REST views of the same storage.
+  Entries hold strong references to item, indicator, and value until
+  removed or the session ends. This differs from the manual's association
+  garbage collection when keys become unreachable; key lifetime remains
+  unsupported until a weak store with MDL `==?` equivalence is proven.
+- `DECL?` consults an atom's `DECL` association when the atom names a type
+  (the `77defs.mud:5` `<PUT RAPPLIC DECL ...>` NEWTYPE-annotation
+  mechanism): the stored pattern is normalized by the existing D1/D3
+  matcher, a matching leaf carries the resolved pattern's leaf in the
+  `#FALSE` payload (reference: `#FALSE (3 NOFFSET)`), and recursion
+  through association-derived declarations is cycle-bounded. `SETG` does
+  NOT enforce an atom's DECL association; the property only feeds `DECL?`.
+  PUTting a property never assigns the atom as a global and never changes
+  its TYPE or PRIMTYPE.
+  Registered TYPE atoms retain their intrinsic meaning even if they carry
+  a `DECL` association. Unregistered alias atoms follow successive `DECL`
+  associations until a pattern is reached; cycles raise a bounded explicit
+  error (pinned Confusion loops on an A-to-B-to-A cycle in a timed probe).
+  The same normalization applies to attached `#DECL` patterns.
+  Two-argument PUT on a structured item with a FIX indicator is a
+  TOO-FEW-ARGUMENTS-SUPPLIED error, not association removal.
+- `GETPROP`/`PUTPROP` and the chapter 13.4 examination machinery
+  (`ASSOCIATIONS`, `NEXT`, `ITEM`, `INDICATOR`, `AVALUE`, `#ASOC`
+  printing) remain explicit unimplemented failures — the pinned load set
+  never uses them.
+
+Final-head review of issue #53 (issue #67) adds a FIX-indicator dispatch
+case: a native SUBR is an unstructured MDL item even though the Racket
+runtime represents it as a host procedure. Pinned Confusion accepts
+`<PUT ,+ 7 9> <GET ,+ 7>` and returns `9`; a two-argument PUT removes
+that association and GET returns `#FALSE ()`. A FIX selector on this
+unstructured item must reach association storage without querying an
+unsupported host procedure's MDL primtype. Indexed FIX selectors on
+LIST/VECTOR/UVECTOR/STRING retain element dispatch. Tests must fail on
+the current D5 head and pass after the narrow dispatch correction.
+
+Deviations from the manual are adjudicated in
+[`evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md): the reference's
+augmented `#FALSE (leaf)` DECL? miss is followed over the manual's plain
+`#FALSE ()` (it carries useful diagnostic information and the pinned
+source flags it as deliberate); the two-argument PUT removal echoes the
+item as the reference does (the manual's "returns the previous value"
+wording was checked — the reference returns the item; we follow the
+reference); and GET's exp is honored only on the association branch.

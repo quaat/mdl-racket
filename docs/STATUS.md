@@ -1,4 +1,43 @@
-# Status — 2026-11-19 (M2 declarations merged; SEGMENT slice open)
+# Status — 2026-11-20 (D5 under review; pre-merge G3 FAIL)
+
+## Current state (2026-11-20)
+
+- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL at
+  original MSETG's missing `N=?` repeat path (issue #57).
+- **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
+  patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
+- **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
+  `feat/m2-atom-props` (D5, issue #53):**
+  atom-property `PUT`/`GET` associations, session-owned `==?`-identity
+  association space, `DECL?` consultation of `DECL` associations, and
+  independent-review fixes for WORD/REST identity, alias chains, and
+  structured/STRING dispatch. A final-head review correction unifies
+  CHARACTER values from STRING GET and SEGMENT expansion (four clean
+  Confusion cases, two new regressions). An independent local final-head
+  review corrected FIX-indicator associations on native SUBRs (issue #67;
+  two red-to-green regressions). Fresh local suites: **868 Racket checks, 13
+  Python tests**, `make test-historical` green; the pinned `77loadall.mud`
+  load completes **twenty-four**
+  expressions.
+- **First failing source construct:** `EMPTY?` (unassigned primitive)
+  inside the original source-defined `NEWSTRUC`, executing
+  `77defs.mud` expression 15 `<NEWSTRUC ROOM VECTOR ...>` (line 37,
+  execute stage).
+- **Known candidates next:** the `EMPTY?` primitive (and whatever else
+  the original `NEWSTRUC` reaches), then `MEMQ` for executing the
+  installed `PSETG`. Actual source execution sets priority.
+- **Parity target:** the pinned Confusion reference loads the full
+  12-file chain to `DONE`.
+- **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57 (`N=?`). Issue
+  #11 is closed as completed. Both PR workflows passed on prior D5 head
+  `ae0984f`; the CHARACTER correction requires final-head CI. A fresh
+  Codex review of `ae0984f` raised that finding; the later hosted final-head
+  review request hit a usage limit. Local review report:
+  [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). Final-head CI and
+  maintainer approval are pending; no merge is authorized.
+- **Not demonstrated:** full integrated M2 state invariants, game boot,
+  parser, puzzle behavior, RNG parity.
+
 
 ## M2 source execution audit (G0)
 
@@ -498,3 +537,34 @@ eager interpreted segment-payload evaluation) are recorded in
 slice's close the structured declaration patterns (issue #48, recorded
 above) were the next dependency; general APPLY/DISPATCH and original game
 execution remained open.
+
+## M2 issue #53: atom-property PUT/GET associations (D5)
+
+**Local slice: PASS (branch `feat/m2-atom-props`). M2 milestone: NOT YET
+PASS.** The D5 slice implements MDL association space: `PUT` and `GET`
+dispatch exactly as the pinned reference classifies (structured item +
+FIX indicator is the element store; every other combination — including
+FIX indicators on non-structured items — is an association;
+two-argument PUT removes and echoes the item; one-argument PUT is
+TOO-FEW-ARGUMENTS-SUPPLIED; three-argument GET on a structure errors).
+Associations match by `==?` identity via `mdl-identical?` on both item
+and indicator in a session-owned entry list — fresh sessions start
+property-free. A weak `eq?` table failed review regressions for WORDs and
+array REST views; the corrected store retains keys until removal or session
+end, a documented GC-lifetime deviation. `DECL?` consults an atom's `DECL` association through
+the existing D1/D3 matcher and carries the resolved leaf in the `#FALSE`
+payload; `SETG` deliberately does not enforce it. `GETPROP`/`PUTPROP`
+and chapter 13.4 machinery remain explicit unimplemented failures.
+The historical `77defs.mud` expression 3
+`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` now executes; the pinned
+load advances from twelve to **twenty-four completed expressions** and
+stops at `77defs.mud` expression 15 (`EMPTY?` inside the original
+`NEWSTRUC`). `make test` passes 864 Racket checks and 13 Python tests.
+Eighteen initial and eleven review-derived pinned Confusion success cases,
+plus six initial deliberate errors, one review-derived error and one bounded
+alias-cycle timeout back the semantics; the two manual-vs-reference conflicts
+(removal returns the item, not the previous value; augmented `#FALSE
+(leaf)` DECL? misses) are adjudicated toward the reference in
+[`docs/evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md) and ADR-0023.
+Full details in `docs/SEMANTICS.md` (M2 D5 section). The integrated G3
+gate and original game execution remain open.

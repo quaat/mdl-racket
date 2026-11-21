@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "m2-d5-character-final-review",
+  "recorded_at": "2026-11-20T09:27:02.051700+00:00",
+  "interpreter_sha256": "987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "put-segment-character",
+      "expression": "<SET S <STRING \"ab\">> <SET C \"xy\"> <PUT .S 1 <NTH (!.C) 1>> .S",
+      "input": "<SET S <STRING \"ab\">> <SET C \"xy\"> <PUT .S 1 <NTH (!.C) 1>> .S\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"ab\"\n\"xy\"\n\"xb\"\n\"xb\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"ab\"\n\"xy\"\n\"xb\"\n\"xb\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "get-and-segment-character-identity",
+      "expression": "<SET C \"xy\"> <==? <GET .C 1> <NTH (!.C) 1>>",
+      "input": "<SET C \"xy\"> <==? <GET .C 1> <NTH (!.C) 1>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"xy\"\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"xy\"\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "get-and-segment-character-type",
+      "expression": "<SET C \"xy\"> <TYPE <GET .C 1>> <TYPE <NTH (!.C) 1>> <PRIMTYPE <GET .C 1>>",
+      "input": "<SET C \"xy\"> <TYPE <GET .C 1>> <TYPE <NTH (!.C) 1>> <PRIMTYPE <GET .C 1>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"xy\"\nCHARACTER\nCHARACTER\nWORD\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"xy\"\nCHARACTER\nCHARACTER\nWORD\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "put-get-character-roundtrip",
+      "expression": "<SET S <STRING \"ab\">> <PUT .S 1 <GET \"xy\" 1>> .S",
+      "input": "<SET S <STRING \"ab\">> <PUT .S 1 <GET \"xy\" 1>> .S\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"ab\"\n\"xb\"\n\"xb\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"ab\"\n\"xb\"\n\"xb\"\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

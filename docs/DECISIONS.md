@@ -486,3 +486,57 @@ the remaining 12 expressions ran. CHARACTER values, explicit CHANNEL/count
 I/O, historical CRLF terminal behavior, declarations and game bootstrap
 remain unsupported. No upstream or game source changed, and no GPLv3 code
 was copied into the runtime.
+
+## ADR-0023: Session-owned ==?-identity association space
+
+**Decision:** Implement MDL atom-property associations (D5, issue #53) as
+a session-owned entry list. Both item and indicator are matched by
+`mdl-identical?` (`==?`), preserving the stored value's exact identity.
+An independent review found that the initial weak `eq?` table missed
+equal WORD values and separately constructed VECTOR/UVECTOR REST views;
+five Confusion-backed identity regressions now cover these keys. `PUT`
+and `GET` dispatch by the pinned
+reference's classification: structured item + FIX indicator keeps the
+existing element store; every other combination is an association
+(including FIX indicators on non-structured items); two-argument PUT
+removes an association and echoes the item, but a structured item with a
+FIX selector raises TOO-FEW-ARGUMENTS-SUPPLIED. `DECL?` consults an atom's
+`DECL` association through the existing D1/D3 declaration matcher,
+carrying the resolved leaf in the `#FALSE` payload. `GETPROP`/`PUTPROP`
+and chapter 13.4 machinery stay explicit unimplemented failures.
+
+**Why:** `77defs.mud` expression 3
+(`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>`) and the object/OBLIST
+property forms throughout the 1977 sources require association space
+with `==?` identity (the manual's chapter 13 warning: READ-generated
+structures do not match). Eighteen success and six deliberate-error
+pinned Confusion observations (evidence: `evidence/M2/ATOM-PROPS.md`)
+fix the dispatch, return values, and error behavior. Two manual passages
+conflict with the reference — removal returns the item (not the previous
+value) and `DECL?` misses print `#FALSE (leaf)` — and the reference wins
+both adjudications because it is the executable parity target.
+
+**Consequence:** The chain advances past the historical `RAPPLIC` barrier
+to twenty-four completed expressions; the new first barrier is `EMPTY?`
+inside the original `NEWSTRUC` (`77defs.mud` expression 15). Associations
+hold strong references to item, indicator, and value until removal or
+session termination. This is a recorded deviation from historical
+association garbage collection; a weak table honoring the full MDL
+`==?` equivalence needs separate design and testing. Registered type atoms
+take precedence over DECL associations, aliases can chain, and a cycle
+raises an explicit error (the pinned reference loops on the tested cycle).
+Indexed STRING GET returns CHARACTER and mutable STRING PUT accepts one.
+Final-head review established that STRING GET and SEGMENT extraction must
+produce `==?` CHARACTER values; both now share the typed CHARACTER
+representation, and PUT accepts it. Four pinned Confusion cases are in
+`evidence/M2/character-review-*`.
+`SETG` intentionally does not enforce DECL associations. Reader behavior
+and printing remain unchanged; each fresh session starts property-free.
+
+**Final-head local review (#67):** A native SUBR is represented here as a
+Racket procedure but is an unstructured MDL association item. A FIX
+indicator on that item must use association storage without asking for
+the host procedure's unsupported MDL primtype. Pinned Confusion returns
+`9` from `<PUT ,+ 7 9> <GET ,+ 7>` and returns FALSE after two-argument
+removal. The narrow dispatch guard and red-to-green tests are recorded in
+`evidence/M2/D5-FINAL-REVIEW.md`; structured FIX indexing is unchanged.

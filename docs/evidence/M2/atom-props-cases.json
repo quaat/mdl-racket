@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "name": "m2-atom-properties-reference-successes",
+  "cases": [
+    {"name": "defs-line3-put-decl", "expression": "<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>"},
+    {"name": "get-decl-after-put", "expression": "<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>> <GET RAPPLIC DECL> <TYPE <GET RAPPLIC DECL>>"},
+    {"name": "getprop-subr-retrieval", "expression": "<PUT RAPPLIC P V> <GETPROP RAPPLIC P> <TYPE <GETPROP RAPPLIC P>>"},
+    {"name": "putprop-subr-computed-value", "expression": "<PUTPROP RAPPLIC P <+ 1 2>> <GET RAPPLIC P> <TYPE <GET RAPPLIC P>>"},
+    {"name": "get-exp-fallback", "expression": "<PUT RAPPLIC P V> <GET RAPPLIC P 'FALLBACK> <GET RAPPLIC Q 'FALLBACK>"},
+    {"name": "rapplic-still-unassigned", "expression": "<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>> <GASSIGNED? RAPPLIC>"},
+    {"name": "second-property-independence", "expression": "<PUT RAPPLIC OTHER 5> <PUT RAPPLIC DECL 'FIX> <GET RAPPLIC OTHER> <GET RAPPLIC DECL>"},
+    {"name": "overwrite-latest-wins", "expression": "<PUT W W 1> <PUT W W 2> <GET W W>"},
+    {"name": "list-value-preserved", "expression": "<PUT RAPPLIC L '(1 2 3)> <GET RAPPLIC L> <TYPE <GET RAPPLIC L>>"},
+    {"name": "atom-echo-no-property-markup", "expression": "<PUT RAPPLIC DECL 'FIX> RAPPLIC 'RAPPLIC"},
+    {"name": "type-primtype-after-put", "expression": "<PUT RAPPLIC DECL 'FIX> <TYPE RAPPLIC> <PRIMTYPE RAPPLIC>"},
+    {"name": "declq-consults-atom-decl", "expression": "<NEWTYPE NOFFSET WORD> <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>> <DECL? <CHTYPE 1 NOFFSET> RAPPLIC> <DECL? 3 RAPPLIC>"},
+    {"name": "setg-ignores-atom-decl", "expression": "<PUT SOMETHING DECL 'FIX> <SETG SOMETHING \"str\"> ,SOMETHING <GASSIGNED? SOMETHING>"},
+    {"name": "get-missing-property-false", "expression": "<GET FOO MISSING-PROP>"},
+    {"name": "fix-item-association", "expression": "<PUT 5 DECL 'FIX> <GET 5 DECL> <TYPE <GET 5 DECL>>"},
+    {"name": "association-remove-two-arg-put", "expression": "<PUT RAPPLIC P V> <PUT RAPPLIC P> <GET RAPPLIC P>"},
+    {"name": "identity-keyed-retrieval", "expression": "<SET L (1 2 3)> <PUT .L FOO VAL> <GET .L FOO> <GET (1 2 3) FOO>"},
+    {"name": "string-item-identity-miss", "expression": "<PUT \"abc\" P X> <GET \"abc\" P>"}
+  ]
+}

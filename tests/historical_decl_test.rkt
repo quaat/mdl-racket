@@ -45,10 +45,11 @@
 ;; The complete original file now loads in full: since D3 (structured
 ;; declaration patterns, issue #48) the PSETG declaration <LIST [REST ATOM]>
 ;; at 11:9 normalizes at install time, so all eight expressions of
-;; 81prim.mud load. Since D4 (issue #51) the 77loadall.mud chain passes the
-;; 77defs.mud:1 MUDDLE guard (short-circuits with ,MUDDLE = 101) and now
-;; stops at 77defs.mud expression 3's atom-property PUT - the assertions
-;; below pin both the full 81prim load and the new chain barrier.
+;; 81prim.mud load. Since D5 (issue #53) the atom-property PUT at
+;; 77defs.mud:5 stores the RAPPLIC DECL association, so the chain passes
+;; 77defs.mud expressions 1-14 and now stops at expression 15's ROOM
+;; NEWSTRUC, whose slot handling needs the unassigned EMPTY? operator - the
+;; assertions below pin both the full 81prim load and the new chain barrier.
 (define root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
 (dynamic-wind
  void
@@ -93,21 +94,22 @@
    (define chain-report
      (mdl-session-load! chain-session "77loadall.mud"))
    (check (hash-ref chain-report 'status) "FAIL")
-   ;; Since D4 (the interpreter-supplied MUDDLE global, issue #51) the
-   ;; 77defs.mud:1 guard <L? ,MUDDLE 100> is false with ,MUDDLE = 101, so the
-   ;; AND short-circuits and the chain advances past it; the next blocker is
-   ;; 77defs.mud expression 3, <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>,
-   ;; whose atom-property PUT form is a later slice.
-   (check (hash-ref chain-report 'completed_expressions) 12)
+   ;; Since D5 (atom-property PUT/GET, issue #53) the blocker
+   ;; <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>> at 77defs.mud:5 succeeds
+   ;; as an association, the NEWTYPE/DEFMAC expressions 2-14 load, and the
+   ;; chain reaches 24 completed expressions (2 x 77loadall + 8 x 81prim +
+   ;; 14 x 77defs); the next blocker is 77defs.mud expression 15, the ROOM
+   ;; NEWSTRUC at line 37, whose slot handling calls EMPTY? (unassigned).
+   (check (hash-ref chain-report 'completed_expressions) 24)
    (define failure (hash-ref chain-report 'failure))
    (check (hash-ref failure 'file) "77defs.mud")
-   (check (hash-ref failure 'expression_index) 3)
+   (check (hash-ref failure 'expression_index) 15)
    (check (hash-ref failure 'stage) "execute")
-   (check (hash-ref failure 'construct) "PUT")
-   (check (hash-ref failure 'line) 5)
+   (check (hash-ref failure 'construct) "NEWSTRUC")
+   (check (hash-ref failure 'line) 37)
    (check (hash-ref failure 'column) 1)
    (check (string-contains? (hash-ref failure 'exception)
-                            "index out of range")
+                            "unassigned or non-applicable MDL operator EMPTY?")
           #t))
  (lambda ()
    (with-handlers ([exn:fail? void])
