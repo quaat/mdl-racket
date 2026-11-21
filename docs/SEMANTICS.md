@@ -1225,3 +1225,32 @@ Confusion implementation. Do not silently discard the third argument
 to match that reference defect. Tests must cover storage, valid and
 invalid casts, same-type recheck, redefinition, malformed patterns,
 wrong arity and primitive type, and the unchanged original-source load.
+
+## M3 GDECL global value declarations (issue #78; specification before implementation)
+
+The [MDL manual §14.5.1](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines `GDECL` as an FSUBR with alternating nonempty ATOM lists and
+declaration Patterns. It installs Patterns on global value slots; a
+later `SETG` must satisfy the Pattern when declaration checking is on.
+Declaring an unassigned name creates its global slot without assigning a
+value. A wrong current value must be rejected before installation, and
+a failed later `SETG` must preserve the previous value. `GDECL` consumes
+source forms as data: it must not evaluate the ATOM list or Pattern. The
+first unchanged source call is `77defs.mud` expression 27, line 139,
+for `ORPHANS` with a five-element VECTOR Pattern. A later original
+GDECL declares three score globals as FIX. This initial slice supports
+the existing declaration matcher (simple type, OR, PRIMTYPE,
+LIST/VECTOR/UVECTOR/TUPLE with required and REST patterns); unsupported
+pattern shapes fail explicitly. `GET-DECL`/`PUT-DECL`, dynamic
+declaration-check switching, and global locatives are separate work.
+
+**Pinned Confusion/manual deviation:** the ten clean local cases in
+`evidence/M3/gdecl-reference.json` show pinned Confusion's GDECL always
+returns `T`, including empty or malformed inputs and a later SETG
+violating a FIX declaration. Its implementation in
+`confusion_patched/macros.cpp` explicitly marks GDECL unimplemented and
+returns `T` without inspecting the unevaluated form. The Racket runtime
+implements the manual operation rather than making a silent no-op. Tests
+must cover strict input shape, slot creation versus assignment,
+multiple names and patterns, existing value validation, SETG
+enforcement, and source-loader advance with zero skipped forms.

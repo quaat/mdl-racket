@@ -1,5 +1,17 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 GDECL checkpoint (2026-11-21)
+
+Issue #78 implements source-data GDECL and SETG declaration checking.
+After `make reference-build`, run `make test`, `make m2-check`, and
+`make m3-source-progress`. `make test` passes 1,077 Racket and 22 Python
+checks. The unchanged loader completes 37 forms with zero skips and
+stops at original `AND?` in `77defs.mud` expression 28. Pinned
+Confusion's GDECL is an explicit no-op; this manual/reference deviation
+is supported by ten native cases in `evidence/M3/gdecl-reference.json`.
+See [GDECL evidence](evidence/M3/GDECL.md) and
+[`source-progress-gdecl.json`](evidence/M3/source-progress-gdecl.json).
+
 ## M3 NEWTYPE declaration checkpoint (2026-11-21)
 
 After `make reference-build`, run `make test`, `make m2-check`, and

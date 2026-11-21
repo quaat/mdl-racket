@@ -12,7 +12,7 @@
          mdl-apply-form mdl-apply-computed mdl-apply-interpreted mdl-function-literal
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
-         mdl-make-declaration
+         mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
@@ -1474,6 +1474,13 @@
 (define (mdl-setg! name value)
   (define atom (binding-atom 'mdl-setg name))
   (define globals (current-mdl-globals))
+  (define declared
+    (hash-ref (atom-space-global-declarations (current-mdl-atom-space)) atom #f))
+  (when declared
+    (define pattern (normalize-decl-pattern declared #f #f "SETG"))
+    (unless (matches-decl? value pattern)
+      (error 'mdl-setg "value does not satisfy GDECL declaration for ~a"
+             (mdl-atom-pname atom))))
   (define old (hash-ref globals atom unassigned))
   (define redefine (hash-ref globals (mdl-atom "REDEFINE") unassigned))
   (when (and (hash-has-key? (atom-space-manifests (current-mdl-atom-space)) atom)
@@ -1484,6 +1491,37 @@
            (mdl-atom-pname atom)))
   (hash-set! globals atom value)
   value)
+
+(define (mdl-gdecl raw-args)
+  (define items (mdl-list->list raw-args))
+  (unless (and (pair? items) (even? (length items)))
+    (error 'mdl-gdecl "GDECL requires ATOM-list/declaration pairs"))
+  (define staged (make-hasheq))
+  (for ([i (in-range 0 (length items) 2)])
+    (define names (list-ref items i))
+    (define pattern (list-ref items (add1 i)))
+    (unless (and (mpair? names) (pair? (mdl-list->list names)))
+      (error 'mdl-gdecl "GDECL requires a nonempty ATOM list"))
+    (check-decl-pattern-shape pattern 'mdl-gdecl)
+    (for ([name (in-list (mdl-list->list names))])
+      (unless (mdl-atom? name)
+        (error 'mdl-gdecl "GDECL name must be an ATOM"))
+      (when (hash-has-key? staged name)
+        (error 'mdl-gdecl "duplicate GDECL name ~a" (mdl-atom-pname name)))
+      (define current (hash-ref (current-mdl-globals) name unassigned))
+      (unless (eq? current unassigned)
+        (unless (matches-decl?
+                 current (normalize-decl-pattern pattern #f #f "GDECL"))
+          (error 'mdl-gdecl "existing value does not satisfy GDECL for ~a"
+                 (mdl-atom-pname name))))
+      (hash-set! staged name pattern)))
+  (define declarations
+    (atom-space-global-declarations (current-mdl-atom-space)))
+  (for ([(name pattern) (in-hash staged)])
+    (hash-set! declarations name pattern)
+    (unless (hash-has-key? (current-mdl-globals) name)
+      (hash-set! (current-mdl-globals) name unassigned)))
+  (mdl-atom "T"))
 
 (define (mdl-gassigned? name)
   (define atom (binding-atom 'mdl-gassigned? name))
@@ -1531,7 +1569,8 @@
 
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
-(struct atom-space (initial root named types builtins manifests associations))
+(struct atom-space (initial root named types builtins manifests associations
+                            global-declarations))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1579,7 +1618,8 @@
               (box (list (list initial-name oblist-name initial)
                          (list root-name oblist-name root)
                          (list initial oblist-name initial-name)
-                         (list root oblist-name root-name)))))
+                         (list root oblist-name root-name)))
+              (make-hasheq)))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
@@ -2201,11 +2241,11 @@
 (define (mdl-primtype value)
   (mdl-typeprim (mdl-type value)))
 
-(define (check-newtype-pattern-shape pattern)
+(define (check-decl-pattern-shape pattern who)
   ;; Referenced type ATOMs may be declared later in the same source file.
   ;; Reject unsupported syntax now; resolve those ATOMs on CHTYPE.
   (define (bad)
-    (error 'mdl-newtype "unsupported declaration pattern"))
+    (error who "unsupported declaration pattern"))
   (define (check-structure-elements elements)
     (when (null? elements) (bad))
     (for ([element (in-list elements)] [index (in-naturals)])
@@ -2261,7 +2301,7 @@
     (error 'mdl-newtype "MDL TYPE already exists with another primitive type: ~a"
            (mdl-atom-pname name)))
   (when (pair? declaration)
-    (check-newtype-pattern-shape (car declaration)))
+    (check-decl-pattern-shape (car declaration) 'mdl-newtype))
   (hash-set! types name (mdl-atom-pname prim))
   ;; The historical Pattern may refer to types defined later in the same
   ;; source file. Store its unevaluated value now and resolve it on CHTYPE.

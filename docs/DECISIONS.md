@@ -735,3 +735,21 @@ completed forms with zero skips, then stops at `GDECL` in `77defs.mud`
 expression 27. Full source loading and game boot remain unproved.
 `GDECL` is tracked in issue #78. No upstream, licensing, or service
 boundary changes.
+
+## ADR-0034: Implement global declarations despite Confusion's no-op
+
+**Decision (2026-11-21, issue #78):** Implement manual §14.5.1 GDECL
+as an FSUBR consuming unevaluated source data. Validate nonempty ATOM
+lists and supported declaration Pattern shapes, install each Pattern
+on the session's global value slot, and check existing and later SETG
+values. Preserve old global values on failed assignments. Store Patterns
+until assignment so names of later-defined types can be resolved then.
+Pinned Confusion's GDECL routine returns T without using its form or
+arguments; copying that no-op would silently discard original source
+meaning.
+
+**Consequence:** Original source execution advances from 36 to 37
+completed forms with zero skips, then stops at `AND?` in
+`77defs.mud` expression 28. This is partial source progress, not a
+game boot or parity result. No upstream, license, or service boundary
+changes.
