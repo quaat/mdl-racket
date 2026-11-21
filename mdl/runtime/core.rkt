@@ -9,7 +9,7 @@
          mdl-with-function-scope mdl-with-prog-activation
          mdl-return mdl-again mdl-go mdl-unwind
          mdl-eval mdl-make-form mdl-form? mdl-macro? mdl-function?
-         mdl-apply-form mdl-apply-interpreted
+         mdl-apply-form mdl-apply-interpreted mdl-function-literal
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
          mdl-make-declaration
@@ -61,6 +61,9 @@
 (define unassigned (gensym 'mdl-unassigned))
 (define restart-token (gensym 'mdl-restart))
 (define goto-token (gensym 'mdl-goto))
+(struct mdl-map-transfer (kind values))
+(define current-mdl-map-step (make-parameter #f))
+(define current-mdl-map-leave (make-parameter #f))
 
 (define (binding-atom who value)
   (cond [(mdl-atom? value) value]
@@ -945,6 +948,18 @@
     [else (error 'mdl-apply-value "unassigned or non-applicable MDL operator ~a"
                  (if (mdl-atom? fn) (mdl-atom-pname fn) fn))]))
 
+;; MAPF already has values from NTH. Send those values directly to an
+;; interpreted FUNCTION; routing them through mdl-eval would rebuild LISTs
+;; and VECTORs and could execute embedded FORMs a second time.
+(define (mdl-apply-evaluated fn values)
+  (cond [(mdl-function? fn) (mdl-apply-interpreted fn values #t)]
+        [(procedure? fn) (apply fn values)]
+        [(exact-integer? fn)
+         (unless (= (length values) 1)
+           (error 'mdl-apply-evaluated "indexed applicable requires one argument"))
+         (mdl-nth (car values) fn)]
+        [else (error 'mdl-apply-evaluated "non-applicable MAPF function ~a" fn)]))
+
 ;; Call arguments assemble like the reference's LIST assembly for a SUBR:
 ;; items evaluate in order and SEGMENT objects contribute their elements,
 ;; already evaluated and never re-evaluated.
@@ -1060,7 +1075,7 @@
 ;; expression by expression. The invocation owns a function activation so
 ;; NAME formals and explicit RETURN/AGAIN targets work; AGAIN re-runs the
 ;; body without re-binding.
-(define (mdl-apply-interpreted fn raw-args)
+(define (mdl-apply-interpreted fn raw-args [already-evaluated? #f])
   (define formals (if (mdl-macro? fn) (mdl-macro-formals fn) (mdl-function-formals fn)))
   (define body (if (mdl-macro? fn) (mdl-macro-body fn) (mdl-function-body fn)))
   (define decl (if (mdl-macro? fn) (mdl-macro-decl fn) (mdl-function-decl fn)))
@@ -1074,12 +1089,14 @@
   ;; branch, which never evaluates or expands the argument list — a SEGMENT
   ;; in a macro call binds as the SEGMENT object (PR #49 review).
   (define raw-list
-    (if (mdl-macro? fn)
+    (if already-evaluated?
+        (map (lambda (item) (cons 'value item)) raw-args)
+        (if (mdl-macro? fn)
         (map (lambda (item) (cons 'raw item))
              (if (or (null? raw-args) (mpair? raw-args))
                  (mdl-list->list raw-args)
                  raw-args))
-        (expand-arg-items raw-args)))
+        (expand-arg-items raw-args))))
   (define (arg-value entry evaluate)
     ;; entry: (cons 'value v) for a spliced element, or (cons 'raw data) for
     ;; a plain argument (evaluated in the caller only when asked).
@@ -1214,10 +1231,27 @@
           (error 'mdl-eval "UNWIND expects a value and cleanup expression"))
         (mdl-unwind (lambda () (mdl-eval (car args)))
                     (lambda () (mdl-eval (cadr args))))]
+       [(FUNCTION) (runtime-function-literal args)]
        [(DEFINE) (runtime-define args #f)]
        [(DEFMAC) (runtime-define args #t)]
        [else (mdl-apply-value (resolve-operator op) args)])]
     [else (mdl-apply-value (mdl-eval (car elements)) (cdr elements))]))
+
+(define (mdl-function-literal formals body [leading-act #f] [decl #f])
+  (interpreted-formal-specs formals leading-act)
+  (when (null? body) (error 'mdl-function "FUNCTION requires a body"))
+  (mdl-function formals body leading-act decl))
+
+(define (runtime-function-literal operands)
+  (unless (and (pair? operands) (pair? (cdr operands)))
+    (error 'mdl-function "FUNCTION requires formals and body"))
+  (define leading-act (and (mdl-atom? (car operands)) (car operands)))
+  (define formals (if leading-act (cadr operands) (car operands)))
+  (define body (if leading-act (cddr operands) (cdr operands)))
+  (unless (or (null? formals) (mpair? formals))
+    (error 'mdl-function "FUNCTION requires a formal LIST"))
+  (define decl (and (pair? body) (mdl-decl-value? (car body)) (car body)))
+  (mdl-function-literal formals (if decl (cdr body) body) leading-act decl))
 
 ;; Runtime DEFINE and DEFMAC store interpreted definitions. The optional
 ;; leading activation atom between the name and the formal list binds the
@@ -1465,6 +1499,8 @@
   (hash-set! (oblist-value-entries root) "INITIAL" initial-name)
   (define initial (oblist-value initial-name (make-hash) 151))
   (hash-set! named initial-name initial)
+  (define oblist-name (atom-value "OBLIST" root))
+  (hash-set! (oblist-value-entries root) "OBLIST" oblist-name)
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
@@ -1478,15 +1514,22 @@
                           ("MACRO" . "LIST")
                           ("FUNCTION" . "LIST")
                           ("ACTIVATION" . "FRAME")))])
-    (define type-atom (atom-value (car entry) initial))
-    (hash-set! (oblist-value-entries initial) (car entry) type-atom)
+    (define type-atom
+      (if (string=? (car entry) "OBLIST")
+          oblist-name
+          (atom-value (car entry) initial)))
+    (unless (eq? type-atom oblist-name)
+      (hash-set! (oblist-value-entries initial) (car entry) type-atom))
     (hash-set! types type-atom (cdr entry))
     (hash-set! builtins type-atom #t))
   (atom-space initial root named types builtins (make-hasheq)
               ;; Session-owned association entries. Key comparison must use
               ;; mdl-identical?, which is broader than Racket eq? for WORDs
               ;; and independently constructed REST views.
-              (box '())))
+              (box (list (list initial-name oblist-name initial)
+                         (list root-name oblist-name root)
+                         (list initial oblist-name initial-name)
+                         (list root oblist-name root-name)))))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
@@ -2182,8 +2225,80 @@
   (error 'mdl-error "~a"
          (if (null? args) "ERROR" (string-join (map describe args) " "))))
 
+(define (mdl-map-structured? value)
+  (define base (mdl-base value))
+  (or (null? base) (mpair? base) (mdl-array? base)
+      (string? base) (mdl-false? base) (mdl-tuple-value? base)))
+
+(define (mdl-mapret . values)
+  (define step (current-mdl-map-step))
+  (unless step (error 'mdl-mapret "No map in MAPRET"))
+  (step (mdl-map-transfer 'continue values)))
+
+(define (mdl-mapstop . values)
+  (define step (current-mdl-map-step))
+  (unless step (error 'mdl-mapstop "No map in MAPSTOP"))
+  (step (mdl-map-transfer 'stop values)))
+
+(define (mdl-mapleave . values)
+  (unless (<= (length values) 1)
+    (error 'mdl-mapleave "TOO-MANY-ARGUMENTS-SUPPLIED"))
+  (define leave (current-mdl-map-leave))
+  (unless leave (error 'mdl-mapleave "No map in MAPLEAVE"))
+  (leave (if (null? values) (mdl-atom "T") (car values))))
+
+(define (mdl-mapf finalf loopf . structures)
+  (for ([structure (in-list structures)])
+    (unless (mdl-map-structured? structure)
+      (error 'mdl-mapf "Arguments to MAPF must be structured")))
+  (let/ec leave
+    (let loop ([index 1] [collected '()] [last-value (mdl-false '())])
+      (define exhausted?
+        (for/or ([structure (in-list structures)])
+          (> index (mdl-length structure))))
+      (if exhausted?
+          (if (mdl-false? finalf)
+              last-value
+              (mdl-apply-evaluated finalf (reverse collected)))
+          (let* ([step-values
+                  (for/list ([structure (in-list structures)])
+                    (mdl-nth structure index))]
+                 [step-result
+                  (let/ec step
+                    (parameterize ([current-mdl-map-step step]
+                                   [current-mdl-map-leave leave])
+                      (mdl-map-transfer
+                       'normal
+                       (list (mdl-apply-evaluated loopf step-values)))))]
+                 [new-collected
+                  (if (mdl-false? finalf)
+                      '()
+                      (append (reverse (mdl-map-transfer-values step-result))
+                              collected))]
+                 [values (mdl-map-transfer-values step-result)]
+                 [new-last
+                  (if (and (mdl-false? finalf)
+                           (not (eq? (mdl-map-transfer-kind step-result) 'normal)))
+                      ;; Pinned Confusion returns the current first input
+                      ;; when MAPRET/MAPSTOP transfers under FALSE finalf,
+                      ;; even when control supplied different values.
+                      (if (null? step-values) last-value (car step-values))
+                      (if (null? values) last-value (last values)))])
+            (if (eq? (mdl-map-transfer-kind step-result) 'stop)
+                (if (mdl-false? finalf)
+                    new-last
+                    (mdl-apply-evaluated finalf (reverse new-collected)))
+                (loop (add1 index) new-collected new-last)))))))
+
+(define (mdl-typeq . args)
+  (when (null? args)
+    (error 'mdl-typeq "Not enough arguments to TYPE?"))
+  (define actual (mdl-type (car args)))
+  (if (member actual (cdr args) eq?) actual (mdl-false '())))
+
 (define builtin-table
   (hash "TYPE" mdl-type
+        "TYPE?" mdl-typeq
         "LVAL" mdl-lval
         "GVAL" mdl-gval
         "VALUE" mdl-value
@@ -2215,6 +2330,10 @@
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
         "ERROR" mdl-error
+        "MAPF" mdl-mapf
+        "MAPRET" mdl-mapret
+        "MAPSTOP" mdl-mapstop
+        "MAPLEAVE" mdl-mapleave
         "LENGTH" mdl-length
         "REST" mdl-rest
         "NTH" mdl-nth

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "m2-mapf-function-context-reference",
+  "cases": [
+    {"name": "nested-direct-function", "expression": "<DEFINE MAP-HELP (X) <+ .X 10>> <MAPF ,LIST <FUNCTION (Y) <MAP-HELP .Y>> '(1 2)>"},
+    {"name": "function-value-in-prog", "expression": "<PROG ((N 10)) <MAPF ,LIST <FUNCTION (X) <+ .N .X>> '(1 2)>>"},
+    {"name": "escaping-function", "expression": "<SETG F <PROG ((N 10)) <FUNCTION (X) <+ .N .X>>>> <MAPF ,LIST ,F '(1 2)>"}
+  ]
+}

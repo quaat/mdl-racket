@@ -5,7 +5,7 @@
 ;; property, shared globals, mutation aliasing, and session independence.
 ;; Run from the repository root via make test-m2-g3, which fetches the pinned
 ;; sources first. This gate currently exits nonzero after all observations
-;; because original FLAGWORD still reaches unsupported MAPF.
+;; including original FLAGWORD through MAPF.
 (require racket/file racket/list racket/path racket/port racket/string rackunit
          "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
 
@@ -175,12 +175,20 @@
    (check (mdl-session-global session psetg-atom) 4)
    (check (render session (mdl-session-global session "PURE-LIST")) "(G3-P)")
 
-   ;; The next installed original definition needed for M2's MAPF build
-   ;; surface is FLAGWORD. Pinned Confusion returns 1 for this empty-TUPLE
-   ;; call; the current Racket runtime must fail explicitly at MAPF.
+   ;; Exact original FLAGWORD now runs through its inline FUNCTION, MAPF,
+   ;; TUPLE binding, declaration, arithmetic and MSETG branches.
+   (check (mdl-session-call session "FLAGWORD") 1)
+   (check (mdl-session-call session "FLAGWORD" (mdl-false '())) 2)
+   (define flag-atom (mdl-session-atom session "G3-FLAG"))
+   (check (mdl-session-call session "FLAGWORD" flag-atom) 2)
+   (check (mdl-session-global session flag-atom) 1)
+   (define flag-two (mdl-session-atom session "G3-FLAG-TWO"))
+   (check (mdl-session-call session "FLAGWORD" (mdl-false '()) flag-two) 3)
+   (check (mdl-session-global session flag-two) 2)
    (check-exn-verb
-    (lambda () (mdl-session-call session "FLAGWORD"))
-    #rx"unassigned or non-applicable MDL operator MAPF")
+    (lambda () (mdl-session-call session "FLAGWORD" flag-atom flag-atom))
+    #rx"MSETG.*G3-FLAG.*ALREADY-GASSIGNED.*1")
+   (check (mdl-session-global session flag-atom) 1)
 
    ;; --- Original RAPPLIC declaration property (77defs.mud:5) -------------
 
@@ -256,6 +264,4 @@
    (with-handlers ([exn:fail? void])
      (delete-directory/files root))))
 
-(displayln (format "historical G3 integrated observations passed: ~a assertions" checks))
-(error 'historical-g3
-       "G3 FAIL: original FLAGWORD requires unsupported MAPF")
+(displayln (format "historical G3 integrated gate passed: ~a assertions" checks))
