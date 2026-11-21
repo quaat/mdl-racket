@@ -1,9 +1,10 @@
 # M2 source execution inventory — pre-merge G3 FAIL
 
 **Pre-merge G3 FAIL.** Stacked corrections for `N=?`, `,.FOO`, and
-`ERROR` let original MSETG first/equal/conflict paths execute; the
-current-head gate run reaches unassigned `MEMQ` inside original PSETG
-([issue #63](https://github.com/quaat/mdl-racket/issues/63)). Current
+`ERROR` let original MSETG first/equal/conflict paths execute; the MEMQ
+correction lets original PSETG first/repeat paths execute. The current-head
+gate run reaches unassigned `MAPF` inside original FLAGWORD
+([issue #65](https://github.com/quaat/mdl-racket/issues/65)). Current
 state (2026-11-20,
 D5 PR #54 head `e6d295d`,
 `main` `419fc5c`): slices D1–D4 are merged (`#DECL`
@@ -29,7 +30,7 @@ record. The current barrier is reproduced with
 | Source | Definitions loaded | Invoked and verified | Blocked or untested |
 |---|---|---|---|
 | Pinned reconstructed `77loadall.mud` SHA256 `389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa` | `VFLOAD` from byte-exact first form in an explicit PARTIAL probe; the full chain executes its first two top-level forms | `VFLOAD` on a one-form controlled file; output, empty FALSE return and global value verified against pinned Confusion; full chain loads `81prim.mud` before entering `77defs.mud` | The G2 probe deliberately left 12 forms unexecuted; the current full-chain failure is downstream at `77defs.mud` expression 15 |
-| Pinned reconstructed `81prim.mud` SHA256 `8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571` | **All eight forms load** (D2+D3): `MSETG` and `PSETG` install with their original declarations | `MSETG` invoked with a fresh ATOM and FIX `3`: returns `T`, leaves the global at `3`, sets its manifest, and rejects a non-ATOM first argument at the declaration boundary; `PSETG` invoked with a valid ATOM advances through its `SETG` and `PURE-LIST` initialization and stops explicitly at `<MEMQ .FOO .PL>` (no `MEMQ` primitive yet) | None within this file; the chain's next blocker is downstream in `77defs.mud` |
+| Pinned reconstructed `81prim.mud` SHA256 `8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571` | **All eight forms load** (D2+D3): `MSETG` and `PSETG` install with their original declarations | `MSETG` first/equal/conflict paths and `PSETG` first/repeat paths execute with the expected global and PURE-LIST state | `FLAGWORD` invocation reaches unassigned `MAPF`; the chain's separate next loader blocker is downstream in `77defs.mud` |
 | Pinned reconstructed `77defs.mud` | Expressions 1–14 execute in the shared session (D5): `<NEWTYPE NOFFSET WORD>`, the `<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` declaration property (stored without global assignment; `DECL?` consults it), and DEFMAC forms `TRNN`/`RTRNN`/`RTRZ`/`TRC`/`TRZ`/`TRO`/`RTRO` | The `RAPPLIC` `DECL` association is installed and read back byte-exactly; `TYPE`/`PRIMTYPE` of the atom are unchanged | Expression 15 `<NEWSTRUC ROOM VECTOR ...>` (line 37) fails in `execute` at `EMPTY?` inside the original `NEWSTRUC` bootstrap; expressions 16+ untested |
 | `77makstr.mud`, `77patch.mud`, later files | None in a coherent session | None | Independent first barriers are listed in [`SOURCE-READINESS.md`](SOURCE-READINESS.md); full load has not reached them |
 | Later reconstructed source files and archival originals | None | None | Not tested for execution through this loader |
@@ -40,13 +41,13 @@ The source lock is MITDDC/zork
 reconstruction, and Racket runtime remain distinct. No game boot, parser
 command, puzzle behavior, RNG parity, or the full integrated M2 state
 contract has been demonstrated from original source execution. The
-pre-merge G3 subset has 48 checked observations, but its gate is FAIL.
+pre-merge G3 subset has 52 checked observations, but its gate is FAIL.
 
-The next M2 action is the focused `MEMQ` correction and a G3 rerun. After
+The next M2 action is the focused `MAPF` correction and a G3 rerun. After
 the M2 gate is settled, the next sequential loader dependency is `EMPTY?`
 (called by the original `NEWSTRUC`/`MAPF` bootstraps at the current
 barrier, `77defs.mud` expression 15), followed by whatever construct
-actual source execution surfaces next. `MEMQ` is now the confirmed barrier
-for executing the installed `PSETG`. G3 can pass only when a coherent
+actual source execution surfaces next. `MAPF` is now the confirmed barrier
+for executing the installed `FLAGWORD`. G3 can pass only when a coherent
 ordered sequence of original definitions is installed and exercised with
 shared state, atom identity, mutation and control behavior verified.

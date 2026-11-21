@@ -66,9 +66,8 @@
    (check (hash-ref report 'status) "PASS")
    (check (hash-ref report 'completed_expressions) 8)
    ;; The original MSETG definition, from the pinned bytes, is retained and
-   ;; executes; the PSETG definition installs with its compound declaration
-   ;; and, when invoked, stops explicitly at its <MEMQ .FOO .PL> (no MEMQ
-   ;; primitive in this slice, by scope).
+   ;; executes; PSETG installs with its compound declaration and now
+   ;; completes its first MEMQ-backed invocation.
    (check-exn-verb
     (lambda () (mdl-session-call session "MSETG" "bad" 3))
     #rx"DECL.*FOO")
@@ -76,10 +75,10 @@
    (check (mdl-atom-pname (mdl-session-call session "MSETG" atom 3)) "T")
    (check (mdl-session-global session atom) 3)
    (define psetg-atom (mdl-session-call session "ATOM" "M2-D3-LVAL"))
-   (check-exn-verb
-    (lambda () (mdl-session-call session "PSETG" psetg-atom 3))
-    #rx"unassigned or non-applicable MDL operator MEMQ")
+   (check (mdl-session-call session "PSETG" psetg-atom 3) 3)
    (check (mdl-session-global session psetg-atom) 3)
+   (check (mdl-list->list (mdl-session-global session "PURE-LIST"))
+          (list psetg-atom))
 
    ;; The pinned 77loadall chain: copy the exact bytes of the entry and the
    ;; two files its load chain reaches, then assert the new failure exactly.

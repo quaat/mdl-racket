@@ -2017,6 +2017,18 @@
            (= (mdl-array-length left) (mdl-array-length right)))]
         [else (eq? left right)]))
 
+(define (mdl-memq item structure)
+  (define base (mdl-base structure))
+  (when (string? base)
+    (error 'mdl-memq "unsupported STRING MEMQ"))
+  (unless (or (null? base) (mpair? base) (mdl-array? base)
+              (mdl-false? base) (mdl-tuple-value? base))
+    (error 'mdl-memq "Second arg to MEMQ must be structured"))
+  (or (for/or ([offset (in-range (mdl-length structure))])
+        (and (mdl-identical? item (mdl-nth structure (add1 offset)))
+             (mdl-rest structure offset)))
+      (mdl-false '())))
+
 (define (mdl-equal? left right)
   (define active (make-hasheq))
   (define (compare-structured a b thunk)
@@ -2208,6 +2220,11 @@
         "NTH" mdl-nth
         "PUT" mdl-put!
         "GET" mdl-get
+        "MEMQ" (lambda args
+                 (case (length args)
+                   [(2) (mdl-memq (car args) (cadr args))]
+                   [(0 1) (error 'mdl-memq "TOO-FEW-ARGUMENTS-SUPPLIED")]
+                   [else (error 'mdl-memq "TOO-MANY-ARGUMENTS-SUPPLIED")]))
         "PUTREST" mdl-putrest!
         "FORM" (lambda elems (mdl-make-form (apply mdl-list elems)))
         "EXPAND" mdl-expand

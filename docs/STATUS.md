@@ -1,11 +1,12 @@
-# Status — 2026-11-20 (D5 under review; G3 FAIL, computed global correction)
+# Status — 2026-11-20 (D5 under review; G3 FAIL at original FLAGWORD/MAPF)
 
 ## Current state (2026-11-20)
 
 - **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL.
   Stacked corrections for `N=?`, `,.FOO`, and `ERROR` pass focused and
-  hash-verified original-MSETG tests. A current-head G3 rerun fails at
-  original PSETG's missing `MEMQ`; M2 cannot pass.
+  hash-verified original-MSETG tests. MEMQ now lets original PSETG pass;
+  the current-head G3 rerun fails at original FLAGWORD's missing `MAPF`.
+  M2 cannot pass.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -25,22 +26,24 @@
   inside the original source-defined `NEWSTRUC`, executing
   `77defs.mud` expression 15 `<NEWSTRUC ROOM VECTOR ...>` (line 37,
   execute stage).
-- **Known candidates next:** the `EMPTY?` primitive (and whatever else
-  the original `NEWSTRUC` reaches), then `MEMQ` for executing the
-  installed `PSETG`. Actual source execution sets priority.
+- **Known candidates next:** `MAPF` for executing original `FLAGWORD`
+  within G3 (issue #65). The sequential full-load barrier is still
+  `EMPTY?` inside `NEWSTRUC`; M3 waits for G3.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
-- **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57/PR #59 (`N=?`),
-  #58/PR #61 (computed global reader), #60/PR #62 (`ERROR`), #65 (`MAPF`),
-  and #67 (D5 review fix). Issue #11 is closed as completed. The D5 SUBR association correction
-  requires final-head CI. Its independent local review report is
-  [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). Maintainer approval
-  and merge are pending; no merge is authorized.
-- **N=? local slice:** `make test` 879 Racket checks and 13 Python tests;
+- **Open issues/PRs:** #53/PR #54 (D5), #56/PR #64 (G3), #57/PR #59
+  (`N=?`), #58/PR #61 (computed global), #60/PR #62 (`ERROR`), #63
+  /PR #66 (`MEMQ`), #65 (`MAPF`), and #67 (D5 review fix). Issue #11 is
+  closed as completed. The D5 SUBR association correction requires
+  final-head CI; its independent local report is
+  [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). The hosted review
+  service declined a prior request due to its usage limit. Maintainer
+  approval and merge are pending; no merge is authorized.
+- **Earlier N=? local slice:** `make test` 879 Racket checks and 13 Python tests;
   focused `neq_test.rkt` 13 checks. Original MSETG advanced from `N=?`
   to `,.FOO`; see [evidence](evidence/M2/NEQ.md). The next action is
   issue #58, then repeat G3. M3 `EMPTY?` waits for G3.
-- **Issue #58 stacked reader slice:** `,.FOO` parses as GVAL of the local
+- **Earlier issue #58 stacked reader slice:** `,.FOO` parses as GVAL of the local
   value FOO. `make test` passes 884 Racket checks and 13 Python tests;
   `make test-historical` passes exact-source MSETG first/equal-repeat paths
   alongside VFLOAD and DECL. The original conflicting-repeat path now reaches
@@ -48,17 +51,22 @@
   [computed-global evidence](evidence/M2/COMPUTED-GLOBAL.md). Next: probe
   and implement `ERROR` as a separate source-backed slice (issue #60), then
   rerun G3.
-- **Issue #60 stacked ERROR slice:** `make test` passes 888 Racket checks
+- **Earlier issue #60 stacked ERROR slice:** `make test` passes 888 Racket checks
   and 13 Python tests; `make test-historical` includes the hash-verified
   original MSETG conflict and passes. Confusion's `ERROR` enters a
   resumable level; this Racket slice raises a non-resumable exception with
   evaluated arguments. See [evidence](evidence/M2/ERROR.md). The integrated
   G3 was rerun and fails at `MEMQ`; no gate PASS claim is possible.
-- **Current-head G3 rerun:** `make test-m2-g3` exits 2 after 48 passing
+- **Earlier current-head G3 rerun:** `make test-m2-g3` exits 2 after 48 passing
   integrated assertions; original MSETG first/equal/conflict paths pass,
   while original PSETG reaches unassigned `MEMQ` after its initial SETG
   and PURE-LIST side effects. **G3 FAIL**. See
   [gate evidence](evidence/M2/G3-GATE.md); focused correction issue #63.
+- **Current MEMQ/G3 rerun:** `make test` passes 903 Racket checks and 13
+  Python tests; `make test-historical` passes VFLOAD 23, DECL 21, MSETG,
+  and PSETG. `make test-m2-g3` exits 2 after 52 passing assertions because
+  original FLAGWORD reaches unassigned `MAPF`. **G3 FAIL**. See
+  [MEMQ evidence](evidence/M2/MEMQ.md) and [G3 gate](evidence/M2/G3-GATE.md).
 - **Not demonstrated:** full integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 

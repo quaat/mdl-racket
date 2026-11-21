@@ -46,6 +46,13 @@ PSETG reaches unassigned `MEMQ` after observable side effects. The
 full source chain still stops at `EMPTY?` after 24 expressions.
 See [`G3-GATE.md`](evidence/M2/G3-GATE.md); issue #63 tracks MEMQ.
 
+After issue #63's MEMQ correction, `make test` exits 0 (903 Racket
+checks, 13 Python), and `make test-historical` exits 0 (VFLOAD 23,
+DECL 21, MSETG and PSETG original-source probes). `make test-m2-g3`
+exits **2** after 52 passing observations because original `FLAGWORD`
+reaches missing `MAPF`; pinned Confusion returns `1` for that call.
+See [`MEMQ.md`](evidence/M2/MEMQ.md) and the updated G3 report.
+
 The M2 G0 audit is reproducible with
 `racket scripts/audit_source_readiness.rkt --output artifacts/m2/source-readiness.json`.
 Its JSON separates independent compile probes from sequential execution
