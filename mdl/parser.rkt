@@ -151,9 +151,16 @@
          (node 'local name))]
       [(#\!)
        (advance! c)
-       (if (equal? (peek c) #\[)
-           (begin (advance! c) (node 'uvector (read-delimited! c 'uvector)))
-           (node 'splice (read-node! c #t)))]
+       (cond
+         [(equal? (peek c) #\\)
+          (advance! c)
+          (define character (advance! c))
+          (unless character (parse-error c "unterminated CHARACTER notation"))
+          (node 'character character)]
+         [(equal? (peek c) #\[)
+          (advance! c)
+          (node 'uvector (read-delimited! c 'uvector))]
+         [else (node 'splice (read-node! c #t))])]
       [(#\%) (advance! c) (node 'percent (read-node! c))]
       [(#\#)
        (let ([name (read-atom! c)])

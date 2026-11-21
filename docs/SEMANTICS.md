@@ -1407,3 +1407,24 @@ explicitly if encountered in this slice. Tests must fail first at
 the current atom-list/pattern error, then cover valid metadata,
 non-enforcement on FUNCTION, malformed markers and strict Pattern
 validation before measuring unchanged source progress.
+
+## M3 `!\` CHARACTER reader notation (issue #92; specification before implementation)
+
+The [MDL manual §7](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/)
+defines `!\` followed by one ASCII character as a CHARACTER value of
+PRIMTYPE WORD. The following character is consumed even when it is a
+separator such as space. The unchanged `81tell-repl.mud` expression 23,
+line 45, uses `<PRINC !\ >` to output one space. This is distinct
+from `!<...>` and `!.X` SEGMENT notation, which must retain their
+existing behavior. An `!\` at end of input is a reader error.
+
+Five isolated pinned Confusion cases in
+`evidence/M3/space-character-reference.json` show `!\ ` has TYPE
+CHARACTER, PRIMTYPE WORD, ASCII code 32, value identity across
+occurrences, and remains a CHARACTER returned from a function.
+The Racket reader must produce a dedicated CHARACTER node, and the
+compiler must construct the existing runtime CHARACTER value in data
+and expression positions. Tests must fail first at unsupported SEGMENT
+notation, then check reader shape, space and ordinary characters,
+value operations, incomplete input and SEGMENT non-regression before
+unchanged source validation.

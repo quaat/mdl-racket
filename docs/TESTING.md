@@ -1,5 +1,19 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 `!\` CHARACTER checkpoint (2026-11-21)
+
+Issue #92 adds `tests/space_character_test.rkt` with 12 focused
+reader and runtime checks. Its first run exited 1 because the reader
+made a SEGMENT; after implementation it exits 0. Five native Confusion
+cases confirm the CHARACTER value and code. `make test` exits 0 with
+1,160 Racket and 22 Python tests; `make m2-check` exits 0;
+`make m3-source-progress` exits 0 with 157 completed, zero skipped
+original forms. This source slice advances the failure location within
+expression 23, but the completed-form count stays 157. The full loader
+itself exits 1 at `%<STRING <ASCII 10>>` in `81tell-repl.mud`.
+See [evidence](evidence/M3/SPACE-CHARACTER.md) and
+[`source-progress-space-character.json`](evidence/M3/source-progress-space-character.json).
+
 ## M3 positional declaration metadata checkpoint (2026-11-21)
 
 Issue #90 adds `tests/function_decl_metadata_test.rkt` with 13
