@@ -10,7 +10,7 @@
 ;; DECL? is a SUBR in both the reference and this implementation, and a
 ;; round-paren structure evaluates as LIST data, so the recorded value
 ;; operands run verbatim. Where this implementation fails explicitly on a
-;; construct the reference supports but D3 leaves out of scope (NTH, OPT,
+;; construct the reference supports but D3 leaves out of scope (OPT,
 ;; quoted-object element patterns), the test pins the explicit failure.
 (require rackunit racket/file racket/path racket/list racket/string
          "../mdl/parser.rkt" "../mdl/compiler.rkt"
@@ -138,11 +138,9 @@
            (lambda () (run "<DECL? 3 '<SPECIAL FIX>>")))
 (check-exn #rx"DECL\\?: unsupported declaration pattern UNSPECIAL"
            (lambda () (run "<DECL? 3 '<UNSPECIAL FIX>>")))
-;; NTH repetitions ([fix pat ...]): the reference implements them
-;; (nth-repeat-two-fixes), D3 leaves them a later slice -- explicit failure
-(check-exn #rx"DECL\\?: unsupported declaration pattern NTH"
-           (lambda () (run "<DECL? (1 2 3 4) '<LIST [2 FIX] [REST FIX]>>")))
-(check-exn #rx"DECL\\?: unsupported declaration pattern NTH"
+;; NTH repetition is covered by nth_decl_test.rkt; invalid counts stay strict.
+(check-decl-true (run "<DECL? (1 2 3 4) '<LIST [2 FIX] [REST FIX]>>"))
+(check-exn #rx"DECL\\?: NTH repetition requires a positive count"
            (lambda () (run "<DECL? (1) '<LIST [0 FIX]>>")))
 ;; [OPT ...] is a later slice (reference computes its results but pollutes
 ;; its own stderr with leftover probe prints)

@@ -1,0 +1,95 @@
+{
+  "stage": "EXECUTED_PARTIAL",
+  "completed_expressions": 233,
+  "skipped_expressions": 0,
+  "progress_delta": 209,
+  "files_encountered": [
+    "77loadall.mud",
+    "81prim.mud",
+    "77defs.mud",
+    "77makstr.mud",
+    "81tell-repl.mud",
+    "77act1.mud"
+  ],
+  "files_completely_loaded": [
+    "81prim.mud",
+    "77defs.mud",
+    "77makstr.mud",
+    "81tell-repl.mud"
+  ],
+  "files_partially_executed": [
+    "77loadall.mud",
+    "77act1.mud"
+  ],
+  "completed_per_file": {
+    "77loadall.mud": 5,
+    "81prim.mud": 8,
+    "77defs.mud": 96,
+    "77makstr.mud": 27,
+    "81tell-repl.mud": 43,
+    "77act1.mud": 54
+  },
+  "definition_forms_completed": 139,
+  "failure": {
+    "construct": "DEFINE",
+    "column": 1,
+    "stage": "execute",
+    "expression_index": 55,
+    "exception": "mdl-decl: DECL 740:9: unknown declaration type PRSOBJ",
+    "line": 737,
+    "classification": "runtime",
+    "load_chain": [
+      "77loadall.mud",
+      "77act1.mud"
+    ],
+    "file": "77act1.mud"
+  },
+  "reference": {
+    "status": "LOADED",
+    "files": [
+      "81prim.mud",
+      "77defs.mud",
+      "77makstr.mud",
+      "81tell-repl.mud",
+      "77act1.mud",
+      "77act2.mud",
+      "77act3.mud",
+      "77rooms.mud",
+      "77patch.mud",
+      "77np.mud",
+      "78melee.mud",
+      "77dung.mud"
+    ]
+  },
+  "source_commits": {
+    "mit_zork": "d94501340842e006791fce0757dc0043b8ec8916",
+    "mdlzork": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3"
+  },
+  "source_sha256": {
+    "77loadall.mud": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+    "81prim.mud": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+    "77defs.mud": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+    "77makstr.mud": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+    "81tell-repl.mud": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+    "77act1.mud": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8"
+  },
+  "historical_text_files_parsed": 36,
+  "historical_nontext_files": 4,
+  "schema_version": 1,
+  "entry": "77loadall.mud",
+  "baseline_completed_expressions": 24,
+  "loader_exit": 1,
+  "loader_stdout": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\nMDL source load FAIL: 233 completed expressions; report: /home/thomas/project/racket/mdl-racket-zork-harness/artifacts/m3/source-load.json\n",
+  "loader_stderr": "runtime: 77act1.mud (execute, expression 55): mdl-decl: DECL 740:9: unknown declaration type PRSOBJ\n",
+  "raw_report": "artifacts/m3/source-load.json",
+  "reference_evidence": "docs/evidence/M2/muddle-reference.json:fload-chain-completion",
+  "milestones": {
+    "PARSED": true,
+    "LOADED": false,
+    "EXECUTED": true,
+    "INITIALIZED": false,
+    "INTERACTIVE": false,
+    "SMOKE_PARITY": false,
+    "PLAYABLE": false
+  }
+}

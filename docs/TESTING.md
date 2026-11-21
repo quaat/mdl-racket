@@ -1,5 +1,16 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 NTH declaration checkpoint (2026-11-21)
+
+Issue #96 adds `tests/nth_decl_test.rkt` to the Racket suite. Run
+`TMPDIR=/tmp raco test tests/nth_decl_test.rkt` for focused repeated
+Pattern, malformed-count, large-count, attached FUNCTION and NEWTYPE checks.
+Run `make test`, `make m2-check`, then `make m3-source-progress` against the
+locked upstream checkout. The last command exits 0 for a valid partial-load
+measurement: inspect `artifacts/m3/source-progress.json` for the underlying
+loader exit 1 and first failure. Native probes and frozen source results are
+in [NTH-DECL.md](evidence/M3/NTH-DECL.md).
+
 ## M3 `%` read-time evaluation checkpoint (2026-11-21)
 
 Issue #94 adds `tests/percent_read_test.rkt` to the explicit Racket

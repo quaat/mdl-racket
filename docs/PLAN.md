@@ -137,10 +137,11 @@ are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
 
-**Current source frontier (2026-11-21):** issue #94's branch completes
-188 unchanged original forms, zero skipped, and fully loads
-`81tell-repl.mud`; the next failure is the NTH declaration Pattern
-`[3 ANY]` in `77act1.mud` expression 10. This is partial source
+**Current source frontier (2026-11-21):** issue #96's branch completes
+233 unchanged original forms, zero skipped; the next failure is the
+unknown declaration type `PRSOBJ` in `77act1.mud` expression 55,
+tracked in [issue #98](https://github.com/quaat/mdl-racket/issues/98).
+This is partial source
 execution, not an M3 gate pass. Track PARSED, LOADED, INITIALIZED,
 INTERACTIVE and SMOKE-PARITY separately; the progress report currently
 verifies PARSED and the incomplete loader state while recording the

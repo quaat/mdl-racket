@@ -22,4 +22,5 @@ raco test mdl/runtime/core.rkt \
   tests/pstring_literal_test.rkt \
   tests/function_decl_metadata_test.rkt \
   tests/space_character_test.rkt \
-  tests/percent_read_test.rkt
+  tests/percent_read_test.rkt \
+  tests/nth_decl_test.rkt
