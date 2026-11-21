@@ -1,0 +1,81 @@
+{
+  "stage": "EXECUTED_PARTIAL",
+  "completed_expressions": 37,
+  "skipped_expressions": 0,
+  "progress_delta": 13,
+  "files_encountered": [
+    "77loadall.mud",
+    "81prim.mud",
+    "77defs.mud"
+  ],
+  "files_completely_loaded": [
+    "81prim.mud"
+  ],
+  "files_partially_executed": [
+    "77loadall.mud",
+    "77defs.mud"
+  ],
+  "completed_per_file": {
+    "77loadall.mud": 2,
+    "81prim.mud": 8,
+    "77defs.mud": 27
+  },
+  "definition_forms_completed": 14,
+  "failure": {
+    "construct": "AND?",
+    "column": 1,
+    "stage": "execute",
+    "expression_index": 28,
+    "exception": "mdl-eval: unassigned or non-applicable MDL operator AND?",
+    "line": 146,
+    "classification": "runtime",
+    "load_chain": [
+      "77loadall.mud",
+      "77defs.mud"
+    ],
+    "file": "77defs.mud"
+  },
+  "reference": {
+    "status": "LOADED",
+    "files": [
+      "81prim.mud",
+      "77defs.mud",
+      "77makstr.mud",
+      "81tell-repl.mud",
+      "77act1.mud",
+      "77act2.mud",
+      "77act3.mud",
+      "77rooms.mud",
+      "77patch.mud",
+      "77np.mud",
+      "78melee.mud",
+      "77dung.mud"
+    ]
+  },
+  "source_commits": {
+    "mit_zork": "d94501340842e006791fce0757dc0043b8ec8916",
+    "mdlzork": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3"
+  },
+  "source_sha256": {
+    "77loadall.mud": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+    "81prim.mud": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+    "77defs.mud": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e"
+  },
+  "historical_text_files_parsed": 36,
+  "historical_nontext_files": 4,
+  "schema_version": 1,
+  "entry": "77loadall.mud",
+  "baseline_completed_expressions": 24,
+  "loader_exit": 1,
+  "loader_stdout": "81prim.mud loaded\nMDL source load FAIL: 37 completed expressions; report: /home/thomas/project/racket/mdl-racket-zork-harness/artifacts/m3/source-load.json\n",
+  "loader_stderr": "runtime: 77defs.mud (execute, expression 28): mdl-eval: unassigned or non-applicable MDL operator AND?\n",
+  "raw_report": "artifacts/m3/source-load.json",
+  "reference_evidence": "docs/evidence/M2/muddle-reference.json:fload-chain-completion",
+  "milestones": {
+    "PARSED": true,
+    "LOADED": false,
+    "EXECUTED": true,
+    "INITIALIZED": false,
+    "PLAYABLE": false
+  }
+}

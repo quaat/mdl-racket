@@ -2,12 +2,20 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #78 GDECL slice PASS; full M3 gate incomplete:** original
+  `GDECL` is a source-data FSUBR that installs global value Patterns and
+  checks later `SETG`. Pinned Confusion's GDECL is an explicit no-op, so
+  this is a documented manual/reference deviation. `make test` passes
+  1,077 Racket checks and 22 Python tests; the unchanged loader completes
+  37 forms with zero skips and next stops at `AND?` in `77defs.mud`
+  expression 28, line 146. See [evidence](evidence/M3/GDECL.md) and
+  [next issue #80](https://github.com/quaat/mdl-racket/issues/80).
 - **Issue #76 source-backed slice PASS; full M3 gate incomplete:**
   three-argument `NEWTYPE` stores and enforces a declaration Pattern,
   including `<<PRIMTYPE VECTOR> ...>` structure heads and same-primitive
   redeclaration. The pinned Confusion reference ignores this third
   argument, a documented manual/reference deviation. The unchanged loader
-  now completes 36 forms with zero skips, then stops at `GDECL` in
+  reached 36 forms with zero skips, then stopped at `GDECL` in
   `77defs.mud` expression 27, line 139. See [evidence](evidence/M3/NEWTYPE-DECL.md)
   and [next issue #78](https://github.com/quaat/mdl-racket/issues/78).
 - **First M3 source-backed slice PASS; full M3 gate remains incomplete:**

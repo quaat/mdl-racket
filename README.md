@@ -24,11 +24,13 @@ The separate [M3 source-progress gate](docs/evidence/M3/SOURCE-PROGRESS.md),
 `make m3-source-progress`, verifies 36 parsed historical text files. The
 [predicate and ROOT slice](docs/evidence/M3/EMPTYQ.md) advanced the
 unchanged `77loadall.mud` chain from 24 to 26 completed forms. The current
-[three-argument NEWTYPE slice](docs/evidence/M3/NEWTYPE-DECL.md) advances
-it to 36 completed, zero skipped forms; it stops at `GDECL` in
-`77defs.mud` expression 27. NEWTYPE now stores and checks its optional
-declaration Pattern as the MDL manual specifies. Pinned Confusion
-silently discards that Pattern, an explicit reference deviation. `ASSIGNED?`
+[three-argument NEWTYPE slice](docs/evidence/M3/NEWTYPE-DECL.md) advanced
+it to 36 forms. The current [GDECL slice](docs/evidence/M3/GDECL.md)
+reaches 37 completed, zero skipped forms and stops at `AND?` in
+`77defs.mud` expression 28. NEWTYPE stores and checks its optional
+declaration Pattern; GDECL installs and checks global value Patterns.
+Pinned Confusion silently omits both checks, explicit reference
+deviations. `ASSIGNED?`
 with ENV remains unsupported; full source loading, game boot and gameplay
 parity are unverified. Reproduce with `make test`, `make m2-check`, and
 `make m3-source-progress` after `make reference-build`.

@@ -501,6 +501,10 @@
              (unsupported n "UNWIND expects a value and cleanup expression"))
            `(mdl-unwind (lambda () ,(compile-expression (first args) locals))
                         (lambda () ,(compile-expression (second args) locals)))]
+          [(GDECL)
+           ;; FSUBR: preserve each source argument as MDL data. Pattern
+           ;; forms and the ATOM-list must not be evaluated.
+           `(mdl-gdecl (mdl-list ,@(map compile-data args)))]
           [(SETG)
            (unless (= (length args) 2) (unsupported n "SETG expects name and value"))
            `(mdl-setg! ,(compile-expression (first args) locals)
