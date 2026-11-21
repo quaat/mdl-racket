@@ -868,3 +868,29 @@ zero skipped. The first failure moves within `81tell-repl.mud`
 expression 23 from `!\ ` to `%<STRING <ASCII 10>>`. This is a
 scoped reader PASS, not an increase in completed source forms or a
 full M3 gate PASS. No upstream, license or service boundary changes.
+
+## ADR-0042: Evaluate `%` during executable reading in the active session
+
+**Decision (2026-11-21, issue #94, before implementation):** Keep
+`parse-mdl` and the source inventory syntax-only. Give the incremental
+reader an optional callback used only by the executable loader. On `%`,
+read its payload recursively, invoke the callback immediately, then put
+an opaque value reference into the source-located node. The callback
+compiles and evaluates the payload in the current MDL session. A
+session-owned registry holds the actual result object; compiled forms
+retrieve that object rather than recreating it from syntax. Nested FLOAD
+inherits the same session and registry. Each new session owns a separate
+registry. Reader evaluation errors retain the percent location and stop
+the loader; no fallback value is inserted.
+
+**Rejected:** Compilation-time evaluation occurs after an entire top-level
+form is read, so a preceding `%` could miss reader-visible state changes.
+Rebuilding the substitution from an AST would lose mutable object identity
+and could evaluate again on function calls. Enabling evaluation in the
+syntax-only source sweep would introduce side effects into diagnostics.
+
+**Boundary:** This implements `%` with currently supported MDL expressions,
+plus the source-required `ASCII` and CHARACTER-capable `STRING` slice.
+`%%`, mutable read tables, channel controls, and unsupported payload forms
+remain strict errors. The source-progress report must distinguish
+read-time failure from parse, compile and execute failures.

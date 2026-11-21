@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m3-percent-read-native-errors",
+  "cases": [
+    {"name": "ascii-negative", "expression": "<ASCII -1>"},
+    {"name": "ascii-128", "expression": "<ASCII 128>"},
+    {"name": "ascii-256", "expression": "<ASCII 256>"},
+    {"name": "ascii-string", "expression": "<ASCII \"x\">"},
+    {"name": "string-fix", "expression": "<STRING 10>"},
+    {"name": "percent-unbound", "expression": "<TYPE %<M3-NO-SUCH>>"}
+  ]
+}

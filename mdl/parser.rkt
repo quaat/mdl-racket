@@ -9,7 +9,8 @@
 
 (struct mdl-node (kind value line column) #:transparent)
 (struct exn:fail:mdl-reader exn:fail (line column) #:transparent)
-(struct cursor (text [pos #:mutable] [line #:mutable] [column #:mutable] source) #:transparent)
+(struct cursor (text [pos #:mutable] [line #:mutable] [column #:mutable]
+                     source read-eval) #:transparent)
 
 (define (peek c)
   (and (< (cursor-pos c) (string-length (cursor-text c)))
@@ -161,7 +162,14 @@
           (advance! c)
           (node 'uvector (read-delimited! c 'uvector))]
          [else (node 'splice (read-node! c #t))])]
-      [(#\%) (advance! c) (node 'percent (read-node! c))]
+      [(#\%)
+       (advance! c)
+       (when (and (cursor-read-eval c) (equal? (peek c) #\%))
+         (parse-error c "unsupported %% reader macro"))
+       (define percent-node (node 'percent (read-node! c)))
+       (if (cursor-read-eval c)
+           ((cursor-read-eval c) percent-node)
+           percent-node)]
       [(#\#)
        (let ([name (read-atom! c)])
          (skip-ws! c)
@@ -196,8 +204,9 @@
          (when (string=? raw "") (parse-error c "invalid token"))
          (node 'atom raw))])))
 
-(define (make-mdl-node-reader text #:source [source "<string>"])
-  (define c (cursor text 0 1 1 source))
+(define (make-mdl-node-reader text #:source [source "<string>"]
+                              #:read-eval [read-eval #f])
+  (define c (cursor text 0 1 1 source read-eval))
   (lambda ()
     (skip-ws! c)
     (and (peek c) (read-node! c))))

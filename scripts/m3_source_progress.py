@@ -87,7 +87,7 @@ def validate_report(report: dict, baseline: dict) -> dict:
                 "invalid failure line")
         require(type(failure.get("column")) is int and failure["column"] > 0,
                 "invalid failure column")
-        require(failure.get("stage") in ("parse", "compile", "execute"),
+        require(failure.get("stage") in ("parse", "read-eval", "compile", "execute"),
                 "invalid failure stage")
         require(isinstance(failure.get("classification"), str)
                 and failure["classification"], "missing failure classification")
@@ -188,6 +188,8 @@ def main() -> int:
         "LOADED": summary["stage"] == "LOADED",
         "EXECUTED": summary["completed_expressions"] > 0,
         "INITIALIZED": False,
+        "INTERACTIVE": False,
+        "SMOKE_PARITY": False,
         "PLAYABLE": False,
     }
     args.output.write_text(json.dumps(summary, indent=2) + "\n")

@@ -2,6 +2,7 @@
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list racket/string)
 (provide current-mdl-globals current-mdl-locals
+         current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
          mdl-setg! mdl-gval mdl-define!
          mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings mdl-type
@@ -38,6 +39,21 @@
 
 (define current-mdl-globals (make-parameter (make-hasheq)))
 (define current-mdl-locals (make-parameter (list (make-hasheq))))
+(define current-mdl-read-values (make-parameter #f))
+
+(define (mdl-register-read-value! value)
+  (define values (current-mdl-read-values))
+  (unless (hash? values)
+    (error 'mdl-register-read-value! "no executable MDL reader session"))
+  (define key (hash-count values))
+  (hash-set! values key value)
+  key)
+
+(define (mdl-read-value key)
+  (define values (current-mdl-read-values))
+  (unless (and (hash? values) (hash-has-key? values key))
+    (error 'mdl-read-value "read-time value is not in this MDL session"))
+  (hash-ref values key))
 ;; kind distinguishes PROG/REPEAT frames from function activations: a bare
 ;; RETURN/AGAIN/GO transfer only ever targets 'prog frames, matching the
 ;; reference's LASTPROG lookup, while explicit activation targets may select
@@ -1931,6 +1947,17 @@
           code)]
     [else #f]))
 
+(define (mdl-ascii value)
+  (cond
+    [(exact-integer? value)
+     (unless (<= 0 value 127)
+       (error 'mdl-ascii "Value for ASCII out of range"))
+     (mdl-character (integer->char value))]
+    [else
+     (define code (mdl-character-code value))
+     (unless code (error 'mdl-ascii "Argument to ASCII must be FIX or CHARACTER"))
+     code]))
+
 (define (mdl-type-name value)
   (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
         [(mdl-activation? value) "ACTIVATION"]
@@ -2398,9 +2425,13 @@
       (mdl-false '())))
 
 (define (mdl-string . pieces)
-  (unless (andmap string? pieces)
-    (error 'mdl-string "STRING expects STRING arguments; CHARACTER is unsupported"))
-  (apply string-append pieces))
+  (apply string-append
+         (for/list ([piece (in-list pieces)])
+           (cond [(string? piece) piece]
+                 [(mdl-character-code piece)
+                  (string (integer->char (mdl-character-code piece)))]
+                 [else (error 'mdl-string
+                              "STRING expects STRING or CHARACTER arguments")]))))
 
 (define (mdl-printstring buffer)
   (unless (string? buffer)
@@ -2602,6 +2633,7 @@
         "VECTOR" mdl-vector
         "UVECTOR" mdl-uvector
         "STRING" mdl-string
+        "ASCII" mdl-ascii
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
         "ERROR" mdl-error

@@ -137,6 +137,16 @@ are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
 
+**Current source frontier (2026-11-21):** issue #94's branch completes
+188 unchanged original forms, zero skipped, and fully loads
+`81tell-repl.mud`; the next failure is the NTH declaration Pattern
+`[3 ANY]` in `77act1.mud` expression 10. This is partial source
+execution, not an M3 gate pass. Track PARSED, LOADED, INITIALIZED,
+INTERACTIVE and SMOKE-PARITY separately; the progress report currently
+verifies PARSED and the incomplete loader state while recording the
+remaining stages false. M3 PASS requires the approved house smoke
+scenario, not just source-chain completion.
+
 The first source-progress gate is `make m3-source-progress`. It runs the
 unchanged `77loadall.mud` entry, accepts a new genuine source dependency
 only when the first 24 original expressions remain intact, and records a
@@ -144,7 +154,7 @@ machine-readable file/order/failure report. The M2 regression suite loads
 an explicit SHA-verified original-source prefix and does not pin the
 full loader to its former EMPTY? failure. See
 [`SOURCE-PROGRESS.md`](evidence/M3/SOURCE-PROGRESS.md). The initial
-M3 observation is 24 completed, zero skipped forms; EMPTY? is first.
+M3 observation was 24 completed, zero skipped forms; EMPTY? was first.
 
 **Build:** world structures (`defs`, `makstr`, `dung`), vocabulary,
 `np` original parser, actions, room logic, game loop, I/O abstraction.

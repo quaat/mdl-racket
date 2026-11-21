@@ -60,6 +60,14 @@ def test_new_dependency_after_forward_progress_is_accepted():
     assert validate_report(report, BASELINE)["progress_delta"] == 1
 
 
+def test_read_time_evaluation_failure_is_a_distinct_valid_stage():
+    report = incomplete_report()
+    report["failure"].update(stage="read-eval", classification="reader",
+                             construct="percent", column=11)
+    report["events"][-1]["construct"] = "percent"
+    assert validate_report(report, BASELINE)["failure"]["stage"] == "read-eval"
+
+
 @pytest.mark.parametrize("mutation", [
     lambda r: r.update(skipped_expressions=1),
     lambda r: r.update(completed_expressions=1),

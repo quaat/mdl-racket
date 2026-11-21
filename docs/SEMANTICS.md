@@ -1428,3 +1428,35 @@ and expression positions. Tests must fail first at unsupported SEGMENT
 notation, then check reader shape, space and ordinary characters,
 value operations, incomplete input and SEGMENT non-regression before
 unchanged source validation.
+
+# M3 issue #94 specification: session-aware `%` READ evaluation
+
+The [MDL manual §17.1.1](https://mdl-language.readthedocs.io/en/latest/17-macro-operations/)
+requires a single `%` to evaluate the following object immediately during
+READ at any nesting depth, substituting the resulting MDL object. The
+syntax-only parser continues to record a percent node; the executable
+reader invokes a session callback as soon as its payload has been read.
+The callback must finish before the reader consumes the next sibling. It
+must preserve the resulting object, including identity, for the lifetime
+of the loaded definition. Errors in that evaluation stop reading at the
+percent source position. `%%` is separate and remains unsupported.
+
+The original `81tell-repl.mud:46` needs `%<STRING <ASCII 10>>`. The manual's
+`ASCII` conversion is bidirectional: a FIX ASCII code becomes a CHARACTER;
+a CHARACTER becomes its FIX code. The supported code range is 0–127, as
+confirmed by pinned Confusion (128, 256 and -1 report out of range).
+`STRING` concatenates STRING and CHARACTER arguments after normal left to
+right evaluation; zero arguments yield the empty STRING. Unsupported types
+raise an error. Existing STRING data is represented by Racket strings and
+CHARACTER by the existing typed WORD value.
+
+Native cases in `evidence/M3/percent-read-reference.json` verify type,
+conversion, newline length, read-before-evaluation, adjacent order,
+once-only function substitution, quoted LIST identity, nested LIST, and
+the prior `%<>` behavior. Deliberate errors are retained in
+`evidence/M3/percent-read-errors-reference.json`; their probe command
+exits 1 because the tool treats native stderr as a failed clean case.
+The regression test must first fail on the original percent construct,
+then pass for these cases and prove that syntax-only parsing has no MDL
+side effects. Arbitrary reader table changes, `%%`, and READ-time channel
+control remain outside this slice and must fail explicitly.
