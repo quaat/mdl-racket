@@ -70,6 +70,10 @@
 ;; closures remain the fast path for quoted-formal-free definitions.
 (struct mdl-macro (formals body leading-act decl))
 (struct mdl-function (formals body leading-act decl))
+;; Chapter 21 registration objects. External event generation and dispatch
+;; remain explicit later slices; these objects are never stand-in T values.
+(struct mdl-iheader (owner name priority [handlers #:mutable] [enabled? #:mutable]))
+(struct mdl-handler (header applicable [active? #:mutable]))
 (define compiled-function-formals (make-weak-hasheq))
 (struct mdl-decl-value (bindings result line column positionals) #:transparent)
 (define local-declarations (make-weak-hasheq))
@@ -1677,7 +1681,7 @@
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
 (struct atom-space (initial root named types builtins manifests associations
-                            global-declarations))
+                            global-declarations events))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1709,7 +1713,9 @@
                           ("TUPLE" . "TUPLE")
                           ("MACRO" . "LIST")
                           ("FUNCTION" . "LIST")
-                          ("ACTIVATION" . "FRAME")))])
+                          ("ACTIVATION" . "FRAME")
+                          ("IHEADER" . "VECTOR")
+                          ("HANDLER" . "VECTOR")))])
     (define type-atom
       (if (string=? (car entry) "OBLIST")
           oblist-name
@@ -1726,9 +1732,94 @@
                          (list root-name oblist-name root)
                          (list initial oblist-name initial-name)
                          (list root oblist-name root-name)))
-              (make-hasheq)))
+              (make-hasheq) (make-hash)))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
+
+;; User-defined event registration per MDL manual chapter 21. A true event
+;; source must be supplied before external names may be registered; accepting
+;; one would silently lose callbacks on GC or operating-system events.
+(define external-interrupt-names
+  '("GC" "CHAR" "READ" "WRITE" "IPC" "BLOCKED" "ERROR" "CLOCK"))
+
+(define (mdl-event . args)
+  (define events (atom-space-events (current-mdl-atom-space)))
+  (case (length args)
+    [(1)
+     (define header (car args))
+     (unless (mdl-iheader? header)
+       (error 'mdl-event "EVENT requires IHEADER or name and priority"))
+     (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+       (error 'mdl-event "IHEADER belongs to another MDL session"))
+     (hash-set! events (mdl-iheader-name header) header)
+     (set-mdl-iheader-enabled?! header #t)
+     header]
+    [(2)
+     (define name (car args))
+     (define priority (cadr args))
+     (unless (string? name)
+       (error 'mdl-event "EVENT name must be STRING in this slice"))
+     (unless (and (exact-integer? priority) (<= fix-min priority fix-max)
+                  (positive? priority))
+       (error 'mdl-event "EVENT priority must be a positive FIX"))
+     (when (member name external-interrupt-names)
+       (error 'mdl-event "unsupported external EVENT ~a" name))
+     (hash-ref events name
+               (lambda ()
+                 (define header (mdl-iheader (current-mdl-atom-space)
+                                             name priority '() #t))
+                 (hash-set! events name header)
+                 header))]
+    [else (error 'mdl-event "EVENT expects IHEADER or name and priority")]))
+
+(define (mdl-install-handler . args)
+  (unless (= (length args) 2)
+    (error 'mdl-handler "HANDLER expects IHEADER and APPLICABLE"))
+  (define header (car args))
+  (define action (cadr args))
+  (unless (mdl-iheader? header)
+    (error 'mdl-handler "HANDLER first argument must be IHEADER"))
+  (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+    (error 'mdl-handler "IHEADER belongs to another MDL session"))
+  (define handler
+    (cond
+      [(mdl-handler? action)
+       (unless (and (eq? (mdl-handler-header action) header)
+                    (not (mdl-handler-active? action)))
+         (error 'mdl-handler "HANDLER already in use or belongs to another IHEADER"))
+       (set-mdl-handler-active?! action #t)
+       action]
+      [(or (procedure? action) (mdl-function? action))
+       (mdl-handler header action #t)]
+      [else (error 'mdl-handler "unsupported HANDLER action; expected FUNCTION or SUBR")]))
+  (set-mdl-iheader-handlers! header
+                             (cons handler (mdl-iheader-handlers header)))
+  handler)
+
+(define (mdl-off . args)
+  (unless (= (length args) 1)
+    (error 'mdl-off "OFF expects one IHEADER or HANDLER"))
+  (define object (car args))
+  (cond
+    [(mdl-handler? object)
+     (define header (mdl-handler-header object))
+     (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+       (error 'mdl-off "HANDLER belongs to another MDL session"))
+     (set-mdl-iheader-handlers! header
+       (filter (lambda (entry) (not (eq? entry object)))
+               (mdl-iheader-handlers header)))
+     (set-mdl-handler-active?! object #f)
+     object]
+    [(mdl-iheader? object)
+     (unless (eq? (mdl-iheader-owner object) (current-mdl-atom-space))
+       (error 'mdl-off "IHEADER belongs to another MDL session"))
+     (define events (atom-space-events (current-mdl-atom-space)))
+     (unless (eq? (hash-ref events (mdl-iheader-name object) #f) object)
+       (error 'mdl-off "IHEADER has no active event association"))
+     (hash-remove! events (mdl-iheader-name object))
+     (set-mdl-iheader-enabled?! object #f)
+     object]
+    [else (error 'mdl-off "OFF expects IHEADER or HANDLER")]))
 
 (define (require-oblist who value)
   (unless (mdl-oblist? value)
@@ -2019,6 +2110,8 @@
         [(mdl-tuple-value? value) "TUPLE"]
         [(mdl-macro? value) "MACRO"]
         [(mdl-function? value) "FUNCTION"]
+        [(mdl-iheader? value) "IHEADER"]
+        [(mdl-handler? value) "HANDLER"]
         [(mdl-decl-value? value) "DECL"]
         [(mdl-atom? value) "ATOM"]
         [(mdl-oblist? value) "OBLIST"]
@@ -2690,6 +2783,9 @@
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
         "ERROR" mdl-error
+        "EVENT" mdl-event
+        "HANDLER" mdl-install-handler
+        "OFF" mdl-off
         "MAPF" mdl-mapf
         "MAPRET" mdl-mapret
         "MAPSTOP" mdl-mapstop

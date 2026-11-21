@@ -1541,3 +1541,31 @@ both constraints, source-order failure, acceptance of the original
 `BALLOON` declaration, and source-load progression. This conjunction is
 an explicit inference from the manual's pairing semantics, not a claim of
 verified historical precedence.
+
+## M3 EVENT/HANDLER registration (issue #102; specification before implementation)
+
+The [MDL manual chapter 21](https://mdl-language.readthedocs.io/en/latest/21-interrupts/)
+defines `EVENT name priority` as creating or retrieving an enabled IHEADER,
+`HANDLER iheader applicable` as prepending a HANDLER, and `OFF` on a HANDLER
+or IHEADER as removing it from the active list or name association while
+returning the same object. EVENT on an IHEADER re-associates it; HANDLER on
+an existing detached HANDLER reattaches it. Both types have VECTOR primitive
+type and object identity. The event registry belongs to one MDL session.
+
+This bounded slice supports registration and removal for user-defined
+STRING-named events, a positive FIX priority, and FUNCTION/SUBR-like
+callables in the current PROCESS. Other APPLICABLE types are explicitly
+unsupported. It rejects external/automatic events such as `"GC"`,
+`"CHAR"`, `"READ"`, `"WRITE"`, `"IPC"` and `"BLOCKED"` explicitly until
+their event sources and scheduling can be implemented. Handler dispatch,
+process-targeted handlers, and `INTERRUPT` remain unsupported and must not
+silently become no-ops. This allows the original `"DIVERT-AGC"` setup to
+be represented faithfully while making the next missing external event
+explicit. Native Confusion's EVENT/HANDLER/OFF/ON return `T` for even invalid
+arguments, and its INTERRUPT is unbound; those are reference limitations,
+not the manual semantics implemented here. The `INTERRUPTS` OBLIST,
+name-to-IHEADER `GET` association and structural indexing/mutation of
+IHEADER/HANDLER values remain unimplemented; only STRING name lookup through
+EVENT is supported. Tests must establish identity,
+removal, reattachment, session isolation, strict unsupported
+paths, and source progression before claiming the slice.

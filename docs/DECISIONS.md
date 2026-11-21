@@ -1,5 +1,22 @@
 # Architecture decision records
 
+## ADR: Represent user event registrations without dispatch (M3 issue #102)
+
+**Decision:** Implement session-owned IHEADER and HANDLER objects and the
+manual's user event registration/removal operations. Reject external
+event registration and interrupt dispatch until callback scheduling is
+implemented. In particular, `EVENT "GC"` must not install a handler
+that would silently fail to run on garbage collection.
+
+**Why:** Pinned Confusion stubs EVENT, HANDLER, OFF and ON as `T` even on
+bad arguments, and has no usable INTERRUPT. Copying that behavior would
+advance source loading while abandoning event semantics. The manual
+provides a real object model and identity/removal rules.
+
+**Consequence:** This registration slice advances only to the first
+external event dependency. M3 remains incomplete, and no game or
+interrupt parity is claimed.
+
 ## ADR: Conjoin duplicate ATOM Patterns in one attached DECL (M3 issue #100)
 
 **Decision:** If an ATOM appears in more than one pair of the same attached

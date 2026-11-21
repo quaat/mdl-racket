@@ -9,7 +9,23 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 checkpoint (2026-11-21, `feat/m3-duplicate-decl`):**
+**Current M3 checkpoint (2026-11-21, `feat/m3-event-handler`):**
+The scoped [issue #102](docs/evidence/M3/EVENT-REGISTRATION.md) change
+represents user-defined EVENT IHEADERs and HANDLERs as session-owned
+objects, with identity, registration, removal and reattachment. External
+events and callback dispatch remain unsupported and fail explicitly; this
+build does not substitute Confusion's `T` stubs for interrupt semantics.
+The unchanged source loader completes **433 original forms with zero
+skips**, then exits 1 at `77rooms.mud` expression 16, line 101:
+`EVENT "GC"` requires automatic GC callback delivery.
+`make m3-source-progress` exits 0 only as a partial measurement. `make test`
+and `make m2-check` pass; see the [evidence](docs/evidence/M3/EVENT-REGISTRATION.md).
+M0/M1/M2 remain PASS; the formal M3 gate is **INCOMPLETE**. Full source
+load, initialization, interactive input, smoke parity and gameplay are
+unverified. Next: [issue #104](https://github.com/quaat/mdl-racket/issues/104)
+under [event issue #71](https://github.com/quaat/mdl-racket/issues/71).
+
+**Previous M3 checkpoint (issue #100):**
 The scoped [issue #100](docs/evidence/M3/DUPLICATE-DECL.md) change retains
 both Patterns when an ATOM appears twice in one attached `#DECL` and checks
 both in source order. The manual does not state duplicate precedence;

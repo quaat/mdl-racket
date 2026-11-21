@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "m3-event-registration-errors-native-reference",
+  "cases": [
+    {
+      "name": "interrupt-callback",
+      "expression": "<SETG COUNT 0> <SETG E <EVENT \"M3-TEST-G\" 7>> <HANDLER ,E <FUNCTION (X) <SETG COUNT .X>>> <INTERRUPT \"M3-TEST-G\" 5> ,COUNT"
+    },
+    {
+      "name": "off-callback",
+      "expression": "<SETG COUNT 0> <SETG E <EVENT \"M3-TEST-H\" 7>> <SETG H <HANDLER ,E <FUNCTION (X) <SETG COUNT .X>>>> <OFF ,H> <INTERRUPT \"M3-TEST-H\" 5> ,COUNT"
+    }
+  ]
+}
