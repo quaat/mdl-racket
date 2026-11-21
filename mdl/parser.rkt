@@ -137,8 +137,13 @@
       [(#\') (advance! c) (node 'quote (read-node! c))]
       [(#\,)
        (advance! c)
-       (let ([name (read-atom! c)])
-         (node 'global (if (string=? name "") (read-node! c) name)))]
+       (if (equal? (peek c) #\.)
+           ;; The comma applies GVAL to the following expression. In
+           ;; `,.FOO`, that expression is the local value of FOO, not an
+           ;; ATOM whose PNAME begins with a period (manual chapter 4).
+           (node 'global (read-node! c))
+           (let ([name (read-atom! c)])
+             (node 'global (if (string=? name "") (read-node! c) name))))]
       [(#\.)
        (advance! c)
        (let ([name (read-atom! c)])

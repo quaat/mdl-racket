@@ -918,3 +918,25 @@ for self and the same explicit error for unsupported distinct equal cycles.
 This differs from the tested pinned Confusion timeout but prevents a hang;
 it is not evidence of general cyclic parity. Reference inputs, outputs,
 source hashes, and commands are in `evidence/M2/NEQ.md`.
+
+## M2 G3 corrective reader slice: computed global `,.FOO` (issue #58)
+
+The [MDL manual chapter 4](https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/)
+says comma abbreviates GVAL of the following expression, and explicitly
+shows `,.FOO` reading the GVAL of the ATOM held in FOO's local value.
+Pinned Confusion confirms this: after `<SETG G3-FOO 3>` and
+`<SET FOO 'G3-FOO>`, `,.FOO` returns 3 and `<+ 1 ,.FOO>` returns 4.
+The exact original `81prim.mud` MSETG uses `,.FOO` in its N=? guard and
+ALREADY-GASSIGNED error path. With N=? available, the current reader's
+literal-name parse of `.FOO` causes a false unassigned-global error.
+
+Parse immediate comma-period as a `global` node containing a `local` node;
+the existing compiler/runtime paths then evaluate local FOO to an ATOM
+and retrieve that ATOM's global value. Preserve plain `,FOO` and computed
+`,<FORM>` behavior. Unknown/unassigned names continue to raise explicit
+errors. Tests must cover reader AST shape, compiled expression behavior,
+and the source-defined MSETG equal-repeat path. Its conflicting-repeat
+path reaches a separate unsupported `ERROR` primitive (issue #60); it is
+not part of this reader slice. Reference inputs
+and outputs are in `evidence/M2/computed-global-*` and the G3 reference
+files; final validation belongs in `evidence/M2/COMPUTED-GLOBAL.md`.
