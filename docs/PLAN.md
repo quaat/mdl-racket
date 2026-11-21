@@ -137,6 +137,15 @@ are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
 
+The first source-progress gate is `make m3-source-progress`. It runs the
+unchanged `77loadall.mud` entry, accepts a new genuine source dependency
+only when the first 24 original expressions remain intact, and records a
+machine-readable file/order/failure report. The M2 regression suite loads
+an explicit SHA-verified original-source prefix and does not pin the
+full loader to its former EMPTY? failure. See
+[`SOURCE-PROGRESS.md`](evidence/M3/SOURCE-PROGRESS.md). The initial
+M3 observation is 24 completed, zero skipped forms; EMPTY? is first.
+
 **Build:** world structures (`defs`, `makstr`, `dung`), vocabulary,
 `np` original parser, actions, room logic, game loop, I/O abstraction.
 

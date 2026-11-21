@@ -30,6 +30,8 @@ jobs:
         run: make test-historical
       - name: Execute M2 G3 original-definition gate
         run: make test-m2-g3
+      - name: Validate M3 original-source progress
+        run: make m3-source-progress
       - name: Build and capture native reference
         run: |
           make reference-build

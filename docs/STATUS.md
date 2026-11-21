@@ -13,9 +13,12 @@
   after 24 completed and zero skipped forms at unassigned `EMPTY?` inside
   original `NEWSTRUC`, `77defs.mud` expression 15, line 37 (execute).
   This is not game initialization or a playable session.
-- **Next action:** make the M2 regression suite independent of full-loader
-  progress, add a machine-readable M3 source-progress target, then implement
-  EMPTY? from native evidence. Random/event APIs are tracked in
+- **M3 progress infrastructure:** issue #73 makes the M2 regression suite
+  independent of full-loader progress and adds a machine-readable M3
+  source-progress target. `make m2-check` now passes with 986 Racket, 22 Python and
+  58 original-source G3 assertions; `make m3-source-progress` passes with
+  the authentic 24-form EMPTY? report. See [M3 source progress](evidence/M3/SOURCE-PROGRESS.md).
+- **Next action:** implement EMPTY? from native evidence. Random/event APIs are tracked in
   [M3 issue #71](https://github.com/quaat/mdl-racket/issues/71), with no
   parity claim. The pinned Confusion reference loads the full 12-file
   chain to `DONE`.

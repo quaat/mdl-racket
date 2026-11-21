@@ -46,10 +46,9 @@
 ;; declaration patterns, issue #48) the PSETG declaration <LIST [REST ATOM]>
 ;; at 11:9 normalizes at install time, so all eight expressions of
 ;; 81prim.mud load. Since D5 (issue #53) the atom-property PUT at
-;; 77defs.mud:5 stores the RAPPLIC DECL association, so the chain passes
-;; 77defs.mud expressions 1-14 and now stops at expression 15's ROOM
-;; NEWSTRUC, whose slot handling needs the unassigned EMPTY? operator - the
-;; assertions below pin both the full 81prim load and the new chain barrier.
+;; 77defs.mud:5 stores the RAPPLIC DECL association. The assertions below
+;; pin full 81prim execution and a bounded 77defs prefix; M3 tracks the
+;; complete chain's changing failure separately.
 (define root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
 (dynamic-wind
  void
@@ -80,8 +79,8 @@
    (check (mdl-list->list (mdl-session-global session "PURE-LIST"))
           (list psetg-atom))
 
-   ;; The pinned 77loadall chain: copy the exact bytes of the entry and the
-   ;; two files its load chain reaches, then assert the new failure exactly.
+   ;; A bounded original-source prefix keeps this M2 declaration regression
+   ;; independent of later full-loader progress in M3.
    (define source-root
      (build-path ".cache" "upstream" "mdlzork" "mdlzork_771212"
                  "patched_confusion"))
@@ -90,26 +89,24 @@
        (lambda (out)
          (write-bytes (file->bytes (build-path source-root name)) out))))
    (define chain-session (make-mdl-session root))
-   (define chain-report
-     (mdl-session-load! chain-session "77loadall.mud"))
-   (check (hash-ref chain-report 'status) "FAIL")
-   ;; Since D5 (atom-property PUT/GET, issue #53) the blocker
-   ;; <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>> at 77defs.mud:5 succeeds
-   ;; as an association, the NEWTYPE/DEFMAC expressions 2-14 load, and the
-   ;; chain reaches 24 completed expressions (2 x 77loadall + 8 x 81prim +
-   ;; 14 x 77defs); the next blocker is 77defs.mud expression 15, the ROOM
-   ;; NEWSTRUC at line 37, whose slot handling calls EMPTY? (unassigned).
-   (check (hash-ref chain-report 'completed_expressions) 24)
-   (define failure (hash-ref chain-report 'failure))
-   (check (hash-ref failure 'file) "77defs.mud")
-   (check (hash-ref failure 'expression_index) 15)
-   (check (hash-ref failure 'stage) "execute")
-   (check (hash-ref failure 'construct) "NEWSTRUC")
-   (check (hash-ref failure 'line) 37)
-   (check (hash-ref failure 'column) 1)
-   (check (string-contains? (hash-ref failure 'exception)
-                            "unassigned or non-applicable MDL operator EMPTY?")
-          #t))
+   (define entry-report
+     (mdl-session-load! chain-session "77loadall.mud" #:max-expressions 1))
+   (define prim-report (mdl-session-load! chain-session "81prim.mud"))
+   (define defs-report
+     (mdl-session-load! chain-session "77defs.mud" #:max-expressions 14))
+   (check (hash-ref entry-report 'status) "PARTIAL")
+   (check (hash-ref entry-report 'completed_expressions) 1)
+   (check (hash-ref prim-report 'status) "PASS")
+   (check (hash-ref prim-report 'completed_expressions) 8)
+   (check (hash-ref defs-report 'status) "PARTIAL")
+   (check (hash-ref defs-report 'completed_expressions) 14)
+   (check (hash-ref defs-report 'failure) #f)
+   (check (mdl-atom-pname
+           (mdl-session-call chain-session "TYPE"
+                             (mdl-session-call chain-session "GET"
+                                               (mdl-session-atom chain-session "RAPPLIC")
+                                               (mdl-session-atom chain-session "DECL"))))
+          "FORM"))
  (lambda ()
    (with-handlers ([exn:fail? void])
      (delete-directory/files root))))

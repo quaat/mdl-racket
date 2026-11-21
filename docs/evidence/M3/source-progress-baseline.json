@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "entry": "77loadall.mud",
+  "minimum_completed_expressions": 24,
+  "accepted_prefix": [
+    {
+      "file": "77loadall.mud",
+      "expression_index": 1,
+      "construct": "DEFINE"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 1,
+      "construct": "string"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 2,
+      "construct": "DEFINE"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 3,
+      "construct": "DEFINE"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 4,
+      "construct": "DEFINE"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 5,
+      "construct": "DEFINE"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 6,
+      "construct": "string"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 7,
+      "construct": "SETG"
+    },
+    {
+      "file": "81prim.mud",
+      "expression_index": 8,
+      "construct": "DEFINE"
+    },
+    {
+      "file": "77loadall.mud",
+      "expression_index": 2,
+      "construct": "VFLOAD"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 1,
+      "construct": "AND"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 2,
+      "construct": "NEWTYPE"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 3,
+      "construct": "PUT"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 4,
+      "construct": "NEWTYPE"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 5,
+      "construct": "NEWTYPE"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 6,
+      "construct": "NEWTYPE"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 7,
+      "construct": "NEWTYPE"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 8,
+      "construct": "DEFMAC"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 9,
+      "construct": "DEFMAC"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 10,
+      "construct": "DEFMAC"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 11,
+      "construct": "DEFMAC"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 12,
+      "construct": "DEFMAC"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 13,
+      "construct": "DEFMAC"
+    },
+    {
+      "file": "77defs.mud",
+      "expression_index": 14,
+      "construct": "DEFMAC"
+    }
+  ],
+  "source_commits": {
+    "mit_zork": "d94501340842e006791fce0757dc0043b8ec8916",
+    "mdlzork": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3"
+  },
+  "source_sha256": {
+    "77loadall.mud": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+    "81prim.mud": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+    "77defs.mud": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e"
+  },
+  "reference_files": [
+    "81prim.mud",
+    "77defs.mud",
+    "77makstr.mud",
+    "81tell-repl.mud",
+    "77act1.mud",
+    "77act2.mud",
+    "77act3.mud",
+    "77rooms.mud",
+    "77patch.mud",
+    "77np.mud",
+    "78melee.mud",
+    "77dung.mud"
+  ],
+  "reference_evidence": "docs/evidence/M2/muddle-reference.json:fload-chain-completion",
+  "source_form_counts": {
+    "77act1.mud": 145,
+    "77act2.mud": 60,
+    "77act3.mud": 31,
+    "77defs.mud": 96,
+    "77dung.mud": 573,
+    "77loadall.mud": 13,
+    "77makstr.mud": 27,
+    "77np.mud": 33,
+    "77patch.mud": 17,
+    "77rooms.mud": 146,
+    "78melee.mud": 37,
+    "81prim.mud": 8,
+    "81tell-repl.mud": 43
+  }
+}

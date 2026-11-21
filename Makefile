@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 m2-check check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -21,7 +21,7 @@ test-racket:
 	@bash scripts/test_racket.sh
 
 test-python:
-	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py
+	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py
 
 test-historical: sources
 	@racket tests/historical_vfload_test.rkt
@@ -46,6 +46,13 @@ m2-check:
 	@$(MAKE) reference-probe
 	@$(MAKE) reference-capture
 	@git diff --check
+
+# A valid incomplete load is progress evidence, not a successful game boot.
+# The validator rejects regressions, skips, malformed reports and false DONE.
+m3-source-progress: sources
+	@MDL_SWEEP_OUTPUT=artifacts/m3/reader-sweep.json $(MAKE) check-source
+	@$(MAKE) test-m2-g3
+	@$(PYTHON) scripts/m3_source_progress.py
 
 check-source:
 	@if raco help make >/dev/null 2>&1; then raco make scripts/mdl_check.rkt; fi

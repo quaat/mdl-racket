@@ -11,17 +11,21 @@
 
 **Current status (2026-11-21):** The authorized M2 stack, PRs #54, #59,
 #61, #62, #64, #66, #68 and #70, is integrated on `main` at `7d34195`.
-The [M2 mainline gate](docs/evidence/M2/MAINLINE-GATE.md) passes: `make
-m2-check` exits 0 with 986 Racket checks, 13 Python tests, and 59
-hash-verified original-source G3 assertions. It includes original VFLOAD,
+The [M2 mainline gate](docs/evidence/M2/MAINLINE-GATE.md) passes at its
+accepted `7d34195` baseline. The permanent M2 suite now loads a bounded,
+SHA-verified original-source prefix: `make m2-check` exits 0 with 986
+Racket checks, 22 Python tests, and 58 G3 assertions. It includes original VFLOAD,
 MSETG, PSETG and FLAGWORD, MAPF, indirect APPLY, declarations, macro
 expansion, activation control, aliasing and session isolation. The
 [requirements audit](docs/evidence/M2/REQUIREMENTS-AUDIT.md) lists tested
 capabilities and limits. Reproduce after `make reference-build` with
 `make m2-check`; the complete loader command is below.
-The full `77loadall.mud` chain still stops at unassigned `EMPTY?` in
-original `NEWSTRUC` after 24 completed expressions. This is the first
-M3 source dependency; no Racket game boot or gameplay parity is claimed.
+The separate [M3 source-progress gate](docs/evidence/M3/SOURCE-PROGRESS.md),
+`make m3-source-progress`, verifies 36 parsed historical text files and
+reports the unchanged `77loadall.mud` chain at 24 completed, zero skipped
+expressions, stopping at unassigned `EMPTY?` in original `NEWSTRUC`.
+That is the first M3 source dependency; no Racket game boot or gameplay
+parity is claimed.
 Explicit CLOSURE, MAPR, TAG, resumable ERROR/ERRET, full loader completion,
 parser/game boot and gameplay remain unsupported or unverified. Random/event
 APIs are tracked as [M3 issue #71](https://github.com/quaat/mdl-racket/issues/71).
