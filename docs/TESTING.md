@@ -1,5 +1,18 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 custom WORD literal checkpoint (2026-11-21)
+
+Issue #88 adds `tests/pstring_literal_test.rkt` with 14 focused
+reader, runtime, AUX default and strict-error checks. Its first run
+exited 1 after the parser split `#PSTRING 0` into two atoms. After
+implementation it exits 0. `make test` exits 0 with 1,135 Racket
+and 22 Python tests; `make m2-check` exits 0;
+`make m3-source-progress` exits 0 with 144 completed, zero skipped
+original forms. The full loader itself exits 1 at a function-style
+declaration in `81tell-repl.mud` expression 10. See
+[evidence](evidence/M3/PSTRING-LITERAL.md) and
+[`source-progress-pstring-literal.json`](evidence/M3/source-progress-pstring-literal.json).
+
 ## M3 `%<>` read macro checkpoint (2026-11-21)
 
 Issue #86 adds `tests/percent_empty_test.rkt` with eight focused

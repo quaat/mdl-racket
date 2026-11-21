@@ -53,7 +53,7 @@
   (define tagged (mdl-node-value n))
   (define name (string-upcase (car tagged)))
   (define value (cdr tagged))
-  (unless (string=? name "#WORD")
+  (unless (regexp-match? #px"^#[A-Z]" name)
     (unsupported n (format "unsupported typed literal ~a" name)))
   (unless (is-kind? value 'atom)
     (unsupported n "#WORD requires a numeric literal"))
@@ -63,8 +63,11 @@
            (string->number (substring raw 1 (sub1 (string-length raw))) 8)]
           [(regexp-match? #px"^[+-]?[0-9]+$" raw)
            (string->number raw)]
-          [else (unsupported n "#WORD requires a decimal or octal integer")]))
-  `(mdl-word ,bits))
+          [else (unsupported n "numeric WORD literal requires a decimal or octal integer")]))
+  (define word-expression `(mdl-word ,bits))
+  (if (string=? name "#WORD")
+      word-expression
+      `(mdl-chtype ,word-expression (mdl-atom ,(substring name 1)))))
 
 ;; A splice node compiles to a runtime SEGMENT object in data positions
 ;; (quoted structures, interpreted bodies, raw call arguments) and to a
@@ -600,7 +603,10 @@
     [(list) (compile-spliced-structure n 'mdl-splice-list 'mdl-list locals)]
     [(vector) (compile-spliced-structure n 'mdl-splice-vector 'mdl-vector locals)]
     [(uvector) (compile-spliced-structure n 'mdl-splice-uvector 'mdl-uvector locals)]
-    [(typed) (compile-typed n)]
+    [(typed)
+     (if (string-ci=? (car (mdl-node-value n)) "#WORD")
+         (compile-typed n)
+         (retain-literal n))]
     [(decl) (compile-data n)]
     ;; Entering a FORM resets the structured context: only the form's own
     ;; argument positions (re-established by compile-apply and the spliced

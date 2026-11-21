@@ -2,6 +2,17 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #88 custom WORD-primtype literal slice PASS; full M3 gate
+  incomplete:** the parser reads `#PSTRING 0` as one typed object in
+  the original two-element AUX default. Six native cases confirm its
+  PSTRING TYPE, WORD primitive, data and binding; a deliberate
+  wrong-primitive native observation differs from manual CHTYPE
+  safety, which Racket retains. `make test` passes 1,135 Racket and
+  22 Python tests; `make m2-check` passes. The unchanged loader
+  completes 144 original forms, zero skipped, then stops at a
+  function-style `#DECL` in `81tell-repl.mud` expression 10, line 27.
+  See [evidence](evidence/M3/PSTRING-LITERAL.md) and
+  [next issue #90](https://github.com/quaat/mdl-racket/issues/90).
 - **Issue #86 `%<>` reader macro value slice PASS; full M3 gate
   incomplete:** the side-effect-free empty FORM after `%` becomes
   canonical empty FALSE in data or expression position. Six native

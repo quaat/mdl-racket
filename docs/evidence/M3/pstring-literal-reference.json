@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "name": "m3-custom-word-literal-native-reference",
+  "recorded_at": "2026-11-21T15:43:10.851806+00:00",
+  "interpreter_sha256": "cd7bfffe22265b3f63dfd2713330507c53e6182ec9f41ba4aa3d818127252580",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "value",
+      "expression": "<NEWTYPE PSTRING WORD> #PSTRING 0",
+      "input": "<NEWTYPE PSTRING WORD> #PSTRING 0\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nPSTRING\n#PSTRING *0000000000000000000000*\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "PSTRING\n#PSTRING *0000000000000000000000*\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "type",
+      "expression": "<NEWTYPE PSTRING WORD> <TYPE #PSTRING 0>",
+      "input": "<NEWTYPE PSTRING WORD> <TYPE #PSTRING 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nPSTRING\nPSTRING\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "PSTRING\nPSTRING\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "primtype",
+      "expression": "<NEWTYPE PSTRING WORD> <PRIMTYPE #PSTRING 0>",
+      "input": "<NEWTYPE PSTRING WORD> <PRIMTYPE #PSTRING 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nPSTRING\nWORD\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "PSTRING\nWORD\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "literal-equality",
+      "expression": "<NEWTYPE PSTRING WORD> <=? #PSTRING 0 #PSTRING 0>",
+      "input": "<NEWTYPE PSTRING WORD> <=? #PSTRING 0 #PSTRING 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nPSTRING\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "PSTRING\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "matches-cast",
+      "expression": "<NEWTYPE PSTRING WORD> <=? #PSTRING 0 <CHTYPE #WORD 0 PSTRING>>",
+      "input": "<NEWTYPE PSTRING WORD> <=? #PSTRING 0 <CHTYPE #WORD 0 PSTRING>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nPSTRING\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "PSTRING\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "default-binding",
+      "expression": "<NEWTYPE PSTRING WORD> <DEFINE M3PS (\"AUX\" (OBJ #PSTRING 0)) <TYPE .OBJ>> <M3PS>",
+      "input": "<NEWTYPE PSTRING WORD> <DEFINE M3PS (\"AUX\" (OBJ #PSTRING 0)) <TYPE .OBJ>> <M3PS>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nPSTRING\nM3PS\nPSTRING\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "PSTRING\nM3PS\nPSTRING\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

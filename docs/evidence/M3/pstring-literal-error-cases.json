@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "m3-custom-word-literal-errors",
+  "cases": [
+    {"name": "unknown-type", "expression": "#PSTRING 0"},
+    {"name": "wrong-primitive", "expression": "<NEWTYPE PSTRING LIST> #PSTRING 0"},
+    {"name": "noninteger-word", "expression": "<NEWTYPE PSTRING WORD> #PSTRING 1.5"}
+  ]
+}
