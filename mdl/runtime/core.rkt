@@ -2218,6 +2218,11 @@
         "G?" (lambda (a b) (mdl-boolean (> a b)))
         "G=?" (lambda (a b) (mdl-boolean (>= a b)))
         "=?" (lambda (a b) (mdl-boolean (mdl-equal? a b)))
+        "N=?" (lambda args
+                 (case (length args)
+                   [(2) (mdl-boolean (not (mdl-equal? (car args) (cadr args))))]
+                   [(0 1) (error 'mdl-neq "TOO-FEW-ARGUMENTS-SUPPLIED")]
+                   [else (error 'mdl-neq "TOO-MANY-ARGUMENTS-SUPPLIED")]))
         "==?" (lambda (a b) (mdl-boolean (mdl-identical? a b)))
         "N==?" (lambda (a b) (mdl-boolean (not (mdl-identical? a b))))))
 

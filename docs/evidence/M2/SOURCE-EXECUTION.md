@@ -1,9 +1,9 @@
 # M2 source execution inventory — pre-merge G3 FAIL
 
-**Pre-merge G3 FAIL** at original MSETG's missing `N=?` repeat path
-([issue #57](https://github.com/quaat/mdl-racket/issues/57)); its dedicated
-branch/report is separate from this D5 PR. Current state (2026-11-20,
-D5 PR #54 prior head `ae0984f`,
+**Pre-merge G3 FAIL.** The focused `N=?` correction (issue #57) now lets
+original MSETG reach the distinct `,.FOO` reader gap (issue #58); the
+dedicated gate branch/report is separate. Current state (2026-11-20,
+D5 PR #54 head `e6d295d`,
 `main` `419fc5c`): slices D1–D4 are merged (`#DECL`
 declarations, SEGMENT evaluation, structured declaration patterns, the
 `MUDDLE` interpreter global) and D5 atom-property `PUT`/`GET`
@@ -40,7 +40,7 @@ command, puzzle behavior, RNG parity, or the full integrated M2 state
 contract has been demonstrated from original source execution. The
 pre-merge G3 subset has 48 checked observations, but its gate is FAIL.
 
-The next M2 action is the focused `N=?` correction and a G3 rerun. After
+The next M2 action is the focused `,.FOO` reader correction and a G3 rerun. After
 the M2 gate is settled, the next sequential loader dependency is `EMPTY?`
 (called by the original `NEWSTRUC`/`MAPF` bootstraps at the current
 barrier, `77defs.mud` expression 15), followed by whatever construct

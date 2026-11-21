@@ -1,9 +1,10 @@
-# Status — 2026-11-20 (D5 under review; pre-merge G3 FAIL)
+# Status — 2026-11-20 (D5 under review; G3 FAIL, N=? correction)
 
 ## Current state (2026-11-20)
 
-- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL at
-  original MSETG's missing `N=?` repeat path (issue #57).
+- **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL.
+  Issue #57's `N=?` correction is local on a separate branch; original
+  MSETG now reaches a computed-global `,.FOO` reader gap (issue #58).
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -28,13 +29,16 @@
   installed `PSETG`. Actual source execution sets priority.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
-- **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57 (`N=?`). Issue
-  #11 is closed as completed. Both PR workflows passed on prior D5 head
-  `ae0984f`; the CHARACTER correction requires final-head CI. A fresh
-  Codex review of `ae0984f` raised that finding; the later hosted final-head
-  review request hit a usage limit. Local review report:
-  [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). Final-head CI and
-  maintainer approval are pending; no merge is authorized.
+- **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57 (`N=?`), #58
+  (computed global reader), #65 (`MAPF`), and #67 (D5 review fix).
+  Issue #11 is closed as completed. The D5 SUBR association correction
+  requires final-head CI. Its independent local review report is
+  [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). Maintainer approval
+  and merge are pending; no merge is authorized.
+- **N=? local slice:** `make test` 879 Racket checks and 13 Python tests;
+  focused `neq_test.rkt` 13 checks. Original MSETG advanced from `N=?`
+  to `,.FOO`; see [evidence](evidence/M2/NEQ.md). The next action is
+  issue #58, then repeat G3. M3 `EMPTY?` waits for G3.
 - **Not demonstrated:** full integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 

@@ -540,3 +540,25 @@ the host procedure's unsupported MDL primtype. Pinned Confusion returns
 `9` from `<PUT ,+ 7 9> <GET ,+ 7>` and returns FALSE after two-argument
 removal. The narrow dispatch guard and red-to-green tests are recorded in
 `evidence/M2/D5-FINAL-REVIEW.md`; structured FIX indexing is unchanged.
+
+## ADR-0024: Complement the existing bounded structural comparator for N=?
+
+**Decision:** Implement M2 `N=?` as the Boolean complement of the
+existing `mdl-equal?` relation with exactly two evaluated arguments. Use
+the reference's TOO-FEW and TOO-MANY diagnostics for wrong arity. Preserve
+the existing explicit failure for comparisons of distinct equal-content
+cycles. Keep `,.FOO` parsing as a separate reader correction (issue #58)
+after the `N=?` primitive PR, because the original MSETG repeat path
+exposed both dependencies in sequence.
+
+**Why:** The manual defines `N=?` as the complement of structural `=?`;
+eight clean pinned Confusion cases and three deliberate arity errors
+confirm finite-value behavior. The two cyclic `N=?` probes timed out, so
+they provide no finite reference result. The existing Racket comparator
+already has a documented bounded cyclic policy, and this small primitive
+must not invent a new equivalence rule or hang.
+
+**Consequence:** Thirteen focused tests pass, including the explicit
+cyclic boundary. The original MSETG advances from unassigned `N=?` to
+the independent computed-global reader failure at `,.FOO`; G3 remains
+FAIL. Evidence and exact commands are in `evidence/M2/NEQ.md`.
