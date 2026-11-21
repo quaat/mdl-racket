@@ -1,17 +1,17 @@
 # Development handoff — MDL on Racket
 
-**Current handoff, 2026-11-21:** M2 remains PASS; M3 is partial. Issue #96
-adds NTH declaration repetition and advances the SHA-verified original loader
-from 188 to 233 completed forms with zero skips. It now stops at undeclared
-`PRSOBJ` in `77act1.mud` expression 55, line 740. See
-[`NTH-DECL.md`](evidence/M3/NTH-DECL.md) and next
-[issue #98](https://github.com/quaat/mdl-racket/issues/98). Full game load,
+**Current handoff, 2026-11-21:** M2 remains PASS; M3 is partial. Issue #98
+defers unresolved attached TYPE names and advances the SHA-verified original
+loader from 233 to 363 completed forms with zero skips, fully loading
+`77act1.mud`. It now stops at duplicate `M` in `77act2.mud` expression 39,
+line 424. See [`DEFERRED-DECL-TYPE.md`](evidence/M3/DEFERRED-DECL-TYPE.md)
+and next [issue #100](https://github.com/quaat/mdl-racket/issues/100). Full game load,
 initialization, and parity remain unverified.
 
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-21.
 
-**Current checkpoint (2026-11-21):** M0/M1/M2 PASS on integrated `main`
+**Earlier checkpoint (2026-11-21):** M0/M1/M2 PASS on integrated `main`
 at `74effec5744a44f43ae9c6a308b2ab37013ec7b0`; M3 incomplete.
 The issue #94 branch advances the unchanged loader from 157 to 188
 original forms, zero skipped. Four files fully load (`81prim.mud`,

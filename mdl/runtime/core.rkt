@@ -212,6 +212,9 @@
              rest-spec)])))
 
 (define current-decl-alias-path (make-parameter '()))
+;; Only attached atom-list declarations retain forward TYPE names. DECL?
+;; and positional metadata continue to reject unknown names immediately.
+(define current-decl-defer-unknown? (make-parameter #f))
 
 (define (normalize-decl-pattern pattern line column
                                  [origin "DECL"])
@@ -223,15 +226,19 @@
             (list 'type pattern)]
            [else
             (define associated (association-lookup pattern (mdl-atom "DECL")))
-            (unless associated
-              (decl-error origin line column "unknown declaration type ~a"
-                          (mdl-atom-pname pattern)))
-            (when (memq pattern (current-decl-alias-path))
-              (decl-error origin line column "cyclic DECL association at ~a"
-                          (mdl-atom-pname pattern)))
-            (parameterize ([current-decl-alias-path
-                            (cons pattern (current-decl-alias-path))])
-              (normalize-decl-pattern (cdr associated) line column origin))])]
+            (cond
+              [(not associated)
+               (if (current-decl-defer-unknown?)
+                   (list 'unresolved pattern line column)
+                   (decl-error origin line column "unknown declaration type ~a"
+                               (mdl-atom-pname pattern)))]
+              [else
+               (when (memq pattern (current-decl-alias-path))
+                 (decl-error origin line column "cyclic DECL association at ~a"
+                             (mdl-atom-pname pattern)))
+               (parameterize ([current-decl-alias-path
+                               (cons pattern (current-decl-alias-path))])
+                 (normalize-decl-pattern (cdr associated) line column origin))])])]
     [(mdl-form? pattern)
      (define items (form-elements pattern))
      (unless (and (pair? items)
@@ -297,7 +304,9 @@
           (define names (list-ref items i))
           (unless (and (mpair? names) (pair? (mdl-list->list names)))
             (decl-error "DECL" line column "expected a nonempty atom list"))
-          (define pattern (normalize-decl-pattern (list-ref items (add1 i)) line column))
+          (define pattern
+            (parameterize ([current-decl-defer-unknown? #t])
+              (normalize-decl-pattern (list-ref items (add1 i)) line column)))
           (for ([name (in-list (mdl-list->list names))])
             (unless (mdl-atom? name)
               (decl-error "DECL" line column "declaration name must be an ATOM"))
@@ -351,6 +360,12 @@
     (error 'mdl-decl "declaration pattern nesting exceeds traversal limit ~a"
            decl-match-max-depth))
   (case (car pattern)
+    [(unresolved)
+     (decl-match value
+                 (parameterize ([current-decl-defer-unknown? #f])
+                   (normalize-decl-pattern (cadr pattern)
+                                           (caddr pattern) (cadddr pattern)))
+                 budget)]
     [(any) #t]
     [(applicable)
      (or (mdl-function? value) (mdl-macro? value)

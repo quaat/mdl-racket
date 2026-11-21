@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "m3-deferred-decl-errors-native-reference",
+  "cases": [
+    {
+      "name": "explicit-unknown",
+      "expression": "<DECL? 1 'PRSOBJ>"
+    },
+    {
+      "name": "explicit-or-unknown",
+      "expression": "<DECL? 1 '<OR PRSOBJ FIX>>"
+    }
+  ]
+}

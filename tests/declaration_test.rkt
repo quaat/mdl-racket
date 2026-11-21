@@ -50,7 +50,8 @@
 (check-equal? (mdl-list->list
                (run "<DEFINE F (X) #DECL ((X) <LIST FIX>) .X> <F (1)>"))
               '(1))
-(check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) #DECL ((X) UNKNOWN-TYPE) .X>")))
+(check-exn #rx"unknown declaration type UNKNOWN-TYPE"
+           (lambda () (run "<DEFINE F (X) #DECL ((X) UNKNOWN-TYPE) .X> <F 1>")))
 (check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X>")))
 
 ;; #DECL is a DECL-typed value in any expression position, like the
