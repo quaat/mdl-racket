@@ -9,7 +9,22 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 checkpoint (2026-11-21, `feat/m3-deferred-decl-type`):**
+**Current M3 checkpoint (2026-11-21, `feat/m3-duplicate-decl`):**
+The scoped [issue #100](docs/evidence/M3/DUPLICATE-DECL.md) change retains
+both Patterns when an ATOM appears twice in one attached `#DECL` and checks
+both in source order. The manual does not state duplicate precedence;
+conjunction is a documented conservative inference. The unchanged source
+loader completes **430 original forms with zero skips**, fully loading
+`77act1.mud`, `77act2.mud` and `77act3.mud`, then exits 1 at
+`77rooms.mud` expression 13, line 92: unsupported `HANDLER`. The latter is
+tracked in [issue #102](https://github.com/quaat/mdl-racket/issues/102),
+under event API issue #71. `make m3-source-progress` exits 0 only as a
+partial measurement. `make test` and `make m2-check` pass; see the
+[evidence](docs/evidence/M3/DUPLICATE-DECL.md). M0/M1/M2 remain PASS;
+the formal M3 gate remains **INCOMPLETE**. Full source load,
+initialization, interactive input, smoke parity and gameplay are unverified.
+
+**Previous M3 checkpoint (issue #98):**
 The scoped [issue #98](docs/evidence/M3/DEFERRED-DECL-TYPE.md) change
 retains an unresolved TYPE atom in an attached `#DECL` until a value is
 checked. An unresolved name still raises an error at check time; explicit

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m3-duplicate-decl-native-reference",
+  "cases": [
+    {
+      "name": "duplicate-decl-value",
+      "expression": "<TYPE #DECL ((X) FIX (X) ATOM)>"
+    },
+    {
+      "name": "duplicate-definition",
+      "expression": "<DEFINE F (X) #DECL ((X) FIX (X) ATOM) .X>"
+    },
+    {
+      "name": "duplicate-call",
+      "expression": "<DEFINE F (X) #DECL ((X) FIX (X) ATOM) .X> <F 1>"
+    },
+    {
+      "name": "duplicate-original-shape",
+      "expression": "<DEFINE F (M) #DECL ((M) <OR FALSE <PRIMTYPE VECTOR>> (M) <OR FALSE <<PRIMTYPE VECTOR> ANY ROOM>>) .M>"
+    }
+  ]
+}

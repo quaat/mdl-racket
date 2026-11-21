@@ -1521,3 +1521,23 @@ discarding the declaration or changing later checking. Tests must first
 show the original strict-definition error, then verify definition,
 late registration, strict call-time failure, explicit `DECL?` failure,
 and the unchanged source progression.
+
+## M3 duplicate attached ATOM declarations (issue #100; specification before implementation)
+
+The original `77act2.mud:424` `BALLOON` function declares `M` twice in one
+`#DECL`, first as `<OR FALSE <PRIMTYPE VECTOR>>`, then as a narrower
+`<OR FALSE <<PRIMTYPE VECTOR> ANY ROOM>>`. The MDL manual §14 describes
+an ATOM declaration as repeated `(atoms:list Pattern)` pairs and does not
+specify a duplicate-name rule. Pinned Confusion accepts a duplicate
+declaration value and function definition, but omits attached checking,
+so it cannot distinguish precedence during a call. Conservatively retain
+both Patterns and require a value to satisfy each, in source order. This
+does not silently discard either original constraint. The special VALUE
+duplicate rule stays unchanged in this bounded slice. Malformed and
+unsupported Patterns remain strict errors.
+
+Tests must first fail at the existing duplicate-name error, then verify
+both constraints, source-order failure, acceptance of the original
+`BALLOON` declaration, and source-load progression. This conjunction is
+an explicit inference from the manual's pairing semantics, not a claim of
+verified historical precedence.

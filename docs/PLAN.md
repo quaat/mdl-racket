@@ -137,11 +137,11 @@ are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
 
-**Current source frontier (2026-11-21):** issue #98's branch completes
-363 unchanged original forms, zero skipped, fully loading `77act1.mud`;
-the next failure is duplicate `M` declaration in `77act2.mud`
-expression 39, tracked in
-[issue #100](https://github.com/quaat/mdl-racket/issues/100).
+**Current source frontier (2026-11-21):** issue #100's branch completes
+430 unchanged original forms, zero skipped, fully loading `77act1.mud`,
+`77act2.mud` and `77act3.mud`; the next failure is `HANDLER` in
+`77rooms.mud` expression 13, tracked in
+[issue #102](https://github.com/quaat/mdl-racket/issues/102).
 This is partial source
 execution, not an M3 gate pass. Track PARSED, LOADED, INITIALIZED,
 INTERACTIVE and SMOKE-PARITY separately; the progress report currently

@@ -315,10 +315,15 @@
                   (when result (decl-error "DECL" line column "duplicate VALUE declaration"))
                   (set! result pattern))
                 (begin
-                  (when (hash-has-key? bindings name)
-                    (decl-error "DECL" line column "duplicate declaration for ~a"
-                                (mdl-atom-pname name)))
-                  (hash-set! bindings name pattern)))))
+                  ;; Repeated ATOM pairs retain every constraint. This is
+                  ;; necessary for original BALLOON's two M declarations.
+                  (hash-set! bindings name
+                             (if (hash-has-key? bindings name)
+                                 (let ([old (hash-ref bindings name)])
+                                   (if (eq? (car old) 'all)
+                                       (append old (list pattern))
+                                       (list 'all old pattern)))
+                                 pattern))))))
         (mdl-decl-value bindings result line column #f))))
 
 ;; Structured pattern matching (issue #48). `decl-match` returns #t on a
@@ -366,6 +371,14 @@
                    (normalize-decl-pattern (cadr pattern)
                                            (caddr pattern) (cadddr pattern)))
                  budget)]
+    [(all)
+     (let loop ([constraints (cdr pattern)])
+       (cond [(null? constraints) #t]
+             [else
+              (define result (decl-match value (car constraints) budget))
+              (if (eq? result #t)
+                  (loop (cdr constraints))
+                  result)]))]
     [(any) #t]
     [(applicable)
      (or (mdl-function? value) (mdl-macro? value)
