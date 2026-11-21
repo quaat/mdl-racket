@@ -17,4 +17,5 @@ raco test mdl/runtime/core.rkt \
   tests/root_test.rkt tests/newtype_decl_test.rkt tests/gdecl_test.rkt \
   tests/andq_test.rkt \
   tests/quoted_optional_test.rkt \
-  tests/applicable_decl_test.rkt
+  tests/applicable_decl_test.rkt \
+  tests/percent_empty_test.rkt

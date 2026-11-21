@@ -804,3 +804,19 @@ the `APPLICABLE?` SUBR or unsupported custom application types.
 zero skipped, and fully executes `77defs.mud`; it next stops on `%<>`
 in `77makstr.mud` expression 6. Full source load and game boot remain
 unproved. No upstream, license or service boundary changes.
+
+## ADR-0038: Substitute the side-effect-free `%<>` reader value
+
+**Decision (2026-11-21, issue #86):** Implement the `%` read macro
+only when its payload is the empty FORM. Evaluating `<>` produces the
+canonical empty FALSE with no side effects, so the compiler retains
+that value once per loaded expression and shares it across uses of a
+compiled definition. Six pinned Confusion cases confirm TYPE, truth
+and identity. Other `%` payloads and `%%` remain explicit errors until
+the general read-time evaluator is designed and tested.
+
+**Consequence:** The unchanged loader advances from 112 to 136 forms,
+zero skipped, and fully executes `77makstr.mud`; it next stops at a
+typed AUX formal in `81tell-repl.mud` expression 2. Full source load
+and game boot remain unproved. No upstream, license or service boundary
+changes.

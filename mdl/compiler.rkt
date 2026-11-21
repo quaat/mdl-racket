@@ -84,6 +84,18 @@
 
 (define (compile-data n)
   (case (mdl-node-kind n)
+    [(percent)
+     ;; % is a READ-time evaluator.  The empty FORM has no side effects and
+     ;; always yields the canonical empty FALSE.  Retain it once per loaded
+     ;; expression so compiled definitions keep the substituted object's
+     ;; identity across calls; all other % payloads stay unsupported.
+     (define payload (mdl-node-value n))
+     (unless (and (is-kind? payload 'form)
+                  (null? (mdl-node-value payload)))
+       (unsupported n "unsupported percent reader macro"))
+     (if (current-mdl-literals)
+         (retain-literal n `(mdl-false '()))
+         `(mdl-false '()))]
     [(decl) `(mdl-make-declaration
               (mdl-list ,@(map compile-data (mdl-node-value n)))
               ,(mdl-node-line n) ,(mdl-node-column n))]
@@ -119,10 +131,10 @@
 
 (define current-mdl-literals (make-parameter #f))
 
-(define (retain-literal n)
+(define (retain-literal n [compiled #f])
   (define id (gensym 'mdl-literal))
   (set-box! (current-mdl-literals)
-            (cons (list id (compile-data n))
+            (cons (list id (or compiled (compile-data n)))
                   (unbox (current-mdl-literals))))
   id)
 
@@ -567,6 +579,7 @@
 
 (define (compile-expression/body n locals)
   (case (mdl-node-kind n)
+    [(percent) (compile-data n)]
     [(atom) (mdl-constant n)]
     [(false) (retain-literal n)]
     [(string) (mdl-node-value n)]

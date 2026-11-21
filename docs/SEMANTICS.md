@@ -1328,3 +1328,27 @@ matcher follows the manual and the reference's type-applicability
 observations. Tests must fail first at unknown declaration type, then
 cover positive and negative values, OR, attached declaration checking,
 and unchanged source progress with zero skipped forms.
+
+## M3 `%<>` reader macro value (issue #86; specification before implementation)
+
+The [MDL manual §17.1.1](https://mdl-language.readthedocs.io/en/latest/17-macro-operations/)
+states that a single `%` immediately evaluates the following object
+during READ and substitutes the resulting object. In particular, `%<>`
+substitutes the canonical empty FALSE object, because evaluating the
+empty FORM `<>` yields empty FALSE. Every occurrence denotes that
+canonical value; it can be used in data or expression positions, and a
+function definition containing it retains the same value on each call.
+Six pinned Confusion cases in `evidence/M3/percent-empty-reference.json`
+confirm TYPE FALSE, false truth, identity across occurrences and calls,
+and use inside a source-shaped argument list. The first unchanged
+source use is `77makstr.mud` expression 6, line 73, in `SOBJECT`.
+
+This vertical slice recognizes only a `%` whose payload is the empty
+FORM. It substitutes the canonical empty FALSE value at compilation
+of each loaded source expression, which has the same observable result
+for this side-effect-free form. Other `%` payloads and `%%` remain
+explicitly unsupported; the broader read-time evaluation mechanism
+must be designed and tested before later source uses such as
+`%<STRING <ASCII 10>>` or `%,OVISON` are admitted. Tests must fail
+first at the unsupported percent node, then cover data and expression
+positions, identity, and rejection of other percent forms.

@@ -1,5 +1,18 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 `%<>` read macro checkpoint (2026-11-21)
+
+Issue #86 adds `tests/percent_empty_test.rkt` with eight focused
+checks. Its first run exited 1 at an unsupported percent data node;
+after implementation it exits 0. Six native Confusion probes cover
+TYPE, truth, identity and source-shaped use. `make test` exits 0 with
+1,121 Racket and 22 Python tests; `make m2-check` exits 0;
+`make m3-source-progress` exits 0 with 136 completed, zero skipped
+original forms. The full loader itself exits 1 at a three-element
+typed AUX formal in `81tell-repl.mud` expression 2. See
+[evidence](evidence/M3/PERCENT-EMPTY.md) and
+[`source-progress-percent-empty.json`](evidence/M3/source-progress-percent-empty.json).
+
 ## M3 APPLICABLE declaration checkpoint (2026-11-21)
 
 Issue #84 adds `tests/applicable_decl_test.rkt`: 16 focused checks for
