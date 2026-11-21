@@ -2,12 +2,21 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #80 eager AND? slice PASS; full M3 gate incomplete:**
+  seven clean native cases, one deliberate late-error case and a
+  SHA-verified original-source regression establish eager argument
+  evaluation and all five `MSETG` global side effects in `77defs.mud`
+  expression 28. `make test` passes 1,086 Racket checks and 22 Python
+  tests. The unchanged loader reaches 70 completed forms, zero skipped;
+  the next failure is a quoted OPTIONAL default in `77defs.mud`
+  expression 61, line 338. See [evidence](evidence/M3/ANDQ.md) and
+  [next issue #82](https://github.com/quaat/mdl-racket/issues/82).
 - **Issue #78 GDECL slice PASS; full M3 gate incomplete:** original
   `GDECL` is a source-data FSUBR that installs global value Patterns and
   checks later `SETG`. Pinned Confusion's GDECL is an explicit no-op, so
   this is a documented manual/reference deviation. `make test` passes
   1,077 Racket checks and 22 Python tests; the unchanged loader completes
-  37 forms with zero skips and next stops at `AND?` in `77defs.mud`
+  37 forms with zero skips and then stopped at `AND?` in `77defs.mud`
   expression 28, line 146. See [evidence](evidence/M3/GDECL.md) and
   [next issue #80](https://github.com/quaat/mdl-racket/issues/80).
 - **Issue #76 source-backed slice PASS; full M3 gate incomplete:**

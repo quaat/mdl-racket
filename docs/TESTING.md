@@ -1,5 +1,16 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 eager AND? checkpoint (2026-11-21)
+
+Issue #80 implements AND? as a SUBR with all arguments evaluated before
+truth selection. `make test` passes 1,086 Racket and 22 Python checks.
+`make test-m3-andq` loads a SHA-verified original-source prefix and
+asserts all five MSETG globals from `77defs.mud` expression 28;
+`make m3-source-progress` now runs that regression and reports 70
+completed forms with zero skipped before the quoted OPTIONAL default
+failure in expression 61. See [AND? evidence](evidence/M3/ANDQ.md) and
+[`source-progress-andq.json`](evidence/M3/source-progress-andq.json).
+
 ## M3 GDECL checkpoint (2026-11-21)
 
 Issue #78 implements source-data GDECL and SETG declaration checking.

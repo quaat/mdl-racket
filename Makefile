@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -33,6 +33,9 @@ test-historical: sources
 test-m2-g3: sources
 	@racket tests/historical_g3_test.rkt
 
+test-m3-andq: sources
+	@racket tests/historical_andq_test.rkt
+
 # Complete local M2 technical check. Build the native reference once with
 # `make reference-build` before using this target. Milestone acceptance also
 # requires review, authorized integration, and verification on main.
@@ -52,6 +55,7 @@ m2-check:
 m3-source-progress: sources
 	@MDL_SWEEP_OUTPUT=artifacts/m3/reader-sweep.json $(MAKE) check-source
 	@$(MAKE) test-m2-g3
+	@$(MAKE) test-m3-andq
 	@$(PYTHON) scripts/m3_source_progress.py
 
 check-source:

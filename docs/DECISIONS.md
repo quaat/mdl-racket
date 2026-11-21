@@ -753,3 +753,19 @@ completed forms with zero skips, then stops at `AND?` in
 `77defs.mud` expression 28. This is partial source progress, not a
 game boot or parity result. No upstream, license, or service boundary
 changes.
+
+## ADR-0035: Keep AND? eager while preserving all original assignments
+
+**Decision (2026-11-21, issue #80):** Implement `AND?` as a normal SUBR,
+using the existing dispatcher to evaluate every argument left to right
+before testing truth. Return the first FALSE value and its payload, or
+the last value if all are true; zero arguments return T. Keep the
+short-circuit `AND` compiler path separate. A SHA-verified bounded
+source regression runs `77defs.mud` expression 28 and asserts all five
+original MSETG globals. The complete loader still reports zero skipped
+forms independently of that bounded test.
+
+**Consequence:** Original source execution advances from 37 to 70
+completed forms with zero skips, then reaches the quoted OPTIONAL
+default in `77defs.mud` expression 61. Full load and game boot remain
+unproved. No upstream, license or service boundary changes.
