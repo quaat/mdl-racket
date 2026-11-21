@@ -101,9 +101,8 @@
            (lambda () (run "<DEFMAC M2-M ('X 'Y) 1> <M2-M 1>")))
 (check-exn #rx"unassigned MDL local"
            (lambda () (run "<DEFMAC M2-M (\"OPTIONAL\" 'X) <FORM N==? .X 1>> <M2-M>")))
-;; APPLY itself is not implemented; calling it fails explicitly, which
-;; subsumes the reference's quoted-argument APPLY restriction.
-(check-exn #rx"unassigned or non-applicable"
+;; APPLY rejects interpreted functions with quoted formals.
+(check-exn #rx"quoted"
            (lambda () (run "<DEFINE M2-F ('X) .X> <APPLY ,M2-F '(1)>")))
 ;; An interpreted function has its own owner; a bare RETURN cannot escape
 ;; the caller's PROG through a quoted-formal function call.

@@ -257,5 +257,5 @@
      (define fn (mdl-gval name))
      (cond
        [(mdl-macro? fn) (mdl-eval (mdl-apply-interpreted fn args))]
-       [(mdl-function? fn) (mdl-apply-interpreted fn args)]
+       [(mdl-function? fn) (mdl-apply-interpreted fn args #t)]
        [else (apply mdl-apply name args)]))))

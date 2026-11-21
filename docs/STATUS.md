@@ -1,11 +1,13 @@
-# Status — 2026-11-20 (branch G3 PASS; M2 audit in progress)
+# Status — 2026-11-20 (branch G3 PASS; M2 mainline NOT RUN)
 
 ## Current state (2026-11-20)
 
 - **Milestone:** M2. **Gates:** G0/G1/G2 PASS; G3 PASS on the stacked
   `feat/m2-mapf` branch (59 exact-source integrated assertions, exit 0).
   This is a branch result, not an M2 mainline acceptance. The requirements
-  audit and indirect APPLY/DISPATCH work remain; M2 is not closed.
+  audit and indirect APPLY/DISPATCH correction are on the child branch
+  `feat/m2-indirect-apply` in [PR #70](https://github.com/quaat/mdl-racket/pull/70);
+  M2 is not closed.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -25,16 +27,16 @@
   inside the original source-defined `NEWSTRUC`, executing
   `77defs.mud` expression 15 `<NEWSTRUC ROOM VECTOR ...>` (line 37,
   execute stage).
-- **Next M2 task:** audit and correct indirect APPLY/DISPATCH and any
-  remaining continuation gaps before final M2 acceptance. The sequential
-  full-load barrier remains `EMPTY?` inside `NEWSTRUC`; M3 waits for M2.
+- **Next M2 task:** final-head CI/review and authorized stack integration,
+  then verify the complete result on `main`. The sequential full-load
+  barrier remains `EMPTY?` inside `NEWSTRUC`; M3 waits for M2.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
 - **Open issues/PRs:** #53/PR #54 (D5), #56/PR #64 (G3), #57/PR #59
   (`N=?`), #58/PR #61 (computed global), #60/PR #62 (`ERROR`), #63
-  /PR #66 (`MEMQ`), #65 (`MAPF`), and #67 (D5 review fix). Issue #11 is
-  closed as completed. The D5 SUBR association correction requires
-  final-head CI; its independent local report is
+  /PR #66 (`MEMQ`), #65/PR #68 (`MAPF`), #67 (D5 review fix), and #69
+  /PR #70 (indirect APPLY). Issue #11 is closed as completed. The D5 SUBR
+  association correction passed final-head CI; its independent report is
   [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). The hosted review
   service declined a prior request due to its usage limit. Maintainer
   approval and merge are pending; no merge is authorized.
@@ -44,10 +46,21 @@ records the 59-assertion PASS with original FLAGWORD no-arg, FALSE,
 ATOM, FALSE+ATOM and deliberate repeat-conflict paths. `make test-historical`
 passes VFLOAD 23, DECL 21, MSETG, and PSETG. The complete loader remains
 FAIL at `77defs.mud` expression 15 after 24 completed forms, with no skipped
-forms. `make test` passes 958 Racket checks and 13 Python tests; native
-reference probe and five-turn capture also pass. MAPF's differential corpus and known limits are in
-[MAPF.md](evidence/M2/MAPF.md). Final-head CI and mainline verification
-remain pending.
+forms. `make test` on PR #68 passes 958 Racket checks and 13 Python
+tests; both PR #68 CI workflows are green. Native reference probe and
+five-turn capture also pass. MAPF's differential corpus and known
+limits are in [MAPF.md](evidence/M2/MAPF.md).
+
+**Requirements audit:** [REQUIREMENTS-AUDIT.md](evidence/M2/REQUIREMENTS-AUDIT.md)
+traces the original M2 build to tests and native evidence. Issue #69 adds
+indirect APPLY and computed FORM dispatch on the child branch; 15 clean
+Confusion cases and nine deliberate errors are in
+[INDIRECT-APPLY.md](evidence/M2/INDIRECT-APPLY.md). `make test` passes
+986 Racket checks and 13 Python tests; historical and G3 targets pass.
+The implementation head `3622b22` passed both required CI workflows;
+[branch acceptance evidence](evidence/M2/BRANCH-ACCEPTANCE.md) records
+exact runs and limitations. Final-head review, authorization, and mainline
+verification remain pending.
 
 ## Earlier checkpoints (retained for provenance)
 - **Earlier N=? local slice:** `make test` 879 Racket checks and 13 Python tests;

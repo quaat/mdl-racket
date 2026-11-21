@@ -14,6 +14,17 @@ Racket checks and 13 Python tests. The native reference job
 provisions pinned sources and runs G3; the fast smoke job remains offline.
 M2 mainline acceptance remains pending.
 
+On `feat/m2-indirect-apply`, issue #69 adds 15 clean native APPLY/computed
+FORM cases and nine separate deliberate errors; see
+[`INDIRECT-APPLY.md`](evidence/M2/INDIRECT-APPLY.md) and the
+[requirements matrix](evidence/M2/REQUIREMENTS-AUDIT.md). `make test`
+passes 986 Racket and 13 Python checks; the historical target and G3
+still pass. `make m2-check` runs the full local technical acceptance
+sequence after `make reference-build`. It writes the source sweep to
+`artifacts/m2/reader-sweep.json`, preserving the frozen M0 evidence file.
+Review, authorization, required CI and verification on `main` are separate
+milestone gates.
+
 ## Earlier M2 D5 and G3 checkpoints (retained for provenance)
 
 On `feat/m2-atom-props`, `make test` runs 868 Racket checks and 13 Python

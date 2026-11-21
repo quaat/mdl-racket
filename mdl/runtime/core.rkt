@@ -9,7 +9,7 @@
          mdl-with-function-scope mdl-with-prog-activation
          mdl-return mdl-again mdl-go mdl-unwind
          mdl-eval mdl-make-form mdl-form? mdl-macro? mdl-function?
-         mdl-apply-form mdl-apply-interpreted mdl-function-literal
+         mdl-apply-form mdl-apply-computed mdl-apply-interpreted mdl-function-literal
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
          mdl-make-declaration
@@ -54,6 +54,7 @@
 ;; closures remain the fast path for quoted-formal-free definitions.
 (struct mdl-macro (formals body leading-act decl))
 (struct mdl-function (formals body leading-act decl))
+(define compiled-function-formals (make-weak-hasheq))
 (struct mdl-decl-value (bindings result line column) #:transparent)
 (define local-declarations (make-weak-hasheq))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
@@ -945,6 +946,9 @@
      (mdl-apply-interpreted fn raw-args)]
     [(procedure? fn)
      (apply fn (assemble-args raw-args (lambda (item) (mdl-eval item))))]
+    [(exact-integer? fn)
+     (mdl-apply-evaluated fn
+                          (assemble-args raw-args (lambda (item) (mdl-eval item))))]
     [else (error 'mdl-apply-value "unassigned or non-applicable MDL operator ~a"
                  (if (mdl-atom? fn) (mdl-atom-pname fn) fn))]))
 
@@ -955,10 +959,15 @@
   (cond [(mdl-function? fn) (mdl-apply-interpreted fn values #t)]
         [(procedure? fn) (apply fn values)]
         [(exact-integer? fn)
-         (unless (= (length values) 1)
-           (error 'mdl-apply-evaluated "indexed applicable requires one argument"))
-         (mdl-nth (car values) fn)]
-        [else (error 'mdl-apply-evaluated "non-applicable MAPF function ~a" fn)]))
+         (case (length values)
+           [(1) (mdl-nth (car values) fn)]
+           [(2)
+            (unless (mdl-map-structured? (car values))
+              (error 'mdl-apply-evaluated "First argument to PUT must be structured"))
+            (mdl-put-element! (car values) fn (cadr values))]
+           [(0) (error 'mdl-apply-evaluated "TOO-FEW-ARGUMENTS-SUPPLIED to FIX")]
+           [else (error 'mdl-apply-evaluated "TOO-MANY-ARGUMENTS-SUPPLIED to FIX")])]
+        [else (error 'mdl-apply-evaluated "NON-APPLICABLE-TYPE ~a" fn)]))
 
 ;; Call arguments assemble like the reference's LIST assembly for a SUBR:
 ;; items evaluate in order and SEGMENT objects contribute their elements,
@@ -1385,23 +1394,28 @@
 ;; not run; procedure applications evaluate the compiled thunks in order.
 ;; Splice markers among the thunk results assemble into the argument list
 ;; in order before the operator is applied (chapter 7.5.2).
-(define (mdl-apply-form name raw-args-thunk arg-thunks)
-  (define atom (binding-atom 'mdl-apply-form name))
-  (define fn (resolve-operator atom))
+(define (mdl-dispatch-call fn raw-args-thunk arg-thunks)
   (cond
     [(or (mdl-macro? fn) (mdl-function? fn))
      (define result (mdl-apply-interpreted fn (raw-args-thunk)))
      (if (mdl-macro? fn) (mdl-eval result) result)]
-    [(procedure? fn)
+    [(or (procedure? fn) (exact-integer? fn))
      (define results (map (lambda (thunk) (thunk)) arg-thunks))
-     (apply fn
-            (append*
-             (for/list ([value (in-list results)])
-               (if (mdl-splice-result? value)
-                   (segment-elements (mdl-splice-result-value value))
-                   (list value)))))]
-    [else (error 'mdl-apply-form "unassigned or non-applicable MDL operator ~a"
-                 (mdl-atom-pname atom))]))
+     (mdl-apply-evaluated
+      fn
+      (append*
+       (for/list ([value (in-list results)])
+         (if (mdl-splice-result? value)
+             (segment-elements (mdl-splice-result-value value))
+             (list value)))))]
+    [else (error 'mdl-dispatch-call "NON-APPLICABLE-TYPE ~a" fn)]))
+
+(define (mdl-apply-form name raw-args-thunk arg-thunks)
+  (define atom (binding-atom 'mdl-apply-form name))
+  (mdl-dispatch-call (resolve-operator atom) raw-args-thunk arg-thunks))
+
+(define (mdl-apply-computed fn raw-args-thunk arg-thunks)
+  (mdl-dispatch-call fn raw-args-thunk arg-thunks))
 
 (define (mdl-defmac! name formals body [leading-act #f] [decl #f])
   (require-atom 'mdl-defmac name)
@@ -1476,7 +1490,9 @@
   (hash-set! (current-mdl-globals) atom unassigned)
   atom)
 
-(define (mdl-define! name fn)
+(define (mdl-define! name fn [formal-kinds '()])
+  (when (procedure? fn)
+    (hash-set! compiled-function-formals fn formal-kinds))
   (mdl-setg! name fn))
 
 (struct atom-value (pname [oblist #:mutable]))
@@ -2296,6 +2312,26 @@
   (define actual (mdl-type (car args)))
   (if (member actual (cdr args) eq?) actual (mdl-false '())))
 
+(define (mdl-apply-subr . args)
+  (when (null? args)
+    (error 'mdl-apply-subr "TOO-FEW-ARGUMENTS-SUPPLIED in APPLY"))
+  (define fn (car args))
+  (when (mdl-macro? fn)
+    (error 'mdl-apply-subr "Can't use APPLY with MACROs"))
+  (define formal-kinds
+    (cond [(mdl-function? fn)
+           (map first
+                (runtime-formal-specs (mdl-function-formals fn)))]
+          [(procedure? fn)
+           (hash-ref compiled-function-formals fn '())]
+          [else '()]))
+  (when (or (memq 'quoted formal-kinds)
+            (memq 'quoted-optional formal-kinds))
+    (error 'mdl-apply-subr "Can't use APPLY to call a function with quoted arguments"))
+  (when (memq 'rest-args formal-kinds)
+    (error 'mdl-apply-subr "ARGS not allowed when called from APPLY"))
+  (mdl-apply-evaluated fn (cdr args)))
+
 (define builtin-table
   (hash "TYPE" mdl-type
         "TYPE?" mdl-typeq
@@ -2334,6 +2370,7 @@
         "MAPRET" mdl-mapret
         "MAPSTOP" mdl-mapstop
         "MAPLEAVE" mdl-mapleave
+        "APPLY" mdl-apply-subr
         "LENGTH" mdl-length
         "REST" mdl-rest
         "NTH" mdl-nth
@@ -2378,10 +2415,12 @@
   (define atom (binding-atom 'mdl-apply name))
   (define global (global-option atom))
   (define fn (if (eq? global unassigned) (local-option atom) global))
-  (unless (procedure? fn)
+  (when (eq? fn unassigned)
     (error 'mdl-apply "unassigned or non-applicable MDL operator ~a"
            (mdl-atom-pname atom)))
-  (apply fn args))
+  (when (mdl-macro? fn)
+    (error 'mdl-apply "raw MACRO arguments are unavailable through the value API"))
+  (mdl-apply-evaluated fn args))
 
 (module+ test
   (require rackunit)

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 m2-check check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -32,6 +32,20 @@ test-historical: sources
 
 test-m2-g3: sources
 	@racket tests/historical_g3_test.rkt
+
+# Complete local M2 technical check. Build the native reference once with
+# `make reference-build` before using this target. Milestone acceptance also
+# requires review, authorized integration, and verification on main.
+m2-check:
+	@$(MAKE) doctor
+	@$(MAKE) sources
+	@MDL_SWEEP_OUTPUT=artifacts/m2/reader-sweep.json $(MAKE) check-source
+	@$(MAKE) test
+	@$(MAKE) test-historical
+	@$(MAKE) test-m2-g3
+	@$(MAKE) reference-probe
+	@$(MAKE) reference-capture
+	@git diff --check
 
 check-source:
 	@if raco help make >/dev/null 2>&1; then raco make scripts/mdl_check.rkt; fi

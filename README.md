@@ -10,20 +10,32 @@
 > versions and original input/time/randomness.
 
 **Current M2 status (2026-11-20):** D1–D4 are merged on `main`
-(`419fc5c`). On the stacked `feat/m2-mapf` branch, the hash-verified
+(`419fc5c`). On the stacked PR #70 head, the hash-verified
 original definitions now pass the [G3 integrated execution gate](docs/evidence/M2/G3-GATE-MAPF.md):
 `make test-m2-g3` exits 0 after 59 assertions, including original VFLOAD,
 MSETG, PSETG, FLAGWORD, RAPPLIC properties, macro expansion, aliasing,
 failure propagation and session isolation. Focused MAPF, TYPE?, and startup
 OBLIST association cases are documented in [MAPF evidence](docs/evidence/M2/MAPF.md).
 The full `77loadall.mud` chain still stops at `EMPTY?` in original
-`NEWSTRUC` after 24 completed expressions. **M2 is not closed:** the
-indirect APPLY/DISPATCH and broader continuation surface must pass the
-requirements audit, required CI, review and mainline verification. PR #54
+`NEWSTRUC` after 24 completed expressions. **M2 is not closed:** indirect
+APPLY/DISPATCH now has a reference-backed correction in
+[issue #69](docs/evidence/M2/INDIRECT-APPLY.md), and the
+[M2 requirements audit](docs/evidence/M2/REQUIREMENTS-AUDIT.md) records
+the tested surface and deviations. The implementation commit passed both
+required CI workflows; see the [branch acceptance report](docs/evidence/M2/BRANCH-ACCEPTANCE.md).
+Final review, authorization and mainline verification remain. PR #54
 remains unmerged pending explicit maintainer authorization. No Racket game
 boot or gameplay parity is claimed. Reproduce with `make test`,
-`make test-historical`, `make test-m2-g3`, and the loader command below.
+`make test-historical`, `make test-m2-g3`, or `make m2-check` after
+`make reference-build`; the complete loader command is below.
 See [current status](docs/STATUS.md).
+The verified M2 subset includes formals, declarations, macros, control
+frames, MAPF, APPLY/computed dispatch, source loading through the G3
+prefix, and shared-state aliasing. Explicit CLOSURE, MAPR, TAG,
+resumable ERROR/ERRET, full loader completion, parser/game boot and
+gameplay remain unsupported or unverified. The next milestone after
+authorized M2 mainline acceptance is M3, beginning with the original
+`NEWSTRUC` call's `EMPTY?` dependency.
 Historical progress notes below preserve
 their original slice-level context.
 

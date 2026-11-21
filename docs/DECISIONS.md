@@ -644,3 +644,23 @@ deliberate error paths. The complete source loader still stops at EMPTY?
 after 24 forms. M2 mainline acceptance remains gated by the requirements
 audit, CI/review, and authorized integration. No upstream, license, or
 network service boundary changes.
+
+## ADR-0029: Share evaluated application for APPLY, MAPF and computed heads
+
+**Decision (2026-11-20, issue #69):** A computed FORM head is compiled as
+an expression before its arguments. The shared runtime dispatcher keeps
+raw arguments for interpreted FUNCTIONs and MACROs, but passes evaluated
+values to native SUBRs and FIX applicables. APPLY always receives already
+evaluated arguments and rejects MACRO, quoted-formal and ARGS-formal
+targets; compiled DEFINE procedures retain formal-kind metadata for this
+check. Host `mdl-apply` and `mdl-session-call` now also pass interpreted
+FUNCTION arguments as values, preserving embedded FORM/LIST identity.
+FIX application with two arguments performs indexed PUT only on a
+structured target, following pinned Confusion rather than general PUT
+association dispatch.
+
+**Consequence:** Fifteen clean native indirect-application cases and
+nine deliberate error observations are recorded; focused tests and the
+existing binding regression pass. The branch G3 gate remains 59/59.
+FSUBR values, CALL formals and broader applicable types remain explicit
+unsupported cases. No upstream, licensing, or service boundary changes.

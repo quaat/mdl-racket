@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 UPSTREAM = ROOT / ".cache/upstream"
-OUTPUT = ROOT / "docs/evidence/M0/reader-sweep.json"
+OUTPUT = ROOT / os.environ.get("MDL_SWEEP_OUTPUT", "docs/evidence/M0/reader-sweep.json")
 ROOTS = (
     UPSTREAM / "mit_zork/zork",
     UPSTREAM / "mdlzork/mdlzork_771212/original_source/zork",
