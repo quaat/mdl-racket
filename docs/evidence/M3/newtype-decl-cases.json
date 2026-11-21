@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "name": "m3-newtype-declaration-reference",
+  "cases": [
+    {"name": "decl-association-omitted", "expression": "<NEWTYPE M3N VECTOR '<<PRIMTYPE VECTOR> FIX>> <GET M3N DECL>"},
+    {"name": "valid-cast", "expression": "<NEWTYPE M3N VECTOR '<<PRIMTYPE VECTOR> FIX>> <TYPE <CHTYPE '[1] M3N>>"},
+    {"name": "invalid-cast-accepted", "expression": "<NEWTYPE M3N VECTOR '<<PRIMTYPE VECTOR> FIX>> <CHTYPE '[A] M3N>"},
+    {"name": "redeclare", "expression": "<NEWTYPE M3N VECTOR '<<PRIMTYPE VECTOR> FIX>> <NEWTYPE M3N VECTOR '<<PRIMTYPE VECTOR> ATOM>> <GET M3N DECL>"},
+    {"name": "original-exit", "expression": "<NEWTYPE EXIT VECTOR '<<PRIMTYPE VECTOR> [REST ATOM <OR ROOM CEXIT NEXIT>]>> <GET EXIT DECL>"},
+    {"name": "bad-pattern-accepted", "expression": "<NEWTYPE M3N VECTOR 3>"},
+    {"name": "without-declaration", "expression": "<NEWTYPE M3N VECTOR> <GET M3N DECL>"}
+  ]
+}

@@ -103,7 +103,21 @@
 ;; required-pats is a list of normalized patterns; rest-spec is #f or the
 ;; list of normalized patterns of the trailing `[REST pat ... pat]`.
 (define (normalize-decl-structure items line column origin)
-  (define type-atom (car items))
+  (define head (car items))
+  (define primitive-head? (mdl-form? head))
+  (define type-atom
+    (if primitive-head?
+        (let ()
+          (define head-items (form-elements head))
+          (unless (and (= (length head-items) 2)
+                       (eq? (car head-items) (mdl-atom "PRIMTYPE")))
+            (decl-error origin line column "malformed declaration pattern"))
+          (define normalized (normalize-decl-pattern head line column origin))
+          (unless (eq? (car normalized) 'primtype)
+            (decl-error origin line column
+                        "structured declaration head must be PRIMTYPE"))
+          (cadr normalized))
+        head))
   (define raw-elements (cdr items))
   (when (null? raw-elements)
     ;; Confusion reads the empty `<struc>` and matches any value of the TYPE,
@@ -114,7 +128,8 @@
                 (mdl-atom-pname type-atom)))
   (let loop ([rest raw-elements] [required '()] [rest-spec #f])
     (cond
-      [(null? rest) (list 'structure type-atom (reverse required) rest-spec)]
+      [(null? rest) (list (if primitive-head? 'structure-primtype 'structure)
+                          type-atom (reverse required) rest-spec)]
       [(mdl-array? (car rest))
        ;; The `[...]` repetition construction: an NTH count, [OPT ...], or
        ;; [REST ...]. Only a VECTOR-typed bracket is a repetition
@@ -194,9 +209,12 @@
               (normalize-decl-pattern (cdr associated) line column origin))])]
     [(mdl-form? pattern)
      (define items (form-elements pattern))
-     (unless (and (pair? items) (mdl-atom? (car items)))
+     (unless (and (pair? items)
+                  (or (mdl-atom? (car items)) (mdl-form? (car items))))
        (decl-error origin line column "malformed declaration pattern"))
-     (case (string->symbol (mdl-atom-pname (car items)))
+     (if (mdl-form? (car items))
+         (normalize-decl-structure items line column origin)
+         (case (string->symbol (mdl-atom-pname (car items)))
        [(OR)
         (when (null? (cdr items)) (decl-error origin line column "empty OR pattern"))
         (cons 'or (map (lambda (item) (normalize-decl-pattern item line column origin))
@@ -210,7 +228,7 @@
        [(LIST VECTOR UVECTOR TUPLE)
         (normalize-decl-structure items line column origin)]
        [else (decl-error origin line column "unsupported declaration pattern ~a"
-                         (mdl-atom-pname (car items)))])]
+                         (mdl-atom-pname (car items)))]))]
     [else (decl-error origin line column "unsupported declaration pattern")]))
 
 (define (mdl-make-declaration payload line column)
@@ -294,7 +312,8 @@
               (define m (decl-match value (car alts) (sub1 budget)))
               (cond [(eq? m #t) #t]
                     [else (loop (cdr alts) m)])]))]
-    [(structure) (decl-match-structure value pattern (sub1 budget))]
+    [(structure structure-primtype)
+     (decl-match-structure value pattern (sub1 budget))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
 ;; `<struc elts>` matching: the value's MDL TYPE must equal the pattern's
@@ -311,19 +330,24 @@
 ;; Arrays cannot be cyclic; their element references are read by index.
 (define (decl-match-structure value pattern budget)
   (define type-atom (cadr pattern))
-  (if (not (eq? (mdl-type value) type-atom))
+  (define type-matches?
+    (if (eq? (car pattern) 'structure-primtype)
+        (eq? (mdl-primtype value) (mdl-typeprim type-atom))
+        (eq? (mdl-type value) type-atom)))
+  (if (not type-matches?)
       (list 'type)
-      (let ([required (caddr pattern)]
+      (let ([base (mdl-base value)]
+            [required (caddr pattern)]
             [rest-spec (cadddr pattern)])
         (cond
-          [(mdl-tuple-value? value)
-           (decl-match-chain (mdl-tuple-value-payload value) required rest-spec budget)]
-          [(or (null? value) (mpair? value))
-           (decl-match-chain value required rest-spec budget)]
-          [(mdl-array? value)
+          [(mdl-tuple-value? base)
+           (decl-match-chain (mdl-tuple-value-payload base) required rest-spec budget)]
+          [(or (null? base) (mpair? base))
+           (decl-match-chain base required rest-spec budget)]
+          [(mdl-array? base)
            (decl-match-sequence
-            (for/list ([i (in-range (mdl-array-length value))])
-              (mdl-nth value (add1 i)))
+            (for/list ([i (in-range (mdl-array-length base))])
+              (mdl-nth base (add1 i)))
             required rest-spec budget)]
           [else (error 'mdl-decl "unsupported structured value")]))))
 
@@ -2177,13 +2201,72 @@
 (define (mdl-primtype value)
   (mdl-typeprim (mdl-type value)))
 
-(define (mdl-newtype name base-type)
+(define (check-newtype-pattern-shape pattern)
+  ;; Referenced type ATOMs may be declared later in the same source file.
+  ;; Reject unsupported syntax now; resolve those ATOMs on CHTYPE.
+  (define (bad)
+    (error 'mdl-newtype "unsupported declaration pattern"))
+  (define (check-structure-elements elements)
+    (when (null? elements) (bad))
+    (for ([element (in-list elements)] [index (in-naturals)])
+      (cond
+        [(mdl-array? element)
+         (unless (and (eq? (mdl-array-kind element) 'VECTOR)
+                      (= index (sub1 (length elements))))
+           (bad))
+         (define bracket (decl-bracket-items element))
+         (unless (and (>= (length bracket) 2)
+                      (eq? (car bracket) (mdl-atom "REST")))
+           (bad))
+         (for ([part (in-list (cdr bracket))]) (check part))]
+        [else (check element)])))
+  (define (check value)
+    (cond
+      [(mdl-atom? value) (void)]
+      [(mdl-form? value)
+       (define items (form-elements value))
+       (unless (pair? items) (bad))
+       (define head (car items))
+       (cond
+         [(mdl-atom? head)
+          (case (string->symbol (mdl-atom-pname head))
+            [(OR)
+             (when (null? (cdr items)) (bad))
+             (for ([part (in-list (cdr items))]) (check part))]
+            [(PRIMTYPE)
+             (unless (and (= (length items) 2) (mdl-atom? (cadr items)))
+               (bad))]
+            [(LIST VECTOR UVECTOR TUPLE)
+             (check-structure-elements (cdr items))]
+            [else (bad)])]
+         [(mdl-form? head)
+          (define head-items (form-elements head))
+          (unless (and (= (length head-items) 2)
+                       (eq? (car head-items) (mdl-atom "PRIMTYPE"))
+                       (mdl-atom? (cadr head-items)))
+            (bad))
+          (check-structure-elements (cdr items))]
+         [else (bad)])]
+      [else (bad)]))
+  (check pattern))
+
+(define (mdl-newtype name base-type . declaration)
   (require-atom 'mdl-newtype name)
+  (when (> (length declaration) 1)
+    (error 'mdl-newtype "TOO-MANY-ARGUMENTS-SUPPLIED"))
   (define prim (mdl-typeprim base-type))
   (define types (atom-space-types (current-mdl-atom-space)))
-  (when (hash-has-key? types name)
-    (error 'mdl-newtype "MDL TYPE already exists: ~a" (mdl-atom-pname name)))
+  (when (and (hash-has-key? types name)
+             (not (string=? (hash-ref types name) (mdl-atom-pname prim))))
+    (error 'mdl-newtype "MDL TYPE already exists with another primitive type: ~a"
+           (mdl-atom-pname name)))
+  (when (pair? declaration)
+    (check-newtype-pattern-shape (car declaration)))
   (hash-set! types name (mdl-atom-pname prim))
+  ;; The historical Pattern may refer to types defined later in the same
+  ;; source file. Store its unevaluated value now and resolve it on CHTYPE.
+  (when (pair? declaration)
+    (mdl-put-association! name (mdl-atom "DECL") (car declaration)))
   name)
 
 (define (mdl-chtype value type)
@@ -2191,7 +2274,8 @@
   (define desired-prim (mdl-typeprim type))
   (unless (eq? (mdl-primtype value) desired-prim)
     (error 'mdl-chtype "primitive type mismatch"))
-  (if (eq? (mdl-type value) type)
+  (define converted
+    (if (eq? (mdl-type value) type)
       value
       (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
         (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
@@ -2219,6 +2303,12 @@
               [(member (mdl-atom-pname desired-prim) '("LIST" "VECTOR" "UVECTOR"))
                (mdl-typed-value type base)]
               [else (error 'mdl-chtype "unsupported primitive type conversion")]))))
+  (define declared (association-lookup type (mdl-atom "DECL")))
+  (when declared
+    (define pattern (normalize-decl-pattern (cdr declared) #f #f "CHTYPE"))
+    (unless (matches-decl? converted pattern)
+      (error 'mdl-chtype "TYPE-MISMATCH: value does not satisfy NEWTYPE declaration")))
+  converted)
 
 (define (mdl-utype value)
   (define base (mdl-base value))

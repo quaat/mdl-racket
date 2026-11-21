@@ -1,5 +1,17 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 NEWTYPE declaration checkpoint (2026-11-21)
+
+After `make reference-build`, run `make test`, `make m2-check`, and
+`make m3-source-progress`. The issue #76 branch stores and checks the
+manual's optional NEWTYPE declaration Pattern and enables the original
+`77defs.mud` three-argument form. The unchanged loader now completes
+36 forms with zero skips, stopping at unassigned `GDECL` in expression
+27. The native Confusion reference discards the Pattern, a documented
+runtime deviation; its seven clean and six deliberate-error cases are in
+`evidence/M3/newtype-decl-*`. See [M3 NEWTYPE evidence](evidence/M3/NEWTYPE-DECL.md)
+and [`source-progress-newtype.json`](evidence/M3/source-progress-newtype.json).
+
 ## M3 first original-source correction (2026-11-21)
 
 Run `make test`, `make m2-check`, and `make m3-source-progress` after

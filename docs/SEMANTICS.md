@@ -788,9 +788,11 @@ rejected here because the manual's BNF requires at least one element
 pattern, while Confusion accepts it and matches any value of the TYPE;
 `DECL?` keeps a strict two-operand arity where Confusion silently
 ignores surplus operands spliced into its call; structured pattern heads
-are restricted to LIST/VECTOR/UVECTOR/TUPLE where Confusion accepts any
-NEWTYPE with a structured PRIMTYPE — extended only when a historical
-source needs it. Confusion's broken `ANY`/`STRUCTURED` compound names
+initially supported only LIST/VECTOR/UVECTOR/TUPLE, later extended in
+issue #76 to `<<PRIMTYPE ...> ...>` for original NEWTYPE declarations.
+Confusion accepts any NEWTYPE with a structured PRIMTYPE but rejects the
+explicit PRIMTYPE-headed DECL? composition in the pinned probe; this
+extension follows the manual. Confusion's broken `ANY`/`STRUCTURED` compound names
 are not reproduced; `ANY` as a simple pattern keeps its manual semantics
 from D1.
 
@@ -1192,3 +1194,34 @@ does not contain COMPILE. The deliberate extra-argument case in
 `root-error-reference.json` writes `Too many arguments to ROOT`.
 Implementation returns the existing session root OBLIST and rejects any
 argument. It must preserve identity, not construct another OBLIST.
+
+## M3 three-argument NEWTYPE declaration (issue #76; specification before implementation)
+
+The [MDL manual, §14.6](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+says the optional third argument is a quoted declaration Pattern. It is
+stored as the type atom's `DECL` association and checked on every
+`CHTYPE` into that type, including a cast into the value's current type.
+Calling `NEWTYPE` again for the same type and primitive type may replace
+the Pattern. The original `77defs.mud` expression 17, line 66, uses
+`<NEWTYPE EXIT VECTOR '<<PRIMTYPE VECTOR> [REST ATOM <OR ROOM CEXIT NEXIT>]>>`.
+The pattern's referenced types are defined later, so storage precedes
+full validation; check its shape on NEWTYPE and resolve names when a
+value is cast. A `<<PRIMTYPE VECTOR> ...>` structure head matches a
+value by primitive type while its element patterns use the existing
+declaration matcher. A bad pattern must fail explicitly.
+
+**Pinned Confusion/manual deviation:** the seven clean cases in
+`evidence/M3/newtype-decl-reference.json` show Confusion accepts the
+third argument and same-primitive redefinition, but `<GET M3N DECL>`
+still returns empty FALSE and a cast violating a FIX-only pattern
+succeeds. The pinned `confusion_patched/macros.cpp` function
+`mdl_builtin_eval_newtype` reads `desc` but calls `mdl_internal_newtype`
+with only name and primitive type. Six deliberate-error cases in
+`newtype-decl-error-reference.json` establish missing/extra arguments,
+unknown primitive, incompatible redefinition, and non-atom type-name
+errors. This Racket slice preserves the manual's declaration association
+and enforces it; it therefore intentionally differs from this incomplete
+Confusion implementation. Do not silently discard the third argument
+to match that reference defect. Tests must cover storage, valid and
+invalid casts, same-type recheck, redefinition, malformed patterns,
+wrong arity and primitive type, and the unchanged original-source load.
