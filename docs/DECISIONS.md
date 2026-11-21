@@ -787,3 +787,20 @@ completed forms with zero skips, then stops at a separate `APPLICABLE`
 declaration in `77defs.mud` expression 78. Full load, initialization
 and gameplay remain unproved. No upstream, license or service boundary
 changes.
+
+## ADR-0037: Match APPLICABLE declarations against runtime callables
+
+**Decision (2026-11-21, issue #84):** Recognize `APPLICABLE` as the
+manual's compound declaration type name. It matches values this runtime
+can apply as a FORM operator: FIX, FUNCTION, MACRO and built-in SUBR
+representations. It participates in simple, OR, structured and attached
+declaration Patterns. Unknown type names remain errors. The native
+`APPLICABLE?` SUBR confirms the type partition, while direct pinned
+Confusion `DECL?` APPLICABLE probes enter `BAD-TYPE-SPECIFICATION1`;
+this is an explicit manual/reference deviation. This slice does not add
+the `APPLICABLE?` SUBR or unsupported custom application types.
+
+**Consequence:** The unchanged loader advances from 87 to 112 forms,
+zero skipped, and fully executes `77defs.mud`; it next stops on `%<>`
+in `77makstr.mud` expression 6. Full source load and game boot remain
+unproved. No upstream, license or service boundary changes.

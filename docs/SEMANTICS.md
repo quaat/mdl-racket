@@ -1302,3 +1302,29 @@ under `evidence/M3/`, add failing focused tests before implementation,
 then verify exact-source loader progress with zero skipped forms. This
 slice does not change quoted required formals or ordinary OPTIONAL/AUX
 binding.
+
+## M3 APPLICABLE declaration Pattern (issue #84; specification before implementation)
+
+The [MDL manual §14.1](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines `APPLICABLE` as a compound type name in a declaration Pattern:
+it accepts values whose TYPE can legally be called as the operator of a
+FORM. This includes FIX (position application), FUNCTION, MACRO and SUBR;
+ordinary ATOM and LIST values do not match. An `APPLICABLE` alternative
+inside `<OR ...>` must obey normal OR matching and preserve strict
+declaration checking at function binding. The first unchanged source
+use is `77defs.mud` expression 78, line 448, the `FN` parameter of
+`DA`, with `<OR APPLICABLE ATOM FIX>`. This slice only adds the
+declaration Pattern; it does not claim `APPLICABLE?` as a runtime SUBR,
+custom APPLYTYPE, CLOSURE, OFFSET or RSUBR support.
+
+The pinned Confusion `APPLICABLE?` predicate returns T for FIX,
+FUNCTION, MACRO and SUBR, and FALSE for ATOM and LIST in six isolated
+cases (`evidence/M3/applicable-predicate-reference.json`). Direct
+`DECL?` probes of `APPLICABLE`, including the original OR shape,
+instead enter `BAD-TYPE-SPECIFICATION1` with an `Atom REP has neither
+LVAL nor GVAL` diagnostic (`applicable-decl-reference.json`), an
+explicit reference defect or unsupported path. The Racket declaration
+matcher follows the manual and the reference's type-applicability
+observations. Tests must fail first at unknown declaration type, then
+cover positive and negative values, OR, attached declaration checking,
+and unchanged source progress with zero skipped forms.

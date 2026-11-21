@@ -194,6 +194,7 @@
   (cond
     [(mdl-atom? pattern)
      (cond [(string=? (mdl-atom-pname pattern) "ANY") '(any)]
+           [(string=? (mdl-atom-pname pattern) "APPLICABLE") '(applicable)]
            [(hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern)
             (list 'type pattern)]
            [else
@@ -273,6 +274,7 @@
   ;; failures are records (bare #FALSE ()), so they never reach here.
   (case (car pattern)
     [(type) (cadr pattern)]
+    [(applicable) (mdl-atom "APPLICABLE")]
     [(or) (decl-failure-leaf (last (cdr pattern)))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
@@ -295,6 +297,9 @@
            decl-match-max-depth))
   (case (car pattern)
     [(any) #t]
+    [(applicable)
+     (or (mdl-function? value) (mdl-macro? value)
+         (procedure? value) (exact-integer? value))]
     [(type) (eq? (mdl-type value) (cadr pattern))]
     ;; The reference's PRIMTYPE check returns the plain FALSE, so a failing
     ;; <PRIMTYPE ...> surfaces as a bare #FALSE () — the (list 'type)
