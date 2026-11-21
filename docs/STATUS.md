@@ -2,6 +2,15 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #90 positional `#DECL` metadata slice PASS; full M3 gate
+  incomplete:** the RSUBR-style `"VALUE"`/`"OPTIONAL"` Pattern list
+  is validated and retained on FUNCTION, without ATOM-variable
+  enforcement, matching nine pinned Confusion observations. `make
+  test` passes 1,148 Racket and 22 Python tests; `make m2-check`
+  passes. The unchanged loader completes 157 forms, zero skipped,
+  then stops at `!\ ` in `81tell-repl.mud` expression 23, line 45.
+  See [evidence](evidence/M3/FUNCTION-DECL.md) and
+  [next issue #92](https://github.com/quaat/mdl-racket/issues/92).
 - **Issue #88 custom WORD-primtype literal slice PASS; full M3 gate
   incomplete:** the parser reads `#PSTRING 0` as one typed object in
   the original two-element AUX default. Six native cases confirm its

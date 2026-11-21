@@ -1379,3 +1379,31 @@ keeps the manual's primitive-type safety check and integer-only WORD
 representation. Tests must demonstrate the existing split-token
 failure first, then verify reader shape, source evaluation, 36-bit
 data, AUX binding, and strict rejection of unsupported typed forms.
+
+## M3 positional `#DECL` metadata on FUNCTION (issue #90; specification before implementation)
+
+The [MDL manual §14.9](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines an RSUBR-style `#DECL` as positional metadata beginning with
+the STRING `"VALUE"`, followed by a result Pattern, required argument
+Patterns, and optionally the STRING `"OPTIONAL"` before optional
+argument Patterns. It is distinct from the ATOM declaration's
+alternating `(ATOM ...) Pattern` pairs. The manual says this positional
+form is useful on RSUBR/RSUBR-ENTRY, not on an interpreted FUNCTION.
+The unchanged `81tell-repl.mud` expression 10 attaches this form to
+`DEFINE TELL`; the loader must parse it as typed declaration data
+rather than misinterpret the leading STRING as an ATOM-list.
+
+Pinned Confusion accepts the positional form on a FUNCTION but does
+not enforce its argument or result Patterns there: four clean cases
+and five deliberately mismatched cases all complete without errors
+(`evidence/M3/function-decl-*-reference.json`). The Racket runtime
+will validate the supported `"VALUE"`/`"OPTIONAL"` grammar and
+Patterns, preserve the positional declaration as metadata, and apply
+no ATOM-variable checks when it is attached to a FUNCTION. This is an
+observed placement rule, not a general no-op for unsupported syntax.
+`"QUOTE"`, `"TUPLE"`, `"ARGS"` and `"CALL"` positional markers,
+and actual RSUBR application, remain separate work and must fail
+explicitly if encountered in this slice. Tests must fail first at
+the current atom-list/pattern error, then cover valid metadata,
+non-enforcement on FUNCTION, malformed markers and strict Pattern
+validation before measuring unchanged source progress.

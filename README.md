@@ -33,9 +33,11 @@ reached 112 and loaded `77defs.mud` in full. The current
 [`%<>` slice](docs/evidence/M3/PERCENT-EMPTY.md) reached 136 forms
 and loaded `77makstr.mud` in full. The current
 [`#PSTRING 0` typed literal slice](docs/evidence/M3/PSTRING-LITERAL.md)
-reaches 144 completed, zero skipped forms. It stops at the
-function-style `#DECL` in `81tell-repl.mud` expression 10,
-tracked in [issue #90](https://github.com/quaat/mdl-racket/issues/90).
+reached 144 forms. The current
+[positional `#DECL` slice](docs/evidence/M3/FUNCTION-DECL.md)
+reaches 157 completed, zero skipped forms. It stops at `!\ ` in
+`81tell-repl.mud` expression 23, tracked in
+[issue #92](https://github.com/quaat/mdl-racket/issues/92).
 NEWTYPE stores and checks its optional
 declaration Pattern; GDECL installs and checks global value Patterns.
 Pinned Confusion silently omits both checks, explicit reference
@@ -44,6 +46,8 @@ while the Racket Pattern follows the MDL manual and native
 `APPLICABLE?` type observations. `ASSIGNED?` with ENV remains unsupported;
 general `%` and `%%` read macros remain unsupported;
 custom `#type` literals currently support only integer WORD data;
+positional `#DECL` is validated as metadata but is not enforced on FUNCTION,
+matching the pinned reference;
 full source loading, game boot and gameplay
 parity are unverified. Reproduce with `make test`, `make m2-check`, and
 `make m3-source-progress` after `make reference-build`.

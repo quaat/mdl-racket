@@ -1,5 +1,19 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 positional declaration metadata checkpoint (2026-11-21)
+
+Issue #90 adds `tests/function_decl_metadata_test.rkt` with 13
+focused checks. Its first run exited 1 at `expected atom-list/pattern
+pairs`; after implementation it exits 0. Four clean and five
+deliberately mismatched pinned Confusion cases establish that a
+positional RSUBR-style declaration attached to FUNCTION is accepted
+but not enforced. `make test` exits 0 with 1,148 Racket and 22
+Python tests; `make m2-check` exits 0; `make m3-source-progress`
+exits 0 with 157 completed, zero skipped original forms. The full
+loader itself exits 1 at `!\ ` in `81tell-repl.mud` expression 23.
+See [evidence](evidence/M3/FUNCTION-DECL.md) and
+[`source-progress-function-decl.json`](evidence/M3/source-progress-function-decl.json).
+
 ## M3 custom WORD literal checkpoint (2026-11-21)
 
 Issue #88 adds `tests/pstring_literal_test.rkt` with 14 focused

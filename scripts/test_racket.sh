@@ -19,4 +19,5 @@ raco test mdl/runtime/core.rkt \
   tests/quoted_optional_test.rkt \
   tests/applicable_decl_test.rkt \
   tests/percent_empty_test.rkt \
-  tests/pstring_literal_test.rkt
+  tests/pstring_literal_test.rkt \
+  tests/function_decl_metadata_test.rkt

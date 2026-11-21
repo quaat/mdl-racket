@@ -837,3 +837,19 @@ pinned Confusion accepts a deliberately mismatched LIST type case.
 zero skipped, then stops on function-style `#DECL` in
 `81tell-repl.mud` expression 10. Full load and game boot remain
 unproved. No upstream, license or service boundary changes.
+
+## ADR-0040: Preserve positional #DECL metadata on FUNCTION
+
+**Decision (2026-11-21, issue #90):** Parse `#DECL ("VALUE" Pattern
+...)` as positional RSUBR-style declaration data, distinct from ATOM
+declaration pairs. Validate its supported `"VALUE"` and `"OPTIONAL"`
+grammar and Patterns, and retain it on the definition. The MDL manual
+places positional declarations on RSUBRs; pinned Confusion accepts
+them on FUNCTION without enforcing their argument or result Patterns.
+The Racket FUNCTION path follows that observed placement behavior.
+Unsupported positional markers and malformed Patterns still fail.
+
+**Consequence:** The unchanged loader advances from 144 to 157 forms,
+zero skipped, then stops at `!\ ` in `81tell-repl.mud` expression 23.
+Full source load and game boot remain unproved. No upstream, license
+or service boundary changes.

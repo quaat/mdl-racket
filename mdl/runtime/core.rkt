@@ -55,7 +55,7 @@
 (struct mdl-macro (formals body leading-act decl))
 (struct mdl-function (formals body leading-act decl))
 (define compiled-function-formals (make-weak-hasheq))
-(struct mdl-decl-value (bindings result line column) #:transparent)
+(struct mdl-decl-value (bindings result line column positionals) #:transparent)
 (define local-declarations (make-weak-hasheq))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
@@ -232,30 +232,61 @@
                          (mdl-atom-pname (car items)))]))]
     [else (decl-error origin line column "unsupported declaration pattern")]))
 
+(define (mdl-make-positional-declaration items line column)
+  ;; RSUBR-style metadata attached to an interpreted FUNCTION has no
+  ;; ATOM binding checks. Validate and retain it instead of treating its
+  ;; leading STRING as an ATOM-list (manual §14.9; pinned Confusion).
+  (unless (and (pair? items) (string? (car items))
+               (string=? (car items) "VALUE") (pair? (cdr items)))
+    (decl-error "DECL" line column "positional declaration must start with VALUE and a Pattern"))
+  (define value-pattern (normalize-decl-pattern (cadr items) line column))
+  (define required '())
+  (define optional '())
+  (define in-optional? #f)
+  (for ([item (in-list (cddr items))])
+    (cond
+      [(string? item)
+       (unless (and (string=? item "OPTIONAL") (not in-optional?))
+         (decl-error "DECL" line column
+                     "unsupported positional declaration marker ~a" item))
+       (set! in-optional? #t)]
+      [else
+       (define pattern (normalize-decl-pattern item line column))
+       (if in-optional?
+           (set! optional (cons pattern optional))
+           (set! required (cons pattern required)))]))
+  (when (and in-optional? (null? optional))
+    (decl-error "DECL" line column "OPTIONAL requires a Pattern"))
+  (mdl-decl-value (make-hasheq) #f line column
+                  (list value-pattern (reverse required) (reverse optional))))
+
 (define (mdl-make-declaration payload line column)
   (define items (mdl-list->list payload))
-  (unless (and (pair? items) (even? (length items)))
-    (decl-error "DECL" line column "expected atom-list/pattern pairs"))
-  (define bindings (make-hasheq))
-  (define result #f)
-  (for ([i (in-range 0 (length items) 2)])
-    (define names (list-ref items i))
-    (unless (and (mpair? names) (pair? (mdl-list->list names)))
-      (decl-error "DECL" line column "expected a nonempty atom list"))
-    (define pattern (normalize-decl-pattern (list-ref items (add1 i)) line column))
-    (for ([name (in-list (mdl-list->list names))])
-      (unless (mdl-atom? name)
-        (decl-error "DECL" line column "declaration name must be an ATOM"))
-      (if (string=? (mdl-atom-pname name) "VALUE")
-          (begin
-            (when result (decl-error "DECL" line column "duplicate VALUE declaration"))
-            (set! result pattern))
-          (begin
-            (when (hash-has-key? bindings name)
-              (decl-error "DECL" line column "duplicate declaration for ~a"
-                          (mdl-atom-pname name)))
-            (hash-set! bindings name pattern)))))
-  (mdl-decl-value bindings result line column))
+  (if (and (pair? items) (string? (car items)))
+      (mdl-make-positional-declaration items line column)
+      (let ()
+        (unless (and (pair? items) (even? (length items)))
+          (decl-error "DECL" line column "expected atom-list/pattern pairs"))
+        (define bindings (make-hasheq))
+        (define result #f)
+        (for ([i (in-range 0 (length items) 2)])
+          (define names (list-ref items i))
+          (unless (and (mpair? names) (pair? (mdl-list->list names)))
+            (decl-error "DECL" line column "expected a nonempty atom list"))
+          (define pattern (normalize-decl-pattern (list-ref items (add1 i)) line column))
+          (for ([name (in-list (mdl-list->list names))])
+            (unless (mdl-atom? name)
+              (decl-error "DECL" line column "declaration name must be an ATOM"))
+            (if (string=? (mdl-atom-pname name) "VALUE")
+                (begin
+                  (when result (decl-error "DECL" line column "duplicate VALUE declaration"))
+                  (set! result pattern))
+                (begin
+                  (when (hash-has-key? bindings name)
+                    (decl-error "DECL" line column "duplicate declaration for ~a"
+                                (mdl-atom-pname name)))
+                  (hash-set! bindings name pattern)))))
+        (mdl-decl-value bindings result line column #f))))
 
 ;; Structured pattern matching (issue #48). `decl-match` returns #t on a
 ;; match, #f on a simple failure (DECL? then keeps the D1 (value pattern)
