@@ -16,7 +16,7 @@ both in source order. The manual does not state duplicate precedence;
 conjunction is a documented conservative inference. The unchanged source
 loader completes **430 original forms with zero skips**, fully loading
 `77act1.mud`, `77act2.mud` and `77act3.mud`, then exits 1 at
-`77rooms.mud` expression 13, line 17: unsupported `HANDLER`. The latter is
+`77rooms.mud` expression 13, line 92: unsupported `HANDLER`. The latter is
 tracked in [issue #102](https://github.com/quaat/mdl-racket/issues/102),
 under event API issue #71. `make m3-source-progress` exits 0 only as a
 partial measurement. `make test` and `make m2-check` pass; see the

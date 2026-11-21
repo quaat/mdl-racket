@@ -4,7 +4,7 @@
 retains both duplicate attached ATOM Patterns and advances the SHA-verified
 original loader from 363 to 430 completed forms with zero skips, fully
 loading `77act1.mud`, `77act2.mud` and `77act3.mud`. It now stops at
-unassigned `HANDLER` in `77rooms.mud` expression 13, line 17. See
+unassigned `HANDLER` in `77rooms.mud` expression 13, line 92. See
 [`DUPLICATE-DECL.md`](evidence/M3/DUPLICATE-DECL.md) and next
 [issue #102](https://github.com/quaat/mdl-racket/issues/102). Full game load,
 initialization, and parity remain unverified.

@@ -10,7 +10,7 @@
   attached declarations. The unchanged loader completes **430 original
   forms, zero skipped**, up from 363, fully loading `77act1.mud`,
   `77act2.mud` and `77act3.mud`. It exits 1 at `77rooms.mud`
-  expression 13, line 17: unassigned `HANDLER`. `make m3-source-progress`
+  expression 13, line 92: unassigned `HANDLER`. `make m3-source-progress`
   exits 0 as a partial measurement only. See
   [evidence](evidence/M3/DUPLICATE-DECL.md) and next
   [issue #102](https://github.com/quaat/mdl-racket/issues/102) under

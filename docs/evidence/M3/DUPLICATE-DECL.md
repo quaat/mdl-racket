@@ -39,7 +39,7 @@ measurement** after source SHA verification and parsing 36 historical
 text files. Its underlying loader exited **1** after **430 completed
 original forms, zero skipped**, up 67 from 363, fully loading
 `77act1.mud`, `77act2.mud` and `77act3.mud`. The next failure is
-`77rooms.mud` expression 13, line 17, unassigned `HANDLER`; see
+`77rooms.mud` expression 13, line 92, unassigned `HANDLER`; see
 [source summary](source-progress-duplicate-decl.json) and
 [raw report](source-load-duplicate-decl.json). The source report records
 `77rooms.mud` SHA256
