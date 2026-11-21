@@ -31,9 +31,9 @@ Reproduce with `make test`,
 requires final-head CI.
 An independent local final-head review found and fixed that P2 issue;
 see [review report](docs/evidence/M2/D5-FINAL-REVIEW.md). D5 still awaits
-maintainer merge authorization. This branch's original MSETG repeat path
-reaches the computed-global reader issue #58. Later dependent G3 work
-reaches original `FLAGWORD`'s unsupported `MAPF` (issue #65).
+maintainer merge authorization. This branch includes the stacked `N=?`,
+computed-global, and `ERROR` corrections. Later dependent G3 work reaches
+original `FLAGWORD`'s unsupported `MAPF` (issue #65).
 Historical progress notes below preserve
 their original slice-level context.
 
@@ -53,6 +53,14 @@ FAIL**. The full source load still stops after 24 expressions at `EMPTY?`.
 Reproduce with those two make targets and the loader command below; see
 [reader evidence](docs/evidence/M2/COMPUTED-GLOBAL.md). Next: implement
 the reference-backed `ERROR` path, then rerun G3. M3 has not started.
+
+**Stacked `ERROR` correction (issue #60):** the source-defined `MSETG`
+conflicting-repeat path raises an observable `ALREADY-GASSIGNED` exception.
+`make test` passes 888 Racket checks and 13 Python tests;
+`make test-historical` passes the original MSETG error probe too. Pinned
+Confusion outputs and the non-resumable Racket deviation are in
+[ERROR evidence](docs/evidence/M2/ERROR.md). Integrated G3 remains FAIL
+until its updated branch is run; no game boot or gameplay parity is claimed.
 
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
 passes: the baseline and pinned source are reproducible, and the first

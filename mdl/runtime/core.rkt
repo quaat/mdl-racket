@@ -1,6 +1,6 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
-(require racket/mpair racket/list)
+(require racket/mpair racket/list racket/string)
 (provide current-mdl-globals current-mdl-locals
          mdl-interpreter-version
          mdl-setg! mdl-gval mdl-define!
@@ -2159,6 +2159,17 @@
   (newline)
   (mdl-false '()))
 
+(define (mdl-error . args)
+  ;; ERROR transfers control out of the current evaluation. The native
+  ;; reference enters a resumable error level; this local runtime has no
+  ;; error-frame/ERRET support, so preserve the failure as an exception.
+  (define (describe value)
+    (cond [(mdl-atom? value) (mdl-atom-pname value)]
+          [(string? value) (format "~s" value)]
+          [else (format "~a" value)]))
+  (error 'mdl-error "~a"
+         (if (null? args) "ERROR" (string-join (map describe args) " "))))
+
 (define builtin-table
   (hash "TYPE" mdl-type
         "LVAL" mdl-lval
@@ -2191,6 +2202,7 @@
         "STRING" mdl-string
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
+        "ERROR" mdl-error
         "LENGTH" mdl-length
         "REST" mdl-rest
         "NTH" mdl-nth

@@ -32,6 +32,14 @@ case remains blocked by unassigned `ERROR` and is tracked as G3 FAIL.
 Reference inputs and outputs are in `computed-global-*` and the method and
 limitations are in [`COMPUTED-GLOBAL.md`](evidence/M2/COMPUTED-GLOBAL.md).
 
+On stacked `feat/m2-error-primitive`, `make test` passes 888 Racket checks
+and 13 Python tests; `make test-historical` adds the exact original MSETG
+conflicting-repeat assertion. The deliberate Confusion `ERROR` probes exit
+the harness with status 1 because the subsequent `<QUIT>` is read in the
+reference's error-level REPL; their `*ERROR*` outputs are retained in
+`error-reference.json`. This is a tested error path, not a clean-success
+probe. See [`ERROR.md`](evidence/M2/ERROR.md).
+
 The M2 G0 audit is reproducible with
 `racket scripts/audit_source_readiness.rkt --output artifacts/m2/source-readiness.json`.
 Its JSON separates independent compile probes from sequential execution

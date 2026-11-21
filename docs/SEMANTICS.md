@@ -940,3 +940,23 @@ path reaches a separate unsupported `ERROR` primitive (issue #60); it is
 not part of this reader slice. Reference inputs
 and outputs are in `evidence/M2/computed-global-*` and the G3 reference
 files; final validation belongs in `evidence/M2/COMPUTED-GLOBAL.md`.
+
+## M2 G3 corrective primitive: `ERROR` (issue #60)
+
+The [MDL manual chapter 1](https://mdl-language.readthedocs.io/en/latest/01-basic-introduction/)
+describes an error as interrupting evaluation and entering an error state;
+chapter 21 describes interrupt handlers and `ERRET` recovery. The pinned
+Confusion probe accepts zero or more evaluated arguments to `ERROR`, prints
+each one in order, and enters `LISTENING-AT-LEVEL 2`. The exact original
+MSETG conflict in `81prim.mud` prints `MSETG`, the target atom,
+`ALREADY-GASSIGNED`, and the old value `3`. See `evidence/M2/error-*`.
+
+This initial slice must evaluate arguments in order and raise a host
+exception carrying those values in readable form, so the source-defined
+error is observable and cannot silently return. A zero-argument call
+must also fail. Racket does not yet reproduce MDL's resumable error
+level, interrupt handlers, or `ERRET`; those are explicit deviations.
+Tests must first fail for unassigned `ERROR`, then pass for zero and
+multiple arguments, evaluation side effects, and the exact source-defined
+MSETG conflicting-repeat path. No error branch may be converted into a
+FALSE or ignored form.

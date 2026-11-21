@@ -575,3 +575,16 @@ calls return `T` without source edits. A conflicting repeat reaches the
 separate missing `ERROR` primitive (issue #60), so integrated G3 remains
 FAIL. Evidence: `evidence/M2/COMPUTED-GLOBAL.md`. No source provenance,
 license, network exposure, or gameplay claim changes.
+
+## ADR-0025: Preserve ERROR as an explicit interruption
+
+**Decision (2026-11-20, issue #60):** A call to `ERROR` evaluates its
+arguments and raises a Racket exception with readable values; zero
+arguments also raises. The pinned Confusion reference enters a resumable
+error level, but this runtime has no compatible error frames or `ERRET`.
+
+**Consequence:** The exact original MSETG conflicting-repeat path reports
+`ALREADY-GASSIGNED` and keeps the old global value. Error handlers,
+resumption, and structured-argument printing remain documented gaps.
+Evidence: `evidence/M2/ERROR.md`. No source provenance, licensing, or
+service exposure changes.

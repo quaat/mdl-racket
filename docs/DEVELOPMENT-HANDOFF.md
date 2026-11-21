@@ -5,6 +5,15 @@ evidence instead of duplicating logs. Last updated 2026-11-20 (D4 merged,
 D5 final-head review correction completed, pre-merge G3 FAIL after the
 computed-global reader correction).
 
+**Latest correction (issue #60):** `feat/m2-error-primitive` adds a strict
+`ERROR` builtin. Four deliberate native error cases are saved in
+`docs/evidence/M2/error-*`; the Racket `ERROR` raises a non-resumable
+exception. The hash-verified original MSETG conflicting-repeat path now
+passes. `make test` passes 888 Racket and 13 Python checks;
+`make test-historical` passes all four probes. The integrated G3 branch
+still needs a current-head run, so G3 remains FAIL and M3 is not started.
+Next: update and rerun G3, then act only on its observed first failure.
+
 **Latest correction (issue #58):** `feat/m2-computed-global` reads `,.FOO`
 as GVAL of FOO's local value. Three pinned Confusion cases, reader and
 binding regressions, and a hash-verified original MSETG equal-repeat probe
@@ -67,8 +76,8 @@ approval remain pending.
   enforce DECL associations; GETPROP/PUTPROP and chapter 13.4 machinery
   explicitly unimplemented. See ADR-0023 and the M2 D5 section of
   `docs/SEMANTICS.md`.
-- **Exact next action:** implement source-backed `ERROR` issue #60 in a
-  separate PR, then rerun G3; merge D5 only after explicit
+- **Exact next action:** rerun G3 on the stacked `ERROR` head; merge D5
+  only after explicit
   maintainer approval and final-head review. M3 `EMPTY?` waits for G3.
 - **Active issues/PRs (historical, D2/D3 era — superseded by the header
   above):** [PR #49](https://github.com/quaat/mdl-racket/pull/49)

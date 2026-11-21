@@ -3,8 +3,9 @@
 ## Current state (2026-11-20)
 
 - **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL.
-  Issue #57's `N=?` correction is local on a separate branch; original
-  MSETG now reaches a computed-global `,.FOO` reader gap (issue #58).
+  Stacked corrections for `N=?`, `,.FOO`, and `ERROR` pass focused and
+  hash-verified original-MSETG tests. G3 has not yet been rerun on this
+  head; M2 cannot pass from those focused checks.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -29,9 +30,9 @@
   installed `PSETG`. Actual source execution sets priority.
 - **Parity target:** the pinned Confusion reference loads the full
   12-file chain to `DONE`.
-- **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57 (`N=?`), #58
-  (computed global reader), #65 (`MAPF`), and #67 (D5 review fix).
-  Issue #11 is closed as completed. The D5 SUBR association correction
+- **Open issues/PRs:** #53 and PR #54 (D5), #56 (G3), #57/PR #59 (`N=?`),
+  #58/PR #61 (computed global reader), #60/PR #62 (`ERROR`), #65 (`MAPF`),
+  and #67 (D5 review fix). Issue #11 is closed as completed. The D5 SUBR association correction
   requires final-head CI. Its independent local review report is
   [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md). Maintainer approval
   and merge are pending; no merge is authorized.
@@ -47,6 +48,12 @@
   [computed-global evidence](evidence/M2/COMPUTED-GLOBAL.md). Next: probe
   and implement `ERROR` as a separate source-backed slice (issue #60), then
   rerun G3.
+- **Issue #60 stacked ERROR slice:** `make test` passes 888 Racket checks
+  and 13 Python tests; `make test-historical` includes the hash-verified
+  original MSETG conflict and passes. Confusion's `ERROR` enters a
+  resumable level; this Racket slice raises a non-resumable exception with
+  evaluated arguments. See [evidence](evidence/M2/ERROR.md). The integrated
+  G3 branch must be rebased and rerun before any gate PASS claim.
 - **Not demonstrated:** full integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 

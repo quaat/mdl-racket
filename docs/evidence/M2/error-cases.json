@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-error-reference",
+  "cases": [
+    {"name": "one-atom", "expression": "<ERROR G3-FAIL>"},
+    {"name": "multiple-values", "expression": "<ERROR MSETG G3-FOO ALREADY-GASSIGNED 3>"},
+    {"name": "original-msetg-conflict", "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-FOO 3> <MSETG G3-FOO 4>"},
+    {"name": "zero-args", "expression": "<ERROR>"}
+  ]
+}
