@@ -26,9 +26,11 @@ The separate [M3 source-progress gate](docs/evidence/M3/SOURCE-PROGRESS.md),
 unchanged `77loadall.mud` chain from 24 to 26 completed forms. The
 [three-argument NEWTYPE slice](docs/evidence/M3/NEWTYPE-DECL.md) advanced
 it to 36 forms, and the [GDECL slice](docs/evidence/M3/GDECL.md) to 37.
-The current [eager AND? slice](docs/evidence/M3/ANDQ.md) reaches 70
-completed, zero skipped forms and stops at a quoted OPTIONAL default
-in `77defs.mud` expression 61. NEWTYPE stores and checks its optional
+The [eager AND? slice](docs/evidence/M3/ANDQ.md) reached 70 forms.
+The current [quoted OPTIONAL default slice](docs/evidence/M3/QUOTED-OPTIONAL.md)
+reaches 87 completed, zero skipped forms and stops at an `APPLICABLE`
+declaration in `77defs.mud` expression 78, tracked in [issue #84](https://github.com/quaat/mdl-racket/issues/84).
+NEWTYPE stores and checks its optional
 declaration Pattern; GDECL installs and checks global value Patterns.
 Pinned Confusion silently omits both checks, explicit reference
 deviations. `ASSIGNED?` with ENV remains unsupported; full source loading, game boot and gameplay

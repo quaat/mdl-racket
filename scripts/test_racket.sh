@@ -15,4 +15,5 @@ raco test mdl/runtime/core.rkt \
   tests/startup_oblist_assoc_test.rkt tests/indirect_apply_test.rkt \
   tests/emptyq_test.rkt tests/lengthq_test.rkt tests/assignedq_test.rkt \
   tests/root_test.rkt tests/newtype_decl_test.rkt tests/gdecl_test.rkt \
-  tests/andq_test.rkt
+  tests/andq_test.rkt \
+  tests/quoted_optional_test.rkt

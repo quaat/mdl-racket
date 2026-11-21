@@ -288,10 +288,15 @@
            (unsupported item
                         "2-list defaults are allowed only in OPTIONAL or AUX sections"))
          (define pair (mdl-node-value item))
-         (when (is-kind? (first pair) 'quote)
-           (unsupported item "quoted formal cannot take a default"))
-         (define name (atom-name (first pair)))
-         (add-spec! item section name (second pair))
+         (define quoted? (is-kind? (first pair) 'quote))
+         (when (and quoted? (not (eq? section 'optional)))
+           (unsupported item "quoted formal not allowed in this section"))
+         (define name-node (if quoted? (mdl-node-value (first pair)) (first pair)))
+         (unless (is-kind? name-node 'atom)
+           (unsupported item (if quoted? "quoted formal must name an ATOM"
+                                 "formal name must be an ATOM")))
+         (add-spec! item (if quoted? 'quoted-optional section)
+                    (atom-name name-node) (second pair))
          (loop (cdr items) section)]
         [(is-kind? item 'form)
          (unsupported item "unsupported FORM in formal list")]

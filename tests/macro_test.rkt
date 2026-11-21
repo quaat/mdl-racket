@@ -110,9 +110,9 @@
            (lambda () (run "<DEFINE M2-F ('X) <RETURN 7>> <PROG () <M2-F 1> 9>")))
 (check-exn #rx"unsupported formal argument"
            (lambda () (run "<DEFMAC M2-M ('X 3) <FORM + .X 1>> <M2-M>")))
-(check-exn #rx"quoted formal"
+(check-exn #rx"quoted formal not allowed"
            (lambda () (compile-program
-                        (parse-mdl "<DEFMAC M2-M (\"OPTIONAL\" ('X 3)) <FORM + .X 1>>"))))
+                        (parse-mdl "<DEFMAC M2-M (\"AUX\" ('X 3)) <FORM + .X 1>>"))))
 (check-exn #rx"BAD-ARGUMENT-LIST"
            (lambda () (run "<DEFINE M2-F M2-SELF ('M2-SELF) .M2-SELF>")))
 

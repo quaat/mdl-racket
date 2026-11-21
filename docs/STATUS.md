@@ -2,6 +2,14 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #82 quoted OPTIONAL default slice PASS; full M3 gate incomplete:**
+  the manual and six pinned Confusion cases establish raw explicit
+  arguments and evaluated defaults in the growing frame. Focused tests
+  pass; `make test` passes 1,097 Racket checks and 22 Python tests;
+  `make m2-check` passes. The unchanged loader now completes 87 forms,
+  zero skipped, then stops at `APPLICABLE` in `77defs.mud` expression
+  78, line 448. See [evidence](evidence/M3/QUOTED-OPTIONAL.md) and
+  [next issue #84](https://github.com/quaat/mdl-racket/issues/84).
 - **Issue #80 eager AND? slice PASS; full M3 gate incomplete:**
   seven clean native cases, one deliberate late-error case and a
   SHA-verified original-source regression establish eager argument
