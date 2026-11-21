@@ -3,8 +3,12 @@
 **Gate result: PASS as a progress measurement; original load INCOMPLETE.**
 Issue [#73](https://github.com/quaat/mdl-racket/issues/73) separates the
 stable M2 original-definition regression from the moving full-loader
-frontier. The accepted M2 code baseline is `0360292` on `main`; this M3
-work does not implement an MDL primitive. Reproduce with:
+frontier. The accepted M2 code baseline is
+`0360292d78e07b79002ee509e3b0a72e373dde2d` on `main`; this M3
+work does not implement an MDL primitive. The implementation commit is
+`7323fa62f2a866b14bb8e0acdcd09086e9dab6c1`; later documentation
+and CI wiring are checked on the PR's final head.
+Reproduce with:
 
 ```bash
 make reference-build
@@ -25,6 +29,8 @@ expressions, a changed accepted event prefix, skipped forms, wrong file
 order, malformed diagnostics, impossible complete-file counts or a false
 completion claim. Its baseline is
 [`source-progress-baseline.json`](source-progress-baseline.json).
+The native reference CI job runs this target after G3, so regressions in
+the accepted original-source prefix fail automated checks too.
 
 | Stage or metric | Current observation | Pinned reference or limit |
 |---|---|---|

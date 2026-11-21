@@ -19,7 +19,8 @@ assertions from a bounded original-source prefix. The full unchanged
 entry is measured by `make m3-source-progress`; its validator fails on
 fewer than 24 completed forms, skipped execution, changed accepted prefix,
 wrong file order, malformed diagnostics or false completion. See
-[`SOURCE-PROGRESS.md`](evidence/M3/SOURCE-PROGRESS.md).
+[`SOURCE-PROGRESS.md`](evidence/M3/SOURCE-PROGRESS.md). The native
+reference CI job runs this source-progress target after G3.
 
 ## Earlier M2 branch checkpoint (2026-11-20)
 
