@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m3-applicable-predicate-native-reference",
+  "cases": [
+    {"name": "fix", "expression": "<APPLICABLE? 1>"},
+    {"name": "function", "expression": "<APPLICABLE? <FUNCTION () 1>>"},
+    {"name": "macro", "expression": "<DEFMAC M3-AM () 1> <APPLICABLE? ,M3-AM>"},
+    {"name": "subr", "expression": "<APPLICABLE? ,+>"},
+    {"name": "atom", "expression": "<APPLICABLE? 'X>"},
+    {"name": "list", "expression": "<APPLICABLE? '(1 2)>"}
+  ]
+}

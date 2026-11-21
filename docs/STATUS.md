@@ -2,6 +2,18 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #84 APPLICABLE declaration Pattern slice PASS; full M3 gate
+  incomplete:** the manual's compound type name now matches the callable
+  values represented by this runtime, including FIX, FUNCTION, MACRO and
+  SUBR, in simple, OR and structured Patterns. Six native `APPLICABLE?`
+  cases corroborate type applicability; direct Confusion `DECL?`
+  APPLICABLE probes instead enter an error, a documented deviation.
+  `make test` passes 1,113 Racket and 22 Python tests; `make m2-check`
+  passes. The unchanged loader completes 112 original forms, zero
+  skipped, fully loading `77defs.mud`. The next failure is `%<>` in
+  `77makstr.mud` expression 6, line 73. See
+  [evidence](evidence/M3/APPLICABLE-DECL.md) and
+  [next issue #86](https://github.com/quaat/mdl-racket/issues/86).
 - **Issue #82 quoted OPTIONAL default slice PASS; full M3 gate incomplete:**
   the manual and six pinned Confusion cases establish raw explicit
   arguments and evaluated defaults in the growing frame. Focused tests

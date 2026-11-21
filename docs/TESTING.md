@@ -1,5 +1,18 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 APPLICABLE declaration checkpoint (2026-11-21)
+
+Issue #84 adds `tests/applicable_decl_test.rkt`: 16 focused checks for
+callable and noncallable values, OR and structured Patterns, attached
+declaration checking, and strict unknown types. Its first run exited 1
+at unknown APPLICABLE; after implementation it exits 0. `make test`
+exits 0 with 1,113 Racket and 22 Python tests; `make m2-check` exits 0;
+`make m3-source-progress` exits 0 with 112 completed, zero skipped
+original forms. The full loader itself exits 1 at the `%<>` data
+construct in `77makstr.mud` expression 6. See
+[evidence](evidence/M3/APPLICABLE-DECL.md) and
+[`source-progress-applicable-decl.json`](evidence/M3/source-progress-applicable-decl.json).
+
 ## M3 quoted OPTIONAL default checkpoint (2026-11-21)
 
 Issue #82 adds focused `DEFINE`/`DEFMAC` binding tests in

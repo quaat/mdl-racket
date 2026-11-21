@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "name": "m3-applicable-decl-native-reference",
+  "recorded_at": "2026-11-21T15:27:04.429455+00:00",
+  "interpreter_sha256": "cd7bfffe22265b3f63dfd2713330507c53e6182ec9f41ba4aa3d818127252580",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "fix",
+      "expression": "<DECL? 1 'APPLICABLE>",
+      "input": "<DECL? 1 'APPLICABLE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "negative-fix",
+      "expression": "<DECL? -1 'APPLICABLE>",
+      "input": "<DECL? -1 'APPLICABLE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "function",
+      "expression": "<DECL? <FUNCTION () 1> 'APPLICABLE>",
+      "input": "<DECL? <FUNCTION () 1> 'APPLICABLE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "macro",
+      "expression": "<DEFMAC M3-AM () 1> <DECL? ,M3-AM 'APPLICABLE>",
+      "input": "<DEFMAC M3-AM () 1> <DECL? ,M3-AM 'APPLICABLE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3-AM\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3-AM\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "subr",
+      "expression": "<DECL? ,+ 'APPLICABLE>",
+      "input": "<DECL? ,+ 'APPLICABLE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "atom",
+      "expression": "<DECL? 'X 'APPLICABLE>",
+      "input": "<DECL? 'X 'APPLICABLE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "list",
+      "expression": "<DECL? '(1 2) 'APPLICABLE>",
+      "input": "<DECL? '(1 2) 'APPLICABLE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "or-fix",
+      "expression": "<DECL? 1 '<OR APPLICABLE ATOM FIX>>",
+      "input": "<DECL? 1 '<OR APPLICABLE ATOM FIX>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "or-atom",
+      "expression": "<DECL? 'X '<OR APPLICABLE ATOM FIX>>",
+      "input": "<DECL? 'X '<OR APPLICABLE ATOM FIX>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "or-list",
+      "expression": "<DECL? '(1 2) '<OR APPLICABLE ATOM FIX>>",
+      "input": "<DECL? '(1 2) '<OR APPLICABLE ATOM FIX>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

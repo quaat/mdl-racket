@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "m3-applicable-decl-native-reference",
+  "cases": [
+    {"name": "fix", "expression": "<DECL? 1 'APPLICABLE>"},
+    {"name": "negative-fix", "expression": "<DECL? -1 'APPLICABLE>"},
+    {"name": "function", "expression": "<DECL? <FUNCTION () 1> 'APPLICABLE>"},
+    {"name": "macro", "expression": "<DEFMAC M3-AM () 1> <DECL? ,M3-AM 'APPLICABLE>"},
+    {"name": "subr", "expression": "<DECL? ,+ 'APPLICABLE>"},
+    {"name": "atom", "expression": "<DECL? 'X 'APPLICABLE>"},
+    {"name": "list", "expression": "<DECL? '(1 2) 'APPLICABLE>"},
+    {"name": "or-fix", "expression": "<DECL? 1 '<OR APPLICABLE ATOM FIX>>"},
+    {"name": "or-atom", "expression": "<DECL? 'X '<OR APPLICABLE ATOM FIX>>"},
+    {"name": "or-list", "expression": "<DECL? '(1 2) '<OR APPLICABLE ATOM FIX>>"}
+  ]
+}

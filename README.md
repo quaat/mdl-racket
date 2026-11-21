@@ -27,13 +27,18 @@ unchanged `77loadall.mud` chain from 24 to 26 completed forms. The
 [three-argument NEWTYPE slice](docs/evidence/M3/NEWTYPE-DECL.md) advanced
 it to 36 forms, and the [GDECL slice](docs/evidence/M3/GDECL.md) to 37.
 The [eager AND? slice](docs/evidence/M3/ANDQ.md) reached 70 forms.
-The current [quoted OPTIONAL default slice](docs/evidence/M3/QUOTED-OPTIONAL.md)
-reaches 87 completed, zero skipped forms and stops at an `APPLICABLE`
-declaration in `77defs.mud` expression 78, tracked in [issue #84](https://github.com/quaat/mdl-racket/issues/84).
+The [quoted OPTIONAL default slice](docs/evidence/M3/QUOTED-OPTIONAL.md)
+reached 87 forms. The current [APPLICABLE declaration slice](docs/evidence/M3/APPLICABLE-DECL.md)
+reaches 112 completed, zero skipped forms: `77defs.mud` now loads in
+full, and the loader stops at `%<>` in `77makstr.mud` expression 6,
+tracked in [issue #86](https://github.com/quaat/mdl-racket/issues/86).
 NEWTYPE stores and checks its optional
 declaration Pattern; GDECL installs and checks global value Patterns.
 Pinned Confusion silently omits both checks, explicit reference
-deviations. `ASSIGNED?` with ENV remains unsupported; full source loading, game boot and gameplay
+deviations. Its direct `DECL?` handling of `APPLICABLE` also errors,
+while the Racket Pattern follows the MDL manual and native
+`APPLICABLE?` type observations. `ASSIGNED?` with ENV remains unsupported;
+full source loading, game boot and gameplay
 parity are unverified. Reproduce with `make test`, `make m2-check`, and
 `make m3-source-progress` after `make reference-build`.
 Explicit CLOSURE, MAPR, TAG, resumable ERROR/ERRET, full loader completion,

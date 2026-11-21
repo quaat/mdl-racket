@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "name": "m3-applicable-predicate-native-reference",
+  "recorded_at": "2026-11-21T15:27:21.700600+00:00",
+  "interpreter_sha256": "cd7bfffe22265b3f63dfd2713330507c53e6182ec9f41ba4aa3d818127252580",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "fix",
+      "expression": "<APPLICABLE? 1>",
+      "input": "<APPLICABLE? 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "function",
+      "expression": "<APPLICABLE? <FUNCTION () 1>>",
+      "input": "<APPLICABLE? <FUNCTION () 1>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "macro",
+      "expression": "<DEFMAC M3-AM () 1> <APPLICABLE? ,M3-AM>",
+      "input": "<DEFMAC M3-AM () 1> <APPLICABLE? ,M3-AM>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3-AM\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3-AM\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "subr",
+      "expression": "<APPLICABLE? ,+>",
+      "input": "<APPLICABLE? ,+>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "atom",
+      "expression": "<APPLICABLE? 'X>",
+      "input": "<APPLICABLE? 'X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "list",
+      "expression": "<APPLICABLE? '(1 2)>",
+      "input": "<APPLICABLE? '(1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}
