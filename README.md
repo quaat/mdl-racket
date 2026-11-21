@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0 and M1 gates PASS on `main`; M2 execution-semantics slices in progress. NOT a playable game.** This repository is a starting
+> **Status: M0, M1 and M2 gates PASS on `main`; M3 source loading is next. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -9,33 +9,23 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M2 status (2026-11-20):** D1–D4 are merged on `main`
-(`419fc5c`). On the stacked PR #70 head, the hash-verified
-original definitions now pass the [G3 integrated execution gate](docs/evidence/M2/G3-GATE-MAPF.md):
-`make test-m2-g3` exits 0 after 59 assertions, including original VFLOAD,
-MSETG, PSETG, FLAGWORD, RAPPLIC properties, macro expansion, aliasing,
-failure propagation and session isolation. Focused MAPF, TYPE?, and startup
-OBLIST association cases are documented in [MAPF evidence](docs/evidence/M2/MAPF.md).
-The full `77loadall.mud` chain still stops at `EMPTY?` in original
-`NEWSTRUC` after 24 completed expressions. **M2 is not closed:** indirect
-APPLY/DISPATCH now has a reference-backed correction in
-[issue #69](docs/evidence/M2/INDIRECT-APPLY.md), and the
-[M2 requirements audit](docs/evidence/M2/REQUIREMENTS-AUDIT.md) records
-the tested surface and deviations. The implementation commit passed both
-required CI workflows; see the [branch acceptance report](docs/evidence/M2/BRANCH-ACCEPTANCE.md).
-Final review, authorization and mainline verification remain. PR #54
-remains unmerged pending explicit maintainer authorization. No Racket game
-boot or gameplay parity is claimed. Reproduce with `make test`,
-`make test-historical`, `make test-m2-g3`, or `make m2-check` after
-`make reference-build`; the complete loader command is below.
+**Current status (2026-11-21):** The authorized M2 stack, PRs #54, #59,
+#61, #62, #64, #66, #68 and #70, is integrated on `main` at `7d34195`.
+The [M2 mainline gate](docs/evidence/M2/MAINLINE-GATE.md) passes: `make
+m2-check` exits 0 with 986 Racket checks, 13 Python tests, and 59
+hash-verified original-source G3 assertions. It includes original VFLOAD,
+MSETG, PSETG and FLAGWORD, MAPF, indirect APPLY, declarations, macro
+expansion, activation control, aliasing and session isolation. The
+[requirements audit](docs/evidence/M2/REQUIREMENTS-AUDIT.md) lists tested
+capabilities and limits. Reproduce after `make reference-build` with
+`make m2-check`; the complete loader command is below.
+The full `77loadall.mud` chain still stops at unassigned `EMPTY?` in
+original `NEWSTRUC` after 24 completed expressions. This is the first
+M3 source dependency; no Racket game boot or gameplay parity is claimed.
+Explicit CLOSURE, MAPR, TAG, resumable ERROR/ERRET, full loader completion,
+parser/game boot and gameplay remain unsupported or unverified. Random/event
+APIs are tracked as [M3 issue #71](https://github.com/quaat/mdl-racket/issues/71).
 See [current status](docs/STATUS.md).
-The verified M2 subset includes formals, declarations, macros, control
-frames, MAPF, APPLY/computed dispatch, source loading through the G3
-prefix, and shared-state aliasing. Explicit CLOSURE, MAPR, TAG,
-resumable ERROR/ERRET, full loader completion, parser/game boot and
-gameplay remain unsupported or unverified. The next milestone after
-authorized M2 mainline acceptance is M3, beginning with the original
-`NEWSTRUC` call's `EMPTY?` dependency.
 Historical progress notes below preserve
 their original slice-level context.
 

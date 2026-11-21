@@ -664,3 +664,21 @@ nine deliberate error observations are recorded; focused tests and the
 existing binding regression pass. The branch G3 gate remains 59/59.
 FSUBR values, CALL formals and broader applicable types remain explicit
 unsupported cases. No upstream, licensing, or service boundary changes.
+
+## ADR-0030: Assign random and event APIs to source-backed M3 work
+
+**Decision (2026-11-21, M2 mainline gate):** The original M2 plan's task
+list included “#16 random/event APIs,” but its stated M2 Build and Gate
+require initial original definitions and execution semantics, not game
+events or random behavior. The hash-verified G3 scenario invokes no
+random/event API, while the M3 Build and Gate explicitly include the game
+loop and event seed handling. Resolve the mismatch by tracking random and
+event APIs as [M3 issue #71](https://github.com/quaat/mdl-racket/issues/71).
+Implement them from actual unchanged-source calls and pinned Confusion
+observations, with controlled seeds and scheduler state. This is a scope
+decision, not evidence that those APIs work today.
+
+**Consequence:** M2 PASS covers its listed Build and Gate plus the audited
+APPLY/DISPATCH surface. It does not imply random/event parity, game boot,
+or parser operation. The first M3 barrier remains original NEWSTRUC's
+EMPTY? call, and source-progress reporting must identify later dependencies.
