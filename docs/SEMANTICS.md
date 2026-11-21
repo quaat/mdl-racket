@@ -1090,3 +1090,105 @@ structured contents. A FIX head with two arguments invokes indexed PUT
 on a structured target directly; it cannot fall through to a PUT
 association on a non-structured item. Red-to-green observations and
 remaining limits are in `evidence/M2/INDIRECT-APPLY.md`.
+
+## M3 EMPTY? predicate (issue #75; specification before implementation)
+
+The [MDL manual predefined SUBR entry](https://mdl-language.readthedocs.io/en/latest/appendix-2-predefined-subroutines/)
+declares `EMPTY? (OBJECT)` with a STRUCTURED argument and a result of
+`T` or empty FALSE. It is true exactly when the structure has zero
+elements. The exact original `81prim.mud` SHA256
+`8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571`
+defines NEWSTRUC at line 35. Its line-43 `<EMPTY? .ELEM>` checks the
+remaining ARGS LIST while `77defs.mud` expression 15 constructs ROOM.
+
+The pinned Confusion clean corpus in
+`evidence/M3/emptyq-reference.json` has 16/16 exit-0 cases. Empty
+LIST, VECTOR, UVECTOR, STRING, FALSE, REST-end LIST, TUPLE and a typed
+LIST return `T`; their nonempty counterparts return `#FALSE ()`.
+The circular LIST case returns FALSE promptly; EMPTY? must inspect only
+whether a first cell exists, without traversing the whole LIST.
+The original source-defined NEWSTRUC succeeds on a controlled VECTOR
+definition after FLOAD of the unchanged 81prim file. Deliberate invalid
+cases are separate in `emptyq-error-reference.json`: no argument writes
+`Not enough arguments to EMPTY?` to stderr; two arguments write
+`Too many args to EMPTY?`; ATOM, FIX and WORD enter an error level with
+`FIRST-ARG-WRONG_TYPE` and a structured-argument diagnostic. Those
+error-level captures have `ok=false` by design, even when the native
+process exits 0 after `<QUIT>`.
+
+Implementation tests must cover each supported structured representation,
+including typed wrappers and TUPLE, and require explicit errors for wrong
+arity or unstructured values. Return the session's canonical `T` atom or
+an empty MDL FALSE; do not coerce host truth values. The unchanged full
+loader must advance beyond 24 completed forms with zero skipped forms.
+This predicate alone does not imply NEWSTRUC, world, or game parity.
+
+## M3 LENGTH? bounded structured length (issue #75 follow-on)
+
+The [MDL manual predefined SUBR entry](https://mdl-language.readthedocs.io/en/latest/appendix-2-predefined-subroutines/)
+declares `LENGTH? (OBJECT MAX)` with STRUCTURED and FIX arguments. It
+returns the actual length as FIX when that length is at most MAX, and
+empty FALSE otherwise. Unlike a full LENGTH traversal, it must stop
+after finding more than MAX elements; the manual explicitly discusses
+using it on circular LISTs. Original NEWSTRUC in pinned `81prim.mud`
+calls `<LENGTH? .ELEM 1>` after the EMPTY? check to reject a one-slot
+remainder. The first post-EMPTY? loader run reaches this unassigned
+operator in `77defs.mud` expression 15, still after 24 completed forms.
+
+The 16 clean pinned Confusion cases in
+`evidence/M3/lengthq-reference.json` cover LIST, VECTOR, UVECTOR,
+STRING, FALSE, TUPLE, typed LIST, REST view, and a circular LIST. A
+length of two with MAX 1 returns `#FALSE ()`; with MAX 2 or 3 it
+returns FIX `2`. A circular LIST with MAX 3 returns empty FALSE in a
+bounded process. The five separate deliberate-error cases in
+`lengthq-error-reference.json` record missing/extra argument messages,
+the structured first-argument requirement, and FIX second-argument
+requirement. Native stderr carries those diagnostics while its process
+may still exit 0 after `<QUIT>`; the probe marks them `ok=false`.
+
+**Observed reference/manual edge:** Confusion returns FIX `0` for an
+empty LIST with negative MAX, although the manual's mathematical
+less-than-or-equal rule would imply FALSE. It returns FALSE for a
+nonempty LIST with negative MAX. This runtime follows that pinned
+observable behavior for the reconstructed target and records the
+deviation; NEWSTRUC passes positive MAX 1. Implement a bounded walk
+over LIST-like values, checking for emptiness before the bound, so
+cyclic lists terminate and the empty/negative case matches the reference.
+Do not call the general `LENGTH` path on an unbounded cyclic LIST.
+
+## M3 ASSIGNED? local binding predicate (issue #75 follow-on)
+
+The [MDL manual's function chapter](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+and predefined SUBR entry specify `ASSIGNED? (ATOM "OPTIONAL" ENV)`.
+Without an ENV, it tests whether the ATOM has an assigned local binding
+in the current environment, returning `T` or empty FALSE. A global-only
+binding does not count. A nearer unassigned local shadows an assigned
+outer local. The original `NEWSTRUC` in SHA-verified `81prim.mud` uses
+`<ASSIGNED? RR>` for its initially unassigned AUX local. The first
+loader run after EMPTY? and LENGTH? reaches this expression.
+
+The nine clean pinned Confusion cases in
+`evidence/M3/assignedq-reference.json` establish unbound, top-level SET,
+global-only SETG, PROG local assignment and shadowing, and function AUX
+behavior. Four separate deliberate-error cases in
+`assignedq-error-reference.json` show the missing-argument error and
+that the first argument must be ATOM; a supplied second FIX is rejected
+because the optional argument must be a frame. These native error-level
+captures are marked `ok=false` even where the process exits zero after
+QUIT. The initial implementation supports the one-argument form used by
+original source; a supplied ENV fails explicitly until frame semantics
+are separately specified and tested. Tests must assert the local/global
+distinction, unassigned shadow, wrong type, and arity before runtime code.
+
+## M3 ROOT startup OBLIST (issue #75 NEWSTRUC dependency)
+
+The manual's OBLIST chapter describes ROOT as the system's root OBLIST.
+The original `NEWSTRUC` calls `<LOOKUP "COMPILE" <ROOT>>` to select a
+compiled or interpreted type definition. On a clean pinned Confusion
+session, the five cases in `evidence/M3/root-reference.json` establish
+that zero-argument ROOT has type OBLIST, is identical to both
+`<MOBLIST 'ROOT>` and `<GET ROOT OBLIST>`, contains the ROOT atom, and
+does not contain COMPILE. The deliberate extra-argument case in
+`root-error-reference.json` writes `Too many arguments to ROOT`.
+Implementation returns the existing session root OBLIST and rejects any
+argument. It must preserve identity, not construct another OBLIST.

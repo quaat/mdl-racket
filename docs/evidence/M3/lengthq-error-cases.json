@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m3-lengthq-deliberate-errors",
+  "cases": [
+    {"name": "missing-both", "expression": "<LENGTH?>"},
+    {"name": "missing-max", "expression": "<LENGTH? '()>"},
+    {"name": "extra-arg", "expression": "<LENGTH? '() 1 2>"},
+    {"name": "wrong-structure", "expression": "<LENGTH? 'A 1>"},
+    {"name": "wrong-max", "expression": "<LENGTH? '(1) 'A>"}
+  ]
+}

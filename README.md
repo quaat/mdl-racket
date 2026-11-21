@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0, M1 and M2 gates PASS on `main`; M3 source loading is next. NOT a playable game.** This repository is a starting
+> **Status: M0, M1 and M2 gates PASS; M3 source loading remains incomplete. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -21,11 +21,15 @@ expansion, activation control, aliasing and session isolation. The
 capabilities and limits. Reproduce after `make reference-build` with
 `make m2-check`; the complete loader command is below.
 The separate [M3 source-progress gate](docs/evidence/M3/SOURCE-PROGRESS.md),
-`make m3-source-progress`, verifies 36 parsed historical text files and
-reports the unchanged `77loadall.mud` chain at 24 completed, zero skipped
-expressions, stopping at unassigned `EMPTY?` in original `NEWSTRUC`.
-That is the first M3 source dependency; no Racket game boot or gameplay
-parity is claimed.
+`make m3-source-progress`, verifies 36 parsed historical text files. The
+current [M3 predicate and ROOT slice](docs/evidence/M3/EMPTYQ.md) advances
+the unchanged `77loadall.mud` chain from 24 to 26 completed, zero skipped
+expressions; it stops at three-argument `NEWTYPE` in `77defs.mud`
+expression 17. `EMPTY?`, `LENGTH?`, one-argument `ASSIGNED?`, and `ROOT`
+have native-backed tests. `ASSIGNED?` with ENV is unsupported, and full
+source loading, game boot and gameplay parity are unverified. Reproduce
+with `make test`, `make m2-check`, and `make m3-source-progress` after
+`make reference-build`.
 Explicit CLOSURE, MAPR, TAG, resumable ERROR/ERRET, full loader completion,
 parser/game boot and gameplay remain unsupported or unverified. Random/event
 APIs are tracked as [M3 issue #71](https://github.com/quaat/mdl-racket/issues/71).

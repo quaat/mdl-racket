@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m3-lengthq-clean-reference",
+  "cases": [
+    {"name": "empty-zero", "expression": "<LENGTH? '() 0>"},
+    {"name": "empty-negative", "expression": "<LENGTH? '() -1>"},
+    {"name": "single-negative", "expression": "<LENGTH? '(1) -1>"},
+    {"name": "single-below", "expression": "<LENGTH? '(1) 0>"},
+    {"name": "single-equal", "expression": "<LENGTH? '(1) 1>"},
+    {"name": "pair-below", "expression": "<LENGTH? '(1 2) 1>"},
+    {"name": "pair-equal", "expression": "<LENGTH? '(1 2) 2>"},
+    {"name": "pair-above", "expression": "<LENGTH? '(1 2) 3>"},
+    {"name": "vector-equal", "expression": "<LENGTH? '[1 2] 2>"},
+    {"name": "uvector-equal", "expression": "<LENGTH? '![1 2] 2>"},
+    {"name": "string-equal", "expression": "<LENGTH? \"ab\" 2>"},
+    {"name": "false-equal", "expression": "<LENGTH? #FALSE (1 2) 2>"},
+    {"name": "tuple-equal", "expression": "<DEFINE TUPLQ (\"TUPLE\" X) <LENGTH? .X 2>> <TUPLQ 1 2>"},
+    {"name": "typed-list", "expression": "<NEWTYPE M3LQ LIST> <LENGTH? <CHTYPE '(1 2) M3LQ> 2>"},
+    {"name": "rest-view", "expression": "<LENGTH? <REST '(1 2) 1> 1>"},
+    {"name": "cyclic-list-bounded", "expression": "<PROG ((L '(1))) <PUTREST .L .L> <LENGTH? .L 3>>"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m3-emptyq-deliberate-errors",
+  "cases": [
+    {"name": "missing-argument", "expression": "<EMPTY?>"},
+    {"name": "extra-argument", "expression": "<EMPTY? '() '()>"},
+    {"name": "atom-argument", "expression": "<EMPTY? 'A>"},
+    {"name": "fix-argument", "expression": "<EMPTY? 1>"},
+    {"name": "word-argument", "expression": "<EMPTY? #WORD 1>"}
+  ]
+}

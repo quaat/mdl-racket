@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m3-root-clean-reference",
+  "cases": [
+    {"name": "root-type", "expression": "<TYPE <ROOT>>"},
+    {"name": "root-identity", "expression": "<==? <ROOT> <MOBLIST 'ROOT>>"},
+    {"name": "root-association", "expression": "<==? <ROOT> <GET ROOT OBLIST>>"},
+    {"name": "root-lookup-existing", "expression": "<==? <LOOKUP \"ROOT\" <ROOT>> 'ROOT>"},
+    {"name": "root-lookup-compile", "expression": "<LOOKUP \"COMPILE\" <ROOT>>"}
+  ]
+}
