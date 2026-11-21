@@ -1440,6 +1440,12 @@ The callback must finish before the reader consumes the next sibling. It
 must preserve the resulting object, including identity, for the lifetime
 of the loaded definition. Errors in that evaluation stop reading at the
 percent source position. `%%` is separate and remains unsupported.
+After substitution, the enclosing expression treats the object exactly
+like any object read there: a substituted FORM or structured object in
+expression position undergoes ordinary MDL evaluation, while quoted
+data retains the object. Syntax-sensitive constructs such as DEFINE
+must inspect the substituted object's actual type and contents; an
+opaque reference cannot be treated as an unknown formal/name token.
 
 The original `81tell-repl.mud:46` needs `%<STRING <ASCII 10>>`. The manual's
 `ASCII` conversion is bidirectional: a FIX ASCII code becomes a CHARACTER;

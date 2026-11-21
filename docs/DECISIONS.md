@@ -875,12 +875,16 @@ full M3 gate PASS. No upstream, license or service boundary changes.
 `parse-mdl` and the source inventory syntax-only. Give the incremental
 reader an optional callback used only by the executable loader. On `%`,
 read its payload recursively, invoke the callback immediately, then put
-an opaque value reference into the source-located node. The callback
-compiles and evaluates the payload in the current MDL session. A
-session-owned registry holds the actual result object; compiled forms
-retrieve that object rather than recreating it from syntax. Nested FLOAD
-inherits the same session and registry. Each new session owns a separate
-registry. Reader evaluation errors retain the percent location and stop
+an object reference into the source-located node. The callback compiles
+and evaluates the payload in the current MDL session. A session-owned
+registry holds the actual result object; compiled forms retrieve that
+object rather than recreating it from syntax. Syntax-sensitive compiler
+paths may inspect a one-level type/content projection whose children
+still refer to the original registry objects. Ordinary expression
+positions evaluate the substituted object; data positions retain it.
+Nested FLOAD inherits the same session and registry. Each new session
+owns a separate registry. Reader evaluation errors retain the percent
+location and stop
 the loader; no fallback value is inserted.
 
 **Rejected:** Compilation-time evaluation occurs after an entire top-level

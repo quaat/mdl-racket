@@ -7,6 +7,7 @@
     {"name": "ascii-256", "expression": "<ASCII 256>"},
     {"name": "ascii-string", "expression": "<ASCII \"x\">"},
     {"name": "string-fix", "expression": "<STRING 10>"},
-    {"name": "percent-unbound", "expression": "<TYPE %<M3-NO-SUCH>>"}
+    {"name": "percent-unbound", "expression": "<TYPE %<M3-NO-SUCH>>"},
+    {"name": "substituted-unbound-form", "expression": "<SETG M3X %'<M3-NO-SUCH>>"}
   ]
 }

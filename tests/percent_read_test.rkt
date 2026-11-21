@@ -25,11 +25,26 @@
           "<SETG BEFORE <LIST <SETG N 8> %<+ ,N 1>>>\n"
           "<SETG NEST '(%<LIST 1>)>\n"
           "<SETG EMPTY %<>>\n"
-          "<SETG ASTR <STRING <ASCII 65> \"B\">>\n"))
+          "<SETG ASTR <STRING <ASCII 65> \"B\">>\n"
+          "<SETG EVALFORM %'<+ 1 2>>\n"
+          "<DEFINE %'DYNAMIC (X) .X>\n"
+          "<DEFINE FORMAL (%'X) .X>\n"
+          "<DEFINE FORMLIST %'(Y) .Y>\n"
+          "<SETG QUOTEDFORM '%'<+ 1 2>>\n"
+          "<SETG EVALLIST %'(1 <+ 1 1>)>\n"))
     (define session (make-mdl-session root))
     (check-equal? (status (mdl-session-load! session "read.mud")) "PASS")
     (check-equal? (mdl-session-global session "NEWLINE") "\n")
     (check-equal? (mdl-session-global session "ASTR") "AB")
+    (check-equal? (mdl-session-global session "EVALFORM") 3)
+    (check-equal? (mdl-session-call session "DYNAMIC" 7) 7)
+    (check-equal? (mdl-session-call session "FORMAL" 5) 5)
+    (check-equal? (mdl-session-call session "FORMLIST" 9) 9)
+    (check-equal? (mdl-atom-pname
+                   (mdl-session-call session "TYPE"
+                                     (mdl-session-global session "QUOTEDFORM")))
+                  "FORM")
+    (check-equal? (mdl-list->list (mdl-session-global session "EVALLIST")) '(1 2))
     (check-equal? (mdl-session-global session "N") 8)
     (check-equal? (mdl-list->list (mdl-session-global session "BEFORE")) '(8 4))
     (check-equal? (mdl-session-call session "NTH"
@@ -61,6 +76,10 @@
     (check-equal? (hash-ref (failure bad) 'stage) "read-eval")
     (check-equal? (hash-ref (failure bad) 'line) 1)
     (check-equal? (hash-ref (failure bad) 'column) 11)
+    (put "bad-form.mud" "<SETG BADFORM %'<M3-NO-SUCH>>\n")
+    (define bad-form (mdl-session-load! session "bad-form.mud"))
+    (check-equal? (status bad-form) "FAIL")
+    (check-equal? (hash-ref (failure bad-form) 'stage) "execute")
     (put "unsupported.mud" "<SETG BAD %%<SETG N 99>>\n")
     (check-equal? (status (mdl-session-load! session "unsupported.mud")) "FAIL")
     (check-equal? (mdl-session-global session "N") 8)

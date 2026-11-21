@@ -1,7 +1,9 @@
 #lang racket/base
 ;; A deliberately narrow, tested MDL-to-Racket bootstrap compiler.
 ;; Anything outside this subset raises an error rather than guessing semantics.
-(require racket/list racket/string "parser.rkt")
+(require racket/list racket/mpair racket/string
+         (rename-in "parser.rkt" [mdl-node-value raw-node-value])
+         "runtime/core.rkt")
 (provide compile-program compile-expression
          exn:fail:mdl-compiler? exn:fail:mdl-compiler-node)
 
@@ -13,15 +15,65 @@
                   (mdl-node-line n) (mdl-node-column n) message)
           (current-continuation-marks) n)))
 
+(define (read-substitution? n)
+  (and (mdl-node? n) (eq? (mdl-node-kind n) 'read-value)))
+
+(define (substitution-value n)
+  (mdl-read-value (raw-node-value n)))
+
+;; The value remains in the session registry. Syntactic consumers may
+;; inspect a one-level projection, whose children still refer to the
+;; original MDL objects; they do not rebuild mutable structures.
+(define (source-node-kind n)
+  (if (read-substitution? n)
+      (let ([value (substitution-value n)])
+        (cond [(mdl-atom? value) 'atom]
+              [(string? value) 'string]
+              [(mdl-form? value) 'form]
+              [(or (null? value) (mpair? value)) 'list]
+              [(mdl-array? value)
+               (string->symbol (string-downcase
+                                (symbol->string (mdl-array-kind value))))]
+              [(mdl-false? value) 'false]
+              [else 'read-value]))
+      (mdl-node-kind n)))
+
+(define (source-node-value n)
+  (if (read-substitution? n)
+      (let ([value (substitution-value n)])
+        (define (children items)
+          (for/list ([item (in-list items)])
+            (mdl-node 'read-value (mdl-register-read-value! item)
+                      (mdl-node-line n) (mdl-node-column n))))
+        (cond [(mdl-atom? value) (mdl-atom-pname value)]
+              [(mdl-form? value) (children (form-elements value))]
+              [(or (null? value) (mpair? value))
+               (children (mdl-list->list value))]
+              [(mdl-array? value)
+               (children (for/list ([i (in-range (mdl-array-length value))])
+                           (mdl-nth value (add1 i))))]
+              [(mdl-false? value) (children (mdl-false-payload value))]
+              [else value]))
+      (raw-node-value n)))
+
 (define (is-kind? n kind)
-  (and (mdl-node? n) (eq? (mdl-node-kind n) kind)))
+  (and (mdl-node? n) (eq? (source-node-kind n) kind)))
 
 (define (atom-name n)
   (unless (is-kind? n 'atom) (unsupported n "expected an MDL atom"))
-  (string-upcase (mdl-node-value n)))
+  (when (and (read-substitution? n)
+             (not (eq? (substitution-value n)
+                       (mdl-atom (mdl-atom-pname (substitution-value n))))))
+    (unsupported n "substituted ATOM outside the current OBLIST is unsupported here"))
+  (string-upcase (source-node-value n)))
 
 (define (mdl-constant n)
-  (define val (mdl-node-value n))
+  (if (read-substitution? n)
+      `(mdl-read-value ,(raw-node-value n))
+      (mdl-constant/plain n)))
+
+(define (mdl-constant/plain n)
+  (define val (source-node-value n))
   (define upper (string-upcase val))
   (define (fix-or-float number)
     (if (and (exact-integer? number)
@@ -50,14 +102,14 @@
     [else `(mdl-atom ,val)]))
 
 (define (compile-typed n)
-  (define tagged (mdl-node-value n))
+  (define tagged (source-node-value n))
   (define name (string-upcase (car tagged)))
   (define value (cdr tagged))
   (unless (regexp-match? #px"^#[A-Z]" name)
     (unsupported n (format "unsupported typed literal ~a" name)))
   (unless (is-kind? value 'atom)
     (unsupported n "#WORD requires a numeric literal"))
-  (define raw (mdl-node-value value))
+  (define raw (source-node-value value))
   (define bits
     (cond [(regexp-match? #px"^\\*[0-7]+\\*$" raw)
            (string->number (substring raw 1 (sub1 (string-length raw))) 8)]
@@ -76,7 +128,7 @@
 (define (splice-element? n) (is-kind? n 'splice))
 
 (define (compile-splice-data n)
-  (define payload (mdl-node-value n))
+  (define payload (source-node-value n))
   (case (mdl-node-kind payload)
     [(local global form quote)
      `(mdl-make-segment ,(compile-data payload)
@@ -87,50 +139,49 @@
 
 (define (compile-data n)
   (case (mdl-node-kind n)
-    [(character) `(mdl-character ,(mdl-node-value n))]
-    [(read-value) `(mdl-read-value ,(mdl-node-value n))]
+    [(character) `(mdl-character ,(source-node-value n))]
+    [(read-value) `(mdl-read-value ,(raw-node-value n))]
     [(percent)
-     ;; % is a READ-time evaluator.  The empty FORM has no side effects and
-     ;; always yields the canonical empty FALSE.  Retain it once per loaded
-     ;; expression so compiled definitions keep the substituted object's
-     ;; identity across calls; all other % payloads stay unsupported.
-     (define payload (mdl-node-value n))
+     ;; Syntax-only callers may still compile the old side-effect-free
+     ;; %<> case. Executable loading has already evaluated every percent
+     ;; payload and supplies a read-value node instead.
+     (define payload (source-node-value n))
      (unless (and (is-kind? payload 'form)
-                  (null? (mdl-node-value payload)))
+                  (null? (source-node-value payload)))
        (unsupported n "unsupported percent reader macro"))
      (if (current-mdl-literals)
          (retain-literal n `(mdl-false '()))
          `(mdl-false '()))]
     [(decl) `(mdl-make-declaration
-              (mdl-list ,@(map compile-data (mdl-node-value n)))
+              (mdl-list ,@(map compile-data (source-node-value n)))
               ,(mdl-node-line n) ,(mdl-node-column n))]
     [(atom) (mdl-constant n)]
-    [(string) (mdl-node-value n)]
+    [(string) (source-node-value n)]
     [(splice) (compile-splice-data n)]
-    [(list) `(mdl-list ,@(map compile-data (mdl-node-value n)))]
-    [(vector) `(mdl-vector ,@(map compile-data (mdl-node-value n)))]
+    [(list) `(mdl-list ,@(map compile-data (source-node-value n)))]
+    [(vector) `(mdl-vector ,@(map compile-data (source-node-value n)))]
     ;; SEGMENT objects in unevaluated UVECTOR data are placeholders, so data
     ;; construction must not enforce element uniformity; the runtime
     ;; evaluator does that when the data is evaluated.
     [(uvector)
-     (if (ormap splice-element? (mdl-node-value n))
-         `(mdl-data-uvector ,@(map compile-data (mdl-node-value n)))
-         `(mdl-uvector ,@(map compile-data (mdl-node-value n))))]
-    [(false) `(mdl-false (mdl-list ,@(map compile-data (mdl-node-value n))))]
+     (if (ormap splice-element? (source-node-value n))
+         `(mdl-data-uvector ,@(map compile-data (source-node-value n)))
+         `(mdl-uvector ,@(map compile-data (source-node-value n))))]
+    [(false) `(mdl-false (mdl-list ,@(map compile-data (source-node-value n))))]
     [(form) `(mdl-make-form
-              (mdl-list ,@(map compile-data (mdl-node-value n))))]
+              (mdl-list ,@(map compile-data (source-node-value n))))]
     [(local) `(mdl-make-form
                (mdl-list (mdl-atom "LVAL")
-                         (mdl-atom ,(string-upcase (mdl-node-value n)))))]
+                         (mdl-atom ,(string-upcase (source-node-value n)))))]
     [(global)
      `(mdl-make-form
        (mdl-list (mdl-atom "GVAL")
-                 ,(if (string? (mdl-node-value n))
-                      `(mdl-atom ,(string-upcase (mdl-node-value n)))
-                      (compile-data (mdl-node-value n)))))]
+                 ,(if (string? (source-node-value n))
+                      `(mdl-atom ,(string-upcase (source-node-value n)))
+                      (compile-data (source-node-value n)))))]
     [(quote) `(mdl-make-form
                (mdl-list (mdl-atom "QUOTE")
-                         ,(compile-data (mdl-node-value n))))]
+                         ,(compile-data (source-node-value n))))]
     [(typed) (compile-typed n)]
     [else (unsupported n "this MDL data construct is not implemented")]))
 
@@ -263,12 +314,12 @@
   (define (add-spec! item kind name [init #f])
     (add-name! name item)
     (set! specs (cons (list kind name init) specs)))
-  (let loop ([items (mdl-node-value args-node)] [section 'required])
+  (let loop ([items (source-node-value args-node)] [section 'required])
     (unless (null? items)
       (define item (car items))
       (cond
         [(is-kind? item 'string)
-         (define marker (string-upcase (mdl-node-value item)))
+         (define marker (string-upcase (source-node-value item)))
          (define next (formal-marker-section marker item section))
          (cond
            [(memq next '(optional aux name)) (loop (cdr items) next)]
@@ -291,24 +342,24 @@
              [else (unsupported item "ATOM formal not allowed in this section")]))
          (loop (cdr items) next-section)]
         [(is-kind? item 'quote)
-         (unless (is-kind? (mdl-node-value item) 'atom)
+         (unless (is-kind? (source-node-value item) 'atom)
            (unsupported item "quoted formal must name an ATOM"))
          (define kind
            (case section
              [(required) 'quoted]
              [(optional) 'quoted-optional]
              [else (unsupported item "quoted formal not allowed in this section")]))
-         (add-spec! item kind (atom-name (mdl-node-value item)))
+         (add-spec! item kind (atom-name (source-node-value item)))
          (loop (cdr items) section)]
-        [(and (is-kind? item 'list) (= (length (mdl-node-value item)) 2))
+        [(and (is-kind? item 'list) (= (length (source-node-value item)) 2))
          (unless (memq section '(optional aux))
            (unsupported item
                         "2-list defaults are allowed only in OPTIONAL or AUX sections"))
-         (define pair (mdl-node-value item))
+         (define pair (source-node-value item))
          (define quoted? (is-kind? (first pair) 'quote))
          (when (and quoted? (not (eq? section 'optional)))
            (unsupported item "quoted formal not allowed in this section"))
-         (define name-node (if quoted? (mdl-node-value (first pair)) (first pair)))
+         (define name-node (if quoted? (source-node-value (first pair)) (first pair)))
          (unless (is-kind? name-node 'atom)
            (unsupported item (if quoted? "quoted formal must name an ATOM"
                                  "formal name must be an ATOM")))
@@ -354,7 +405,7 @@
 ;; only true atom names can be labels.
 (define (prog-label-name n)
   (and (is-kind? n 'atom)
-       (let ([val (mdl-node-value n)])
+       (let ([val (source-node-value n)])
          (and (not (atom-node-constant-token? val))
               (atom-name n)))))
 
@@ -383,12 +434,12 @@
   (define-values (decl body) (split-declaration n (cdr operands)))
   (define names '())
   (define specs
-    (for/list ([item (in-list (mdl-node-value aux))])
+    (for/list ([item (in-list (source-node-value aux))])
       (define-values (name initializer)
         (cond [(is-kind? item 'atom) (values (atom-name item) #f)]
               [(and (is-kind? item 'list)
-                    (= (length (mdl-node-value item)) 2))
-               (define pair (mdl-node-value item))
+                    (= (length (source-node-value item)) 2))
+               (define pair (source-node-value item))
                (values (atom-name (first pair)) (second pair))]
               [else (unsupported item "PROG auxiliary must be an ATOM or two-element LIST")]))
       (when (member name names)
@@ -410,9 +461,9 @@
 (define (compile-cond n clauses locals)
   (when (null? clauses) (unsupported n "COND requires at least one clause"))
   (define (compile-clause clause)
-    (unless (and (is-kind? clause 'list) (pair? (mdl-node-value clause)))
+    (unless (and (is-kind? clause 'list) (pair? (source-node-value clause)))
       (unsupported clause "COND requires nonempty parenthesized clauses"))
-    (mdl-node-value clause))
+    (source-node-value clause))
   (define (loop remaining)
     (define exprs (compile-clause (car remaining)))
     (define test-id (gensym 'mdl-test))
@@ -455,7 +506,7 @@
                 args)))
 
 (define (compile-form n locals)
-  (define xs (mdl-node-value n))
+  (define xs (source-node-value n))
   (if (null? xs)
       '(mdl-false '())
       (let* ([op-node (car xs)]
@@ -574,7 +625,7 @@
 ;; strict left-to-right order and SEGMENT payloads contribute their elements
 ;; (chapter 7.5.2), the last one by reference for LIST construction.
 (define (compile-spliced-structure n spliced-constructor plain-constructor locals)
-  (define elements (mdl-node-value n))
+  (define elements (source-node-value n))
   (if (ormap splice-element? elements)
       `(,spliced-constructor
         ,@(for/list ([element (in-list elements)])
@@ -584,31 +635,31 @@
 
 (define (compile-expression/body n locals)
   (case (mdl-node-kind n)
-    [(character) `(mdl-character ,(mdl-node-value n))]
-    [(read-value) `(mdl-read-value ,(mdl-node-value n))]
+    [(character) `(mdl-character ,(source-node-value n))]
+    [(read-value) `(mdl-eval (mdl-read-value ,(raw-node-value n)))]
     [(percent) (compile-data n)]
     [(atom) (mdl-constant n)]
     [(false) (retain-literal n)]
-    [(string) (mdl-node-value n)]
+    [(string) (source-node-value n)]
     [(splice)
      ;; A SEGMENT only exists at a structured-evaluation position; the
      ;; reference breaks with ILLEGAL-SEGMENT anywhere else.
      (unless (current-structured-context)
        (unsupported n "SEGMENT outside a structured construction"))
-     `(mdl-splice-result ,(compile-expression (mdl-node-value n) locals)
+     `(mdl-splice-result ,(compile-expression (source-node-value n) locals)
                          ,(mdl-node-line n) ,(mdl-node-column n))]
     [(local)
-     `(mdl-lval (mdl-atom ,(string-upcase (mdl-node-value n))))]
+     `(mdl-lval (mdl-atom ,(string-upcase (source-node-value n))))]
     [(global)
-     `(mdl-gval ,(if (string? (mdl-node-value n))
-                     `(mdl-atom ,(string-upcase (mdl-node-value n)))
-                     (compile-expression (mdl-node-value n) locals)))]
-    [(quote) (compile-quote (mdl-node-value n))]
+     `(mdl-gval ,(if (string? (source-node-value n))
+                     `(mdl-atom ,(string-upcase (source-node-value n)))
+                     (compile-expression (source-node-value n) locals)))]
+    [(quote) (compile-quote (source-node-value n))]
     [(list) (compile-spliced-structure n 'mdl-splice-list 'mdl-list locals)]
     [(vector) (compile-spliced-structure n 'mdl-splice-vector 'mdl-vector locals)]
     [(uvector) (compile-spliced-structure n 'mdl-splice-uvector 'mdl-uvector locals)]
     [(typed)
-     (if (string-ci=? (car (mdl-node-value n)) "#WORD")
+     (if (string-ci=? (car (source-node-value n)) "#WORD")
          (compile-typed n)
          (retain-literal n))]
     [(decl) (compile-data n)]

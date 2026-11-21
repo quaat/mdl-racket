@@ -20,7 +20,7 @@ interactive loop or game parity has been verified.
 **Issue #94 branch checkpoint:** `feat/m3-read-time-percent` implements
 session-aware `%` READ evaluation and the original `ASCII`/`STRING`
 dependency. Native probes and architecture ADR-0042 preceded the change.
-`make test` exits 0 (1,187 Racket, 23 Python); `make m2-check` exits 0;
+`make test` exits 0 (1,195 Racket, 23 Python); `make m2-check` exits 0;
 `make m3-source-progress` exits 0 as partial progress. The unchanged
 loader exits 1 after 188 forms, zero skipped; `81tell-repl.mud` is now
 fully loaded. `77act1.mud` expression 10, line 78 fails at unsupported

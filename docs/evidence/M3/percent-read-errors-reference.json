@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "m3-percent-read-native-errors",
-  "recorded_at": "2026-11-21T17:56:06.091585+00:00",
+  "recorded_at": "2026-11-21T18:04:14.986753+00:00",
   "interpreter_sha256": "bd70657059954cbb706fe93e8aceb14c64a58f51f227cfa4e69841d7df9ef340",
   "protocol": "one local process per case; stdin expression then <QUIT>",
   "cases": [
@@ -74,6 +74,18 @@
       "stderr": "Atom REP has neither LVAL nor GVAL\nUnexpected > in input\n",
       "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 18:55:51\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
       "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n M3-NO-SUCH \nLISTENING-AT-LEVEL 2 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "substituted-unbound-form",
+      "expression": "<SETG M3X %'<M3-NO-SUCH>>",
+      "input": "<SETG M3X %'<M3-NO-SUCH>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 18:55:51\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n M3-NO-SUCH \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 18:55:51\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n M3-NO-SUCH \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
       "ok": false,
       "error": "nonzero exit, stderr, or missing LISTENING marker"
     }
