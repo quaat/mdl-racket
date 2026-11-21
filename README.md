@@ -29,15 +29,17 @@ it to 36 forms, and the [GDECL slice](docs/evidence/M3/GDECL.md) to 37.
 The [eager AND? slice](docs/evidence/M3/ANDQ.md) reached 70 forms.
 The [quoted OPTIONAL default slice](docs/evidence/M3/QUOTED-OPTIONAL.md)
 reached 87 forms. The [APPLICABLE declaration slice](docs/evidence/M3/APPLICABLE-DECL.md)
-reached 112 and loaded `77defs.mud` in full. The current
-[`%<>` slice](docs/evidence/M3/PERCENT-EMPTY.md) reached 136 forms
-and loaded `77makstr.mud` in full. The current
+reached 112 and loaded `77defs.mud` in full.
+The [`%<>` slice](docs/evidence/M3/PERCENT-EMPTY.md) reached 136 forms
+and loaded `77makstr.mud` in full. The
 [`#PSTRING 0` typed literal slice](docs/evidence/M3/PSTRING-LITERAL.md)
-reached 144 forms. The current
+reached 144 forms. The
 [positional `#DECL` slice](docs/evidence/M3/FUNCTION-DECL.md)
-reaches 157 completed, zero skipped forms. It stops at `!\ ` in
-`81tell-repl.mud` expression 23, tracked in
-[issue #92](https://github.com/quaat/mdl-racket/issues/92).
+reached 157 forms. The current
+[`!\ ` CHARACTER slice](docs/evidence/M3/SPACE-CHARACTER.md)
+keeps 157 completed, zero skipped forms and moves the first failure
+within `81tell-repl.mud` expression 23 to `%<STRING <ASCII 10>>`,
+tracked in [issue #94](https://github.com/quaat/mdl-racket/issues/94).
 NEWTYPE stores and checks its optional
 declaration Pattern; GDECL installs and checks global value Patterns.
 Pinned Confusion silently omits both checks, explicit reference

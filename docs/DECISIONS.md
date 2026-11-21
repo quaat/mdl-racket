@@ -853,3 +853,18 @@ Unsupported positional markers and malformed Patterns still fail.
 zero skipped, then stops at `!\ ` in `81tell-repl.mud` expression 23.
 Full source load and game boot remain unproved. No upstream, license
 or service boundary changes.
+
+## ADR-0041: Distinguish `!\` CHARACTER from SEGMENT notation
+
+**Decision (2026-11-21, issue #92):** Read `!\` followed by one
+character, including a separator such as space, as a CHARACTER node.
+Compile it to the runtime's existing CHARACTER value. Keep `!<...>`,
+`!.X` and other SEGMENT paths separate. Five pinned Confusion cases
+confirm TYPE CHARACTER, PRIMTYPE WORD, code 32 and identity for
+`!\ `. The runtime `ASCII` SUBR is not added by this reader slice.
+
+**Consequence:** The original loader still completes 157 forms with
+zero skipped. The first failure moves within `81tell-repl.mud`
+expression 23 from `!\ ` to `%<STRING <ASCII 10>>`. This is a
+scoped reader PASS, not an increase in completed source forms or a
+full M3 gate PASS. No upstream, license or service boundary changes.

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m3-space-character-native-reference",
+  "cases": [
+    {"name": "type", "expression": "<TYPE !\\ >"},
+    {"name": "primtype", "expression": "<PRIMTYPE !\\ >"},
+    {"name": "ascii", "expression": "<ASCII !\\ >"},
+    {"name": "identity", "expression": "<==? !\\  !\\ >"},
+    {"name": "function-value", "expression": "<DEFINE M3CH () !\\ > <ASCII <M3CH>>"}
+  ]
+}

@@ -20,7 +20,7 @@
          mdl-segment-column mdl-make-segment mdl-splice-result
          mdl-splice-result-value mdl-splice-list mdl-splice-vector
          mdl-splice-uvector
-         mdl-word mdl-word? mdl-word-bits mdl-chtype
+         mdl-word mdl-word? mdl-word-bits mdl-chtype mdl-character
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          current-mdl-atom-space make-mdl-atom-space
          mdl-false mdl-false? mdl-false-payload

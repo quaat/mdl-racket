@@ -87,6 +87,7 @@
 
 (define (compile-data n)
   (case (mdl-node-kind n)
+    [(character) `(mdl-character ,(mdl-node-value n))]
     [(percent)
      ;; % is a READ-time evaluator.  The empty FORM has no side effects and
      ;; always yields the canonical empty FALSE.  Retain it once per loaded
@@ -582,6 +583,7 @@
 
 (define (compile-expression/body n locals)
   (case (mdl-node-kind n)
+    [(character) `(mdl-character ,(mdl-node-value n))]
     [(percent) (compile-data n)]
     [(atom) (mdl-constant n)]
     [(false) (retain-literal n)]

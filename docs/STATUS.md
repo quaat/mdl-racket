@@ -2,6 +2,17 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #92 `!\` CHARACTER reader slice PASS; full M3 gate
+  incomplete:** `!\ ` now reads as a CHARACTER with code 32, distinct
+  from SEGMENT syntax. Five native cases corroborate TYPE, primitive
+  type, ASCII code and identity. `make test` passes 1,160 Racket and
+  22 Python tests; `make m2-check` passes. The unchanged loader still
+  completes 157 forms, zero skipped: the first failure moves within
+  `81tell-repl.mud` expression 23 from `!\ ` at line 45 to the
+  distinct `%<STRING <ASCII 10>>` read macro at line 46. This slice
+  has **no completed-form increase**. See
+  [evidence](evidence/M3/SPACE-CHARACTER.md) and
+  [next issue #94](https://github.com/quaat/mdl-racket/issues/94).
 - **Issue #90 positional `#DECL` metadata slice PASS; full M3 gate
   incomplete:** the RSUBR-style `"VALUE"`/`"OPTIONAL"` Pattern list
   is validated and retained on FUNCTION, without ATOM-variable
