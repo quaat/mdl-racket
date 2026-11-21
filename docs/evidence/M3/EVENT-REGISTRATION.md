@@ -65,6 +65,14 @@ must supply faithful GC event generation and scheduling before allowing
 the external registration; this is part of
 [event issue #71](https://github.com/quaat/mdl-racket/issues/71).
 
+The blocker is missing automatic GC event delivery, not merely the EVENT
+constructor. Two paths remain: implement and test a GC callback source with
+priority/handler scheduling, or leave external registration unsupported and
+keep the source loader stopped here. The recommended next action is to
+prototype a local GC callback integration and validate delivery/order
+against manual chapter 21 and any usable native observations before
+enabling `EVENT "GC"`. Confusion's T stubs cannot certify this gate.
+
 Reproduce after `make reference-build`:
 
 ```bash

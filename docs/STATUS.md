@@ -12,6 +12,10 @@
   The unchanged loader completes **433 original forms, zero skipped**,
   up from 430, then exits 1 at `77rooms.mud` expression 16, line 101:
   `EVENT "GC"` is explicitly unsupported until real GC callback delivery.
+  The blocker is absent automatic GC scheduling; the options are to
+  implement verifiable delivery or keep registration unsupported. The
+  recommended next action is a GC callback probe and implementation,
+  with the source stop retained until verified.
   `make m3-source-progress` exits 0 only as a partial measurement. See
   [evidence](evidence/M3/EVENT-REGISTRATION.md) and next
   [issue #104](https://github.com/quaat/mdl-racket/issues/104) under
