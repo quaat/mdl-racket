@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "m3-assignedq-deliberate-errors",
+  "cases": [
+    {"name": "missing-atom", "expression": "<ASSIGNED?>"},
+    {"name": "extra-argument", "expression": "<ASSIGNED? M3A 1>"},
+    {"name": "wrong-first-type", "expression": "<ASSIGNED? 3>"},
+    {"name": "wrong-first-string", "expression": "<ASSIGNED? \"M3A\">"}
+  ]
+}

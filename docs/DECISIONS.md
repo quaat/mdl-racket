@@ -700,3 +700,20 @@ invalidating M2's semantic regression. The progress target itself is an
 incomplete-execution measurement, not a game-boot or parity claim. The
 first observed M3 dependency is still EMPTY? until a tested correction
 changes it. No upstream, licensing or network service boundary changes.
+
+## ADR-0032: Advance original NEWSTRUC through native-backed predicates
+
+**Decision (2026-11-21, issue #75):** Implement `EMPTY?`, bounded
+`LENGTH?`, current-frame `ASSIGNED?`, and zero-argument `ROOT` as four
+small, native-backed dependencies of original NEWSTRUC. `EMPTY?` checks
+the first LIST cell so a circular LIST terminates. `LENGTH?` stops at the
+given bound and preserves Confusion's empty-LIST/negative-MAX result of
+FIX 0, a recorded manual deviation. `ASSIGNED?` accepts only the
+one-argument source form; a supplied ENV fails explicitly pending frame
+semantics. `ROOT` returns the already seeded session OBLIST by identity.
+
+**Consequence:** The unchanged source loader advances from 24 to 26
+completed forms with zero skips. It then fails at three-argument NEWTYPE
+in `77defs.mud` expression 17. This is partial source execution, with no
+game boot or parity claim. The original sources, GPLv3 interpreter,
+license, and service exposure are unchanged.

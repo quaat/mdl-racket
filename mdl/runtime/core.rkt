@@ -1465,6 +1465,16 @@
   (define atom (binding-atom 'mdl-gassigned? name))
   (mdl-boolean (not (eq? (global-option atom) unassigned))))
 
+(define (mdl-assigned? . args)
+  (when (null? args)
+    (error 'mdl-assigned? "Not enough arguments to ASSIGNED?"))
+  (when (pair? (cdr args))
+    (error 'mdl-assigned? "ASSIGNED? ENV frame argument unsupported"))
+  (define atom (car args))
+  (unless (mdl-atom? atom)
+    (error 'mdl-assigned? "First arg to ASSIGNED? must be ATOM"))
+  (mdl-boolean (not (eq? (local-option atom) unassigned))))
+
 (define (mdl-manifest . names)
   (for ([name (in-list names)])
     (define atom (binding-atom 'mdl-manifest name))
@@ -1567,6 +1577,11 @@
               (define oblist (oblist-value name (make-hash) size))
               (hash-set! named name oblist)
               oblist)))
+
+(define (mdl-root . args)
+  (unless (null? args)
+    (error 'mdl-root "Too many arguments to ROOT"))
+  (atom-space-root (current-mdl-atom-space)))
 
 (define (mdl-lookup name oblist)
   (unless (string? name) (error 'mdl-lookup "expected a STRING PNAME"))
@@ -2312,6 +2327,48 @@
   (define actual (mdl-type (car args)))
   (if (member actual (cdr args) eq?) actual (mdl-false '())))
 
+(define (mdl-emptyq . args)
+  (case (length args)
+    [(0) (error 'mdl-emptyq "Not enough arguments to EMPTY?")]
+    [(1) (void)]
+    [else (error 'mdl-emptyq "Too many args to EMPTY?")])
+  (define object (car args))
+  (unless (mdl-map-structured? object)
+    (error 'mdl-emptyq "First arg to EMPTY? must be structured"))
+  (define base (mdl-base object))
+  (define empty?
+    (if (or (mdl-array? base) (string? base))
+        (zero? (mdl-length object))
+        (null? (mdl-list-head object 'mdl-emptyq))))
+  (if empty? (mdl-atom "T") (mdl-false '())))
+
+(define (mdl-lengthq . args)
+  (case (length args)
+    [(0 1) (error 'mdl-lengthq "Not enough arguments to LENGTH?")]
+    [(2) (void)]
+    [else (error 'mdl-lengthq "Too many args to LENGTH?")])
+  (define object (car args))
+  (define maximum (cadr args))
+  (unless (mdl-map-structured? object)
+    (error 'mdl-lengthq "First arg to LENGTH? must be structured"))
+  (unless (and (exact-integer? maximum) (<= fix-min maximum fix-max))
+    (error 'mdl-lengthq "Second arg to LENGTH? must be FIX"))
+  (define base (mdl-base object))
+  (cond
+    [(or (mdl-array? base) (string? base))
+     (define count (mdl-length object))
+     (if (or (zero? count) (<= count maximum)) count (mdl-false '()))]
+    [else
+     ;; Stop after MAX+1 cells; LENGTH itself need not terminate on a
+     ;; circular LIST. Empty input is checked before MAX, matching the
+     ;; pinned reference's empty/negative-MAX result of FIX 0.
+     (let loop ([remaining (mdl-list-head object 'mdl-lengthq)] [count 0])
+       (cond [(null? remaining) count]
+             [(not (mpair? remaining))
+              (error 'mdl-lengthq "improper structured LIST")]
+             [(>= count maximum) (mdl-false '())]
+             [else (loop (mcdr remaining) (add1 count))]))]))
+
 (define (mdl-apply-subr . args)
   (when (null? args)
     (error 'mdl-apply-subr "TOO-FEW-ARGUMENTS-SUPPLIED in APPLY"))
@@ -2335,12 +2392,15 @@
 (define builtin-table
   (hash "TYPE" mdl-type
         "TYPE?" mdl-typeq
+        "EMPTY?" mdl-emptyq
+        "LENGTH?" mdl-lengthq
         "LVAL" mdl-lval
         "GVAL" mdl-gval
         "VALUE" mdl-value
         "SET" mdl-set!
         "SETG" mdl-setg!
         "GASSIGNED?" mdl-gassigned?
+        "ASSIGNED?" mdl-assigned?
         "MANIFEST" mdl-manifest
         "DECL?" mdl-decl?
         "GUNASSIGN" mdl-gunassign!
@@ -2388,6 +2448,7 @@
                  (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
                  (atom-value name #f))
         "MOBLIST" mdl-moblist
+        "ROOT" mdl-root
         "LOOKUP" mdl-lookup
         "INSERT" mdl-insert
         "REMOVE" mdl-remove

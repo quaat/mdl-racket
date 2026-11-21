@@ -1,5 +1,19 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 first original-source correction (2026-11-21)
+
+Run `make test`, `make m2-check`, and `make m3-source-progress` after
+`make reference-build`. On the issue #75 branch these exit 0: 1,046
+Racket checks, 22 Python tests, 58 bounded G3 assertions, 12 native
+primitive probes, five reference turns, 36 parsed historical text files,
+and 26 unchanged original-source forms with zero skips. The full loader
+itself exits 1 at `77defs.mud` expression 17, three-argument NEWTYPE;
+the source-progress target exits 0 because this is an accurately reported
+partial advance. See [M3 slice evidence](evidence/M3/EMPTYQ.md) and
+[`source-progress-emptyq.json`](evidence/M3/source-progress-emptyq.json).
+Confusion `EMPTY?`, `LENGTH?`, `ASSIGNED?` and `ROOT` cases have separate
+clean and deliberate-error corpus files in `evidence/M3/`.
+
 ## Current M2 mainline checkpoint (2026-11-21)
 
 The [mainline gate](evidence/M2/MAINLINE-GATE.md) passes at integrated

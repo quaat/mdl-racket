@@ -1,6 +1,18 @@
-# Status — 2026-11-21 (M2 mainline PASS; M3 source progress next)
+# Status — 2026-11-21 (M2 mainline PASS; M3 source execution partial)
 
 ## Current state (2026-11-21)
+
+- **First M3 source-backed slice PASS; full M3 gate remains incomplete:**
+  issue #75 adds native-backed `EMPTY?`, bounded `LENGTH?`, current-frame
+  `ASSIGNED?`, and startup `ROOT`. `make test` passes 1,046 Racket checks
+  and 22 Python tests; `make m2-check` passes its G3 58 assertions and
+  native probes/capture. `make m3-source-progress` measures 26 completed,
+  zero skipped forms, two beyond the accepted prefix. The first remaining
+  barrier is `77defs.mud` expression 17, line 66: three-argument
+  `NEWTYPE`, tracked in [issue #76](https://github.com/quaat/mdl-racket/issues/76).
+  See [slice evidence](evidence/M3/EMPTYQ.md). The optional
+  `ASSIGNED?` ENV form, full loader, initialization, and play are not
+  supported or established.
 
 - **M2 gate PASS on integrated `main` code baseline `7d34195`:**
   [mainline report](evidence/M2/MAINLINE-GATE.md) records the eight

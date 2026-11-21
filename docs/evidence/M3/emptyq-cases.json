@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m3-emptyq-clean-reference",
+  "cases": [
+    {"name": "empty-list", "expression": "<EMPTY? '()>"},
+    {"name": "nonempty-list", "expression": "<EMPTY? '(1)>"},
+    {"name": "empty-vector", "expression": "<EMPTY? '[]>"},
+    {"name": "nonempty-vector", "expression": "<EMPTY? '[1]>"},
+    {"name": "empty-uvector", "expression": "<EMPTY? '![]>"},
+    {"name": "nonempty-uvector", "expression": "<EMPTY? '![1]>"},
+    {"name": "empty-string", "expression": "<EMPTY? \"\">"},
+    {"name": "nonempty-string", "expression": "<EMPTY? \"a\">"},
+    {"name": "empty-false", "expression": "<EMPTY? <>>"},
+    {"name": "nonempty-false", "expression": "<EMPTY? #FALSE (1)>"},
+    {"name": "empty-rest-view", "expression": "<EMPTY? <REST '(A) 1>>"},
+    {"name": "empty-tuple", "expression": "<DEFINE TUPQ (\"TUPLE\" X) <EMPTY? .X>> <TUPQ>"},
+    {"name": "nonempty-tuple", "expression": "<DEFINE TUPQ (\"TUPLE\" X) <EMPTY? .X>> <TUPQ 1>"},
+    {"name": "typed-empty-list", "expression": "<NEWTYPE M3EMPTY LIST> <EMPTY? <CHTYPE '() M3EMPTY>>"},
+    {"name": "original-newstruc", "expression": "<FLOAD \"81prim.mud\"> <NEWSTRUC M3EMPTYTEST VECTOR A FIX>"},
+    {"name": "circular-list", "expression": "<PROG ((L '(1))) <PUTREST .L .L> <EMPTY? .L>>"}
+  ]
+}
