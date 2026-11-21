@@ -1,5 +1,15 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 user EVENT/HANDLER registration checkpoint (2026-11-21)
+
+Issue #102 adds `tests/event_registration_test.rkt` to the Racket suite.
+Run `TMPDIR=/tmp raco test tests/event_registration_test.rkt`, `make test`,
+`make m2-check`, and `make m3-source-progress` against locked sources.
+The source target exits 0 for a partial measurement and records the
+underlying loader exit 1 at `EVENT "GC"`. Native Confusion stubs these
+operators, so the manual and strict unsupported paths define this slice.
+See [EVENT-REGISTRATION.md](evidence/M3/EVENT-REGISTRATION.md).
+
 ## M3 duplicate attached declaration checkpoint (2026-11-21)
 
 Issue #100 adds `tests/duplicate_decl_test.rkt` to the Racket suite.

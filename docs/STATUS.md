@@ -2,6 +2,21 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #102 user EVENT/HANDLER registration slice PASS on
+  `feat/m3-event-handler`; full M3 gate incomplete:** session-owned
+  IHEADER and HANDLER objects support registration, identity, removal
+  and reattachment for user-defined STRING events. The manual supplies
+  these rules; pinned Confusion stubs the related operators as `T`, so
+  native output is a documented reference deviation. Automatic events,
+  callback dispatch and process-targeted handlers remain unsupported.
+  The unchanged loader completes **433 original forms, zero skipped**,
+  up from 430, then exits 1 at `77rooms.mud` expression 16, line 101:
+  `EVENT "GC"` is explicitly unsupported until real GC callback delivery.
+  `make m3-source-progress` exits 0 only as a partial measurement. See
+  [evidence](evidence/M3/EVENT-REGISTRATION.md) and next
+  [issue #104](https://github.com/quaat/mdl-racket/issues/104) under
+  [event issue #71](https://github.com/quaat/mdl-racket/issues/71).
+  Full load, initialization, interactive input and parity remain unverified.
 - **Issue #100 duplicate ATOM declaration slice PASS on
   `feat/m3-duplicate-decl`; full M3 gate incomplete:** duplicate names
   retain both Patterns and enforce their conjunction in source order.

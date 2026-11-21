@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "name": "m3-event-registration-native-reference",
+  "cases": [
+    {
+      "name": "event-type",
+      "expression": "<TYPE <EVENT \"M3-TEST-A\" 7>>"
+    },
+    {
+      "name": "event-identity",
+      "expression": "<SETG E <EVENT \"M3-TEST-B\" 7>> <==? ,E <EVENT \"M3-TEST-B\" 9>>"
+    },
+    {
+      "name": "handler-type",
+      "expression": "<TYPE <HANDLER <EVENT \"M3-TEST-C\" 7> <FUNCTION (X) .X>>>"
+    },
+    {
+      "name": "off-handler",
+      "expression": "<SETG E <EVENT \"M3-TEST-D\" 7>> <SETG H <HANDLER ,E <FUNCTION (X) .X>>> <TYPE <OFF ,H>>"
+    },
+    {
+      "name": "off-event",
+      "expression": "<SETG E <EVENT \"M3-TEST-E\" 7>> <TYPE <OFF ,E>>"
+    },
+    {
+      "name": "reenable-event",
+      "expression": "<SETG E <EVENT \"M3-TEST-F\" 7>> <OFF ,E> <==? ,E <EVENT ,E>>"
+    },
+    {
+      "name": "on-type",
+      "expression": "<TYPE <ON \"M3-TEST-I\" <FUNCTION (X) .X> 7>>"
+    },
+    {
+      "name": "event-default",
+      "expression": "<EVENT \"M3-J\">"
+    },
+    {
+      "name": "event-bad-priority",
+      "expression": "<EVENT \"M3-K\" \"BAD\">"
+    },
+    {
+      "name": "handler-bad-header",
+      "expression": "<HANDLER 1 2>"
+    },
+    {
+      "name": "handler-bad-callable",
+      "expression": "<HANDLER <EVENT \"M3-L\" 7> \"BAD\">"
+    },
+    {
+      "name": "off-bad",
+      "expression": "<OFF 1>"
+    }
+  ]
+}

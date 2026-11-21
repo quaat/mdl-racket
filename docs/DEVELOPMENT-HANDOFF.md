@@ -1,12 +1,12 @@
 # Development handoff — MDL on Racket
 
-**Current handoff, 2026-11-21:** M2 remains PASS; M3 is partial. Issue #100
-retains both duplicate attached ATOM Patterns and advances the SHA-verified
-original loader from 363 to 430 completed forms with zero skips, fully
-loading `77act1.mud`, `77act2.mud` and `77act3.mud`. It now stops at
-unassigned `HANDLER` in `77rooms.mud` expression 13, line 92. See
-[`DUPLICATE-DECL.md`](evidence/M3/DUPLICATE-DECL.md) and next
-[issue #102](https://github.com/quaat/mdl-racket/issues/102). Full game load,
+**Current handoff, 2026-11-21:** M2 remains PASS; M3 is partial. Issue #102
+adds real user EVENT/HANDLER registration and advances the SHA-verified
+original loader from 430 to 433 completed forms with zero skips. It now
+stops explicitly at external `EVENT "GC"` in `77rooms.mud` expression 16,
+line 101. See [`EVENT-REGISTRATION.md`](evidence/M3/EVENT-REGISTRATION.md)
+and next [issue #104](https://github.com/quaat/mdl-racket/issues/104).
+Full game load,
 initialization, and parity remain unverified.
 
 Durable cross-session state. Update at every meaningful checkpoint; link to
