@@ -1,5 +1,15 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 duplicate attached declaration checkpoint (2026-11-21)
+
+Issue #100 adds `tests/duplicate_decl_test.rkt` to the Racket suite.
+Run `TMPDIR=/tmp raco test tests/duplicate_decl_test.rkt
+tests/declaration_test.rkt`, `make test`, `make m2-check` and
+`make m3-source-progress` against locked sources. The last target records
+the underlying loader exit 1 and source frontier despite its own exit 0.
+Native probes and frozen source results are in
+[DUPLICATE-DECL.md](evidence/M3/DUPLICATE-DECL.md).
+
 ## M3 deferred TYPE atom checkpoint (2026-11-21)
 
 Issue #98 adds `tests/deferred_decl_type_test.rkt` to the Racket suite.

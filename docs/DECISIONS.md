@@ -1,5 +1,20 @@
 # Architecture decision records
 
+## ADR: Conjoin duplicate ATOM Patterns in one attached DECL (M3 issue #100)
+
+**Decision:** If an ATOM appears in more than one pair of the same attached
+`#DECL`, retain each normalized Pattern and check all of them in source
+order. Continue rejecting duplicate VALUE declarations in this slice.
+
+**Why:** The unchanged original `BALLOON` source declares `M` twice. The
+manual does not state a duplicate precedence rule, and pinned Confusion
+does not enforce attached checks. Conjunction preserves both written
+constraints. The later `M` Pattern is narrower than the earlier one.
+
+**Consequence:** This is a documented inference, pending a stronger
+historical oracle. It permits the original function definition without
+weakening later checks or editing upstream source.
+
 ## ADR: Defer unresolved TYPE atoms in attached declarations (M3 issue #98)
 
 **Decision:** Retain an unresolved TYPE atom in an attached declaration's
