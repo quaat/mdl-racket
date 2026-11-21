@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -28,6 +28,9 @@ test-historical: sources
 	@racket tests/historical_decl_test.rkt
 	@racket tests/historical_computed_global_test.rkt
 	@racket tests/historical_error_test.rkt
+
+test-m2-g3: sources
+	@racket tests/historical_g3_test.rkt
 
 check-source:
 	@if raco help make >/dev/null 2>&1; then raco make scripts/mdl_check.rkt; fi

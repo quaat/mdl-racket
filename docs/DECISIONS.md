@@ -588,3 +588,15 @@ error level, but this runtime has no compatible error frames or `ERRET`.
 resumption, and structured-argument printing remain documented gaps.
 Evidence: `evidence/M2/ERROR.md`. No source provenance, licensing, or
 service exposure changes.
+
+## ADR-0026: Keep M2 G3 failed at original PSETG's MEMQ dependency
+
+**Decision (2026-11-20, issue #56):** The current-head integrated probe
+must require original MSETG first/equal/conflict paths and an original
+PSETG invocation in the same loaded session. The 48 reached assertions
+pass, but PSETG stops at unassigned `MEMQ` after SETG and PURE-LIST
+initialization. G3 remains FAIL; partial side effects do not count as a
+completed function call.
+
+**Consequence:** Issue #63 is the next focused M2 correction. M3 `EMPTY?`
+waits for a new G3 decision. Evidence: `evidence/M2/G3-GATE.md`.

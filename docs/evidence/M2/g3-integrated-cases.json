@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-integrated-reference-successes",
+  "cases": [
+    {"name": "g3-msetg-after-fload", "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-TEMP 3>"},
+    {"name": "g3-msetg-repeat", "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-TEMP 3> <MSETG G3-TEMP 3>"},
+    {"name": "g3-psetg-complete", "expression": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3>"},
+    {"name": "g3-psetg-purelist", "expression": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3> ,PURE-LIST"},
+    {"name": "g3-rapplic-prop-from-source", "expression": "<FLOAD \"77defs.mud\"> <GET RAPPLIC DECL>"},
+    {"name": "g3-declq-rapplic-hit", "expression": "<FLOAD \"77defs.mud\"> <DECL? <CHTYPE 1 NOFFSET> RAPPLIC>"},
+    {"name": "g3-rapplic-prop-both-files", "expression": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <GET RAPPLIC DECL>"},
+    {"name": "g3-declq-rapplic-hit-both-files", "expression": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <DECL? <CHTYPE 1 NOFFSET> RAPPLIC>"},
+    {"name": "g3-global-alias-put", "expression": "<SETG G3-L (1 2 3)> <SETG G3-M ,G3-L> <PUT ,G3-L 1 99> <1 ,G3-M>"},
+    {"name": "g3-muddle-value", "expression": ",MUDDLE"}
+  ]
+}

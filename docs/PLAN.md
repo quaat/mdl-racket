@@ -92,7 +92,10 @@ separate unassigned `ERROR` primitive. G3 remains FAIL pending that
 source-backed correction ([issue #60](https://github.com/quaat/mdl-racket/issues/60))
 and a fresh integrated run.
 The `ERROR` slice now passes focused and original-MSETG conflict tests;
-the integrated G3 branch still requires a current-head run and gate decision.
+the integrated G3 branch required a current-head run and gate decision.
+That run now fails at original PSETG's unassigned `MEMQ` after 48 passing
+integrated assertions ([issue #63](https://github.com/quaat/mdl-racket/issues/63)).
+G3 remains FAIL; M3 is still gated.
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,

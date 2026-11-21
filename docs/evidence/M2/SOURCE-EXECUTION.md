@@ -1,8 +1,10 @@
 # M2 source execution inventory — pre-merge G3 FAIL
 
-**Pre-merge G3 FAIL.** The focused `N=?` correction (issue #57) now lets
-original MSETG reach the distinct `,.FOO` reader gap (issue #58); the
-dedicated gate branch/report is separate. Current state (2026-11-20,
+**Pre-merge G3 FAIL.** Stacked corrections for `N=?`, `,.FOO`, and
+`ERROR` let original MSETG first/equal/conflict paths execute; the
+current-head gate run reaches unassigned `MEMQ` inside original PSETG
+([issue #63](https://github.com/quaat/mdl-racket/issues/63)). Current
+state (2026-11-20,
 D5 PR #54 head `e6d295d`,
 `main` `419fc5c`): slices D1–D4 are merged (`#DECL`
 declarations, SEGMENT evaluation, structured declaration patterns, the
@@ -40,11 +42,11 @@ command, puzzle behavior, RNG parity, or the full integrated M2 state
 contract has been demonstrated from original source execution. The
 pre-merge G3 subset has 48 checked observations, but its gate is FAIL.
 
-The next M2 action is the focused `,.FOO` reader correction and a G3 rerun. After
+The next M2 action is the focused `MEMQ` correction and a G3 rerun. After
 the M2 gate is settled, the next sequential loader dependency is `EMPTY?`
 (called by the original `NEWSTRUC`/`MAPF` bootstraps at the current
 barrier, `77defs.mud` expression 15), followed by whatever construct
-actual source execution surfaces next. `MEMQ` remains a known candidate
+actual source execution surfaces next. `MEMQ` is now the confirmed barrier
 for executing the installed `PSETG`. G3 can pass only when a coherent
 ordered sequence of original definitions is installed and exercised with
 shared state, atom identity, mutation and control behavior verified.

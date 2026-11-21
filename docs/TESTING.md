@@ -40,6 +40,12 @@ reference's error-level REPL; their `*ERROR*` outputs are retained in
 `error-reference.json`. This is a tested error path, not a clean-success
 probe. See [`ERROR.md`](evidence/M2/ERROR.md).
 
+`make test-m2-g3` on `feat/m2-g3-current` exits 2 deliberately after 48
+passing same-session assertions. Original MSETG paths pass; original
+PSETG reaches unassigned `MEMQ` after observable side effects. The
+full source chain still stops at `EMPTY?` after 24 expressions.
+See [`G3-GATE.md`](evidence/M2/G3-GATE.md); issue #63 tracks MEMQ.
+
 The M2 G0 audit is reproducible with
 `racket scripts/audit_source_readiness.rkt --output artifacts/m2/source-readiness.json`.
 Its JSON separates independent compile probes from sequential execution

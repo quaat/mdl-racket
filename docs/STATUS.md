@@ -4,8 +4,8 @@
 
 - **Milestone:** M2. **Gates:** G0/G1/G2 PASS; pre-merge G3 FAIL.
   Stacked corrections for `N=?`, `,.FOO`, and `ERROR` pass focused and
-  hash-verified original-MSETG tests. G3 has not yet been rerun on this
-  head; M2 cannot pass from those focused checks.
+  hash-verified original-MSETG tests. A current-head G3 rerun fails at
+  original PSETG's missing `MEMQ`; M2 cannot pass.
 - **Merged `main`:** `419fc5c` (D1 `#DECL`, D2 SEGMENT, D3 declaration
   patterns, D4 `MUDDLE` global — plus M1 and earlier slices).
 - **In [PR #54](https://github.com/quaat/mdl-racket/pull/54), branch
@@ -53,7 +53,12 @@
   original MSETG conflict and passes. Confusion's `ERROR` enters a
   resumable level; this Racket slice raises a non-resumable exception with
   evaluated arguments. See [evidence](evidence/M2/ERROR.md). The integrated
-  G3 branch must be rebased and rerun before any gate PASS claim.
+  G3 was rerun and fails at `MEMQ`; no gate PASS claim is possible.
+- **Current-head G3 rerun:** `make test-m2-g3` exits 2 after 48 passing
+  integrated assertions; original MSETG first/equal/conflict paths pass,
+  while original PSETG reaches unassigned `MEMQ` after its initial SETG
+  and PURE-LIST side effects. **G3 FAIL**. See
+  [gate evidence](evidence/M2/G3-GATE.md); focused correction issue #63.
 - **Not demonstrated:** full integrated M2 state invariants, game boot,
   parser, puzzle behavior, RNG parity.
 

@@ -60,7 +60,15 @@ conflicting-repeat path raises an observable `ALREADY-GASSIGNED` exception.
 `make test-historical` passes the original MSETG error probe too. Pinned
 Confusion outputs and the non-resumable Racket deviation are in
 [ERROR evidence](docs/evidence/M2/ERROR.md). Integrated G3 remains FAIL
-until its updated branch is run; no game boot or gameplay parity is claimed.
+at the next source-backed dependency; no game boot or gameplay parity is claimed.
+
+**Current-head G3 run:** `make test-m2-g3` exits 2 after 48 passing
+integrated assertions because original `PSETG` reaches unassigned `MEMQ`
+after its initial side effects. Original MSETG first/equal/conflict paths
+pass. The exact-source chain still stops at `EMPTY?` after 24 expressions;
+G3 and M2 remain **FAIL**. Reproduce with `make test-m2-g3`; see
+[G3 evidence](docs/evidence/M2/G3-GATE.md). Next correction: issue #63
+`MEMQ`, followed by a fresh G3 run. M3 remains unstarted.
 
 The [M2 G0 source-readiness audit](docs/evidence/M2/SOURCE-READINESS.md)
 passes: the baseline and pinned source are reproducible, and the first

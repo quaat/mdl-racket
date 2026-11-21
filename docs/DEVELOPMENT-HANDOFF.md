@@ -14,6 +14,13 @@ passes. `make test` passes 888 Racket and 13 Python checks;
 still needs a current-head run, so G3 remains FAIL and M3 is not started.
 Next: update and rerun G3, then act only on its observed first failure.
 
+**Current G3 rerun:** `feat/m2-g3-current` carries the saved integration
+test onto `3589652`. `make test-m2-g3` exits 2 after 48 passing assertions;
+original MSETG first/equal/conflict paths pass, while original PSETG
+reaches unassigned `MEMQ` after initial side effects. Issue #63 is the
+next focused correction. See `docs/evidence/M2/G3-GATE.md`. G3 FAIL;
+do not begin M3.
+
 **Latest correction (issue #58):** `feat/m2-computed-global` reads `,.FOO`
 as GVAL of FOO's local value. Three pinned Confusion cases, reader and
 binding regressions, and a hash-verified original MSETG equal-repeat probe

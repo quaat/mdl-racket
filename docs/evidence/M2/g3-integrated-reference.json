@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-integrated-reference-successes",
+  "recorded_at": "2026-11-20T08:18:15.678224+00:00",
+  "interpreter_sha256": "a29c756df5c973e462a6ad2b318e28ec265934e89e72d825bc7672387317e629",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "g3-msetg-after-fload",
+      "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-TEMP 3>",
+      "input": "<FLOAD \"81prim.mud\"> <MSETG G3-TEMP 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "g3-msetg-repeat",
+      "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-TEMP 3> <MSETG G3-TEMP 3>",
+      "input": "<FLOAD \"81prim.mud\"> <MSETG G3-TEMP 3> <MSETG G3-TEMP 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\nT\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\nT\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "g3-psetg-complete",
+      "expression": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3>",
+      "input": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\n3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "g3-psetg-purelist",
+      "expression": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3> ,PURE-LIST",
+      "input": "<FLOAD \"81prim.mud\"> <PSETG G3-P 3> ,PURE-LIST\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\n3\n(G3-P)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\n3\n(G3-P)\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "g3-rapplic-prop-from-source",
+      "expression": "<FLOAD \"77defs.mud\"> <GET RAPPLIC DECL>",
+      "input": "<FLOAD \"77defs.mud\"> <GET RAPPLIC DECL>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n NEWSTRUC \nLISTENING-AT-LEVEL 2 PROCESS 1\n<OR ATOM FALSE NOFFSET>\n",
+      "stderr": "LVAL of INCHAN not reasonable\nAtom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n NEWSTRUC \nLISTENING-AT-LEVEL 2 PROCESS 1\n<OR ATOM FALSE NOFFSET>\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "g3-declq-rapplic-hit",
+      "expression": "<FLOAD \"77defs.mud\"> <DECL? <CHTYPE 1 NOFFSET> RAPPLIC>",
+      "input": "<FLOAD \"77defs.mud\"> <DECL? <CHTYPE 1 NOFFSET> RAPPLIC>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n NEWSTRUC \nLISTENING-AT-LEVEL 2 PROCESS 1\nT\n",
+      "stderr": "LVAL of INCHAN not reasonable\nAtom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n NEWSTRUC \nLISTENING-AT-LEVEL 2 PROCESS 1\nT\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "g3-rapplic-prop-both-files",
+      "expression": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <GET RAPPLIC DECL>",
+      "input": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <GET RAPPLIC DECL>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\n\"DONE\"\n<OR ATOM FALSE NOFFSET>\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\n\"DONE\"\n<OR ATOM FALSE NOFFSET>\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "g3-declq-rapplic-hit-both-files",
+      "expression": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <DECL? <CHTYPE 1 NOFFSET> RAPPLIC>",
+      "input": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <DECL? <CHTYPE 1 NOFFSET> RAPPLIC>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\n\"DONE\"\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\n\"DONE\"\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "g3-global-alias-put",
+      "expression": "<SETG G3-L (1 2 3)> <SETG G3-M ,G3-L> <PUT ,G3-L 1 99> <1 ,G3-M>",
+      "input": "<SETG G3-L (1 2 3)> <SETG G3-M ,G3-L> <PUT ,G3-L 1 99> <1 ,G3-M>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n(1 2 3)\n(1 2 3)\n(99 2 3)\n99\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "(1 2 3)\n(1 2 3)\n(99 2 3)\n99\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "g3-muddle-value",
+      "expression": ",MUDDLE",
+      "input": ",MUDDLE\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n101\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "101\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": false
+}
