@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m3-percent-empty-native-reference",
+  "cases": [
+    {"name": "type", "expression": "<TYPE %<>>"},
+    {"name": "truth", "expression": "<NOT %<>>"},
+    {"name": "distinct-occurrences", "expression": "<==? %<> %<>>"},
+    {"name": "constant-function-type", "expression": "<DEFINE M3P () %<>> <TYPE <M3P>>"},
+    {"name": "constant-function-identity", "expression": "<DEFINE M3P () %<>> <==? <M3P> <M3P>>"},
+    {"name": "source-call-shape", "expression": "<DEFINE M3P () <LIST %<>>> <TYPE <1 <M3P>>>"}
+  ]
+}

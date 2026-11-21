@@ -2,6 +2,16 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #86 `%<>` reader macro value slice PASS; full M3 gate
+  incomplete:** the side-effect-free empty FORM after `%` becomes
+  canonical empty FALSE in data or expression position. Six native
+  cases corroborate TYPE, truth and identity; other `%`/`%%` forms
+  still fail strictly. `make test` passes 1,121 Racket and 22 Python
+  tests; `make m2-check` passes. The unchanged loader completes 136
+  original forms, zero skipped, fully loading `77makstr.mud` before a
+  three-element typed AUX formal in `81tell-repl.mud` expression 2,
+  line 3. See [evidence](evidence/M3/PERCENT-EMPTY.md) and
+  [next issue #88](https://github.com/quaat/mdl-racket/issues/88).
 - **Issue #84 APPLICABLE declaration Pattern slice PASS; full M3 gate
   incomplete:** the manual's compound type name now matches the callable
   values represented by this runtime, including FIX, FUNCTION, MACRO and
