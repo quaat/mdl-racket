@@ -1,5 +1,15 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 deferred TYPE atom checkpoint (2026-11-21)
+
+Issue #98 adds `tests/deferred_decl_type_test.rkt` to the Racket suite.
+Run `TMPDIR=/tmp raco test tests/deferred_decl_type_test.rkt
+tests/declaration_test.rkt`, `make test`, `make m2-check` and
+`make m3-source-progress` against locked sources. The last target measures
+the partial load and writes the underlying loader exit 1 to its report.
+Native probes and frozen source results are in
+[DEFERRED-DECL-TYPE.md](evidence/M3/DEFERRED-DECL-TYPE.md).
+
 ## M3 NTH declaration checkpoint (2026-11-21)
 
 Issue #96 adds `tests/nth_decl_test.rkt` to the Racket suite. Run

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m3-deferred-decl-native-reference",
+  "cases": [
+    {
+      "name": "unknown-define",
+      "expression": "<DEFINE F (X) #DECL ((X) PRSOBJ) .X>"
+    },
+    {
+      "name": "unknown-call",
+      "expression": "<DEFINE F (X) #DECL ((X) PRSOBJ) .X> <F 1>"
+    },
+    {
+      "name": "late-type",
+      "expression": "<DEFINE F (X) #DECL ((X) FUTURE) .X> <NEWTYPE FUTURE VECTOR> <F <CHTYPE [] FUTURE>>"
+    },
+    {
+      "name": "unknown-in-or",
+      "expression": "<DEFINE F (X) #DECL ((X) <OR PRSOBJ FIX>) .X> <F 1>"
+    }
+  ]
+}

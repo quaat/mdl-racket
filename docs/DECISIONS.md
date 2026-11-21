@@ -1,5 +1,22 @@
 # Architecture decision records
 
+## ADR: Defer unresolved TYPE atoms in attached declarations (M3 issue #98)
+
+**Decision:** Retain an unresolved TYPE atom in an attached declaration's
+normalized Pattern. Resolve it at each actual declaration check. Keep
+explicit `DECL?` and positional declaration validation immediate.
+
+**Why:** The original `77act1.mud` defines a function with `PRSOBJ` in
+`#DECL` before any registered type or DECL association of that name exists.
+Pinned Confusion accepts the definition and invocation but rejects explicit
+`DECL? PRSOBJ`; its attached checks are absent. Retaining the unresolved
+name lets source definitions load while the Racket runtime still enforces
+the manual's declaration checks when the function runs.
+
+**Consequence:** Unknown names remain strict at use time, and a later NEWTYPE
+or DECL association can make a previously defined Pattern valid. The source
+frontier can advance without changing upstream bytes.
+
 ## ADR: Lazy NTH declaration matching for M3 issue #96
 
 **Decision:** Normalize `[n pattern ...]` as a counted sequence in the

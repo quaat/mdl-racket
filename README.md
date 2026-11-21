@@ -9,7 +9,21 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 checkpoint (2026-11-21, `feat/m3-nth-declaration`):**
+**Current M3 checkpoint (2026-11-21, `feat/m3-deferred-decl-type`):**
+The scoped [issue #98](docs/evidence/M3/DEFERRED-DECL-TYPE.md) change
+retains an unresolved TYPE atom in an attached `#DECL` until a value is
+checked. An unresolved name still raises an error at check time; explicit
+`DECL?` still rejects it immediately. The unchanged source loader completes
+**363 original forms with zero skips**, fully loading `77act1.mud`, then
+exits 1 at `77act2.mud` expression 39, line 424: duplicate declaration
+for `M` in `BALLOON`. `make m3-source-progress` exits 0 only as a partial
+measurement. `make test` and `make m2-check` pass; see the
+[evidence](docs/evidence/M3/DEFERRED-DECL-TYPE.md). M0/M1/M2 remain PASS;
+the formal M3 gate is **INCOMPLETE**. Full source load, initialization,
+interactive input, smoke parity and gameplay remain unverified. Next:
+[issue #100](https://github.com/quaat/mdl-racket/issues/100).
+
+**Previous M3 checkpoint (issue #96):**
 The scoped [issue #96](docs/evidence/M3/NTH-DECL.md) change implements
 positive-count `[n Pattern ...]` repetition in structured declarations,
 including attached `#DECL` and NEWTYPE patterns. It rejects malformed
@@ -22,7 +36,7 @@ measurement. `make test` and `make m2-check` pass; see the
 and the one documented Confusion deviation. The formal M3 gate remains
 **INCOMPLETE**: full load, initialization, interactive input, smoke parity,
 and gameplay are unverified. The next task is
-[issue #98](https://github.com/quaat/mdl-racket/issues/98).
+[issue #98](https://github.com/quaat/mdl-racket/issues/98) addressed above.
 
 **Previous M3 checkpoint (issue #94):**
 The scoped [issue #94](docs/evidence/M3/PERCENT-READ.md) change implements

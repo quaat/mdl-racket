@@ -2,6 +2,19 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #98 deferred attached TYPE names PASS on
+  `feat/m3-deferred-decl-type`; full M3 gate incomplete:** an unresolved
+  TYPE atom remains in an attached declaration and is resolved only when
+  checking a value. It raises an error if still unknown; explicit `DECL?`
+  remains immediate. Four clean and two error-level pinned Confusion probes
+  support the distinction, with attached enforcement retained as a manual
+  rule and reference deviation. The unchanged loader completes **363
+  original forms, zero skipped**, up from 233, and fully loads
+  `77act1.mud`. It exits 1 at `77act2.mud` expression 39, line 424:
+  duplicate declaration for `M`. `make m3-source-progress` exits 0 as a
+  partial measurement only. See [evidence](evidence/M3/DEFERRED-DECL-TYPE.md)
+  and next [issue #100](https://github.com/quaat/mdl-racket/issues/100).
+  Full load, initialization, interactive input and parity remain unverified.
 - **Issue #96 NTH declaration slice PASS on `feat/m3-nth-declaration`;
   full M3 gate incomplete:** positive-count repeated Pattern sequences
   match lazily and reject short values; NTH also works in NEWTYPE's stored

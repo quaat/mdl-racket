@@ -1499,3 +1499,25 @@ Focused tests must first fail on NTH normalization, then cover the
 manual rule in DECL?, attached FUNCTION declarations, zero/negative
 counts, malformed brackets, large counts, and the existing REST rule.
 The unchanged original source is the final progression check.
+
+## M3 deferred attached declaration type names (issue #98; specification before implementation)
+
+An attached `#DECL` is a data value that may name a TYPE atom declared
+later. Preserve such an unresolved ATOM Pattern at definition time and
+resolve it when checking a bound argument, assignment, or result. If it is
+still neither a registered TYPE nor an atom with a `DECL` association,
+checking raises `unknown declaration type`; it must never match as `ANY`.
+The same rule applies inside OR and structured Patterns. Explicit `DECL?`
+continues to normalize and validate its Pattern immediately. Malformed
+structure, unsupported Pattern forms, aliases with cycles, and positional
+metadata retain their existing strict behavior.
+
+Pinned Confusion accepts a FUNCTION definition with `#DECL ((X) PRSOBJ)`
+and a call with `1`, but its explicit `DECL?` on `PRSOBJ` enters
+`BAD-TYPE-SPECIFICATION1`. It does not enforce attached declarations,
+while this runtime follows the manual's attached-check rule. Delaying only
+the TYPE name resolution lets the original source definition load without
+discarding the declaration or changing later checking. Tests must first
+show the original strict-definition error, then verify definition,
+late registration, strict call-time failure, explicit `DECL?` failure,
+and the unchanged source progression.
