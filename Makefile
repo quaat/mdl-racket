@@ -34,7 +34,7 @@ test-m2-g3: sources
 	@racket tests/historical_g3_test.rkt
 
 test-m3-andq: sources
-	@raco test tests/historical_andq_test.rkt
+	@racket tests/historical_andq_test.rkt
 
 # Complete local M2 technical check. Build the native reference once with
 # `make reference-build` before using this target. Milestone acceptance also

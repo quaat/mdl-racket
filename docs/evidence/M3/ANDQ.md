@@ -48,10 +48,15 @@ in one session. It asserts all five original MSETG effects:
 regression deliberately leaves 68 later `77defs.mud` expressions
 unexecuted; the unchanged full loader is measured separately and
 skips zero. The first test run reported a RackUnit failure despite a
-zero process exit because it used `racket`; switching to `raco test`
-made failures fatal. Its first raco run exited 2 because raco changed
-the working directory; a module-relative source root fixed that. The
-final target exits 0 with 21 checks and the five-global assertion.
+zero process exit because it used `racket`. A switch to `raco test`
+made failures fatal locally; its first run exited 2 because raco changed
+the working directory, fixed with a module-relative source root. Native
+reference CI run 44917796838 then exited 2 because its minimal Racket
+image has no `raco test` command (`/usr/bin/raco: Unrecognized command:
+test`). The test now uses plain `racket` with a direct raising assertion
+on every mismatch, so a failed assertion gives a nonzero process status
+in that image. The corrected local target exits 0 with the five-global
+assertion.
 
 `make test` exits 0 with 1,086 Racket checks and 22 Python tests.
 `make m2-check` exits 0 with original VFLOAD 23, DECL 20,

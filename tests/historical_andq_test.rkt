@@ -1,7 +1,14 @@
 #lang racket/base
 ;; Exact-source issue #80 regression: AND? evaluates all five MSETG calls.
-(require racket/file racket/path racket/port racket/string racket/runtime-path rackunit
+(require racket/file racket/path racket/port racket/string racket/runtime-path
          "../mdl/loader.rkt")
+
+;; RackUnit's top-level checks can print a failure while leaving `racket` with
+;; exit status zero.  This test also runs in the minimal native-reference image,
+;; which has no `raco test` command, so every mismatch must raise directly.
+(define (check-equal? actual expected)
+  (unless (equal? actual expected)
+    (error 'historical-andq "expected ~s, got ~s" expected actual)))
 
 (define-runtime-path repository-root "..")
 (define source-root
