@@ -7,10 +7,12 @@ evidence instead of duplicating logs. Last updated 2026-11-21.
 SHA-verified G3 assertions, 986 Racket checks and 13 Python tests.
 `make m2-check` and the final mainline harness workflow passed. See
 `docs/evidence/M2/MAINLINE-GATE.md` for all merge commits, command exits,
-source hashes, reference comparisons and limits. The full original loader
-still exits 1 at unassigned EMPTY? in `77defs.mud` expression 15 after 24
-completed forms. **Next:** decouple M2's fixed-loader failure assertion,
-then implement M3 EMPTY? from native evidence and advance the unchanged
+source hashes, reference comparisons and limits. Issue #73 now separates
+the permanent M2 prefix from full-loader progress: M2 G3 passes 58
+assertions, `make test` passes 986 Racket and 22 Python checks, and
+`make m3-source-progress` reports 24 completed and zero skipped forms at
+EMPTY? in `77defs.mud` expression 15. See `docs/evidence/M3/SOURCE-PROGRESS.md`.
+**Next:** implement M3 EMPTY? from native evidence and advance the unchanged
 source chain. Random/event APIs are M3 issue #71. User untracked files
 `.claude/worktrees/` and `tests/fixtures/mytest.mdl` are untouched.
 

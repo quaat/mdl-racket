@@ -12,8 +12,14 @@ the freshly rebuilt native capture to the approved M0 golden exits 2
 solely for Confusion's build timestamp; a comparison with only that line
 normalized finds zero mismatches and the game SHA matches. This does not
 compare a Racket game transcript. The complete original loader separately
-exits 1 at EMPTY? after 24 forms. Before M3 advances it, decouple the
-fixed 24-form expectation from the M2 G3 suite.
+exits 1 at EMPTY? after 24 forms. Issue #73 has now decoupled the fixed
+24-form expectation from all M2 tests. On the issue #73 branch the same
+target exits 0 with 986 Racket checks, 22 Python tests and 58 G3
+assertions from a bounded original-source prefix. The full unchanged
+entry is measured by `make m3-source-progress`; its validator fails on
+fewer than 24 completed forms, skipped execution, changed accepted prefix,
+wrong file order, malformed diagnostics or false completion. See
+[`SOURCE-PROGRESS.md`](evidence/M3/SOURCE-PROGRESS.md).
 
 ## Earlier M2 branch checkpoint (2026-11-20)
 

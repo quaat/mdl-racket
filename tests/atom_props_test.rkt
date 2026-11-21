@@ -7,8 +7,8 @@
 ;; `run` cases mirror recorded successes and deliberate errors, keyed by ==?
 ;; identity of item and indicator; the loader cases replay the pinned
 ;; 77loadall.mud -> 77defs.mud bytes in an isolated scratch root (never from
-;; .cache/upstream) and pin the chain's new failure after 77defs.mud
-;; expression 3's `<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>`. Every value
+;; .cache/upstream) and pin the original RAPPLIC association in a bounded
+;; prefix. Every value
 ;; is rendered in the pinned Confusion notation *inside* its session context,
 ;; since rendering an identity (a FORM's TYPE atom) after the session's atom
 ;; space is gone would fail spuriously.
@@ -212,11 +212,11 @@
 (check-exn #rx"unknown declaration type RAPPLIC"
            (lambda () (run "<DECL? 3 RAPPLIC>")))
 
-;; --- historical chain: the pinned 77loadall.mud path -----------------------
+;; --- historical bounded prefix: the pinned original bytes ------------------
 ;; Copy the exact pinned bytes of 77loadall.mud, 81prim.mud, and 77defs.mud
 ;; into an isolated scratch root (never executing from .cache/upstream), then
-;; assert the chain advances past 77defs.mud expression 3 and pin the new
-;; barrier exactly. Skipped where the pinned sources have not been fetched
+;; assert the association exists after the first 14 77defs forms. The full
+;; loader's next barrier belongs to M3. Skipped where sources have not been fetched
 ;; (run `make sources` first).
 (define pinned-root
   (build-path ".cache" "upstream" "mdlzork" "mdlzork_771212"
@@ -244,23 +244,25 @@
          #:exists 'truncate/replace
          (lambda (out) (write-bytes (file->bytes (build-path pinned-root name)) out))))
      (define chain-session (make-mdl-session scratch-root))
-     (define chain-report (mdl-session-load! chain-session "77loadall.mud"))
-     (check-equal? (hash-ref chain-report 'status) "FAIL")
-     ;; D5: the atom-property PUT at 77defs.mud:5 succeeds, the NEWTYPE and
-     ;; DEFMAC expressions 2-14 all load, and the chain reaches 24 completed
-     ;; expressions (2 x 77loadall + 8 x 81prim + 14 x 77defs); the new
-     ;; barrier is 77defs.mud expression 15, the ROOM NEWSTRUC at line 37,
-     ;; whose slot handling needs the unassigned EMPTY? operator.
-     (check-equal? (hash-ref chain-report 'completed_expressions) 24)
-     (define failure (hash-ref chain-report 'failure))
-     (check-equal? (hash-ref failure 'file) "77defs.mud")
-     (check-equal? (hash-ref failure 'expression_index) 15)
-     (check-equal? (hash-ref failure 'stage) "execute")
-     (check-equal? (hash-ref failure 'construct) "NEWSTRUC")
-     (check-equal? (hash-ref failure 'line) 37)
-     (check-equal? (hash-ref failure 'column) 1)
-     (check-true (string-contains? (hash-ref failure 'exception)
-                                   "unassigned or non-applicable MDL operator EMPTY?")))
+     (define entry-report
+       (mdl-session-load! chain-session "77loadall.mud" #:max-expressions 1))
+     (define prim-report (mdl-session-load! chain-session "81prim.mud"))
+     (define defs-report
+       (mdl-session-load! chain-session "77defs.mud" #:max-expressions 14))
+     (check-equal? (hash-ref entry-report 'status) "PARTIAL")
+     (check-equal? (hash-ref entry-report 'completed_expressions) 1)
+     (check-equal? (hash-ref prim-report 'status) "PASS")
+     (check-equal? (hash-ref prim-report 'completed_expressions) 8)
+     (check-equal? (hash-ref defs-report 'status) "PARTIAL")
+     (check-equal? (hash-ref defs-report 'completed_expressions) 14)
+     (check-false (hash-ref defs-report 'failure))
+     (check-equal?
+      (mdl-atom-pname
+       (mdl-session-call chain-session "TYPE"
+                         (mdl-session-call chain-session "GET"
+                                           (mdl-session-atom chain-session "RAPPLIC")
+                                           (mdl-session-atom chain-session "DECL"))))
+      "FORM"))
    (lambda () (with-handlers ([exn:fail? void])
                 (delete-directory/files scratch-root)))))
 

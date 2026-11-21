@@ -682,3 +682,21 @@ decision, not evidence that those APIs work today.
 APPLY/DISPATCH surface. It does not imply random/event parity, game boot,
 or parser operation. The first M3 barrier remains original NEWSTRUC's
 EMPTY? call, and source-progress reporting must identify later dependencies.
+
+## ADR-0031: Separate stable M2 semantics from moving M3 source progress
+
+**Decision (2026-11-21, issue #73):** The M2 G3, historical DECL and D5
+property regressions load an explicit, SHA-verified source prefix in one
+session: `77loadall.mud` expression 1, complete `81prim.mud`, and
+`77defs.mud` expressions 1–14. They assert original definitions and state,
+not the full chain's first failure. `make m3-source-progress` separately
+executes unchanged `77loadall.mud` and validates a machine-readable report
+against the accepted 24-form prefix and the pinned Confusion file order.
+A legitimate later failure may advance the count without making M2 fail;
+skips, lost prefix events, backward progress or false completion fail.
+
+**Consequence:** Implementing EMPTY? can advance the loader without
+invalidating M2's semantic regression. The progress target itself is an
+incomplete-execution measurement, not a game-boot or parity claim. The
+first observed M3 dependency is still EMPTY? until a tested correction
+changes it. No upstream, licensing or network service boundary changes.
