@@ -9,7 +9,22 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 checkpoint (2026-11-21, `feat/m3-read-time-percent`):**
+**Current M3 checkpoint (2026-11-21, `feat/m3-nth-declaration`):**
+The scoped [issue #96](docs/evidence/M3/NTH-DECL.md) change implements
+positive-count `[n Pattern ...]` repetition in structured declarations,
+including attached `#DECL` and NEWTYPE patterns. It rejects malformed
+counts and short values and matches large counts without expanding them.
+The unchanged source loader completes **233 original forms with zero skips**,
+then exits 1 at `77act1.mud` expression 55, line 740: unknown declaration
+type `PRSOBJ`. `make m3-source-progress` exits 0 as a partial-progress
+measurement. `make test` and `make m2-check` pass; see the
+[evidence](docs/evidence/M3/NTH-DECL.md) for native probes, exact commands,
+and the one documented Confusion deviation. The formal M3 gate remains
+**INCOMPLETE**: full load, initialization, interactive input, smoke parity,
+and gameplay are unverified. The next task is
+[issue #98](https://github.com/quaat/mdl-racket/issues/98).
+
+**Previous M3 checkpoint (issue #94):**
 The scoped [issue #94](docs/evidence/M3/PERCENT-READ.md) change implements
 session-aware `%` evaluation during executable reading, `ASCII`, and
 CHARACTER arguments to `STRING`. The syntax-only parser remains free of
@@ -53,7 +68,7 @@ and loaded `77makstr.mud` in full. The
 [`#PSTRING 0` typed literal slice](docs/evidence/M3/PSTRING-LITERAL.md)
 reached 144 forms. The
 [positional `#DECL` slice](docs/evidence/M3/FUNCTION-DECL.md)
-reached 157 forms. The current
+reached 157 forms. The earlier
 [`!\ ` CHARACTER slice](docs/evidence/M3/SPACE-CHARACTER.md)
 keeps 157 completed, zero skipped forms and moves the first failure
 within `81tell-repl.mud` expression 23 to `%<STRING <ASCII 10>>`,
@@ -64,7 +79,7 @@ Pinned Confusion silently omits both checks, explicit reference
 deviations. Its direct `DECL?` handling of `APPLICABLE` also errors,
 while the Racket Pattern follows the MDL manual and native
 `APPLICABLE?` type observations. `ASSIGNED?` with ENV remains unsupported;
-general `%` and `%%` read macros remain unsupported;
+`%%` read macros and mutable read tables remain unsupported;
 custom `#type` literals currently support only integer WORD data;
 positional `#DECL` is validated as metadata but is not enforced on FUNCTION,
 matching the pinned reference;

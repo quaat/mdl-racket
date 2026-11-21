@@ -1471,3 +1471,31 @@ The regression test must first fail on the original percent construct,
 then pass for these cases and prove that syntax-only parsing has no MDL
 side effects. Arbitrary reader table changes, `%%`, and READ-time channel
 control remain outside this slice and must fail explicitly.
+
+## M3 NTH declaration repetition (issue #96; specification before implementation)
+
+The [MDL manual §14.1](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines `[number:fix Pattern ...]` inside a structured declaration as
+the Pattern sequence repeated that positive number of times. Each
+repeated position is required; a following ordinary Pattern applies
+after the repeats, and `[REST ...]` may constrain the remaining tail.
+Additional undeclared elements are allowed. Zero/negative counts and
+an empty Pattern sequence are errors. A large count must not require
+allocating that many pattern copies merely to reject a short value.
+
+Thirteen clean pinned Confusion observations in
+`evidence/M3/nth-decl-reference.json` confirm positive count,
+multi-Pattern order, prefix/suffix placement, trailing REST, short
+values, mismatched elements and extra undeclared elements. Four
+deliberate error-level cases in `evidence/M3/nth-decl-errors-reference.json`
+confirm invalid count and empty sequence diagnostics. Confusion's
+explicit `DECL?` rejects `ANY` as BAD-TYPE-SPECIFICATION1, while its
+attached `#DECL` accepts `[3 ANY]` but does not reject a two-element
+argument. The manual and this runtime's existing `ANY` Pattern and
+attached-declaration enforcement require a three-element minimum.
+This is an explicit manual/reference deviation, not silent parity.
+
+Focused tests must first fail on NTH normalization, then cover the
+manual rule in DECL?, attached FUNCTION declarations, zero/negative
+counts, malformed brackets, large counts, and the existing REST rule.
+The unchanged original source is the final progression check.

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "name": "m3-nth-declaration-native-reference",
+  "cases": [
+    {"name": "vector-three", "expression": "<DECL? [1 2 3] '<VECTOR [3 FIX]>>"},
+    {"name": "vector-short", "expression": "<DECL? [1 2] '<VECTOR [3 FIX]>>"},
+    {"name": "vector-extra", "expression": "<DECL? [1 2 3 4] '<VECTOR [3 FIX]>>"},
+    {"name": "vector-mismatch", "expression": "<DECL? [1 A 3] '<VECTOR [3 FIX]>>"},
+    {"name": "sequence-good", "expression": "<DECL? [1 A 2 B] '<VECTOR [2 FIX ATOM]>>"},
+    {"name": "sequence-short", "expression": "<DECL? [1 A 2] '<VECTOR [2 FIX ATOM]>>"},
+    {"name": "sequence-extra", "expression": "<DECL? [1 A 2 B 3] '<VECTOR [2 FIX ATOM]>>"},
+    {"name": "prefix-and-nth", "expression": "<DECL? [A 1 2 3] '<VECTOR ATOM [3 FIX]>>"},
+    {"name": "nth-and-suffix", "expression": "<DECL? [1 2 3 A] '<VECTOR [3 FIX] ATOM>>"},
+    {"name": "list-extra", "expression": "<DECL? (1 2 3 4) '<LIST [3 FIX]>>"},
+    {"name": "rest-after-nth", "expression": "<DECL? (1 2 3 A B) '<LIST [3 FIX] [REST ATOM]>>"},
+    {"name": "attached-original-shape", "expression": "<DEFINE M3N (PV) #DECL ((PV) <VECTOR [3 ANY]>) .PV> <M3N [1 2 3]>"},
+    {"name": "attached-original-short", "expression": "<DEFINE M3N (PV) #DECL ((PV) <VECTOR [3 ANY]>) .PV> <M3N [1 2]>"}
+  ]
+}

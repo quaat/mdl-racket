@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "m3-nth-declaration-native-errors",
+  "cases": [
+    {"name": "zero-count", "expression": "<DECL? [1] '<VECTOR [0 FIX]>>"},
+    {"name": "negative-count", "expression": "<DECL? [1] '<VECTOR [-1 FIX]>>"},
+    {"name": "empty-pattern-sequence", "expression": "<DECL? [1] '<VECTOR [2]>>"},
+    {"name": "explicit-any", "expression": "<DECL? [1 2 3] '<VECTOR [3 ANY]>>"}
+  ]
+}

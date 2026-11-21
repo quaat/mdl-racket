@@ -1,5 +1,21 @@
 # Architecture decision records
 
+## ADR: Lazy NTH declaration matching for M3 issue #96
+
+**Decision:** Normalize `[n pattern ...]` as a counted sequence in the
+required prefix. Unfold one pattern while consuming each actual element,
+without constructing `n` copies. Require a positive FIX count and at least
+one pattern. Keep the manual's required-length rule for attached declarations.
+
+**Why:** The original source uses `[3 ANY]`; a large valid count must reject a
+short value without large allocation. Pinned Confusion's attached declaration
+accepts a short vector, although its explicit `DECL?` and the manual reject
+short repeated prefixes. That discrepancy is recorded in SEMANTICS.md.
+
+**Consequence:** The runtime deliberately differs from that one attached
+Confusion observation. NTH remains strict for malformed syntax and is matched
+incrementally for LIST and array values.
+
 ## ADR-0001: Racket custom language, not a new adventure engine
 
 **Decision:** Implement a source-located MDL reader plus semantic translator/

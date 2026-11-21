@@ -2,6 +2,19 @@
 
 ## Current state (2026-11-21)
 
+- **Issue #96 NTH declaration slice PASS on `feat/m3-nth-declaration`;
+  full M3 gate incomplete:** positive-count repeated Pattern sequences
+  match lazily and reject short values; NTH also works in NEWTYPE's stored
+  Pattern. Thirteen clean and four error-level pinned Confusion observations
+  are retained. Its attached `[3 ANY]` accepts a short vector, a documented
+  reference deviation from the manual and this runtime. The unchanged
+  loader completes **233 original forms, zero skipped**, up from 188,
+  and exits 1 at `77act1.mud` expression 55, line 740: unknown
+  declaration type `PRSOBJ`. `make m3-source-progress` exits 0 only as a
+  partial-progress measurement. The next bounded task is
+  [issue #98](https://github.com/quaat/mdl-racket/issues/98). See
+  [NTH evidence](evidence/M3/NTH-DECL.md). Full loading, initialization,
+  interactive input and game parity remain unverified.
 - **Issue #94 session-aware `%` READ slice PASS on
   `feat/m3-read-time-percent`; full M3 gate incomplete:** executable
   reading evaluates `%` before consuming the next sibling, retaining the

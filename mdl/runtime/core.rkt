@@ -116,7 +116,8 @@
     (mdl-nth bracket (add1 i))))
 
 ;; Normalizes `<struc elts>`: (structure TYPE-ATOM required-pats rest-spec).
-;; required-pats is a list of normalized patterns; rest-spec is #f or the
+;; required-pats is a list of normalized patterns or counted (nth n pats)
+;; sequences; rest-spec is #f or the
 ;; list of normalized patterns of the trailing `[REST pat ... pat]`.
 (define (normalize-decl-structure items line column origin)
   (define head (car items))
@@ -193,10 +194,17 @@
           ;; results but pollutes stderr with its own leftover probes).
           (decl-error origin line column "unsupported declaration pattern OPT")]
          [(nth)
-          ;; `[fix pat ... pat]` repetition: a later slice (the reference
-          ;; implements it, including its non-positive-count BAD-TYPE-
-          ;; SPECIFICATION4 error).
-          (decl-error origin line column "unsupported declaration pattern NTH")])]
+          (unless (positive? first-item)
+            (decl-error origin line column "NTH repetition requires a positive count"))
+          (when (null? (cdr bracket-items))
+            (decl-error origin line column "NTH repetition requires at least one element pattern"))
+          (loop (cdr rest)
+                (cons (list 'nth first-item
+                            (map (lambda (item)
+                                   (normalize-decl-pattern item line column origin))
+                                 (cdr bracket-items)))
+                      required)
+                rest-spec)])]
       [else
        (loop (cdr rest)
              (cons (normalize-decl-pattern (car rest) line column origin)
@@ -403,39 +411,55 @@
             required rest-spec budget)]
           [else (error 'mdl-decl "unsupported structured value")]))))
 
-;; Required-prefix walking over a LIST-primtype chain: consumes at most
-;; (length required) cells in place, so a cyclic chain never runs away
-;; while patterns remain; only the REST tail is materialized (cycle-guarded).
+;; Unfold a counted sequence only as its corresponding value elements are
+;; consumed. This bounds work for an enormous count and a short value.
+(define (decl-next-required pats)
+  (cond
+    [(null? pats) (values #f '())]
+    [(eq? (caar pats) 'nth)
+     (define entry (car pats))
+     (define count (cadr entry))
+     (define sequence (caddr entry))
+     (decl-next-required
+      (append sequence
+              (if (> count 1) (list (list 'nth (sub1 count) sequence)) '())
+              (cdr pats)))]
+    [else (values (car pats) (cdr pats))]))
+
+;; Required-prefix walking over a LIST-primtype chain consumes one cell at a
+;; time, so a cyclic chain is bounded when there is no REST tail.
 (define (decl-match-chain chain required rest-spec budget)
   (let loop ([cursor chain] [pats required])
+    (define-values (pat remaining) (decl-next-required pats))
     (cond
-      [(null? pats)
+      [(not pat)
        (if rest-spec
            (decl-match-rest (mdl-list->list cursor) rest-spec budget)
            #t)]
       [(null? cursor) (list 'short)]
       [else
-       (define m (decl-match (mcar cursor) (car pats) budget))
+       (define m (decl-match (mcar cursor) pat budget))
        (cond
-         [(eq? m #t) (loop (mcdr cursor) (cdr pats))]
-         [(eq? m #f) (list 'element (mcar cursor) (decl-failure-leaf (car pats)))]
+         [(eq? m #t) (loop (mcdr cursor) remaining)]
+         [(eq? m #f) (list 'element (mcar cursor) (decl-failure-leaf pat))]
          [else m])])))
 
 ;; Required-prefix matching over an extracted array-element sequence
 ;; (arrays are finite; the reference walks them by NTH similarly).
 (define (decl-match-sequence elements required rest-spec budget)
   (let loop ([els elements] [pats required])
+    (define-values (pat remaining) (decl-next-required pats))
     (cond
-      [(null? pats)
+      [(not pat)
        (if (or (not rest-spec) (null? els))
            #t
            (decl-match-rest els rest-spec budget))]
       [(null? els) (list 'short)]
       [else
-       (define m (decl-match (car els) (car pats) budget))
+       (define m (decl-match (car els) pat budget))
        (cond
-         [(eq? m #t) (loop (cdr els) (cdr pats))]
-         [(eq? m #f) (list 'element (car els) (decl-failure-leaf (car pats)))]
+         [(eq? m #t) (loop (cdr els) remaining)]
+         [(eq? m #f) (list 'element (car els) (decl-failure-leaf pat))]
          [else m])])))
 
 ;; `[REST pat ... pat]` repetition: the sequence restarts after each period
@@ -2317,12 +2341,13 @@
     (for ([element (in-list elements)] [index (in-naturals)])
       (cond
         [(mdl-array? element)
-         (unless (and (eq? (mdl-array-kind element) 'VECTOR)
-                      (= index (sub1 (length elements))))
-           (bad))
+         (unless (eq? (mdl-array-kind element) 'VECTOR) (bad))
          (define bracket (decl-bracket-items element))
          (unless (and (>= (length bracket) 2)
-                      (eq? (car bracket) (mdl-atom "REST")))
+                      (or (and (eq? (car bracket) (mdl-atom "REST"))
+                               (= index (sub1 (length elements))))
+                          (and (exact-integer? (car bracket))
+                               (positive? (car bracket)))))
            (bad))
          (for ([part (in-list (cdr bracket))]) (check part))]
         [else (check element)])))

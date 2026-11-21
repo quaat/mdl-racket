@@ -1,5 +1,13 @@
 # Development handoff — MDL on Racket
 
+**Current handoff, 2026-11-21:** M2 remains PASS; M3 is partial. Issue #96
+adds NTH declaration repetition and advances the SHA-verified original loader
+from 188 to 233 completed forms with zero skips. It now stops at undeclared
+`PRSOBJ` in `77act1.mud` expression 55, line 740. See
+[`NTH-DECL.md`](evidence/M3/NTH-DECL.md) and next
+[issue #98](https://github.com/quaat/mdl-racket/issues/98). Full game load,
+initialization, and parity remain unverified.
+
 Durable cross-session state. Update at every meaningful checkpoint; link to
 evidence instead of duplicating logs. Last updated 2026-11-21.
 
