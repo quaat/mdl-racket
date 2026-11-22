@@ -34,5 +34,5 @@
     (parameterize ([current-output-port output])
       (mdl-session-call session "SAVE-IT"))))
 (check-true (exn:fail? failure))
-(check-true (regexp-match? #rx"unassigned or non-applicable MDL operator SUBSTRUC"
+(check-true (regexp-match? #rx"unassigned or non-applicable MDL operator SUBSTRUC$"
                            (exn-message failure)))

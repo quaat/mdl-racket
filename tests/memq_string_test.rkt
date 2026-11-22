@@ -69,3 +69,13 @@
 (check-true (mdl-false? (run "<MEMQ \"a\" \"abc\">"))) ; STRING needle
 
 (displayln "STRING MEMQ tests passed")
+
+;; ---- review additions ----
+;; Case-sensitive CHARACTER identity (==?): the game's YES/NO reader depends on
+;; it (77defs.mud:436-438, <MEMQ <1 .INBUF> "NnfF">). Confusion: both #FALSE ().
+(check-equal? (run "<TYPE <MEMQ !\\A \"abc\">>") (run "<TYPE <>>"))
+(check-equal? (run "<TYPE <MEMQ !\\a \"ABC\">>") (run "<TYPE <>>"))
+(check-equal? (run "<STRING <MEMQ !\\N \"NnfF\">>") "NnfF")
+(check-equal? (run "<STRING <MEMQ !\\n \"NnfF\">>") "nfF")
+;; BACK past the start of the underlying storage stays a strict error.
+(check-exn #rx"BACK" (lambda () (run "<BACK <MEMQ !\\b \"abc\"> 2>")))
