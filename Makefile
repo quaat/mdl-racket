@@ -30,6 +30,7 @@ test-historical: sources
 	@racket tests/historical_error_test.rkt
 	@racket tests/historical_memq_test.rkt
 	@racket tests/historical_oblist_placement_test.rkt
+	@racket tests/historical_channel_start_test.rkt
 
 test-m2-g3: sources
 	@racket tests/historical_g3_test.rkt
