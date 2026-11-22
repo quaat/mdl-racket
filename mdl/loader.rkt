@@ -69,7 +69,7 @@
     (lambda ()
       (for ([spec (in-list '(("INCHAN" . "READ")
                             ("OUTCHAN" . "PRINT")))])
-        (define name (mdl-atom (string-append (car spec) "!-ROOT")))
+        (define name (mdl-root-atom (car spec)))
         (define channel (mdl-make-terminal-channel (cdr spec)))
         (mdl-set! name channel)
         (mdl-setg! name channel))
@@ -78,8 +78,8 @@
       ;; space current — interning earlier would produce a different atom
       ;; identity than later GVAL lookups.
       (hash-set! (current-mdl-globals)
-                 (mdl-atom "MUDDLE") mdl-interpreter-version)
-      (mdl-define! "FLOAD"
+                 (mdl-root-atom "MUDDLE") mdl-interpreter-version)
+      (mdl-define! (mdl-root-atom "FLOAD")
                    (lambda (name)
                      (load-internal!
                       session
