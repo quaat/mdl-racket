@@ -39,4 +39,4 @@ raco test mdl/runtime/core.rkt \
   tests/empty_uvector_test.rkt tests/spname_test.rkt \
   tests/gettimedate_test.rkt tests/terminal_channel_test.rkt \
   tests/printstring_channel_test.rkt tests/crlf_test.rkt \
-  tests/constructor_eval_policy_test.rkt
+  tests/constructor_eval_policy_test.rkt tests/string_view_consumers_test.rkt

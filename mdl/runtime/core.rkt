@@ -26,6 +26,7 @@
          mdl-splice-uvector
          mdl-word mdl-word? mdl-word-bits mdl-chtype mdl-character
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
+         mdl-string-snapshot
          current-mdl-atom-space make-mdl-atom-space
          mdl-false mdl-false? mdl-false-payload
          decl-match-max-depth)
@@ -1941,10 +1942,9 @@
      (set-mdl-iheader-enabled?! header #t)
      header]
     [(2)
-     (define name (car args))
+     (define name (mdl-string-snapshot 'mdl-event (car args)
+                                       "EVENT name must be STRING in this slice"))
      (define priority (cadr args))
-     (unless (string? name)
-       (error 'mdl-event "EVENT name must be STRING in this slice"))
      (unless (and (exact-integer? priority) (<= fix-min priority fix-max)
                   (positive? priority))
        (error 'mdl-event "EVENT priority must be a positive FIX"))
@@ -2033,8 +2033,8 @@
     (error 'mdl-root "Too many arguments to ROOT"))
   (atom-space-root (current-mdl-atom-space)))
 
-(define (mdl-lookup name oblist)
-  (unless (string? name) (error 'mdl-lookup "expected a STRING PNAME"))
+(define (mdl-lookup name-value oblist)
+  (define name (mdl-string-snapshot 'mdl-lookup name-value "expected a STRING PNAME"))
   (unless (mdl-oblist? oblist)
     (error 'mdl-lookup "expected an MDL OBLIST for PNAME ~a, got ~a"
            name oblist))
@@ -2043,7 +2043,9 @@
 (define (mdl-insert value oblist)
   (require-oblist 'mdl-insert oblist)
   (define atom
-    (cond [(string? value) (atom-value value #f)]
+    (cond [(mdl-string? value)
+           (atom-value (mdl-string-snapshot 'mdl-insert value "expected a STRING PNAME")
+                       #f)]
           [(mdl-atom? value)
            (when (atom-value-oblist value)
              (error 'mdl-insert "ATOM is already on an OBLIST"))
@@ -2186,6 +2188,15 @@
                  (+ (mdl-string-view-start value)
                     (mdl-string-view-length value)))
       value))
+;; A primitive that consumes an MDL STRING argument by value (PNAMEs, OBLIST
+;; keys, EVENT names, host file paths) accepts a native STRING or a shared
+;; REST view, and takes an immutable copy of the visible characters. The
+;; copy is the PNAME semantics (an atom's name never aliases user storage);
+;; the user's STRING and its views keep sharing their own storage. Any
+;; other TYPE fails with MESSAGE.
+(define (mdl-string-snapshot who value message)
+  (unless (mdl-string? value) (error who message))
+  (string->immutable-string (mdl-string-content value)))
 (define (mdl-string-set! value index ch)
   (define storage (if (mdl-string-view? value)
                       (mdl-string-view-storage value) value))
@@ -3291,8 +3302,8 @@
         "FORM" (lambda elems (mdl-make-form (apply mdl-list elems)))
         "EXPAND" mdl-expand
         "ATOM" (lambda (name)
-                 (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
-                 (atom-value name #f))
+                 (atom-value (mdl-string-snapshot 'mdl-atom name "expected a STRING PNAME")
+                             #f))
         "MOBLIST" mdl-moblist
         "BLOCK" mdl-block
         "ENDBLOCK" mdl-endblock
