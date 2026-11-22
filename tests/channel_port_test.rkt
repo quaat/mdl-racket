@@ -11,6 +11,15 @@
 (define-runtime-path print-fixture "fixtures/channel-print.mdl")
 (define-namespace-anchor anchor)
 (define test-namespace (namespace-anchor->namespace anchor))
+(define-runtime-path core-module "../mdl/runtime/core.rkt")
+
+;; A fresh namespace (so a fixture module instantiates again) that shares
+;; THIS runtime instance; a plain make-base-namespace would load a second
+;; core.rkt with its own parameters and default context.
+(define (fresh-mdl-namespace)
+  (define ns (make-base-namespace))
+  (namespace-attach-module test-namespace core-module ns)
+  ns)
 
 ;; Fresh non-loader context from the shared context constructor.
 (define (in-fresh-context thunk)
@@ -25,6 +34,17 @@
   (define port (open-output-string))
   (define result (parameterize ([current-output-port port]) (thunk)))
   (values result (get-output-string port)))
+
+;; 0. The default context is initialized by the runtime itself (end of
+;;    core.rkt), before any #lang mdl module runs: nothing above has
+;;    instantiated an MDL module yet.
+(test-case "The process-wide default context has INCHAN/OUTCHAN at load."
+  (check-equal? (mdl-atom-pname (mdl-type (mdl-gval "OUTCHAN"))) "CHANNEL")
+  (check-equal? (mdl-atom-pname (mdl-type (mdl-lval "INCHAN"))) "CHANNEL")
+  (define-values (n output)
+    (capture (lambda () ((mdl-gval "PRINTSTRING") "boot"))))
+  (check-equal? n 4)
+  (check-equal? output "boot"))
 
 ;; 1. Standalone #lang mdl module in the process-wide default context.
 (test-case "Standalone #lang mdl module: no loader session binds OUTCHAN."
@@ -233,7 +253,7 @@
                     (call-with-mdl-context ctx-b (lambda () (mdl-gval "OUTCHAN")))))
   ;; Shared-context boundary, in a fresh namespace so both modules instantiate.
   (define ctx-shared (make-mdl-context))
-  (parameterize ([current-namespace (make-base-namespace)])
+  (parameterize ([current-namespace (fresh-mdl-namespace)])
     (call-with-mdl-context ctx-shared
       (lambda ()
         (capture (lambda () (dynamic-require mutate-fixture #f)))
@@ -278,3 +298,21 @@
      (check-exn #rx"non-channel" (lambda () (run "<PRINTSTRING 5 6>")))
      (check-exn #rx"STRING buffer"
                 (lambda () (run "<PRINTSTRING 5 .OUTCHAN -1>"))))))
+
+;; 15. A #lang mdl module gives a context WITHOUT INCHAN/OUTCHAN its initial
+;;     bindings (module-begin call site); output reaches that context's port.
+(test-case "A #lang mdl module initializes a context that lacks channels."
+  (define globals (make-hasheq))
+  (define bare (list (make-hasheq)))
+  (define space (make-mdl-atom-space))
+  (parameterize ([current-namespace (fresh-mdl-namespace)]
+                 [current-mdl-globals globals]
+                 [current-mdl-locals bare]
+                 [current-mdl-atom-space space])
+    (check-true (mdl-false? ((mdl-gval "GASSIGNED?") "OUTCHAN")))
+    (define-values (_ output)
+      (capture (lambda () (dynamic-require print-fixture #f))))
+    (check-regexp-match #rx"^from-b" output)
+    (check-equal? (mdl-gval "R1-B-RESULT") 6)
+    (check-equal? (mdl-atom-pname (mdl-type (mdl-gval "OUTCHAN"))) "CHANNEL")
+    (check-eq? (mdl-lval "OUTCHAN") (mdl-gval "OUTCHAN"))))
