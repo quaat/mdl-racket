@@ -57,11 +57,12 @@
   (define expected (inexact->exact (ceiling (/ (log (/ words 1000)) (log 3/2)))))
   (printf "  n=~a words=~a: expected ≈ ~a GCs~n" n words expected))
 
-(printf "~nExpected collections with linear growth (+8192):~n")
+(printf "~nFormula prediction, old policy (flat +8192, NOT measured here):~n")
+(printf "  (Run at git commit 850a87f to get actual measurements)~n")
 (for ([n '(10000 100000 500000)])
   (define words (* 2 n))
   (define expected (inexact->exact (ceiling (/ (- words 1000) 8192))))
-  (printf "  n=~a words=~a: expected ≈ ~a GCs~n" n words expected))
+  (printf "  n=~a words=~a: formula ≈ ~a GCs~n" n words expected))
 
 (printf "~nDefault capacity (cap0=262144, most allocations never GC):~n")
 (run-bench "AFTER-FIX" 50000  262144)

@@ -376,6 +376,88 @@
 ;; --- Exception safety: DIVERT-AGC handler raises; state stays consistent ---
 ;; (Already covered above; this confirms that after RECOVERY via BLOAT, used counts correctly.)
 
+;; ============================================================
+;; --- BLOAT handler satisfies request: gc-min NOT applied, 0 GCs ---
+;;
+;; R2 round-3 regression: 4e71e3a applied gc-min growth after every pressure
+;; event, even when a DIVERT-AGC handler's BLOAT already satisfied the request
+;; and no collection ran.  Result: cap jumped to 8192+ on each BLOAT, collapsing
+;; a game-designed diversion schedule from ~85 diversions to ~2.
+;;
+;; Fix: `collected?` flag; gc-min growth only fires when a collection ran.
+;;
+;; Test (a): BLOAT handler exactly satisfies request (words+10).
+;; Probe: cap=0, handler BLOATs words+10 → cap = 0 + (2+10) = 12.
+;;   After fix:    cap = 12 exactly, 0 GCs.  ← PASS
+;;   On 4e71e3a:   cap = 8192 (gc-min fires), 0 GCs.  ← FAIL (cap ≠ 12)
+(session
+ (lambda ()
+   (define gc-count 0)
+   (define diversions 0)
+   (define gc-header (mdl-apply "EVENT" "GC" 11))
+   (mdl-apply "HANDLER" gc-header (lambda _ (set! gc-count (+ gc-count 1))))
+   (define divert-header (mdl-apply "EVENT" "DIVERT-AGC" 1000))
+   (mdl-apply "HANDLER" divert-header
+              (lambda (words _initiator)
+                (set! diversions (+ diversions 1))
+                (mdl-apply "BLOAT" (+ words 10))))
+   (mdl-set-logical-storage-capacity! 0)
+   ;; 2-word alloc: used=0, cap=0 → pressure → BLOAT(2+10=12) → cap=12.
+   ;; Second pressure check: 0+2=2 > 12? No → no collection.
+   (define retained (mdl-list 42))
+   (check-equal? gc-count 0 "BLOAT handler: 0 GCs (no collection ran)")
+   (check-equal? diversions 1 "BLOAT handler: 1 diversion")
+   ;; Key: cap = used + words + 10 = 0 + 2 + 10 = 12, NOT 8192.
+   ;; On 4e71e3a: gc-min fires unconditionally → cap = max(8192, ceil(0×1.5)) = 8192.
+   (check-equal? (hash-ref (mdl-logical-storage-stats) 'capacity) 12
+                 "BLOAT handler: cap = 12 (used=0+words=2+10), gc-min NOT applied")
+   (check-equal? (mdl-list->list retained) '(42))
+   (check-invariant! " BLOAT-no-gc")))
+
+;; Test (b): Game-like DIVERT-AGC scenario — BLOAT(words+200) handler; 1010 live allocs.
+;;
+;; Hand-computed trace (each mdl-list = 2 words, BLOAT adds words+200=202 capacity):
+;;   Alloc #1:   cap=0, used=0. 0+2>0 → pressure → BLOAT(202) → cap=202. No GC. used=2.
+;;   Allocs 2-101: used 4,6,...,202. Fit without pressure (202 ≤ 202).
+;;   Alloc #102: 202+2=204>202 → pressure → BLOAT(202) → cap=404. used=204.
+;;   ...pattern: 1 diversion per 101 allocs. 1010 allocs → 10 diversions.
+;;
+;;   After fix: 10 diversions, 0 GCs.           ← PASS
+;;   On 4e71e3a: after BLOAT diversion #1, gc-min fires → cap = max(needed=8192, 303) = 8192.
+;;   Then 4095 allocs fit before next pressure (4095×2=8190 words). With 1010 allocs,
+;;   that's only 1 more possible diversion at alloc #4097 — which never happens.
+;;   → diversions = 1 (not 10).                 ← FAIL
+(define (alloc-and-keep! sink i) (set-mcar! sink (mdl-list i)) (void))
+(session
+ (lambda ()
+   (define diversions 0)
+   (define gc-count 0)
+   (define divert-header (mdl-apply "EVENT" "DIVERT-AGC" 1000))
+   (define gc-header (mdl-apply "EVENT" "GC" 11))
+   (mdl-apply "HANDLER" divert-header
+              (lambda (words _init)
+                (set! diversions (+ diversions 1))
+                (mdl-apply "BLOAT" (+ words 200))))
+   (mdl-apply "HANDLER" gc-header
+              (lambda _ (set! gc-count (+ gc-count 1))))
+   (mdl-set-logical-storage-capacity! 0)
+   ;; Allocate 1010 single-cell lists, keeping them all live in a list.
+   ;; Use a mutable sink to prevent the optimizer from treating allocations
+   ;; as dead even if the loop variable isn't used after the loop.
+   (define sink (mcons #f '()))
+   (define live-cells
+     (for/list ([i (in-range 1010)])
+       (define c (mdl-list i))
+       (set-mcar! sink c)   ; keep alive throughout the loop
+       c))
+   (check-equal? diversions 10
+                 "game-like BLOAT(words+200): 10 diversions for 1010 allocs")
+   (check-equal? gc-count 0 "game-like BLOAT: 0 GCs (handler always satisfied)")
+   ;; Verify cells are still live
+   (check-equal? (mdl-apply "NTH" (car live-cells) 1) 0)
+   (check-equal? (mdl-apply "NTH" (car (reverse live-cells)) 1) 1009)
+   (check-invariant! " game-like-BLOAT")))
+
 ;; --- Session isolation: two atom spaces have independent ledgers ---
 (define first-space (make-mdl-atom-space))
 (define second-space (make-mdl-atom-space))
