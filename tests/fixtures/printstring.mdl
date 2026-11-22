@@ -1,0 +1,3 @@
+#lang mdl
+;"Review R1: PRINTSTRING with no CHANNEL in a standalone module."
+<SETG R1-PS-RESULT <PRINTSTRING "standalone">>

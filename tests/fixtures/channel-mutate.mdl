@@ -1,0 +1,3 @@
+#lang mdl
+;"Review R1: mutate this context's OUTCHAN mode slot."
+<PUT .OUTCHAN 2 "READ">

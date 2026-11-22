@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "m3-review-r1-followup",
+  "cases": [
+    {"name": "rest-type", "expression": "<TYPE <REST .OUTCHAN 0>>\n<TYPE <REST .OUTCHAN 1>>"},
+    {"name": "rest0-printstring", "expression": "<PRINTSTRING \"rv\" <REST .OUTCHAN 0>>"},
+    {"name": "top-rest-printstring", "expression": "<PRINTSTRING \"tv\" <TOP <REST .OUTCHAN 1>>>"},
+    {"name": "order-buffer-vs-inchan", "expression": "<PRINTSTRING 5 .INCHAN>"},
+    {"name": "order-buffer-vs-nonchannel", "expression": "<PRINTSTRING 5 6>"},
+    {"name": "order-buffer-vs-count", "expression": "<PRINTSTRING 5 .OUTCHAN -1>"},
+    {"name": "gdecl-channel", "expression": "<GDECL (OUTCHAN) CHANNEL>\n<GASSIGNED? OUTCHAN>\n<PRINTSTRING \"g\" ,OUTCHAN>"},
+    {"name": "gdecl-fix-mismatch", "expression": "<GDECL (OUTCHAN) FIX>"},
+    {"name": "manifest-setg", "expression": "<MANIFEST OUTCHAN>\n<SETG OUTCHAN 5>"}
+  ]
+}

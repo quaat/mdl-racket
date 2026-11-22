@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "name": "m3-review-r3r4-oblist-identity",
+  "cases": [
+    {
+      "name": "root-placement-internal-names",
+      "expression": "(<==? <OBLIST? T> <ROOT>> <==? <OBLIST? FIX> <ROOT>> <==? <OBLIST? +> <ROOT>> <==? <OBLIST? OBLIST> <ROOT>> <==? <OBLIST? REDEFINE> <ROOT>> <==? <OBLIST? LOSE> <ROOT>> <==? <OBLIST? DECL> <ROOT>> <==? <OBLIST? CHANNEL> <ROOT>> <==? <OBLIST? QUOTE> <ROOT>> <==? <OBLIST? LVAL> <ROOT>> <==? <OBLIST? GVAL> <ROOT>> <==? <OBLIST? MUDDLE> <ROOT>> <==? <OBLIST? INCHAN> <ROOT>> <==? <OBLIST? PRIMTYPE> <ROOT>> <==? <OBLIST? REST> <ROOT>> <==? <OBLIST? APPLICABLE> <ROOT>> <==? <OBLIST? FORM> <ROOT>> <==? <OBLIST? LIST> <ROOT>> <==? <OBLIST? ATOM> <ROOT>> <==? <OBLIST? GC> <ROOT>> <==? <OBLIST? FALSE> <ROOT>>)"
+    },
+    {
+      "name": "user-atom-in-initial",
+      "expression": "<==? <OBLIST? FOO> <GET INITIAL OBLIST>>"
+    },
+    {
+      "name": "startup-lval-shape",
+      "expression": "(<LENGTH .OBLIST> <==? <1 .OBLIST> <GET INITIAL OBLIST>> <==? <2 .OBLIST> <ROOT>>)"
+    },
+    {
+      "name": "lval-distinct-from-gval",
+      "expression": "(<GASSIGNED? OBLIST> <==? .OBLIST ,OBLIST>)"
+    },
+    {
+      "name": "prog-bound-oblist-drives-parse",
+      "expression": "<SETG X1 <MOBLIST X1>> 1\n<PROG ((OBLIST (,X1 <ROOT>))) <==? <OBLIST? <PARSE \"PFOO\">> ,X1>>"
+    },
+    {
+      "name": "prog-exit-restores-parse",
+      "expression": "<SETG X1 <MOBLIST X1>> 1\n<PROG ((OBLIST (,X1 <ROOT>))) 1>\n(<==? <1 .OBLIST> ,X1> <==? <OBLIST? <PARSE \"PFOO2\">> <GET INITIAL OBLIST>>)"
+    },
+    {
+      "name": "set-inside-prog-does-not-leak",
+      "expression": "<SETG X1 <MOBLIST X1>> 1\n<PROG ((OBLIST .OBLIST)) <SET OBLIST (,X1 <ROOT>)> <==? <OBLIST? <PARSE \"PIN\">> ,X1>>\n(<==? <1 .OBLIST> ,X1> <==? <OBLIST? <PARSE \"POUT\">> <GET INITIAL OBLIST>>)"
+    },
+    {
+      "name": "block-in-function-sets-toplevel",
+      "expression": "<SETG X1 <MOBLIST X1>> 1\n<DEFINE F () <BLOCK (,X1 <GET INITIAL OBLIST> <ROOT>)> 1>\n<F>\n(<==? <1 .OBLIST> ,X1> <==? <OBLIST? BF1> ,X1>)\n<ENDBLOCK> 1\n<==? <OBLIST? BF2> <GET INITIAL OBLIST>>"
+    },
+    {
+      "name": "toplevel-set-oblist",
+      "expression": "<SET OBLIST (<MOBLIST S1> <GET INITIAL OBLIST> <ROOT>)> 1\n<==? <OBLIST? NEWS> <GET S1 OBLIST>>\n<SET OBLIST (<GET INITIAL OBLIST> <ROOT>)> 1\n<==? <OBLIST? NEWS2> <GET INITIAL OBLIST>>"
+    },
+    {
+      "name": "setg-under-fresh-block-no-internal-intern",
+      "expression": "<BLOCK (<MOBLIST RB> <ROOT>)> 1\n<SETG ZZ 1>\n<ENDBLOCK> 1\n(<LOOKUP \"REDEFINE\" <GET RB OBLIST>> <LOOKUP \"T\" <GET RB OBLIST>>)"
+    },
+    {
+      "name": "gassigned-uninterned-no-intern",
+      "expression": "<GASSIGNED? <ATOM \"ZQX\">>\n<LOOKUP \"ZQX\" <GET INITIAL OBLIST>>"
+    },
+    {
+      "name": "lexical-identity-function-body",
+      "expression": "<DEFINE LX () LXATOM>\n<BLOCK (<MOBLIST LB> <GET INITIAL OBLIST> <ROOT>)> 1\n<==? <OBLIST? <LX>> <GET INITIAL OBLIST>>\n<ENDBLOCK> 1\n<DEFINE LY () <PROG ((OBLIST (<MOBLIST LC> <ROOT>))) LYATOM>>\n<==? <OBLIST? <LY>> <GET INITIAL OBLIST>>"
+    },
+    {
+      "name": "empty-trailer-root",
+      "expression": "(<==? TOPLEVEL!- <LOOKUP \"TOPLEVEL\" <ROOT>>> <==? NEWROOTX!- <LOOKUP \"NEWROOTX\" <ROOT>>> <LOOKUP \"NEWROOTX\" <GET INITIAL OBLIST>> <==? T!- T> <==? <OBLIST? FOO!-INITIAL!-> <GET INITIAL OBLIST>>)"
+    },
+    {
+      "name": "printstring-default-outchan-shadowed-by-block",
+      "expression": "<SETG OB1 <MOBLIST OB1>> 1\n<INSERT \"OUTCHAN\" ,OB1> 1\n<BLOCK (,OB1 <ROOT>)> 1\n<PRINTSTRING \"hello\">\n<ENDBLOCK> 1"
+    },
+    {
+      "name": "printstring-default-outchan-unassigned-oblist",
+      "expression": "<DEFINE P (\"AUX\" OBLIST) <PRINTSTRING \"hello\">>\n<P>"
+    },
+    {
+      "name": "internal-name-placement",
+      "expression": "<MAPF ,LIST <FUNCTION (N) (.N <TYPE <LOOKUP .N <ROOT>>> <TYPE <LOOKUP .N <GET INITIAL OBLIST>>>)> (\"T\" \"QUOTE\" \"REDEFINE\" \"MUDDLE\" \"INCHAN\" \"OUTCHAN\" \"FLOAD\" \"DIVERT-AGC\" \"DEFINE\" \"DEFMAC\" \"FUNCTION\" \"PROG\" \"REPEAT\" \"RETURN\" \"AGAIN\" \"GO\" \"UNWIND\" \"GDECL\" \"COND\" \"AND\" \"OR\" \"NOT\" \"INTERRUPTS\" \"APPLICABLE\" \"ELSE\")>"
+    }
+  ]
+}

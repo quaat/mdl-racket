@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "m3-review-r3r4-oblist-identity-errors",
+  "cases": [
+    {
+      "name": "error-unwind-restores",
+      "expression": "<SETG X1 <MOBLIST X1>> 1\n<PROG ((OBLIST (,X1 <ROOT>))) <ERROR FOO>>\n<ERRET>\n(<==? <1 .OBLIST> <GET INITIAL OBLIST>> <==? <OBLIST? AFTER> <GET INITIAL OBLIST>>)"
+    },
+    {
+      "name": "bound-unassigned-oblist-lval-errors",
+      "expression": "<PROG (OBLIST) .OBLIST>"
+    },
+    {
+      "name": "block-in-function-with-oblist-binding",
+      "expression": "<SETG X1 <MOBLIST X1>> 1\n<DEFINE G (\"AUX\" (OBLIST .OBLIST)) <BLOCK (,X1 <ROOT>)> <==? <OBLIST? <PARSE \"GIN\">> ,X1>>\n<G>\n(<==? <1 .OBLIST> ,X1> <==? <OBLIST? GA> <GET INITIAL OBLIST>>)\n<ENDBLOCK> 1\n<==? <1 .OBLIST> <GET INITIAL OBLIST>>\n<ENDBLOCK>"
+    },
+    {
+      "name": "block-without-root-internal-t",
+      "expression": "<SETG MYEQ ,==?> <SETG MYOB ,OBLIST?> <SETG MYDECL ,DECL?> <SETG MYROOT ,ROOT> <SETG MYEND ,ENDBLOCK> <SETG RT T> <SETG RFIX FIX> 1\n<BLOCK (<MOBLIST NR> <GET INITIAL OBLIST>)> 1\n(<MYEQ <MYOB T> <MYROOT>> <MYEQ <MYDECL 1 ,RFIX> ,RT>)\n<MYEND> 1"
+    }
+  ]
+}
