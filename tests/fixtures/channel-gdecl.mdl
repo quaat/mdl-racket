@@ -1,0 +1,5 @@
+#lang mdl
+;"Review R1: the default context's OUTCHAN GVAL is a real table binding."
+<GDECL (OUTCHAN) CHANNEL>
+<SETG R1-GD-ASSIGNED <GASSIGNED? OUTCHAN>>
+<SETG R1-GD-RESULT <PRINTSTRING "g" ,OUTCHAN>>

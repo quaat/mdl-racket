@@ -70,17 +70,16 @@
     (raise-argument-error 'make-mdl-session "(or/c #f output-port?)" output-port))
   (when (and input-port (not (input-port? input-port)))
     (raise-argument-error 'make-mdl-session "(or/c #f input-port?)" input-port))
+  ;; The shared context constructor binds INCHAN/OUTCHAN (LVAL and GVAL)
+  ;; to this session's terminal CHANNELs before any source runs.
+  (define context (make-mdl-context #:output-port output-port
+                                    #:input-port input-port))
   (define session
-    (mdl-session root (make-hasheq) (list (make-hasheq))
-                 (make-mdl-atom-space) loader-namespace (box '()) (make-hash)))
+    (mdl-session root (mdl-context-globals context) (mdl-context-locals context)
+                 (mdl-context-atom-space context) loader-namespace (box '())
+                 (make-hash)))
   (call-in-session session
     (lambda ()
-      (for ([spec (in-list (list (list "INCHAN" "READ" input-port)
-                                 (list "OUTCHAN" "PRINT" output-port)))])
-        (define name (mdl-atom (string-append (car spec) "!-ROOT")))
-        (define channel (mdl-make-terminal-channel (cadr spec) (caddr spec)))
-        (mdl-set! name channel)
-        (mdl-setg! name channel))
       ;; Interpreter-supplied globals (MUDDLE, issue #51) intern in THIS
       ;; session's atom space, so they must be seeded with the session's
       ;; space current — interning earlier would produce a different atom
