@@ -2284,9 +2284,42 @@
                         ([value (in-list (cdr values))])
                 (arithmetic-step 'mdl-div / acc value))]))
 
+;; The 36-bit target stores FLOAT in PDP-10 single precision: bit 0 sign,
+;; bits 1-8 excess-128 exponent, bits 9-35 a normalized 27-bit fraction;
+;; a negative FLOAT is the two's complement of the whole word. The host
+;; keeps FLOAT as a flonum and derives this image only when a FLOAT is
+;; reinterpreted as WORD-primtype data (CHTYPE). Flonums with no exact
+;; 36-bit image fail instead of being rounded.
+(define pdp10-fraction-bits 27)
+(define pdp10-greatest-float
+  (* (exact->inexact (sub1 (arithmetic-shift 1 pdp10-fraction-bits)))
+     (expt 2.0 100)))
+
+(define (float-word-bits who value)
+  (define (unrepresentable)
+    (error who "FLOAT has no exact PDP-10 FLOAT word image: ~a" value))
+  (unless (and (flonum? value) (= value value)
+               (not (eqv? value +inf.0)) (not (eqv? value -inf.0)))
+    (unrepresentable))
+  (if (zero? value)
+      0
+      (let* ([magnitude (inexact->exact (abs value))]
+             [exponent (+ (- (integer-length (numerator magnitude))
+                             (integer-length (denominator magnitude)))
+                          1)]
+             [fraction (* magnitude (expt 2 (- pdp10-fraction-bits exponent)))]
+             [field (+ exponent 128)])
+        (unless (and (exact-integer? fraction) (<= 0 field 255))
+          (unrepresentable))
+        (define positive (bitwise-ior (arithmetic-shift field pdp10-fraction-bits)
+                                      fraction))
+        (if (negative? value)
+            (bitwise-and (- positive) word-mask)
+            positive))))
+
 (define (mdl-min . values)
   (if (null? values)
-      (mdl-typed-value (mdl-atom "FLOAT") (mdl-word fix-max))
+      pdp10-greatest-float
       (for/fold ([smallest (check-number 'mdl-min (car values))])
                 ([value (in-list (cdr values))])
         (check-number 'mdl-min value)
@@ -2335,8 +2368,11 @@
   (check-fix 'mdl-fix (inexact->exact (truncate value))))
 
 (define (mdl-float value)
-  (check-number 'mdl-float value)
-  (exact->inexact value))
+  ;; Manual 3.4: FLOAT converts a FIX; pinned Confusion also rejects a
+  ;; FLOAT argument ("Arg to FLOAT must be FIX").
+  (unless (exact-integer? value)
+    (error 'mdl-float "Arg to FLOAT must be FIX"))
+  (exact->inexact (check-fix 'mdl-float value)))
 
 (define (mdl-bits width [edge 0])
   (unless (and (exact-integer? width) (exact-integer? edge)
@@ -2942,12 +2978,16 @@
                    (not (string=? (mdl-atom-pname desired-prim) "WORD")))
           (error 'mdl-chtype "unsupported primitive storage conversion"))
         (cond [(string=? (mdl-atom-pname desired-prim) "WORD")
+               (define bits
+                 (if (flonum? base)
+                     (float-word-bits 'mdl-chtype base)
+                     (word-bits-of base)))
                (cond [(string=? target "FIX")
-                      (word-signed (word-bits-of base))]
+                      (word-signed bits)]
                      [(string=? target "WORD")
-                      (mdl-word (word-bits-of base))]
-                     [(or (exact-integer? base) (mdl-word? base))
-                      (mdl-typed-value type (mdl-word (word-bits-of base)))]
+                      (mdl-word bits)]
+                     [(or (exact-integer? base) (mdl-word? base) (flonum? base))
+                      (mdl-typed-value type (mdl-word bits))]
                      [else (error 'mdl-chtype "unsupported WORD reinterpretation")])]
               [(string=? target "LIST")
                (mdl-list-head base 'mdl-chtype)]
