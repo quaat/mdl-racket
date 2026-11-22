@@ -17,7 +17,7 @@
          mdl-logical-storage-stats mdl-set-logical-storage-capacity!
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
-         mdl-make-terminal-channel
+         mdl-make-terminal-channel mdl-substruc
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
          mdl-segment mdl-segment? mdl-segment-payload mdl-segment-line
@@ -3116,6 +3116,116 @@
   (newline)
   (mdl-atom "T"))
 
+;; SUBSTRUC (MDL manual ch. 7, section 7.1.7)
+;;
+;; Contract: `<SUBSTRUC from rest amount to>` copies `amount` elements of
+;; `from` starting at index `rest` into a fresh structure (or into `to` when
+;; supplied) and returns it.  All arguments except `from` are optional:
+;;   rest   – FIX, default 0.  Must be in [0, length(from)].
+;;   amount – FIX, default remaining length after rest.  Must be in
+;;            [0, length(from)-rest].
+;;   to     – structured of the same PRIMTYPE as `from`; receives the copied
+;;            elements starting at its position 0 (may be a REST view).
+;;            Returned as-is after modification.
+;;
+;; Confusion-confirmed error messages:
+;;   "SUBSTRUC rest cannot be negative"
+;;   "SUBSTRUC rest too large"
+;;   "SUBSTRUC amount cannot be negative"
+;;   "SUBSTRUC amount too big for source"
+;;
+;; Supported primitive types: STRING, VECTOR, UVECTOR, LIST.
+;; The result is never a view/alias of `from`; copying is atomic.
+;; Element type for UVECTOR `to`: inherited from source elements on no-to path;
+;; not re-checked for the `to` path (Confusion copies blindly).
+;;
+;; Probe evidence: docs/evidence/M3/S3-SUBSTRUC.md
+;; Reference SHA: 6df359f6…  source: mdlzork bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3
+(define (mdl-substruc from [rest 0] [amount #f] [to #f])
+  (unless (and (exact-integer? rest) (>= rest 0))
+    (error 'mdl-substruc "SUBSTRUC rest cannot be negative"))
+  (when (and amount (or (not (exact-integer? amount)) (< amount 0)))
+    (error 'mdl-substruc "SUBSTRUC amount cannot be negative"))
+  (define base (mdl-base from))
+  (cond
+    ;; ---- STRING ----
+    [(mdl-string? base)
+     (define src-len (mdl-string-length base))
+     (when (> rest src-len)
+       (error 'mdl-substruc "SUBSTRUC rest too large"))
+     (define avail (- src-len rest))
+     (define count (or amount avail))
+     (when (> count avail)
+       (error 'mdl-substruc "SUBSTRUC amount too big for source"))
+     (cond
+       [to
+        ;; Copy `count` characters into `to` starting at its position 0.
+        (define to-base (mdl-base to))
+        (unless (mdl-string? to-base)
+          (error 'mdl-substruc "SUBSTRUC: to must have STRING PRIMTYPE"))
+        (for ([i (in-range count)])
+          (mdl-string-set! to-base i (mdl-string-ref base (+ rest i))))
+        to]
+       [else
+        ;; Allocate a fresh independent mutable string.
+        (define result (make-string count))
+        (for ([i (in-range count)])
+          (string-set! result i (mdl-string-ref base (+ rest i))))
+        result])]
+    ;; ---- VECTOR / UVECTOR ----
+    [(mdl-array? base)
+     (define src-len (mdl-array-length base))
+     (when (> rest src-len)
+       (error 'mdl-substruc "SUBSTRUC rest too large"))
+     (define avail (- src-len rest))
+     (define count (or amount avail))
+     (when (> count avail)
+       (error 'mdl-substruc "SUBSTRUC amount too big for source"))
+     (define kind (mdl-array-kind base))
+     (define storage (mdl-array-storage base))
+     (define src-start (mdl-array-start base))
+     (cond
+       [to
+        (define to-base (mdl-base to))
+        (unless (and (mdl-array? to-base) (eq? (mdl-array-kind to-base) kind))
+          (error 'mdl-substruc "SUBSTRUC: to must have matching PRIMTYPE"))
+        (define to-storage (mdl-array-storage to-base))
+        (define to-start (mdl-array-start to-base))
+        (for ([i (in-range count)])
+          (vector-set! to-storage (+ to-start i)
+                       (vector-ref storage (+ src-start rest i))))
+        to]
+       [else
+        (define new-storage (make-vector count))
+        (for ([i (in-range count)])
+          (vector-set! new-storage i (vector-ref storage (+ src-start rest i))))
+        (define word-count
+          (case kind
+            [(VECTOR) (+ (* 2 count) 2)]
+            [else     (+ count 2)]))      ; UVECTOR
+        (mdl-track-allocation! new-storage word-count (symbol->string kind))
+        ;; Preserve element type for UVECTOR; use #f for VECTOR.
+        (define elem-type
+          (if (eq? kind 'UVECTOR)
+              (mdl-array-element-type base)
+              #f))
+        (new-mdl-array kind new-storage 0 count elem-type)])]
+    ;; ---- LIST ----
+    [(or (null? base) (mpair? base))
+     (define elems (mdl-list->list (mdl-list-head from 'mdl-substruc)))
+     (define src-len (length elems))
+     (when (> rest src-len)
+       (error 'mdl-substruc "SUBSTRUC rest too large"))
+     (define avail (- src-len rest))
+     (define count (or amount avail))
+     (when (> count avail)
+       (error 'mdl-substruc "SUBSTRUC amount too big for source"))
+     (when to
+       (error 'mdl-substruc "SUBSTRUC: to argument for LIST is unsupported"))
+     (apply mdl-list (take (drop elems rest) count))]
+    [else
+     (error 'mdl-substruc "SUBSTRUC requires a structured argument")]))
+
 ;; UNPARSE (MDL manual ch. 7, section 7.6.6.4; appendix 2)
 ;;
 ;; Contract: `<UNPARSE any radix:fix>` returns a fresh mutable STRING
@@ -3470,6 +3580,7 @@
         "ASCII" mdl-ascii
         "UNPARSE" mdl-unparse
         "PRINTSTRING" mdl-printstring
+        "SUBSTRUC" mdl-substruc
         "TERPRI" mdl-terpri
         "CRLF" mdl-crlf
         "ERROR" mdl-error

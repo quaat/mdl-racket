@@ -41,4 +41,5 @@ raco test mdl/runtime/core.rkt \
   tests/printstring_channel_test.rkt tests/crlf_test.rkt \
   tests/random36_test.rkt tests/back_test.rkt \
   tests/unparse_test.rkt \
-  tests/memq_string_test.rkt
+  tests/memq_string_test.rkt \
+  tests/substruc_test.rkt

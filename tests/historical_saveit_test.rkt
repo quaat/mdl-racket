@@ -21,11 +21,18 @@
 (check-equal? (hash-ref load-report 'completed_expressions) 1229)
 (check-equal? (hash-ref load-report 'skipped_expressions) 0)
 
-;; Known XFAIL frontier: SAVE-IT calls UNSPEAKABLE-CODE (77rooms.mud:146-157)
-;; which uses SUBSTRUC on a STRING (77rooms.mud:155), called from SAVE-IT
-;; (77rooms.mud:12).  MEMQ on STRING is now implemented (S1-MEMQ-STRING);
-;; SUBSTRUC is the next dependency.
-;; Call chain: SAVE-IT → UNSPEAKABLE-CODE → SUBSTRUC (77rooms.mud:155)
+;; Known XFAIL frontier: SAVE-IT progressed past UNSPEAKABLE-CODE (now uses
+;; SUBSTRUC — implemented in S3-SUBSTRUC).  The next barrier is `ON` at
+;; 77rooms.mud:16: `<SET IH <ON "IPC" ,ILO 1>>`.
+;;
+;; SAVE-IT steps that now execute successfully before the failure:
+;;   77rooms.mud:12  PUT <FIND-OBJ "PAPER"> ODESC1 <UNSPEAKABLE-CODE>
+;;   77rooms.mud:13  SETG VERS .ST (REMARKABLY-DISGUSTING-CODE date string)
+;;   77rooms.mud:14  SETG SCRIPT-CHANNEL <>
+;;   77rooms.mud:15  SETG RAW-SCORE 0
+;;   77rooms.mud:16  SET IH <ON "IPC" ,ILO 1>  ← NEW BARRIER
+;;
+;; Call chain: SAVE-IT → ON (77rooms.mud:16)
 ;; This test asserts the XFAIL message so progress is tracked without claiming
 ;; INITIALIZED.
 (define output (open-output-string))
@@ -34,5 +41,5 @@
     (parameterize ([current-output-port output])
       (mdl-session-call session "SAVE-IT"))))
 (check-true (exn:fail? failure))
-(check-true (regexp-match? #rx"unassigned or non-applicable MDL operator SUBSTRUC$"
+(check-true (regexp-match? #rx"unassigned or non-applicable MDL operator ON$"
                            (exn-message failure)))
