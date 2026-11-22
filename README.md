@@ -19,9 +19,10 @@ path (`<FLOAD "77loadall.mud">` then `<SAVE-IT>`) now records SAVE of
 (77rooms.mud:26), GETSYS, `ON "BLOCKED"` and START (welcome text), then
 stops in CONTIN at `77rooms.mud:301` with `mdl-gval: unassigned MDL global
 REP` (known XFAIL, `make test-m3-saveit`, 27 assertions). Gate result for
-this slice: scoped PASS in the sandbox for `tests/on_save_test.rkt` (146)
-and `make test-m3-saveit`; the full `make test` and the `/tmp`-writing
-historical targets must still be run outside the sandbox. RESET, the
+this slice: full gate PASS outside the sandbox at `fe495b1` (`make test`,
+`test-historical`, `m3-source-progress`, `test-m3-historical-gc`,
+`test-m3-start-back`, `test-m3-saveit`, `test-m3-andq`: all exit 0; see
+`docs/evidence/M3/S5-SAVE-RECORD.md`). RESET, the
 LISTEN/REP loop, PRINC, READSTRING, interactive input and smoke parity are
 unsupported. **INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have not
 passed; M3 is incomplete.** Next: a maintainer decision and slice for the

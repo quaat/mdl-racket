@@ -1144,6 +1144,10 @@ part 1 for IPC):**
    arguments. The manual's multi-name form (`<SAVE name1 name2 device dir
    gc?>`) is therefore refused too (its second STRING is a non-FALSE
    `gc?` position here). Validation happens before any record is appended.
+   The one-argument form is accepted, although under the manual an omitted
+   `gc?` also means "collect"; this asymmetry is intended. `<SAVE .FN>` is
+   the only form the game uses, an explicit non-FALSE `gc?` is refused
+   rather than silently ignored, and the missing GC is a recorded deviation.
 3. **RESTORE stays strictly refused** with an explicit error naming this
    decision. Neither Confusion's behavior (RESTORE swaps the heap and
    re-enters the LISTEN loop, so SAVE never returns again) nor the manual's

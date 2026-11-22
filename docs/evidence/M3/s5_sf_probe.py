@@ -64,7 +64,7 @@ def main():
         rows.append({"name": c["name"], "note": c.get("note", ""), "cwd_kind": c.get("cwd", "empty"),
                      "argv": c.get("argv", []), "input": stdin, "exit_status": status,
                      "stdout": out, "stderr": err, "files_created_or_changed": changed,
-                     "workdir": str(d)})
+                     "workdir": "$TMPDIR/sf-work/" + d.name})
         print(f"{c['name']}: exit={status} changed={list(changed)}")
     res = {"schema_version": 1, "name": data["name"],
            "recorded_at": datetime.now(timezone.utc).isoformat(),

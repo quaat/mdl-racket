@@ -15,7 +15,7 @@
       "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n101101\n",
       "stderr": "",
       "files_created_or_changed": {},
-      "workdir": "/tmp/claude-1000/sf-work/muddle-value-ksv4_tms"
+      "workdir": "$TMPDIR/sf-work/muddle-value-ksv4_tms"
     },
     {
       "name": "intlevel-default",
@@ -27,7 +27,7 @@
       "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n",
       "stderr": "",
       "files_created_or_changed": {},
-      "workdir": "/tmp/claude-1000/sf-work/intlevel-default-5j5n0e3k"
+      "workdir": "$TMPDIR/sf-work/intlevel-default-5j5n0e3k"
     },
     {
       "name": "save-return-and-intlevel",
@@ -47,7 +47,7 @@
           ]
         }
       },
-      "workdir": "/tmp/claude-1000/sf-work/save-return-and-intlevel-vg6ey73y"
+      "workdir": "$TMPDIR/sf-work/save-return-and-intlevel-vg6ey73y"
     },
     {
       "name": "save-mdl-dir",
@@ -59,7 +59,7 @@
       "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
       "stderr": "",
       "files_created_or_changed": {},
-      "workdir": "/tmp/claude-1000/sf-work/save-mdl-dir-240034fd"
+      "workdir": "$TMPDIR/sf-work/save-mdl-dir-240034fd"
     },
     {
       "name": "save-mdl-dir-present",
@@ -82,7 +82,7 @@
           ]
         }
       },
-      "workdir": "/tmp/claude-1000/sf-work/save-mdl-dir-present-l0blegyi"
+      "workdir": "$TMPDIR/sf-work/save-mdl-dir-present-l0blegyi"
     },
     {
       "name": "save-midprogram-make",
@@ -102,7 +102,7 @@
           ]
         }
       },
-      "workdir": "/tmp/claude-1000/sf-work/save-midprogram-make-7ssnbxq7"
+      "workdir": "$TMPDIR/sf-work/save-midprogram-make-7ssnbxq7"
     },
     {
       "name": "save-midprogram-restore-r",
@@ -117,7 +117,7 @@
       "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n11\n100000100000\n",
       "stderr": "",
       "files_created_or_changed": {},
-      "workdir": "/tmp/claude-1000/sf-work/save-midprogram-make-7ssnbxq7"
+      "workdir": "$TMPDIR/sf-work/save-midprogram-make-7ssnbxq7"
     },
     {
       "name": "restore-subr-same-process",
@@ -137,7 +137,7 @@
           ]
         }
       },
-      "workdir": "/tmp/claude-1000/sf-work/restore-subr-same-process-jrcqn3mi"
+      "workdir": "$TMPDIR/sf-work/restore-subr-same-process-jrcqn3mi"
     },
     {
       "name": "restore-applies-rep",
@@ -157,7 +157,7 @@
           ]
         }
       },
-      "workdir": "/tmp/claude-1000/sf-work/restore-applies-rep-r6ltrp4e"
+      "workdir": "$TMPDIR/sf-work/restore-applies-rep-r6ltrp4e"
     },
     {
       "name": "restore-applies-rep-r",
@@ -172,7 +172,7 @@
       "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n[default REP read this]\"[default REP read this]\"\n",
       "stderr": "",
       "files_created_or_changed": {},
-      "workdir": "/tmp/claude-1000/sf-work/restore-applies-rep-r6ltrp4e"
+      "workdir": "$TMPDIR/sf-work/restore-applies-rep-r6ltrp4e"
     },
     {
       "name": "save-eval-make",
@@ -192,7 +192,7 @@
           ]
         }
       },
-      "workdir": "/tmp/claude-1000/sf-work/save-eval-make-vfr_3vvh"
+      "workdir": "$TMPDIR/sf-work/save-eval-make-vfr_3vvh"
     },
     {
       "name": "save-eval-restore",
@@ -207,7 +207,7 @@
       "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n[save-eval form ran]0",
       "stderr": "",
       "files_created_or_changed": {},
-      "workdir": "/tmp/claude-1000/sf-work/save-eval-make-vfr_3vvh"
+      "workdir": "$TMPDIR/sf-work/save-eval-make-vfr_3vvh"
     }
   ]
 }

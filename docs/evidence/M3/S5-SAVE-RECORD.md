@@ -137,6 +137,39 @@ record: #(struct:mdl-save-record 1 "<MDL>MADADV.SAVE" 100000)
 `make test-historical`, `make test-m3-historical-gc`, `make m3-source-progress`.
 No sandboxed result above should be read as a full-gate PASS.
 
+### Unsandboxed full gate (orchestrator, 2026-11-23, commit `fe495b1`)
+
+Run outside the sandbox as the normal user, with `PLTCOLLECTS=":$PWD" TMPDIR=/tmp
+PYTHON=/usr/bin/python3 PYTHONPATH=$PWD/.sandbox-pydeps/lib`:
+
+| command | exit |
+|---|---|
+| `make test` | 0 |
+| `make test-historical` | 0 (`historical OBLIST placement matches pinned Confusion (2350 entries)`) |
+| `make m3-source-progress` | 0 |
+| `make test-m3-historical-gc` | 0 |
+| `make test-m3-start-back` | 0 |
+| `make test-m3-saveit` | 0 (27 tests passed) |
+| `make test-m3-andq` | 0 |
+| `git diff --check` | 0 |
+
+No log contained `test failures`, `FAILURE` or `raised an exception`.
+
+**Full gate: PASS** for this slice. That is not an INITIALIZED claim: startup still
+stops at 77rooms.mud:301.
+
+### Review follow-ups (independent review: APPROVE WITH NITS)
+
+- **Paths:** `s5_sf_probe.py` now records `workdir` as `$TMPDIR/sf-work/<dir>`. The two
+  recorded reference JSON files had their 17 `workdir` values rewritten from the
+  developer's absolute temp path to that form. This was a text substitution; the
+  probes were not re-run, and no other field changed.
+- **Delivery-path guard:** it is now tested. A host-level `module+ test` in
+  `mdl/runtime/core.rkt` injects an IPC and a BLOCKED occurrence into
+  `mdl-deliver-occurrence!` and expects the strict error. Replacing the check with
+  `(void)` fails 2/42.
+- **ADR-0048:** now states that accepting the one-argument form is intended.
+
 ## Deviations (recorded)
 
 - SAVE writes no image. Confusion writes one, and returns `#FALSE ()` when it cannot

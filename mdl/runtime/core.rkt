@@ -4269,3 +4269,20 @@
 
 ;; Initialize the process-wide default context (see "Execution contexts").
 (mdl-ensure-terminal-channels!)
+
+;; Delivery-path guard for sourceless predefined events (ADR-0047 IPC,
+;; ADR-0048 BLOCKED). No MDL-level path can queue such an occurrence, so this
+;; host-level test injects one directly to prove the defensive check bites.
+(module+ test
+  (for ([name (in-list '("IPC" "BLOCKED"))]
+        [priority (in-list '(1 100))])
+    (parameterize ([current-mdl-globals (make-hasheq)]
+                   [current-mdl-locals (list (make-hasheq))]
+                   [current-mdl-atom-space (make-mdl-atom-space)])
+      (define header (mdl-event name priority))
+      (check-exn (regexp (string-append "^mdl-deliver-occurrence!: " name ": "))
+                 (lambda ()
+                   (mdl-deliver-occurrence!
+                    (mdl-interrupt-occurrence header '()))))
+      (check-exn (regexp (string-append name ": "))
+                 (lambda () (mdl-emit-event! name '()))))))
