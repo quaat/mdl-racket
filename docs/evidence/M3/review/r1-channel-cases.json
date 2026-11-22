@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "m3-review-r1-channels",
+  "cases": [
+    {"name": "lval-gval-same", "expression": "<TYPE .OUTCHAN>\n<TYPE ,OUTCHAN>\n<==? .OUTCHAN ,OUTCHAN>\n<==? .INCHAN ,INCHAN>"},
+    {"name": "root-oblist", "expression": "<==? OUTCHAN OUTCHAN!-ROOT>\n<==? INCHAN INCHAN!-ROOT>"},
+    {"name": "printstring-default", "expression": "<PRINTSTRING \"abc\">"},
+    {"name": "printstring-explicit-lval", "expression": "<PRINTSTRING \"abc\" .OUTCHAN>"},
+    {"name": "printstring-explicit-gval", "expression": "<PRINTSTRING \"abc\" ,OUTCHAN>"},
+    {"name": "printstring-count", "expression": "<PRINTSTRING \"abcdef\" .OUTCHAN 2>"},
+    {"name": "printstring-count-over", "expression": "<PRINTSTRING \"ab\" .OUTCHAN 9>"},
+    {"name": "printstring-wrong-type", "expression": "<PRINTSTRING \"abc\" 5>"},
+    {"name": "printstring-vector-chan", "expression": "<PRINTSTRING \"abc\" [1 2]>"},
+    {"name": "printstring-inchan", "expression": "<PRINTSTRING \"abc\" .INCHAN>"},
+    {"name": "printstring-negative-count", "expression": "<PRINTSTRING \"abc\" .OUTCHAN -1>"},
+    {"name": "terpri-inchan", "expression": "<TERPRI .INCHAN>"},
+    {"name": "crlf-inchan", "expression": "<CRLF .INCHAN>"},
+    {"name": "crlf-default", "expression": "<CRLF>"},
+    {"name": "setg-outchan-default-uses-lval", "expression": "<SETG OUTCHAN .INCHAN>\n<PRINTSTRING \"abc\">"},
+    {"name": "set-outchan-default-uses-lval", "expression": "<SET OUTCHAN .INCHAN>\n<PRINTSTRING \"abc\">"},
+    {"name": "prog-bound-inchan-default", "expression": "<PROG ((OUTCHAN .INCHAN)) <PRINTSTRING \"abc\"> 1>"},
+    {"name": "prog-bound-fix-default", "expression": "<PROG ((OUTCHAN 5)) <PRINTSTRING \"abc\"> 1>"},
+    {"name": "prog-bound-gval-default", "expression": "<PROG ((OUTCHAN ,OUTCHAN)) <PRINTSTRING \"abc\"> 1>"},
+    {"name": "terpri-default", "expression": "<TERPRI>"},
+    {"name": "unassign-lval-default", "expression": "<UNASSIGN OUTCHAN>\n<PRINTSTRING \"abc\">"},
+    {"name": "chtype-vector-roundtrip", "expression": "<PRINTSTRING \"abc\" <CHTYPE <CHTYPE .OUTCHAN VECTOR> CHANNEL>>"}
+  ]
+}

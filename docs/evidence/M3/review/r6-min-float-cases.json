@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "name": "m3-review-r6-min-float-native-reference",
+  "cases": [
+    {"name": "min-zero", "expression": "<MIN>"},
+    {"name": "min-zero-type", "expression": "<TYPE <MIN>>"},
+    {"name": "min-zero-chtype-fix", "expression": "<CHTYPE <MIN> FIX>"},
+    {"name": "min-zero-chtype-word", "expression": "<CHTYPE <MIN> WORD>"},
+    {"name": "source-bigfix", "expression": "</ <CHTYPE <MIN> FIX> 2>"},
+    {"name": "min-zero-fix", "expression": "<FIX <MIN>>"},
+    {"name": "min-zero-float", "expression": "<FLOAT <MIN>>"},
+    {"name": "min-zero-plus-one", "expression": "<+ <MIN> 1>"},
+    {"name": "min-zero-times-two", "expression": "<* <MIN> 2>"},
+    {"name": "min-zero-minus-self", "expression": "<- <MIN> <MIN>>"},
+    {"name": "min-zero-gt-one", "expression": "<G? <MIN> 1>"},
+    {"name": "min-zero-lt-one", "expression": "<L? <MIN> 1>"},
+    {"name": "min-zero-identical-self", "expression": "<==? <MIN> <MIN>>"},
+    {"name": "min-zero-equal-self", "expression": "<=? <MIN> <MIN>>"},
+    {"name": "min-zero-with-one", "expression": "<MIN <MIN> 1>"},
+    {"name": "min-mixed", "expression": "<MIN 1 2.0>"},
+    {"name": "min-mixed-float-first", "expression": "<MIN 2.0 1>"},
+    {"name": "max-zero", "expression": "<MAX>"},
+    {"name": "max-zero-type", "expression": "<TYPE <MAX>>"},
+    {"name": "max-zero-chtype-fix", "expression": "<CHTYPE <MAX> FIX>"},
+    {"name": "chtype-one-float-fix", "expression": "<CHTYPE 1.0 FIX>"},
+    {"name": "chtype-half-float-fix", "expression": "<CHTYPE 0.5 FIX>"},
+    {"name": "chtype-neg-half-float-fix", "expression": "<CHTYPE -0.5 FIX>"},
+    {"name": "chtype-tenth-float-fix", "expression": "<CHTYPE 0.1 FIX>"},
+    {"name": "chtype-fix-float", "expression": "<CHTYPE 1 FLOAT>"},
+    {"name": "andb-min-one", "expression": "<ANDB <MIN> 1>"},
+    {"name": "prin1-min", "expression": "<PRIN1 <MIN>>"}
+  ]
+}
