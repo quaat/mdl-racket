@@ -1,0 +1,3 @@
+#lang mdl
+;"Review R1: print through this context's default OUTCHAN."
+<SETG R1-B-RESULT <PRINTSTRING "from-b">>

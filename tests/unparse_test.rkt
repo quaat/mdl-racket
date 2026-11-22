@@ -132,3 +132,13 @@
 (check-exn #rx"UNPARSE radix must be a FIX" (lambda () (run "<UNPARSE 1 37>")))
 ;; Radix 10 explicit: works (decimal).
 (check-equal? (run "<UNPARSE -5 10>") "-5")
+
+;; ── ATOM reachability uses the single authoritative search path (#118) ────
+;; The current path is the LVAL of ROOT OBLIST, including PROG/AUX/formal
+;; bindings, not the session's default path. An INITIAL atom UNPARSEd while
+;; OBLIST is bound to (ROOT) alone is not reachable: Confusion prints the
+;; trailer FOO!-INITIAL, which is not implemented, so this is a strict error.
+(check-exn #rx"UNPARSE ATOM: trailer notation not implemented"
+           (lambda () (run "<SETG A 'FOO> <PROG ((OBLIST (<ROOT>))) <UNPARSE ,A>>")))
+(check-equal? (run "<SETG A 'FOO> <PROG ((OBLIST (<GET INITIAL OBLIST> <ROOT>))) <UNPARSE ,A>>")
+              "FOO")

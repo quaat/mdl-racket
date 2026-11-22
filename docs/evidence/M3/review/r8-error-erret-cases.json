@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "name": "m3-review-r8-error-erret-native-reference",
+  "cases": [
+    {"name": "event-error-registration", "expression": "<EVENT \"ERROR\" 8>"},
+    {"name": "handler-registration", "expression": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (F \"TUPLE\" T) <ERRET 42 .F>>>"},
+    {"name": "explicit-error-with-handler", "expression": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (F \"TUPLE\" T) <ERRET 42 .F>>>\n<+ <ERROR PROBE 9> 1>"},
+    {"name": "explicit-error-erret-from-listen", "expression": "<+ <ERROR PROBE 9> 1>\n<ERRET 41>"},
+    {"name": "error-listen-int-level", "expression": "<INT-LEVEL 3>\n<+ <ERROR PROBE> 1>\n<INT-LEVEL>\n<ERRET 5>\n<INT-LEVEL>"},
+    {"name": "primitive-wrong-type", "expression": "<+ 1 \"a\">"},
+    {"name": "primitive-wrong-type-erret", "expression": "<+ <+ 1 \"a\"> 1>\n<ERRET 5>"},
+    {"name": "primitive-unassigned", "expression": ".NOT-A-BOUND-LVAL"},
+    {"name": "primitive-unbound-gval", "expression": ",NOT-A-BOUND-GVAL"},
+    {"name": "primitive-too-many-args", "expression": "<MOD 1 2 3>"},
+    {"name": "primitive-zero-divide", "expression": "</ 1 0>"},
+    {"name": "erret-without-error", "expression": "<ERRET 1>"}
+  ]
+}
