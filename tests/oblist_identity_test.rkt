@@ -218,3 +218,50 @@
    (run "<BLOCK (<MOBLIST NR>)>")
    (check-eq? (mdl-atom "TOPLEVEL!-") toplevel)
    (check-exn #rx"trailer" (lambda () (mdl-atom "!-")))))
+
+;; Review follow-up: host-internal defaults must name ROOT atoms, not
+;; strings resolved through .OBLIST (Confusion printstring-default-*).
+(define (load-printing source)
+  (define dir (make-temporary-file "oblist-printstring-~a" 'directory))
+  (dynamic-wind
+   void
+   (lambda ()
+     (call-with-output-file (build-path dir "main.mud")
+       (lambda (out) (write-string source out)))
+     (define session (make-mdl-session dir))
+     (define port (open-output-string))
+     (define result
+       (parameterize ([current-output-port port])
+         (mdl-session-load! session "main.mud")))
+     (values (hash-ref result 'status)
+             (let ([f (hash-ref result 'failure)]) (and f (hash-ref f 'exception)))
+             (get-output-string port)))
+   (lambda () (delete-directory/files dir))))
+
+(test-case "PRINTSTRING default channel ignores a user OUTCHAN on .OBLIST"
+  (define-values (status failure output)
+    (load-printing
+     "<SETG OB1 <MOBLIST OB1>>\n<INSERT \"OUTCHAN\" ,OB1>\n<BLOCK (,OB1 <ROOT>)>\n<PRINTSTRING \"hello\">\n<ENDBLOCK>\n"))
+  (check-equal? status "PASS" (format "~a" failure))
+  (check-equal? output "hello"))
+
+(test-case "PRINTSTRING default channel works with an unassigned OBLIST binding"
+  (define-values (status failure output)
+    (load-printing "<DEFINE P (\"AUX\" OBLIST) <PRINTSTRING \"hello\">>\n<P>\n"))
+  (check-equal? status "PASS" (format "~a" failure))
+  (check-equal? output "hello"))
+
+;; Confusion internal-name-placement: GO and DIVERT-AGC are in neither ROOT
+;; nor INITIAL at startup; INTERRUPTS is in ROOT.
+(test-case "seeded ROOT internal names match Confusion placement"
+  (in-fresh-session
+   (define r (root))
+   (check-true (mdl-false? (lookup "GO" r)))
+   (check-true (mdl-false? (lookup "DIVERT-AGC" r)))
+   (check-true (mdl-false? (lookup "APPLICABLE" r)))
+   (check-true (mdl-atom? (lookup "INTERRUPTS" r)))
+   (for ([name (in-list '("T" "QUOTE" "REDEFINE" "MUDDLE" "INCHAN" "OUTCHAN"
+                          "FLOAD" "DEFINE" "DEFMAC" "FUNCTION" "PROG" "REPEAT"
+                          "RETURN" "AGAIN" "UNWIND" "GDECL" "COND" "AND" "OR"
+                          "NOT"))])
+     (check-true (mdl-atom? (lookup name r)) name))))

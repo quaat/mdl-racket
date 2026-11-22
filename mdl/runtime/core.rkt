@@ -92,6 +92,11 @@
 (define current-mdl-map-step (make-parameter #f))
 (define current-mdl-map-leave (make-parameter #f))
 
+;; A STRING here comes from MDL code (e.g. <SET "FOO" 3>, pre-existing
+;; acceptance) or from the host test/introspection API, and both mean "the
+;; ATOM the reader would produce", so it resolves through .OBLIST.
+;; Runtime-internal callers must never pass a STRING: they pass
+;; (mdl-root-atom NAME) so a user OBLIST cannot shadow or break them.
 (define (binding-atom who value)
   (cond [(mdl-atom? value) value]
         [(string? value) (mdl-atom value)]
@@ -1813,14 +1818,17 @@
               ;; Top-level default LVAL of ROOT OBLIST; see current-lookup-path.
               (mcons initial (mcons root '())) '()))
 
-;; ROOT names that are not built-in TYPEs or builtin-table SUBRs: values
-;; the runtime itself produces or compares (T, QUOTE, REDEFINE, ...),
-;; interpreter-supplied globals and channels (MUDDLE, INCHAN, OUTCHAN,
-;; FLOAD), interrupt names, and the FSUBRs the compiler handles by name.
+;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
+;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
+;; internal-name-placement): values the runtime produces or compares (T,
+;; QUOTE, REDEFINE); interpreter-supplied globals and channels (MUDDLE,
+;; INCHAN, OUTCHAN, FLOAD); the INTERRUPTS OBLIST name; and the FSUBRs the
+;; compiler handles by name. GO, DIVERT-AGC and APPLICABLE are deliberately
+;; absent: Confusion has them in neither ROOT nor INITIAL at startup.
 (define root-internal-names
-  '("T" "QUOTE" "REDEFINE" "MUDDLE" "INCHAN" "OUTCHAN" "FLOAD"
-    "DIVERT-AGC" "DEFINE" "DEFMAC" "FUNCTION" "PROG" "REPEAT" "RETURN"
-    "AGAIN" "GO" "UNWIND" "GDECL" "COND" "AND" "OR" "NOT"))
+  '("T" "QUOTE" "REDEFINE" "MUDDLE" "INCHAN" "OUTCHAN" "FLOAD" "INTERRUPTS"
+    "DEFINE" "DEFMAC" "FUNCTION" "PROG" "REPEAT" "RETURN" "AGAIN" "UNWIND"
+    "GDECL" "COND" "AND" "OR" "NOT"))
 
 ;; Runtime-internal name -> the current session's ROOT atom. It never reads
 ;; .OBLIST and never interns: every internal name is seeded when the
@@ -3105,7 +3113,7 @@
                      (if fill (lambda () (mdl-eval fill))
                          (lambda () (mdl-character #\nul)))))
 
-(define (mdl-printstring buffer [channel (mdl-lval "OUTCHAN")] [count #f])
+(define (mdl-printstring buffer [channel (mdl-lval (mdl-root-atom "OUTCHAN"))] [count #f])
   (unless (mdl-string? buffer)
     (error 'mdl-printstring "PRINTSTRING expects a STRING buffer"))
   (unless (and (eq? (mdl-type channel) (mdl-root-atom "CHANNEL"))

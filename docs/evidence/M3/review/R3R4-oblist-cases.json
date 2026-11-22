@@ -53,6 +53,18 @@
     {
       "name": "empty-trailer-root",
       "expression": "(<==? TOPLEVEL!- <LOOKUP \"TOPLEVEL\" <ROOT>>> <==? NEWROOTX!- <LOOKUP \"NEWROOTX\" <ROOT>>> <LOOKUP \"NEWROOTX\" <GET INITIAL OBLIST>> <==? T!- T> <==? <OBLIST? FOO!-INITIAL!-> <GET INITIAL OBLIST>>)"
+    },
+    {
+      "name": "printstring-default-outchan-shadowed-by-block",
+      "expression": "<SETG OB1 <MOBLIST OB1>> 1\n<INSERT \"OUTCHAN\" ,OB1> 1\n<BLOCK (,OB1 <ROOT>)> 1\n<PRINTSTRING \"hello\">\n<ENDBLOCK> 1"
+    },
+    {
+      "name": "printstring-default-outchan-unassigned-oblist",
+      "expression": "<DEFINE P (\"AUX\" OBLIST) <PRINTSTRING \"hello\">>\n<P>"
+    },
+    {
+      "name": "internal-name-placement",
+      "expression": "<MAPF ,LIST <FUNCTION (N) (.N <TYPE <LOOKUP .N <ROOT>>> <TYPE <LOOKUP .N <GET INITIAL OBLIST>>>)> (\"T\" \"QUOTE\" \"REDEFINE\" \"MUDDLE\" \"INCHAN\" \"OUTCHAN\" \"FLOAD\" \"DIVERT-AGC\" \"DEFINE\" \"DEFMAC\" \"FUNCTION\" \"PROG\" \"REPEAT\" \"RETURN\" \"AGAIN\" \"GO\" \"UNWIND\" \"GDECL\" \"COND\" \"AND\" \"OR\" \"NOT\" \"INTERRUPTS\" \"APPLICABLE\" \"ELSE\")>"
     }
   ]
 }
