@@ -49,7 +49,11 @@
 (check* (check-true (mdl-false? (run "<L? <MIN> 1>"))))
 (check* (check-equal? (name "<L? 1 <MIN>>") "T"))
 (check* (check-true (mdl-false? (run "<0? <MIN>>"))))
-(check* (check-equal? (run "<FLOAT <MIN>>") greatest-float))
+(check* (check-equal? (run "<FLOAT 3>") 3.0))
+;; FLOAT takes a FIX (manual 3.4; Confusion: "Arg to FLOAT must be FIX").
+(check* (check-exn #rx"FLOAT must be FIX" (lambda () (run "<FLOAT <MIN>>"))))
+(check* (check-exn #rx"FLOAT must be FIX" (lambda () (run "<FLOAT 1.5>"))))
+(check* (check-exn #rx"FLOAT must be FIX" (lambda () (run "<FLOAT A>"))))
 (check* (check-exn #rx"FIX overflow" (lambda () (run "<FIX <MIN>>"))))
 
 ;; CHTYPE from FLOAT to a WORD-primtype TYPE exposes the PDP-10
@@ -66,3 +70,44 @@
 ;; Bit operations on FLOAT remain unsupported, for <MIN> as for 1.0.
 (check* (check-exn exn:fail? (lambda () (run "<ANDB <MIN> 1>"))))
 (check* (check-exn exn:fail? (lambda () (run "<ANDB 1.0 3>"))))
+
+;; Smallest positive PDP-10 FLOAT, 0.5*2^-128: exponent field 0, word
+;; 000400000000 (octal). Half of it has no 36-bit image.
+(define smallest-expr
+  (string-append "</ 0.5 1024.0 1024.0 1024.0 1024.0 1024.0 1024.0 16.0"
+                 " 1024.0 1024.0 1024.0 1024.0 1024.0 1024.0 16.0>"))
+(check* (check-equal? (run (string-append "<CHTYPE " smallest-expr " FIX>"))
+                      #o000400000000))
+(check* (check-exn #rx"PDP-10 FLOAT"
+                   (lambda () (run (string-append "<CHTYPE </ " smallest-expr " 2.0> FIX>")))))
+
+;; A user NEWTYPE of primtype WORD receives the same image.
+(check* (check-equal? (run "<NEWTYPE FOO WORD> <CHTYPE <CHTYPE 1.0 FOO> FIX>")
+                      #o201400000000))
+(check* (check-equal? (name "<NEWTYPE FOO WORD> <TYPE <CHTYPE -0.5 FOO>>") "FOO"))
+
+;; CHUTYPE converts each FLOAT element through the same CHTYPE path.
+(check* (check-equal? (run "<SET U <UVECTOR 1.0 0.5>> <CHUTYPE .U FIX> <1 .U>")
+                      #o201400000000))
+(check* (check-equal? (run "<SET U <UVECTOR 1.0 0.5>> <CHUTYPE .U FIX> <2 .U>")
+                      #o200400000000))
+(check* (check-equal? (run "<NEWTYPE FOO WORD> <SET U <UVECTOR 1.0>> <CHUTYPE .U FOO>
+                            <CHTYPE <1 .U> FIX>")
+                      #o201400000000))
+;; An element without an exact image fails the whole CHUTYPE: no element
+;; and not the element type is changed.
+(check* (check-exn #rx"PDP-10 FLOAT"
+                   (lambda () (run "<SET U <UVECTOR 1.0 0.1>> <CHUTYPE .U FIX>"))))
+(test-case "failed CHUTYPE leaves the UVECTOR unchanged"
+  (parameterize ([current-namespace ns]
+                 [current-mdl-globals (make-hasheq)]
+                 [current-mdl-locals (list (make-hasheq))]
+                 [current-mdl-atom-space (make-mdl-atom-space)])
+    (define (eval-mdl source)
+      (for/fold ([value #f]) ([expr (in-list (compile-program (parse-mdl source)))])
+        (eval expr)))
+    (eval-mdl "<SETG U <UVECTOR 1.0 0.1>>")
+    (check-exn #rx"PDP-10 FLOAT" (lambda () (eval-mdl "<CHUTYPE ,U FIX>")))
+    (check-equal? (mdl-atom-pname (eval-mdl "<UTYPE ,U>")) "FLOAT")
+    (check-equal? (eval-mdl "<1 ,U>") 1.0)
+    (check-equal? (eval-mdl "<2 ,U>") 0.1)))

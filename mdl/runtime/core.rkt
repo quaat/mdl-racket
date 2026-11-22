@@ -2363,8 +2363,11 @@
   (check-fix 'mdl-fix (inexact->exact (truncate value))))
 
 (define (mdl-float value)
-  (check-number 'mdl-float value)
-  (exact->inexact value))
+  ;; Manual 3.4: FLOAT converts a FIX; pinned Confusion also rejects a
+  ;; FLOAT argument ("Arg to FLOAT must be FIX").
+  (unless (exact-integer? value)
+    (error 'mdl-float "Arg to FLOAT must be FIX"))
+  (exact->inexact (check-fix 'mdl-float value)))
 
 (define (mdl-bits width [edge 0])
   (unless (and (exact-integer? width) (exact-integer? edge)
