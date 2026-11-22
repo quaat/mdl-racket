@@ -125,6 +125,28 @@
    (t? (run "<SETG A 0>
              <=? <MAPF ,VECTOR ,IUVECTOR '(2) '(<SETG A <+ ,A 1>>)> [![1 2!]]>"))))
 
+;; A non-uniform element fails as soon as it is produced: later elements are
+;; never evaluated. Pinned Confusion stops at the same count
+;; (docs/evidence/M3/review/r5-iuvector-uniform-reference.json).
+(test-case "IUVECTOR rejects a non-uniform element before evaluating the rest"
+  (define (count-after-failure fill size)
+    (call-with-session
+     (lambda ()
+       (run-in-session "<SETG A 0>")
+       (check-exn #rx"UVECTOR"
+                  (lambda () (run-in-session (format "<IUVECTOR ~a '~a>" size fill))))
+       (check-exn #rx"UVECTOR"
+                  (lambda ()
+                    (run-in-session (format "<SETG A 0> <APPLY ,IUVECTOR ~a '~a>" size fill))))
+       (run-in-session ",A"))))
+  (check-equal?
+   (count-after-failure "<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 2> \"X\") (T 1)>>" 4)
+   2)
+  (check-equal?
+   (count-after-failure "<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 3> FOO) (T 1)>>" 5)
+   3)
+  (check-equal? (count-after-failure "<PROG () <SETG A <+ ,A 1>> \"X\">" 3) 1))
+
 ;; --- ISTRING -------------------------------------------------------------
 (paths "ISTRING quoted CHARACTER form"
        "<ISTRING 3 '<ASCII <SETG A <+ ,A 1>>>>"
