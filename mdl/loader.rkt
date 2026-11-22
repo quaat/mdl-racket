@@ -81,9 +81,10 @@
                  (mdl-root-atom "MUDDLE") mdl-interpreter-version)
       (mdl-define! (mdl-root-atom "FLOAD")
                    (lambda (name)
-                     (unless (string? name)
-                       (error 'mdl-fload "FLOAD expects a STRING path"))
-                     (load-internal! session name)))))
+                     (load-internal!
+                      session
+                      (mdl-string-snapshot 'mdl-fload name
+                                           "FLOAD expects a STRING path"))))))
   session)
 
 (define (inside-root? root path)
