@@ -485,7 +485,7 @@
 
 (define (compile-and args locals)
   (if (null? args)
-      '(mdl-atom "T")
+      '(mdl-root-atom "T")
       (let loop ([remaining args])
         (if (null? (cdr remaining))
             (compile-expression (car remaining) locals)
@@ -562,7 +562,7 @@
            (when (> (length args) 2)
              (unsupported n "RETURN accepts at most a value and activation"))
            `(mdl-return ,(if (null? args)
-                             '(mdl-atom "T")
+                             '(mdl-root-atom "T")
                              (compile-expression (car args) locals))
                         ,@(if (= (length args) 2)
                               (list (compile-expression (second args) locals))
@@ -604,7 +604,7 @@
            (unless (= (length args) 1) (unsupported n "NOT expects one argument"))
            `(if (mdl-truthy? ,(compile-expression (first args) locals))
                 (mdl-false '())
-                (mdl-atom "T"))]
+                (mdl-root-atom "T"))]
           [(QUOTE)
            (unless (= (length args) 1) (unsupported n "QUOTE expects one argument"))
            (compile-quote (first args))]
