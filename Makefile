@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc m2-check m3-source-progress check-source reference-build reference-capture reference-capture-boot reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -21,7 +21,7 @@ test-racket:
 	@bash scripts/test_racket.sh
 
 test-python:
-	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py
+	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py tests/test_boot_reference.py
 
 test-historical: sources
 	@racket tests/historical_vfload_test.rkt
@@ -72,6 +72,15 @@ reference-build: sources
 
 reference-capture:
 	@$(PYTHON) scripts/reference_runner.py capture --scenario tests/scenarios/house.json --output artifacts/reference/house.json
+
+# Fresh-boot scenario capture (BOOT-REF). Requires the native mdli binary and gcc.
+# The LD_PRELOAD shim is compiled at run time into .cache/build/shim/ (gitignored).
+# Clock is frozen via MDL_FIXED_EPOCH from tests/scenarios/house-boot.json.
+# Output is a CANDIDATE — review before approving as golden.
+reference-capture-boot:
+	@$(PYTHON) scripts/boot_reference.py capture \
+		--scenario tests/scenarios/house-boot.json \
+		--output artifacts/reference/house-boot.json
 
 compare:
 	@test -n "$(CANDIDATE)" || (echo 'Usage: make compare CANDIDATE=artifacts/candidate/house.json' >&2; exit 2)

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "engine": "confusion-patched-1977-boot",
+  "scenario": "house-boot",
+  "run_mud": "/home/thomas/project/racket/mdl-racket-zork-harness/.claude/worktrees/agent-a64a330470b6b2df4/.cache/upstream/mdlzork/mdlzork_771212/patched_confusion/run.mud",
+  "fixed_epoch": 250776000,
+  "captured_at": "2026-11-22T21:59:32.147514+00:00",
+  "engine_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "game_files_sha256": "9788550ab64baa7d0b6db5db86ce85383149340f88af9718a0660890200f447b",
+  "boot_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\n\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n",
+  "commands": [
+    {
+      "input": "north",
+      "output": "You are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "west",
+      "output": "West of House\nThere is a small mailbox here.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "open mailbox",
+      "output": "Opening the mailbox reveals a leaflet.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "take leaflet",
+      "output": "Taken.\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "inventory",
+      "output": "You are carrying:\nA leaflet\n",
+      "prompt_returned": true
+    },
+    {
+      "input": "score",
+      "output": "\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n",
+      "prompt_returned": true
+    }
+  ],
+  "complete": true,
+  "error": null,
+  "process_exitstatus": null,
+  "process_signalstatus": 1,
+  "candidate": true,
+  "candidate_note": "CANDIDATE: awaiting maintainer approval. NOT an approved golden. Run twice — transcripts byte-identical (ignoring captured_at)."
+}
