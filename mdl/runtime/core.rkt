@@ -1,6 +1,7 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
-(require racket/mpair racket/list racket/string racket/date "memory.rkt")
+(require racket/mpair racket/list racket/string racket/date racket/runtime-path
+         "memory.rkt")
 (provide current-mdl-globals current-mdl-locals
          current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
@@ -28,6 +29,7 @@
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          mdl-string-snapshot
          current-mdl-atom-space make-mdl-atom-space mdl-root-atom
+         mdl-oblist-pnames
          mdl-false mdl-false? mdl-false-payload
          decl-match-max-depth)
 
@@ -1760,24 +1762,27 @@
   (hash-set! named initial-name initial)
   (define oblist-name (atom-value "OBLIST" root))
   (hash-set! (oblist-value-entries root) "OBLIST" oblist-name)
-  ;; Manual 15.5 and Confusion (review/R3R4-oblist-reference.json): ROOT
-  ;; holds T, OBLIST, every SUBR/FSUBR name and the built-in TYPE names;
-  ;; INITIAL starts empty. Runtime-internal names are these ROOT atoms
-  ;; (mdl-root-atom), so they must exist before any user text is read.
-  ;; `internal` caches each seeded atom by name; later REMOVE/INSERT on
-  ;; ROOT cannot change which atom the runtime means.
+  ;; Manual 15.5 and Confusion: ROOT holds T, OBLIST, every SUBR/FSUBR
+  ;; name and the built-in TYPE names; INITIAL starts empty. ROOT is seeded
+  ;; with the complete pinned-Confusion startup inventory
+  ;; (historical-root-names), implemented or not, so source read before a
+  ;; primitive exists already holds the ROOT atom. `internal` caches every
+  ;; seeded atom by name; later REMOVE/INSERT on ROOT cannot change which
+  ;; atom the runtime means.
   (define internal (make-hash))
-  (for ([(name atom) (in-hash (oblist-value-entries root))])
+  (define entries (oblist-value-entries root))
+  (for ([name (in-list historical-root-names)])
+    (unless (hash-ref entries name #f)
+      (hash-set! entries name (atom-value name root))))
+  (for ([(name atom) (in-hash entries)])
     (hash-set! internal name atom))
+  ;; Every name the runtime itself needs must be historical; a new one is
+  ;; a deliberate inventory change backed by new reference evidence.
   (define (seed-root! name)
-    (define entries (oblist-value-entries root))
-    (define atom
-      (or (hash-ref entries name #f)
-          (let ([atom (atom-value name root)])
-            (hash-set! entries name atom)
-            atom)))
-    (hash-set! internal name atom)
-    atom)
+    (or (hash-ref entries name #f)
+        (error 'make-mdl-atom-space
+               "~a is not in the historical ROOT inventory (root-names.rktd)"
+               name)))
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
@@ -1824,6 +1829,19 @@
   '("T" "QUOTE" "REDEFINE" "MUDDLE" "INCHAN" "OUTCHAN" "FLOAD" "INTERRUPTS"
     "DEFINE" "DEFMAC" "FUNCTION" "PROG" "REPEAT" "RETURN" "AGAIN" "UNWIND"
     "GDECL" "COND" "AND" "OR" "NOT"))
+
+;; The complete startup ROOT inventory of pinned Confusion, a checked-in
+;; data file with provenance (docs/evidence/M3/review/
+;; confusion-root-names.json). Malformed data fails module loading.
+(define-runtime-path root-names-path "root-names.rktd")
+(define historical-root-names
+  (let ([names (call-with-input-file root-names-path read)])
+    (unless (and (list? names) (pair? names)
+                 (andmap (lambda (n) (and (string? n) (positive? (string-length n))))
+                         names)
+                 (= (length names) (length (remove-duplicates names))))
+      (error 'root-names "root-names.rktd must be a nonempty list of distinct PNAME strings"))
+    names))
 
 ;; Runtime-internal name -> the current session's ROOT atom. It never reads
 ;; .OBLIST and never interns: every internal name is seeded when the
@@ -2140,6 +2158,13 @@
         (set-atom-value-oblist! atom #f)
         atom)
       (mdl-false '())))
+
+;; Host-only introspection for reference comparisons (never an MDL
+;; primitive, never reachable from MDL code): the PNAMEs currently on an
+;; OBLIST, sorted.
+(define (mdl-oblist-pnames oblist)
+  (require-oblist 'mdl-oblist-pnames oblist)
+  (sort (hash-keys (oblist-value-entries oblist)) string<?))
 
 (define (mdl-oblist-of atom)
   (require-atom 'mdl-oblist? atom)

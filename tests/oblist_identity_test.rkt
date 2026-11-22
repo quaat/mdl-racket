@@ -3,7 +3,7 @@
 ;; and session ROOT identity for runtime-internal names.
 ;; Native observations: docs/evidence/M3/review/R3R4-oblist-reference.json
 ;; and R3R4-oblist-error-reference.json (pinned Confusion b5fcb91b...).
-(require rackunit racket/file racket/port
+(require rackunit racket/file racket/port racket/runtime-path
          "../mdl/parser.rkt" "../mdl/compiler.rkt" "../mdl/loader.rkt"
          "../mdl/runtime/core.rkt")
 (define-namespace-anchor anchor)
@@ -265,3 +265,45 @@
                           "RETURN" "AGAIN" "UNWIND" "GDECL" "COND" "AND" "OR"
                           "NOT"))])
      (check-true (mdl-atom? (lookup name r)) name))))
+
+;; Maintainer review: ROOT holds the complete pinned-Confusion startup
+;; inventory (mdl/runtime/root-names.rktd, evidence
+;; docs/evidence/M3/review/confusion-root-names.json), implemented or not,
+;; so source read before a primitive exists already holds the ROOT atom.
+(define-runtime-path root-names-file "../mdl/runtime/root-names.rktd")
+
+(test-case "every historical ROOT name is a ROOT atom in a fresh session"
+  (define names (call-with-input-file root-names-file read))
+  (check-equal? (length names) 240)
+  (in-fresh-session
+   (define r (root))
+   (for ([name (in-list names)])
+     (check-true (mdl-atom? (lookup name r)) name))
+   (for ([name (in-list '("PARSE" "PRINC" "MEMBER" "T" "FIX" "INCHAN"
+                          "OUTCHAN" "INTERRUPTS"))])
+     (check-eq? (oblist-of (run name)) r name)
+     (check-eq? (mdl-root-atom name) (lookup name r) name))
+   ;; Nothing outside the inventory is in a fresh ROOT.
+   (check-true (mdl-false? (lookup "GO" r)))
+   (check-true (mdl-false? (lookup "ELSE" r)))))
+
+(test-case "unimplemented ROOT names stay strictly unbound when applied"
+  (in-fresh-session
+   (check-exn #rx"unassigned or non-applicable MDL operator PARSE"
+              (lambda () (run "<PARSE \"FOO\">")))
+   (check-exn #rx"unassigned or non-applicable MDL operator PRINC"
+              (lambda () (run "<PRINC \"FOO\">")))
+   (check-exn #rx"unassigned MDL global MEMBER"
+              (lambda () (run ",MEMBER")))))
+
+(test-case "user INSERT, REMOVE and BLOCK cannot change mdl-root-atom"
+  (in-fresh-session
+   (define princ (mdl-root-atom "PRINC"))
+   (define t (mdl-root-atom "T"))
+   (run "<SETG OB1 <MOBLIST OB1>>")
+   (run "<INSERT \"PRINC\" ,OB1>")
+   (run "<REMOVE \"T\" <ROOT>>")
+   (run "<BLOCK (,OB1 <ROOT>)>")
+   (check-eq? (mdl-root-atom "PRINC") princ)
+   (check-eq? (mdl-root-atom "T") t)
+   (check-false (eq? (mdl-atom "PRINC") princ))))
