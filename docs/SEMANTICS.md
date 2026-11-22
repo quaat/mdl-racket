@@ -1910,3 +1910,34 @@ T. It accepts an optional output CHANNEL, like TERPRI, which instead returns
 empty FALSE. The local runner writes a line feed to the current Racket output
 port and requires a PRINT-mode CHANNEL. This follows the existing documented
 Unix terminal normalization; an actual carriage-return byte is not emitted.
+
+## M3 reader: backslash escapes in atom names (issue #119)
+
+**Contract** (MDL manual chapter 15, confirmed by pinned Confusion binary
+`6df359f6…`, probed 2026-11-22):
+
+- `\X` within an atom PNAME quotes the next character: the backslash is
+  **dropped** and the following character `X` is retained verbatim in the PNAME.
+- The `!-` OBLIST-trailer split (`mdl-atom`) operates on the processed
+  (backslash-stripped) string, so `DEAD\!!-WORDS` → pname `"DEAD!"`, oblist
+  `WORDS` (not pname `"DEAD\!"` on oblist `WORDS`).
+- A token that began with a `\`-prefixed character is classified as ATOM
+  regardless of its PNAME text.  `\5` has PNAME `"5"` but TYPE ATOM, not FIX.
+  `\-5` → ATOM, `\1.5` → ATOM, `\*7*` → ATOM, `\#FOO` → ATOM.
+  Confusion confirms all five via `<TYPE \5>` → ATOM, etc.
+- `\X` as a PROG/REPEAT label is legal: `\1ST` has PNAME `"1ST"` and is a
+  valid label.
+
+**Implementation** (`mdl/parser.rkt`, `mdl/compiler.rkt`):
+
+The parser's `read-atom!` returns `(values pname escaped?)`.  When `escaped?`
+is `#t` the caller emits an `'escaped-atom` node instead of `'atom`.  The
+compiler's `mdl-constant/plain` returns `(atom-ref val)` immediately for
+`'escaped-atom` nodes, skipping all numeric and `#` classification.
+`atom-node-constant-token?` accepts a node (not a string) and returns `#f`
+for `'escaped-atom`, so `prog-label-name` treats such nodes as valid labels.
+All other compiler predicates that previously checked `is-kind? n 'atom` now
+use the `is-atom-node?` helper which accepts both kinds.
+
+**Tests**: `tests/escaped_atom_test.rkt` — covers PNAME stripping, `!-`
+trailer splitting, intern identity, and the five escaped-numeric/`#` cases.
