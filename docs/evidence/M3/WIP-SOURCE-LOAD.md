@@ -63,6 +63,7 @@ Toolchain: Racket v7.9 [bc], Python 3.13.0.
 | `TMPDIR=/tmp raco test tests/iuvector_chutype_test.rkt` | 1 then 0 | New alias checks failed with FIX, then passed with shared UTYPE header and complete storage conversion |
 | `TMPDIR=/tmp raco test tests/logical_gc_test.rkt` | 0 | 44 checks including shared storage, cycle collection, callback exception and session isolation |
 | `TMPDIR=/tmp make test-m3-historical-gc` | 0 | Source lock verified; 18 checks including exact 1,229 form load, zero skips and file order |
+| GitHub Actions Native Confusion reference, run 45048914454, head `5719b3f` | 2 | `raco test` was unavailable in the container because `compiler-lib` was omitted; source verification and source-progress steps passed before this failure |
 | direct `mdl-session-load!` then `mdl-session-call` of original `START` | shell 0; semantic failure | `mdl-eval: unassigned or non-applicable MDL operator RANDOM`; wrapper caught the exception, so shell exit 0 is not a startup pass |
 
 The focused tests were observed failing first on their respective missing
@@ -91,6 +92,11 @@ source-root-restricted session; no network service or evaluator endpoint was
 added. Confusion remains a separately built GPLv3 reference; no Confusion
 source was copied into the MIT-0 runtime. The branch needs independent
 review of evaluation, memory and loader changes before integration.
+
+The follow-up CI repair installs `compiler-lib` in the Native Confusion
+reference workflow before its source-dependent GC test. The Harness checks
+workflow passed on `5719b3f`. Both required workflows must pass on the
+final PR head before this review checkpoint is considered CI-clean.
 
 After adding CRLF, the next executable task is a session-owned 36-bit RANDOM
 with reference-validated seed and call-order behavior. Review its provenance
