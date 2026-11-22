@@ -1937,3 +1937,25 @@ normalizes every state transition to 36 bits and therefore intentionally
 differs for that case. Tests require range safety, deterministic replay,
 separate session state, valid seeding, strict errors, and original START
 advancement to its next actual dependency.
+
+## M3 BACK and terminal CHANNEL predecessor (`77rooms.mud:297`; issue #110)
+
+[The MDL Programming Language, chapter 7.6.2](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/)
+defines BACK on VECTOR, UVECTOR and STRING arrays as the inverse of REST:
+it exposes one or more previously removed elements from the same storage.
+The default offset is one. A nonpositive offset, a value that is not an
+array, or an offset beyond the view's start fails. BACK shares the backing
+storage and UVECTOR UTYPE header with the input view; mutation through
+either view remains visible to the other. The pinned native probes in
+`evidence/M3/back-reference.json` confirm vector, uvector and string
+content, zero-offset and beyond-start errors, and the host terminal
+CHANNEL's one preceding slot. Confusion retains CHANNEL TYPE on BACK of
+INCHAN, despite the manual's general statement that BACK changes to the
+array PRIMTYPE; preserve that observed host-channel behavior only for a
+CHANNEL value. Its preceding slot reads as FIX 0 in the pinned bare
+interpreter; the original source's PUT on that FIX uses the existing
+association dispatch. This host representation is not a puzzle-rule change.
+
+Tests must first fail on unassigned BACK, then assert shared view mutation,
+strict bounds and types, terminal CHANNEL metadata, and the next actual
+original START failure. TOP and RESET are separate source dependencies.

@@ -1,5 +1,14 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 BACK follow-up checkpoint (2026-11-22)
+
+`tests/back_test.rkt` covers manual and pinned reference array BACK
+semantics without upstream fixtures. `make test-m3-start-back` requires
+`make sources`, checks all 1,229 original forms and zero skips, then
+records the known direct-START XFAIL at TENEX? in `77rooms.mud:298`.
+The required Native Confusion reference workflow runs this target after
+source preparation. See [BACK-CONTIN.md](evidence/M3/BACK-CONTIN.md).
+
 ## M3 RANDOM follow-up checkpoint (2026-11-22)
 
 `tests/random36_test.rkt` uses temporary session roots and belongs to the

@@ -2450,8 +2450,10 @@
     (error 'mdl-make-terminal-channel "expected READ or PRINT mode"))
   (mdl-typed-value
    (mdl-atom "CHANNEL")
-   (mdl-vector 0 mode "" "" "" "" "" "" "TTY" ""
-               0 0 80 0 24 0 0 10 0)))
+   ;; The host CHANNEL has one predecessor slot before its 19 visible
+   ;; elements. Original CONTIN uses BACK to reach it.
+   (mdl-rest (mdl-vector 0 0 mode "" "" "" "" "" "" "TTY" ""
+                         0 0 80 0 24 0 0 10 0) 1)))
 
 (define (mdl-ivector-build size make-element)
   (unless (and (exact-integer? size) (<= 0 size fix-max))
@@ -2573,6 +2575,32 @@
                                (- (mdl-array-length base) offset)
                                (mdl-array-type-cell base))))
          (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))]))
+
+(define (mdl-back value [offset 1])
+  (unless (and (exact-integer? offset) (positive? offset) (<= offset fix-max))
+    (error 'mdl-back "BACK requires a positive FIX offset"))
+  (define base (mdl-base value))
+  (cond
+    [(mdl-string? base)
+     (define start (if (mdl-string-view? base) (mdl-string-view-start base) 0))
+     (when (> offset start)
+       (error 'mdl-back "BACK offset exceeds removed prefix"))
+     (mdl-string-view (mdl-string-view-storage base)
+                      (- start offset)
+                      (+ (mdl-string-length base) offset))]
+    [(mdl-array? base)
+     (when (> offset (mdl-array-start base))
+       (error 'mdl-back "BACK offset exceeds removed prefix"))
+     (define result
+       (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                       (- (mdl-array-start base) offset)
+                       (+ (mdl-array-length base) offset)
+                       (mdl-array-type-cell base)))
+     (if (and (mdl-typed-value? value)
+              (eq? (mdl-typed-value-type value) (mdl-atom "CHANNEL")))
+         (mdl-typed-value (mdl-atom "CHANNEL") result)
+         result)]
+    [else (error 'mdl-back "BACK requires an array")]))
 
 (define (mdl-check-index who value index)
   (unless (and (exact-integer? index) (<= 1 index) (<= index (mdl-length value)))
@@ -3318,6 +3346,7 @@
         "APPLY" mdl-apply-subr
         "LENGTH" mdl-length
         "REST" mdl-rest
+        "BACK" mdl-back
         "NTH" mdl-nth
         "PUT" mdl-put!
         "GET" mdl-get
