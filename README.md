@@ -9,6 +9,22 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
+**Current M3 interrupt foundation checkpoint (2026-11-22, issue #104):**
+The reviewed branch `feat/m3-interrupt-dispatcher` adds session-owned interrupt
+dispatch, priority and pending-event scheduling, `INT-LEVEL`, `ENABLE`,
+and `DISABLE`. Focused deterministic callbacks are verified (scoped Gate A
+PASS); real GC delivery and historical automatic collection remain blocked
+by missing MDL reclaimed-word accounting and event scheduling. Gate B and
+the formal M3 gate are incomplete. Reproduce with
+`TMPDIR=/tmp raco test tests/interrupt_dispatch_test.rkt
+tests/event_registration_test.rkt`, `TMPDIR=/tmp make test`,
+`TMPDIR=/tmp make m2-check`, and `TMPDIR=/tmp make m3-source-progress`.
+The loader still exits 1 after **433 original forms and zero skips** at
+`77rooms.mud` expression 16, line 101, `EVENT "GC"`; source loading,
+initialization, interactive gameplay and house-smoke parity remain
+unverified. See [interrupt evidence](docs/evidence/M3/INTERRUPT-FOUNDATION.md)
+and [issue #104](https://github.com/quaat/mdl-racket/issues/104).
+
 **Current M3 checkpoint (2026-11-21, `feat/m3-event-handler`):**
 The scoped [issue #102](docs/evidence/M3/EVENT-REGISTRATION.md) change
 represents user-defined EVENT IHEADERs and HANDLERs as session-owned
@@ -17,7 +33,7 @@ events and callback dispatch remain unsupported and fail explicitly; this
 build does not substitute Confusion's `T` stubs for interrupt semantics.
 The unchanged source loader completes **433 original forms with zero
 skips**, then exits 1 at `77rooms.mud` expression 16, line 101:
-`EVENT "GC"` requires automatic GC callback delivery.
+`EVENT "GC"` requires actual GC callback delivery.
 `make m3-source-progress` exits 0 only as a partial measurement. `make test`
 and `make m2-check` pass; see the [evidence](docs/evidence/M3/EVENT-REGISTRATION.md).
 M0/M1/M2 remain PASS; the formal M3 gate is **INCOMPLETE**. Full source

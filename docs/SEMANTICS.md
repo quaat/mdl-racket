@@ -1555,12 +1555,12 @@ type and object identity. The event registry belongs to one MDL session.
 This bounded slice supports registration and removal for user-defined
 STRING-named events, a positive FIX priority, and FUNCTION/SUBR-like
 callables in the current PROCESS. Other APPLICABLE types are explicitly
-unsupported. It rejects external/automatic events such as `"GC"`,
+unsupported. It rejects unimplemented predefined events such as `"GC"`,
 `"CHAR"`, `"READ"`, `"WRITE"`, `"IPC"` and `"BLOCKED"` explicitly until
 their event sources and scheduling can be implemented. Handler dispatch,
 process-targeted handlers, and `INTERRUPT` remain unsupported and must not
 silently become no-ops. This allows the original `"DIVERT-AGC"` setup to
-be represented faithfully while making the next missing external event
+be represented faithfully while making the next missing internal event
 explicit. Native Confusion's EVENT/HANDLER/OFF/ON return `T` for even invalid
 arguments, and its INTERRUPT is unbound; those are reference limitations,
 not the manual semantics implemented here. The `INTERRUPTS` OBLIST,
@@ -1569,3 +1569,37 @@ IHEADER/HANDLER values remain unimplemented; only STRING name lookup through
 EVENT is supported. Tests must establish identity,
 removal, reattachment, session isolation, strict unsupported
 paths, and source progression before claiming the slice.
+
+## M3 interrupt dispatcher (issue #104; specification before implementation)
+
+The [MDL manual chapter 21](https://mdl-language.readthedocs.io/en/latest/21-interrupts/)
+sets normal interrupt level to zero. An enabled event occurrence dispatches
+at a safe interpreter point when its IHEADER priority exceeds the current
+level; otherwise it is queued. Pending occurrences retain already evaluated
+arguments and occurrence order. Lowering `INT-LEVEL`, or finishing a handler,
+delivers eligible pending occurrences before normal execution resumes.
+Handlers run newest first at the IHEADER priority; the previous level is
+restored even on an error. `OFF` during dispatch prevents a removed, pending
+handler from running. A disabled or disassociated header does not dispatch;
+if disabled before queued delivery, its pending occurrence is suppressed.
+Each MDL session owns its interrupt level and queue.
+If a handler raises, its queued events remain pending while that exception
+propagates. A later `INT-LEVEL` call is a safe delivery point even when it
+sets the level to its current value, so eligible events cannot remain stuck.
+A later event-source call also drains older eligible occurrences before
+dispatching the new occurrence, preserving occurrence order after recovery.
+The new occurrence enters the queue before draining; if an older callback
+raises, the new occurrence remains pending for another safe point.
+
+`INT-LEVEL` with no arguments returns the current FIX level; with one FIX
+it sets the level and returns the old one. `ENABLE` and `DISABLE` require a
+session-owned IHEADER and return it. Focused tests call the host-only
+event-source API deterministically. Callback arguments go
+through the ordinary evaluated-argument application path. This slice keeps
+`"GC"` guarded until real collection and after-collection dispatch exist.
+The manual classifies `"GC"` and `"DIVERT-AGC"` as internal interrupts.
+All other named predefined interrupts in manual chapter 21 remain guarded
+until their sources exist. The earlier source-loading slice permits
+`"DIVERT-AGC"` registration because the original handler is immediately
+removed; its automatic event source remains unimplemented and unclaimed.
+Process-targeted handlers, `DISMISS`, and automatic sources remain unsupported.

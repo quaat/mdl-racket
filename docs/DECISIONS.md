@@ -1,5 +1,69 @@
 # Architecture decision records
 
+## ADR-0043: Session-owned interrupt scheduling before GC integration
+
+**Decision (2026-11-22, issue #104, before implementation):** Extend each
+MDL atom-space with a scheduler state containing interrupt level and pending
+occurrences. Event sources report already evaluated arguments at explicit
+safe points; the dispatcher calls the existing evaluated-argument function
+application path. Eligible occurrences dispatch immediately; others queue
+in order. Dynamic cleanup restores the prior level on normal return and
+exceptions. A deterministic test-only event source verifies scheduling
+independently of host GC. `INT-LEVEL`, `ENABLE`, and `DISABLE` expose the
+source-independent manual behavior.
+
+**GC investigation:** Installed Racket is v7.9 [bc]. `collect-garbage`,
+`current-gc-milliseconds`, and `current-memory-use` exist. Host collection
+is real, but its return value does not provide historical MDL reclaimed
+words. Its timing and allocation triggers differ from MDL's. Arbitrary MDL
+callbacks must run after collection at a safe boundary. The original
+`77rooms.mud:78–104` installs and removes DIVERT/GC handlers;
+`DIVERT-FCN` reattaches `GC-HAND`, and `GC-FCN` removes it. The manual
+classifies GC and DIVERT-AGC as internal interrupts. GC delivers FLOAT
+seconds, FIX cause (explicit `<GC>` is 1), and ATOM initiator. DIVERT-AGC
+delivers FIX requested words and ATOM initiator before a deferrable
+automatic collection.
+The [Racket GC reference](https://docs.racket-lang.org/reference/garbagecollection.html)
+says `collect-garbage` returns void and host memory use is estimated in bytes.
+Its [timing API](https://docs.racket-lang.org/reference/time.html) reports
+collector processor milliseconds. Racket's
+[will executors](https://docs.racket-lang.org/reference/willexecutor.html)
+report object finalization, not every collection, and must be polled or run
+by a thread. Its [unsafe collector callbacks](https://docs.racket-lang.org/foreign/Garbage_Collection_Callbacks.html)
+cannot allocate managed memory, so they cannot directly execute MDL code.
+Pinned Confusion source itself marks `GC` only partially implemented:
+`mdl_builtin_eval_gc` calls Boehm `GC_gcollect()` and returns `T`, whereas
+the manual requires reclaimed MDL words. Its `BLOAT` implementation calls
+its values bogus and returns the requested FIX or 65536. Those routines
+are useful evidence of the reference limitation, not code or semantics to
+copy into the Racket runtime. This project has not changed either upstream
+source tree.
+
+**Rejected:** Equating every Racket GC to historical MDL GC invents event
+timing and cause codes. Accepting `EVENT "GC"` without delivery silently
+loses callbacks. Fabricated reclaimed-word counts for `<GC>` or `BLOAT`
+would corrupt observable MDL values.
+
+**Boundary:** This first slice proves the dispatcher. GC registration stays
+guarded pending a defensible explicit collection operation and a separate
+decision on automatic MDL allocation pressure. Pinned Confusion stubs
+interrupt registration and offers no usable delivery oracle; manual
+semantics and focused assertions supply the evidence here.
+
+**Gate B options after foundation:** (1) Use host `collect-garbage` and
+estimate reclaimed MDL words from Racket bytes. This is measurable host
+behavior but does not count MDL words or reproduce the historical return
+contract, so it cannot be presented as runtime equivalence. (2) Add a
+bounded session-owned ledger for MDL allocation sizes and reachable roots,
+then use a real host collection at an explicit `<GC>` safe point while
+reporting an honest MDL-ledger reclaimed count. This needs a separate
+prototype and tests for object identity, sharing, cycles, and roots before
+it can be accepted. (3) Copy Confusion's `T`/bogus-value stubs; rejected as
+false semantics. The recommended next action is a small ledger feasibility
+probe on the original `77rooms.mud` GC/BLOAT call paths. Keep `EVENT "GC"`
+guarded until that probe demonstrates executable post-collection delivery
+and a defensible return value.
+
 ## ADR: Represent user event registrations without dispatch (M3 issue #102)
 
 **Decision:** Implement session-owned IHEADER and HANDLER objects and the

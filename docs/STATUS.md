@@ -1,6 +1,34 @@
-# Status — 2026-11-21 (M2 mainline PASS; M3 source execution partial)
+# Status — 2026-11-22 (M2 mainline PASS; M3 source execution partial)
 
-## Current state (2026-11-21)
+## Current state (2026-11-22)
+
+| M3 stage | Current evidence |
+|---|---|
+| PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
+| LOADED | FAIL: loader exit 1 after 433 original forms, zero skipped |
+| INITIALIZED | NOT RUN: source chain has not completed |
+| INTERACTIVE | NOT RUN: original startup/game loop unavailable |
+| SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
+| PLAYABLE | NOT RUN: original game has not booted in Racket |
+
+- **Issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
+  scoped Gate A PASS after independent review; Gate B BLOCKED and M3
+  incomplete.** Session-owned
+  priority dispatch, pending occurrences, `INT-LEVEL`, `ENABLE`, and
+  `DISABLE` have focused red-to-green tests. Independent review findings
+  were fixed for queued delivery after a handler exception,
+  event-order preservation, and strict predefined event registration.
+  The verified source frontier remains **433 completed forms, zero
+  skipped**, with loader exit 1 at `77rooms.mud` expression 16, line 101:
+  `EVENT "GC"` stays guarded until an actual post-collection event source
+  and defensible `<GC>` return semantics exist. The blocker is missing
+  MDL reclaimed-word accounting and automatic collection scheduling;
+  options and the recommended bounded ledger feasibility probe are in
+  [ADR-0043](DECISIONS.md). `make m3-source-progress`
+  exits 0 only as a partial measurement. M2 remains PASS; source loading,
+  initialization, interactive input and parity are unverified. See
+  [interrupt evidence](evidence/M3/INTERRUPT-FOUNDATION.md) and
+  [issue #104](https://github.com/quaat/mdl-racket/issues/104).
 
 - **Issue #102 user EVENT/HANDLER registration slice PASS on
   `feat/m3-event-handler`; full M3 gate incomplete:** session-owned
