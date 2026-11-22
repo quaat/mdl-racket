@@ -1,17 +1,28 @@
-# Status — 2026-11-22 (M2 mainline PASS; M3 source execution partial)
+# Status — 2026-11-22 (M2 mainline PASS; M3 source load WIP PASS)
 
 ## Current state (2026-11-22)
 
 | M3 stage | Current evidence |
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
-| LOADED | FAIL: loader exit 1 after 433 original forms, zero skipped |
-| INITIALIZED | NOT RUN: source chain has not completed |
+| LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
+| INITIALIZED | FAIL: original START reaches unassigned CRLF after welcome output |
 | INTERACTIVE | NOT RUN: original startup/game loop unavailable |
 | SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
 | PLAYABLE | NOT RUN: original game has not booted in Racket |
 
-- **Issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
+- **Current WIP `feat/m3-logical-gc` (`2f8dab7`):** The complete unchanged
+  source chain loads: 1,229 forms, zero skips, loader exit 0. This is a
+  scoped LOADED gate result, not M3 acceptance. A direct original `START`
+  call fails at unassigned `CRLF`; terminal input, the game loop, approved
+  house smoke parity, and state comparisons remain unverified. `make test`
+  passes 1,462 Racket and 23 Python tests; `make m2-check` exits 0. The
+  logical GC ledger covers LIST, VECTOR and UVECTOR backing allocations,
+  with the limits in [WIP evidence](evidence/M3/WIP-SOURCE-LOAD.md). The
+  next executable action is to implement CRLF and the original terminal
+  I/O path, then retest START. M3 status: **FAIL / incomplete**.
+
+- **Previous issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
   scoped Gate A PASS after independent review; Gate B BLOCKED and M3
   incomplete.** Session-owned
   priority dispatch, pending occurrences, `INT-LEVEL`, `ENABLE`, and

@@ -1,2 +1,0 @@
-#lang mdl
-<+ 1 <MOD  <RANDOM> 10 >>$

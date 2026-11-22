@@ -137,19 +137,14 @@ are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
 
-**Current source frontier (2026-11-22):** issue #104's interrupt foundation
-adds session-owned priority dispatch and safe pending-event delivery but
-intentionally keeps `EVENT "GC"` guarded. The unchanged loader still completes
-433 unchanged original forms, zero skipped, fully loading `77act1.mud`,
-`77act2.mud` and `77act3.mud`; the next failure is internal
-`EVENT "GC"` in `77rooms.mud` expression 16, tracked in
-[issue #104](https://github.com/quaat/mdl-racket/issues/104).
-This is partial source
-execution, not an M3 gate pass. Track PARSED, LOADED, INITIALIZED,
-INTERACTIVE and SMOKE-PARITY separately; the progress report currently
-verifies PARSED and the incomplete loader state while recording the
-remaining stages false. M3 PASS requires the approved house smoke
-scenario, not just source-chain completion.
+**Current source frontier (2026-11-22 WIP):** the unchanged `77loadall.mud`
+chain completes all 1,229 original forms with zero skips. The scoped LOADED
+gate passes on `feat/m3-logical-gc`. A direct call to the original START
+fails at unassigned CRLF after the welcome output; INITIALIZED,
+INTERACTIVE and SMOKE-PARITY remain incomplete. The progress report
+verifies PARSED and LOADED while recording the remaining stages false.
+M3 PASS requires the approved house smoke scenario, not just source-chain
+completion. See [WIP evidence](evidence/M3/WIP-SOURCE-LOAD.md).
 
 The first source-progress gate is `make m3-source-progress`. It runs the
 unchanged `77loadall.mud` entry, accepts a new genuine source dependency

@@ -1029,3 +1029,23 @@ plus the source-required `ASCII` and CHARACTER-capable `STRING` slice.
 `%%`, mutable read tables, channel controls, and unsupported payload forms
 remain strict errors. The source-progress report must distinguish
 read-time failure from parse, compile and execute failures.
+
+## ADR-0044: Track bounded logical MDL storage with weak references
+
+**Decision (2026-11-22, WIP branch `feat/m3-logical-gc`):** Maintain a
+session-owned ledger of allocation counts for LIST cells and VECTOR/UVECTOR
+backing arrays, using manual word formulas and weak boxes. An explicit GC
+triggers Racket major collection, sweeps dead ledger entries, returns the
+reclaimed logical words, and dispatches the MDL event only after collection.
+BLOAT requests free logical movable words. Allocation pressure invokes the
+existing safe DIVERT-AGC/GC event path at tracked allocation boundaries.
+The original handler lifecycle has a focused source-level regression.
+
+**Limits:** The ledger deliberately omits atoms, OBLIST entries, strings,
+closures, locals and frames; it is a bounded logical model, not a complete
+PDP-10 storage simulator. Racket collection timing is not historical MDL
+collection timing, and Confusion's GC/BLOAT stubs are not reference oracles.
+The real host collector runs locally, outside any MDL callback. No public
+REPL or evaluator service was added. The scope can be widened only with
+separate word-accounting evidence and tests. The source LOADED gate passes;
+M3 initialization and gameplay remain incomplete.

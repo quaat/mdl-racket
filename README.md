@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0, M1 and M2 gates PASS; M3 source loading remains incomplete. NOT a playable game.** This repository is a starting
+> **Status: M0, M1 and M2 gates PASS; M3 source loading PASS on the WIP branch, but initialization and gameplay remain incomplete. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -9,7 +9,25 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 interrupt foundation checkpoint (2026-11-22, issue #104):**
+**Current M3 WIP checkpoint (2026-11-22, `feat/m3-logical-gc`):**
+`TMPDIR=/tmp make m3-source-progress` verifies all 1,229 forms in the unchanged
+`77loadall.mud` chain, zero skipped, loader exit 0, and the approved source
+hashes. `TMPDIR=/tmp make test` passes 1,462 Racket checks and 23 Python
+tests; `TMPDIR=/tmp make m2-check` exits 0. Logical GC accounting, the
+original GC handler lifecycle, additional language primitives, and default
+terminal CHANNEL metadata enabled this load. Explicit GC is bounded to
+tracked LIST, VECTOR and UVECTOR backing storage; historical automatic
+collection timing and other allocations remain unmodeled. A direct call to
+the original `START` reaches `CRLF` after emitting the welcome line and then
+fails because CRLF is not yet implemented. **INITIALIZED, INTERACTIVE,
+SMOKE_PARITY, and PLAYABLE remain NOT RUN or FAIL; M3 is not accepted.**
+Reproduce with `TMPDIR=/tmp make test`, `TMPDIR=/tmp make m2-check`, and
+`TMPDIR=/tmp make m3-source-progress`. See the
+[WIP evidence](docs/evidence/M3/WIP-SOURCE-LOAD.md). Next: implement the
+source-driven terminal output and input path, then a strict `m3-check` with
+the approved house smoke transcript.
+
+**Previous M3 interrupt foundation checkpoint (2026-11-22, issue #104):**
 The reviewed branch `feat/m3-interrupt-dispatcher` adds session-owned interrupt
 dispatch, priority and pending-event scheduling, `INT-LEVEL`, `ENABLE`,
 and `DISABLE`. Focused deterministic callbacks are verified (scoped Gate A
