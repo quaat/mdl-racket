@@ -3491,7 +3491,7 @@
                         ")"))]
     [(or (char? value)
          (and (mdl-typed-value? value)
-              (eq? (mdl-typed-value-type value) (mdl-atom "CHARACTER"))))
+              (eq? (mdl-typed-value-type value) (mdl-root-atom "CHARACTER"))))
      ;; CHARACTER: "!\" followed by the character (Confusion: !\A → "!\\A").
      ;; The returned string contains !, \, char (3 chars for printable ASCII).
      ;; B3: control characters (codes 0-31, 127) require Confusion's "!\^A"

@@ -142,3 +142,11 @@
            (lambda () (run "<SETG A 'FOO> <PROG ((OBLIST (<ROOT>))) <UNPARSE ,A>>")))
 (check-equal? (run "<SETG A 'FOO> <PROG ((OBLIST (<GET INITIAL OBLIST> <ROOT>))) <UNPARSE ,A>>")
               "FOO")
+
+;; ── CHARACTER TYPE identity is the session ROOT atom (#118 R4) ───────────
+;; A user OBLIST that shadows the name CHARACTER must not change how UNPARSE
+;; recognises a CHARACTER value (atoms below are read before BLOCK runs).
+(check-equal?
+ (run "<SETG C <ASCII 65>> <SETG SH <MOBLIST CSH>> <INSERT \"CHARACTER\" ,SH>
+       <PROG (R) <BLOCK (,SH <ROOT>)> <SET R <UNPARSE ,C>> <ENDBLOCK> .R>")
+ "!\\A")
