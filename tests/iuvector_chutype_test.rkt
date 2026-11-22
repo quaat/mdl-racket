@@ -19,6 +19,12 @@
                 "M3OBJ")
   (check-equal? (run "<SETG UV <IUVECTOR 2 1>> <CHUTYPE ,UV WORD> <TYPE <1 ,UV>>")
                 (mdl-atom "WORD"))
+  (check-equal? (mdl-atom-pname
+                 (run "<SETG UV <IUVECTOR 2 1>> <SETG TAIL <REST ,UV 1>> <CHUTYPE ,TAIL WORD> <UTYPE ,UV>"))
+                "WORD")
+  (check-equal? (mdl-atom-pname
+                 (run "<SETG UV <IUVECTOR 2 1>> <SETG TAIL <REST ,UV 1>> <CHUTYPE ,TAIL WORD> <TYPE <1 ,UV>>"))
+                "WORD")
   (check-exn #rx"primitive|primtype" (lambda () (run "<CHUTYPE <IUVECTOR 2 1> LIST>")))
   (check-exn #rx"UVECTOR" (lambda () (run "<CHUTYPE [1] FIX>")))
   (check-exn #rx"length" (lambda () (run "<IUVECTOR -1>"))))

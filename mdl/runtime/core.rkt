@@ -998,7 +998,7 @@
 ;; element TYPE fixed by the first (macros.cpp:2823-2835).
 (define (uniform-uvector items)
   (if (null? items)
-      (mdl-array 'UVECTOR (vector) 0 0 #f)
+      (new-mdl-array 'UVECTOR (vector) 0 0 #f)
       (let ([element-type (mdl-type (car items))])
         (for ([value (in-list items)])
           (unless (eq? (mdl-type value) element-type)
@@ -1007,7 +1007,7 @@
         (when (string=? (mdl-type-name (car items)) "STRING")
           (error 'mdl-splice-uvector
                  "UVECTOR elements must have one permitted TYPE"))
-        (mdl-array 'UVECTOR (list->vector items) 0 (length items) element-type))))
+        (new-mdl-array 'UVECTOR (list->vector items) 0 (length items) element-type))))
 
 (define (build-spliced-uvector units)
   (define (unit-items rest acc)
@@ -2152,7 +2152,17 @@
           [else (hash-set! seen remaining #t)
                 (cons (mcar remaining) (loop (mcdr remaining) seen))])))
 
-(struct mdl-array (kind storage start length [element-type #:mutable]))
+(struct mdl-array (kind storage start length type-cell)
+  #:constructor-name make-mdl-array)
+
+(define (new-mdl-array kind storage start length element-type)
+  (make-mdl-array kind storage start length (box element-type)))
+
+(define (mdl-array-element-type array)
+  (unbox (mdl-array-type-cell array)))
+
+(define (set-mdl-array-element-type! array type)
+  (set-box! (mdl-array-type-cell array) type))
 (struct mdl-string-view (storage start length))
 (struct mdl-typed-value (type value))
 (struct mdl-word-value (bits))
@@ -2424,7 +2434,7 @@
 (define (mdl-vector . values)
   (define storage (list->vector values))
   (mdl-track-allocation! storage (+ (* 2 (length values)) 2) "VECTOR")
-  (mdl-array 'VECTOR storage 0 (length values) #f))
+  (new-mdl-array 'VECTOR storage 0 (length values) #f))
 
 (define (mdl-make-terminal-channel mode)
   (unless (member mode '("READ" "PRINT"))
@@ -2467,7 +2477,7 @@
       (error 'mdl-uvector "UVECTOR elements must have one permitted TYPE")))
   (define storage (list->vector values))
   (mdl-track-allocation! storage (+ (length values) 2) "UVECTOR")
-  (mdl-array 'UVECTOR storage 0 (length values) element-type))
+  (new-mdl-array 'UVECTOR storage 0 (length values) element-type))
 
 (define (mdl-iuvector-build size make-element)
   (unless (and (exact-integer? size) (<= 0 size fix-max))
@@ -2476,7 +2486,7 @@
   (if (null? values)
       (let ([storage (vector)])
         (mdl-track-allocation! storage 2 "UVECTOR")
-        (mdl-array 'UVECTOR storage 0 0 (mdl-atom "LOSE")))
+        (new-mdl-array 'UVECTOR storage 0 0 (mdl-atom "LOSE")))
       (apply mdl-uvector values)))
 
 (define (mdl-iuvector . args)
@@ -2503,7 +2513,7 @@
 (define (mdl-data-uvector . values)
   (define storage (list->vector values))
   (mdl-track-allocation! storage (+ (length values) 2) "UVECTOR")
-  (mdl-array 'UVECTOR storage 0 (length values)
+  (new-mdl-array 'UVECTOR storage 0 (length values)
              (if (null? values) (mdl-atom "LOSE") #f)))
 
 (define (mdl-list-head value who)
@@ -2549,10 +2559,10 @@
            (when (> offset (mdl-array-length base))
              (error 'mdl-rest "offset out of range"))
            (if (and (zero? offset) (not (mdl-typed-value? value))) value
-               (mdl-array (mdl-array-kind base) (mdl-array-storage base)
-                          (+ (mdl-array-start base) offset)
-                          (- (mdl-array-length base) offset)
-                          (mdl-array-element-type base))))
+               (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                               (+ (mdl-array-start base) offset)
+                               (- (mdl-array-length base) offset)
+                               (mdl-array-type-cell base))))
          (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))]))
 
 (define (mdl-check-index who value index)
@@ -2963,8 +2973,8 @@
               (eq? (mdl-typeprim old-type) target-prim))
     (error 'mdl-chutype "cannot change element primitive type"))
   (define converted
-    (for/list ([index (in-range (mdl-array-length base))])
-      (define old (mdl-nth base (add1 index)))
+    (for/list ([index (in-range (vector-length (mdl-array-storage base)))])
+      (define old (vector-ref (mdl-array-storage base) index))
       (if (eq? old-type (mdl-atom "LOSE"))
           (case (string->symbol (mdl-atom-pname target-prim))
             [(WORD) (mdl-chtype 0 type)]
@@ -2974,8 +2984,7 @@
             [else (error 'mdl-chutype "uninitialized ATOM element unsupported")])
           (mdl-chtype old type))))
   (for ([new (in-list converted)] [index (in-naturals)])
-    (vector-set! (mdl-array-storage base)
-                 (+ (mdl-array-start base) index) new))
+    (vector-set! (mdl-array-storage base) index new))
   (set-mdl-array-element-type! base type)
   value)
 

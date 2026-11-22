@@ -32,6 +32,8 @@ jobs:
         run: make test-m2-g3
       - name: Validate M3 original-source progress
         run: make m3-source-progress
+      - name: Test historical GC handlers against pinned source
+        run: make test-m3-historical-gc
       - name: Build and capture native reference
         run: |
           make reference-build

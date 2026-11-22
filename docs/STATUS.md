@@ -11,12 +11,13 @@
 | SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
 | PLAYABLE | NOT RUN: original game has not booted in Racket |
 
-- **Current WIP `feat/m3-logical-gc` (`2f8dab7`):** The complete unchanged
+- **Current WIP `feat/m3-logical-gc` (reviewed checkpoint `c5a6027`):** The complete unchanged
   source chain loads: 1,229 forms, zero skips, loader exit 0. This is a
   scoped LOADED gate result, not M3 acceptance. A direct original `START`
   call fails at unassigned `RANDOM` after CRLF; terminal input, the game loop, approved
-  house smoke parity, and state comparisons remain unverified. `make test`
-  passes 1,465 Racket and 23 Python tests; `make m2-check` exits 0. The
+  house smoke parity, and state comparisons remain unverified. After CI fixture
+  repair and GC/UVECTOR regressions, `make test` passes 1,471 Racket and 23
+  Python tests; `make m2-check` exits 0 on the repaired head. The
   logical GC ledger covers LIST, VECTOR and UVECTOR backing allocations,
   with the limits in [WIP evidence](evidence/M3/WIP-SOURCE-LOAD.md). The
   next executable action is a reference-validated session RNG and then

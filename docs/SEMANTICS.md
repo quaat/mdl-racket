@@ -1780,13 +1780,18 @@ The zero-length REST view retains UTYPE, so the original source can allocate
 20 empty slots, take REST at 20, then change that empty view to OBJECT.
 
 `CHUTYPE uv type` changes the UVECTOR's uniform TYPE in place and returns the
-same UVECTOR. Each existing element is reinterpreted at the new TYPE only if
+same UVECTOR. The type header is shared by REST views of the same backing
+storage: changing a tail's UTYPE changes the base's UTYPE too. The pinned
+Confusion probe in `evidence/M3/chutype-alias-reference.json` observes WORD
+from both base and tail, including an element outside the visible tail,
+after changing the tail. Focused regressions first failed with base UTYPE
+and first-element TYPE FIX on 2026-11-22. Each existing element in the
+shared storage is reinterpreted at the new TYPE only if
 old and new element PRIMTYPE agree. LOSE is a special case that can become
 any type legal in a UVECTOR. Wrong arity, non-UVECTOR, invalid TYPE, and
 incompatible primitive storage fail explicitly. This slice tests mutation
 through a shared UVECTOR view and a zero-length LOSE-to-OBJECT cast; the
-runtime's UVECTOR views currently copy the UTYPE header, so changing the
-UTYPE of one view is not propagated to other views of the same storage.
+runtime shares the UTYPE header across views of the same storage.
 
 ## M3 IVECTOR (`77rooms.mud:1545`)
 

@@ -31,7 +31,7 @@ raco test mdl/runtime/core.rkt \
   tests/logical_gc_test.rkt tests/special_decl_test.rkt \
   tests/lose_literal_test.rkt tests/error_interrupt_test.rkt \
   tests/channel_type_test.rkt tests/numeric_predicate_test.rkt \
-  tests/historical_gc_handler_test.rkt tests/istring_test.rkt \
+  tests/istring_test.rkt \
   tests/structured_type_head_test.rkt tests/block_test.rkt \
   tests/iuvector_chutype_test.rkt tests/ivector_test.rkt tests/mapr_test.rkt \
   tests/chtype_atom_test.rkt tests/min_test.rkt tests/chtype_string_test.rkt \

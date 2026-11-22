@@ -1,6 +1,7 @@
 #lang racket/base
-(require rackunit "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
-(define s (make-mdl-session "../.cache/upstream/mdlzork/mdlzork_771212/patched_confusion"))
+(require rackunit racket/file "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
+(define root (make-temporary-file "mdl-terminal~a" 'directory))
+(define s (make-mdl-session root))
 (define input (mdl-session-global s "INCHAN"))
 (define output (mdl-session-global s "OUTCHAN"))
 (check-equal? (mdl-atom-pname (mdl-session-call s "TYPE" input)) "CHANNEL")
@@ -9,3 +10,4 @@
 (check-equal? (mdl-session-call s "NTH" output 2) "PRINT")
 (check-equal? (mdl-session-call s "NTH" output 10) "")
 (check-equal? (mdl-session-call s "LENGTH" output) 19)
+(delete-directory/files root)

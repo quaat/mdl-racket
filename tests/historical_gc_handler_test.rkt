@@ -1,5 +1,5 @@
 #lang racket/base
-(require rackunit racket/file racket/path racket/port racket/runtime-path
+(require rackunit racket/file racket/list racket/path racket/port racket/runtime-path
          "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
 
 (define-runtime-path source-root
@@ -22,7 +22,16 @@
    (define report
      (parameterize ([current-output-port (open-output-string)])
        (mdl-session-load! session "77loadall.mud")))
-   (check-true (>= (hash-ref report 'completed_expressions) 443))
+   (check-equal? (hash-ref report 'status) "PASS")
+   (check-equal? (hash-ref report 'completed_expressions) 1229)
+   (check-equal? (hash-ref report 'skipped_expressions) 0)
+   (check-false (hash-ref report 'failure))
+   (define events (hash-ref report 'events))
+   (check-equal? (length events) 1229)
+   (check-true (andmap (lambda (event)
+                         (equal? (hash-ref event 'status) "PASS")) events))
+   (check-equal? (remove-duplicates (map (lambda (event) (hash-ref event 'file)) events))
+                 source-files)
    (define original-divert-hand (mdl-session-global session "DIVERT-HAND"))
    (define original-gc-hand (mdl-session-global session "GC-HAND"))
    (check-equal? (mdl-session-global session "DIVERT-CNT") 0)

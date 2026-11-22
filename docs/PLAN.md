@@ -140,7 +140,7 @@ are ready to review.
 **Current source frontier (2026-11-22 WIP):** the unchanged `77loadall.mud`
 chain completes all 1,229 original forms with zero skips. The scoped LOADED
 gate passes on `feat/m3-logical-gc`. A direct call to the original START
-fails at unassigned CRLF after the welcome output; INITIALIZED,
+fails at unassigned RANDOM after the welcome output and CRLF; INITIALIZED,
 INTERACTIVE and SMOKE-PARITY remain incomplete. The progress report
 verifies PARSED and LOADED while recording the remaining stages false.
 M3 PASS requires the approved house smoke scenario, not just source-chain

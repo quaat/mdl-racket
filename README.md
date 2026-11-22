@@ -12,7 +12,7 @@
 **Current M3 WIP checkpoint (2026-11-22, `feat/m3-logical-gc`):**
 `TMPDIR=/tmp make m3-source-progress` verifies all 1,229 forms in the unchanged
 `77loadall.mud` chain, zero skipped, loader exit 0, and the approved source
-hashes. `TMPDIR=/tmp make test` passes 1,465 Racket checks and 23 Python
+hashes. `TMPDIR=/tmp make test` passes 1,471 Racket checks and 23 Python
 tests; `TMPDIR=/tmp make m2-check` exits 0. Logical GC accounting, the
 original GC handler lifecycle, additional language primitives, and default
 terminal CHANNEL metadata enabled this load. Explicit GC is bounded to

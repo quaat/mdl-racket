@@ -2,7 +2,7 @@
 
 Date: 2026-11-22. Base `main` commit:
 `fdf48e4a5d1baa4f02faf00b824aa1e275f2e365`. Implementation WIP commit:
-`2f8dab7f192efb6b0a76e8e7132d9196aa7dfbdc` on
+`c5a6027a56017c12f7081e1025937490a9fbc164` on
 `feat/m3-logical-gc`. This document records the pre-integration result;
 the formal M3 gate remains **FAIL / incomplete**.
 
@@ -18,7 +18,7 @@ No `.cache/upstream/` file or source lock was changed.
 | Stage | Result | Evidence |
 |---|---|---|
 | PARSED | PASS | 36 text files parsed, 4 nontext files identified |
-| LOADED | PASS on branch | 1,229 original forms, 0 skipped, loader exit 0, all 12 expected files in order |
+| LOADED | PASS on branch | 1,229 original forms, 0 skipped, loader exit 0, all 13 expected files in order |
 | INITIALIZED | FAIL | Original `START "WHOUS" ""` reaches unassigned `RANDOM` after welcome output and CRLF |
 | INTERACTIVE | NOT RUN | Original loop and input channel path not yet available |
 | SMOKE_PARITY | NOT RUN | No Racket transcript or state comparison |
@@ -55,11 +55,14 @@ Toolchain: Racket v7.9 [bc], Python 3.13.0.
 
 | Command | Exit | Result |
 |---|---:|---|
-| `TMPDIR=/tmp make test` | 0 | 1,465 Racket checks, 23 Python tests |
+| `TMPDIR=/tmp make test` | 0 | 1,471 Racket checks, 23 Python tests after CI fixture repair and GC/UVECTOR regressions |
 | `TMPDIR=/tmp make m2-check` | 0 | M2 reference and regression gate |
 | `TMPDIR=/tmp make m3-source-progress` | 0 | LOADED, 1,229 forms, 0 skipped, loader exit 0 |
 | `TMPDIR=/tmp raco test tests/printstring_channel_test.rkt tests/terminal_channel_test.rkt tests/gettimedate_test.rkt` | 0 | 17 focused checks |
 | `TMPDIR=/tmp raco test tests/crlf_test.rkt` | 0 | 3 focused checks after a missing-operator failure |
+| `TMPDIR=/tmp raco test tests/iuvector_chutype_test.rkt` | 1 then 0 | New alias checks failed with FIX, then passed with shared UTYPE header and complete storage conversion |
+| `TMPDIR=/tmp raco test tests/logical_gc_test.rkt` | 0 | 44 checks including shared storage, cycle collection, callback exception and session isolation |
+| `TMPDIR=/tmp make test-m3-historical-gc` | 0 | Source lock verified; 18 checks including exact 1,229 form load, zero skips and file order |
 | direct `mdl-session-load!` then `mdl-session-call` of original `START` | shell 0; semantic failure | `mdl-eval: unassigned or non-applicable MDL operator RANDOM`; wrapper caught the exception, so shell exit 0 is not a startup pass |
 
 The focused tests were observed failing first on their respective missing
@@ -68,7 +71,9 @@ UTYPE before the fix; `tests/moblist_association_test.rkt` failed on missing
 associations. The full suite later passed. Pinned Confusion probes for
 SPECIAL and ISTRING are saved as
 [`special-reference.json`](special-reference.json) and
-[`istring-reference.json`](istring-reference.json). The original M2
+[`istring-reference.json`](istring-reference.json). The
+[`chutype-alias-reference.json`](chutype-alias-reference.json) probe records
+the shared UVECTOR UTYPE header in pinned Confusion. The original M2
 reference capture remains available through `make m2-check`. Confusion's
 GC/BLOAT stubs cannot validate the new logical memory semantics. The MIN
 zero-argument cast differs in magnitude because Confusion uses host-sized

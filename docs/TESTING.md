@@ -1,5 +1,17 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 source-load review checkpoint (2026-11-22)
+
+`TMPDIR=/tmp make test` is source independent: terminal CHANNEL tests create
+temporary source roots and the historical GC handler test is excluded. The
+required Native Confusion reference workflow runs `make sources`, then
+`make m3-source-progress` and `make test-m3-historical-gc`; the latter also
+depends on `sources` locally and fails if any pinned file is missing. It
+asserts the complete 1,229-form load, zero skips, and all 13 files in order.
+Use `TMPDIR=/tmp make m2-check` for the existing M2 and native reference
+regression. The scope and current START failure are recorded in
+[WIP-SOURCE-LOAD.md](evidence/M3/WIP-SOURCE-LOAD.md).
+
 ## M3 interrupt foundation checkpoint (2026-11-22)
 
 Issue #104 adds `tests/interrupt_dispatch_test.rkt` to the Racket suite.

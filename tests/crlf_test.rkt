@@ -1,6 +1,7 @@
 #lang racket/base
-(require rackunit "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
-(define s (make-mdl-session "../.cache/upstream/mdlzork/mdlzork_771212/patched_confusion"))
+(require rackunit racket/file "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
+(define root (make-temporary-file "mdl-crlf~a" 'directory))
+(define s (make-mdl-session root))
 (define out (mdl-session-global s "OUTCHAN"))
 (define port (open-output-string))
 (define result (parameterize ([current-output-port port])
@@ -9,3 +10,4 @@
 (check-equal? (mdl-atom-pname result) "T")
 (check-exn #rx"output channel" (lambda ()
   (mdl-session-call s "CRLF" (mdl-session-global s "INCHAN"))))
+(delete-directory/files root)

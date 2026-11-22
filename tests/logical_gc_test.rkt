@@ -92,3 +92,48 @@
    (mdl-putrest! cycle cycle)
    (check-equal? (mdl-apply "GC") 0)
    (check-eq? (mcdr cycle) cycle)))
+
+(session
+ (lambda ()
+   (define initial (hash-ref (mdl-logical-storage-stats) 'used))
+   (define base (mdl-apply "UVECTOR" 1 2 3))
+   (define tail (mdl-apply "REST" base 1))
+   (check-equal? (- (hash-ref (mdl-logical-storage-stats) 'used) initial) 5)
+   (check-equal? (mdl-apply "GC") 0)
+   (check-equal? (mdl-apply "NTH" tail 1) 2)
+   (check-equal? (mdl-apply "NTH" base 2) 2)))
+
+(define (discard-cycle)
+  (define cycle (mdl-list 1))
+  (mdl-putrest! cycle cycle)
+  (void))
+(session
+ (lambda ()
+   (discard-cycle)
+   (check-equal? (mdl-apply "GC") 2)
+   (check-equal? (mdl-apply "GC") 0)))
+
+(session
+ (lambda ()
+   (define header (mdl-apply "EVENT" "DIVERT-AGC" 1000))
+   (mdl-apply "HANDLER" header
+              (lambda (_words _initiator) (error 'pressure-handler "probe")))
+   (mdl-set-logical-storage-capacity! 0)
+   (check-exn #rx"probe" (lambda () (mdl-list 1)))
+   (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 0)
+   (mdl-apply "BLOAT" 2)
+   (check-equal? (mdl-list->list (mdl-list 1)) '(1))
+   (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 2)))
+
+(define first-space (make-mdl-atom-space))
+(define second-space (make-mdl-atom-space))
+(parameterize ([current-mdl-atom-space first-space])
+  (define retained (mdl-list 1 2))
+  (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 4)
+  (parameterize ([current-mdl-atom-space second-space])
+    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 0)
+    (define other (mdl-vector 1))
+    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 4)
+    (check-equal? (mdl-apply "NTH" other 1) 1))
+  (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 4)
+  (check-equal? (mdl-apply "NTH" retained 1) 1))

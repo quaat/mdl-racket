@@ -1,6 +1,7 @@
 #lang racket/base
-(require rackunit "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
-(define s (make-mdl-session "../.cache/upstream/mdlzork/mdlzork_771212/patched_confusion"))
+(require rackunit racket/file "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
+(define root (make-temporary-file "mdl-printstring~a" 'directory))
+(define s (make-mdl-session root))
 (define out (mdl-session-global s "OUTCHAN"))
 (define-values (written output)
   (let ([port (open-output-string)])
@@ -13,3 +14,4 @@
   (mdl-session-call s "PRINTSTRING" "abc" (mdl-session-global s "INCHAN"))))
 (check-exn #rx"count" (lambda ()
   (mdl-session-call s "PRINTSTRING" "abc" out -1)))
+(delete-directory/files root)
