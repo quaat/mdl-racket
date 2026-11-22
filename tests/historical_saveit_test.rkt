@@ -33,4 +33,4 @@
     (parameterize ([current-output-port output])
       (mdl-session-call session "SAVE-IT"))))
 (check-true (exn:fail? failure))
-(check-true (regexp-match? #rx"unsupported STRING MEMQ" (exn-message failure)))
+(check-true (regexp-match? #rx"mdl-memq: unsupported STRING MEMQ" (exn-message failure)))

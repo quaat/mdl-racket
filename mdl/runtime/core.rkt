@@ -3121,11 +3121,12 @@
 ;;
 ;; Types implemented exactly against Confusion:
 ;;   FIX → decimal digits (radix 10 or omitted; non-10 radix → strict error)
-;;   ATOM → PNAME, only for pnames that need no \-escaping in MDL notation;
-;;           pnames containing whitespace, brackets, quotes, \, ;, , → strict error
-;;   STRING → double-quoted with \" and \\ escaping of internal " and \
+;;   ATOM → PNAME, only for pnames in [A-Za-z0-9-] whitelist, non-numeric,
+;;           AND reachable eq? via current OBLIST chain (B2 + B1);
+;;           else strict unsupported error
+;;   STRING → double-quoted with \" and \\ escaping; B4: control chars → strict error
 ;;   FALSE → "#FALSE ()" or "#FALSE (elem …)"
-;;   CHARACTER → "!\" followed by the character
+;;   CHARACTER → "!\" followed by the character; B3: control chars → strict error
 ;;   LIST → "(elem …)" with space-separated elements (recursive)
 ;;
 ;; Strict unsupported error for all other types (FLOAT, VECTOR, UVECTOR,
@@ -3135,16 +3136,6 @@
   ;; Escape \ as \\ first, then " as \" — order matters.
   (string-replace (string-replace s "\\" "\\\\") "\"" "\\\""))
 
-;; Characters that always require \-escaping in MDL reader ATOM context.
-;; Any PNAME containing these cannot be safely emitted as a bare atom name.
-(define mdl-atom-pname-special-chars
-  (list #\space #\tab #\newline #\return
-        #\( #\) #\[ #\] #\" #\\ #\; #\,))
-
-(define (mdl-atom-pname-needs-escaping? pname)
-  (for/or ([ch (in-string pname)])
-    (memv ch mdl-atom-pname-special-chars)))
-
 (define (mdl-unparse-value who value)
   (cond
     [(exact-integer? value)
@@ -3152,18 +3143,44 @@
      (check-fix who value)
      (number->string value)]
     [(mdl-atom? value)
-     ;; ATOM: PNAME, only for pnames that need no \-escaping.
-     ;; Strict error for exotic pnames (whitespace, brackets, quotes, etc.)
-     ;; per AGENTS.md strict-failure rule; \-escaping is not implemented.
-     (define pname (mdl-atom-pname value))
-     (when (mdl-atom-pname-needs-escaping? pname)
+     ;; B2: whitelist — only PNAMEs made of [A-Za-z0-9-], non-empty, and not
+     ;; parseable as a number.  Atoms outside this set would require \-escaping
+     ;; (not implemented) or cannot be round-tripped as ATOMs.
+     ;;
+     ;; B1: reachability — emit the bare PNAME only when looking the PNAME up
+     ;; on the current OBLIST search path finds this exact atom (eq?).
+     ;; Otherwise Confusion appends a "!-oblist" trailer, which is not
+     ;; implemented; strict error.
+     (define pname (atom-value-pname value))
+     (unless (and (not (string=? pname ""))
+                  (for/and ([ch (in-string pname)])
+                    (or (char-alphabetic? ch) (char-numeric? ch) (char=? ch #\-)))
+                  (not (string->number pname)))
        (error who
-              "UNPARSE ATOM: PNAME ~s contains characters requiring \\-escaping; not implemented"
+              "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"
+              pname))
+     (define lookups (mdl-list->list (atom-space-lookup (current-mdl-atom-space))))
+     (define found
+       (for/or ([oblist (in-list lookups)])
+         (define candidate (mdl-lookup pname oblist))
+         (and (not (mdl-false? candidate)) candidate)))
+     (unless (eq? found value)
+       (error who
+              "UNPARSE ATOM: trailer notation not implemented; atom ~s not reachable via current OBLIST path"
               pname))
      pname]
     [(mdl-string? value)
      ;; STRING: double-quoted, internal " and \ escaped.
-     (string-append "\"" (mdl-unparse-escape-string (mdl-string-content value)) "\"")]
+     ;; B4: control characters (codes 0-31, 127) in string content require the
+     ;; Confusion "^A…" embedded-control notation, which is not implemented.
+     (define content (mdl-string-content value))
+     (for ([ch (in-string content)])
+       (define code (char->integer ch))
+       (when (or (< code 32) (= code 127))
+         (error who
+                "UNPARSE STRING: control character (code ~a) not implemented; Confusion uses \"^A\" notation"
+                code)))
+     (string-append "\"" (mdl-unparse-escape-string content) "\"")]
     [(mdl-false? value)
      ;; FALSE: "#FALSE ()" or "#FALSE (…)" for non-empty payload.
      (define items (mdl-false-payload value))
@@ -3177,8 +3194,14 @@
               (eq? (mdl-typed-value-type value) (mdl-atom "CHARACTER"))))
      ;; CHARACTER: "!\" followed by the character (Confusion: !\A → "!\\A").
      ;; The returned string contains !, \, char (3 chars for printable ASCII).
+     ;; B3: control characters (codes 0-31, 127) require Confusion's "!\^A"
+     ;; notation, which is not implemented; strict error.
      (define code (mdl-character-code value))
-     (unless code (error who "UNPARSE CHARACTER has invalid code"))
+     (unless code (error who "UNPARSE CHARACTER: invalid character code"))
+     (when (or (< code 32) (= code 127))
+       (error who
+              "UNPARSE CHARACTER: control character (code ~a) not implemented; Confusion uses !\\^A notation"
+              code))
      (string-append "!\\" (string (integer->char code)))]
     [(or (null? value) (mpair? value))
      ;; LIST: "(elem1 elem2 …)" with space-separated recursive elements.

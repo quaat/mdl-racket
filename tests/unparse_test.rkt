@@ -18,13 +18,13 @@
 
 ;; ── FIX ─────────────────────────────────────────────────────────────────────
 ;; Confusion probe: <UNPARSE 0> → "0", <UNPARSE 22> → "22", <UNPARSE -1> → "-1"
-;; <UNPARSE 1073741823> → "1073741823", <UNPARSE -1073741824> → "-1073741824"
+;; 36-bit MDL FIX extremes: max = 2^35-1 = 34359738367, min = -2^35 = -34359738368.
 (check-equal? (run "<UNPARSE 0>") "0")
 (check-equal? (run "<UNPARSE 1>") "1")
 (check-equal? (run "<UNPARSE 22>") "22")
 (check-equal? (run "<UNPARSE -1>") "-1")
-(check-equal? (run "<UNPARSE 1073741823>") "1073741823")
-(check-equal? (run "<UNPARSE -1073741824>") "-1073741824")
+(check-equal? (run "<UNPARSE 34359738367>") "34359738367")
+(check-equal? (run "<UNPARSE -34359738368>") "-34359738368")
 
 ;; Explicit radix=10 is the same as the default (decimal).
 (check-equal? (run "<UNPARSE 22 10>") "22")
@@ -34,9 +34,9 @@
 ;; a semantic contract — see docs/evidence/M3/S1-UNPARSE.md). The game never
 ;; passes a non-10 radix, so we raise a strict error rather than implement
 ;; unverified non-decimal output.
-(check-exn #rx"UNPARSE|radix|not implemented" (lambda () (run "<UNPARSE 22 8>")))
-(check-exn #rx"UNPARSE|radix|not implemented" (lambda () (run "<UNPARSE 255 16>")))
-(check-exn #rx"UNPARSE|radix|not implemented" (lambda () (run "<UNPARSE 22 2>")))
+(check-exn #rx"UNPARSE: non-decimal radix" (lambda () (run "<UNPARSE 22 8>")))
+(check-exn #rx"UNPARSE: non-decimal radix" (lambda () (run "<UNPARSE 255 16>")))
+(check-exn #rx"UNPARSE: non-decimal radix" (lambda () (run "<UNPARSE 22 2>")))
 
 ;; ── Result type and mutability ──────────────────────────────────────────────
 ;; Confusion: <TYPE <UNPARSE 42>> → STRING
@@ -59,15 +59,22 @@
 (check-equal? (run "<UNPARSE FOO>") "FOO")
 ;; Hyphenated atoms are common in MDL and need no escaping.
 (check-equal? (run "<UNPARSE FIND-OBJ>") "FIND-OBJ")
-;; Exotic PNAME with space: strict error. \-escaping is not implemented.
+;; Exotic PNAME with space: strict error (space not in [A-Za-z0-9-] whitelist).
 ;; Use <ATOM "..."> to construct atoms with unusual pnames.
-(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"FOO BAR\">>")))
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"FOO BAR\">>")))
 ;; Exotic PNAME with quote char: strict error.
-(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"A\\\"B\">>")))
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A\\\"B\">>")))
 ;; Exotic PNAME with open-paren: strict error.
-(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"A(B\">>")))
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A(B\">>")))
 ;; Exotic PNAME with backslash: strict error.
-(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"A\\\\B\">>" )))
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A\\\\B\">>" )))
+;; B2: pname parseable as a number must fail even though digits are in the whitelist.
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"42\">>")))
+;; B2: pname with dot (not in whitelist).
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A.B\">>")))
+;; B1: atom removed from OBLIST requires trailer notation — strict error.
+(check-exn #rx"UNPARSE ATOM: trailer notation not implemented"
+           (lambda () (run "<SET X <REMOVE FOO>> <UNPARSE .X>")))
 
 ;; ── STRING ───────────────────────────────────────────────────────────────────
 ;; Confusion: <UNPARSE "hello"> → "\"hello\"" (the string itself contains "hello"
@@ -84,6 +91,11 @@
 ;; Confusion: <UNPARSE !\\A> → result_output "\"!\\\\A\"" i.e., the MDL string
 ;; contains 3 chars: !, \, A.
 (check-equal? (run "<UNPARSE !\\A>") "!\\A")
+;; B3: control character codes 0-31 and 127 require Confusion's !\^A notation — strict error.
+(check-exn #rx"UNPARSE CHARACTER: control character"
+           (lambda () (run "<UNPARSE <ASCII 0>>")))    ; NUL (code 0)
+(check-exn #rx"UNPARSE CHARACTER: control character"
+           (lambda () (run "<UNPARSE <ASCII 127>>")))
 
 ;; ── LIST ─────────────────────────────────────────────────────────────────────
 ;; Confusion: <UNPARSE (1 2 3)> → "(1 2 3)"
@@ -93,17 +105,26 @@
 ;; Confirm UNPARSE is reachable via APPLY (tests the dispatch path).
 (check-equal? (run "<APPLY ,UNPARSE 42>") "42")
 
+;; ── STRING with control chars ────────────────────────────────────────────────
+;; B4: strings with control characters (codes 0-31, 127) require Confusion's
+;; "^A…" embedded-control notation, which is not implemented; strict error.
+;; Use <STRING <ASCII n>> to build a string with a control character via MDL.
+(check-exn #rx"UNPARSE STRING: control character"
+           (lambda () (run "<UNPARSE <STRING <ASCII 7>>>")))   ; bell (code 7)
+(check-exn #rx"UNPARSE STRING: control character"
+           (lambda () (run "<UNPARSE <STRING <ASCII 127>>>")))
+
 ;; ── Strict error on unsupported types ────────────────────────────────────────
 ;; FLOAT is not implemented exactly (Confusion format: 7 decimal places, not
 ;; confirmed for all values). Expect an explicit unsupported error, not Racket's
 ;; printer output.
-(check-exn #rx"UNPARSE|unsupported|type" (lambda () (run "<UNPARSE 1.5>")))
+(check-exn #rx"UNPARSE: unsupported MDL type" (lambda () (run "<UNPARSE 1.5>")))
 ;; VECTOR: not implemented.
-(check-exn #rx"UNPARSE|unsupported|type" (lambda () (run "<UNPARSE [1 2]>")))
+(check-exn #rx"UNPARSE: unsupported MDL type" (lambda () (run "<UNPARSE [1 2]>")))
 ;; UVECTOR: not implemented.
-(check-exn #rx"UNPARSE|unsupported|type" (lambda () (run "<UNPARSE ![1 2!]>")))
+(check-exn #rx"UNPARSE: unsupported MDL type" (lambda () (run "<UNPARSE ![1 2!]>")))
 ;; Out-of-range radix: error (range check is distinct from "not implemented").
-(check-exn #rx"UNPARSE|radix" (lambda () (run "<UNPARSE 1 1>")))
-(check-exn #rx"UNPARSE|radix" (lambda () (run "<UNPARSE 1 37>")))
+(check-exn #rx"UNPARSE radix must be a FIX" (lambda () (run "<UNPARSE 1 1>")))
+(check-exn #rx"UNPARSE radix must be a FIX" (lambda () (run "<UNPARSE 1 37>")))
 ;; Radix 10 explicit: works (decimal).
 (check-equal? (run "<UNPARSE -5 10>") "-5")
