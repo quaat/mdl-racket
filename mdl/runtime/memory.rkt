@@ -2,7 +2,8 @@
 ;; Session-local logical movable-storage ledger. Entries never retain values.
 (provide make-mdl-memory mdl-memory? mdl-memory-capacity mdl-memory-used
          set-mdl-memory-capacity! mdl-memory-register! mdl-memory-collect!
-         mdl-memory-free mdl-memory-bloat!)
+         mdl-memory-free mdl-memory-bloat! mdl-memory-entry-word-sum
+         mdl-memory-set-used-for-test!)
 
 (struct allocation (reference words))
 (struct mdl-memory ([entries #:mutable] [capacity #:mutable] [used #:mutable]))
@@ -37,6 +38,18 @@
   (set-mdl-memory-entries! memory survivors)
   (set-mdl-memory-used! memory (- (mdl-memory-used memory) reclaimed))
   (values reclaimed elapsed))
+
+(define (mdl-memory-set-used-for-test! memory used)
+  ;; Test-only: directly set the cached 'used' field WITHOUT registering entries.
+  ;; Use only to simulate near-fix-max states for overflow/cap testing.
+  (set-mdl-memory-used! memory used))
+
+(define (mdl-memory-entry-word-sum memory)
+  ;; Independently recompute the total charged words by summing all entries.
+  ;; This is NOT the same as mdl-memory-used: it recomputes from the entry list,
+  ;; so it can catch bugs where the cached 'used' field diverges from the entries.
+  (for/sum ([entry (in-list (mdl-memory-entries memory))])
+    (allocation-words entry)))
 
 (define (mdl-memory-bloat! memory free-words)
   (unless (and (exact-integer? free-words) (>= free-words 0))

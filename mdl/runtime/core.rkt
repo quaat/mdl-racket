@@ -15,6 +15,7 @@
          mdl-apply mdl-list mdl-list->list
          mdl-emit-event!
          mdl-logical-storage-stats mdl-set-logical-storage-capacity!
+         mdl-recompute-entry-words current-mdl-gc-min mdl-set-used-for-test!
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-make-terminal-channel
@@ -1832,6 +1833,27 @@
     (error 'mdl-set-logical-storage-capacity! "expected nonnegative FIX"))
   (set-mdl-memory-capacity! (current-mdl-memory) words))
 
+(define (mdl-recompute-entry-words)
+  ;; Host-only test hook: independently recompute the total charged words
+  ;; by summing ALL currently-registered entries, bypassing the cached 'used'
+  ;; field. Use this in tests to verify 'used' is consistent with the entry list.
+  (mdl-memory-entry-word-sum (current-mdl-memory)))
+
+(define (mdl-set-used-for-test! words)
+  ;; Host-only test hook: directly set the cached 'used' field WITHOUT
+  ;; registering entries. Use ONLY to simulate near-fix-max ledger state for
+  ;; overflow / cap-clamping tests. Leaves entries inconsistent.
+  (unless (and (exact-integer? words) (>= words 0))
+    (error 'mdl-set-used-for-test! "expected nonnegative integer"))
+  (mdl-memory-set-used-for-test! (current-mdl-memory) words))
+
+;; MDL manual ch.22 §22.5: GC min = minimum free words after a collection.
+;; "A large min will result in fewer total garbage collections."
+;; Initial value: 8192 words. Exposed as a session parameter so tests can
+;; use a small value to reach the fix-max cap case that would otherwise
+;; require fix-max live objects to trigger.
+(define current-mdl-gc-min (make-parameter 8192))
+
 (define (mdl-collect-logical! reason initiator)
   (define-values (reclaimed elapsed) (mdl-memory-collect! (current-mdl-memory)))
   (mdl-emit-event! "GC" (list elapsed reason (mdl-atom initiator)))
@@ -1857,13 +1879,45 @@
              (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory)))
     (parameterize ([current-mdl-storage-pressure? #t])
       (mdl-emit-event! "DIVERT-AGC" (list words (mdl-atom initiator)))
+      ;; Track whether a collection actually ran during this allocation.
+      ;; The gc-min growth policy (MDL manual ch.22 §22.5) applies only after
+      ;; a collection ran, NOT when a DIVERT-AGC handler's BLOAT already satisfied
+      ;; the request. BLOAT is the handler's mechanism for postponing GC; if the
+      ;; handler BLOATs to cover the pending words, logical capacity is already
+      ;; correct and gc-min does not impose an additional floor.  Applying gc-min
+      ;; after every BLOAT inflates capacity far beyond the handler's intent,
+      ;; collapsing a game-designed diversion schedule (e.g. 77rooms.mud §78-90)
+      ;; from ~85 diversions to ~2 per 300 k cells.
+      (define collected? #f)
       (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
-        (mdl-collect-logical! 2 initiator))
-      ;; Historical MDL asks the host for more space when collection alone
-      ;; cannot satisfy a pending request. This capacity is logical only.
-      (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
-        (set-mdl-memory-capacity!
-         memory (+ (mdl-memory-used memory) (max words 8192))))))
+        (mdl-collect-logical! 2 initiator)
+        (set! collected? #t))
+      ;; MDL manual ch.22 §22.5: gc-min = "the smallest number of words of
+      ;; 'free' (unclaimed, available for use) movable garbage-collected storage"
+      ;; that the collector must leave after a collection; initial value 8192.
+      ;; "A large min will result in fewer total garbage collections."
+      ;; Apply gc-min growth ONLY when collected? is #t (a collection ran).
+      ;; Capacity grows geometrically (×3/2) to also avoid O(n²) cost.
+      ;; Capped at fix-max (2^35-1); Racket error if needed > fix-max.
+      ;;
+      ;; Explicit <GC> (mdl-gc) bypasses this path entirely and does NOT apply
+      ;; gc-min growth: it calls mdl-collect-logical! directly, leaving capacity
+      ;; unchanged.  This matches the manual: min is an automatic-GC parameter.
+      (when collected?
+        (let* ([gc-min (current-mdl-gc-min)]  ; MDL manual ch.22, initial 8192
+               [free-after (mdl-memory-free memory)])
+          (when (< free-after (max words gc-min))
+            (define needed (+ (mdl-memory-used memory) (max words gc-min)))
+            (when (> needed fix-max)
+              (error 'mdl-gc
+                     "storage overflow: ~a logical words needed, exceeds FIX maximum ~a"
+                     needed fix-max))
+            (set-mdl-memory-capacity!
+             memory
+             (min fix-max
+                  (max needed
+                       (inexact->exact
+                        (ceiling (* (mdl-memory-capacity memory) 3/2)))))))))))
   (mdl-memory-register! memory value words))
 
 (define (mdl-deliver-occurrence! occurrence)
