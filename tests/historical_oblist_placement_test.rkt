@@ -24,17 +24,6 @@
 ;; docs/evidence/M3/review/R3R4.md "Placement allowlist".
 (define allowlist
   (append
-   ;; Separate issue: backslash-escaped OBLIST trailers. `DEAD\!!-WORDS`,
-   ;; `IN\!!-WORDS`, `OUT\!!-WORDS` (77act1.mud:379-384, 78melee.mud) read as
-   ;; PNAME "DEAD\!" here; Confusion reads "DEAD!" (which both runtimes also
-   ;; hold on WORDS from the vocabulary strings).
-   (for/list ([name (in-list '("DEAD" "IN" "OUT"))])
-     (list 'runtime-only "@WORDS" (string-append name "\\!")
-           "backslash-escaped trailer PNAME (separate issue)"))
-   ;; Separate reader issue: `.5` (78melee.mud:369, <FIX <+ .5 ...>>) is the
-   ;; FLOAT 0.5 in MDL; this reader reads LVAL of an ATOM named 5.
-   (list (list 'runtime-only "INITIAL" "5"
-               "`.5` read as LVAL of ATOM 5 instead of FLOAT (separate issue)"))
    ;; Separate reader issue: `;` comments the next OBJECT, which MDL READs
    ;; (81tell-repl.mud:40-42 `; Read a line ...`, `; (ALT not supported
    ;; yet)`), interning its atoms; this reader discards comment text.

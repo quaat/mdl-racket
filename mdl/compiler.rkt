@@ -60,8 +60,13 @@
 (define (is-kind? n kind)
   (and (mdl-node? n) (eq? (source-node-kind n) kind)))
 
+;; True for both ordinary and escaped-atom nodes: an escaped atom has the
+;; same PNAME semantics as a plain atom but must bypass numeric/# classification.
+(define (is-atom-node? n)
+  (or (is-kind? n 'atom) (is-kind? n 'escaped-atom)))
+
 (define (atom-name n)
-  (unless (is-kind? n 'atom) (unsupported n "expected an MDL atom"))
+  (unless (is-atom-node? n) (unsupported n "expected an MDL atom"))
   (when (and (read-substitution? n)
              (not (eq? (substitution-value n)
                        (mdl-atom (mdl-atom-pname (substitution-value n))))))
@@ -84,23 +89,33 @@
             (unsupported n "FLOAT literal overflow"))
           float)
         number))
-  (cond
-    [(string=? upper "#FALSE") (unsupported n "#FALSE requires a LIST payload")]
-    [(string=? upper "#WORD") (unsupported n "#WORD requires a numeric payload")]
-    [(member upper '("T" "ELSE" "NIL")) (atom-ref upper)]
-    [(regexp-match? #px"^[+-]?[0-9]+$" val)
-     (fix-or-float (string->number val))]
-    [(regexp-match? #px"^[+-]?[0-9]+\\.$" val)
-     (fix-or-float (string->number (substring val 0 (sub1 (string-length val)))))]
-    [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
-    [(regexp-match? #px"^\\*[0-7]+\\*$" val)
-     (fix-or-float (string->number (substring val 1 (sub1 (string-length val))) 8))]
-    [(regexp-match? #px"^\\*[0-9]+\\*$" val)
-     (unsupported n "invalid octal FIX token")]
-    [(regexp-match? #px"^[+-]?[0-9]+(\\.[0-9]*)?[Ee][+-]?[0-9]+$" val)
-     (unsupported n "unsupported numeric token")]
-    [(string-prefix? val "#") (unsupported n "unsupported # reader token")]
-    [else (atom-ref val)]))
+  ;; An escaped atom (produced by a `\`-prefixed PNAME in source) is always
+  ;; an ATOM regardless of its PNAME.  `\5` has PNAME "5" but is ATOM, not
+  ;; FIX; `\#FOO` has PNAME "#FOO" but is ATOM, not an unsupported # token.
+  ;; See MDL chapter 15 and issue I119.
+  (if (is-kind? n 'escaped-atom)
+      (atom-ref val)
+      (cond
+        [(string=? upper "#FALSE") (unsupported n "#FALSE requires a LIST payload")]
+        [(string=? upper "#WORD") (unsupported n "#WORD requires a numeric payload")]
+        [(member upper '("T" "ELSE" "NIL")) (atom-ref upper)]
+        [(regexp-match? #px"^[+-]?[0-9]+$" val)
+         (fix-or-float (string->number val))]
+        [(regexp-match? #px"^[+-]?[0-9]+\\.$" val)
+         (fix-or-float (string->number (substring val 0 (sub1 (string-length val)))))]
+        [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
+        ;; Leading-dot FLOATs: `.5` → 0.5, `.05` → 0.05 (MDL ch.7; Confusion I124)
+        [(regexp-match? #px"^\\.[0-9]+$" val) (string->number val)]
+        [(regexp-match? #px"^\\.[0-9]+[Ee][+-]?[0-9]+$" val)
+         (unsupported n "unsupported numeric token")]
+        [(regexp-match? #px"^\\*[0-7]+\\*$" val)
+         (fix-or-float (string->number (substring val 1 (sub1 (string-length val))) 8))]
+        [(regexp-match? #px"^\\*[0-9]+\\*$" val)
+         (unsupported n "invalid octal FIX token")]
+        [(regexp-match? #px"^[+-]?[0-9]+(\\.[0-9]*)?[Ee][+-]?[0-9]+$" val)
+         (unsupported n "unsupported numeric token")]
+        [(string-prefix? val "#") (unsupported n "unsupported # reader token")]
+        [else (atom-ref val)])))
 
 (define (compile-typed n)
   (define tagged (source-node-value n))
@@ -115,7 +130,7 @@
       (compile-typed-word n name value)))
 
 (define (compile-typed-word n name value)
-  (unless (is-kind? value 'atom)
+  (unless (is-atom-node? value)
     (unsupported n "#WORD requires a numeric literal"))
   (define raw (source-node-value value))
   (define bits
@@ -163,7 +178,7 @@
     [(decl) `(mdl-make-declaration
               (mdl-list ,@(map compile-data (source-node-value n)))
               ,(mdl-node-line n) ,(mdl-node-column n))]
-    [(atom) (mdl-constant n)]
+    [(atom escaped-atom) (mdl-constant n)]
     [(string) (source-node-value n)]
     [(splice) (compile-splice-data n)]
     [(list) `(mdl-list ,@(map compile-data (source-node-value n)))]
@@ -222,7 +237,7 @@
   id)
 
 (define (compile-quote n)
-  (if (is-kind? n 'atom)
+  (if (is-atom-node? n)
       (mdl-constant n)
       (retain-literal n)))
 
@@ -246,7 +261,7 @@
   ;; the formal list bind the same activation.
   (define-values (leading-act args-node body-xs)
     (cond [(and (>= (length xs) 4)
-                (is-kind? (second xs) 'atom)
+                (is-atom-node? (second xs))
                 (is-kind? (third xs) 'list))
            (values (atom-name (second xs)) (third xs) (cdddr xs))]
           [(and (>= (length xs) 3) (is-kind? (second xs) 'list))
@@ -352,13 +367,13 @@
            [(memq next '(optional aux name)) (loop (cdr items) next)]
            [else ; one ARGS or TUPLE rest binding
             (when (or (null? (cdr items))
-                      (not (is-kind? (cadr items) 'atom)))
+                      (not (is-atom-node? (cadr items))))
               (unsupported item "ARGS or TUPLE requires an ATOM formal"))
             (define target (cadr items))
             (add-spec! item 'rest (atom-name target)
                        (if (string=? marker "TUPLE") 'tuple 'args))
             (loop (cddr items) 'after-rest)])]
-        [(is-kind? item 'atom)
+        [(is-atom-node? item)
          (define name (atom-name item))
          (define next-section
            (case section
@@ -369,7 +384,7 @@
              [else (unsupported item "ATOM formal not allowed in this section")]))
          (loop (cdr items) next-section)]
         [(is-kind? item 'quote)
-         (unless (is-kind? (source-node-value item) 'atom)
+         (unless (is-atom-node? (source-node-value item))
            (unsupported item "quoted formal must name an ATOM"))
          (define kind
            (case section
@@ -387,7 +402,7 @@
          (when (and quoted? (not (eq? section 'optional)))
            (unsupported item "quoted formal not allowed in this section"))
          (define name-node (if quoted? (source-node-value (first pair)) (first pair)))
-         (unless (is-kind? name-node 'atom)
+         (unless (is-atom-node? name-node)
            (unsupported item (if quoted? "quoted formal must name an ATOM"
                                  "formal name must be an ATOM")))
          (add-spec! item (if quoted? 'quoted-optional section)
@@ -420,10 +435,15 @@
 ;; explicit invalid-octal error), and # reader tokens. Everything else is
 ;; an atom name. PROG/REPEAT label detection shares this classification
 ;; with constant compilation.
-(define (atom-node-constant-token? val)
-  (or (regexp-match? #px"^[+-]?[0-9]" val)
-      (regexp-match? #px"^\\*[0-9]+\\*$" val)
-      (string-prefix? val "#")))
+;; An escaped-atom node (produced by a \-prefixed PNAME) is NEVER a constant
+;; token regardless of PNAME text: `\5` is an ATOM named "5", not FIX 5.
+(define (atom-node-constant-token? n)
+  (and (not (is-kind? n 'escaped-atom))
+       (let ([val (source-node-value n)])
+         (or (regexp-match? #px"^[+-]?[0-9]" val)
+             (regexp-match? #px"^\\.[0-9]" val)       ; leading-dot FLOAT: `.5`, `.5E1`
+             (regexp-match? #px"^\\*[0-9]+\\*$" val)
+             (string-prefix? val "#")))))
 
 ;; PROG and REPEAT bodies run as ordered items: top-level ATOMs are labels
 ;; skipped in normal flow and addressed by GO; other expressions compile to
@@ -431,10 +451,9 @@
 ;; which constant compilation rejects or turns into FIX/FLOAT/WORD values;
 ;; only true atom names can be labels.
 (define (prog-label-name n)
-  (and (is-kind? n 'atom)
-       (let ([val (source-node-value n)])
-         (and (not (atom-node-constant-token? val))
-              (atom-name n)))))
+  (and (is-atom-node? n)
+       (not (atom-node-constant-token? n))
+       (atom-name n)))
 
 (define (compile-prog-items body locals)
   (for/list ([n (in-list body)])
@@ -449,7 +468,7 @@
     (unsupported n (format "~a requires an auxiliary LIST and body" name)))
   (define named?
     (and (>= (length args) 2)
-         (is-kind? (car args) 'atom)
+         (is-atom-node? (car args))
          (is-kind? (second args) 'list)))
   (define activation-name (and named? (atom-name (car args))))
   (define operands (if named? (cdr args) args))
@@ -463,7 +482,7 @@
   (define specs
     (for/list ([item (in-list (source-node-value aux))])
       (define-values (name initializer)
-        (cond [(is-kind? item 'atom) (values (atom-name item) #f)]
+        (cond [(is-atom-node? item) (values (atom-name item) #f)]
               [(and (is-kind? item 'list)
                     (= (length (source-node-value item)) 2))
                (define pair (source-node-value item))
@@ -537,7 +556,7 @@
   (if (null? xs)
       '(mdl-false '())
       (let* ([op-node (car xs)]
-             [op (and (is-kind? op-node 'atom) (atom-name op-node))]
+             [op (and (is-atom-node? op-node) (atom-name op-node))]
              [args (cdr xs)])
         (if (and op (not (number? (mdl-constant op-node))))
         (case (string->symbol op)
@@ -545,7 +564,7 @@
           [(FUNCTION)
            (define-values (leading-act formals-node body-xs)
              (cond [(and (>= (length args) 3)
-                         (is-kind? (first args) 'atom)
+                         (is-atom-node? (first args))
                          (is-kind? (second args) 'list))
                     (values (atom-name (first args)) (second args) (cddr args))]
                    [(and (>= (length args) 2) (is-kind? (first args) 'list))
@@ -558,11 +577,11 @@
                                   ,(if leading-act (atom-ref leading-act) #f)
                                   ,(if decl (compile-data decl) #f))]
           [(DEFMAC)
-           (unless (and (pair? args) (is-kind? (first args) 'atom))
+           (unless (and (pair? args) (is-atom-node? (first args)))
              (unsupported n "First argument of DEFMAC must be an atom"))
            (define-values (leading-act formals-node body-xs)
              (cond [(and (>= (length args) 4)
-                         (is-kind? (second args) 'atom)
+                         (is-atom-node? (second args))
                          (is-kind? (third args) 'list))
                     (values (atom-name (second args)) (third args) (cdddr args))]
                    [(and (>= (length args) 3) (is-kind? (second args) 'list))
@@ -680,7 +699,7 @@
              `(mdl-eval (mdl-read-value ,(raw-node-value n))))
          `(mdl-eval (mdl-read-value ,(raw-node-value n))))]
     [(percent) (compile-data n)]
-    [(atom) (mdl-constant n)]
+    [(atom escaped-atom) (mdl-constant n)]
     [(false) (retain-literal n)]
     [(string) (source-node-value n)]
     [(splice)
