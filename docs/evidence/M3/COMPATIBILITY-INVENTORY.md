@@ -15,7 +15,8 @@ the authority for the next implementation dependency.
 | `77dung.mud:148`, `77dung.mud:2463` | Source load | `#NEXIT` STRING literal and SPNAME | Implemented and tested; SPNAME may copy to enforce immutability |
 | `81tell-repl.mud:57`, `77rooms.mud:286` | START path | GETTIMEDATE and PRINTSTRING with terminal CHANNEL | Implemented and tested for the source-reached subset; clock is host time |
 | `77rooms.mud:286` | START path | CRLF newline and T return | Implemented and focused test passing |
-| `77rooms.mud:291` | START path | 36-bit session-owned RANDOM with deterministic seeding | First actual initialization failure; requires reference validation and licensing review |
+| `77rooms.mud:291` | START path | 36-bit session-owned RANDOM with deterministic seeding | Implemented on issue #108 follow-up branch; native negative-seed range deviation documented |
+| `77rooms.mud:297` | CONTIN path | BACK on terminal CHANNEL's backing storage | First actual failure after RANDOM; source-backed semantics and reference probes required |
 | `81tell-repl.mud:46` | Interactive path | READSTRING plus original LEX/parser | Not implemented or verified; source definition loaded only |
 
 Locked source revision: mdlzork/Confusion

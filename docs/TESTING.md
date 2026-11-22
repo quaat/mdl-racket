@@ -1,5 +1,15 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 RANDOM follow-up checkpoint (2026-11-22)
+
+`tests/random36_test.rkt` uses temporary session roots and belongs to the
+source-independent Racket suite. `make test-m3-start-random` runs only after
+`make sources` and asserts the unchanged 1,229-form load and known XFAIL
+frontier at BACK in `77rooms.mud:297`. The required Native Confusion
+reference workflow runs this target after source preparation. Pinned
+RANDOM observations and the 36-bit negative-seed deviation are in
+[RANDOM-START.md](evidence/M3/RANDOM-START.md).
+
 ## M3 source-load review checkpoint (2026-11-22)
 
 `TMPDIR=/tmp make test` is source independent: terminal CHANNEL tests create

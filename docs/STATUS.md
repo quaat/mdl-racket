@@ -6,10 +6,18 @@
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
 | LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | FAIL: original START reaches unassigned RANDOM after welcome output |
+| INITIALIZED | FAIL on RNG follow-up branch: original START reaches unassigned BACK in CONTIN |
 | INTERACTIVE | NOT RUN: original startup/game loop unavailable |
 | SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
 | PLAYABLE | NOT RUN: original game has not booted in Racket |
+
+- **Issue #108 RNG follow-up on `feat/m3-session-random` (WIP):** A
+  session-owned two-word 36-bit generator passes deterministic reference
+  cases, seed-order checks, strict errors, range checks and independent
+  session tests. The unchanged START now passes RANDOM and fails at
+  unassigned `BACK` in `77rooms.mud:297` after welcome output. The source
+  load remains 1,229 forms, zero skips. This is a new executable frontier,
+  not an INITIALIZED or M3 pass. See [RANDOM evidence](evidence/M3/RANDOM-START.md).
 
 - **Current WIP `feat/m3-logical-gc` (reviewed checkpoint `c5a6027`):** The complete unchanged
   source chain loads: 1,229 forms, zero skips, loader exit 0. This is a
