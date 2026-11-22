@@ -132,4 +132,58 @@
    (define atom (run "'A\\!!-B"))
    (check-equal? (mdl-atom-pname atom) "A!")))
 
+;; ---- Regression: escaped atoms must NOT be classified as numeric / # tokens -----
+;; Confusion reference (I119): `<TYPE \5>` → ATOM; `<TYPE \-5>` → ATOM;
+;; `<TYPE \1.5>` → ATOM; `<TYPE \*7*>` → ATOM; `<TYPE \#FOO>` → ATOM.
+;; Without the 'escaped-atom node kind the compiler would mis-classify these.
+
+(test-case "\\5 → ATOM with PNAME \"5\", not FIX 5"
+  ;; Parser must tag this 'escaped-atom; compiler must skip the numeric path.
+  (define nodes (parse-mdl "\\5"))
+  (check-equal? (length nodes) 1)
+  (check-equal? (mdl-node-kind (car nodes)) 'escaped-atom)
+  (check-equal? (mdl-node-value (car nodes)) "5")
+  ;; At runtime the atom interned from PNAME "5" must be an ATOM, not a FIX.
+  (check-true (mdl-atom? (run "'\\5"))))
+
+(test-case "\\-5 → ATOM with PNAME \"-5\", not FIX -5"
+  (define nodes (parse-mdl "\\-5"))
+  (check-equal? (mdl-node-kind (car nodes)) 'escaped-atom)
+  (check-equal? (mdl-node-value (car nodes)) "-5")
+  (check-true (mdl-atom? (run "'\\-5"))))
+
+(test-case "\\1.5 → ATOM with PNAME \"1.5\", not FLOAT 1.5"
+  (define nodes (parse-mdl "\\1.5"))
+  (check-equal? (mdl-node-kind (car nodes)) 'escaped-atom)
+  (check-equal? (mdl-node-value (car nodes)) "1.5")
+  (check-true (mdl-atom? (run "'\\1.5"))))
+
+(test-case "\\*7* → ATOM with PNAME \"*7*\", not octal FIX"
+  (define nodes (parse-mdl "\\*7*"))
+  (check-equal? (mdl-node-kind (car nodes)) 'escaped-atom)
+  (check-equal? (mdl-node-value (car nodes)) "*7*")
+  (check-true (mdl-atom? (run "'\\*7*"))))
+
+(test-case "\\#FOO → ATOM with PNAME \"#FOO\", not an unsupported # token"
+  (define nodes (parse-mdl "\\#FOO"))
+  (check-equal? (mdl-node-kind (car nodes)) 'escaped-atom)
+  (check-equal? (mdl-node-value (car nodes)) "#FOO")
+  (check-true (mdl-atom? (run "'\\#FOO"))))
+
+;; ---- Regression: escaped atom as PROG label -----
+;; `\1ST` has PNAME "1ST" and kind 'escaped-atom.  atom-node-constant-token?
+;; must return #f for 'escaped-atom so prog-label-name accepts it as a label.
+(test-case "\\1ST is a valid PROG label"
+  ;; The PROG body has two items: label \1ST and expression 42.
+  ;; GO jumps to the label; the PROG returns the value after it.
+  (check-equal? (run "<PROG () <GO \\1ST> 99 \\1ST 42>") 42))
+
+;; ---- Regression: .\ is LVAL of escaped atom, not numeric -----
+;; `.\5` must produce LVAL of ATOM "5", not a FLOAT/FIX literal.
+;; (Local variables with numeric-looking names are bizarre but legal.)
+;; Use a function with formal argument \5 to bind the local.
+(test-case ".\\5 → LVAL of atom named \"5\""
+  ;; Bind the local "5" via a function formal, read it back via .\5.
+  (check-equal? (run "<DEFINE F (\\5) .\\5>  <F 99>") 99))
+
 (displayln "escaped atom tests passed")

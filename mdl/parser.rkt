@@ -60,21 +60,25 @@
       (memv ch '(#\< #\> #\( #\) #\[ #\] #\{ #\} #\" #\; #\, #\'))))
 
 (define (read-atom! c)
+  ;; Returns (values pname escaped?) where escaped? is #t if any backslash
+  ;; was consumed.  The caller may use escaped? to tag the resulting node as
+  ;; 'escaped-atom so the compiler knows to skip numeric / # classification.
   (define out (open-output-string))
+  (define escaped? #f)
   (let loop ()
     (define ch (peek c))
     (cond
-      [(delimiter? ch) (get-output-string out)]
+      [(delimiter? ch) (values (get-output-string out) escaped?)]
       [(and (char=? ch #\!) (equal? (peek-next c) #\]))
-       (get-output-string out)]
+       (values (get-output-string out) escaped?)]
       ;; `!>` terminates a SEGMENT payload (chapter 7: the trailing `!` is
       ;; part of the close, not of the atom in front of it).
       [(and (char=? ch #\!) (equal? (peek-next c) #\>))
-       (get-output-string out)]
+       (values (get-output-string out) escaped?)]
       [(char=? ch #\\)
        (advance! c)
-       (let ([escaped (advance! c)])
-         (unless escaped (parse-error c "unterminated MDL escape"))
+       (let ([escaped-char (advance! c)])
+         (unless escaped-char (parse-error c "unterminated MDL escape"))
          ;; MDL chapter 15: `\` quotes the next character, making it a
          ;; literal constituent of the PNAME (backslash is dropped).
          ;; Confusion probe confirms: `A\!B` → PNAME "A!B",
@@ -83,7 +87,8 @@
          ;; (backslash-stripped) string, so `A\!-B` → pname "A", oblist B
          ;; and `DEAD\!!-WORDS` → pname "DEAD!", oblist WORDS — both
          ;; matching pinned Confusion (I119).
-         (write-char escaped out)
+         (set! escaped? #t)
+         (write-char escaped-char out)
          (loop))]
       [else (write-char (advance! c) out) (loop)])))
 
@@ -149,11 +154,11 @@
            ;; `,.FOO`, that expression is the local value of FOO, not an
            ;; ATOM whose PNAME begins with a period (manual chapter 4).
            (node 'global (read-node! c))
-           (let ([name (read-atom! c)])
+           (let-values ([(name _esc) (read-atom! c)])
              (node 'global (if (string=? name "") (read-node! c) name))))]
       [(#\.)
        (advance! c)
-       (let ([name (read-atom! c)])
+       (let-values ([(name _esc) (read-atom! c)])
          (when (string=? name "") (parse-error c "empty local reference"))
          (node 'local name))]
       [(#\!)
@@ -177,7 +182,7 @@
            ((cursor-read-eval c) percent-node)
            percent-node)]
       [(#\#)
-       (let ([name (read-atom! c)])
+       (let-values ([(name _esc) (read-atom! c)])
          (skip-ws! c)
          (cond
            [(string-ci=? name "#DECL")
@@ -186,7 +191,7 @@
             ;; generic #type reader re-types the inner DECL value, a no-op,
             ;; so extra #DECL tokens collapse into one declaration.
             (let loop ()
-              (define next (read-atom! c))
+              (define-values (next _esc) (read-atom! c))
               (skip-ws! c)
               (cond
                 [(string-ci=? next "#DECL") (loop)]
@@ -206,9 +211,11 @@
            [else (node 'atom name)]))]
       [(#\> #\) #\] #\}) (parse-error c "unexpected closing delimiter")]
       [else
-       (let ([raw (read-atom! c)])
+       (let-values ([(raw escaped?) (read-atom! c)])
          (when (string=? raw "") (parse-error c "invalid token"))
-         (node 'atom raw))])))
+         ;; Tag the node 'escaped-atom when any backslash was consumed so the
+         ;; compiler skips numeric / # classification (I119).
+         (node (if escaped? 'escaped-atom 'atom) raw))])))
 
 (define (make-mdl-node-reader text #:source [source "<string>"]
                               #:read-eval [read-eval #f])
