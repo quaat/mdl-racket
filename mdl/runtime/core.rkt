@@ -1866,9 +1866,23 @@
         (mdl-collect-logical! 2 initiator))
       ;; Historical MDL asks the host for more space when collection alone
       ;; cannot satisfy a pending request. This capacity is logical only.
+      ;; R2 fix: use amortised geometric growth (factor 3/2, minimum increment)
+      ;; instead of a flat +8192 bump to avoid O(n) collections for a growing
+      ;; live set. The new capacity is capped at fix-max (the MDL 36-bit FIX
+      ;; maximum = 2^35-1). If even the minimum needed exceeds fix-max, raise an
+      ;; explicit MDL-visible error rather than silently wrapping.
       (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
-        (set-mdl-memory-capacity!
-         memory (+ (mdl-memory-used memory) (max words 8192))))))
+        (define needed (+ (mdl-memory-used memory) words))
+        (when (> needed fix-max)
+          (error 'mdl-gc
+                 "storage overflow: ~a logical words needed, exceeds FIX maximum ~a"
+                 needed fix-max))
+        (define grown
+          (min fix-max
+               (max needed
+                    (inexact->exact
+                     (ceiling (* (mdl-memory-capacity memory) 3/2))))))
+        (set-mdl-memory-capacity! memory grown))))
   (mdl-memory-register! memory value words))
 
 (define (mdl-deliver-occurrence! occurrence)
