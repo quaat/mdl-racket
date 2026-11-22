@@ -30,6 +30,7 @@ raco test mdl/runtime/core.rkt \
   tests/interrupt_dispatch_test.rkt \
   tests/logical_gc_test.rkt tests/special_decl_test.rkt \
   tests/lose_literal_test.rkt tests/error_interrupt_test.rkt \
+  tests/erret_interrupt_cleanup_test.rkt \
   tests/channel_type_test.rkt tests/numeric_predicate_test.rkt \
   tests/istring_test.rkt \
   tests/structured_type_head_test.rkt tests/block_test.rkt \
@@ -39,4 +40,6 @@ raco test mdl/runtime/core.rkt \
   tests/empty_uvector_test.rkt tests/spname_test.rkt \
   tests/gettimedate_test.rkt tests/terminal_channel_test.rkt \
   tests/printstring_channel_test.rkt tests/crlf_test.rkt \
-  tests/channel_port_test.rkt
+  tests/channel_port_test.rkt tests/channel_root_identity_test.rkt \
+  tests/constructor_eval_policy_test.rkt tests/string_view_consumers_test.rkt \
+  tests/oblist_identity_test.rkt
