@@ -1897,3 +1897,11 @@ character-count return value; pinned Confusion returns the source STRING,
 a recorded deviation already present for one-argument PRINTSTRING. Invalid
 CHANNEL, count, or arity fails. Typed STRING values are accepted after
 CHTYPE to STRING, as used by the original TELL definition.
+
+## M3 CRLF and terminal newline (`77rooms.mud:286`)
+
+Manual chapter 11 defines CRLF as emitting a terminal newline and returning
+T. It accepts an optional output CHANNEL, like TERPRI, which instead returns
+empty FALSE. The local runner writes a line feed to the current Racket output
+port and requires a PRINT-mode CHANNEL. This follows the existing documented
+Unix terminal normalization; an actual carriage-return byte is not emitted.

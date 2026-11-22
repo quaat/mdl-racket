@@ -19,7 +19,7 @@ No `.cache/upstream/` file or source lock was changed.
 |---|---|---|
 | PARSED | PASS | 36 text files parsed, 4 nontext files identified |
 | LOADED | PASS on branch | 1,229 original forms, 0 skipped, loader exit 0, all 12 expected files in order |
-| INITIALIZED | FAIL | Original `START "WHOUS" ""` reaches unassigned `CRLF` after welcome output |
+| INITIALIZED | FAIL | Original `START "WHOUS" ""` reaches unassigned `RANDOM` after welcome output and CRLF |
 | INTERACTIVE | NOT RUN | Original loop and input channel path not yet available |
 | SMOKE_PARITY | NOT RUN | No Racket transcript or state comparison |
 | PLAYABLE | NOT RUN | No complete original game startup |
@@ -55,11 +55,12 @@ Toolchain: Racket v7.9 [bc], Python 3.13.0.
 
 | Command | Exit | Result |
 |---|---:|---|
-| `TMPDIR=/tmp make test` | 0 | 1,462 Racket checks, 23 Python tests |
+| `TMPDIR=/tmp make test` | 0 | 1,465 Racket checks, 23 Python tests |
 | `TMPDIR=/tmp make m2-check` | 0 | M2 reference and regression gate |
 | `TMPDIR=/tmp make m3-source-progress` | 0 | LOADED, 1,229 forms, 0 skipped, loader exit 0 |
 | `TMPDIR=/tmp raco test tests/printstring_channel_test.rkt tests/terminal_channel_test.rkt tests/gettimedate_test.rkt` | 0 | 17 focused checks |
-| direct `mdl-session-load!` then `mdl-session-call` of original `START` | shell 0; semantic failure | `mdl-eval: unassigned or non-applicable MDL operator CRLF`; wrapper caught the exception, so shell exit 0 is not a startup pass |
+| `TMPDIR=/tmp raco test tests/crlf_test.rkt` | 0 | 3 focused checks after a missing-operator failure |
+| direct `mdl-session-load!` then `mdl-session-call` of original `START` | shell 0; semantic failure | `mdl-eval: unassigned or non-applicable MDL operator RANDOM`; wrapper caught the exception, so shell exit 0 is not a startup pass |
 
 The focused tests were observed failing first on their respective missing
 operators or behavior. `tests/empty_uvector_test.rkt` failed on a FALSE
@@ -86,8 +87,10 @@ added. Confusion remains a separately built GPLv3 reference; no Confusion
 source was copied into the MIT-0 runtime. The branch needs independent
 review of evaluation, memory and loader changes before integration.
 
-Next executable task: implement source-defined `CRLF` output behavior and
-continue the original `START` call through initialization. Then connect
+After adding CRLF, the next executable task is a session-owned 36-bit RANDOM
+with reference-validated seed and call-order behavior. Review its provenance
+before implementation; GPLv3 Confusion is a reference, not MIT-0 code to
+copy. Continue the original `START` call through initialization. Then connect
 `READSTRING`, the original parser/game loop, and a strict five-command
 house-smoke parity gate. The startup failure is a feature dependency, not
 an approval blocker.

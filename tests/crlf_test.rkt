@@ -1,0 +1,11 @@
+#lang racket/base
+(require rackunit "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
+(define s (make-mdl-session "../.cache/upstream/mdlzork/mdlzork_771212/patched_confusion"))
+(define out (mdl-session-global s "OUTCHAN"))
+(define port (open-output-string))
+(define result (parameterize ([current-output-port port])
+                 (mdl-session-call s "CRLF" out)))
+(check-equal? (get-output-string port) "\n")
+(check-equal? (mdl-atom-pname result) "T")
+(check-exn #rx"output channel" (lambda ()
+  (mdl-session-call s "CRLF" (mdl-session-global s "INCHAN"))))

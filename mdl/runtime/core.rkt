@@ -3041,9 +3041,21 @@
   ;; Confusion returns the original STRING; see docs/SEMANTICS.md.
   written)
 
-(define (mdl-terpri)
+(define (mdl-terpri [channel #f])
+  (when channel
+    (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
+                 (equal? (mdl-nth channel 2) "PRINT"))
+      (error 'mdl-terpri "TERPRI requires an output channel")))
   (newline)
   (mdl-false '()))
+
+(define (mdl-crlf [channel #f])
+  (when channel
+    (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
+                 (equal? (mdl-nth channel 2) "PRINT"))
+      (error 'mdl-crlf "CRLF requires an output channel")))
+  (newline)
+  (mdl-atom "T"))
 
 (define (mdl-error . args)
   ;; ERROR is undeferable: a registered handler runs only above the current
@@ -3271,6 +3283,7 @@
         "ASCII" mdl-ascii
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
+        "CRLF" mdl-crlf
         "ERROR" mdl-error
         "ERRET" mdl-erret
         "EVENT" mdl-event
