@@ -44,4 +44,23 @@
 (check-equal? (mdl-node-kind word-node) 'typed)
 (check-equal? (car (mdl-node-value word-node)) "#WORD")
 (check-equal? (mdl-node-value (cdr (mdl-node-value word-node))) "*777777777777*")
+;; I124: leading-dot FLOAT literals (Confusion-confirmed: .5→FLOAT, .05→FLOAT,
+;; .5E1→FLOAT, .5A→LVAL "5A", .A→LVAL "A", .1ST→LVAL "1ST").
+;; The parser must NOT produce a 'local node for digit-only/exponent suffixes.
+(define (node1 src) (car (parse-mdl src)))
+(check-equal? (mdl-node-kind (node1 ".5")) 'atom)
+(check-equal? (mdl-node-value (node1 ".5")) ".5")
+(check-equal? (mdl-node-kind (node1 ".05")) 'atom)
+(check-equal? (mdl-node-value (node1 ".05")) ".05")
+(check-equal? (mdl-node-kind (node1 ".5E1")) 'atom)
+(check-equal? (mdl-node-value (node1 ".5E1")) ".5E1")
+;; .5A and .1ST: Confusion treats as LVAL (probe I124; the suffix contains a letter)
+(check-equal? (mdl-node-kind (node1 ".5A")) 'local)
+(check-equal? (mdl-node-value (node1 ".5A")) "5A")
+(check-equal? (mdl-node-kind (node1 ".1ST")) 'local)
+(check-equal? (mdl-node-value (node1 ".1ST")) "1ST")
+;; .A: plain LVAL, unchanged
+(check-equal? (mdl-node-kind (node1 ".A")) 'local)
+(check-equal? (mdl-node-value (node1 ".A")) "A")
+
 (displayln "reader smoke tests passed")

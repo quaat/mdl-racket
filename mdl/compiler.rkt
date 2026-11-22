@@ -93,6 +93,10 @@
     [(regexp-match? #px"^[+-]?[0-9]+\\.$" val)
      (fix-or-float (string->number (substring val 0 (sub1 (string-length val)))))]
     [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
+    ;; Leading-dot FLOATs: `.5` → 0.5, `.05` → 0.05 (MDL ch.7; Confusion I124)
+    [(regexp-match? #px"^\\.[0-9]+$" val) (string->number val)]
+    [(regexp-match? #px"^\\.[0-9]+[Ee][+-]?[0-9]+$" val)
+     (unsupported n "unsupported numeric token")]
     [(regexp-match? #px"^\\*[0-7]+\\*$" val)
      (fix-or-float (string->number (substring val 1 (sub1 (string-length val))) 8))]
     [(regexp-match? #px"^\\*[0-9]+\\*$" val)
@@ -422,6 +426,7 @@
 ;; with constant compilation.
 (define (atom-node-constant-token? val)
   (or (regexp-match? #px"^[+-]?[0-9]" val)
+      (regexp-match? #px"^\\.[0-9]" val)       ; leading-dot FLOAT: `.5`, `.5E1`
       (regexp-match? #px"^\\*[0-9]+\\*$" val)
       (string-prefix? val "#")))
 

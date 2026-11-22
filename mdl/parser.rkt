@@ -149,7 +149,16 @@
        (advance! c)
        (let ([name (read-atom! c)])
          (when (string=? name "") (parse-error c "empty local reference"))
-         (node 'local name))]
+         ;; A token `.X` where X is a valid FLOAT suffix (digits only, optionally
+         ;; with an embedded decimal and/or exponent: `.5`, `.05`, `.5E1`) is a
+         ;; leading-dot FLOAT literal, NOT an LVAL.  Any non-numeral letter in X
+         ;; means LVAL, e.g. `.1ST` → LVAL of atom "1ST", `.5A` → LVAL of atom
+         ;; "5A".  (MDL manual ch.7; Confusion-confirmed: .5→FLOAT, .5E1→FLOAT,
+         ;; .5A→LVAL "5A", .A→LVAL "A".)  Produce an atom node so that the
+         ;; compiler's mdl-constant/plain can emit the FLOAT value.
+         (if (regexp-match? #px"^[0-9]+(\\.[0-9]*)?([Ee][+-]?[0-9]+)?$" name)
+             (node 'atom (string-append "." name))
+             (node 'local name)))]
       [(#\!)
        (advance! c)
        (cond
