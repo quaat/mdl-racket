@@ -149,14 +149,21 @@
        (advance! c)
        (let ([name (read-atom! c)])
          (when (string=? name "") (parse-error c "empty local reference"))
-         ;; A token `.X` where X is a valid FLOAT suffix (digits only, optionally
-         ;; with an embedded decimal and/or exponent: `.5`, `.05`, `.5E1`) is a
-         ;; leading-dot FLOAT literal, NOT an LVAL.  Any non-numeral letter in X
-         ;; means LVAL, e.g. `.1ST` → LVAL of atom "1ST", `.5A` → LVAL of atom
-         ;; "5A".  (MDL manual ch.7; Confusion-confirmed: .5→FLOAT, .5E1→FLOAT,
-         ;; .5A→LVAL "5A", .A→LVAL "A".)  Produce an atom node so that the
-         ;; compiler's mdl-constant/plain can emit the FLOAT value.
-         (if (regexp-match? #px"^[0-9]+(\\.[0-9]*)?([Ee][+-]?[0-9]+)?$" name)
+         ;; `..X`: the second `.` is not a delimiter so read-atom! includes it.
+         ;; Confusion evaluates `..5` as LVAL of FLOAT 0.5 → type mismatch; we
+         ;; raise a strict reader error rather than producing a reachable LVAL.
+         (when (and (not (string=? name "")) (char=? (string-ref name 0) #\.))
+           (parse-error c "..name: LVAL argument must be an ATOM, not a compound form"))
+         ;; A token `.X` where X consists entirely of digits and an optional
+         ;; exponent (`[0-9]+([Ee][+-]?[0-9]+)?`) is a leading-dot FLOAT literal,
+         ;; NOT an LVAL: `.5` → FLOAT 0.5, `.05` → FLOAT 0.05, `.5E1` → FLOAT 5.0.
+         ;; Any other suffix means LVAL: `.5A` → LVAL atom "5A", `.5.` → LVAL atom
+         ;; "5.", `.5.5` → LVAL atom "5.5", `.1ST` → LVAL atom "1ST".
+         ;; The `(\.[0-9]*)?` group is intentionally absent: an embedded decimal
+         ;; inside the suffix (`.5.`, `.5.5`) is NOT a FLOAT — Confusion yields
+         ;; UNBOUND-VARIABLE LVAL "5."/"5.5" for those.
+         ;; (MDL manual ch.7; Confusion probe I124.)
+         (if (regexp-match? #px"^[0-9]+([Ee][+-]?[0-9]+)?$" name)
              (node 'atom (string-append "." name))
              (node 'local name)))]
       [(#\!)

@@ -62,5 +62,16 @@
 ;; .A: plain LVAL, unchanged
 (check-equal? (mdl-node-kind (node1 ".A")) 'local)
 (check-equal? (mdl-node-value (node1 ".A")) "A")
+;; I124 review MAJOR: `.5.` and `.5.5` have an embedded decimal in the suffix;
+;; Confusion yields UNBOUND-VARIABLE LVAL "5."/"5.5" (not FLOATs).
+;; The `(\.[0-9]*)?` group was dropped from the FLOAT check to prevent these
+;; from being misclassified as atom nodes (which had no compiler pattern match).
+(check-equal? (mdl-node-kind (node1 ".5.")) 'local)
+(check-equal? (mdl-node-value (node1 ".5.")) "5.")
+(check-equal? (mdl-node-kind (node1 ".5.5")) 'local)
+(check-equal? (mdl-node-value (node1 ".5.5")) "5.5")
+;; `..5`: Confusion errors with "Type Mismatch: LVAL arg must be atom" (it
+;; evaluates ..5 as LVAL of FLOAT 0.5); we raise a strict reader error.
+(check-exn exn:fail? (lambda () (node1 "..5")))
 
 (displayln "reader smoke tests passed")

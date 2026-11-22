@@ -58,15 +58,28 @@ Interpreter SHA256: `6df359f6…` (pinned build from bdcd4a67)
 | `1.5`             | `1.5000000`                               | FLOAT 1.5          |
 | `<TYPE .A>`       | ERROR UNBOUND-VARIABLE LVAL A             | LVAL of atom A     |
 | `<TYPE .5A>`      | ERROR UNBOUND-VARIABLE LVAL **5A**        | LVAL of atom `5A`  |
-| `'. 5`            | `.5` (unparse of LVAL 5)                  | LVAL of atom 5     |
-| `..5`             | ERROR Type Mismatch: LVAL arg must be atom| LVAL of float 0.5  |
+| `'. 5`            | `.5` (unparse: LVAL of FIX 5)             | LVAL of FIX 5 (type error on eval) |
+| `..5`             | ERROR Type Mismatch: LVAL arg must be atom| LVAL of FLOAT 0.5 → type error |
 | `'(.5)`           | `(0.5000000)`                             | FLOAT in list      |
 | `<+ .5 1>`        | `1.5000000`                               | arithmetic FLOAT   |
 | `<FIX <+ .5 0>>`  | `0`                                       | FIX of 0.5 = 0     |
 
 **Key discriminator:** `.5A` → LVAL of atom `5A` (not FLOAT).  Confusion
-reads the full atom name after `.` and only treats it as a leading-dot float
-if the name consists entirely of float-numeral characters (`[0-9]+(.[0-9]*)?([Ee][+-]?[0-9]+)?`).
+reads the full atom-name after `.` and only treats it as a leading-dot FLOAT
+if the suffix consists entirely of digits plus optional exponent
+(`^[0-9]+([Ee][+-]?[0-9]+)?$`).  An embedded decimal in the suffix (`.5.`,
+`.5.5`) produces LVAL of atom `"5."` / `"5.5"` — NOT a FLOAT.
+
+Note on `..5`: Confusion evaluates `..5` as LVAL of FLOAT 0.5 → type mismatch
+("1st arg to LVAL must be atom").  After the first `.`, Confusion's reader
+sees the second `.5` as a leading-dot FLOAT literal, then tries to take its
+LVAL.  Our reader raises a strict parse error at this point.
+
+Note on `. 5`: Confusion prints `.5` for `'. 5`, meaning it parsed `. 5` as
+"LVAL of FIX 5" (the space is skipped by Confusion's atom reader, leaving `5`
+as the LVAL argument — which is a FIX, not an ATOM, causing a type mismatch
+when evaluated).  Our reader raises "empty local reference" (strict parse
+error), which is acceptable.
 
 Note: `-.5` is an ATOM in Confusion, not a FLOAT.  The `-` triggers
 the else/atom branch in the reader, and `-` followed by `.` (not a digit)
@@ -75,10 +88,12 @@ does not start a signed number.  Our existing compiler correctly leaves
 
 ## Design decision
 
-**Parser**: in the `#\.` case, after reading `name` via `read-atom!`, check
-whether `name` matches `^[0-9]+(\.[0-9]*)?([Ee][+-]?[0-9]+)?$`.  If so,
-emit `(node 'atom (string-append "." name))` so the compiler can classify it.
-Otherwise emit `(node 'local name)` as before.
+**Parser**: in the `#\.` case, after reading `name` via `read-atom!`:
+1. If `name` starts with `.`, raise a strict reader error (`..X` not supported).
+2. If `name` matches `^[0-9]+([Ee][+-]?[0-9]+)?$` (no embedded decimal —
+   the `(\.[0-9]*)?` group is intentionally absent; `.5.`/`.5.5` are LVALs),
+   emit `(node 'atom (string-append "." name))` for the compiler to classify.
+3. Otherwise emit `(node 'local name)` as before.
 
 **Compiler `mdl-constant/plain`**: add `^\.[0-9]+$` → `(string->number val)`
 (Racket's `string->number` correctly handles `".5"` → `0.5`).  Add
@@ -115,10 +130,10 @@ $ racket … (run "<FIX <+ .5 0>>") → 0  (matches Confusion)
 
 ```
 raco test tests/parser_test.rkt tests/compiler_test.rkt
-53 tests passed   (was 41; +12 new I124 assertions)
+58 tests passed   (was 41; +17 new I124 assertions incl. review fixes)
 
 make test (outside sandbox):
-2204 tests passed   (Racket) + 23 passed (Python)
+2209 tests passed   (Racket) + 23 passed (Python)
 
 make m3-source-progress:
 M3 source progress LOADED: 1229 completed, delta +1205, 0 skipped
@@ -138,32 +153,16 @@ errno=30" sandbox artifacts that pass outside the sandbox (confirmed).
   the existing policy for scientific notation.  Does not appear in the pinned
   game source.
 - `-.5` — remains an ATOM; Confusion confirms.  Not needed by the game source.
-- `. 5` (space between `.` and `5`) — Confusion treats as LVAL of atom `5`;
-  our reader raises "empty local reference".  Not present in the game source.
-  Separate issue if ever needed.
+- `. 5` (space between `.` and digit) — Confusion evaluates as LVAL of FIX 5
+  (type error on eval); our reader raises "empty local reference" (strict parse
+  error), which is acceptable.  Not present in the game source.
+- `..5` — Confusion evaluates as LVAL of FLOAT 0.5 → type mismatch; our reader
+  raises a strict parse error.  Not present in the game source.
+- `.5.` / `.5.5` — Confusion: LVAL of atom `"5."` / `"5.5"` (UNBOUND-VARIABLE);
+  our reader: same (LVAL of atom `"5."` / `"5.5"`).  Correct.  Not in game source.
 
 ## Proposed docs/SEMANTICS.md section
 
-```markdown
-### Leading-dot FLOAT literals (I124)
-
-MDL allows FLOAT literals that begin with a decimal point: `.5` = 0.5,
-`.05` = 0.05.  The reader identifies a leading-dot FLOAT by the following
-rule:
-
-1. Consume the `.`.
-2. Read the atom name until the next delimiter → `name`.
-3. If `name` matches `^[0-9]+(\.[0-9]*)?([Ee][+-]?[0-9]+)?$` (all float-
-   numeral characters), the token is a FLOAT: value = `.` + `name`.
-4. Otherwise the token is an LVAL reference to atom `name`.
-
-Consequence: `.5A` is LVAL of atom `"5A"`, not FLOAT 0.5 (Confusion-
-confirmed).  `-.5` is an ATOM named `"-.5"`, not a negative FLOAT (Confusion-
-confirmed; the `-` prefix only introduces a signed number when followed
-immediately by a digit).
-
-Scientific notation with a leading dot (`.5E1`) maps to Racket's
-`string->number` correctly (= 5.0) but is currently marked `unsupported`
-consistent with the existing policy for `1E2`.  It does not appear in the
-pinned 1977 game source.
-```
+Merged directly into `docs/SEMANTICS.md` as section
+"M3 reader: leading-dot FLOAT vs LVAL (issue #124)".
+See that file for the authoritative contract text.
