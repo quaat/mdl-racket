@@ -3109,14 +3109,20 @@
 ;; containing the character sequence PRINT would have output for `any`,
 ;; without the carriage-returns PRINT inserts for line-width control.
 ;;
-;; The optional radix argument is documented as the base for FIX values.
-;; Pinned Confusion (SHA256 b5fcb91b…) ignores it: `<UNPARSE 22 8>` → "22"
-;; (decimal), not "26" (octal). We match Confusion: radix is accepted but
-;; always treated as 10. Explicit non-10 radix is documented as a deviation.
+;; Radix (manual contract): the optional FIX argument selects the number base
+;; for FIX values, default 10. Pinned Confusion DEVIATES from the manual —
+;; it ignores the radix argument completely (`<UNPARSE 22 8>` → "22", not "26";
+;; `<UNPARSE 255 16>` → "255", not "FF"). We follow the manual, not Confusion:
+;; radix=10 or omitted → decimal; any other valid radix → strict unsupported
+;; error (the game never supplies a non-10 radix). Non-FIX radix → error.
+;; The Confusion deviation is a reference implementation bug, not a semantic
+;; contract (AGENTS.md: Confusion is the observable reference; the manual is
+;; the semantic contract; record where they differ).
 ;;
 ;; Types implemented exactly against Confusion:
-;;   FIX → decimal digits (possibly with leading minus)
-;;   ATOM → PNAME (simple alphanumeric names only; \-escaping not implemented)
+;;   FIX → decimal digits (radix 10 or omitted; non-10 radix → strict error)
+;;   ATOM → PNAME, only for pnames that need no \-escaping in MDL notation;
+;;           pnames containing whitespace, brackets, quotes, \, ;, , → strict error
 ;;   STRING → double-quoted with \" and \\ escaping of internal " and \
 ;;   FALSE → "#FALSE ()" or "#FALSE (elem …)"
 ;;   CHARACTER → "!\" followed by the character
@@ -3129,16 +3135,32 @@
   ;; Escape \ as \\ first, then " as \" — order matters.
   (string-replace (string-replace s "\\" "\\\\") "\"" "\\\""))
 
+;; Characters that always require \-escaping in MDL reader ATOM context.
+;; Any PNAME containing these cannot be safely emitted as a bare atom name.
+(define mdl-atom-pname-special-chars
+  (list #\space #\tab #\newline #\return
+        #\( #\) #\[ #\] #\" #\\ #\; #\,))
+
+(define (mdl-atom-pname-needs-escaping? pname)
+  (for/or ([ch (in-string pname)])
+    (memv ch mdl-atom-pname-special-chars)))
+
 (define (mdl-unparse-value who value)
   (cond
     [(exact-integer? value)
-     ;; FIX: decimal string. Radix is ignored per Confusion reference.
+     ;; FIX: decimal string.
      (check-fix who value)
      (number->string value)]
     [(mdl-atom? value)
-     ;; ATOM: PNAME without quoting. Exact only for pnames that need no
-     ;; \-escaping in MDL notation (all game ATOMs qualify).
-     (mdl-atom-pname value)]
+     ;; ATOM: PNAME, only for pnames that need no \-escaping.
+     ;; Strict error for exotic pnames (whitespace, brackets, quotes, etc.)
+     ;; per AGENTS.md strict-failure rule; \-escaping is not implemented.
+     (define pname (mdl-atom-pname value))
+     (when (mdl-atom-pname-needs-escaping? pname)
+       (error who
+              "UNPARSE ATOM: PNAME ~s contains characters requiring \\-escaping; not implemented"
+              pname))
+     pname]
     [(mdl-string? value)
      ;; STRING: double-quoted, internal " and \ escaped.
      (string-append "\"" (mdl-unparse-escape-string (mdl-string-content value)) "\"")]
@@ -3169,10 +3191,18 @@
             (mdl-type-name value))]))
 
 (define (mdl-unparse value [radix #f])
-  ;; The optional radix arg is accepted (must be FIX if supplied) but its
-  ;; value is not used: Confusion always produces decimal output regardless.
-  (when (and radix (not (and (exact-integer? radix) (<= 2 radix 36))))
-    (error 'mdl-unparse "UNPARSE radix must be a FIX in range 2–36"))
+  ;; Radix must be a FIX in [2,36] if supplied. Per the MDL manual, it
+  ;; selects the base for FIX conversion; Confusion incorrectly ignores it
+  ;; (reference deviation — see docs/evidence/M3/S1-UNPARSE.md). We follow
+  ;; the manual: radix=10 (or omitted) → decimal output; any other valid
+  ;; FIX radix → strict unsupported error (the game never uses non-10 radix).
+  (when radix
+    (unless (and (exact-integer? radix) (<= 2 radix 36))
+      (error 'mdl-unparse "UNPARSE radix must be a FIX in range 2-36"))
+    (unless (= radix 10)
+      (error 'mdl-unparse
+             "UNPARSE: non-decimal radix ~a not implemented; strict-failure per AGENTS.md"
+             radix)))
   ;; Return a fresh mutable STRING so callers may PUT into it (Confusion
   ;; probe: `<PUT <UNPARSE 42> 1 !\\X>` succeeds).
   (string-copy (mdl-unparse-value 'mdl-unparse value)))

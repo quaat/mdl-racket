@@ -26,10 +26,17 @@
 (check-equal? (run "<UNPARSE 1073741823>") "1073741823")
 (check-equal? (run "<UNPARSE -1073741824>") "-1073741824")
 
-;; Radix argument is accepted but ignored per Confusion (22 at radix 8 → "22",
-;; not "26"; 255 at radix 16 → "255", not "FF").
-(check-equal? (run "<UNPARSE 22 8>") "22")
-(check-equal? (run "<UNPARSE 255 16>") "255")
+;; Explicit radix=10 is the same as the default (decimal).
+(check-equal? (run "<UNPARSE 22 10>") "22")
+;; Non-decimal radix: strict unsupported error per AGENTS.md.
+;; The MDL manual (§7.6.6.4) says radix is used for FIX conversion; Confusion
+;; DEVIATES from this by ignoring the radix arg entirely (reference bug, not
+;; a semantic contract — see docs/evidence/M3/S1-UNPARSE.md). The game never
+;; passes a non-10 radix, so we raise a strict error rather than implement
+;; unverified non-decimal output.
+(check-exn #rx"UNPARSE|radix|not implemented" (lambda () (run "<UNPARSE 22 8>")))
+(check-exn #rx"UNPARSE|radix|not implemented" (lambda () (run "<UNPARSE 255 16>")))
+(check-exn #rx"UNPARSE|radix|not implemented" (lambda () (run "<UNPARSE 22 2>")))
 
 ;; ── Result type and mutability ──────────────────────────────────────────────
 ;; Confusion: <TYPE <UNPARSE 42>> → STRING
@@ -48,8 +55,19 @@
 (check-equal? (run "<STRING \"Day \" <UNPARSE 22> \".\">") "Day 22.")
 
 ;; ── ATOM ────────────────────────────────────────────────────────────────────
-;; Confusion: <UNPARSE FOO> → "FOO"
+;; Plain ATOM (no special chars): Confusion → "FOO".
 (check-equal? (run "<UNPARSE FOO>") "FOO")
+;; Hyphenated atoms are common in MDL and need no escaping.
+(check-equal? (run "<UNPARSE FIND-OBJ>") "FIND-OBJ")
+;; Exotic PNAME with space: strict error. \-escaping is not implemented.
+;; Use <ATOM "..."> to construct atoms with unusual pnames.
+(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"FOO BAR\">>")))
+;; Exotic PNAME with quote char: strict error.
+(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"A\\\"B\">>")))
+;; Exotic PNAME with open-paren: strict error.
+(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"A(B\">>")))
+;; Exotic PNAME with backslash: strict error.
+(check-exn #rx"UNPARSE ATOM|escaping" (lambda () (run "<UNPARSE <ATOM \"A\\\\B\">>" )))
 
 ;; ── STRING ───────────────────────────────────────────────────────────────────
 ;; Confusion: <UNPARSE "hello"> → "\"hello\"" (the string itself contains "hello"
@@ -84,6 +102,8 @@
 (check-exn #rx"UNPARSE|unsupported|type" (lambda () (run "<UNPARSE [1 2]>")))
 ;; UVECTOR: not implemented.
 (check-exn #rx"UNPARSE|unsupported|type" (lambda () (run "<UNPARSE ![1 2!]>")))
-;; Bad radix arg.
+;; Out-of-range radix: error (range check is distinct from "not implemented").
 (check-exn #rx"UNPARSE|radix" (lambda () (run "<UNPARSE 1 1>")))
 (check-exn #rx"UNPARSE|radix" (lambda () (run "<UNPARSE 1 37>")))
+;; Radix 10 explicit: works (decimal).
+(check-equal? (run "<UNPARSE -5 10>") "-5")
