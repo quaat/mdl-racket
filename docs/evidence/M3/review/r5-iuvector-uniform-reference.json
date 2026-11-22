@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "m3-review-r5-iuvector-uniform-type-failure",
+  "recorded_at": "2026-11-22T18:40:33.509142+00:00",
+  "interpreter_sha256": "b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda83b177",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "mismatch-at-element-2",
+      "expression": "<SETG A 0> <IUVECTOR 4 '<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 2> \"X\") (T 1)>>> ,A",
+      "input": "<SETG A 0> <IUVECTOR 4 '<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 2> \"X\") (T 1)>>> ,A\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n2\n",
+      "stderr": "All elements of UVECTOR must be of the same type\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n2\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "mismatch-at-element-3",
+      "expression": "<SETG A 0> <IUVECTOR 5 '<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 3> FOO) (T 1)>>> ,A",
+      "input": "<SETG A 0> <IUVECTOR 5 '<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 3> FOO) (T 1)>>> ,A\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "stderr": "All elements of UVECTOR must be of the same type\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "string-first-element",
+      "expression": "<SETG A 0> <IUVECTOR 3 '<PROG () <SETG A <+ ,A 1>> \"X\">> ,A",
+      "input": "<SETG A 0> <IUVECTOR 3 '<PROG () <SETG A <+ ,A 1>> \"X\">> ,A\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n",
+      "stderr": "Type not valid for inclusion in UVECTOR\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "success-count",
+      "expression": "<SETG A 0> <IUVECTOR 4 '<SETG A <+ ,A 1>>> ,A",
+      "input": "<SETG A 0> <IUVECTOR 4 '<SETG A <+ ,A 1>>> ,A\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n![2 3 4 5!]\n5\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n![2 3 4 5!]\n5\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": false
+}

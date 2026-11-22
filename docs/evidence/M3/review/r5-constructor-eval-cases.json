@@ -1,0 +1,26 @@
+{
+ "schema_version": 1,
+ "name": "m3-review-r5-constructor-evaluation",
+ "cases": [
+  {"name": "ivector-direct-quoted-form", "expression": "<SET A 0> <IVECTOR 3 '<SET A <+ .A 1>>> .A"},
+  {"name": "ivector-direct-unquoted-form", "expression": "<SET A 0> <IVECTOR 3 <SET A <+ .A 1>>> .A"},
+  {"name": "ivector-direct-plain-value", "expression": "<IVECTOR 3 5>"},
+  {"name": "ivector-direct-lval-form", "expression": "<SET X '<SET A <+ .A 1>>> <SET A 0> <IVECTOR 3 .X> .A"},
+  {"name": "ivector-apply-quoted-form", "expression": "<SET A 0> <APPLY ,IVECTOR 3 '<SET A <+ .A 1>>> .A"},
+  {"name": "ivector-apply-plain-value", "expression": "<APPLY ,IVECTOR 2 7>"},
+  {"name": "ivector-mapf-forms", "expression": "<SET A 0> <MAPF ,LIST ,IVECTOR '(2 3) '(<SET A <+ .A 1>> <SET A <+ .A 10>>)> .A"},
+  {"name": "ivector-segment-args", "expression": "<SET L (2 7)> <IVECTOR !.L>"},
+  {"name": "ivector-segment-form-fill", "expression": "<SET A 0> <SET L (3 '<SET A <+ .A 1>>)> <IVECTOR !.L> .A"},
+  {"name": "ivector-vector-fill-fresh", "expression": "<SET V <IVECTOR 2 [1 2]>> <==? <1 .V> <2 .V>> <=? <1 .V> <2 .V>>"},
+  {"name": "iuvector-direct-quoted-form", "expression": "<SET A 0> <IUVECTOR 3 '<SET A <+ .A 1>>> .A"},
+  {"name": "iuvector-apply-quoted-form", "expression": "<SET A 0> <APPLY ,IUVECTOR 3 '<SET A <+ .A 1>>> .A"},
+  {"name": "iuvector-direct-unquoted-form", "expression": "<SET A 0> <IUVECTOR 3 <SET A <+ .A 1>>> .A"},
+  {"name": "istring-direct-quoted-form", "expression": "<SET A 64> <ISTRING 3 '<ASCII <SET A <+ .A 1>>>> .A"},
+  {"name": "istring-direct-unquoted-form", "expression": "<SET A 64> <ISTRING 3 <ASCII <SET A <+ .A 1>>>> .A"},
+  {"name": "istring-apply-quoted-form", "expression": "<SET A 64> <APPLY ,ISTRING 3 '<ASCII <SET A <+ .A 1>>>> .A"},
+  {"name": "istring-apply-character", "expression": "<APPLY ,ISTRING 2 !\\Q>"},
+  {"name": "istring-mapf-forms", "expression": "<MAPF ,LIST ,ISTRING '(1 2) '(<ASCII 65> !\\Z)>"},
+  {"name": "istring-non-character-error", "expression": "<ISTRING 2 5>"},
+  {"name": "istring-form-to-non-character-error", "expression": "<ISTRING 2 '<+ 1 2>>"}
+ ]
+}
