@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "m3-I119-escaped-trailer",
+  "description": "Probe cases for backslash-escape semantics in ATOM names (issue I119)",
+  "cases": [
+    {"name": "setup-words", "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<SPNAME DEAD\\!!-WORDS>"},
+    {"name": "in-words", "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<SPNAME IN\\!!-WORDS>"},
+    {"name": "out-words", "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<SPNAME OUT\\!!-WORDS>"},
+    {"name": "a-bang-b", "expression": "<SPNAME A\\!B>"},
+    {"name": "a-dash-b", "expression": "<SPNAME A\\-B>"},
+    {"name": "a-dbl-backslash-b", "expression": "<SPNAME A\\\\B>"},
+    {"name": "bang-a", "expression": "<SPNAME \\!A>"},
+    {"name": "identity", "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<==? DEAD\\!!-WORDS DEAD\\!!-WORDS>"},
+    {"name": "a-esc-trailer-b", "expression": "<SETG B <MOBLIST B>>\n<SPNAME A\\!-B>"},
+    {"name": "a-esc-dbl-trailer-b", "expression": "<SETG B <MOBLIST B>>\n<SPNAME A\\!!-B>"}
+  ]
+}

@@ -1959,3 +1959,70 @@ association dispatch. This host representation is not a puzzle-rule change.
 Tests must first fail on unassigned BACK, then assert shared view mutation,
 strict bounds and types, terminal CHANNEL metadata, and the next actual
 original START failure. TOP and RESET are separate source dependencies.
+
+## M3 reader: backslash escapes in atom names (issue #119)
+
+**Contract** (MDL manual chapter 15, confirmed by pinned Confusion binary
+`6df359f6…`, probed 2026-11-22):
+
+- `\X` within an atom PNAME quotes the next character: the backslash is
+  **dropped** and the following character `X` is retained verbatim in the PNAME.
+- The `!-` OBLIST-trailer split (`mdl-atom`) operates on the processed
+  (backslash-stripped) string, so `DEAD\!!-WORDS` → pname `"DEAD!"`, oblist
+  `WORDS` (not pname `"DEAD\!"` on oblist `WORDS`).
+- A token that began with a `\`-prefixed character is classified as ATOM
+  regardless of its PNAME text.  `\5` has PNAME `"5"` but TYPE ATOM, not FIX.
+  `\-5` → ATOM, `\1.5` → ATOM, `\*7*` → ATOM, `\#FOO` → ATOM.
+  Confusion confirms all five via `<TYPE \5>` → ATOM, etc.
+- `\X` as a PROG/REPEAT label is legal: `\1ST` has PNAME `"1ST"` and is a
+  valid label.
+
+**Implementation** (`mdl/parser.rkt`, `mdl/compiler.rkt`):
+
+The parser's `read-atom!` returns `(values pname escaped?)`.  When `escaped?`
+is `#t` the caller emits an `'escaped-atom` node instead of `'atom`.  The
+compiler's `mdl-constant/plain` returns `(atom-ref val)` immediately for
+`'escaped-atom` nodes, skipping all numeric and `#` classification.
+`atom-node-constant-token?` accepts a node (not a string) and returns `#f`
+for `'escaped-atom`, so `prog-label-name` treats such nodes as valid labels.
+All other compiler predicates that previously checked `is-kind? n 'atom` now
+use the `is-atom-node?` helper which accepts both kinds.
+
+**Tests**: `tests/escaped_atom_test.rkt` — covers PNAME stripping, `!-`
+trailer splitting, intern identity, and the five escaped-numeric/`#` cases.
+
+## M3 reader: leading-dot FLOAT vs LVAL (issue #124)
+
+MDL allows FLOAT literals that begin with a decimal point.  The reader
+identifies a leading-dot FLOAT by this rule:
+
+1. Consume the `.`.
+2. Read the atom-name characters until the next delimiter → `name`.
+3. If the raw character right after the first `.` is a literal (unescaped)
+   `.`, raise a strict reader error (`..X` is not supported; Confusion
+   evaluates `..5` as LVAL of FLOAT 0.5 → type mismatch). `.\.5` is the
+   LVAL of ATOM ".5" (the second `.` is escaped).
+4. If `name` contained no `\` escape (#119) and matches `^[0-9]+([Ee][+-]?[0-9]+)?$` (all float-numeral chars,
+   no embedded decimal), the token is a FLOAT: value = `"." + name`.
+   - `.5` → FLOAT 0.5; `.05` → FLOAT 0.05; `.5E1` unsupported (see below).
+5. Otherwise the token is an LVAL reference to atom `name`.
+   - `.\5` → LVAL "5" (escaped, never numeric; #119);
+   - `.A` → LVAL "A"; `.5A` → LVAL "5A"; `.5.` → LVAL "5."; `.5.5` → LVAL "5.5".
+
+The `(\.[0-9]*)?` group is intentionally absent from step 4: `.5.` and `.5.5`
+contain an embedded decimal in the suffix and are NOT FLOATs — Confusion yields
+UNBOUND-VARIABLE for LVAL "5." and "5.5" respectively.
+
+`-.5` is an ATOM named `"-.5"`, not a negative FLOAT.  Confusion confirms: the
+`-` prefix only introduces a signed number when followed immediately by a digit.
+
+**Deviation: `.5E1`** — Confusion returns FLOAT 5.0.  This reader produces an
+`unsupported numeric token` error, consistent with the existing strict-failure
+policy for scientific notation (`1E2` is also unsupported).  `.5E1` does not
+appear in the pinned 1977 game source.
+
+**Deviation: `. 5` (space between `.` and digit)** — Confusion evaluates this
+as LVAL of the FIX 5 (a type mismatch when evaluated).  This reader raises
+"empty local reference", a strict reader error.  Not present in the game source.
+
+Evidence: `docs/evidence/M3/I124-LEADING-DOT.md`, Confusion probe I124.
