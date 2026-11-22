@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "m3-unparse-native-reference",
+  "cases": [
+    {"name": "fix-zero", "expression": "<UNPARSE 0>"},
+    {"name": "fix-positive", "expression": "<UNPARSE 1>"},
+    {"name": "fix-22", "expression": "<UNPARSE 22>"},
+    {"name": "fix-negative", "expression": "<UNPARSE -1>"},
+    {"name": "fix-large", "expression": "<UNPARSE 1073741823>"},
+    {"name": "fix-min", "expression": "<UNPARSE -1073741824>"},
+    {"name": "fix-radix-8", "expression": "<UNPARSE 22 8>"},
+    {"name": "fix-radix-16", "expression": "<UNPARSE 255 16>"},
+    {"name": "result-type", "expression": "<TYPE <UNPARSE 42>>"},
+    {"name": "result-mutable", "expression": "<PUT <UNPARSE 42> 1 !\\X> <UNPARSE 42>"},
+    {"name": "atom", "expression": "<UNPARSE FOO>"},
+    {"name": "string", "expression": "<UNPARSE \"hello\">"},
+    {"name": "false", "expression": "<UNPARSE <>>"},
+    {"name": "character", "expression": "<UNPARSE !\\A>"},
+    {"name": "float", "expression": "<UNPARSE 1.5>"},
+    {"name": "list", "expression": "<UNPARSE (1 2 3)>"},
+    {"name": "game-use", "expression": "<UNPARSE <CHTYPE 22 FIX>>"}
+  ]
+}

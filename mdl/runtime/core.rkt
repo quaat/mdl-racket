@@ -3103,6 +3103,80 @@
   (newline)
   (mdl-atom "T"))
 
+;; UNPARSE (MDL manual ch. 7, section 7.6.6.4; appendix 2)
+;;
+;; Contract: `<UNPARSE any radix:fix>` returns a fresh mutable STRING
+;; containing the character sequence PRINT would have output for `any`,
+;; without the carriage-returns PRINT inserts for line-width control.
+;;
+;; The optional radix argument is documented as the base for FIX values.
+;; Pinned Confusion (SHA256 b5fcb91b…) ignores it: `<UNPARSE 22 8>` → "22"
+;; (decimal), not "26" (octal). We match Confusion: radix is accepted but
+;; always treated as 10. Explicit non-10 radix is documented as a deviation.
+;;
+;; Types implemented exactly against Confusion:
+;;   FIX → decimal digits (possibly with leading minus)
+;;   ATOM → PNAME (simple alphanumeric names only; \-escaping not implemented)
+;;   STRING → double-quoted with \" and \\ escaping of internal " and \
+;;   FALSE → "#FALSE ()" or "#FALSE (elem …)"
+;;   CHARACTER → "!\" followed by the character
+;;   LIST → "(elem …)" with space-separated elements (recursive)
+;;
+;; Strict unsupported error for all other types (FLOAT, VECTOR, UVECTOR,
+;; WORD, FORM, FUNCTION, …). Do not fall back to Racket's printer.
+
+(define (mdl-unparse-escape-string s)
+  ;; Escape \ as \\ first, then " as \" — order matters.
+  (string-replace (string-replace s "\\" "\\\\") "\"" "\\\""))
+
+(define (mdl-unparse-value who value)
+  (cond
+    [(exact-integer? value)
+     ;; FIX: decimal string. Radix is ignored per Confusion reference.
+     (check-fix who value)
+     (number->string value)]
+    [(mdl-atom? value)
+     ;; ATOM: PNAME without quoting. Exact only for pnames that need no
+     ;; \-escaping in MDL notation (all game ATOMs qualify).
+     (mdl-atom-pname value)]
+    [(mdl-string? value)
+     ;; STRING: double-quoted, internal " and \ escaped.
+     (string-append "\"" (mdl-unparse-escape-string (mdl-string-content value)) "\"")]
+    [(mdl-false? value)
+     ;; FALSE: "#FALSE ()" or "#FALSE (…)" for non-empty payload.
+     (define items (mdl-false-payload value))
+     (if (null? items)
+         "#FALSE ()"
+         (string-append "#FALSE ("
+                        (string-join (map (lambda (v) (mdl-unparse-value who v)) items) " ")
+                        ")"))]
+    [(or (char? value)
+         (and (mdl-typed-value? value)
+              (eq? (mdl-typed-value-type value) (mdl-atom "CHARACTER"))))
+     ;; CHARACTER: "!\" followed by the character (Confusion: !\A → "!\\A").
+     ;; The returned string contains !, \, char (3 chars for printable ASCII).
+     (define code (mdl-character-code value))
+     (unless code (error who "UNPARSE CHARACTER has invalid code"))
+     (string-append "!\\" (string (integer->char code)))]
+    [(or (null? value) (mpair? value))
+     ;; LIST: "(elem1 elem2 …)" with space-separated recursive elements.
+     (define items (mdl-list->list value))
+     (string-append "("
+                    (string-join (map (lambda (v) (mdl-unparse-value who v)) items) " ")
+                    ")")]
+    [else
+     (error who "UNPARSE: unsupported MDL type ~a; strict-failure per AGENTS.md"
+            (mdl-type-name value))]))
+
+(define (mdl-unparse value [radix #f])
+  ;; The optional radix arg is accepted (must be FIX if supplied) but its
+  ;; value is not used: Confusion always produces decimal output regardless.
+  (when (and radix (not (and (exact-integer? radix) (<= 2 radix 36))))
+    (error 'mdl-unparse "UNPARSE radix must be a FIX in range 2–36"))
+  ;; Return a fresh mutable STRING so callers may PUT into it (Confusion
+  ;; probe: `<PUT <UNPARSE 42> 1 !\\X>` succeeds).
+  (string-copy (mdl-unparse-value 'mdl-unparse value)))
+
 (define (mdl-error . args)
   ;; ERROR is undeferable: a registered handler runs only above the current
   ;; level. A normal handler return falls through to the original failure.
@@ -3327,6 +3401,7 @@
         "GC" mdl-gc
         "BLOAT" mdl-bloat
         "ASCII" mdl-ascii
+        "UNPARSE" mdl-unparse
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
         "CRLF" mdl-crlf
