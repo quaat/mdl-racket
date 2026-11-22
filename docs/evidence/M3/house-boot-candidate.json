@@ -1,13 +1,60 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "engine": "confusion-patched-1977-boot",
   "scenario": "house-boot",
-  "run_mud": "/home/thomas/project/racket/mdl-racket-zork-harness/.claude/worktrees/agent-a64a330470b6b2df4/.cache/upstream/mdlzork/mdlzork_771212/patched_confusion/run.mud",
   "fixed_epoch": 250776000,
-  "captured_at": "2026-11-22T21:59:32.147514+00:00",
-  "engine_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
-  "game_files_sha256": "9788550ab64baa7d0b6db5db86ce85383149340f88af9718a0660890200f447b",
-  "boot_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\n\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n",
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "run_mud": "mdlzork_771212/patched_confusion/run.mud",
+  "provenance": {
+    "upstream_source": {
+      "name": "mdlzork",
+      "commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+      "checked_out_commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+      "checkout_root": ".cache/upstream/mdlzork",
+      "game_dir": "mdlzork_771212/patched_confusion"
+    },
+    "boot_input_state": {
+      "description": "game_dir copy after removing removed_before_boot; sha256 = sha256_manifest(files)",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "sha256": "7f8589c80882da1ed6ed2db5104a9e6cad891fe6e617baa1af32247b6fb21260",
+      "files": {
+        "77act1.mud": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+        "77act2.mud": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+        "77act3.mud": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+        "77defs.mud": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+        "77dung.mud": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+        "77loadall.mud": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+        "77makstr.mud": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+        "77np.mud": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+        "77patch.mud": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+        "77rooms.mud": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+        "78melee.mud": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+        "81prim.mud": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+        "81tell-repl.mud": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+        "MDL/MADADV.HELP": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+        "MDL/MADADV.INFO": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+        "MDL/MADADV.SAVE": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+        "run.mud": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b"
+      }
+    },
+    "engine_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789"
+  },
+  "strict_fields": [
+    "scenario",
+    "fixed_epoch",
+    "tz",
+    "entry",
+    "boot_output",
+    "commands",
+    "complete"
+  ],
+  "boot_output": "LISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\n\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n",
   "commands": [
     {
       "input": "north",
@@ -42,8 +89,12 @@
   ],
   "complete": true,
   "error": null,
-  "process_exitstatus": null,
-  "process_signalstatus": 1,
+  "informational": {
+    "captured_at": "2026-11-22T22:49:43.618889+00:00",
+    "interpreter_banner": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+    "process_exitstatus": null,
+    "process_signalstatus": 1
+  },
   "candidate": true,
-  "candidate_note": "CANDIDATE: awaiting maintainer approval. NOT an approved golden. Run twice — transcripts byte-identical (ignoring captured_at)."
+  "candidate_note": "CANDIDATE: gameplay approved by maintainer 2026-11-22; NOT yet a strict golden fixture. Compare only STRICT_FIELDS (scripts/boot_reference.py compare)."
 }

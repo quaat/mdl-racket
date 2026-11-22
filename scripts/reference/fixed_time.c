@@ -1,27 +1,35 @@
 /*
  * fixed_time.c — LD_PRELOAD shim for deterministic clock control.
  *
- * Purpose: When MDL_FIXED_EPOCH is set in the environment, intercept all
- * C-library time calls and return a constant value derived from that env var.
+ * Purpose: When MDL_FIXED_EPOCH is set in the environment, intercept the
+ * C-library WALL-CLOCK calls and return a constant value derived from that
+ * env var. Monotonic and CPU clocks are left untouched.
  * This freezes DSKDATE/GETTIMEDATE output so that the version-date line and
  * the RANDOM seed in Confusion/mdli runs are reproducible across machines and
  * across time.
  *
  * Usage:
  *   export MDL_FIXED_EPOCH=250776000   # 1977-12-12 12:00:00 UTC
- *   LD_PRELOAD=/path/to/fixed_time.so mdli ...
+ *   TZ=UTC LD_PRELOAD=/path/to/fixed_time.so mdli ...
  *
- * Build (into $TMPDIR or .cache/build/):
+ * Build (boot_reference.py compiles it into the per-capture temp dir):
  *   gcc -shared -fPIC -O2 -o fixed_time.so fixed_time.c -ldl
  *
- * Functions intercepted (all used by Confusion for GETTIMEDATE / DSKDATE):
+ * Functions intercepted (wall-clock sources only):
  *   - gettimeofday(2)   — primary time source in mdl_builtin_eval_gettimeofday
- *                         and mdl_builtin_eval_gettimedate
- *   - time(2)           — POSIX standard time() occasionally called by libc
- *   - clock_gettime(2)  — POSIX monotonic/realtime clock
+ *                         and mdl_builtin_eval_gettimedate (macros.cpp)
+ *   - time(2)           — POSIX wall-clock time(); defensive
+ *   - clock_gettime(2)  — ONLY for CLOCK_REALTIME and CLOCK_REALTIME_COARSE.
+ *                         Every other clock (CLOCK_MONOTONIC*, CLOCK_BOOTTIME,
+ *                         CLOCK_PROCESS_CPUTIME_ID, ...) falls through to libc
+ *                         so timeouts, sleeps and CPU-time accounting keep
+ *                         working normally.
  *
- * localtime_r is NOT intercepted: Confusion calls it on the tv_sec value that
- * came from gettimeofday, so intercepting gettimeofday is sufficient.
+ * localtime_r is NOT intercepted: GETTIMEDATE calls localtime_r on the tv_sec
+ * returned by gettimeofday. The capture tool sets TZ=UTC in the child
+ * environment, so localtime_r is a deterministic function of the frozen
+ * tv_sec. getrusage (MDL <TIME>, CPU seconds) is not a wall clock and is not
+ * intercepted.
  *
  * If MDL_FIXED_EPOCH is unset or empty, all calls fall through to the real
  * libc implementations; this shim has zero effect when inactive.
@@ -76,12 +84,21 @@ time_t time(time_t *tloc)
     return epoch;
 }
 
-/* Intercept clock_gettime() — POSIX realtime and monotonic clocks. */
+/* Intercept clock_gettime() — wall-clock (CLOCK_REALTIME*) ids only. */
 int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
     REAL(clock_gettime, int, clockid_t, struct timespec *);
     time_t epoch = fixed_epoch();
     if (epoch == (time_t)-1) return real_clock_gettime(clk_id, tp);
-    if (tp) { tp->tv_sec = epoch; tp->tv_nsec = 0; }
-    return 0;
+    switch (clk_id) {
+    case CLOCK_REALTIME:
+#ifdef CLOCK_REALTIME_COARSE
+    case CLOCK_REALTIME_COARSE:
+#endif
+        if (tp) { tp->tv_sec = epoch; tp->tv_nsec = 0; }
+        return 0;
+    default:
+        /* CLOCK_MONOTONIC and all other clocks are deliberately NOT frozen. */
+        return real_clock_gettime(clk_id, tp);
+    }
 }

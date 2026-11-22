@@ -1,250 +1,125 @@
 # BOOT-REF — Fresh-boot reference capture for SMOKE_PARITY
 
-**Branch:** `feat/m3-boot-reference`
-**Base commit:** `124f60c` (`origin/feat/m3-logical-gc`)
-**Engine SHA256:** `6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789`
-**Game SHA:** `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3` (mdlzork_771212)
-**Candidate artifact:** `docs/evidence/M3/house-boot-candidate.json` (this directory)
-**Approved golden:** NOT YET — awaiting maintainer approval
+**Branch:** `feat/m3-boot-reference` (PR #131, base `feat/m3-logical-gc`)
+**Upstream source (pinned, `sources.lock.json`):** mdlzork `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`
+**Boot-input state (post-cleanup manifest hash):** `7f8589c80882da1ed6ed2db5104a9e6cad891fe6e617baa1af32247b6fb21260`
+**Engine SHA256 (build-specific, informational):** `6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789`
+**Candidate artifact:** `docs/evidence/M3/house-boot-candidate.json` (schema_version 2)
+**Status:** gameplay APPROVED by maintainer (2026-11-22); full JSON is a CANDIDATE,
+NOT a strict golden fixture. Only the gameplay view (`STRICT_FIELDS`) is compared.
 
 ---
 
 ## Maintainer decision (2026-11-22)
 
-SMOKE_PARITY uses a new fresh-boot scenario. The entry is `<FLOAD "77loadall.mud">` then
-`<SAVE-IT>` via stdin (the `run.mud` path). After `<SAVE-IT>`, the game starts immediately
+SMOKE_PARITY uses a fresh-boot scenario. The entry is `<FLOAD "77loadall.mud">` then
+`<SAVE-IT>` via stdin (the `run.mud` path). After `<SAVE-IT>` the game starts immediately
 because the patched COND in `77rooms.mud` continues in the same clause as a successful SAVE.
-Clock and RNG are fixed via an LD_PRELOAD shim (`scripts/reference/fixed_time.c`).
-
-The existing approved `tests/scenarios/house.json` (ZORK.SAVE restore) is UNCHANGED.
+Approved behaviour: fixed reference clock, commands
+`north / west / open mailbox / take leaflet / inventory / score`, expected
+`0 points ... in 6 moves`. `tests/scenarios/house.json` (ZORK.SAVE restore) is UNCHANGED.
 
 ---
 
-## Task 1: Clock control shim
+## PR #131 review findings — resolution
 
-**File:** `scripts/reference/fixed_time.c`
-**Binary:** `.cache/build/shim/fixed_time.so` (gitignored — built at run time by `boot_reference.py`)
-
-Confusion (`macros.cpp` lines 7922, 7965) calls `gettimeofday` directly in
-`mdl_builtin_eval_gettimeofday` and `mdl_builtin_eval_gettimedate`. Both are the entry
-points for `<GETTIMEDATE>` / `<DSKDATE>`, which determine the version-date line and the
-`<RANDOM <CHTYPE <DSKDATE> FIX>>` seed in `START`.
-
-The shim intercepts three POSIX calls:
-
-| Symbol | Used by Confusion | Notes |
+| # | Finding | Resolution |
 |---|---|---|
-| `gettimeofday` | Yes (`macros.cpp:7922,7965`) | primary clock source |
-| `time` | libc internal | defensive intercept |
-| `clock_gettime` | libc internal | defensive intercept |
+| 1 | `test_house_boot_candidate_exists` required gitignored `artifacts/reference/house-boot.json` | Replaced by `test_committed_house_boot_candidate`, which validates the committed `docs/evidence/M3/house-boot-candidate.json` (portability, provenance, approved gameplay). No test in the normal gate reads `artifacts/`. |
+| 2 | `run_mud` was an absolute path; Confusion banner (compile timestamp) was in `boot_output` | `run_mud` = `mdlzork_771212/patched_confusion/run.mud` (relative to the upstream checkout root `.cache/upstream/mdlzork`). `boot_output` now starts at `LISTENING-AT-LEVEL`; the banner is moved to `informational.interpreter_banner`. If a Confusion banner appears without that terminator the capture fails (no silent leak). Strict parity uses `gameplay_view()` = `scenario, fixed_epoch, tz, entry, boot_output, commands, complete`. `captured_at`, banner, exit status and `engine_sha256` are excluded. |
+| 3 | Timezone not fixed | Child env sets `TZ=UTC`; recorded as `"tz": "UTC"` (a strict field). Verified by a fake-interpreter test that echoes `TZ`, and by a native capture with parent `TZ=Pacific/Kiritimati` (UTC+14, which would otherwise render December 13): gameplay identical. |
+| 4 | `@pytest.mark.native` did not exclude anything (the native test ran in the normal gate) | `pytest.ini`: `addopts = -m "not native"`. New opt-in `make test-boot-reference` (capture -> `compare` against committed candidate -> `pytest -m native`). Evidence of the original bug: before the fix, `pytest tests/test_boot_reference.py` executed `test_boot_reference_determinism`. |
+| 5 | Shim froze `CLOCK_MONOTONIC` | `clock_gettime` is frozen only for `CLOCK_REALTIME` / `CLOCK_REALTIME_COARSE`; all other clock ids fall through. `gettimeofday` and `time` stay frozen. `localtime_r` is not intercepted (deterministic under `TZ=UTC`). Test `test_shim_freezes_wall_clock_only` proves monotonic advances across a 50 ms sleep while wall clock equals the epoch. Game transcript identical. |
+| 6 | Tree hash taken before stale save deletion; provenance kinds mixed | Stale `SAVEFILE/ZORK.SAVE` is removed first, then a per-file manifest (`provenance.boot_input_state.files`, relative paths) and its aggregate `sha256` are recorded, with `removed_before_boot`. `provenance.upstream_source` separately records the pinned commit from `sources.lock.json` and the `git rev-parse HEAD` of the checkout; capture aborts if they differ. |
 
-`localtime_r` is NOT intercepted: Confusion applies it to the `tv_sec` already returned
-from gettimeofday, so intercepting gettimeofday is sufficient.
-
-**Determinism evidence (commands, exit 0):**
-
-```
-# Epoch 250776000 (1977-12-12 12:00 UTC)
-$ MDL_FIXED_EPOCH=250776000 LD_PRELOAD=.cache/build/shim/fixed_time.so ./test_shim_time
-250776000
-
-# Epoch 100000000 (1973-03-03)
-$ MDL_FIXED_EPOCH=100000000 LD_PRELOAD=.cache/build/shim/fixed_time.so ./test_shim_time
-100000000
-
-# Without shim — returns current wall clock (not a fixed value)
-$ ./test_shim_time
-1795384763
-```
-
-Two different epochs return different values deterministically. Without the shim, the
-current wall clock is returned.
+Other changes: the shim is compiled into the per-capture temp dir (nothing written under
+the shared `.cache/build`); new `scripts/boot_reference.py compare EXPECTED ACTUAL` exits
+non-zero naming differing strict fields; `schema_version` bumped 1 -> 2 (layout changed).
+`MDL/MADADV.SAVE` (upstream file, overwritten by `SAVE-IT`) is still present in the
+boot-input state; it is not read during the boot.
 
 ---
 
-## Task 2: Capture tooling
+## Commands and results (2026-11-22, Racket 7.9 BC, Python 3.9.2, gcc 10.2.1)
 
-**File:** `scripts/boot_reference.py`
+Environment: `export PYTHONPATH="$PWD/.sandbox-pydeps/lib" PLTCOLLECTS=":$PWD"`,
+`PYTHON=/usr/bin/python3`, run inside the Claude Code sandbox.
 
-Extends `reference_runner.py` with a boot-specific capture function:
-1. Copies the upstream game directory to a fresh `tempfile.mkdtemp()` dir.
-2. Builds (or accepts) the shim `.so` targeting `.cache/build/shim/`.
-3. Spawns `mdli` without `-r`, with `LD_PRELOAD` and `MDL_FIXED_EPOCH` set.
-4. Sends `<FLOAD "77loadall.mud">` and `<SAVE-IT>` before waiting for the first `>` prompt.
-5. Waits for `^>` (RDCOM prompt) which indicates the game is running.
-6. Sends scenario commands one at a time, waiting for `^>` after each.
-7. Writes a JSON transcript extending schema_version 1 with: `run_mud`, `fixed_epoch`,
-   `boot_output`, `engine_sha256`, `game_files_sha256`.
-8. Deletes the temp copy on exit.
-
-**Key design note:** Both `<FLOAD "77loadall.mud">` and `<SAVE-IT>` are sent before we
-wait for the first `^>`. This is correct because:
-- The MDL REPL in Confusion uses prompts that do NOT match `^>`.
-- The first standalone `>` in the PTY stream is always the Zork RDCOM game prompt.
-
----
-
-## Task 3: Scenario
-
-**File:** `tests/scenarios/house-boot.json`
-
-```json
-{
-  "name": "house-boot",
-  "fixed_epoch": 250776000,
-  "commands": ["north", "west", "open mailbox", "take leaflet", "inventory", "score"]
-}
-```
-
-`fixed_epoch` = 250776000 = **1977-12-12 12:00:00 UTC**.
-
-Justification: One day before the `mdlzork_771212` game snapshot (`bdcd4a67`). The epoch
-makes DSKDATE → day=12, month=12, year=1977 — matching the archive date. The RANDOM seed
-is `<CHTYPE <DSKDATE> FIX>` which uses the GETTIMEDATE UVECTOR; with this epoch the seed
-is deterministic across machines and time zones when the shim is active.
+1. Tests written first (red):
+   `pytest -q tests/test_boot_reference.py` -> `3 failed, 3 passed, 3 errors`
+   (missing `compare_gameplay` / `UPSTREAM_ROOT`; the native test was collected and run).
+2. Capture regenerated:
+   `python3 scripts/boot_reference.py capture --scenario tests/scenarios/house-boot.json --output artifacts/reference/house-boot.json --timeout 90`
+   -> exit 0. `boot_output` equals the previously approved `boot_output` minus the banner;
+   all six command outputs byte-identical to the approved candidate. Copied to
+   `docs/evidence/M3/house-boot-candidate.json`.
+3. Acceptance (a), clean gate without the artifact:
+   `rm -f artifacts/reference/house-boot.json && make test-python PYTHON=/usr/bin/python3`
+   -> exit 0, `31 passed, 1 deselected` (the deselected test is the native one).
+4. Acceptance (b), opt-in native gate: `make test-boot-reference PYTHON=/usr/bin/python3`
+   -> exit 0: capture OK; `Boot gameplay identical (scenario, fixed_epoch, tz, entry,
+   boot_output, commands, complete)`; `1 passed, 8 deselected`. The new capture has
+   `tz=UTC`, `take leaflet` -> `Taken.\n`, score `... in 6 moves.`, no `You already have it.`;
+   every non-`informational` field equals the committed candidate.
+5. TZ robustness: `TZ=Pacific/Kiritimati python3 scripts/boot_reference.py capture ... --output $TMPDIR/kiri.json`
+   then `compare` against the committed candidate -> both exit 0, identical.
+6. Acceptance (c): `grep -c '/home\|/tmp' docs/evidence/M3/house-boot-candidate.json` -> `0`;
+   `This Confusion created` appears only in `informational.interpreter_banner`
+   (asserted by `test_committed_house_boot_candidate`).
+7. Acceptance (d): `make test PYTHON=/usr/bin/python3` inside the sandbox -> **exit 2**:
+   `test-racket` reports `3/2040 test failures`, all `make-directory: ... Read-only file
+   system; errno=30` from pre-existing tests that hardcode `/tmp`
+   (`tests/loader_test.rkt`, `tests/declaration_test.rkt`, `tests/percent_read_test.rkt`);
+   the sandbox mounts `/tmp` read-only. This change touches no `.rkt` file. A retry outside
+   the sandbox was not permitted in this session, so **`make test` = BLOCKED (environment)**
+   here; it must be re-run on an unsandboxed checkout. `test-python` passes (step 3).
 
 ---
 
-## Task 4: Candidate output
+## Clock control shim
 
-**Run 1:** `python3 scripts/boot_reference.py capture --scenario tests/scenarios/house-boot.json --output artifacts/reference/house-boot.json --timeout 90`
-**Run 2:** same command
-**Result:** byte-identical (ignoring `captured_at` timestamp field) ✓
+**File:** `scripts/reference/fixed_time.c`. Confusion (`macros.cpp` 7922, 7965) calls
+`gettimeofday` in `mdl_builtin_eval_gettimeofday` / `mdl_builtin_eval_gettimedate`, then
+`localtime_r` (7997) for local broken-down time. These feed `<DSKDATE>`, the version-date line
+and `<RANDOM <CHTYPE <DSKDATE> FIX>>` in `START`.
 
-**Full candidate transcript (boot_output + 6 commands):**
+| Symbol | Frozen | Notes |
+|---|---|---|
+| `gettimeofday` | yes | primary clock source |
+| `time` | yes | defensive |
+| `clock_gettime(CLOCK_REALTIME[_COARSE])` | yes | defensive |
+| `clock_gettime(other ids, incl. CLOCK_MONOTONIC)` | **no** | falls through to libc |
+| `localtime_r` | not intercepted | deterministic because child `TZ=UTC` |
+| `getrusage` (MDL `<TIME>`) | not intercepted | CPU time, not a wall clock |
+
+## Scenario
+
+`tests/scenarios/house-boot.json`: `fixed_epoch` 250776000 = 1977-12-12 12:00:00 UTC, giving
+`This version created December 12.` under `TZ=UTC`.
+
+## Approved gameplay transcript (strict fields)
 
 ```
-boot_output:
-  Welcome to 'Confusion', a MDL interpreter.
-  Copyright 2009 Matthew T. Russotto
-  This Confusion created Nov 22 2026 @ 20:58:42
-  ...
-  LISTENING-AT-LEVEL 1 PROCESS 1
-  81prim.mud loaded
-  ...
-  77dung.mud loaded
-  "DONE"
-  Welcome to Dungeon.
-
-  This version created December 12.
-
-  You are in an open field west of a big white house, with a boarded
-  front door.
+boot_output: LISTENING-AT-LEVEL 1 PROCESS 1 / 81prim.mud loaded ... 77dung.mud loaded /
+  "DONE" / Welcome to Dungeon. / This version created December 12. /
+  You are in an open field west of a big white house, with a boarded front door.
   There is a small mailbox here.
-
-> north
-  You are facing the north side of a white house.  There is no door here,
-  and all the windows are barred.
-
-> west
-  West of House
-  There is a small mailbox here.
-
-> open mailbox
-  Opening the mailbox reveals a leaflet.
-
-> take leaflet
-  Taken.
-
-> inventory
-  You are carrying:
-  A leaflet
-
-> score
-
-  Your score would be 0 [total of 500 points], in 6 moves.
-  This score gives you the rank of Beginner.
+north        -> You are facing the north side of a white house. ...
+west         -> West of House / There is a small mailbox here.
+open mailbox -> Opening the mailbox reveals a leaflet.
+take leaflet -> Taken.
+inventory    -> You are carrying: / A leaflet
+score        -> Your score would be 0 [total of 500 points], in 6 moves. /
+                This score gives you the rank of Beginner.
 ```
 
-**Epoch comparison:** With epoch 244598400 (1977-10-02 UTC), only the version line changes:
-`"This version created October 2."`. All six command outputs are identical across epochs —
-no RNG-visible text in this scenario (commands avoid combat areas).
+## Remaining risks
 
-**Surprise:** "This Confusion created Nov 22 2026 @ 20:58:42" in the banner is the binary's
-compile-time timestamp (from the `__DATE__`/`__TIME__` macros in the Confusion source), NOT
-from DSKDATE. The shim correctly intercepts only the game's DSKDATE calls; the Confusion
-banner compile timestamp is unaffected.
-
----
-
-## Task 5: Make target and pytest
-
-**Makefile target:** `reference-capture-boot` (runs `scripts/boot_reference.py capture`)
-**Pytest file:** `tests/test_boot_reference.py`
-**Added to:** `Makefile test-python` target
-
-Test coverage (all without the native binary; native test skips cleanly):
-- `test_shim_builds_and_exports_symbols` — gcc required, skips if absent
-- `test_shim_freezes_gettimeofday` — gcc required; proves epoch control end-to-end
-- `test_capture_boot_with_fake_interpreter` — fake mdli, no binary needed
-- `test_capture_boot_requires_commands` — error path
-- `test_house_boot_scenario_schema` — JSON schema validation
-- `test_house_boot_candidate_exists` — artifact presence check
-- `test_boot_reference_determinism` — `@pytest.mark.native`, skips without mdli/gcc
-
-**make test-python result:**
-
-```
-30 passed in 8.11s
-```
-
-Exit 0, `git diff --check` clean.
-
----
-
-## Changed files
-
-| File | Status |
-|---|---|
-| `Makefile` | modified — added `reference-capture-boot` target; added `tests/test_boot_reference.py` to `test-python` |
-| `pytest.ini` | new — registers `native` mark |
-| `scripts/boot_reference.py` | new |
-| `scripts/reference/fixed_time.c` | new |
-| `tests/scenarios/house-boot.json` | new |
-| `tests/test_boot_reference.py` | new |
-| `docs/evidence/M3/house-boot-candidate.json` | new — CANDIDATE transcript |
-
-NOT changed: `mdl/` runtime, `tests/scenarios/house.json`, any upstream source.
-
----
-
-## Remaining risks and open items
-
-1. **SAVE semantics:** `<SAVE-IT>` requires real Confusion image save/restore semantics.
-   The current harness cannot re-enter from ZORK.SAVE via `mdli -r` from a boot-fresh image
-   because Confusion's binary image format is not implemented. This capture is therefore
-   read-only: it records what the reference does, not what the Racket runtime does.
-
-2. **SAVE-IT → BLOCKED:** The Racket harness will error on `<ON "IPC" ,ILO 1>` before
-   reaching SAVE (see STARTUP-CALLGRAPH.md step 3). This capture proves what the reference
-   output should look like for a future implementation.
-
-3. **Score discrepancy:** Fresh boot starts with MOVES=0; the approved `house.json`
-   (ZORK.SAVE restore) starts at MOVES=2. After `north` + 5 commands = 6 moves total in
-   the fresh-boot scenario; the restore scenario has 7 moves. This is correct and expected.
-
-4. **Timezone sensitivity:** DSKDATE uses `localtime_r` after the shim freezes `tv_sec`.
-   If the host machine is not UTC, `December 12` might render as `December 11` (for UTC-13
-   or similar). The candidate was captured on a UTC+1 host (December 12 output confirmed).
-   Future golden approval should note the expected local date string.
-
----
-
-## Proposed docs/SEMANTICS.md section
-
-```markdown
-### Boot-reference entry sequence (run.mud)
-
-The faithful game entry is `run.mud`:
-  <FLOAD "77loadall.mud">
-  <SAVE-IT>
-
-After FLOAD loads all source, SAVE-IT calls SAVE with FN="<MDL>MADADV.SAVE". In the
-patched Confusion build (mdlzork_771212), the patched COND continues in the same clause
-as the SAVE success, so the game starts immediately without returning to the MDL REPL.
-DSKDATE (via GETTIMEDATE → gettimeofday) determines both the version-date banner and the
-RANDOM seed. Clock must be frozen for reproducible captures.
-
-The MDL REPL in Confusion does NOT use '>' as its prompt. The first standalone '>' in the
-PTY stream is always the Zork RDCOM game prompt.
-```
+1. The Racket runtime cannot yet run this boot (blocked before `SAVE-IT`; see
+   STARTUP-CALLGRAPH.md); the capture records reference behaviour only.
+2. `make test` exit status in this session is environment-blocked (see step 7).
+3. Fresh boot starts at MOVES=0 (6 moves); the restore scenario `house.json` starts at
+   MOVES=2. Expected.
+4. The scenario shows no RNG-visible text; epoch control of RANDOM is not yet exercised by
+   a gameplay assertion.
+5. Promotion of the full JSON to a strict golden fixture still needs maintainer approval.
