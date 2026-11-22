@@ -108,6 +108,13 @@
   (define value (cdr tagged))
   (unless (regexp-match? #px"^#[A-Z]" name)
     (unsupported n (format "unsupported typed literal ~a" name)))
+  (when (and (is-kind? value 'string) (string=? name "#WORD"))
+    (unsupported n "#WORD requires a numeric literal"))
+  (if (is-kind? value 'string)
+      `(mdl-chtype ,(source-node-value value) (mdl-atom ,(substring name 1)))
+      (compile-typed-word n name value)))
+
+(define (compile-typed-word n name value)
   (unless (is-kind? value 'atom)
     (unsupported n "#WORD requires a numeric literal"))
   (define raw (source-node-value value))

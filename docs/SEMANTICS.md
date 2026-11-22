@@ -1603,3 +1603,297 @@ until their sources exist. The earlier source-loading slice permits
 `"DIVERT-AGC"` registration because the original handler is immediately
 removed; its automatic event source remains unimplemented and unclaimed.
 Process-targeted handlers, `DISMISS`, and automatic sources remain unsupported.
+
+## M3 logical movable storage and explicit GC (issue #104; specification before implementation)
+
+The manual's chapters 21–22 specify that `GC` returns reclaimed MDL words,
+while `BLOAT` returns free movable-storage words. An explicit collection
+reports `GC` after collection with `(FLOAT seconds, FIX 1, ATOM GC)`.
+`DIVERT-AGC` runs before a deferrable collection with `(FIX requested-words,
+ATOM initiator)`. The original `77rooms.mud:78–104` installs these handlers,
+removes both initially, and reattaches `GC-HAND` on first diversion.
+
+The bounded Racket model tracks each newly constructed LIST pair as two
+logical words and each VECTOR/UVECTOR backing block as `2*n+2`/`n+2` words,
+respectively, following manual appendix 1. REST views share their backing
+allocation. An entry holds only a weak reference, so a host major collection
+can establish that an allocation is no longer reachable; a subsequent ledger
+sweep releases its logical words once. This is a logical subset, not a claim
+about host bytes or exact PDP-10 accounting for every object class. In
+particular reader-created strings, atoms, closures, frames, deferred list
+elements and other structures are not yet charged. Any GC result is the
+reclaimed words **within this tracked subset**. An explicit GC calls the host
+collector, sweeps the ledger, and only then delivers its event. Repeated GC
+with no newly dead tracked object returns zero. A live shared or cyclic
+structure remains charged until the entire allocation becomes unreachable.
+Every session has an independent ledger and capacity.
+
+`BLOAT` supports the original one-argument movable-free-space request; it
+validates a nonnegative FIX and expands logical capacity enough to satisfy
+the requested free space, returning current free words. Other argument
+positions are rejected until their storage classes are modeled. At a
+tracked allocation boundary, exhaustion signals `DIVERT-AGC` once; if
+the handler's `BLOAT` makes room, allocation proceeds without collection.
+Otherwise the runtime performs a host collection and emits `GC` with reason
+2 and the allocating operation. Pressure handlers run at a safe interpreter
+boundary, not from a host GC callback. Pressure recursion is suppressed.
+The chosen initial capacity is an implementation parameter, not a claim of
+historical GC timing. Host-initiated automatic collections alone do not
+create MDL events. `GC` arguments beyond the no-argument form remain
+unsupported until the manual's parameter changes can be modeled.
+
+## M3 SPECIAL and UNSPECIAL declaration wrappers (source `77rooms.mud:189`)
+
+Manual chapter 14 permits `<SPECIAL Pattern>` and `<UNSPECIAL Pattern>` at
+the top level of an ATOM declaration. The marker describes local-binding
+specialty for compiled code; interpreted bindings are inherently SPECIAL
+while `SPECIAL-CHECK` is off initially. The wrapped Pattern still constrains
+the value under this runtime's attached-declaration checking. Preserve the
+marker in normalized metadata so a future compiler can inspect it, and
+delegate value matching to the nested Pattern. A wrapper needs exactly one
+Pattern and is rejected inside OR, a structure, a positional RSUBR-style
+declaration, or an explicit `DECL?` Pattern. This bounded slice does not
+implement `SPECIAL-CHECK` or change binding representation.
+
+Pinned Confusion accepts valid SPECIAL and UNSPECIAL wrappers. Its attached
+declaration check also accepts a mismatched STRING for `<SPECIAL FIX>`;
+that observation reflects its previously documented lack of attached
+checking, not a rule to drop the nested Pattern in Racket. The original
+source uses `<SPECIAL CHANNEL>` and `<SPECIAL STRING>` in attached
+declarations. Focused tests must fail first at unsupported SPECIAL, then
+cover valid wrappers, nested-pattern enforcement and malformed placement.
+
+## M3 built-in LOSE WORD literal (source `77rooms.mud:218`)
+
+Manual appendix 3 lists `LOSE` as a built-in WORD-primitive placeholder.
+The original error handler stores `#LOSE 27` and octal `#LOSE` values in
+channel control slots. Read the numeric payload with the existing 36-bit
+WORD literal rules, then tag it as LOSE. TYPE and PRIMTYPE report LOSE and
+WORD. A LOSE value may be stored and inspected; its meaning as a placeholder
+does not make arbitrary arithmetic legal. Preserve the established strict
+numeric parsing and overflow errors. This source-loading slice registers
+the built-in TYPE and permits only its WORD retyping path. It does not
+implement CHANNEL or the source error handler's I/O operations.
+
+## M3 ERROR interrupt and resumable ERROR frame (source `77rooms.mud:261`)
+
+Manual chapter 21 says an `"ERROR"` interrupt occurs when `ERROR` is called.
+Handlers receive the FRAME of that ERROR call, followed by its evaluated
+arguments (which a TUPLE formal can collect). An eligible handler runs at
+the registered priority. Unlike ordinary events, ERROR occurrences cannot
+be queued: at an interrupt level at least as high as its priority, normal
+ERROR handling runs. A handler may use `<ERRET value frame>` to resume the
+interrupted ERROR call with `value`; a normal handler return falls through
+to the original error. The frame must belong to the current session and
+remain live during handler execution. Invalid, stale and foreign frames
+raise strict errors. Existing error value reporting remains the fallback.
+
+This slice covers explicit `ERROR` calls and their registered handlers.
+It does not convert arbitrary host exceptions into MDL ERROR interrupts,
+implement error-level REPLs, or supply the original host's CHANNEL/FINISH
+operations. Tests must demonstrate failing registration first, then verify
+argument types and order, normal fallthrough, ERRET, interrupt-level
+suppression, session isolation, and stale-frame rejection. Pinned Confusion
+stubs EVENT/HANDLER so it cannot certify callback delivery; the manual is
+the behavioral specification.
+
+## M3 built-in CHANNEL type declaration (source `77rooms.mud:270`)
+
+Manual chapter 11 defines CHANNEL as a built-in VECTOR-primitive type.
+The original GDECL for `SCRIPT-CHANNEL` names it before any channel is
+constructed in the Racket loader. Registering this TYPE makes TYPEPRIM and
+declaration normalization recognize it; ordinary GDECL checks still reject
+values of other types. This slice does not fabricate a CHANNEL value, open
+files, or provide input/output behavior. CHANNEL construction and operations
+remain explicit later dependencies. The regression first fails on the
+original unknown-TYPE error and then verifies TYPEPRIM and strict GDECL
+matching.
+
+## M3 numeric 0? and 1? predicates (original `DIVERT-FCN`)
+
+Manual chapter 8 defines `0?` and `1?` for one FIX or FLOAT argument.
+Each returns the session's T atom if its numeric value is zero or one,
+otherwise empty FALSE. Wrong types and arity raise errors. The original
+`DIVERT-FCN` uses `1?` to attach `GC-HAND` only at its first diversion.
+This runtime must use the predicate's ordinary MDL truth values, including
+for 0.0 and 1.0; the numeric comparison does not coerce other types.
+
+## M3 ISTRING and shared STRING REST views (`77rooms.mud:559`)
+
+Manual chapter 7 defines `ISTRING length [expression]` as a STRING of
+length FIX characters. Omitted expression produces ASCII NUL characters;
+when present, its result must be a CHARACTER and is re-evaluated per slot.
+`REST` on STRING returns a view into the same character storage, including
+the zero-length view at its end. Mutating a view with PUT changes the
+original STRING. Pinned Confusion confirms a three-character NUL fill,
+character fill, an empty STRING at REST length, and a PUT through a REST
+view changing `"XXX"` to `"XYX"`.
+
+The runtime will represent a REST view by backing STRING plus start and
+length, keeping value TYPE STRING. `LENGTH`, NTH, PUT, EMPTY?, LENGTH?,
+STRING concatenation and text output must read the view's visible range.
+Identity compares backing storage and range; structural equality compares
+visible characters. A valid offset is from zero through length; wrong
+length or fill types raise errors. The source-loading form uses omitted
+fill. Re-evaluation of supplied expressions requires the raw FORM at the
+compiled call boundary, and must not accidentally evaluate only once.
+
+## M3 registered structured TYPE heads in declarations (`77rooms.mud:725`)
+
+Manual chapter 14 permits a structured declaration headed by a registered
+structured TYPE. The original `<CHANNEL FIX>` names built-in CHANNEL, whose
+primitive representation is VECTOR. Normalization must accept any current
+registered TYPE whose primitive is LIST, VECTOR, UVECTOR, or TUPLE, retain
+that TYPE atom, and validate the same positional element Patterns as the
+existing LIST/VECTOR rules. Matching checks the actual TYPE, not merely
+the primitive representation. Thus a plain VECTOR must fail `<CHANNEL FIX>`.
+Unsupported storage classes such as BYTES and STRING remain explicit errors
+for this slice. Tests should first reproduce the unsupported CHANNEL head,
+then cover a custom VECTOR-primitive NEWTYPE's matching and strict failure.
+
+## M3 BLOCK/ENDBLOCK OBLIST search state (`77rooms.mud:804`)
+
+Manual chapter 15 defines `.OBLIST` as the READ search list. Unqualified
+ATOMs are looked up in its OBLISTs in order and inserted into the first
+OBLIST on a miss. `BLOCK` takes an evaluated nonempty LIST of OBLISTs,
+pushes the current search list independent of function application, installs
+the argument as the current `.OBLIST`, and returns it. `ENDBLOCK` restores
+and returns the previous list. An unmatched ENDBLOCK and malformed search
+list fail. State belongs to one session. Explicit `!-` trailers still
+select their named OBLIST independently of the current search list.
+
+The original block in `77rooms.mud` prepends the FLAG OBLIST while
+defining `FLAG-NAMES`; the following `PSETG` must resolve FLAG-NAMES in
+INITIAL but intern new flag atoms in FLAG. ENDBLOCK restores the prior
+lookup for the later VAL-NAMES definitions. The source reader compiles one
+expression at a time, so runtime atom resolution can follow the active
+search list. This slice does not implement DEFAULT insertion redirection,
+READ's explicit lookup argument, or print-time minimal trailer selection.
+
+## M3 IUVECTOR and CHUTYPE (`77rooms.mud:1249`)
+
+Manual chapter 7 defines `IUVECTOR length [expression]` as a UVECTOR with
+the expression evaluated once for each element. Without the expression,
+the UVECTOR has UTYPE LOSE and zero-word placeholders. The length is a
+nonnegative FIX. Filled UVECTOR elements must have one legal uniform TYPE.
+The zero-length REST view retains UTYPE, so the original source can allocate
+20 empty slots, take REST at 20, then change that empty view to OBJECT.
+
+`CHUTYPE uv type` changes the UVECTOR's uniform TYPE in place and returns the
+same UVECTOR. Each existing element is reinterpreted at the new TYPE only if
+old and new element PRIMTYPE agree. LOSE is a special case that can become
+any type legal in a UVECTOR. Wrong arity, non-UVECTOR, invalid TYPE, and
+incompatible primitive storage fail explicitly. This slice tests mutation
+through a shared UVECTOR view and a zero-length LOSE-to-OBJECT cast; the
+runtime's UVECTOR views currently copy the UTYPE header, so changing the
+UTYPE of one view is not propagated to other views of the same storage.
+
+## M3 IVECTOR (`77rooms.mud:1545`)
+
+Manual chapter 7 defines `IVECTOR length [expression]` as a VECTOR of
+nonnegative FIX length. The optional expression evaluates once per slot;
+omission fills each slot with the zero-word LOSE value. The source's LEXV
+allocation passes a quoted REST expression whose evaluation must create
+ten distinct empty STRING views. Wrong arity or length fails explicitly.
+
+## M3 MAPR (`77rooms.mud`)
+
+Manual chapter 10 defines MAPR with MAPF's final function, loop function,
+multiple structured inputs, and map control operators. At each position,
+the loop function receives each input's `REST` at offset zero, one, etc.,
+so its PUT at index one mutates the underlying source. Iteration stops at
+the shortest input. MAPRET, MAPSTOP, and MAPLEAVE use the same control
+semantics as MAPF. The existing MAPF collection and control flow is shared;
+only the loop arguments differ. A bounded regression covers LIST and VECTOR
+mutation and map termination.
+
+## M3 CHTYPE for ATOM-primitive NEWTYPE (`77np.mud:10`)
+
+Manual chapter 6 permits NEWTYPE with primitive ATOM, including the game's
+PREP and ADJECTIVE types. CHTYPE of an ATOM to such a registered type keeps
+the same underlying ATOM while changing the visible TYPE; casting back to
+ATOM returns the underlying ATOM. A different PRIMTYPE remains an error.
+
+## M3 MIN (`77dung.mud:57`)
+
+Manual chapter 3 defines MIN over any number of FIX/FLOAT arguments, with
+FLOAT contagion; zero arguments return the greatest FLOAT identity. The
+source casts that identity to FIX and divides by two. On a 36-bit target,
+the cast produces the greatest FIX, 34359738367. Pinned Confusion uses a
+64-bit host representation and yields 9218868437227405311 for the cast,
+so its magnitude is a documented reference deviation. The runtime stores
+the zero-argument identity as a FLOAT-typed word sentinel for this cast;
+ordinary MIN calls return numeric FIX or FLOAT values. Other arithmetic on
+the sentinel is not implemented.
+
+## M3 CHTYPE for STRING-primitive NEWTYPE (`77dung.mud:69`)
+
+The original ADD-BUZZ macro creates BUZZ values by changing a STRING's
+TYPE. CHTYPE must preserve the same STRING contents and backing storage
+when moving between STRING and a registered STRING-primitive type. The
+primitive must match; other built-in STRING conversions remain strict.
+
+## M3 custom STRING `#TYPE` literal (`77dung.mud:148`)
+
+Manual chapter 6 defines `#TYPE representation` as a read-time type change.
+For a registered STRING-primitive type such as NEXIT, `#NEXIT "text"`
+must read as one typed value with the same string payload. The compiler
+retains the literal and resolves TYPE when the expression executes. An
+unknown TYPE or primitive mismatch fails, preserving the reader's strict
+behavior for unsupported `#` tokens.
+
+## M3 MOBLIST name association (`77dung.mud:184`)
+
+Manual chapter 15 and pinned Confusion's `mdl_create_oblist` associate a
+new named OBLIST with its name ATOM under indicator OBLIST, and the reverse
+association with the OBLIST. A later `<GET FLAG OBLIST>` must retrieve the
+OBLIST created by `<MOBLIST FLAG>`. Repeated MOBLIST of the same ATOM returns
+that same OBLIST. These associations are session local.
+
+## M3 empty UVECTOR UTYPE (`77dung.mud:213`)
+
+The manual's UVECTOR rules and pinned Confusion's empty UVECTOR constructor
+give an empty UVECTOR UTYPE LOSE. This applies to `UVECTOR` with zero
+arguments, literal `![]`, and a MAPF final call to UVECTOR with no collected
+elements. CHUTYPE can then change the empty object to ADJECTIVE in place.
+
+## M3 SPNAME (`77dung.mud:2463`)
+
+Manual chapter 15 defines SPNAME as the ATOM's printed-name STRING with
+shared, immutable storage. The runtime returns an immutable STRING with
+the same contents; this prevents PUT from changing the ATOM name. Racket
+may copy when freezing a mutable host string, so physical sharing is not
+claimed. PNAME continues to return a mutable copy. Wrong operand types fail.
+
+## M3 GETTIMEDATE host clock bridge (`81tell-repl.mud:57`)
+
+GETTIMEDATE is a Confusion host extension used by the source-defined
+DSKDATE. It returns a FIX UVECTOR with seconds, minutes, hours, day,
+month, full year, and microseconds. With no time argument or a FALSE first
+argument, it reads the host wall clock; a FIX or two-FIX UVECTOR supplies
+explicit Unix seconds and microseconds. A truthy second argument selects
+UTC; otherwise host local time is used. Each call captures one timestamp
+before decomposing it. Invalid types and arity fail. This is an explicit
+host compatibility bridge; deterministic cross-engine RNG parity still
+requires a seed strategy and is not implied by matching this API shape.
+
+## M3 default terminal CHANNEL bindings (startup)
+
+Confusion initializes root ATOMs INCHAN and OUTCHAN with session-local
+CHANNEL values and both LVAL and GVAL bindings. Each CHANNEL is a VECTOR
+primitive with the documented channel slots. The default read and print
+channels provide mode, terminal device name, empty file names, and basic
+position and radix fields. The Racket session will create analogous local
+values on construction; this is host environment state, not a change to
+the historical game source. Terminal I/O operations are separate work.
+
+## M3 PRINTSTRING terminal CHANNEL and count (`77rooms.mud:286`)
+
+Manual chapter 11 allows `PRINTSTRING string [channel [count]]`. It writes
+at most `count` visible characters, or the entire STRING when omitted.
+The CHANNEL must be an output CHANNEL. This local runner maps its terminal
+channel to the current Racket output port. The runtime retains the manual's
+character-count return value; pinned Confusion returns the source STRING,
+a recorded deviation already present for one-argument PRINTSTRING. Invalid
+CHANNEL, count, or arity fails. Typed STRING values are accepted after
+CHTYPE to STRING, as used by the original TELL definition.

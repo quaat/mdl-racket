@@ -67,6 +67,12 @@
                  (make-mdl-atom-space) loader-namespace (box '()) (make-hash)))
   (call-in-session session
     (lambda ()
+      (for ([spec (in-list '(("INCHAN" . "READ")
+                            ("OUTCHAN" . "PRINT")))])
+        (define name (mdl-atom (string-append (car spec) "!-ROOT")))
+        (define channel (mdl-make-terminal-channel (cdr spec)))
+        (mdl-set! name channel)
+        (mdl-setg! name channel))
       ;; Interpreter-supplied globals (MUDDLE, issue #51) intern in THIS
       ;; session's atom space, so they must be seeded with the session's
       ;; space current — interning earlier would produce a different atom

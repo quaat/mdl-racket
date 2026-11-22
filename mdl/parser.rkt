@@ -195,7 +195,7 @@
             (node 'false (mdl-node-value (read-node! c)))]
            [(and (regexp-match? #px"^#[A-Za-z]" name) (peek c)
                  (or (char-numeric? (peek c))
-                     (memv (peek c) '(#\* #\- #\+))))
+                     (memv (peek c) '(#\* #\- #\+ #\"))))
             (node 'typed (cons name (read-node! c)))]
            [else (node 'atom name)]))]
       [(#\> #\) #\] #\}) (parse-error c "unexpected closing delimiter")]

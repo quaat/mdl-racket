@@ -1,6 +1,6 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
-(require racket/mpair racket/list racket/string)
+(require racket/mpair racket/list racket/string racket/date "memory.rkt")
 (provide current-mdl-globals current-mdl-locals
          current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
@@ -14,8 +14,10 @@
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
          mdl-emit-event!
+         mdl-logical-storage-stats mdl-set-logical-storage-capacity!
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
+         mdl-make-terminal-channel
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
          mdl-segment mdl-segment? mdl-segment-payload mdl-segment-line
@@ -77,6 +79,7 @@
 (struct mdl-handler (header applicable [active? #:mutable]))
 (struct mdl-interrupt-state ([level #:mutable] [pending #:mutable]))
 (struct mdl-interrupt-occurrence (header arguments))
+(struct mdl-error-frame (owner resume [live? #:mutable]))
 (define compiled-function-formals (make-weak-hasheq))
 (struct mdl-decl-value (bindings result line column positionals) #:transparent)
 (define local-declarations (make-weak-hasheq))
@@ -110,11 +113,11 @@
 ;; instead of recursing indefinitely.
 (define decl-match-max-depth 200)
 
-;; The structured declaration types of this slice (issue #48) are the head
-;; ATOMs LIST, VECTOR, UVECTOR, and TUPLE of the `<struc elts>` pattern
-;; construction. Anything else -- NEWTYPE names with element patterns,
-;; BYTES, TEMPLATE-like heads -- stays an explicit unsupported-pattern error
-;; for a later slice.
+(define (registered-structured-type? atom)
+  (and (mdl-atom? atom)
+       (member (hash-ref (atom-space-types (current-mdl-atom-space)) atom #f)
+               '("LIST" "VECTOR" "UVECTOR" "TUPLE"))
+       #t))
 
 (define (decl-bracket-items bracket)
   ;; The `[...]` repetition construction reads as a VECTOR literal inside the
@@ -142,6 +145,9 @@
                         "structured declaration head must be PRIMTYPE"))
           (cadr normalized))
         head))
+  (unless (registered-structured-type? type-atom)
+    (decl-error origin line column "unsupported structured declaration TYPE ~a"
+                (if (mdl-atom? type-atom) (mdl-atom-pname type-atom) type-atom)))
   (define raw-elements (cdr items))
   (when (null? raw-elements)
     ;; Confusion reads the empty `<struc>` and matches any value of the TYPE,
@@ -224,7 +230,7 @@
 (define current-decl-defer-unknown? (make-parameter #f))
 
 (define (normalize-decl-pattern pattern line column
-                                 [origin "DECL"])
+                                 [origin "DECL"] [specialty-allowed? #f])
   (cond
     [(mdl-atom? pattern)
      (cond [(string=? (mdl-atom-pname pattern) "ANY") '(any)]
@@ -264,10 +270,23 @@
                                     (cadr items)))
           (decl-error origin line column "PRIMTYPE requires one registered type"))
         (list 'primtype (cadr items))]
+       [(SPECIAL UNSPECIAL)
+        (unless specialty-allowed?
+          (decl-error origin line column
+                      "unsupported declaration pattern ~a in this position"
+                      (mdl-atom-pname (car items))))
+        (unless (= (length items) 2)
+          (decl-error origin line column
+                      "~a requires one Pattern" (mdl-atom-pname (car items))))
+        (list 'specialty (car items)
+              (normalize-decl-pattern (cadr items) line column origin))]
        [(LIST VECTOR UVECTOR TUPLE)
         (normalize-decl-structure items line column origin)]
-       [else (decl-error origin line column "unsupported declaration pattern ~a"
-                         (mdl-atom-pname (car items)))]))]
+       [else
+        (if (registered-structured-type? (car items))
+            (normalize-decl-structure items line column origin)
+            (decl-error origin line column "unsupported declaration pattern ~a"
+                        (mdl-atom-pname (car items))))]))]
     [else (decl-error origin line column "unsupported declaration pattern")]))
 
 (define (mdl-make-positional-declaration items line column)
@@ -313,7 +332,8 @@
             (decl-error "DECL" line column "expected a nonempty atom list"))
           (define pattern
             (parameterize ([current-decl-defer-unknown? #t])
-              (normalize-decl-pattern (list-ref items (add1 i)) line column)))
+              (normalize-decl-pattern (list-ref items (add1 i)) line column
+                                      "DECL" #t)))
           (for ([name (in-list (mdl-list->list names))])
             (unless (mdl-atom? name)
               (decl-error "DECL" line column "declaration name must be an ATOM"))
@@ -349,6 +369,7 @@
   ;; leaf for the (element pattern) payload; PRIMTYPE and structure
   ;; failures are records (bare #FALSE ()), so they never reach here.
   (case (car pattern)
+    [(specialty) (decl-failure-leaf (caddr pattern))]
     [(type) (cadr pattern)]
     [(applicable) (mdl-atom "APPLICABLE")]
     [(or) (decl-failure-leaf (last (cdr pattern)))]
@@ -372,6 +393,7 @@
     (error 'mdl-decl "declaration pattern nesting exceeds traversal limit ~a"
            decl-match-max-depth))
   (case (car pattern)
+    [(specialty) (decl-match value (caddr pattern) budget)]
     [(unresolved)
      (decl-match value
                  (parameterize ([current-decl-defer-unknown? #f])
@@ -575,11 +597,16 @@
   (define atom (binding-atom 'mdl-lval name))
   (define result (local-option atom))
   (if (eq? result unassigned)
-      (error 'mdl-lval "unassigned MDL local ~a" (mdl-atom-pname atom))
+      (if (eq? atom (mdl-atom "OBLIST"))
+          (atom-space-lookup (current-mdl-atom-space))
+          (error 'mdl-lval "unassigned MDL local ~a" (mdl-atom-pname atom)))
       result))
 
 (define (mdl-set! name value)
   (define atom (binding-atom 'mdl-set name))
+  (when (eq? atom (mdl-atom "OBLIST"))
+    (validate-oblist-lookup 'mdl-set value)
+    (set-atom-space-lookup! (current-mdl-atom-space) value))
   (define frames (current-mdl-locals))
   (define target
     (or (for/or ([frame (in-list frames)])
@@ -870,9 +897,9 @@
     [(mdl-array? value)
      (for/list ([i (in-range (mdl-array-length value))])
        (mdl-nth value (add1 i)))]
-    [(string? value)
-     (for/list ([ch (in-string value)])
-       (mdl-character ch))]
+    [(mdl-string? value)
+     (for/list ([index (in-range (mdl-string-length value))])
+       (mdl-character (mdl-string-ref value index)))]
     [else
      (error 'mdl-segment
             "ILLEGAL-SEGMENT: Segment evaluated to nonstructured type")]))
@@ -1075,6 +1102,9 @@
 
 (define (mdl-apply-value fn raw-args)
   (cond
+    [(eq? fn mdl-istring) (mdl-istring-raw raw-args)]
+    [(eq? fn mdl-iuvector) (mdl-iuvector-raw raw-args)]
+    [(eq? fn mdl-ivector) (mdl-ivector-raw raw-args)]
     [(mdl-macro? fn)
      (mdl-eval (mdl-apply-interpreted fn raw-args))]
     [(mdl-function? fn)
@@ -1534,6 +1564,9 @@
 ;; in order before the operator is applied (chapter 7.5.2).
 (define (mdl-dispatch-call fn raw-args-thunk arg-thunks)
   (cond
+    [(eq? fn mdl-istring) (mdl-istring-raw (raw-args-thunk))]
+    [(eq? fn mdl-iuvector) (mdl-iuvector-raw (raw-args-thunk))]
+    [(eq? fn mdl-ivector) (mdl-ivector-raw (raw-args-thunk))]
     [(or (mdl-macro? fn) (mdl-function? fn))
      (define result (mdl-apply-interpreted fn (raw-args-thunk)))
      (if (mdl-macro? fn) (mdl-eval result) result)]
@@ -1684,7 +1717,8 @@
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
 (struct atom-space (initial root named types builtins manifests associations
-                            global-declarations events interrupt-state))
+                            global-declarations events interrupt-state memory
+                            [lookup #:mutable] [lookup-stack #:mutable]))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1708,9 +1742,11 @@
                           ("LIST" . "LIST") ("FORM" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
                           ("VECTOR" . "VECTOR")
+                          ("CHANNEL" . "VECTOR")
                           ("UVECTOR" . "UVECTOR") ("STRING" . "STRING")
                           ("FIX" . "WORD") ("FLOAT" . "WORD")
                           ("WORD" . "WORD") ("BITS" . "WORD")
+                          ("LOSE" . "WORD")
                           ("CHARACTER" . "WORD")
                           ("FRAME" . "FRAME")
                           ("TUPLE" . "TUPLE")
@@ -1735,15 +1771,16 @@
                          (list root-name oblist-name root)
                          (list initial oblist-name initial-name)
                          (list root oblist-name root-name)))
-              (make-hasheq) (make-hash) (mdl-interrupt-state 0 '())))
+              (make-hasheq) (make-hash) (mdl-interrupt-state 0 '())
+              (make-mdl-memory) (mcons initial (mcons root '())) '()))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
 ;; A true event source must be supplied before predefined names are
 ;; registered. GC and DIVERT-AGC are internal MDL interrupts, not OS signals.
 (define unsupported-predefined-interrupt-names
-  '("GC" "CHAR" "READ" "WRITE" "IPC" "BLOCKED" "UNBLOCKED"
-    "ERROR" "CLOCK" "SYSDOWN" "INFERIOR" "RUNT" "REALT"
+  '("CHAR" "READ" "WRITE" "IPC" "BLOCKED" "UNBLOCKED"
+    "CLOCK" "SYSDOWN" "INFERIOR" "RUNT" "REALT"
     "MPV" "PURE" "ILOPR" "PARITY" "IOC"))
 
 (define (current-interrupt-state)
@@ -1780,6 +1817,59 @@
                    (list (mdl-interrupt-occurrence header arguments)))))
   (mdl-drain-pending!)
   (and enabled? #t))
+
+;; Host collection establishes lifetime; the ledger reports only charged
+;; logical MDL words. No callback runs inside the host collector.
+(define current-mdl-storage-pressure? (make-parameter #f))
+
+(define (current-mdl-memory)
+  (atom-space-memory (current-mdl-atom-space)))
+
+(define (mdl-logical-storage-stats)
+  (define memory (current-mdl-memory))
+  (hash 'capacity (mdl-memory-capacity memory)
+        'used (mdl-memory-used memory)
+        'free (mdl-memory-free memory)))
+
+(define (mdl-set-logical-storage-capacity! words)
+  ;; Host-only test/configuration hook, never an MDL primitive.
+  (unless (and (exact-integer? words) (>= words 0) (<= words fix-max))
+    (error 'mdl-set-logical-storage-capacity! "expected nonnegative FIX"))
+  (set-mdl-memory-capacity! (current-mdl-memory) words))
+
+(define (mdl-collect-logical! reason initiator)
+  (define-values (reclaimed elapsed) (mdl-memory-collect! (current-mdl-memory)))
+  (mdl-emit-event! "GC" (list elapsed reason (mdl-atom initiator)))
+  (check-fix 'mdl-gc reclaimed))
+
+(define (mdl-gc . args)
+  (unless (null? args)
+    (error 'mdl-gc "GC arguments are unsupported in this logical storage model"))
+  (parameterize ([current-mdl-storage-pressure? #t])
+    (mdl-collect-logical! 1 "GC")))
+
+(define (mdl-bloat . args)
+  (unless (<= (length args) 1)
+    (error 'mdl-bloat "BLOAT storage classes beyond movable free space are unsupported"))
+  (define requested (if (null? args) 0 (car args)))
+  (unless (and (exact-integer? requested) (<= 0 requested fix-max))
+    (error 'mdl-bloat "BLOAT requires a nonnegative FIX"))
+  (check-fix 'mdl-bloat (mdl-memory-bloat! (current-mdl-memory) requested)))
+
+(define (mdl-track-allocation! value words initiator)
+  (define memory (current-mdl-memory))
+  (when (and (not (current-mdl-storage-pressure?))
+             (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory)))
+    (parameterize ([current-mdl-storage-pressure? #t])
+      (mdl-emit-event! "DIVERT-AGC" (list words (mdl-atom initiator)))
+      (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
+        (mdl-collect-logical! 2 initiator))
+      ;; Historical MDL asks the host for more space when collection alone
+      ;; cannot satisfy a pending request. This capacity is logical only.
+      (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
+        (set-mdl-memory-capacity!
+         memory (+ (mdl-memory-used memory) (max words 8192))))))
+  (mdl-memory-register! memory value words))
 
 (define (mdl-deliver-occurrence! occurrence)
   (define header (mdl-interrupt-occurrence-header occurrence))
@@ -1940,6 +2030,8 @@
             (lambda ()
               (define oblist (oblist-value name (make-hash) size))
               (hash-set! named name oblist)
+              (mdl-put-association! name (mdl-atom "OBLIST") oblist)
+              (mdl-put-association! oblist (mdl-atom "OBLIST") name)
               oblist)))
 
 (define (mdl-root . args)
@@ -1949,7 +2041,9 @@
 
 (define (mdl-lookup name oblist)
   (unless (string? name) (error 'mdl-lookup "expected a STRING PNAME"))
-  (require-oblist 'mdl-lookup oblist)
+  (unless (mdl-oblist? oblist)
+    (error 'mdl-lookup "expected an MDL OBLIST for PNAME ~a, got ~a"
+           name oblist))
   (hash-ref (oblist-value-entries oblist) name (lambda () (mdl-false '()))))
 
 (define (mdl-insert value oblist)
@@ -1995,6 +2089,32 @@
   (require-atom 'mdl-pname atom)
   (string-copy (atom-value-pname atom)))
 
+(define (mdl-spname atom)
+  (require-atom 'mdl-spname atom)
+  (string->immutable-string (atom-value-pname atom)))
+
+(define (validate-oblist-lookup who value)
+  (unless (and (mpair? value)
+               (let ([items (mdl-list->list value)])
+                 (and (pair? items) (andmap mdl-oblist? items))))
+    (error who "expected a nonempty LIST of OBLISTs"))
+  value)
+
+(define (mdl-block lookup)
+  (validate-oblist-lookup 'mdl-block lookup)
+  (define space (current-mdl-atom-space))
+  (set-atom-space-lookup-stack!
+   space (cons (atom-space-lookup space) (atom-space-lookup-stack space)))
+  (mdl-set! "OBLIST" lookup))
+
+(define (mdl-endblock)
+  (define space (current-mdl-atom-space))
+  (define stack (atom-space-lookup-stack space))
+  (when (null? stack)
+    (error 'mdl-endblock "ENDBLOCK without BLOCK"))
+  (set-atom-space-lookup-stack! space (cdr stack))
+  (mdl-set! "OBLIST" (car stack)))
+
 (define (mdl-atom name)
   (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
   (define trailer-match (regexp-match-positions #rx"!-" name))
@@ -2007,19 +2127,17 @@
         (define oblist (mdl-moblist (mdl-atom trailer)))
         (define found (mdl-lookup pname oblist))
         (if (mdl-false? found) (mdl-insert pname oblist) found))
-      (let* ([space (current-mdl-atom-space)]
-             [initial (atom-space-initial space)]
-             [root (atom-space-root space)]
-             [found (mdl-lookup name initial)])
-        (if (mdl-false? found)
-            (let ([root-found (mdl-lookup name root)])
-              (if (mdl-false? root-found)
-                  (mdl-insert name initial)
-                  root-found))
-            found))))
+      (let* ([lookups (mdl-list->list
+                       (atom-space-lookup (current-mdl-atom-space)))]
+             [found (for/or ([oblist (in-list lookups)])
+                      (define candidate (mdl-lookup name oblist))
+                      (and (not (mdl-false? candidate)) candidate))])
+        (or found (mdl-insert name (car lookups))))))
 
 (define (mdl-list . vals)
-  (foldr mcons '() vals))
+  (foldr (lambda (value tail)
+           (mdl-track-allocation! (mcons value tail) 2 "LIST"))
+         '() vals))
 
 (define (mdl-normalize-list value)
   (cond [(or (null? value) (mpair? value)) value]
@@ -2034,7 +2152,8 @@
           [else (hash-set! seen remaining #t)
                 (cons (mcar remaining) (loop (mcdr remaining) seen))])))
 
-(struct mdl-array (kind storage start length element-type))
+(struct mdl-array (kind storage start length [element-type #:mutable]))
+(struct mdl-string-view (storage start length))
 (struct mdl-typed-value (type value))
 (struct mdl-word-value (bits))
 (struct mdl-bits-value (width edge))
@@ -2044,6 +2163,42 @@
 (define fix-max (sub1 (arithmetic-shift 1 35)))
 
 (define mdl-word? mdl-word-value?)
+
+(define (mdl-string? value)
+  (or (string? value) (mdl-string-view? value)))
+(define (mdl-string-length value)
+  (if (mdl-string-view? value)
+      (mdl-string-view-length value)
+      (string-length value)))
+(define (mdl-string-ref value index)
+  (if (mdl-string-view? value)
+      (string-ref (mdl-string-view-storage value)
+                  (+ (mdl-string-view-start value) index))
+      (string-ref value index)))
+(define (mdl-string-content value)
+  (if (mdl-string-view? value)
+      (substring (mdl-string-view-storage value)
+                 (mdl-string-view-start value)
+                 (+ (mdl-string-view-start value)
+                    (mdl-string-view-length value)))
+      value))
+(define (mdl-string-set! value index ch)
+  (define storage (if (mdl-string-view? value)
+                      (mdl-string-view-storage value) value))
+  (when (immutable? storage)
+    (error 'mdl-put "immutable STRING literal cannot be mutated"))
+  (string-set! storage
+               (+ (if (mdl-string-view? value)
+                      (mdl-string-view-start value) 0)
+                  index)
+               ch))
+(define (mdl-string-rest value offset)
+  (define start (if (mdl-string-view? value)
+                    (mdl-string-view-start value) 0))
+  (define storage (if (mdl-string-view? value)
+                      (mdl-string-view-storage value) value))
+  (mdl-string-view storage (+ start offset)
+                   (- (mdl-string-length value) offset)))
 (define mdl-word-bits mdl-word-value-bits)
 (define (mdl-word value)
   (unless (and (exact-integer? value) (<= fix-min value word-mask))
@@ -2113,6 +2268,46 @@
         [else (for/fold ([acc (check-number 'mdl-div (car values))])
                         ([value (in-list (cdr values))])
                 (arithmetic-step 'mdl-div / acc value))]))
+
+(define (mdl-min . values)
+  (if (null? values)
+      (mdl-typed-value (mdl-atom "FLOAT") (mdl-word fix-max))
+      (for/fold ([smallest (check-number 'mdl-min (car values))])
+                ([value (in-list (cdr values))])
+        (check-number 'mdl-min value)
+        (define result (min smallest value))
+        (if (or (inexact? smallest) (inexact? value))
+            (exact->inexact result)
+            result))))
+
+(define (mdl-gettimedate . args)
+  (unless (<= (length args) 2)
+    (error 'mdl-gettimedate "too many arguments to GETTIMEDATE"))
+  (define requested (if (null? args) (mdl-false '()) (car args)))
+  (define utc? (and (= (length args) 2) (mdl-truthy? (cadr args))))
+  (define-values (seconds micros)
+    (cond
+      [(mdl-false? requested)
+       (define now (/ (current-inexact-milliseconds) 1000.0))
+       (define whole (inexact->exact (floor now)))
+       (values whole (min 999999 (max 0
+                         (inexact->exact (round (* 1000000 (- now whole)))))))]
+      [(and (exact-integer? requested) (<= fix-min requested fix-max))
+       (values requested 0)]
+      [(and (mdl-array? requested)
+            (eq? (mdl-array-kind requested) 'UVECTOR)
+            (= (mdl-array-length requested) 2)
+            (eq? (mdl-array-element-type requested) (mdl-atom "FIX")))
+       (define sec (mdl-nth requested 1))
+       (define usec (mdl-nth requested 2))
+       (unless (and (exact-integer? sec) (exact-integer? usec)
+                    (<= 0 usec 999999))
+         (error 'mdl-gettimedate "invalid time UVECTOR"))
+       (values sec usec)]
+      [else (error 'mdl-gettimedate "wrong type of time to GETTIMEDATE")]))
+  (define date (seconds->date seconds (not utc?)))
+  (mdl-uvector (date-second date) (date-minute date) (date-hour date)
+               (date-day date) (date-month date) (date-year date) micros))
 
 (define (mdl-mod left right)
   (check-fix 'mdl-mod left)
@@ -2206,6 +2401,7 @@
 (define (mdl-type-name value)
   (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
         [(mdl-activation? value) "ACTIVATION"]
+        [(mdl-error-frame? value) "FRAME"]
         [(mdl-word? value) "WORD"]
         [(mdl-bits-value? value) "BITS"]
         [(mdl-false? value) "FALSE"]
@@ -2222,24 +2418,93 @@
         [(exact-integer? value) (check-fix 'mdl-type value) "FIX"]
         [(and (real? value) (inexact? value)) "FLOAT"]
         [(char? value) "CHARACTER"]
-        [(string? value) "STRING"]
+        [(mdl-string? value) "STRING"]
         [else (error 'mdl-type "unsupported MDL type ~a" value)]))
 
 (define (mdl-vector . values)
-  (mdl-array 'VECTOR (list->vector values) 0 (length values) #f))
+  (define storage (list->vector values))
+  (mdl-track-allocation! storage (+ (* 2 (length values)) 2) "VECTOR")
+  (mdl-array 'VECTOR storage 0 (length values) #f))
+
+(define (mdl-make-terminal-channel mode)
+  (unless (member mode '("READ" "PRINT"))
+    (error 'mdl-make-terminal-channel "expected READ or PRINT mode"))
+  (mdl-typed-value
+   (mdl-atom "CHANNEL")
+   (mdl-vector 0 mode "" "" "" "" "" "" "TTY" ""
+               0 0 80 0 24 0 0 10 0)))
+
+(define (mdl-ivector-build size make-element)
+  (unless (and (exact-integer? size) (<= 0 size fix-max))
+    (error 'mdl-ivector "IVECTOR length must be a nonnegative FIX"))
+  (apply mdl-vector (for/list ([i (in-range size)]) (make-element))))
+
+(define (mdl-ivector . args)
+  (unless (<= 1 (length args) 2)
+    (error 'mdl-ivector "IVECTOR expects length and optional element"))
+  (mdl-ivector-build (car args)
+                     (if (= (length args) 2)
+                         (lambda () (cadr args))
+                         (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
+
+(define (mdl-ivector-raw raw-args)
+  (define items (if (or (null? raw-args) (mpair? raw-args))
+                    (mdl-list->list raw-args) raw-args))
+  (unless (<= 1 (length items) 2)
+    (error 'mdl-ivector "IVECTOR expects length and optional expression"))
+  (define size (mdl-eval (car items)))
+  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
+  (mdl-ivector-build size
+                     (if fill (lambda () (mdl-eval fill))
+                         (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
 
 (define (mdl-uvector . values)
-  (define element-type (and (pair? values) (mdl-type (car values))))
+  (define element-type (if (pair? values) (mdl-type (car values))
+                           (mdl-atom "LOSE")))
   (for ([value (in-list values)])
     (when (or (string=? (mdl-type-name value) "STRING")
               (not (eq? (mdl-type value) element-type)))
       (error 'mdl-uvector "UVECTOR elements must have one permitted TYPE")))
-  (mdl-array 'UVECTOR (list->vector values) 0 (length values) element-type))
+  (define storage (list->vector values))
+  (mdl-track-allocation! storage (+ (length values) 2) "UVECTOR")
+  (mdl-array 'UVECTOR storage 0 (length values) element-type))
+
+(define (mdl-iuvector-build size make-element)
+  (unless (and (exact-integer? size) (<= 0 size fix-max))
+    (error 'mdl-iuvector "IUVECTOR length must be a nonnegative FIX"))
+  (define values (for/list ([i (in-range size)]) (make-element)))
+  (if (null? values)
+      (let ([storage (vector)])
+        (mdl-track-allocation! storage 2 "UVECTOR")
+        (mdl-array 'UVECTOR storage 0 0 (mdl-atom "LOSE")))
+      (apply mdl-uvector values)))
+
+(define (mdl-iuvector . args)
+  (unless (<= 1 (length args) 2)
+    (error 'mdl-iuvector "IUVECTOR expects length and optional element"))
+  (mdl-iuvector-build (car args)
+                      (if (= (length args) 2)
+                          (lambda () (cadr args))
+                          (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
+
+(define (mdl-iuvector-raw raw-args)
+  (define items (if (or (null? raw-args) (mpair? raw-args))
+                    (mdl-list->list raw-args) raw-args))
+  (unless (<= 1 (length items) 2)
+    (error 'mdl-iuvector "IUVECTOR expects length and optional expression"))
+  (define size (mdl-eval (car items)))
+  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
+  (mdl-iuvector-build size
+                      (if fill (lambda () (mdl-eval fill))
+                          (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
 
 ;; Unevaluated UVECTOR data may contain SEGMENT placeholders; uniformity is
 ;; enforced when the data is evaluated (see uniform-uvector).
 (define (mdl-data-uvector . values)
-  (mdl-array 'UVECTOR (list->vector values) 0 (length values) #f))
+  (define storage (list->vector values))
+  (mdl-track-allocation! storage (+ (length values) 2) "UVECTOR")
+  (mdl-array 'UVECTOR storage 0 (length values)
+             (if (null? values) (mdl-atom "LOSE") #f)))
 
 (define (mdl-list-head value who)
   (cond [(mdl-typed-value? value) (mdl-list-head (mdl-base value) who)]
@@ -2259,7 +2524,7 @@
 (define (mdl-length value)
   (define base (mdl-base value))
   (cond [(mdl-array? base) (mdl-array-length base)]
-        [(string? base) (string-length base)]
+        [(mdl-string? base) (mdl-string-length base)]
         [else (length (mdl-list->list (mdl-list-head value 'mdl-length)))]))
 
 (define (mdl-rest value [offset 1])
@@ -2274,7 +2539,12 @@
           (mdl-list-tail (mdl-tuple-value-payload value) offset 'mdl-rest)))]
     [else
      (define base (mdl-base value))
-     (if (mdl-array? base)
+     (if (mdl-string? base)
+         (begin
+           (when (> offset (mdl-string-length base))
+             (error 'mdl-rest "offset out of range"))
+           (if (zero? offset) base (mdl-string-rest base offset)))
+         (if (mdl-array? base)
          (begin
            (when (> offset (mdl-array-length base))
              (error 'mdl-rest "offset out of range"))
@@ -2283,7 +2553,7 @@
                           (+ (mdl-array-start base) offset)
                           (- (mdl-array-length base) offset)
                           (mdl-array-element-type base))))
-         (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest))]))
+         (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))]))
 
 (define (mdl-check-index who value index)
   (unless (and (exact-integer? index) (<= 1 index) (<= index (mdl-length value)))
@@ -2294,7 +2564,7 @@
   (define base (mdl-base value))
   (cond [(mdl-array? base)
          (vector-ref (mdl-array-storage base) (+ (mdl-array-start base) (sub1 index)))]
-        [(string? base) (mdl-character (string-ref base (sub1 index)))]
+        [(mdl-string? base) (mdl-character (mdl-string-ref base (sub1 index)))]
         [else (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth)
                                    (sub1 index) 'mdl-nth))]))
 
@@ -2386,13 +2656,11 @@
     (error 'mdl-put "PUT index too large"))
   (define base (mdl-base value))
   (cond
-    [(string? base)
+    [(mdl-string? base)
      (define code (mdl-character-code item))
      (unless code
        (error 'mdl-put "Error in PUT: Strings may only contain CHARACTER type"))
-     (when (immutable? base)
-       (error 'mdl-put "immutable STRING literal cannot be mutated"))
-     (string-set! base (sub1 index) (integer->char code))]
+     (mdl-string-set! base (sub1 index) (integer->char code))]
     [(mdl-array? base)
      (when (and (eq? (mdl-array-kind base) 'UVECTOR)
                 (not (eq? (mdl-type item) (mdl-array-element-type base))))
@@ -2466,11 +2734,20 @@
            (eq? (mdl-array-storage left) (mdl-array-storage right))
            (= (mdl-array-start left) (mdl-array-start right))
            (= (mdl-array-length left) (mdl-array-length right)))]
+        [(and (mdl-string? left) (mdl-string? right))
+         (define left-storage (if (mdl-string-view? left)
+                                  (mdl-string-view-storage left) left))
+         (define right-storage (if (mdl-string-view? right)
+                                   (mdl-string-view-storage right) right))
+         (and (eq? left-storage right-storage)
+              (= (if (mdl-string-view? left) (mdl-string-view-start left) 0)
+                 (if (mdl-string-view? right) (mdl-string-view-start right) 0))
+              (= (mdl-string-length left) (mdl-string-length right)))]
         [else (eq? left right)]))
 
 (define (mdl-memq item structure)
   (define base (mdl-base structure))
-  (when (string? base)
+  (when (mdl-string? base)
     (error 'mdl-memq "unsupported STRING MEMQ"))
   (unless (or (null? base) (mpair? base) (mdl-array? base)
               (mdl-false? base) (mdl-tuple-value? base))
@@ -2512,6 +2789,8 @@
                     (for/and ([i (in-range (mdl-array-length a))])
                       (loop (mdl-nth a (add1 i))
                             (mdl-nth b (add1 i)))))))]
+          [(and (mdl-string? a) (mdl-string? b))
+           (string=? (mdl-string-content a) (mdl-string-content b))]
           [(and (mdl-false? a) (mdl-false? b))
            (compare-structured a b
              (lambda ()
@@ -2592,7 +2871,10 @@
                (bad))]
             [(LIST VECTOR UVECTOR TUPLE)
              (check-structure-elements (cdr items))]
-            [else (bad)])]
+            [else
+             (if (registered-structured-type? head)
+                 (check-structure-elements (cdr items))
+                 (bad))])]
          [(mdl-form? head)
           (define head-items (form-elements head))
           (unless (and (= (length head-items) 2)
@@ -2633,10 +2915,11 @@
       value
       (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
         (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
-                   (not (member target '("LIST" "FALSE" "VECTOR" "UVECTOR"
-                                         "FIX" "WORD"))))
+                   (not (member target '("ATOM" "LIST" "FALSE" "VECTOR" "UVECTOR" "STRING"
+                                         "FIX" "WORD" "LOSE"))))
           (error 'mdl-chtype "unsupported built-in TYPE conversion"))
-        (when (and (not (or (null? base) (mpair? base)
+        (when (and (not (or (null? base) (mpair? base) (mdl-atom? base)
+                            (mdl-string? base)
                             (mdl-false? base) (mdl-array? base)))
                    (not (string=? (mdl-atom-pname desired-prim) "WORD")))
           (error 'mdl-chtype "unsupported primitive storage conversion"))
@@ -2652,9 +2935,11 @@
                (mdl-list-head base 'mdl-chtype)]
               [(string=? target "FALSE")
                (mdl-false (mdl-list-head base 'mdl-chtype))]
+              [(string=? target "ATOM") base]
+              [(string=? target "STRING") base]
               [(or (string=? target "VECTOR") (string=? target "UVECTOR"))
                base]
-              [(member (mdl-atom-pname desired-prim) '("LIST" "VECTOR" "UVECTOR"))
+              [(member (mdl-atom-pname desired-prim) '("ATOM" "LIST" "VECTOR" "UVECTOR" "STRING"))
                (mdl-typed-value type base)]
               [else (error 'mdl-chtype "unsupported primitive type conversion")]))))
   (define declared (association-lookup type (mdl-atom "DECL")))
@@ -2663,6 +2948,36 @@
     (unless (matches-decl? converted pattern)
       (error 'mdl-chtype "TYPE-MISMATCH: value does not satisfy NEWTYPE declaration")))
   converted)
+
+(define (mdl-chutype value type)
+  (define base (mdl-base value))
+  (unless (and (mdl-array? base) (eq? (mdl-array-kind base) 'UVECTOR))
+    (error 'mdl-chutype "CHUTYPE requires UVECTOR"))
+  (require-atom 'mdl-chutype type)
+  (define target-prim (mdl-typeprim type))
+  (unless (member (mdl-atom-pname target-prim)
+                  '("ATOM" "LIST" "WORD" "VECTOR" "UVECTOR"))
+    (error 'mdl-chutype "TYPE not valid for UVECTOR"))
+  (define old-type (mdl-array-element-type base))
+  (unless (or (eq? old-type (mdl-atom "LOSE"))
+              (eq? (mdl-typeprim old-type) target-prim))
+    (error 'mdl-chutype "cannot change element primitive type"))
+  (define converted
+    (for/list ([index (in-range (mdl-array-length base))])
+      (define old (mdl-nth base (add1 index)))
+      (if (eq? old-type (mdl-atom "LOSE"))
+          (case (string->symbol (mdl-atom-pname target-prim))
+            [(WORD) (mdl-chtype 0 type)]
+            [(LIST) (mdl-chtype '() type)]
+            [(VECTOR) (mdl-chtype (mdl-vector) type)]
+            [(UVECTOR) (mdl-chtype (mdl-uvector) type)]
+            [else (error 'mdl-chutype "uninitialized ATOM element unsupported")])
+          (mdl-chtype old type))))
+  (for ([new (in-list converted)] [index (in-naturals)])
+    (vector-set! (mdl-array-storage base)
+                 (+ (mdl-array-start base) index) new))
+  (set-mdl-array-element-type! base type)
+  value)
 
 (define (mdl-utype value)
   (define base (mdl-base value))
@@ -2675,39 +2990,96 @@
 (define (mdl-string . pieces)
   (apply string-append
          (for/list ([piece (in-list pieces)])
-           (cond [(string? piece) piece]
+           (cond [(mdl-string? piece) (mdl-string-content piece)]
                  [(mdl-character-code piece)
                   (string (integer->char (mdl-character-code piece)))]
                  [else (error 'mdl-string
                               "STRING expects STRING or CHARACTER arguments")]))))
 
-(define (mdl-printstring buffer)
-  (unless (string? buffer)
+(define (mdl-istring-build size make-character)
+  (unless (and (exact-integer? size) (<= 0 size fix-max))
+    (error 'mdl-istring "ISTRING length must be a nonnegative FIX"))
+  (define result (make-string size #\nul))
+  (for ([index (in-range size)])
+    (define code (mdl-character-code (make-character)))
+    (unless code
+      (error 'mdl-istring "ISTRING fill must evaluate to CHARACTER"))
+    (string-set! result index (integer->char code)))
+  result)
+
+(define (mdl-istring . args)
+  (unless (<= 1 (length args) 2)
+    (error 'mdl-istring "ISTRING expects length and optional CHARACTER"))
+  (mdl-istring-build (car args)
+                     (if (= (length args) 2)
+                         (lambda () (cadr args))
+                         (lambda () (mdl-character #\nul)))))
+
+(define (mdl-istring-raw raw-args)
+  (define items (if (or (null? raw-args) (mpair? raw-args))
+                    (mdl-list->list raw-args) raw-args))
+  (unless (<= 1 (length items) 2)
+    (error 'mdl-istring "ISTRING expects length and optional expression"))
+  (define size (mdl-eval (car items)))
+  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
+  (mdl-istring-build size
+                     (if fill (lambda () (mdl-eval fill))
+                         (lambda () (mdl-character #\nul)))))
+
+(define (mdl-printstring buffer [channel (mdl-lval "OUTCHAN")] [count #f])
+  (unless (mdl-string? buffer)
     (error 'mdl-printstring "PRINTSTRING expects a STRING buffer"))
-  (display buffer)
+  (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
+               (equal? (mdl-nth channel 2) "PRINT"))
+    (error 'mdl-printstring "PRINTSTRING requires an output channel"))
+  (when (and count (not (and (exact-integer? count) (>= count 0))))
+    (error 'mdl-printstring "PRINTSTRING count must be a nonnegative FIX"))
+  (define written (if count (min count (mdl-string-length buffer))
+                      (mdl-string-length buffer)))
+  (display (substring (mdl-string-content buffer) 0 written))
   ;; The MDL manual returns the number of characters printed. Pinned
   ;; Confusion returns the original STRING; see docs/SEMANTICS.md.
-  (string-length buffer))
+  written)
 
 (define (mdl-terpri)
   (newline)
   (mdl-false '()))
 
 (define (mdl-error . args)
-  ;; ERROR transfers control out of the current evaluation. The native
-  ;; reference enters a resumable error level; this local runtime has no
-  ;; error-frame/ERRET support, so preserve the failure as an exception.
+  ;; ERROR is undeferable: a registered handler runs only above the current
+  ;; level. A normal handler return falls through to the original failure.
   (define (describe value)
     (cond [(mdl-atom? value) (mdl-atom-pname value)]
-          [(string? value) (format "~s" value)]
+          [(mdl-string? value) (format "~s" (mdl-string-content value))]
           [else (format "~a" value)]))
-  (error 'mdl-error "~a"
-         (if (null? args) "ERROR" (string-join (map describe args) " "))))
+  (call/ec
+   (lambda (resume)
+     (define frame (mdl-error-frame (current-mdl-atom-space) resume #t))
+     (dynamic-wind
+       void
+       (lambda ()
+         (define header (hash-ref (atom-space-events (current-mdl-atom-space))
+                                  "ERROR" #f))
+         (when (and header (active-iheader? header)
+                    (> (mdl-iheader-priority header)
+                       (mdl-interrupt-state-level (current-interrupt-state))))
+           (mdl-emit-event! "ERROR" (cons frame args)))
+         (error 'mdl-error "~a"
+                (if (null? args) "ERROR"
+                    (string-join (map describe args) " "))))
+       (lambda () (set-mdl-error-frame-live?! frame #f))))))
+
+(define (mdl-erret value frame)
+  (unless (and (mdl-error-frame? frame)
+               (eq? (mdl-error-frame-owner frame) (current-mdl-atom-space))
+               (mdl-error-frame-live? frame))
+    (error 'mdl-erret "ERRET requires a live ERROR FRAME in this session"))
+  ((mdl-error-frame-resume frame) value))
 
 (define (mdl-map-structured? value)
   (define base (mdl-base value))
   (or (null? base) (mpair? base) (mdl-array? base)
-      (string? base) (mdl-false? base) (mdl-tuple-value? base)))
+      (mdl-string? base) (mdl-false? base) (mdl-tuple-value? base)))
 
 (define (mdl-mapret . values)
   (define step (current-mdl-map-step))
@@ -2726,10 +3098,11 @@
   (unless leave (error 'mdl-mapleave "No map in MAPLEAVE"))
   (leave (if (null? values) (mdl-atom "T") (car values))))
 
-(define (mdl-mapf finalf loopf . structures)
+(define (mdl-map-core rest? finalf loopf structures)
   (for ([structure (in-list structures)])
     (unless (mdl-map-structured? structure)
-      (error 'mdl-mapf "Arguments to MAPF must be structured")))
+      (error (if rest? 'mdl-mapr 'mdl-mapf)
+             "Arguments to MAPF/R must be structured")))
   (let/ec leave
     (let loop ([index 1] [collected '()] [last-value (mdl-false '())])
       (define exhausted?
@@ -2741,7 +3114,9 @@
               (mdl-apply-evaluated finalf (reverse collected)))
           (let* ([step-values
                   (for/list ([structure (in-list structures)])
-                    (mdl-nth structure index))]
+                    (if rest?
+                        (mdl-rest structure (sub1 index))
+                        (mdl-nth structure index)))]
                  [step-result
                   (let/ec step
                     (parameterize ([current-mdl-map-step step]
@@ -2769,6 +3144,12 @@
                     (mdl-apply-evaluated finalf (reverse new-collected)))
                 (loop (add1 index) new-collected new-last)))))))
 
+(define (mdl-mapf finalf loopf . structures)
+  (mdl-map-core #f finalf loopf structures))
+
+(define (mdl-mapr finalf loopf . structures)
+  (mdl-map-core #t finalf loopf structures))
+
 (define (mdl-typeq . args)
   (when (null? args)
     (error 'mdl-typeq "Not enough arguments to TYPE?"))
@@ -2794,7 +3175,7 @@
     (error 'mdl-emptyq "First arg to EMPTY? must be structured"))
   (define base (mdl-base object))
   (define empty?
-    (if (or (mdl-array? base) (string? base))
+    (if (or (mdl-array? base) (mdl-string? base))
         (zero? (mdl-length object))
         (null? (mdl-list-head object 'mdl-emptyq))))
   (if empty? (mdl-atom "T") (mdl-false '())))
@@ -2812,7 +3193,7 @@
     (error 'mdl-lengthq "Second arg to LENGTH? must be FIX"))
   (define base (mdl-base object))
   (cond
-    [(or (mdl-array? base) (string? base))
+    [(or (mdl-array? base) (mdl-string? base))
      (define count (mdl-length object))
      (if (or (zero? count) (<= count maximum)) count (mdl-false '()))]
     [else
@@ -2866,6 +3247,7 @@
         "TYPEPRIM" mdl-typeprim
         "NEWTYPE" mdl-newtype
         "CHTYPE" mdl-chtype
+        "CHUTYPE" mdl-chutype
         "FIX" mdl-fix
         "FLOAT" mdl-float
         "BITS" mdl-bits
@@ -2879,12 +3261,18 @@
         "UTYPE" mdl-utype
         "LIST" mdl-list
         "VECTOR" mdl-vector
+        "IVECTOR" mdl-ivector
         "UVECTOR" mdl-uvector
+        "IUVECTOR" mdl-iuvector
         "STRING" mdl-string
+        "ISTRING" mdl-istring
+        "GC" mdl-gc
+        "BLOAT" mdl-bloat
         "ASCII" mdl-ascii
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
         "ERROR" mdl-error
+        "ERRET" mdl-erret
         "EVENT" mdl-event
         "HANDLER" mdl-install-handler
         "OFF" mdl-off
@@ -2892,6 +3280,7 @@
         "ENABLE" mdl-enable
         "DISABLE" mdl-disable
         "MAPF" mdl-mapf
+        "MAPR" mdl-mapr
         "MAPRET" mdl-mapret
         "MAPSTOP" mdl-mapstop
         "MAPLEAVE" mdl-mapleave
@@ -2913,17 +3302,24 @@
                  (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
                  (atom-value name #f))
         "MOBLIST" mdl-moblist
+        "BLOCK" mdl-block
+        "ENDBLOCK" mdl-endblock
         "ROOT" mdl-root
         "LOOKUP" mdl-lookup
         "INSERT" mdl-insert
         "REMOVE" mdl-remove
         "OBLIST?" mdl-oblist-of
         "PNAME" mdl-pname
+        "SPNAME" mdl-spname
         "+" mdl-add
         "-" mdl-sub
         "*" mdl-mul
         "/" mdl-div
+        "MIN" mdl-min
+        "GETTIMEDATE" mdl-gettimedate
         "MOD" mdl-mod
+        "0?" (lambda (number) (mdl-boolean (= (check-number 'mdl-zero? number) 0)))
+        "1?" (lambda (number) (mdl-boolean (= (check-number 'mdl-one? number) 1)))
         "L?" (lambda (a b) (mdl-boolean (< a b)))
         "L=?" (lambda (a b) (mdl-boolean (<= a b)))
         "G?" (lambda (a b) (mdl-boolean (> a b)))

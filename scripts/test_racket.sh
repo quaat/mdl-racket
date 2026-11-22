@@ -27,4 +27,15 @@ raco test mdl/runtime/core.rkt \
   tests/deferred_decl_type_test.rkt \
   tests/duplicate_decl_test.rkt \
   tests/event_registration_test.rkt \
-  tests/interrupt_dispatch_test.rkt
+  tests/interrupt_dispatch_test.rkt \
+  tests/logical_gc_test.rkt tests/special_decl_test.rkt \
+  tests/lose_literal_test.rkt tests/error_interrupt_test.rkt \
+  tests/channel_type_test.rkt tests/numeric_predicate_test.rkt \
+  tests/historical_gc_handler_test.rkt tests/istring_test.rkt \
+  tests/structured_type_head_test.rkt tests/block_test.rkt \
+  tests/iuvector_chutype_test.rkt tests/ivector_test.rkt tests/mapr_test.rkt \
+  tests/chtype_atom_test.rkt tests/min_test.rkt tests/chtype_string_test.rkt \
+  tests/typed_string_literal_test.rkt tests/moblist_association_test.rkt \
+  tests/empty_uvector_test.rkt tests/spname_test.rkt \
+  tests/gettimedate_test.rkt tests/terminal_channel_test.rkt \
+  tests/printstring_channel_test.rkt
