@@ -58,19 +58,27 @@
   (record! session (hash-set info 'status "FAIL"))
   (raise (exn:fail:mdl-load message (current-continuation-marks) info)))
 
-(define (make-mdl-session source-root)
+;; output-port / input-port: host ports owned by this session's terminal
+;; CHANNELs. #f (default) follows the current Racket port at each operation.
+;; input-port is stored for later READ-channel primitives; none read yet.
+(define (make-mdl-session source-root #:output-port [output-port #f]
+                          #:input-port [input-port #f])
   (define root (canonical-path (path->complete-path source-root)))
   (unless (directory-exists? root)
     (raise-argument-error 'make-mdl-session "existing source-root directory" source-root))
+  (when (and output-port (not (output-port? output-port)))
+    (raise-argument-error 'make-mdl-session "(or/c #f output-port?)" output-port))
+  (when (and input-port (not (input-port? input-port)))
+    (raise-argument-error 'make-mdl-session "(or/c #f input-port?)" input-port))
   (define session
     (mdl-session root (make-hasheq) (list (make-hasheq))
                  (make-mdl-atom-space) loader-namespace (box '()) (make-hash)))
   (call-in-session session
     (lambda ()
-      (for ([spec (in-list '(("INCHAN" . "READ")
-                            ("OUTCHAN" . "PRINT")))])
+      (for ([spec (in-list (list (list "INCHAN" "READ" input-port)
+                                 (list "OUTCHAN" "PRINT" output-port)))])
         (define name (mdl-atom (string-append (car spec) "!-ROOT")))
-        (define channel (mdl-make-terminal-channel (cdr spec)))
+        (define channel (mdl-make-terminal-channel (cadr spec) (caddr spec)))
         (mdl-set! name channel)
         (mdl-setg! name channel))
       ;; Interpreter-supplied globals (MUDDLE, issue #51) intern in THIS

@@ -589,7 +589,7 @@
 
 (define (local-option atom)
   (let loop ([frames (current-mdl-locals)])
-    (cond [(null? frames) unassigned]
+    (cond [(null? frames) (terminal-channel-option atom)]
           [(hash-has-key? (car frames) atom) (hash-ref (car frames) atom)]
           [else (loop (cdr frames))])))
 
@@ -1606,8 +1606,9 @@
   (define globals (current-mdl-globals))
   (cond [(hash-has-key? globals atom) (hash-ref globals atom)]
         [(eq? atom (mdl-atom (mdl-atom-pname atom)))
-         (hash-ref builtin-table (mdl-atom-pname atom) unassigned)]
-        [else unassigned]))
+         (define builtin (hash-ref builtin-table (mdl-atom-pname atom) unassigned))
+         (if (eq? builtin unassigned) (terminal-channel-option atom) builtin)]
+        [else (terminal-channel-option atom)]))
 
 ;; Interpreter-supplied globals bound in every fresh MDL session, like the
 ;; historical interpreter's startup environment. The pinned reference binds
@@ -1716,9 +1717,13 @@
 
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
+;; inchan/outchan are the ROOT ATOMs INCHAN!-ROOT and OUTCHAN!-ROOT. channels
+;; maps each CHANNEL's VECTOR storage to its host-channel; terminals holds the
+;; lazily created default terminal CHANNELs (see "Session-owned channels").
 (struct atom-space (initial root named types builtins manifests associations
                             global-declarations events interrupt-state memory
-                            [lookup #:mutable] [lookup-stack #:mutable]))
+                            [lookup #:mutable] [lookup-stack #:mutable]
+                            inchan outchan channels [terminals #:mutable]))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1738,6 +1743,11 @@
   (hash-set! named initial-name initial)
   (define oblist-name (atom-value "OBLIST" root))
   (hash-set! (oblist-value-entries root) "OBLIST" oblist-name)
+  ;; Manual chapter 11 / Confusion startup: INCHAN and OUTCHAN live in ROOT.
+  (define inchan-name (atom-value "INCHAN" root))
+  (hash-set! (oblist-value-entries root) "INCHAN" inchan-name)
+  (define outchan-name (atom-value "OUTCHAN" root))
+  (hash-set! (oblist-value-entries root) "OUTCHAN" outchan-name)
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
@@ -1772,7 +1782,8 @@
                          (list initial oblist-name initial-name)
                          (list root oblist-name root-name)))
               (make-hasheq) (make-hash) (mdl-interrupt-state 0 '())
-              (make-mdl-memory) (mcons initial (mcons root '())) '()))
+              (make-mdl-memory) (mcons initial (mcons root '())) '()
+              inchan-name outchan-name (make-weak-hasheq) #f))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
@@ -2436,13 +2447,81 @@
   (mdl-track-allocation! storage (+ (* 2 (length values)) 2) "VECTOR")
   (new-mdl-array 'VECTOR storage 0 (length values) #f))
 
-(define (mdl-make-terminal-channel mode)
+;; Session-owned channels. A CHANNEL value is an MDL VECTOR of documented
+;; slots; the host side lives in a host-channel record registered in the
+;; current atom space, keyed by that VECTOR's storage object (so CHTYPE to
+;; VECTOR and back keeps the channel). port is the Racket port the channel
+;; writes to (PRINT) or will read from (READ, reserved for READSTRING); #f
+;; means "the current Racket port at the time of each operation", which is
+;; how the default terminal channels of a non-loader context behave. A
+;; CHANNEL VECTOR without a host record in the current space (forged by
+;; CHTYPE, or belonging to another session) is rejected, never written.
+(struct host-channel (direction port))
+
+(define (mdl-make-terminal-channel mode [port #f])
   (unless (member mode '("READ" "PRINT"))
     (error 'mdl-make-terminal-channel "expected READ or PRINT mode"))
-  (mdl-typed-value
-   (mdl-atom "CHANNEL")
-   (mdl-vector 0 mode "" "" "" "" "" "" "TTY" ""
-               0 0 80 0 24 0 0 10 0)))
+  (when port
+    (unless (if (equal? mode "PRINT") (output-port? port) (input-port? port))
+      (error 'mdl-make-terminal-channel
+             "~a CHANNEL requires a Racket ~a port" mode
+             (if (equal? mode "PRINT") "output" "input"))))
+  (define storage (mdl-vector 0 mode "" "" "" "" "" "" "TTY" ""
+                              0 0 80 0 24 0 0 10 0))
+  (hash-set! (atom-space-channels (current-mdl-atom-space)) storage
+             (host-channel (string->symbol mode) port))
+  (mdl-typed-value (mdl-atom "CHANNEL") storage))
+
+;; The initial LVAL and GVAL of INCHAN!-ROOT / OUTCHAN!-ROOT when nothing in
+;; the current context bound them (standalone #lang mdl modules, direct
+;; runtime use, compile-and-eval). One pair per atom space, created on first
+;; use and following the current Racket ports. A loader session binds its own
+;; channels explicitly, so these never shadow a session's bindings.
+(define (terminal-channel-option atom)
+  (define space (current-mdl-atom-space))
+  (cond
+    [(eq? atom (atom-space-inchan space)) (car (default-terminal-channels space))]
+    [(eq? atom (atom-space-outchan space)) (cdr (default-terminal-channels space))]
+    [else unassigned]))
+
+(define (default-terminal-channels space)
+  (or (atom-space-terminals space)
+      (let ([pair (parameterize ([current-mdl-atom-space space])
+                    (cons (mdl-make-terminal-channel "READ")
+                          (mdl-make-terminal-channel "PRINT")))])
+        (set-atom-space-terminals! space pair)
+        pair)))
+
+;; Manual 11.2.7 and pinned Confusion (mdl_setup_frame_for_print): an omitted
+;; channel argument means the LVAL of OUTCHAN!-ROOT; the GVAL is not
+;; consulted (review evidence r1-channel-reference.json).
+(define (default-output-channel who)
+  (define value (local-option (atom-space-outchan (current-mdl-atom-space))))
+  (when (eq? value unassigned)
+    (error who "no channel: OUTCHAN has no local value"))
+  value)
+
+;; Validate an output CHANNEL and return the Racket port it writes to.
+;; Mirrors Confusion's checks: non-CHANNEL fails, then a non-PRINT mode slot
+;; fails; additionally the CHANNEL must be open (registered) in this session.
+(define (channel-output-port who channel)
+  (unless (and (mdl-typed-value? channel)
+               (equal? (mdl-atom-pname (mdl-typed-value-type channel)) "CHANNEL"))
+    (error who "attempt to write to non-channel"))
+  (define storage (mdl-typed-value-value channel))
+  (define host (hash-ref (atom-space-channels (current-mdl-atom-space))
+                         storage #f))
+  (unless (and host (eq? (mdl-typed-value-type channel) (mdl-atom "CHANNEL")))
+    (error who "CHANNEL is not open in this MDL session"))
+  (unless (and (eq? (host-channel-direction host) 'PRINT)
+               (equal? (mdl-nth storage 2) "PRINT"))
+    (error who "~a requires an output channel"
+           (case who
+             [(mdl-printstring) "PRINTSTRING"]
+             [(mdl-terpri) "TERPRI"]
+             [(mdl-crlf) "CRLF"]
+             [else who])))
+  (or (host-channel-port host) (current-output-port)))
 
 (define (mdl-ivector-build size make-element)
   (unless (and (exact-integer? size) (<= 0 size fix-max))
@@ -3035,35 +3114,26 @@
                      (if fill (lambda () (mdl-eval fill))
                          (lambda () (mdl-character #\nul)))))
 
-(define (mdl-printstring buffer [channel (mdl-lval "OUTCHAN")] [count #f])
+(define (mdl-printstring buffer [channel (default-output-channel 'mdl-printstring)]
+                         [count #f])
+  (define port (channel-output-port 'mdl-printstring channel))
   (unless (mdl-string? buffer)
     (error 'mdl-printstring "PRINTSTRING expects a STRING buffer"))
-  (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
-               (equal? (mdl-nth channel 2) "PRINT"))
-    (error 'mdl-printstring "PRINTSTRING requires an output channel"))
   (when (and count (not (and (exact-integer? count) (>= count 0))))
     (error 'mdl-printstring "PRINTSTRING count must be a nonnegative FIX"))
   (define written (if count (min count (mdl-string-length buffer))
                       (mdl-string-length buffer)))
-  (display (substring (mdl-string-content buffer) 0 written))
+  (write-string (substring (mdl-string-content buffer) 0 written) port)
   ;; The MDL manual returns the number of characters printed. Pinned
   ;; Confusion returns the original STRING; see docs/SEMANTICS.md.
   written)
 
-(define (mdl-terpri [channel #f])
-  (when channel
-    (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
-                 (equal? (mdl-nth channel 2) "PRINT"))
-      (error 'mdl-terpri "TERPRI requires an output channel")))
-  (newline)
+(define (mdl-terpri [channel (default-output-channel 'mdl-terpri)])
+  (newline (channel-output-port 'mdl-terpri channel))
   (mdl-false '()))
 
-(define (mdl-crlf [channel #f])
-  (when channel
-    (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
-                 (equal? (mdl-nth channel 2) "PRINT"))
-      (error 'mdl-crlf "CRLF requires an output channel")))
-  (newline)
+(define (mdl-crlf [channel (default-output-channel 'mdl-crlf)])
+  (newline (channel-output-port 'mdl-crlf channel))
   (mdl-atom "T"))
 
 (define (mdl-error . args)
