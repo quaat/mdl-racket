@@ -75,8 +75,14 @@
        (advance! c)
        (let ([escaped (advance! c)])
          (unless escaped (parse-error c "unterminated MDL escape"))
-         ;; Retain both chars for now. MDL escape semantics are a later milestone.
-         (write-char #\\ out)
+         ;; MDL chapter 15: `\` quotes the next character, making it a
+         ;; literal constituent of the PNAME (backslash is dropped).
+         ;; Confusion probe confirms: `A\!B` → PNAME "A!B",
+         ;; `A\\B` → PNAME "A\B", `\!A` → PNAME "!A".
+         ;; The !- trailer split (mdl-atom) operates on the processed
+         ;; (backslash-stripped) string, so `A\!-B` → pname "A", oblist B
+         ;; and `DEAD\!!-WORDS` → pname "DEAD!", oblist WORDS — both
+         ;; matching pinned Confusion (I119).
          (write-char escaped out)
          (loop))]
       [else (write-char (advance! c) out) (loop)])))
