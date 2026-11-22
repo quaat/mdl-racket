@@ -3423,26 +3423,38 @@
 ;;            [0, length(from)-rest].
 ;;   to     – structured of the same PRIMTYPE as `from`; receives the copied
 ;;            elements starting at its position 0 (may be a REST view).
+;;            For UVECTOR `to`: element type must equal source element type.
+;;            For LIST `to`: mutates the first `count` mcars in-place.
 ;;            Returned as-is after modification.
 ;;
-;; Confusion-confirmed error messages:
+;; Confusion-confirmed error messages (class → message):
+;;   SECOND-ARG-WRONG-TYPE   → "Second argument to SUBSTRUC must be a FIX"
+;;   THIRD-ARG-WRONG-TYPE    → "Third argument to SUBSTRUC must be a FIX"
 ;;   "SUBSTRUC rest cannot be negative"
 ;;   "SUBSTRUC rest too large"
 ;;   "SUBSTRUC amount cannot be negative"
 ;;   "SUBSTRUC amount too big for source"
+;;   ARG-WRONG-TYPE          → "Last arg to SUBSTRUC must be same type as primtype of first arg"
+;;   TYPES-DIFFER-IN-UNIFORM-VECTOR → "SUBSTRUC UVECTOR to and from must be same type"
+;;   ARGUMENT-OUT-OF-RANGE   → "SUBSTRUC destination too short"
 ;;
-;; Supported primitive types: STRING, VECTOR, UVECTOR, LIST.
-;; The result is never a view/alias of `from`; copying is atomic.
-;; Element type for UVECTOR `to`: inherited from source elements on no-to path;
-;; not re-checked for the `to` path (Confusion copies blindly).
+;; Supported primitive types: STRING, VECTOR, UVECTOR, LIST (incl. LIST `to`).
+;; Copying is atomic (all source elements are snapshotted before any write).
+;; This prevents corruption when `from` and `to` are views on the same storage.
 ;;
 ;; Probe evidence: docs/evidence/M3/S3-SUBSTRUC.md
 ;; Reference SHA: 6df359f6…  source: mdlzork bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3
 (define (mdl-substruc from [rest 0] [amount #f] [to #f])
-  (unless (and (exact-integer? rest) (>= rest 0))
+  ;; Item 4: distinguish wrong-type from negative-value errors.
+  (unless (exact-integer? rest)
+    (error 'mdl-substruc "Second argument to SUBSTRUC must be a FIX"))
+  (when (< rest 0)
     (error 'mdl-substruc "SUBSTRUC rest cannot be negative"))
-  (when (and amount (or (not (exact-integer? amount)) (< amount 0)))
-    (error 'mdl-substruc "SUBSTRUC amount cannot be negative"))
+  (when amount
+    (unless (exact-integer? amount)
+      (error 'mdl-substruc "Third argument to SUBSTRUC must be a FIX"))
+    (when (< amount 0)
+      (error 'mdl-substruc "SUBSTRUC amount cannot be negative")))
   (define base (mdl-base from))
   (cond
     ;; ---- STRING ----
@@ -3456,12 +3468,19 @@
        (error 'mdl-substruc "SUBSTRUC amount too big for source"))
      (cond
        [to
-        ;; Copy `count` characters into `to` starting at its position 0.
         (define to-base (mdl-base to))
+        ;; Item 4: Confusion reports "Last arg … same type as primtype"
         (unless (mdl-string? to-base)
-          (error 'mdl-substruc "SUBSTRUC: to must have STRING PRIMTYPE"))
-        (for ([i (in-range count)])
-          (mdl-string-set! to-base i (mdl-string-ref base (+ rest i))))
+          (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
+        ;; Item 2: check destination length before any write.
+        (when (< (mdl-string-length to-base) count)
+          (error 'mdl-substruc "SUBSTRUC destination too short"))
+        ;; Item 3: snapshot all source chars atomically, then write.
+        (define snapshot
+          (for/list ([i (in-range count)])
+            (mdl-string-ref base (+ rest i))))
+        (for ([i (in-range count)] [ch (in-list snapshot)])
+          (mdl-string-set! to-base i ch))
         to]
        [else
         ;; Allocate a fresh independent mutable string.
@@ -3484,13 +3503,26 @@
      (cond
        [to
         (define to-base (mdl-base to))
+        ;; Item 4: wrong PRIMTYPE → "Last arg … same type as primtype"
         (unless (and (mdl-array? to-base) (eq? (mdl-array-kind to-base) kind))
-          (error 'mdl-substruc "SUBSTRUC: to must have matching PRIMTYPE"))
+          (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
+        ;; Item 1: UVECTOR → also check element-type compatibility.
+        (when (eq? kind 'UVECTOR)
+          (define src-elem (mdl-array-element-type base))
+          (define to-elem  (mdl-array-element-type to-base))
+          (unless (or (not src-elem) (not to-elem) (mdl-equal? src-elem to-elem))
+            (error 'mdl-substruc "SUBSTRUC UVECTOR to and from must be same type")))
+        ;; Item 2: check destination length before any write.
+        (when (< (mdl-array-length to-base) count)
+          (error 'mdl-substruc "SUBSTRUC destination too short"))
+        ;; Item 3: snapshot all source elements atomically, then write.
         (define to-storage (mdl-array-storage to-base))
-        (define to-start (mdl-array-start to-base))
-        (for ([i (in-range count)])
-          (vector-set! to-storage (+ to-start i)
-                       (vector-ref storage (+ src-start rest i))))
+        (define to-start   (mdl-array-start to-base))
+        (define snapshot
+          (for/list ([i (in-range count)])
+            (vector-ref storage (+ src-start rest i))))
+        (for ([i (in-range count)] [v (in-list snapshot)])
+          (vector-set! to-storage (+ to-start i) v))
         to]
        [else
         (define new-storage (make-vector count))
@@ -3517,9 +3549,25 @@
      (define count (or amount avail))
      (when (> count avail)
        (error 'mdl-substruc "SUBSTRUC amount too big for source"))
-     (when to
-       (error 'mdl-substruc "SUBSTRUC: to argument for LIST is unsupported"))
-     (apply mdl-list (take (drop elems rest) count))]
+     (define src-slice (take (drop elems rest) count))
+     (cond
+       [to
+        ;; Item 5: Confusion supports LIST `to` by mutating the first `count`
+        ;; mcars in-place.  Check length first (atomic: no writes if too short).
+        (define to-base (mdl-base to))
+        (unless (or (null? to-base) (mpair? to-base))
+          (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
+        (define to-elems (mdl-list->list (mdl-list-head to 'mdl-substruc)))
+        (when (< (length to-elems) count)
+          (error 'mdl-substruc "SUBSTRUC destination too short"))
+        ;; src-slice already snapshotted above, so write is safe even if from=to.
+        (let loop ([pairs (mdl-base to)] [items src-slice])
+          (unless (or (null? items) (null? pairs))
+            (set-mcar! pairs (car items))
+            (loop (mcdr pairs) (cdr items))))
+        to]
+       [else
+        (apply mdl-list src-slice)])]
     [else
      (error 'mdl-substruc "SUBSTRUC requires a structured argument")]))
 

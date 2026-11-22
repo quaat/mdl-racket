@@ -92,9 +92,21 @@
  (run "<SET T <ISTRING 6 !\\ >> <SUBSTRUC \"xyz\" 0 3 <REST .T 3>> <STRING .T>")
  "   xyz")
 
-;; ---- CHTYPED source (Confusion: same as plain STRING result) ----
-(check-equal? (run "<SUBSTRUC <CHTYPE \"abc\" STRING> 0 3>") "abc")
-;; Result type is STRING
+;; ---- NEWTYPE source (Confusion-confirmed: result PRIMTYPE, not NEWTYPE) ----
+;; NEWTYPE FOO STRING source: result is a plain STRING.
+(check-equal? (run "<NEWTYPE FOO STRING> <SET S <CHTYPE \"abc\" FOO>> <SUBSTRUC .S 0 3>") "abc")
+(check-equal?
+ (mdl-atom-pname (run "<NEWTYPE FOO STRING> <SET S <CHTYPE \"abc\" FOO>> <TYPE <SUBSTRUC .S 0 3>>"))
+ "STRING")
+;; NEWTYPE BAR VECTOR source: result TYPE is VECTOR.
+(check-equal?
+ (mdl-atom-pname (run "<NEWTYPE BAR VECTOR> <SET V <CHTYPE [1 2 3] BAR>> <TYPE <SUBSTRUC .V 0 2>>"))
+ "VECTOR")
+;; FORM has PRIMTYPE LIST: SUBSTRUC returns a LIST.
+(check-equal?
+ (mdl-atom-pname (run "<TYPE <SUBSTRUC '<+ 1 2> 0 2>>"))
+ "LIST")
+;; Result type for view source is STRING
 (check-equal?
  (mdl-atom-pname (run "<TYPE <SUBSTRUC <REST \"hello\" 1> 0 3>>"))
  "STRING")
@@ -133,6 +145,15 @@
 (check-equal? (run "<APPLY ,SUBSTRUC \"abc\" 0 2>") "ab")
 
 ;; ---- Error cases (Confusion confirmed error messages) ----
+;; Item 4: non-FIX rest → "Second argument to SUBSTRUC must be a FIX"
+(check-exn #rx"Second argument to SUBSTRUC must be a FIX"
+           (lambda () (run "<SUBSTRUC \"abc\" \"x\" 2>")))
+;; Item 4: FALSE rest (<>) is not FIX → same error
+(check-exn #rx"Second argument to SUBSTRUC must be a FIX"
+           (lambda () (run "<SUBSTRUC \"abc\" <> 2>")))
+;; Item 4: non-FIX amount → "Third argument to SUBSTRUC must be a FIX"
+(check-exn #rx"Third argument to SUBSTRUC must be a FIX"
+           (lambda () (run "<SUBSTRUC \"abc\" 0 \"y\">")))
 ;; negative rest
 (check-exn #rx"SUBSTRUC rest cannot be negative"
            (lambda () (run "<SUBSTRUC \"abc\" -1 2>")))
@@ -148,6 +169,64 @@
 ;; Non-structured argument
 (check-exn #rx"SUBSTRUC requires a structured"
            (lambda () (run "<SUBSTRUC 42>")))
+;; Item 4: wrong `to` type → "Last arg to SUBSTRUC must be same type as primtype of first arg"
+(check-exn #rx"Last arg to SUBSTRUC must be same type as primtype of first arg"
+           (lambda () (run "<SUBSTRUC \"abc\" 0 2 ![1 2]>")))
+(check-exn #rx"Last arg to SUBSTRUC must be same type as primtype of first arg"
+           (lambda () (run "<SUBSTRUC ![1 2] 0 2 <ISTRING 2>>")))
+;; Item 2 regression: destination too short → error; to is UNCHANGED (no partial write)
+(check-exn #rx"SUBSTRUC destination too short"
+           (lambda () (run "<SUBSTRUC \"abcde\" 0 4 <ISTRING 2>>")))
+(check-exn #rx"SUBSTRUC destination too short"
+           (lambda () (run "<SUBSTRUC ![1 2 3] 0 3 <IUVECTOR 2 0>>")))
+(check-exn #rx"SUBSTRUC destination too short"
+           (lambda () (run "<SUBSTRUC [1 2 3] 0 3 <IVECTOR 2>>")))
+;; Item 1 regression: UVECTOR to with mismatched element type must raise.
+;; (a40e5e4 silently corrupted the target UVECTOR; now TYPES-DIFFER fires.)
+(check-exn #rx"SUBSTRUC UVECTOR to and from must be same type"
+           (lambda () (run "<SUBSTRUC <IUVECTOR 2 !\\a> 0 2 <IUVECTOR 2 0>>")))
+;; Item 3 regression: overlapping from/to uses atomic (memmove) semantics.
+;; (a40e5e4 gave "aaaaaf"; atomic copy snapshot gives "aabcdf" — Confusion-confirmed.)
+(check-equal?
+ (run (string-append
+       "<SET S <ISTRING 6 !\\ >>"
+       "<SUBSTRUC \"abcdef\" 0 6 .S>"
+       "<SUBSTRUC .S 0 4 <REST .S 1>>"
+       "<STRING .S>"))
+ "aabcdf")
+;; VECTOR overlap (a40e5e4 gave [1 1 1 1 5 6]; atomic gives [1 1 2 3 4 6])
+(check-equal?
+ (run (string-append
+       "<SET V [1 2 3 4 5 6]>"
+       "<SUBSTRUC .V 0 4 <REST .V 1>>"
+       "<1 .V>"))
+ 1)
+(check-equal?
+ (run (string-append
+       "<SET V [1 2 3 4 5 6]>"
+       "<SUBSTRUC .V 0 4 <REST .V 1>>"
+       "<3 .V>"))
+ 2)
+
+;; ---- LIST to (Item 5 — Confusion-confirmed) ----
+;; Confusion mutates the first `count` mcars of `to` in-place.
+;; <SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> → (1 2 0)
+(check-equal?
+ (run "<SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> <1 .T>")
+ 1)
+(check-equal?
+ (run "<SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> <2 .T>")
+ 2)
+(check-equal?
+ (run "<SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> <3 .T>")
+ 0)
+;; Returns to (not from)
+(check-equal?
+ (run "<LENGTH <SUBSTRUC '(1 2 3) 0 2 '(0 0 0)>>")
+ 3)
+;; LIST to too short → SUBSTRUC destination too short
+(check-exn #rx"SUBSTRUC destination too short"
+           (lambda () (run "<SUBSTRUC '(1 2 3) 0 3 '(0 0)>")))
 
 ;; ---- Interpreted / DEFINE path ----
 ;; Ensure SUBSTRUC is callable from an interpreted MDL function
