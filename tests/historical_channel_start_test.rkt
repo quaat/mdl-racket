@@ -4,6 +4,9 @@
 ;; Needs the pinned source (.cache/upstream); run by `make test-historical`,
 ;; not by the smoke suite. Run from the repository root.
 (require rackunit racket/runtime-path racket/string "../mdl/loader.rkt")
+;; Run with plain `racket` by `make test-historical`: a failed check must
+;; abort with a non-zero exit, not just print FAILURE.
+(current-check-handler raise)
 
 (define-runtime-path source-root
   "../.cache/upstream/mdlzork/mdlzork_771212/patched_confusion")

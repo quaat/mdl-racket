@@ -136,3 +136,20 @@
         (run "<ENDBLOCK>")
         (check-eq? (run "OUTCHAN") root-outchan)))
      (check-equal? (get-output-string port2) "y"))))
+
+;; (d2) The same shadowing on the compiled `run` path, as its own test-case
+;;      so it is reported independently of the session-load case above:
+;;      top-level and inside a function, the omitted channel stays the ROOT
+;;      OUTCHAN's LVAL while a user OUTCHAN shadows ROOT on .OBLIST.
+(test-case "(d2) compiled PRINTSTRING inside a shadowing BLOCK uses ROOT OUTCHAN"
+  (define out (open-output-string))
+  (call-with-mdl-context
+   (make-mdl-context #:output-port out)
+   (lambda ()
+     (run "<SETG OB3 <MOBLIST OB3>> <INSERT \"OUTCHAN\" ,OB3>")
+     (run "<BLOCK (,OB3 <ROOT>)>")
+     (check-not-exn (lambda () (run "<PRINTSTRING \"top\">")))
+     (check-not-exn
+      (lambda () (run "<DEFINE R1-PS () <PRINTSTRING \"fn\">> <R1-PS>")))
+     (run "<ENDBLOCK>")))
+  (check-equal? (get-output-string out) "topfn"))
