@@ -49,6 +49,10 @@
     {
       "name": "lexical-identity-function-body",
       "expression": "<DEFINE LX () LXATOM>\n<BLOCK (<MOBLIST LB> <GET INITIAL OBLIST> <ROOT>)> 1\n<==? <OBLIST? <LX>> <GET INITIAL OBLIST>>\n<ENDBLOCK> 1\n<DEFINE LY () <PROG ((OBLIST (<MOBLIST LC> <ROOT>))) LYATOM>>\n<==? <OBLIST? <LY>> <GET INITIAL OBLIST>>"
+    },
+    {
+      "name": "empty-trailer-root",
+      "expression": "(<==? TOPLEVEL!- <LOOKUP \"TOPLEVEL\" <ROOT>>> <==? NEWROOTX!- <LOOKUP \"NEWROOTX\" <ROOT>>> <LOOKUP \"NEWROOTX\" <GET INITIAL OBLIST>> <==? T!- T> <==? <OBLIST? FOO!-INITIAL!-> <GET INITIAL OBLIST>>)"
     }
   ]
 }

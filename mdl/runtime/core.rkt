@@ -234,7 +234,7 @@
   (cond
     [(mdl-atom? pattern)
      (cond [(string=? (mdl-atom-pname pattern) "ANY") '(any)]
-           [(string=? (mdl-atom-pname pattern) "APPLICABLE") '(applicable)]
+           [(string=? (mdl-atom-pname pattern) "APPLICABLE") (list 'applicable pattern)]
            [(hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern)
             (list 'type pattern)]
            [else
@@ -371,7 +371,7 @@
   (case (car pattern)
     [(specialty) (decl-failure-leaf (caddr pattern))]
     [(type) (cadr pattern)]
-    [(applicable) (mdl-root-atom "APPLICABLE")]
+    [(applicable) (cadr pattern)]
     [(or) (decl-failure-leaf (last (cdr pattern)))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
@@ -587,26 +587,45 @@
 (define (check-result! decl value)
   (check-declared! decl 'VALUE value))
 
+;; The LVAL of an ATOM is its innermost binding in the dynamic frame chain,
+;; ending in the session's top-level frame. ROOT OBLIST is the one ATOM with
+;; a default top-level value: the session's startup search list, used only
+;; when no frame (top level included) binds it. A binding that exists but
+;; is unassigned stays unassigned; it never falls back to the default.
 (define (local-option atom)
   (let loop ([frames (current-mdl-locals)])
-    (cond [(null? frames) unassigned]
+    (cond [(null? frames)
+           (define space (current-mdl-atom-space))
+           (if (eq? atom (hash-ref (atom-space-internal space) "OBLIST"))
+               (atom-space-lookup space)
+               unassigned)]
           [(hash-has-key? (car frames) atom) (hash-ref (car frames) atom)]
           [else (loop (cdr frames))])))
+
+;; The one authoritative atom search path (manual 15.3: READ uses the LVAL
+;; of OBLIST). There is no cached copy: PROG/AUX/formal bindings, SET,
+;; BLOCK and ENDBLOCK all act on the ordinary LVAL, so every exit from a
+;; binding frame (normal, RETURN/AGAIN, ERROR, host exception) restores it
+;; through the frame parameterization itself.
+(define (current-lookup-path who)
+  (define value (local-option (mdl-root-atom "OBLIST")))
+  (when (eq? value unassigned)
+    (error who "unassigned MDL local OBLIST: no atom search path"))
+  (validate-oblist-lookup who value))
 
 (define (mdl-lval name)
   (define atom (binding-atom 'mdl-lval name))
   (define result (local-option atom))
   (if (eq? result unassigned)
-      (if (eq? atom (mdl-root-atom "OBLIST"))
-          (atom-space-lookup (current-mdl-atom-space))
-          (error 'mdl-lval "unassigned MDL local ~a" (mdl-atom-pname atom)))
+      (error 'mdl-lval "unassigned MDL local ~a" (mdl-atom-pname atom))
       result))
 
 (define (mdl-set! name value)
   (define atom (binding-atom 'mdl-set name))
+  ;; Strict slice: SET of OBLIST requires a valid search list now rather
+  ;; than failing at the next read (Confusion accepts it and fails later).
   (when (eq? atom (mdl-root-atom "OBLIST"))
-    (validate-oblist-lookup 'mdl-set value)
-    (set-atom-space-lookup! (current-mdl-atom-space) value))
+    (validate-oblist-lookup 'mdl-set value))
   (define frames (current-mdl-locals))
   (define target
     (or (for/or ([frame (in-list frames)])
@@ -1721,7 +1740,7 @@
 (struct oblist-value (name entries size))
 (struct atom-space (initial root named types builtins manifests associations
                             global-declarations events interrupt-state memory
-                            internal [lookup #:mutable] [lookup-stack #:mutable]))
+                            internal lookup [lookup-stack #:mutable]))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1799,7 +1818,7 @@
 ;; interpreter-supplied globals and channels (MUDDLE, INCHAN, OUTCHAN,
 ;; FLOAD), interrupt names, and the FSUBRs the compiler handles by name.
 (define root-internal-names
-  '("T" "QUOTE" "REDEFINE" "APPLICABLE" "MUDDLE" "INCHAN" "OUTCHAN" "FLOAD"
+  '("T" "QUOTE" "REDEFINE" "MUDDLE" "INCHAN" "OUTCHAN" "FLOAD"
     "DIVERT-AGC" "DEFINE" "DEFMAC" "FUNCTION" "PROG" "REPEAT" "RETURN"
     "AGAIN" "GO" "UNWIND" "GDECL" "COND" "AND" "OR" "NOT"))
 
@@ -2137,12 +2156,20 @@
     (error who "expected a nonempty LIST of OBLISTs"))
   value)
 
+;; Manual 15.6: BLOCK pushes the current LVAL of OBLIST and SETs its
+;; argument; ENDBLOCK pops and SETs. The stack belongs to the session and is
+;; "entirely independent of functional application, binding, etc.": a
+;; BLOCK inside a frame that binds OBLIST sets that binding, and a later
+;; ENDBLOCK sets whichever binding is current then (Confusion
+;; block-in-function-with-oblist-binding).
 (define (mdl-block lookup)
   (validate-oblist-lookup 'mdl-block lookup)
   (define space (current-mdl-atom-space))
+  (define previous (current-lookup-path 'mdl-block))
+  (mdl-set! (mdl-root-atom "OBLIST") lookup)
   (set-atom-space-lookup-stack!
-   space (cons (atom-space-lookup space) (atom-space-lookup-stack space)))
-  (mdl-set! "OBLIST" lookup))
+   space (cons previous (atom-space-lookup-stack space)))
+  lookup)
 
 (define (mdl-endblock)
   (define space (current-mdl-atom-space))
@@ -2150,7 +2177,7 @@
   (when (null? stack)
     (error 'mdl-endblock "ENDBLOCK without BLOCK"))
   (set-atom-space-lookup-stack! space (cdr stack))
-  (mdl-set! "OBLIST" (car stack)))
+  (mdl-set! (mdl-root-atom "OBLIST") (car stack)))
 
 (define (mdl-atom name)
   (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
@@ -2159,13 +2186,19 @@
   (if trailer-pos
       (let* ([pname (substring name 0 trailer-pos)]
              [trailer (substring name (+ trailer-pos 2))])
-        (when (or (string=? pname "") (string=? trailer ""))
+        (when (string=? pname "")
           (error 'mdl-atom "invalid OBLIST trailer ~a" name))
-        (define oblist (mdl-moblist (mdl-atom trailer)))
+        ;; An empty trailer (A!-) names the session ROOT OBLIST directly,
+        ;; with no .OBLIST lookup (Confusion prints ROOT atoms outside the
+        ;; search path as A!-; review/R3R4-oblist-reference.json
+        ;; empty-trailer-root). 81tell-repl.mud uses TOPLEVEL!-.
+        (define oblist
+          (if (string=? trailer "")
+              (atom-space-root (current-mdl-atom-space))
+              (mdl-moblist (mdl-atom trailer))))
         (define found (mdl-lookup pname oblist))
         (if (mdl-false? found) (mdl-insert pname oblist) found))
-      (let* ([lookups (mdl-list->list
-                       (atom-space-lookup (current-mdl-atom-space)))]
+      (let* ([lookups (mdl-list->list (current-lookup-path 'mdl-atom))]
              [found (for/or ([oblist (in-list lookups)])
                       (define candidate (mdl-lookup name oblist))
                       (and (not (mdl-false? candidate)) candidate))])
