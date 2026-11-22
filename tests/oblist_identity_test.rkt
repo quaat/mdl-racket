@@ -307,3 +307,39 @@
    (check-eq? (mdl-root-atom "PRINC") princ)
    (check-eq? (mdl-root-atom "T") t)
    (check-false (eq? (mdl-atom "PRINC") princ))))
+
+;; ------------------------------------------------- R4 x #123 (R2 GC growth)
+;; Interrupt arguments produced by the runtime are internal ROOT atoms. #123
+;; introduced the DIVERT-AGC emission after R4 branched; the initiator must
+;; be the session's ROOT LIST/VECTOR atom even when a user BLOCK shadows those
+;; names (or omits ROOT entirely), never an atom resolved via .OBLIST.
+(test-case "R4 GC/DIVERT-AGC initiators are ROOT atoms under OBLIST shadowing"
+  (in-fresh-session
+   (define root-list (mdl-root-atom "LIST"))
+   (define root-vector (mdl-root-atom "VECTOR"))
+   (define diverted '())
+   (define collected '())
+   (mdl-apply "HANDLER" (mdl-apply "EVENT" "DIVERT-AGC" 1000)
+              (lambda (words initiator) (set! diverted (cons initiator diverted))))
+   (mdl-apply "HANDLER" (mdl-apply "EVENT" "GC" 11)
+              (lambda (elapsed reason initiator)
+                (set! collected (cons initiator collected))))
+   ;; Shadow the initiator names in a user OBLIST and make it the only path.
+   (run "<SETG SH <MOBLIST SHADOW>>")
+   (run "<INSERT \"LIST\" ,SH>")
+   (run "<INSERT \"VECTOR\" ,SH>")
+   (run "<BLOCK (,SH)>")
+   (define user-list (mdl-atom "LIST"))
+   (check-false (eq? user-list root-list))
+   (mdl-set-logical-storage-capacity! 0)
+   (define kept-list (mdl-list 1 2))
+   (define kept-vector (mdl-vector 3 4))
+   (check-true (pair? diverted))
+   (check-true (pair? collected))
+   (for ([initiator (in-list (append diverted collected))])
+     (check-true (or (eq? initiator root-list) (eq? initiator root-vector))
+                 (format "initiator ~a is not a ROOT atom" (mdl-atom-pname initiator)))
+     (check-false (eq? initiator user-list)))
+   (check-equal? (mdl-list->list kept-list) '(1 2))
+   ;; ROOT is not on the path, so ENDBLOCK must be named through ROOT.
+   (run "<ENDBLOCK!->")))
