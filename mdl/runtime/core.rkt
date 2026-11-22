@@ -3154,7 +3154,8 @@
      (define pname (atom-value-pname value))
      (unless (and (not (string=? pname ""))
                   (for/and ([ch (in-string pname)])
-                    (or (char-alphabetic? ch) (char-numeric? ch) (char=? ch #\-)))
+                    (or (char<=? #\A ch #\Z) (char<=? #\a ch #\z)
+                        (char<=? #\0 ch #\9) (char=? ch #\-)))
                   (not (string->number pname)))
        (error who
               "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"

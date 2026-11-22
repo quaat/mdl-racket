@@ -66,6 +66,10 @@
 (check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A\\\"B\">>")))
 ;; Exotic PNAME with open-paren: strict error.
 (check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A(B\">>")))
+;; Whitelist is ASCII-only: Racket char-alphabetic?/char-numeric? accept
+;; Unicode letters/digits, which MDL does not print bare. Strict error.
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"É\">>")))
+(check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A٣\">>")))
 ;; Exotic PNAME with backslash: strict error.
 (check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A\\\\B\">>" )))
 ;; B2: pname parseable as a number must fail even though digits are in the whitelist.
