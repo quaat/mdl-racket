@@ -30,6 +30,7 @@ raco test mdl/runtime/core.rkt \
   tests/interrupt_dispatch_test.rkt \
   tests/logical_gc_test.rkt tests/special_decl_test.rkt \
   tests/lose_literal_test.rkt tests/error_interrupt_test.rkt \
+  tests/erret_interrupt_cleanup_test.rkt \
   tests/channel_type_test.rkt tests/numeric_predicate_test.rkt \
   tests/istring_test.rkt \
   tests/structured_type_head_test.rkt tests/block_test.rkt \
