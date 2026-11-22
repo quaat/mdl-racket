@@ -1,15 +1,32 @@
-# Status — 2026-11-22 (M2 mainline PASS; M3 source load WIP PASS)
+# Status — 2026-11-23 (M2 mainline PASS; M3 source load WIP PASS)
 
-## Current state (2026-11-22)
+## Current state (2026-11-23)
 
 | M3 stage | Current evidence |
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
 | LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | FAIL on BACK follow-up branch: direct START reaches unassigned TENEX? in CONTIN |
+| INITIALIZED | FAIL on S5 branch: faithful SAVE-IT passes SAVE (session record), ON "BLOCKED" and START, then stops in CONTIN at unassigned GVAL REP (77rooms.mud:301) |
 | INTERACTIVE | NOT RUN: original startup/game loop unavailable |
 | SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
 | PLAYABLE | NOT RUN: original game has not booted in Racket |
+
+- **S5 SAVE session record on `feat/m3-startup-save-record` (WIP, ADR-0048):**
+  SAVE returns a fresh `"SAVED"`, writes no file, performs no GC or
+  interrupt side effect, and records (sequence, file-spec, INT-LEVEL) for
+  host inspection; RESTORE stays refused; `"BLOCKED"` registers but never
+  fires. Earlier, S4 (ADR-0047, issue #112) added ON with IPC registration
+  and stopped at the strict SAVE refusal at 77rooms.mud:26. The faithful
+  `<FLOAD "77loadall.mud">` + `<SAVE-IT>` path now records one SAVE of
+  `"<MDL>MADADV.SAVE"` at INT-LEVEL 100000, executes `<INT-LEVEL 0>`
+  (77rooms.mud:26; no GC/DIVERT-AGC occurrence was pending), STARTER,
+  GETSYS, `ON "BLOCKED"` and START (welcome text, INT-LEVEL 0 at 292),
+  and fails in CONTIN at 77rooms.mud:301 `<SETG SAVEREP ,REP>`:
+  `mdl-gval: unassigned MDL global REP`. Next blockers per the reference
+  trace: GVAL REP plus a LISTEN loop that applies it, RESET, PRINC,
+  READSTRING. No INITIALIZED, interactive or parity result is claimed.
+  See [S5 evidence](evidence/M3/S5-SAVE-RECORD.md) and the
+  [reference frontier](evidence/M3/S5-SAVE-FRONTIER.md).
 
 - **Issue #110 BACK follow-up on `feat/m3-back-continuation` (WIP):**
   Manual and pinned Confusion probes establish BACK view behavior and the

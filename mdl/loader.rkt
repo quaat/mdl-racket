@@ -3,7 +3,8 @@
 (require racket/file racket/list racket/path racket/string
          "parser.rkt" "compiler.rkt" "runtime/core.rkt")
 (provide make-mdl-session mdl-session? mdl-session-load!
-         mdl-session-atom mdl-session-global mdl-session-call exn:fail:mdl-load?
+         mdl-session-atom mdl-session-global mdl-session-call
+         mdl-session-save-records exn:fail:mdl-load?
          exn:fail:mdl-load-diagnostic)
 
 (struct mdl-session (root globals locals atoms namespace events read-values) #:transparent)
@@ -278,6 +279,11 @@
 ;; source reader without exposing arbitrary evaluation.
 (define (mdl-session-atom session name)
   (call-in-session session (lambda () (mdl-atom name))))
+
+;; Test/introspection boundary (ADR-0048): the session's SAVE records,
+;; oldest first. Host-only; no MDL primitive exposes them.
+(define (mdl-session-save-records session)
+  (call-in-session session mdl-save-records))
 
 (define (mdl-session-call session name . args)
   (call-in-session

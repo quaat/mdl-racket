@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "name": "save-frontier-primitives",
+  "recorded_at": "2026-11-22T22:52:08.605852+00:00",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "protocol": "scratch driver sf_probe.py; one mdli process per case, cwd = fresh $TMPDIR dir (empty or copy of patched_confusion game dir); never .cache/upstream",
+  "cases": [
+    {
+      "name": "muddle-value",
+      "note": "",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<PRIN1 ,MUDDLE>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n101101\n",
+      "stderr": "",
+      "files_created_or_changed": {},
+      "workdir": "/tmp/claude-1000/sf-work/muddle-value-ksv4_tms"
+    },
+    {
+      "name": "intlevel-default",
+      "note": "",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<INT-LEVEL>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n",
+      "stderr": "",
+      "files_created_or_changed": {},
+      "workdir": "/tmp/claude-1000/sf-work/intlevel-default-5j5n0e3k"
+    },
+    {
+      "name": "save-return-and-intlevel",
+      "note": "SAVE inside a function: value returned, INT-LEVEL preserved across SAVE",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<INT-LEVEL 100000>\n<DEFINE F (\"AUX\" R) <SET R <SAVE \"P1.SAVE\">> <PRINC \"[after-save:\"> <PRIN1 .R> <PRINC \" il=\"> <PRIN1 <INT-LEVEL>> <PRINC \"]\"> .R>\n<F>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\nF\n[after-save:\"SAVED\" il=100000]\"SAVED\"\n",
+      "stderr": "",
+      "files_created_or_changed": {
+        "P1.SAVE": {
+          "before": null,
+          "after": [
+            13387,
+            "e94b1748522031397ae1555e174be694031dc138c0f0e4979b9724aab284fbf1"
+          ]
+        }
+      },
+      "workdir": "/tmp/claude-1000/sf-work/save-return-and-intlevel-vg6ey73y"
+    },
+    {
+      "name": "save-mdl-dir",
+      "note": "FN default for MUDDLE>=100 is <MDL>MADADV.SAVE; MDL dir absent in empty cwd",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<SAVE \"<MDL>MADADV.SAVE\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "files_created_or_changed": {},
+      "workdir": "/tmp/claude-1000/sf-work/save-mdl-dir-240034fd"
+    },
+    {
+      "name": "save-mdl-dir-present",
+      "note": "same FN in game-dir copy (MDL/ exists)",
+      "cwd_kind": "game",
+      "argv": [],
+      "input": "<SAVE \"<MDL>MADADV.SAVE\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"SAVED\"\n",
+      "stderr": "",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            12835,
+            "5a6d0b044e5ce819f5715579f0005cd70fdf36b294de76c9392112d39cab9738"
+          ]
+        }
+      },
+      "workdir": "/tmp/claude-1000/sf-work/save-mdl-dir-present-l0blegyi"
+    },
+    {
+      "name": "save-midprogram-make",
+      "note": "image saved mid-PROG with a custom REP and INT-LEVEL 100000",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<SETG MARK 1>\n<INT-LEVEL 100000>\n<PROG () <PRINC \"[A]\"> <PRINC <SAVE \"MID.SAVE\">> <PRINC \"[B]\"> <SETG MARK 2>>\n<PRIN1 ,MARK>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n0\n[A]SAVED[B]2\n22\n",
+      "stderr": "",
+      "files_created_or_changed": {
+        "MID.SAVE": {
+          "before": null,
+          "after": [
+            12925,
+            "05c02dd2ee983e70b28e9f17a7ebedfe282a4a55bd5ee252b45dee73bce1034b"
+          ]
+        }
+      },
+      "workdir": "/tmp/claude-1000/sf-work/save-midprogram-make-7ssnbxq7"
+    },
+    {
+      "name": "save-midprogram-restore-r",
+      "note": "restore via -r: does the SAVE call return again (prints RESTORED and [B])?",
+      "cwd_kind": "empty",
+      "argv": [
+        "-r",
+        "MID.SAVE"
+      ],
+      "input": "<PRIN1 ,MARK>\n<PRIN1 <INT-LEVEL>>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n11\n100000100000\n",
+      "stderr": "",
+      "files_created_or_changed": {},
+      "workdir": "/tmp/claude-1000/sf-work/save-midprogram-make-7ssnbxq7"
+    },
+    {
+      "name": "restore-subr-same-process",
+      "note": "RESTORE in-process: does the continuation of RESTORE or of SAVE run?",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<SETG MARK 1>\n<PROG () <PRINC \"[A]\"> <PRINC <SAVE \"M2.SAVE\">> <PRINC \"[B]\">>\n<SETG MARK 3>\n<PROG () <PRINC \"[C]\"> <PRINC <RESTORE \"M2.SAVE\">> <PRINC \"[D]\">>\n<PRINC \"[E]\">\n<PRIN1 ,MARK>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n[A]SAVED[B]\"[B]\"\n3\n[C][E]\"[E]\"\n11\n",
+      "stderr": "",
+      "files_created_or_changed": {
+        "M2.SAVE": {
+          "before": null,
+          "after": [
+            12910,
+            "68a7130b3e35b8a160046aba1f286469ca3cb41121ca9b4cf888805ee0fdc379"
+          ]
+        }
+      },
+      "workdir": "/tmp/claude-1000/sf-work/restore-subr-same-process-jrcqn3mi"
+    },
+    {
+      "name": "restore-applies-rep",
+      "note": "after restore, LISTEN applies GVAL REP",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<DEFINE MYREP () <PRINC \"[MYREP called]\"> <QUIT>>\n<PROG () <SAVE \"R.SAVE\"> <SETG REP ,MYREP>>\n<PRINC \"[unreachable?]\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nMYREP\n#FUNCTION (() <PRINC \"[MYREP called]\"> <QUIT>)\n[MYREP called]",
+      "stderr": "",
+      "files_created_or_changed": {
+        "R.SAVE": {
+          "before": null,
+          "after": [
+            13014,
+            "1e9a1e78f888ef64e971ae13ac9555967895a3960a8a0cecead82d9c84d2760a"
+          ]
+        }
+      },
+      "workdir": "/tmp/claude-1000/sf-work/restore-applies-rep-r6ltrp4e"
+    },
+    {
+      "name": "restore-applies-rep-r",
+      "note": "image saved BEFORE SETG REP: restored REP is the default",
+      "cwd_kind": "empty",
+      "argv": [
+        "-r",
+        "R.SAVE"
+      ],
+      "input": "<PRINC \"[default REP read this]\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n[default REP read this]\"[default REP read this]\"\n",
+      "stderr": "",
+      "files_created_or_changed": {},
+      "workdir": "/tmp/claude-1000/sf-work/restore-applies-rep-r6ltrp4e"
+    },
+    {
+      "name": "save-eval-make",
+      "note": "",
+      "cwd_kind": "empty",
+      "argv": [],
+      "input": "<SAVE-EVAL '<PROG () <PRINC \"[save-eval form ran]\"> <PRIN1 <INT-LEVEL>>> \"SE.SAVE\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"SAVED\"\n",
+      "stderr": "",
+      "files_created_or_changed": {
+        "SE.SAVE": {
+          "before": null,
+          "after": [
+            13018,
+            "1314112116d6fdee1ed498901fb25aaad5fd579ef85c38a9b041d6f3d7010f54"
+          ]
+        }
+      },
+      "workdir": "/tmp/claude-1000/sf-work/save-eval-make-vfr_3vvh"
+    },
+    {
+      "name": "save-eval-restore",
+      "note": "",
+      "cwd_kind": "empty",
+      "argv": [
+        "-r",
+        "SE.SAVE"
+      ],
+      "input": "<QUIT>\n",
+      "exit_status": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n[save-eval form ran]0",
+      "stderr": "",
+      "files_created_or_changed": {},
+      "workdir": "/tmp/claude-1000/sf-work/save-eval-make-vfr_3vvh"
+    }
+  ]
+}

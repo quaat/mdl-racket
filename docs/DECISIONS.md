@@ -1084,6 +1084,10 @@ platform state. No GPLv3 implementation was copied.
 
 ## ADR-0047: Register IPC without a source; refuse SAVE strictly
 
+**Superseded in part (2026-11-23):** part (2), strict SAVE refusal, is
+superseded by ADR-0048 (SAVE session record). Part (1), IPC registration,
+still applies, and RESTORE remains refused.
+
 **Decision (maintainer, 2026-11-22, issue #112):** (1) `ON` is EVENT plus
 HANDLER per manual chapter 21 and returns the new HANDLER. The predefined
 `"IPC"` may be registered and observed, and OFF removes it, but an isolated
@@ -1111,3 +1115,62 @@ the same session past SAVE (for example by calling START) must account for
 it explicitly, after probing what Confusion's RESTORE does to the level,
 instead of letting queued DIVERT-AGC occurrences silently change the GC
 schedule.
+
+## ADR-0048: SAVE as an in-session save record; BLOCKED registers without a source
+
+**Decision (maintainer, 2026-11-23; supersedes ADR-0047 part 2, keeps ADR-0047
+part 1 for IPC):**
+
+1. **SAVE = session record.** `<SAVE file-spec>` evaluates its arguments as
+   any SUBR, then returns a *fresh* mutable STRING `"SAVED"` (two calls never
+   return `==?` objects; mutating one result never affects a later SAVE). It
+   writes no file, opens no channel, performs no garbage collection, and has no
+   interrupt side effect: it neither changes INT-LEVEL nor emits, queues or
+   drains any occurrence. It appends one immutable record to the current
+   session: a 1-based per-session sequence number, an immutable snapshot of
+   the file-spec STRING's visible characters, and the INT-LEVEL at the call.
+   The records are visible only to host Racket code
+   (`mdl-save-records` in `mdl/runtime/core.rkt`,
+   `mdl-session-save-records` in `mdl/loader.rkt`); no MDL primitive exposes
+   them.
+2. **Strict arguments.** Exactly the forms the game and manual 11.6.1
+   (`<SAVE file-spec:string gc?:false-or-any>`) need: one STRING file-spec
+   (a native STRING or a REST view), optionally followed by a FALSE `gc?`.
+   A FALSE `gc?` asks the manual's SAVE *not* to collect, which is exactly
+   what this SAVE does, so it is accepted and has no further effect. Strict
+   errors: `<SAVE>` (Confusion writes `MUDDLE.SAVE`), a non-STRING file-spec
+   (`<SAVE 1>` crashes pinned Confusion with SIGSEGV), a non-FALSE `gc?`
+   (the manual would collect; this SAVE never does), and more than two
+   arguments. The manual's multi-name form (`<SAVE name1 name2 device dir
+   gc?>`) is therefore refused too (its second STRING is a non-FALSE
+   `gc?` position here). Validation happens before any record is appended.
+3. **RESTORE stays strictly refused** with an explicit error naming this
+   decision. Neither Confusion's behavior (RESTORE swaps the heap and
+   re-enters the LISTEN loop, so SAVE never returns again) nor the manual's
+   (SAVE returns a second time with `"RESTORED"`) is modeled. The two
+   references disagree; that disagreement is recorded in
+   `evidence/M3/S5-SAVE-FRONTIER.md` and must be resolved before any future
+   RESTORE slice.
+4. **"BLOCKED" registers, never fires** (same treatment as IPC). It moves from
+   the refused predefined names to the sourceless ones: EVENT, HANDLER, ON
+   and OFF work; emitting or delivering a BLOCKED occurrence is a strict
+   error naming this decision, because the session has no blocked-input
+   source. Every other refused predefined name (CHAR, READ, WRITE,
+   UNBLOCKED, CLOCK, ...) stays refused.
+
+**Deviations recorded:** pinned Confusion writes an image file and returns
+`"SAVED"` (or `#FALSE ()` if the file cannot be opened), and ignores `gc?`;
+the manual collects garbage unless `gc?` is FALSE. This SAVE writes nothing,
+never returns FALSE, and never collects. Confusion stubs `ON "BLOCKED"` as
+`T`; this runtime returns a real HANDLER.
+
+**Consequence:** the patched `SAVE-IT` takes its single COND clause
+(`<=? <SAVE .FN> "SAVED">`), runs `<INT-LEVEL 0>` at 77rooms.mud:26 in the
+same session and continues into the startup code. At that `<INT-LEVEL 0>`
+this runtime would deliver any GC or DIVERT-AGC occurrence queued while the
+level was 100000 (Confusion has no such occurrences); this is faithful MDL
+behavior and is not suppressed. On the observed faithful path none was
+pending (DIVERT-CNT stayed 0). The run then stops in CONTIN at
+77rooms.mud:301 on the unassigned GVAL of REP; see
+`evidence/M3/S5-SAVE-RECORD.md`. INITIALIZED remains FAIL. No GPLv3
+implementation was copied.

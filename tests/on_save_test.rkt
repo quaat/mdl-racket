@@ -1,9 +1,11 @@
 #lang racket/base
-;; S4-ON-SAVE (issue #112): maintainer decisions of 2026-11-22.
+;; S4-ON-SAVE (issue #112, ADR-0047) and S5-SAVE-RECORD (ADR-0048).
 ;; (1) ON = EVENT + HANDLER (manual ch.21) returning the new HANDLER; the
-;;     predefined "IPC" may be registered but can never be emitted.
-;; (2) SAVE (and RESTORE) are strict, intentional unsupported errors that
-;;     write no file.
+;;     predefined "IPC" and "BLOCKED" may be registered but can never be
+;;     emitted (no source).
+;; (2) SAVE (ADR-0048, superseding ADR-0047 part 2) returns a fresh
+;;     "SAVED", writes no file, performs no GC and no interrupt side effect,
+;;     and appends a host-visible session record. RESTORE stays refused.
 ;; Each `run` builds a fresh atom space; never compare atoms across runs.
 (require rackunit racket/list racket/file
          "../mdl/parser.rkt" "../mdl/compiler.rkt" "../mdl/runtime/core.rkt")
@@ -89,7 +91,8 @@
 (check-exn #rx"ON process and which arguments are unsupported"
            (lambda () (run "<ON \"IPC\" ,TYPE 1 2 3>")))
 ;; Every other refused predefined name stays refused, through ON and EVENT.
-(for ([name '("BLOCKED" "CHAR" "READ" "WRITE" "UNBLOCKED" "CLOCK" "SYSDOWN")])
+;; ("BLOCKED" moved to the sourceless names by ADR-0048; see below.)
+(for ([name '("CHAR" "READ" "WRITE" "UNBLOCKED" "CLOCK" "SYSDOWN")])
   (check-exn #rx"unsupported predefined EVENT"
              (lambda () (run (format "<ON ~s ,TYPE 100>" name))))
   (check-exn #rx"unsupported predefined EVENT"
@@ -121,6 +124,32 @@
 ;; Emission is refused even with no IPC registration at all.
 (session (lambda () (check-exn ipc-rx (lambda () (mdl-emit-event! "IPC" '())))))
 
+;; --- BLOCKED registers (ADR-0048); BLOCKED emission is a strict error ----
+(define blocked-rx
+  #rx"^mdl-emit-event!: BLOCKED: this session has no blocked-input source; BLOCKED occurrences cannot be emitted \\(maintainer decision 2026-11-23; ADR-0048\\)$")
+(check-equal? (type-name (run "<ON \"BLOCKED\" ,TYPE 100>")) "HANDLER")
+(check-equal? (type-name (run "<EVENT \"BLOCKED\" 100>")) "IHEADER")
+(check-equal? (type-name (run "<APPLY ,ON \"BLOCKED\" ,TYPE 100>")) "HANDLER")
+(check-true (true? (run "<SETG H <ON \"BLOCKED\" ,TYPE 100>> <==? ,H <OFF ,H>>")))
+(check-true (true? (run "<SETG H <ON \"BLOCKED\" ,TYPE 100>> <OFF ,H>
+                         <==? ,H <HANDLER <EVENT \"BLOCKED\" 1> ,H>>")))
+(check-true (true? (run "<SETG E <EVENT \"BLOCKED\" 100>> <==? ,E <OFF ,E>>")))
+(session
+ (lambda ()
+   (define seen '())
+   (define handler (mdl-apply "ON" "BLOCKED" (lambda args (set! seen (cons args seen))) 100))
+   (check-equal? (type-name handler) "HANDLER")
+   (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '())))
+   (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '(1) #t)))
+   (check-equal? (mdl-apply "INT-LEVEL" 0) 0)
+   (check-equal? seen '())
+   (check-eq? (mdl-apply "OFF" handler) handler)
+   (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '())))
+   (check-equal? seen '())
+   ;; IPC keeps its own ADR-0047 message.
+   (check-exn ipc-rx (lambda () (mdl-emit-event! "IPC" '())))))
+(session (lambda () (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '())))))
+
 ;; --- session isolation --------------------------------------------------
 (define foreign-handler (session (lambda () (mdl-apply "ON" "IPC" mdl-type 1))))
 (session
@@ -135,11 +164,105 @@
    (check-exn #rx"belongs to another IHEADER|another MDL session"
               (lambda () (mdl-apply "HANDLER" header foreign-user)))))
 
-;; --- SAVE / RESTORE: explicit decision error, no file written -------------
-(define save-rx
-  #rx"^SAVE: saving a restorable image is not supported \\(maintainer decision 2026-11-22; issue #112\\)$")
+;; --- SAVE: session record (ADR-0048) -----------------------------------
+(check-equal? (run "<SAVE \"S5PROBE.SAVE\">") "SAVED")
+(check-equal? (type-name (run "<SAVE \"S5PROBE.SAVE\">")) "STRING")
+(check-false (immutable? (run "<SAVE \"S5PROBE.SAVE\">")))
+(check-equal? (run "<APPLY ,SAVE \"S5PROBE.SAVE\">") "SAVED")
+(check-true (true? (run "<=? <SAVE \"S5PROBE.SAVE\"> \"SAVED\">")))
+;; Fresh object every call: =? but not ==?.
+(check-true (mdl-false? (run "<==? <SAVE \"X\"> <SAVE \"X\">>")))
+(check-true (true? (run "<=? <SAVE \"X\"> <SAVE \"X\">>")))
+;; Mutating one result does not affect the next.
+(check-equal? (run "<SETG S <SAVE \"X\">> <PUT ,S 1 !\\Z> <SAVE \"X\">") "SAVED")
+(check-equal? (run "<SETG S <SAVE \"X\">> <PUT ,S 1 !\\Z> <SAVE \"X\"> ,S") "ZAVED")
+;; Optional FALSE gc? (manual 11.6.1: no GC before saving).
+(check-equal? (run "<SAVE \"X\" <>>") "SAVED")
+(check-equal? (run "<SAVE \"X\" #FALSE (1)>") "SAVED")
+(check-equal? (run "<APPLY ,SAVE \"X\" <>>") "SAVED")
+;; REST view file-spec.
+(check-equal? (run "<SAVE <REST \"ZZB.SAVE\" 2>>") "SAVED")
+
+;; Records: sequence, file-spec snapshot, INT-LEVEL at the call.
+(define (record->list r)
+  (list (mdl-save-record-sequence r) (mdl-save-record-file-spec r)
+        (mdl-save-record-int-level r)))
+(session
+ (lambda ()
+   (check-equal? (mdl-save-records) '())
+   (eval-source "<INT-LEVEL 7> <SAVE \"A.SAVE\"> <INT-LEVEL 0>
+                 <SAVE <REST \"XXB.SAVE\" 2> <>>
+                 <SETG F <STRING \"MUT.SAVE\">> <INT-LEVEL 100000> <SAVE ,F>
+                 <PUT ,F 1 !\\Z> <INT-LEVEL 0>")
+   (define records (mdl-save-records))
+   (check-true (andmap mdl-save-record? records))
+   (check-equal? (map record->list records)
+                 '((1 "A.SAVE" 7) (2 "B.SAVE" 0) (3 "MUT.SAVE" 100000)))
+   (check-true (andmap (lambda (r) (immutable? (mdl-save-record-file-spec r))) records))
+   ;; The argument was mutated after SAVE; the record kept its snapshot.
+   (check-equal? (eval-source ",F") "ZUT.SAVE")
+   ;; Failed calls append nothing.
+   (for ([bad '("<SAVE>" "<SAVE 1>" "<SAVE \"X\" T>" "<SAVE \"X\" <> 3>")])
+     (check-exn exn:fail? (lambda () (eval-source bad)) bad))
+   (check-equal? (length (mdl-save-records)) 3)))
+;; Records are per session; the counter restarts at 1.
+(session
+ (lambda ()
+   (check-equal? (mdl-save-records) '())
+   (eval-source "<SAVE \"OTHER.SAVE\">")
+   (check-equal? (map record->list (mdl-save-records)) '((1 "OTHER.SAVE" 0)))))
+
+;; No interrupt side effects: SAVE neither changes INT-LEVEL nor delivers a
+;; queued occurrence nor runs a (GC-signalling) collection.
+(session
+ (lambda ()
+   (define seen '())
+   (mdl-apply "ON" "M3-USER" (lambda args (set! seen (cons (cons 'user args) seen))) 5)
+   (mdl-apply "ON" "GC" (lambda args (set! seen (cons (cons 'gc args) seen))) 1)
+   (define stats-before (mdl-logical-storage-stats))
+   (mdl-apply "INT-LEVEL" 10)
+   (check-true (mdl-emit-event! "M3-USER" '(1)) "recorded, queued below INT-LEVEL")
+   (check-true (true? (mdl-apply "=?" (mdl-apply "SAVE" "Q.SAVE") "SAVED")))
+   (check-equal? seen '())
+   (check-equal? (mdl-apply "INT-LEVEL") 10)
+   (check-equal? (mdl-save-record-int-level (car (mdl-save-records))) 10)
+   (check-equal? (hash-ref (mdl-logical-storage-stats) 'capacity)
+                 (hash-ref stats-before 'capacity))
+   ;; The queued occurrence is still pending and arrives at the next safe point.
+   (mdl-apply "INT-LEVEL" 0)
+   (check-equal? seen '((user 1)))
+   ;; At level 0 SAVE still neither collects nor signals GC.
+   (mdl-apply "SAVE" "Q2.SAVE")
+   (check-equal? seen '((user 1)))))
+
+;; Strict errors (Confusion: <SAVE> writes MUDDLE.SAVE, <SAVE 1> SIGSEGV).
+(define save-arity-rx #rx"SAVE expects a file-spec STRING and an optional FALSE gc\\?")
+(define save-spec-rx #rx"SAVE file-spec must be STRING")
+(define save-gc-rx #rx"SAVE gc\\? must be FALSE; this session never collects on SAVE")
+(for ([case (list (cons "<SAVE>" save-arity-rx)
+                  (cons "<APPLY ,SAVE>" save-arity-rx)
+                  (cons "<SAVE \"X\" <> 3>" save-arity-rx)
+                  (cons "<SAVE \"MUDDLE\" \"SAVE\" \"DSK\" \"MDL\">" save-arity-rx)
+                  (cons "<SAVE 1>" save-spec-rx)
+                  (cons "<APPLY ,SAVE 1>" save-spec-rx)
+                  (cons "<SAVE FOO>" save-spec-rx)
+                  (cons "<SAVE (\"X\")>" save-spec-rx)
+                  (cons "<SAVE 1 <>>" save-spec-rx)
+                  (cons "<SAVE \"X\" T>" save-gc-rx)
+                  (cons "<SAVE \"X\" \"SAVE\">" save-gc-rx)
+                  (cons "<SAVE \"X\" 0>" save-gc-rx))])
+  (check-exn (cdr case) (lambda () (run (car case))) (car case)))
+;; SAVE evaluates its arguments as a SUBR (before validating them).
+(session
+ (lambda ()
+   (check-exn save-spec-rx (lambda () (eval-source "<SETG X 0> <SAVE <SETG X 1>>")))
+   (check-equal? (eval-source ",X") 1)
+   (check-equal? (eval-source "<SAVE <STRING \"A\" \"B\">>") "SAVED")
+   (check-equal? (mdl-save-record-file-spec (car (mdl-save-records))) "AB")))
+
+;; --- RESTORE: still refused; SAVE/RESTORE write and delete no file --------
 (define restore-rx
-  #rx"^RESTORE: restoring a saved image is not supported \\(maintainer decision 2026-11-22; issue #112\\)$")
+  #rx"^RESTORE: restoring a saved image is not supported \\(maintainer decision 2026-11-23; ADR-0048\\)$")
 (define (snapshot dir) (sort (map path->string (directory-list dir)) string<?))
 (define scratch (make-temporary-file "on-save-test-~a" 'directory))
 ;; Record every write/delete file access the SAVE/RESTORE calls attempt,
@@ -159,20 +282,24 @@
    (parameterize ([current-directory scratch]
                   [current-security-guard write-recorder])
      (define cwd-before (snapshot scratch))
-     (for ([source '("<SAVE \"S4PROBE.SAVE\">" "<SAVE>" "<SAVE 1>"
-                     "<SAVE \"<MDL>MADADV.SAVE\">" "<APPLY ,SAVE \"S4PROBE.SAVE\">"
+     (for ([source '("<SAVE \"S4PROBE.SAVE\">" "<SAVE \"<MDL>MADADV.SAVE\">"
+                     "<APPLY ,SAVE \"S4PROBE.SAVE\">" "<SAVE \"S4PROBE.SAVE\" <>>"
                      "<=? <SAVE \"S4PROBE.SAVE\"> \"SAVED\">")])
-       (check-exn save-rx (lambda () (run source)) source))
+       (check-not-exn (lambda () (run source)) source))
+     (for ([source '("<SAVE>" "<SAVE 1>" "<SAVE \"S4PROBE.SAVE\" T>")])
+       (check-exn exn:fail? (lambda () (run source)) source))
      (for ([source '("<RESTORE \"S4PROBE.SAVE\">" "<RESTORE>"
-                     "<APPLY ,RESTORE \"S4PROBE.SAVE\">")])
+                     "<APPLY ,RESTORE \"S4PROBE.SAVE\">"
+                     "<SAVE \"S4PROBE.SAVE\"> <RESTORE \"S4PROBE.SAVE\">")])
        (check-exn restore-rx (lambda () (run source)) source))
      (check-equal? (snapshot scratch) cwd-before)
      (check-equal? cwd-before '())
      (check-equal? attempted-writes '())
-     (check-false (file-exists? (build-path scratch "S4PROBE.SAVE")))))
+     (check-false (file-exists? (build-path scratch "S4PROBE.SAVE")))
+     (check-false (directory-exists? (build-path scratch "MDL")))))
  (lambda () (delete-directory/files scratch)))
-;; SAVE evaluates its arguments as a SUBR before refusing.
+;; RESTORE evaluates its arguments as a SUBR before refusing.
 (session
  (lambda ()
-   (check-exn save-rx (lambda () (eval-source "<SETG X 0> <SAVE <SETG X 1>>")))
+   (check-exn restore-rx (lambda () (eval-source "<SETG X 0> <RESTORE <SETG X 1>>")))
    (check-equal? (eval-source ",X") 1)))
