@@ -58,32 +58,40 @@
   (record! session (hash-set info 'status "FAIL"))
   (raise (exn:fail:mdl-load message (current-continuation-marks) info)))
 
-(define (make-mdl-session source-root)
+;; output-port / input-port: host ports owned by this session's terminal
+;; CHANNELs. #f (default) follows the current Racket port at each operation.
+;; input-port is stored for later READ-channel primitives; none read yet.
+(define (make-mdl-session source-root #:output-port [output-port #f]
+                          #:input-port [input-port #f])
   (define root (canonical-path (path->complete-path source-root)))
   (unless (directory-exists? root)
     (raise-argument-error 'make-mdl-session "existing source-root directory" source-root))
+  (when (and output-port (not (output-port? output-port)))
+    (raise-argument-error 'make-mdl-session "(or/c #f output-port?)" output-port))
+  (when (and input-port (not (input-port? input-port)))
+    (raise-argument-error 'make-mdl-session "(or/c #f input-port?)" input-port))
+  ;; The shared context constructor binds INCHAN/OUTCHAN (LVAL and GVAL)
+  ;; to this session's terminal CHANNELs before any source runs.
+  (define context (make-mdl-context #:output-port output-port
+                                    #:input-port input-port))
   (define session
-    (mdl-session root (make-hasheq) (list (make-hasheq))
-                 (make-mdl-atom-space) loader-namespace (box '()) (make-hash)))
+    (mdl-session root (mdl-context-globals context) (mdl-context-locals context)
+                 (mdl-context-atom-space context) loader-namespace (box '())
+                 (make-hash)))
   (call-in-session session
     (lambda ()
-      (for ([spec (in-list '(("INCHAN" . "READ")
-                            ("OUTCHAN" . "PRINT")))])
-        (define name (mdl-atom (string-append (car spec) "!-ROOT")))
-        (define channel (mdl-make-terminal-channel (cdr spec)))
-        (mdl-set! name channel)
-        (mdl-setg! name channel))
       ;; Interpreter-supplied globals (MUDDLE, issue #51) intern in THIS
       ;; session's atom space, so they must be seeded with the session's
       ;; space current — interning earlier would produce a different atom
       ;; identity than later GVAL lookups.
       (hash-set! (current-mdl-globals)
-                 (mdl-atom "MUDDLE") mdl-interpreter-version)
-      (mdl-define! "FLOAD"
+                 (mdl-root-atom "MUDDLE") mdl-interpreter-version)
+      (mdl-define! (mdl-root-atom "FLOAD")
                    (lambda (name)
-                     (unless (string? name)
-                       (error 'mdl-fload "FLOAD expects a STRING path"))
-                     (load-internal! session name)))))
+                     (load-internal!
+                      session
+                      (mdl-string-snapshot 'mdl-fload name
+                                           "FLOAD expects a STRING path"))))))
   session)
 
 (define (inside-root? root path)

@@ -1,6 +1,7 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
-(require racket/mpair racket/list racket/string racket/date "memory.rkt" "random36.rkt")
+(require racket/mpair racket/list racket/string racket/date racket/runtime-path
+         "memory.rkt" "random36.rkt")
 (provide current-mdl-globals current-mdl-locals
          current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
@@ -15,9 +16,13 @@
          mdl-apply mdl-list mdl-list->list
          mdl-emit-event!
          mdl-logical-storage-stats mdl-set-logical-storage-capacity!
+         mdl-recompute-entry-words current-mdl-gc-min mdl-set-used-for-test!
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-make-terminal-channel
+         make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
+         mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
+         atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
          mdl-segment mdl-segment? mdl-segment-payload mdl-segment-line
@@ -26,7 +31,9 @@
          mdl-splice-uvector
          mdl-word mdl-word? mdl-word-bits mdl-chtype mdl-character
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
-         current-mdl-atom-space make-mdl-atom-space
+         mdl-string-snapshot
+         current-mdl-atom-space make-mdl-atom-space mdl-root-atom
+         mdl-oblist-pnames
          mdl-false mdl-false? mdl-false-payload
          decl-match-max-depth)
 
@@ -92,6 +99,11 @@
 (define current-mdl-map-step (make-parameter #f))
 (define current-mdl-map-leave (make-parameter #f))
 
+;; A STRING here comes from MDL code (e.g. <SET "FOO" 3>, pre-existing
+;; acceptance) or from the host test/introspection API, and both mean "the
+;; ATOM the reader would produce", so it resolves through .OBLIST.
+;; Runtime-internal callers must never pass a STRING: they pass
+;; (mdl-root-atom NAME) so a user OBLIST cannot shadow or break them.
 (define (binding-atom who value)
   (cond [(mdl-atom? value) value]
         [(string? value) (mdl-atom value)]
@@ -137,7 +149,7 @@
         (let ()
           (define head-items (form-elements head))
           (unless (and (= (length head-items) 2)
-                       (eq? (car head-items) (mdl-atom "PRIMTYPE")))
+                       (eq? (car head-items) (mdl-root-atom "PRIMTYPE")))
             (decl-error origin line column "malformed declaration pattern"))
           (define normalized (normalize-decl-pattern head line column origin))
           (unless (eq? (car normalized) 'primtype)
@@ -234,11 +246,11 @@
   (cond
     [(mdl-atom? pattern)
      (cond [(string=? (mdl-atom-pname pattern) "ANY") '(any)]
-           [(string=? (mdl-atom-pname pattern) "APPLICABLE") '(applicable)]
+           [(string=? (mdl-atom-pname pattern) "APPLICABLE") (list 'applicable pattern)]
            [(hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern)
             (list 'type pattern)]
            [else
-            (define associated (association-lookup pattern (mdl-atom "DECL")))
+            (define associated (association-lookup pattern (mdl-root-atom "DECL")))
             (cond
               [(not associated)
                (if (current-decl-defer-unknown?)
@@ -371,7 +383,7 @@
   (case (car pattern)
     [(specialty) (decl-failure-leaf (caddr pattern))]
     [(type) (cadr pattern)]
-    [(applicable) (mdl-atom "APPLICABLE")]
+    [(applicable) (cadr pattern)]
     [(or) (decl-failure-leaf (last (cdr pattern)))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
@@ -556,12 +568,12 @@
   (define resolved?
     (and (mdl-atom? pattern)
          (not (hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern))
-         (association-lookup pattern (mdl-atom "DECL"))))
+         (association-lookup pattern (mdl-root-atom "DECL"))))
   (define normalized
     (normalize-decl-pattern pattern #f #f "DECL?"))
   (define result (decl-match value normalized decl-match-max-depth))
   (cond
-    [(eq? result #t) (mdl-atom "T")]
+    [(eq? result #t) (mdl-root-atom "T")]
     [(eq? result #f)
      (if resolved?
          (mdl-false (list value (decl-failure-leaf normalized)))
@@ -587,26 +599,45 @@
 (define (check-result! decl value)
   (check-declared! decl 'VALUE value))
 
+;; The LVAL of an ATOM is its innermost binding in the dynamic frame chain,
+;; ending in the session's top-level frame. ROOT OBLIST is the one ATOM with
+;; a default top-level value: the session's startup search list, used only
+;; when no frame (top level included) binds it. A binding that exists but
+;; is unassigned stays unassigned; it never falls back to the default.
 (define (local-option atom)
   (let loop ([frames (current-mdl-locals)])
-    (cond [(null? frames) unassigned]
+    (cond [(null? frames)
+           (define space (current-mdl-atom-space))
+           (if (eq? atom (hash-ref (atom-space-internal space) "OBLIST"))
+               (atom-space-lookup space)
+               unassigned)]
           [(hash-has-key? (car frames) atom) (hash-ref (car frames) atom)]
           [else (loop (cdr frames))])))
+
+;; The one authoritative atom search path (manual 15.3: READ uses the LVAL
+;; of OBLIST). There is no cached copy: PROG/AUX/formal bindings, SET,
+;; BLOCK and ENDBLOCK all act on the ordinary LVAL, so every exit from a
+;; binding frame (normal, RETURN/AGAIN, ERROR, host exception) restores it
+;; through the frame parameterization itself.
+(define (current-lookup-path who)
+  (define value (local-option (mdl-root-atom "OBLIST")))
+  (when (eq? value unassigned)
+    (error who "unassigned MDL local OBLIST: no atom search path"))
+  (validate-oblist-lookup who value))
 
 (define (mdl-lval name)
   (define atom (binding-atom 'mdl-lval name))
   (define result (local-option atom))
   (if (eq? result unassigned)
-      (if (eq? atom (mdl-atom "OBLIST"))
-          (atom-space-lookup (current-mdl-atom-space))
-          (error 'mdl-lval "unassigned MDL local ~a" (mdl-atom-pname atom)))
+      (error 'mdl-lval "unassigned MDL local ~a" (mdl-atom-pname atom))
       result))
 
 (define (mdl-set! name value)
   (define atom (binding-atom 'mdl-set name))
-  (when (eq? atom (mdl-atom "OBLIST"))
-    (validate-oblist-lookup 'mdl-set value)
-    (set-atom-space-lookup! (current-mdl-atom-space) value))
+  ;; Strict slice: SET of OBLIST requires a valid search list now rather
+  ;; than failing at the next read (Confusion accepts it and fails later).
+  (when (eq? atom (mdl-root-atom "OBLIST"))
+    (validate-oblist-lookup 'mdl-set value))
   (define frames (current-mdl-locals))
   (define target
     (or (for/or ([frame (in-list frames)])
@@ -907,7 +938,7 @@
 ;; A trailing SEGMENT whose value has PRIMTYPE LIST shares its storage in
 ;; LIST construction instead of being copied (macros.cpp:2716-2724).
 (define (segment-shares-tail? value)
-  (eq? (mdl-primtype value) (mdl-atom "LIST")))
+  (eq? (mdl-primtype value) (mdl-root-atom "LIST")))
 (define (segment-tail-chain value)
   (mdl-list-head value 'mdl-splice-list))
 
@@ -1074,11 +1105,11 @@
 ;; ---------------------------------------------------------------------------
 
 (define (mdl-make-form lst)
-  (mdl-typed-value (mdl-atom "FORM") lst))
+  (mdl-typed-value (mdl-root-atom "FORM") lst))
 
 (define (mdl-form? value)
   (and (mdl-typed-value? value)
-       (eq? (mdl-typed-value-type value) (mdl-atom "FORM"))))
+       (eq? (mdl-typed-value-type value) (mdl-root-atom "FORM"))))
 
 (define (form-elements form)
   (mdl-list->list (mdl-typed-value-value form)))
@@ -1088,7 +1119,7 @@
   (and (mdl-form? item)
        (let ([elements (form-elements item)])
          (and (= 2 (length elements))
-              (eq? (car elements) (mdl-atom "QUOTE"))
+              (eq? (car elements) (mdl-root-atom "QUOTE"))
               (mdl-atom? (cadr elements))
               (cadr elements)))))
 
@@ -1102,9 +1133,6 @@
 
 (define (mdl-apply-value fn raw-args)
   (cond
-    [(eq? fn mdl-istring) (mdl-istring-raw raw-args)]
-    [(eq? fn mdl-iuvector) (mdl-iuvector-raw raw-args)]
-    [(eq? fn mdl-ivector) (mdl-ivector-raw raw-args)]
     [(mdl-macro? fn)
      (mdl-eval (mdl-apply-interpreted fn raw-args))]
     [(mdl-function? fn)
@@ -1397,7 +1425,7 @@
         (unless (= 1 (length args)) (error 'mdl-eval "NOT expects one argument"))
         (if (mdl-truthy? (mdl-eval (car args)))
             (mdl-false '())
-            (mdl-atom "T"))]
+            (mdl-root-atom "T"))]
        [(PROG) (runtime-prog args #f)]
        [(REPEAT) (runtime-prog args #t)]
        [(RETURN) (apply mdl-return (map mdl-eval args))]
@@ -1479,7 +1507,7 @@
 
 (define (runtime-and args)
   (if (null? args)
-      (mdl-atom "T")
+      (mdl-root-atom "T")
       (let loop ([remaining args])
         (if (null? (cdr remaining))
             (mdl-eval (car remaining))
@@ -1564,9 +1592,6 @@
 ;; in order before the operator is applied (chapter 7.5.2).
 (define (mdl-dispatch-call fn raw-args-thunk arg-thunks)
   (cond
-    [(eq? fn mdl-istring) (mdl-istring-raw (raw-args-thunk))]
-    [(eq? fn mdl-iuvector) (mdl-iuvector-raw (raw-args-thunk))]
-    [(eq? fn mdl-ivector) (mdl-ivector-raw (raw-args-thunk))]
     [(or (mdl-macro? fn) (mdl-function? fn))
      (define result (mdl-apply-interpreted fn (raw-args-thunk)))
      (if (mdl-macro? fn) (mdl-eval result) result)]
@@ -1604,8 +1629,11 @@
 
 (define (global-option atom)
   (define globals (current-mdl-globals))
+  ;; Built-in SUBRs are the GVALs of this session's ROOT atoms (manual
+  ;; 15.5). The check never consults .OBLIST and never interns: a
+  ;; same-named atom on another OBLIST, or an uninterned one, is unbound.
   (cond [(hash-has-key? globals atom) (hash-ref globals atom)]
-        [(eq? atom (mdl-atom (mdl-atom-pname atom)))
+        [(eq? atom (root-atom-or-false (mdl-atom-pname atom)))
          (hash-ref builtin-table (mdl-atom-pname atom) unassigned)]
         [else unassigned]))
 
@@ -1629,7 +1657,7 @@
       (error 'mdl-setg "value does not satisfy GDECL declaration for ~a"
              (mdl-atom-pname atom))))
   (define old (hash-ref globals atom unassigned))
-  (define redefine (hash-ref globals (mdl-atom "REDEFINE") unassigned))
+  (define redefine (hash-ref globals (mdl-root-atom "REDEFINE") unassigned))
   (when (and (hash-has-key? (atom-space-manifests (current-mdl-atom-space)) atom)
              (not (eq? old unassigned))
              (not (mdl-identical? old value))
@@ -1668,7 +1696,7 @@
     (hash-set! declarations name pattern)
     (unless (hash-has-key? (current-mdl-globals) name)
       (hash-set! (current-mdl-globals) name unassigned)))
-  (mdl-atom "T"))
+  (mdl-root-atom "T"))
 
 (define (mdl-gassigned? name)
   (define atom (binding-atom 'mdl-gassigned? name))
@@ -1690,7 +1718,7 @@
     (hash-set! (atom-space-manifests (current-mdl-atom-space)) atom #t)
     (unless (hash-has-key? (current-mdl-globals) atom)
       (hash-set! (current-mdl-globals) atom unassigned)))
-  (mdl-atom "T"))
+  (mdl-root-atom "T"))
 
 (define (mdl-gval name)
   (define atom (binding-atom 'mdl-gval name))
@@ -1716,9 +1744,13 @@
 
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
+;; inchan/outchan are the ROOT ATOMs INCHAN!-ROOT and OUTCHAN!-ROOT; channels
+;; maps each CHANNEL's VECTOR storage to its host-channel (see
+;; "Session-owned channels").
 (struct atom-space (initial root named types builtins manifests associations
                             global-declarations events interrupt-state memory
-                            random-state [lookup #:mutable] [lookup-stack #:mutable]))
+                            random-state internal lookup [lookup-stack #:mutable]
+                            inchan outchan channels))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1738,6 +1770,27 @@
   (hash-set! named initial-name initial)
   (define oblist-name (atom-value "OBLIST" root))
   (hash-set! (oblist-value-entries root) "OBLIST" oblist-name)
+  ;; Manual 15.5 and Confusion: ROOT holds T, OBLIST, every SUBR/FSUBR
+  ;; name and the built-in TYPE names; INITIAL starts empty. ROOT is seeded
+  ;; with the complete pinned-Confusion startup inventory
+  ;; (historical-root-names), implemented or not, so source read before a
+  ;; primitive exists already holds the ROOT atom. `internal` caches every
+  ;; seeded atom by name; later REMOVE/INSERT on ROOT cannot change which
+  ;; atom the runtime means.
+  (define internal (make-hash))
+  (define entries (oblist-value-entries root))
+  (for ([name (in-list historical-root-names)])
+    (unless (hash-ref entries name #f)
+      (hash-set! entries name (atom-value name root))))
+  (for ([(name atom) (in-hash entries)])
+    (hash-set! internal name atom))
+  ;; Every name the runtime itself needs must be historical; a new one is
+  ;; a deliberate inventory change backed by new reference evidence.
+  (define (seed-root! name)
+    (or (hash-ref entries name #f)
+        (error 'make-mdl-atom-space
+               "~a is not in the historical ROOT inventory (root-names.rktd)"
+               name)))
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
@@ -1755,14 +1808,11 @@
                           ("ACTIVATION" . "FRAME")
                           ("IHEADER" . "VECTOR")
                           ("HANDLER" . "VECTOR")))])
-    (define type-atom
-      (if (string=? (car entry) "OBLIST")
-          oblist-name
-          (atom-value (car entry) initial)))
-    (unless (eq? type-atom oblist-name)
-      (hash-set! (oblist-value-entries initial) (car entry) type-atom))
+    (define type-atom (seed-root! (car entry)))
     (hash-set! types type-atom (cdr entry))
     (hash-set! builtins type-atom #t))
+  (for ([name (in-hash-keys builtin-table)]) (seed-root! name))
+  (for-each seed-root! root-internal-names)
   (atom-space initial root named types builtins (make-hasheq)
               ;; Session-owned association entries. Key comparison must use
               ;; mdl-identical?, which is broader than Racket eq? for WORDs
@@ -1772,10 +1822,47 @@
                          (list initial oblist-name initial-name)
                          (list root oblist-name root-name)))
               (make-hasheq) (make-hash) (mdl-interrupt-state 0 '())
-              (make-mdl-memory) (make-random36-state)
-              (mcons initial (mcons root '())) '()))
+              (make-mdl-memory) (make-random36-state) internal
+              ;; Top-level default LVAL of ROOT OBLIST; see current-lookup-path.
+              (mcons initial (mcons root '())) '()
+              ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
+              ;; (seed-root! fails if either is missing from the inventory).
+              (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)))
 
-(define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
+;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
+;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
+;; internal-name-placement): values the runtime produces or compares (T,
+;; QUOTE, REDEFINE); interpreter-supplied globals and channels (MUDDLE,
+;; INCHAN, OUTCHAN, FLOAD); the INTERRUPTS OBLIST name; and the FSUBRs the
+;; compiler handles by name. GO, DIVERT-AGC and APPLICABLE are deliberately
+;; absent: Confusion has them in neither ROOT nor INITIAL at startup.
+(define root-internal-names
+  '("T" "QUOTE" "REDEFINE" "MUDDLE" "INCHAN" "OUTCHAN" "FLOAD" "INTERRUPTS"
+    "DEFINE" "DEFMAC" "FUNCTION" "PROG" "REPEAT" "RETURN" "AGAIN" "UNWIND"
+    "GDECL" "COND" "AND" "OR" "NOT"))
+
+;; The complete startup ROOT inventory of pinned Confusion, a checked-in
+;; data file with provenance (docs/evidence/M3/review/
+;; confusion-root-names.json). Malformed data fails module loading.
+(define-runtime-path root-names-path "root-names.rktd")
+(define historical-root-names
+  (let ([names (call-with-input-file root-names-path read)])
+    (unless (and (list? names) (pair? names)
+                 (andmap (lambda (n) (and (string? n) (positive? (string-length n))))
+                         names)
+                 (= (length names) (length (remove-duplicates names))))
+      (error 'root-names "root-names.rktd must be a nonempty list of distinct PNAME strings"))
+    names))
+
+;; Runtime-internal name -> the current session's ROOT atom. It never reads
+;; .OBLIST and never interns: every internal name is seeded when the
+;; session is created, so a missing name is an implementation error.
+(define (mdl-root-atom name)
+  (or (root-atom-or-false name)
+      (error 'mdl-root-atom "internal name ~a is not a seeded ROOT atom" name)))
+
+(define (root-atom-or-false name)
+  (hash-ref (atom-space-internal (current-mdl-atom-space)) name #f))
 
 ;; A true event source must be supplied before predefined names are
 ;; registered. GC and DIVERT-AGC are internal MDL interrupts, not OS signals.
@@ -1838,9 +1925,30 @@
     (error 'mdl-set-logical-storage-capacity! "expected nonnegative FIX"))
   (set-mdl-memory-capacity! (current-mdl-memory) words))
 
+(define (mdl-recompute-entry-words)
+  ;; Host-only test hook: independently recompute the total charged words
+  ;; by summing ALL currently-registered entries, bypassing the cached 'used'
+  ;; field. Use this in tests to verify 'used' is consistent with the entry list.
+  (mdl-memory-entry-word-sum (current-mdl-memory)))
+
+(define (mdl-set-used-for-test! words)
+  ;; Host-only test hook: directly set the cached 'used' field WITHOUT
+  ;; registering entries. Use ONLY to simulate near-fix-max ledger state for
+  ;; overflow / cap-clamping tests. Leaves entries inconsistent.
+  (unless (and (exact-integer? words) (>= words 0))
+    (error 'mdl-set-used-for-test! "expected nonnegative integer"))
+  (mdl-memory-set-used-for-test! (current-mdl-memory) words))
+
+;; MDL manual ch.22 §22.5: GC min = minimum free words after a collection.
+;; "A large min will result in fewer total garbage collections."
+;; Initial value: 8192 words. Exposed as a session parameter so tests can
+;; use a small value to reach the fix-max cap case that would otherwise
+;; require fix-max live objects to trigger.
+(define current-mdl-gc-min (make-parameter 8192))
+
 (define (mdl-collect-logical! reason initiator)
   (define-values (reclaimed elapsed) (mdl-memory-collect! (current-mdl-memory)))
-  (mdl-emit-event! "GC" (list elapsed reason (mdl-atom initiator)))
+  (mdl-emit-event! "GC" (list elapsed reason (mdl-root-atom initiator)))
   (check-fix 'mdl-gc reclaimed))
 
 (define (mdl-gc . args)
@@ -1862,14 +1970,46 @@
   (when (and (not (current-mdl-storage-pressure?))
              (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory)))
     (parameterize ([current-mdl-storage-pressure? #t])
-      (mdl-emit-event! "DIVERT-AGC" (list words (mdl-atom initiator)))
+      (mdl-emit-event! "DIVERT-AGC" (list words (mdl-root-atom initiator)))
+      ;; Track whether a collection actually ran during this allocation.
+      ;; The gc-min growth policy (MDL manual ch.22 §22.5) applies only after
+      ;; a collection ran, NOT when a DIVERT-AGC handler's BLOAT already satisfied
+      ;; the request. BLOAT is the handler's mechanism for postponing GC; if the
+      ;; handler BLOATs to cover the pending words, logical capacity is already
+      ;; correct and gc-min does not impose an additional floor.  Applying gc-min
+      ;; after every BLOAT inflates capacity far beyond the handler's intent,
+      ;; collapsing a game-designed diversion schedule (e.g. 77rooms.mud §78-90)
+      ;; from ~85 diversions to ~2 per 300 k cells.
+      (define collected? #f)
       (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
-        (mdl-collect-logical! 2 initiator))
-      ;; Historical MDL asks the host for more space when collection alone
-      ;; cannot satisfy a pending request. This capacity is logical only.
-      (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
-        (set-mdl-memory-capacity!
-         memory (+ (mdl-memory-used memory) (max words 8192))))))
+        (mdl-collect-logical! 2 initiator)
+        (set! collected? #t))
+      ;; MDL manual ch.22 §22.5: gc-min = "the smallest number of words of
+      ;; 'free' (unclaimed, available for use) movable garbage-collected storage"
+      ;; that the collector must leave after a collection; initial value 8192.
+      ;; "A large min will result in fewer total garbage collections."
+      ;; Apply gc-min growth ONLY when collected? is #t (a collection ran).
+      ;; Capacity grows geometrically (×3/2) to also avoid O(n²) cost.
+      ;; Capped at fix-max (2^35-1); Racket error if needed > fix-max.
+      ;;
+      ;; Explicit <GC> (mdl-gc) bypasses this path entirely and does NOT apply
+      ;; gc-min growth: it calls mdl-collect-logical! directly, leaving capacity
+      ;; unchanged.  This matches the manual: min is an automatic-GC parameter.
+      (when collected?
+        (let* ([gc-min (current-mdl-gc-min)]  ; MDL manual ch.22, initial 8192
+               [free-after (mdl-memory-free memory)])
+          (when (< free-after (max words gc-min))
+            (define needed (+ (mdl-memory-used memory) (max words gc-min)))
+            (when (> needed fix-max)
+              (error 'mdl-gc
+                     "storage overflow: ~a logical words needed, exceeds FIX maximum ~a"
+                     needed fix-max))
+            (set-mdl-memory-capacity!
+             memory
+             (min fix-max
+                  (max needed
+                       (inexact->exact
+                        (ceiling (* (mdl-memory-capacity memory) 3/2)))))))))))
   (mdl-memory-register! memory value words))
 
 (define (mdl-deliver-occurrence! occurrence)
@@ -1948,10 +2088,9 @@
      (set-mdl-iheader-enabled?! header #t)
      header]
     [(2)
-     (define name (car args))
+     (define name (mdl-string-snapshot 'mdl-event (car args)
+                                       "EVENT name must be STRING in this slice"))
      (define priority (cadr args))
-     (unless (string? name)
-       (error 'mdl-event "EVENT name must be STRING in this slice"))
      (unless (and (exact-integer? priority) (<= fix-min priority fix-max)
                   (positive? priority))
        (error 'mdl-event "EVENT priority must be a positive FIX"))
@@ -2031,8 +2170,8 @@
             (lambda ()
               (define oblist (oblist-value name (make-hash) size))
               (hash-set! named name oblist)
-              (mdl-put-association! name (mdl-atom "OBLIST") oblist)
-              (mdl-put-association! oblist (mdl-atom "OBLIST") name)
+              (mdl-put-association! name (mdl-root-atom "OBLIST") oblist)
+              (mdl-put-association! oblist (mdl-root-atom "OBLIST") name)
               oblist)))
 
 (define (mdl-root . args)
@@ -2040,8 +2179,8 @@
     (error 'mdl-root "Too many arguments to ROOT"))
   (atom-space-root (current-mdl-atom-space)))
 
-(define (mdl-lookup name oblist)
-  (unless (string? name) (error 'mdl-lookup "expected a STRING PNAME"))
+(define (mdl-lookup name-value oblist)
+  (define name (mdl-string-snapshot 'mdl-lookup name-value "expected a STRING PNAME"))
   (unless (mdl-oblist? oblist)
     (error 'mdl-lookup "expected an MDL OBLIST for PNAME ~a, got ~a"
            name oblist))
@@ -2050,7 +2189,9 @@
 (define (mdl-insert value oblist)
   (require-oblist 'mdl-insert oblist)
   (define atom
-    (cond [(string? value) (atom-value value #f)]
+    (cond [(mdl-string? value)
+           (atom-value (mdl-string-snapshot 'mdl-insert value "expected a STRING PNAME")
+                       #f)]
           [(mdl-atom? value)
            (when (atom-value-oblist value)
              (error 'mdl-insert "ATOM is already on an OBLIST"))
@@ -2082,6 +2223,13 @@
         atom)
       (mdl-false '())))
 
+;; Host-only introspection for reference comparisons (never an MDL
+;; primitive, never reachable from MDL code): the PNAMEs currently on an
+;; OBLIST, sorted.
+(define (mdl-oblist-pnames oblist)
+  (require-oblist 'mdl-oblist-pnames oblist)
+  (sort (hash-keys (oblist-value-entries oblist)) string<?))
+
 (define (mdl-oblist-of atom)
   (require-atom 'mdl-oblist? atom)
   (or (atom-value-oblist atom) (mdl-false '())))
@@ -2101,12 +2249,20 @@
     (error who "expected a nonempty LIST of OBLISTs"))
   value)
 
+;; Manual 15.6: BLOCK pushes the current LVAL of OBLIST and SETs its
+;; argument; ENDBLOCK pops and SETs. The stack belongs to the session and is
+;; "entirely independent of functional application, binding, etc.": a
+;; BLOCK inside a frame that binds OBLIST sets that binding, and a later
+;; ENDBLOCK sets whichever binding is current then (Confusion
+;; block-in-function-with-oblist-binding).
 (define (mdl-block lookup)
   (validate-oblist-lookup 'mdl-block lookup)
   (define space (current-mdl-atom-space))
+  (define previous (current-lookup-path 'mdl-block))
+  (mdl-set! (mdl-root-atom "OBLIST") lookup)
   (set-atom-space-lookup-stack!
-   space (cons (atom-space-lookup space) (atom-space-lookup-stack space)))
-  (mdl-set! "OBLIST" lookup))
+   space (cons previous (atom-space-lookup-stack space)))
+  lookup)
 
 (define (mdl-endblock)
   (define space (current-mdl-atom-space))
@@ -2114,7 +2270,7 @@
   (when (null? stack)
     (error 'mdl-endblock "ENDBLOCK without BLOCK"))
   (set-atom-space-lookup-stack! space (cdr stack))
-  (mdl-set! "OBLIST" (car stack)))
+  (mdl-set! (mdl-root-atom "OBLIST") (car stack)))
 
 (define (mdl-atom name)
   (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
@@ -2123,13 +2279,19 @@
   (if trailer-pos
       (let* ([pname (substring name 0 trailer-pos)]
              [trailer (substring name (+ trailer-pos 2))])
-        (when (or (string=? pname "") (string=? trailer ""))
+        (when (string=? pname "")
           (error 'mdl-atom "invalid OBLIST trailer ~a" name))
-        (define oblist (mdl-moblist (mdl-atom trailer)))
+        ;; An empty trailer (A!-) names the session ROOT OBLIST directly,
+        ;; with no .OBLIST lookup (Confusion prints ROOT atoms outside the
+        ;; search path as A!-; review/R3R4-oblist-reference.json
+        ;; empty-trailer-root). 81tell-repl.mud uses TOPLEVEL!-.
+        (define oblist
+          (if (string=? trailer "")
+              (atom-space-root (current-mdl-atom-space))
+              (mdl-moblist (mdl-atom trailer))))
         (define found (mdl-lookup pname oblist))
         (if (mdl-false? found) (mdl-insert pname oblist) found))
-      (let* ([lookups (mdl-list->list
-                       (atom-space-lookup (current-mdl-atom-space)))]
+      (let* ([lookups (mdl-list->list (current-lookup-path 'mdl-atom))]
              [found (for/or ([oblist (in-list lookups)])
                       (define candidate (mdl-lookup name oblist))
                       (and (not (mdl-false? candidate)) candidate))])
@@ -2193,6 +2355,15 @@
                  (+ (mdl-string-view-start value)
                     (mdl-string-view-length value)))
       value))
+;; A primitive that consumes an MDL STRING argument by value (PNAMEs, OBLIST
+;; keys, EVENT names, host file paths) accepts a native STRING or a shared
+;; REST view, and takes an immutable copy of the visible characters. The
+;; copy is the PNAME semantics (an atom's name never aliases user storage);
+;; the user's STRING and its views keep sharing their own storage. Any
+;; other TYPE fails with MESSAGE.
+(define (mdl-string-snapshot who value message)
+  (unless (mdl-string? value) (error who message))
+  (string->immutable-string (mdl-string-content value)))
 (define (mdl-string-set! value index ch)
   (define storage (if (mdl-string-view? value)
                       (mdl-string-view-storage value) value))
@@ -2280,9 +2451,42 @@
                         ([value (in-list (cdr values))])
                 (arithmetic-step 'mdl-div / acc value))]))
 
+;; The 36-bit target stores FLOAT in PDP-10 single precision: bit 0 sign,
+;; bits 1-8 excess-128 exponent, bits 9-35 a normalized 27-bit fraction;
+;; a negative FLOAT is the two's complement of the whole word. The host
+;; keeps FLOAT as a flonum and derives this image only when a FLOAT is
+;; reinterpreted as WORD-primtype data (CHTYPE). Flonums with no exact
+;; 36-bit image fail instead of being rounded.
+(define pdp10-fraction-bits 27)
+(define pdp10-greatest-float
+  (* (exact->inexact (sub1 (arithmetic-shift 1 pdp10-fraction-bits)))
+     (expt 2.0 100)))
+
+(define (float-word-bits who value)
+  (define (unrepresentable)
+    (error who "FLOAT has no exact PDP-10 FLOAT word image: ~a" value))
+  (unless (and (flonum? value) (= value value)
+               (not (eqv? value +inf.0)) (not (eqv? value -inf.0)))
+    (unrepresentable))
+  (if (zero? value)
+      0
+      (let* ([magnitude (inexact->exact (abs value))]
+             [exponent (+ (- (integer-length (numerator magnitude))
+                             (integer-length (denominator magnitude)))
+                          1)]
+             [fraction (* magnitude (expt 2 (- pdp10-fraction-bits exponent)))]
+             [field (+ exponent 128)])
+        (unless (and (exact-integer? fraction) (<= 0 field 255))
+          (unrepresentable))
+        (define positive (bitwise-ior (arithmetic-shift field pdp10-fraction-bits)
+                                      fraction))
+        (if (negative? value)
+            (bitwise-and (- positive) word-mask)
+            positive))))
+
 (define (mdl-min . values)
   (if (null? values)
-      (mdl-typed-value (mdl-atom "FLOAT") (mdl-word fix-max))
+      pdp10-greatest-float
       (for/fold ([smallest (check-number 'mdl-min (car values))])
                 ([value (in-list (cdr values))])
         (check-number 'mdl-min value)
@@ -2316,7 +2520,7 @@
       [(and (mdl-array? requested)
             (eq? (mdl-array-kind requested) 'UVECTOR)
             (= (mdl-array-length requested) 2)
-            (eq? (mdl-array-element-type requested) (mdl-atom "FIX")))
+            (eq? (mdl-array-element-type requested) (mdl-root-atom "FIX")))
        (define sec (mdl-nth requested 1))
        (define usec (mdl-nth requested 2))
        (unless (and (exact-integer? sec) (exact-integer? usec)
@@ -2339,8 +2543,11 @@
   (check-fix 'mdl-fix (inexact->exact (truncate value))))
 
 (define (mdl-float value)
-  (check-number 'mdl-float value)
-  (exact->inexact value))
+  ;; Manual 3.4: FLOAT converts a FIX; pinned Confusion also rejects a
+  ;; FLOAT argument ("Arg to FLOAT must be FIX").
+  (unless (exact-integer? value)
+    (error 'mdl-float "Arg to FLOAT must be FIX"))
+  (exact->inexact (check-fix 'mdl-float value)))
 
 (define (mdl-bits width [edge 0])
   (unless (and (exact-integer? width) (exact-integer? edge)
@@ -2392,13 +2599,13 @@
 ;; CHARACTER value. A host character remains accepted at the API boundary,
 ;; but source-visible extraction uses the typed WORD representation.
 (define (mdl-character ch)
-  (mdl-typed-value (mdl-atom "CHARACTER") (char->integer ch)))
+  (mdl-typed-value (mdl-root-atom "CHARACTER") (char->integer ch)))
 
 (define (mdl-character-code value)
   (cond
     [(char? value) (char->integer value)]
     [(and (mdl-typed-value? value)
-          (eq? (mdl-typed-value-type value) (mdl-atom "CHARACTER")))
+          (eq? (mdl-typed-value-type value) (mdl-root-atom "CHARACTER")))
      (define code (mdl-base value))
      (and (exact-integer? code)
           (<= 0 code #x10ffff)
@@ -2445,47 +2652,157 @@
   (mdl-track-allocation! storage (+ (* 2 (length values)) 2) "VECTOR")
   (new-mdl-array 'VECTOR storage 0 (length values) #f))
 
-(define (mdl-make-terminal-channel mode)
+;; Session-owned channels. A CHANNEL value is an MDL VECTOR of documented
+;; slots; the host side lives in a host-channel record registered in the
+;; current atom space, keyed by the VECTOR's shared backing storage (the
+;; Racket vector inside the mdl-array), not by one mdl-array view. Every
+;; view of that storage (CHTYPE round trips, REST/TOP/BACK views typed
+;; CHANNEL again) therefore reaches the same host port; a shifted view still
+;; has to pass the mode-slot check. port is the Racket port the channel
+;; writes to (PRINT) or will read from (READ, reserved for READSTRING); #f
+;; means "the current Racket port at the time of each operation", which is
+;; how the default terminal channels of a non-loader context behave. A
+;; CHANNEL VECTOR without a host record in the current space (forged by
+;; CHTYPE, or belonging to another session) is rejected, never written.
+(struct host-channel (direction port))
+
+(define (mdl-make-terminal-channel mode [port #f])
   (unless (member mode '("READ" "PRINT"))
     (error 'mdl-make-terminal-channel "expected READ or PRINT mode"))
-  (mdl-typed-value
-   (mdl-atom "CHANNEL")
-   ;; The host CHANNEL has one predecessor slot before its 19 visible
-   ;; elements. Original CONTIN uses BACK to reach it.
-   (mdl-rest (mdl-vector 0 0 mode "" "" "" "" "" "" "TTY" ""
-                         0 0 80 0 24 0 0 10 0) 1)))
+  (when port
+    (unless (if (equal? mode "PRINT") (output-port? port) (input-port? port))
+      (error 'mdl-make-terminal-channel
+             "~a CHANNEL requires a Racket ~a port" mode
+             (if (equal? mode "PRINT") "output" "input"))))
+  ;; #111: the host CHANNEL has one predecessor slot before its 19 visible
+  ;; elements; original CONTIN uses BACK to reach it. #117 keys the host-port
+  ;; registry by the shared backing storage, so the REST/BACK/TOP views of
+  ;; this channel all resolve to the same port.
+  (define storage (mdl-vector 0 0 mode "" "" "" "" "" "" "TTY" ""
+                              0 0 80 0 24 0 0 10 0))
+  (hash-set! (atom-space-channels (current-mdl-atom-space))
+             (mdl-array-storage storage)
+             (host-channel (string->symbol mode) port))
+  (mdl-typed-value (mdl-root-atom "CHANNEL") (mdl-rest storage 1)))
+
+;; Execution contexts. A context is one globals table, one local frame
+;; stack (whose last frame holds top-level LVALs) and one atom space. Every
+;; context starts like a fresh interpreter (manual 11.2.7; Confusion
+;; startup): INCHAN!-ROOT and OUTCHAN!-ROOT have the same terminal CHANNEL
+;; as LVAL and GVAL. The bindings are stored in the tables when the context
+;; is created, so GDECL, MANIFEST, SETG and ASSIGNED?/GASSIGNED? see them.
+;; make-mdl-context builds a fresh context (used by make-mdl-session and by
+;; hosts that want an isolated run); the process-wide default context (the
+;; parameters' initial values) is initialized at the end of this module.
+;; mdl-ensure-terminal-channels! is idempotent: it binds a fresh pair only
+;; when neither the top-level LVAL nor the GVAL of that ATOM exists, so it
+;; never replaces a host's or program's binding. #lang mdl modules call it
+;; first; they run in the ambient context and therefore share it, and its
+;; channels, with every other module run in that same context.
+(struct mdl-context (globals locals atom-space))
+
+(define (make-mdl-context #:output-port [output-port #f]
+                          #:input-port [input-port #f])
+  (define context (mdl-context (make-hasheq) (list (make-hasheq))
+                               (make-mdl-atom-space)))
+  (call-with-mdl-context
+   context
+   (lambda ()
+     (mdl-ensure-terminal-channels! #:output-port output-port
+                                    #:input-port input-port)))
+  context)
+
+(define (call-with-mdl-context context thunk)
+  (parameterize ([current-mdl-globals (mdl-context-globals context)]
+                 [current-mdl-locals (mdl-context-locals context)]
+                 [current-mdl-atom-space (mdl-context-atom-space context)])
+    (thunk)))
+
+(define (mdl-ensure-terminal-channels! #:output-port [output-port #f]
+                                       #:input-port [input-port #f])
+  (define space (current-mdl-atom-space))
+  (define top-frame (last (current-mdl-locals)))
+  (define globals (current-mdl-globals))
+  (for ([atom (in-list (list (atom-space-inchan space)
+                             (atom-space-outchan space)))]
+        [mode (in-list '("READ" "PRINT"))]
+        [port (in-list (list input-port output-port))])
+    (unless (or (hash-has-key? top-frame atom) (hash-has-key? globals atom))
+      (define channel (mdl-make-terminal-channel mode port))
+      (hash-set! top-frame atom channel)
+      (mdl-setg! atom channel)))
+  (void))
+
+;; Manual 11.2.7 and pinned Confusion (mdl_setup_frame_for_print): an omitted
+;; channel argument means the LVAL of OUTCHAN!-ROOT; the GVAL is not
+;; consulted (review evidence r1-channel-reference.json).
+(define (default-output-channel who)
+  (define value (local-option (atom-space-outchan (current-mdl-atom-space))))
+  (when (eq? value unassigned)
+    (error who "no channel: OUTCHAN has no local value"))
+  value)
+
+;; Validate an output CHANNEL and return the Racket port it writes to.
+;; Mirrors Confusion's checks: non-CHANNEL fails, then a non-PRINT mode slot
+;; fails; additionally the CHANNEL must be open (registered) in this session.
+(define (channel-output-port who channel)
+  (unless (and (mdl-typed-value? channel)
+               (equal? (mdl-atom-pname (mdl-typed-value-type channel)) "CHANNEL"))
+    (error who "attempt to write to non-channel"))
+  (define view (mdl-typed-value-value channel))
+  (define host (and (mdl-array? view)
+                    (hash-ref (atom-space-channels (current-mdl-atom-space))
+                              (mdl-array-storage view) #f)))
+  (unless (and host (eq? (mdl-typed-value-type channel) (mdl-root-atom "CHANNEL")))
+    (error who "CHANNEL is not open in this MDL session"))
+  (unless (and (eq? (host-channel-direction host) 'PRINT)
+               (>= (mdl-array-length view) 2)
+               (equal? (mdl-nth view 2) "PRINT"))
+    (error who "~a requires an output channel"
+           (case who
+             [(mdl-printstring) "PRINTSTRING"]
+             [(mdl-terpri) "TERPRI"]
+             [(mdl-crlf) "CRLF"]
+             [else who])))
+  (or (host-channel-port host) (current-output-port)))
 
 (define (mdl-ivector-build size make-element)
   (unless (and (exact-integer? size) (<= 0 size fix-max))
     (error 'mdl-ivector "IVECTOR length must be a nonnegative FIX"))
   (apply mdl-vector (for/list ([i (in-range size)]) (make-element))))
 
+;; IVECTOR/IUVECTOR/ISTRING are ordinary SUBRs (manual 7.5.4; ILIST is not
+;; implemented in this runtime yet and must reuse this policy): every
+;; call path (compiled, interpreted, APPLY, MAPF) evaluates the arguments
+;; once before the call, as for any SUBR. The optional second argument's
+;; VALUE is then EVALed once per generated element, in element order, so
+;; `<IVECTOR 3 '<SET A <+ .A 1>>>' counts 1 2 3 while
+;; `<IVECTOR 3 <SET A <+ .A 1>>>' evaluates its argument once and fills
+;; with the self-evaluating result.
+(define (constructor-fill-thunk args default)
+  (if (= (length args) 2)
+      (let ([fill (cadr args)]) (lambda () (mdl-eval fill)))
+      default))
+
 (define (mdl-ivector . args)
   (unless (<= 1 (length args) 2)
     (error 'mdl-ivector "IVECTOR expects length and optional element"))
   (mdl-ivector-build (car args)
-                     (if (= (length args) 2)
-                         (lambda () (cadr args))
-                         (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
+                     (constructor-fill-thunk
+                      args (lambda () (mdl-chtype 0 (mdl-root-atom "LOSE"))))))
 
-(define (mdl-ivector-raw raw-args)
-  (define items (if (or (null? raw-args) (mpair? raw-args))
-                    (mdl-list->list raw-args) raw-args))
-  (unless (<= 1 (length items) 2)
-    (error 'mdl-ivector "IVECTOR expects length and optional expression"))
-  (define size (mdl-eval (car items)))
-  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
-  (mdl-ivector-build size
-                     (if fill (lambda () (mdl-eval fill))
-                         (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
+;; The first element fixes a UVECTOR's uniform TYPE; STRING is not a
+;; permitted element TYPE.
+(define (check-uvector-element! who value element-type)
+  (when (or (string=? (mdl-type-name value) "STRING")
+            (not (eq? (mdl-type value) element-type)))
+    (error who "UVECTOR elements must have one permitted TYPE")))
 
 (define (mdl-uvector . values)
   (define element-type (if (pair? values) (mdl-type (car values))
-                           (mdl-atom "LOSE")))
+                           (mdl-root-atom "LOSE")))
   (for ([value (in-list values)])
-    (when (or (string=? (mdl-type-name value) "STRING")
-              (not (eq? (mdl-type value) element-type)))
-      (error 'mdl-uvector "UVECTOR elements must have one permitted TYPE")))
+    (check-uvector-element! 'mdl-uvector value element-type))
   (define storage (list->vector values))
   (mdl-track-allocation! storage (+ (length values) 2) "UVECTOR")
   (new-mdl-array 'UVECTOR storage 0 (length values) element-type))
@@ -2493,31 +2810,28 @@
 (define (mdl-iuvector-build size make-element)
   (unless (and (exact-integer? size) (<= 0 size fix-max))
     (error 'mdl-iuvector "IUVECTOR length must be a nonnegative FIX"))
-  (define values (for/list ([i (in-range size)]) (make-element)))
+;; Validate each element as it is produced, so a non-uniform element stops
+  ;; the per-element evaluation immediately (later fills never run).
+  (define values
+    (let loop ([i 0] [element-type #f] [acc '()])
+      (if (= i size)
+          (reverse acc)
+          (let* ([value (make-element)]
+                 [type (or element-type (mdl-type value))])
+            (check-uvector-element! 'mdl-iuvector value type)
+            (loop (add1 i) type (cons value acc))))))
   (if (null? values)
       (let ([storage (vector)])
         (mdl-track-allocation! storage 2 "UVECTOR")
-        (new-mdl-array 'UVECTOR storage 0 0 (mdl-atom "LOSE")))
+        (new-mdl-array 'UVECTOR storage 0 0 (mdl-root-atom "LOSE")))
       (apply mdl-uvector values)))
 
 (define (mdl-iuvector . args)
   (unless (<= 1 (length args) 2)
     (error 'mdl-iuvector "IUVECTOR expects length and optional element"))
   (mdl-iuvector-build (car args)
-                      (if (= (length args) 2)
-                          (lambda () (cadr args))
-                          (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
-
-(define (mdl-iuvector-raw raw-args)
-  (define items (if (or (null? raw-args) (mpair? raw-args))
-                    (mdl-list->list raw-args) raw-args))
-  (unless (<= 1 (length items) 2)
-    (error 'mdl-iuvector "IUVECTOR expects length and optional expression"))
-  (define size (mdl-eval (car items)))
-  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
-  (mdl-iuvector-build size
-                      (if fill (lambda () (mdl-eval fill))
-                          (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
+                      (constructor-fill-thunk
+                       args (lambda () (mdl-chtype 0 (mdl-root-atom "LOSE"))))))
 
 ;; Unevaluated UVECTOR data may contain SEGMENT placeholders; uniformity is
 ;; enforced when the data is evaluated (see uniform-uvector).
@@ -2525,7 +2839,7 @@
   (define storage (list->vector values))
   (mdl-track-allocation! storage (+ (length values) 2) "UVECTOR")
   (new-mdl-array 'UVECTOR storage 0 (length values)
-             (if (null? values) (mdl-atom "LOSE") #f)))
+             (if (null? values) (mdl-root-atom "LOSE") #f)))
 
 (define (mdl-list-head value who)
   (cond [(mdl-typed-value? value) (mdl-list-head (mdl-base value) who)]
@@ -2597,8 +2911,8 @@
                        (+ (mdl-array-length base) offset)
                        (mdl-array-type-cell base)))
      (if (and (mdl-typed-value? value)
-              (eq? (mdl-typed-value-type value) (mdl-atom "CHANNEL")))
-         (mdl-typed-value (mdl-atom "CHANNEL") result)
+              (eq? (mdl-typed-value-type value) (mdl-root-atom "CHANNEL")))
+         (mdl-typed-value (mdl-root-atom "CHANNEL") result)
          result)]
     [else (error 'mdl-back "BACK requires an array")]))
 
@@ -2748,7 +3062,7 @@
 (define (mdl-putrest! head tail)
   (define (require-list-primtype value)
     (define prim (mdl-primtype value))
-    (unless (eq? prim (mdl-atom "LIST"))
+    (unless (eq? prim (mdl-root-atom "LIST"))
       (error 'mdl-putrest "PUTREST requires LIST-primtype values, not ~a"
              (mdl-atom-pname prim))))
   (require-list-primtype head)
@@ -2876,19 +3190,19 @@
   (not (mdl-false? value)))
 
 (define (mdl-boolean value)
-  (if value (mdl-atom "T") (mdl-false '())))
+  (if value (mdl-root-atom "T") (mdl-false '())))
 
 (define (mdl-type value)
   (if (mdl-typed-value? value)
       (mdl-typed-value-type value)
-      (mdl-atom (mdl-type-name value))))
+      (mdl-root-atom (mdl-type-name value))))
 
 (define (mdl-typeprim type)
   (require-atom 'mdl-typeprim type)
   (define prim
     (hash-ref (atom-space-types (current-mdl-atom-space)) type
               (lambda () (error 'mdl-typeprim "unknown MDL TYPE ~a" (mdl-atom-pname type)))))
-  (mdl-atom prim))
+  (mdl-root-atom prim))
 
 (define (mdl-primtype value)
   (mdl-typeprim (mdl-type value)))
@@ -2906,7 +3220,7 @@
          (unless (eq? (mdl-array-kind element) 'VECTOR) (bad))
          (define bracket (decl-bracket-items element))
          (unless (and (>= (length bracket) 2)
-                      (or (and (eq? (car bracket) (mdl-atom "REST"))
+                      (or (and (eq? (car bracket) (mdl-root-atom "REST"))
                                (= index (sub1 (length elements))))
                           (and (exact-integer? (car bracket))
                                (positive? (car bracket)))))
@@ -2938,7 +3252,7 @@
          [(mdl-form? head)
           (define head-items (form-elements head))
           (unless (and (= (length head-items) 2)
-                       (eq? (car head-items) (mdl-atom "PRIMTYPE"))
+                       (eq? (car head-items) (mdl-root-atom "PRIMTYPE"))
                        (mdl-atom? (cadr head-items)))
             (bad))
           (check-structure-elements (cdr items))]
@@ -2962,7 +3276,7 @@
   ;; The historical Pattern may refer to types defined later in the same
   ;; source file. Store its unevaluated value now and resolve it on CHTYPE.
   (when (pair? declaration)
-    (mdl-put-association! name (mdl-atom "DECL") (car declaration)))
+    (mdl-put-association! name (mdl-root-atom "DECL") (car declaration)))
   name)
 
 (define (mdl-chtype value type)
@@ -2976,7 +3290,7 @@
       (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
         (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
                    (not (member target '("ATOM" "LIST" "FALSE" "VECTOR" "UVECTOR" "STRING"
-                                         "FIX" "WORD" "LOSE"))))
+                                         "FIX" "WORD" "LOSE" "CHANNEL"))))
           (error 'mdl-chtype "unsupported built-in TYPE conversion"))
         (when (and (not (or (null? base) (mpair? base) (mdl-atom? base)
                             (mdl-string? base)
@@ -2984,12 +3298,16 @@
                    (not (string=? (mdl-atom-pname desired-prim) "WORD")))
           (error 'mdl-chtype "unsupported primitive storage conversion"))
         (cond [(string=? (mdl-atom-pname desired-prim) "WORD")
+               (define bits
+                 (if (flonum? base)
+                     (float-word-bits 'mdl-chtype base)
+                     (word-bits-of base)))
                (cond [(string=? target "FIX")
-                      (word-signed (word-bits-of base))]
+                      (word-signed bits)]
                      [(string=? target "WORD")
-                      (mdl-word (word-bits-of base))]
-                     [(or (exact-integer? base) (mdl-word? base))
-                      (mdl-typed-value type (mdl-word (word-bits-of base)))]
+                      (mdl-word bits)]
+                     [(or (exact-integer? base) (mdl-word? base) (flonum? base))
+                      (mdl-typed-value type (mdl-word bits))]
                      [else (error 'mdl-chtype "unsupported WORD reinterpretation")])]
               [(string=? target "LIST")
                (mdl-list-head base 'mdl-chtype)]
@@ -3002,7 +3320,7 @@
               [(member (mdl-atom-pname desired-prim) '("ATOM" "LIST" "VECTOR" "UVECTOR" "STRING"))
                (mdl-typed-value type base)]
               [else (error 'mdl-chtype "unsupported primitive type conversion")]))))
-  (define declared (association-lookup type (mdl-atom "DECL")))
+  (define declared (association-lookup type (mdl-root-atom "DECL")))
   (when declared
     (define pattern (normalize-decl-pattern (cdr declared) #f #f "CHTYPE"))
     (unless (matches-decl? converted pattern)
@@ -3019,13 +3337,13 @@
                   '("ATOM" "LIST" "WORD" "VECTOR" "UVECTOR"))
     (error 'mdl-chutype "TYPE not valid for UVECTOR"))
   (define old-type (mdl-array-element-type base))
-  (unless (or (eq? old-type (mdl-atom "LOSE"))
+  (unless (or (eq? old-type (mdl-root-atom "LOSE"))
               (eq? (mdl-typeprim old-type) target-prim))
     (error 'mdl-chutype "cannot change element primitive type"))
   (define converted
     (for/list ([index (in-range (vector-length (mdl-array-storage base)))])
       (define old (vector-ref (mdl-array-storage base) index))
-      (if (eq? old-type (mdl-atom "LOSE"))
+      (if (eq? old-type (mdl-root-atom "LOSE"))
           (case (string->symbol (mdl-atom-pname target-prim))
             [(WORD) (mdl-chtype 0 type)]
             [(LIST) (mdl-chtype '() type)]
@@ -3070,51 +3388,30 @@
   (unless (<= 1 (length args) 2)
     (error 'mdl-istring "ISTRING expects length and optional CHARACTER"))
   (mdl-istring-build (car args)
-                     (if (= (length args) 2)
-                         (lambda () (cadr args))
-                         (lambda () (mdl-character #\nul)))))
+                     (constructor-fill-thunk
+                      args (lambda () (mdl-character #\nul)))))
 
-(define (mdl-istring-raw raw-args)
-  (define items (if (or (null? raw-args) (mpair? raw-args))
-                    (mdl-list->list raw-args) raw-args))
-  (unless (<= 1 (length items) 2)
-    (error 'mdl-istring "ISTRING expects length and optional expression"))
-  (define size (mdl-eval (car items)))
-  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
-  (mdl-istring-build size
-                     (if fill (lambda () (mdl-eval fill))
-                         (lambda () (mdl-character #\nul)))))
-
-(define (mdl-printstring buffer [channel (mdl-lval "OUTCHAN")] [count #f])
+(define (mdl-printstring buffer [channel (default-output-channel 'mdl-printstring)]
+                         [count #f])
+  (define port (channel-output-port 'mdl-printstring channel))
   (unless (mdl-string? buffer)
     (error 'mdl-printstring "PRINTSTRING expects a STRING buffer"))
-  (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
-               (equal? (mdl-nth channel 2) "PRINT"))
-    (error 'mdl-printstring "PRINTSTRING requires an output channel"))
   (when (and count (not (and (exact-integer? count) (>= count 0))))
     (error 'mdl-printstring "PRINTSTRING count must be a nonnegative FIX"))
   (define written (if count (min count (mdl-string-length buffer))
                       (mdl-string-length buffer)))
-  (display (substring (mdl-string-content buffer) 0 written))
+  (write-string (substring (mdl-string-content buffer) 0 written) port)
   ;; The MDL manual returns the number of characters printed. Pinned
   ;; Confusion returns the original STRING; see docs/SEMANTICS.md.
   written)
 
-(define (mdl-terpri [channel #f])
-  (when channel
-    (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
-                 (equal? (mdl-nth channel 2) "PRINT"))
-      (error 'mdl-terpri "TERPRI requires an output channel")))
-  (newline)
+(define (mdl-terpri [channel (default-output-channel 'mdl-terpri)])
+  (newline (channel-output-port 'mdl-terpri channel))
   (mdl-false '()))
 
-(define (mdl-crlf [channel #f])
-  (when channel
-    (unless (and (eq? (mdl-type channel) (mdl-atom "CHANNEL"))
-                 (equal? (mdl-nth channel 2) "PRINT"))
-      (error 'mdl-crlf "CRLF requires an output channel")))
-  (newline)
-  (mdl-atom "T"))
+(define (mdl-crlf [channel (default-output-channel 'mdl-crlf)])
+  (newline (channel-output-port 'mdl-crlf channel))
+  (mdl-root-atom "T"))
 
 ;; UNPARSE (MDL manual ch. 7, section 7.6.6.4; appendix 2)
 ;;
@@ -3173,7 +3470,9 @@
        (error who
               "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"
               pname))
-     (define lookups (mdl-list->list (atom-space-lookup (current-mdl-atom-space))))
+     ;; #118: the one authoritative search path (LVAL of ROOT OBLIST), not
+     ;; the session default stored in atom-space-lookup.
+     (define lookups (mdl-list->list (current-lookup-path who)))
      (define found
        (for/or ([oblist (in-list lookups)])
          (define candidate (mdl-lookup pname oblist))
@@ -3205,7 +3504,7 @@
                         ")"))]
     [(or (char? value)
          (and (mdl-typed-value? value)
-              (eq? (mdl-typed-value-type value) (mdl-atom "CHARACTER"))))
+              (eq? (mdl-typed-value-type value) (mdl-root-atom "CHARACTER"))))
      ;; CHARACTER: "!\" followed by the character (Confusion: !\A → "!\\A").
      ;; The returned string contains !, \, char (3 chars for printable ASCII).
      ;; B3: control characters (codes 0-31, 127) require Confusion's "!\^A"
@@ -3251,29 +3550,43 @@
     (cond [(mdl-atom? value) (mdl-atom-pname value)]
           [(mdl-string? value) (format "~s" (mdl-string-content value))]
           [else (format "~a" value)]))
-  (call/ec
-   (lambda (resume)
-     (define frame (mdl-error-frame (current-mdl-atom-space) resume #t))
-     (dynamic-wind
-       void
-       (lambda ()
-         (define header (hash-ref (atom-space-events (current-mdl-atom-space))
-                                  "ERROR" #f))
-         (when (and header (active-iheader? header)
-                    (> (mdl-iheader-priority header)
-                       (mdl-interrupt-state-level (current-interrupt-state))))
-           (mdl-emit-event! "ERROR" (cons frame args)))
-         (error 'mdl-error "~a"
-                (if (null? args) "ERROR"
-                    (string-join (map describe args) " "))))
-       (lambda () (set-mdl-error-frame-live?! frame #f))))))
+  (define-values (value erret-level)
+    (call/ec
+     (lambda (resume)
+       (define frame (mdl-error-frame (current-mdl-atom-space) resume #t))
+       (dynamic-wind
+         void
+         (lambda ()
+           (define header (hash-ref (atom-space-events (current-mdl-atom-space))
+                                    "ERROR" #f))
+           ;; ERROR occurrences are never queued (manual 21.8.11): deliver
+           ;; this one now instead of appending it behind older pending
+           ;; occurrences, where it could outlive its FRAME.
+           (when (and header (active-iheader? header)
+                      (> (mdl-iheader-priority header)
+                         (mdl-interrupt-state-level (current-interrupt-state))))
+             (mdl-deliver-occurrence!
+              (mdl-interrupt-occurrence header (cons frame args))))
+           (error 'mdl-error "~a"
+                  (if (null? args) "ERROR"
+                      (string-join (map describe args) " "))))
+         (lambda () (set-mdl-error-frame-live?! frame #f))))))
+  ;; ERRET returns from this ERROR at the interrupt level current when ERRET
+  ;; ran; the handler is responsible for <INT-LEVEL 0> (manual 21.8.11).
+  ;; Handler cleanup restored older levels while unwinding; undo that here.
+  (set-mdl-interrupt-state-level! (current-interrupt-state) erret-level)
+  ;; Returning from ERROR is a safe point: deliver occurrences eligible at
+  ;; the resumed level (e.g. left pending by an earlier raising handler).
+  (mdl-drain-pending!)
+  value)
 
 (define (mdl-erret value frame)
   (unless (and (mdl-error-frame? frame)
                (eq? (mdl-error-frame-owner frame) (current-mdl-atom-space))
                (mdl-error-frame-live? frame))
     (error 'mdl-erret "ERRET requires a live ERROR FRAME in this session"))
-  ((mdl-error-frame-resume frame) value))
+  ((mdl-error-frame-resume frame)
+   value (mdl-interrupt-state-level (current-interrupt-state))))
 
 (define (mdl-map-structured? value)
   (define base (mdl-base value))
@@ -3295,7 +3608,7 @@
     (error 'mdl-mapleave "TOO-MANY-ARGUMENTS-SUPPLIED"))
   (define leave (current-mdl-map-leave))
   (unless leave (error 'mdl-mapleave "No map in MAPLEAVE"))
-  (leave (if (null? values) (mdl-atom "T") (car values))))
+  (leave (if (null? values) (mdl-root-atom "T") (car values))))
 
 (define (mdl-map-core rest? finalf loopf structures)
   (for ([structure (in-list structures)])
@@ -3359,7 +3672,7 @@
   ;; mdl-dispatch-call evaluates the complete SUBR argument list before
   ;; invoking this procedure, including arguments after the first FALSE.
   (let loop ([remaining args])
-    (cond [(null? remaining) (mdl-atom "T")]
+    (cond [(null? remaining) (mdl-root-atom "T")]
           [(not (mdl-truthy? (car remaining))) (car remaining)]
           [(null? (cdr remaining)) (car remaining)]
           [else (loop (cdr remaining))])))
@@ -3377,7 +3690,7 @@
     (if (or (mdl-array? base) (mdl-string? base))
         (zero? (mdl-length object))
         (null? (mdl-list-head object 'mdl-emptyq))))
-  (if empty? (mdl-atom "T") (mdl-false '())))
+  (if empty? (mdl-root-atom "T") (mdl-false '())))
 
 (define (mdl-lengthq . args)
   (case (length args)
@@ -3501,8 +3814,8 @@
         "FORM" (lambda elems (mdl-make-form (apply mdl-list elems)))
         "EXPAND" mdl-expand
         "ATOM" (lambda (name)
-                 (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
-                 (atom-value name #f))
+                 (atom-value (mdl-string-snapshot 'mdl-atom name "expected a STRING PNAME")
+                             #f))
         "MOBLIST" mdl-moblist
         "BLOCK" mdl-block
         "ENDBLOCK" mdl-endblock
@@ -3535,6 +3848,11 @@
                    [else (error 'mdl-neq "TOO-MANY-ARGUMENTS-SUPPLIED")]))
         "==?" (lambda (a b) (mdl-boolean (mdl-identical? a b)))
         "N==?" (lambda (a b) (mdl-boolean (not (mdl-identical? a b))))))
+
+;; The default session is created after builtin-table exists, because a
+;; session's ROOT is seeded with every builtin SUBR name. Definitions
+;; above only read the parameter when called.
+(define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
 (define (mdl-apply name . args)
   (define atom (binding-atom 'mdl-apply name))
@@ -3704,3 +4022,6 @@
              (mdl-again (car (current-mdl-activations))))))))
    3)
   (check-equal? self-again-count 3))
+
+;; Initialize the process-wide default context (see "Execution contexts").
+(mdl-ensure-terminal-channels!)

@@ -70,156 +70,88 @@ Interpreter SHA256: `b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda8
 | `<UNPARSE (1 2 3)>` | `"(1 2 3)"` | LIST → `(elem …)` space-separated |
 | `<UNPARSE <CHTYPE 22 FIX>>` | `"22"` | game use case |
 
-**Key deviation:** Confusion ignores the optional `radix` argument completely — it always
-produces decimal output for FIX regardless of radix value. This matches the game's
-usage (no radix argument supplied).
+**Key deviation:** Confusion ignores the optional `radix` argument and always prints
+decimal. That is a reference deviation from the manual, not behaviour to copy. The
+runtime **rejects** any radix other than 10 with an explicit "not implemented" error
+instead of silently returning a decimal string (AGENTS.md strict-failure rule). The game
+never supplies a radix.
 
 ---
 
-## Design decision
+## Final behaviour (after independent review rounds; PR #125)
 
-Implement UNPARSE as a Racket SUBR registered in the core dispatch table.
+Implementation history:
+- `04e3004`: first implementation.
+- `e854766` (round 1): strict radix and escape rules.
+- `30cec5d` (round 2): ATOM whitelist and reachability; control characters.
+- `c09bb02`: ASCII-only whitelist.
+- Propagation merge onto the #107 remediation: reachability via the #118 search path.
 
-- **FIX** (required for the game): `(number->string value)` in base 10. Radix argument
-  accepted as FIX in range 2–36 (error otherwise) but always treated as 10 per Confusion.
-- **ATOM**: pname string. Exact for simple alphanumeric pnames; `\`-escaping for exotic
-  atom names is not implemented (not needed by the game).
-- **STRING**: double-quoted with `\"` and `\\` escaping of `"` and `\` in content.
-- **FALSE**: `"#FALSE ()"` or `"#FALSE (elem …)"` for non-empty payload (recursive).
-- **CHARACTER**: `"!\\"` + character string (3 chars for ASCII printable).
-- **LIST**: `"(elem …)"` with space-separated recursively-unparsed elements.
-- **FLOAT**: strict unsupported error (7-decimal-place format unconfirmed for all values;
-  not used in the game). Per AGENTS.md strict-failure rule.
-- **Other types** (VECTOR, UVECTOR, WORD, FORM, FUNCTION, …): strict unsupported error.
+Exact against pinned Confusion, otherwise a strict error:
 
-Result is always a **fresh mutable** Racket string (via `string-copy`), matching
-Confusion's observed mutability.
+- **FIX:** decimal, including the 36-bit extremes 34359738367 / -34359738368. The radix
+  must be omitted or 10. Any other FIX in 2–36 raises "UNPARSE: non-decimal radix N not
+  implemented". A non-FIX or out-of-range radix also raises an error.
+- **ATOM:** the bare PNAME, only when both hold:
+  - (a) the PNAME is non-empty, consists only of ASCII `[A-Za-z0-9-]`, and does not
+    parse as a number;
+  - (b) looking the PNAME up on the **current** OBLIST search path finds this exact atom
+    (`eq?`).
 
----
+  The current path is #118's single authority `current-lookup-path`, i.e. the LVAL of
+  ROOT OBLIST including PROG/AUX/formal bindings and BLOCK, not the session's default
+  path. Otherwise a strict error is raised. Confusion escapes `!`, `.`, `#`, `%`, `<`, `>`
+  and prints `!-oblist` trailers for unreachable atoms; neither is implemented.
+- **STRING:** double-quoted, with `\"` and `\\`. Content with control characters
+  (codes 0–31, 127) raises a strict error; Confusion prints `^A` notation.
+- **CHARACTER:** `!\c`. Control codes 0–31 and 127 raise a strict error.
+- **FALSE:** `#FALSE ()` or `#FALSE (elem …)`.
+- **LIST:** `(elem …)`, recursive.
+- **FLOAT, VECTOR, UVECTOR, WORD, FORM and other types:** strict unsupported error.
 
-## Changed files
+Manual §7.6.6.4: the result is the character sequence PRINT would output, with no
+line-width breaks. It is always a fresh mutable STRING.
 
-| File | Change |
-|---|---|
-| `mdl/runtime/core.rkt` | Added `mdl-unparse-escape-string`, `mdl-unparse-value`, `mdl-unparse`; registered `"UNPARSE"` in dispatch table |
-| `tests/unparse_test.rkt` | New: 25 tests (interpreted, compiled, APPLY paths; FIX, ATOM, STRING, FALSE, CHARACTER, LIST, error cases) |
-| `tests/historical_saveit_test.rkt` | New: historical regression asserting 1229-form load + SAVE-IT XFAIL frontier |
-| `scripts/test_racket.sh` | Added `tests/unparse_test.rkt` to smoke suite |
-| `Makefile` | Added `test-m3-saveit` target; added to `.PHONY` |
-| `docs/evidence/M3/unparse-cases.json` | Confusion probe cases |
-| `docs/evidence/M3/unparse-reference.json` | Confusion probe reference output |
+## Tests (final)
 
----
-
-## Red → green evidence
-
-**Before fix** (base commit, calling SAVE-IT after loading):
-```
-mdl-eval: unassigned or non-applicable MDL operator UNPARSE
-```
-
-**After fix** (probe-saveit.rkt output):
-```
-Load status: PASS
-Completed expressions: 1229
-Skipped expressions: 0
-
---- SAVE-IT call result ---
-EXCEPTION: mdl-memq: unsupported STRING MEMQ
-```
-
-UNPARSE no longer fails. The 1,229-form load still completes with 0 skips.
-
----
-
-## Test counts
-
-```
-raco test tests/unparse_test.rkt
-25 tests passed
-
-raco test tests/historical_saveit_test.rkt
-5 tests passed
-
-bash scripts/test_racket.sh
-3/1882 test failures
-```
-
-The 3 failures are pre-existing sandbox artifacts (loader_test.rkt, declaration_test.rkt,
-percent_read_test.rkt hardcode `/tmp` paths that the sandbox blocks; unrelated to this change).
-
-Python tests and m3-source-progress: not affected (no semantic change to loaded forms).
-
----
-
-## Source progress
-
-- Completed expressions: 1229 / 1229 loaded
-- Skipped expressions: 0
-- SAVE-IT progress: UNPARSE ✓ → next frontier: STRING MEMQ
-
----
-
-## Next SAVE-IT frontier
-
-**Operator:** MEMQ  
-**Function:** `UNSPEAKABLE-CODE` (77rooms.mud:146)  
-**Call site:** 77rooms.mud:148  
-**Expression:** `<SET STR <MEMQ !\/ <OREAD .O>>>`  
-**Error:** `mdl-memq: unsupported STRING MEMQ`  
-**Called from:** SAVE-IT at 77rooms.mud:12 (`<PUT <FIND-OBJ "PAPER"> ,ODESC1 <UNSPEAKABLE-CODE>>`)
-
-MEMQ with a CHARACTER needle in a STRING haystack (the "search string for character"
-form) is not currently implemented. This is distinct from MEMQ on LISTs which works.
-
----
+- `tests/unparse_test.rkt`: **44 checks** covering interpreted, compiled and APPLY
+  paths. These include:
+  - the radix strict errors;
+  - ASCII-only and number-like PNAME rejection;
+  - unreachable-atom rejection;
+  - an atom unreachable under a PROG-bound OBLIST of `(<ROOT>)`, which failed with the
+    stale default-path accessor and now raises the strict trailer error;
+  - control-character rejection.
+- `tests/historical_saveit_test.rkt` (`make test-m3-saveit`, run via `raco test`):
+  asserts the 1,229-form load and the next faithful SAVE-IT frontier as a known XFAIL.
+  The frontier is now advanced by later slices (MEMQ → SUBSTRUC). It is not an
+  INITIALIZED claim.
 
 ## Remaining risks / unsupported cases
 
-1. **Radix deviation:** Confusion ignores radix; the MDL manual says it should work. If
-   any source ever passes a non-10 radix to UNPARSE and expects non-decimal output, we
-   will deviate from the manual. The game does not use the radix argument.
-2. **ATOM \-escaping:** ATOM PNAME is emitted without backslash-escaping special chars.
-   Exact only for alphanumeric pnames. Not an issue for the game's atoms.
-3. **FLOAT format:** Confusion uses 7 decimal places (e.g. `1.5000000`). Not implemented;
-   strict error on FLOAT input. FLOAT not used in the game's UNPARSE calls.
-4. **WORD, FORM, structured typed values:** not implemented; strict error. Not needed by
-   the game's UNPARSE calls.
-
----
+1. Radix other than 10, ATOM escaping and trailers, control-character `^` notation, and
+   FLOAT/VECTOR/UVECTOR/WORD/FORM printing are all strict errors. None is used by the
+   game's single UNPARSE call (77rooms.mud:164, a day-of-month FIX).
 
 ## Proposed docs/SEMANTICS.md section
 
 ```markdown
-### UNPARSE
-
-**Contract (MDL manual ch. 7, section 7.6.6.4; appendix 2):**
-`<UNPARSE any radix:fix>` → STRING
-
-Returns a fresh mutable STRING containing the character sequence PRINT would
-emit for `any`, without line-break characters. The optional `radix` (FIX,
-default 10) selects the number base for FIX values.
-
-**Confusion reference (SHA256 b5fcb91b…):**
-Confusion ignores the `radix` argument; always produces decimal FIX output
-regardless of radix value. We match this behaviour.
-
-**Implemented types (exact against Confusion):**
-- FIX → decimal string (radix ignored per Confusion)
-- ATOM → PNAME (exact only for alphanumeric pnames; \\-escaping not implemented)
-- STRING → double-quoted with \" and \\ content escaping
-- FALSE → `#FALSE ()` or `#FALSE (elem …)` (recursive)
-- CHARACTER → `!\\` followed by the character
-- LIST → `(elem …)` space-separated, recursive
-
-**Strict unsupported error for:** FLOAT, VECTOR, UVECTOR, WORD, FORM, FUNCTION,
-and all other types.
-
-**Result mutability:** each call returns a fresh mutable STRING (string-copy),
-matching Confusion's observed behaviour.
-
-**Source use:** the only UNPARSE call in the December 1977 Zork is
-`77rooms.mud:164` (`REMARKABLY-DISGUSTING-CODE`), which unparses a FIX
-(day-of-month from DSKDATE). The radix and other-type paths are not exercised
-by the game source.
+### UNPARSE (manual 7.6.6.4)
+`<UNPARSE any radix:fix>` returns a fresh mutable STRING with the characters PRINT
+would output, without line-width breaks.
+Implemented exactly (pinned Confusion probes):
+- FIX in decimal;
+- STRING (quoted; `\"`, `\\`);
+- CHARACTER (`!\c`);
+- FALSE;
+- LIST;
+- plain ATOMs: an ASCII `[A-Za-z0-9-]` non-numeric PNAME that is reachable as the same
+  atom on the current OBLIST search path (LVAL of ROOT OBLIST).
+Strict errors:
+- a radix other than 10. Confusion ignores the radix: a documented reference deviation,
+  not copied.
+- ATOMs needing escaping or a trailer;
+- control characters in STRING/CHARACTER;
+- FLOAT, VECTOR, UVECTOR, WORD, FORM and other types.
+Source use: 77rooms.mud:164 only (a day-of-month FIX).
 ```
