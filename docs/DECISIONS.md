@@ -1081,3 +1081,21 @@ in the reference, so the runtime preserves it for that host value.
 behavior. The original CONTIN then fails at TENEX?, a global initialized
 by source wrappers before START. Probe that prelude before adding host
 platform state. No GPLv3 implementation was copied.
+
+## ADR-0047: Register IPC without a source; refuse SAVE strictly
+
+**Decision (maintainer, 2026-11-22, issue #112):** (1) `ON` is EVENT plus
+HANDLER per manual chapter 21 and returns the new HANDLER. The predefined
+`"IPC"` may be registered and observed, and OFF removes it, but an isolated
+session has no inter-process message source, so any attempt to emit or
+deliver an IPC occurrence is a strict error. All other refused predefined
+names (CHAR, READ, BLOCKED, ...) stay refused. (2) `SAVE` raises an explicit
+unsupported error naming this decision; it does not return `"SAVED"` and
+writes no file. `RESTORE` is refused the same way.
+
+**Consequence:** the faithful `run.mud` path stops at `<SAVE .FN>`
+(77rooms.mud:26) after ON IPC, HANDLER DIVERT, ISTRING, DEV/SNM and
+`INT-LEVEL 100000`; INITIALIZED is BLOCKED at SAVE. Confusion stubs ON and
+really saves an image; both differences are documented reference deviations.
+A session-owned snapshot (option b) remains a later, separately approved slice.
+No GPLv3 implementation was copied.

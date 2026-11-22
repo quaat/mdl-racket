@@ -1867,9 +1867,21 @@
 ;; A true event source must be supplied before predefined names are
 ;; registered. GC and DIVERT-AGC are internal MDL interrupts, not OS signals.
 (define unsupported-predefined-interrupt-names
-  '("CHAR" "READ" "WRITE" "IPC" "BLOCKED" "UNBLOCKED"
+  '("CHAR" "READ" "WRITE" "BLOCKED" "UNBLOCKED"
     "CLOCK" "SYSDOWN" "INFERIOR" "RUNT" "REALT"
     "MPV" "PURE" "ILOPR" "PARITY" "IOC"))
+
+;; Maintainer decision 2026-11-22 (issue #112): "IPC" may be registered
+;; (EVENT, HANDLER, ON, OFF all work), but an isolated session has no
+;; inter-process message source, so an IPC occurrence can never arise.
+;; Any attempt to emit or deliver one is a strict error.
+(define sourceless-predefined-interrupt-names '("IPC"))
+
+(define (check-emittable-event who name)
+  (when (member name sourceless-predefined-interrupt-names)
+    (error who
+           "~a: this session has no inter-process message source; ~a occurrences cannot be emitted (maintainer decision 2026-11-22; issue #112)"
+           name name)))
 
 (define (current-interrupt-state)
   (atom-space-interrupt-state (current-mdl-atom-space)))
@@ -1890,6 +1902,7 @@
 ;; already evaluated. Focused tests call it directly; it is not an MDL
 ;; primitive or client-facing evaluator, and no fake GC source uses it.
 (define (mdl-emit-event! name arguments [strict? #f])
+  (check-emittable-event 'mdl-emit-event! name)
   (define header (hash-ref (atom-space-events (current-mdl-atom-space)) name #f))
   (when (and strict? (not header))
     (error 'mdl-emit-event! "unknown or unregistered event ~a" name))
@@ -2014,6 +2027,7 @@
 
 (define (mdl-deliver-occurrence! occurrence)
   (define header (mdl-interrupt-occurrence-header occurrence))
+  (check-emittable-event 'mdl-deliver-occurrence! (mdl-iheader-name header))
   (when (active-iheader? header)
     (define state (current-interrupt-state))
     (define old-level (mdl-interrupt-state-level state))
@@ -2152,6 +2166,42 @@
      (set-mdl-iheader-enabled?! object #f)
      object]
     [else (error 'mdl-off "OFF expects IHEADER or HANDLER")]))
+
+;; Manual ch.21.6: <ON name applicable priority> = <HANDLER <EVENT name
+;; priority> applicable>; it finds or creates the IHEADER, associates and
+;; enables it, prepends a new HANDLER and returns that HANDLER. Every
+;; argument is validated before anything is registered. The optional
+;; process/which arguments are unsupported in this slice.
+(define (mdl-on . args)
+  (case (length args)
+    [(3) (void)]
+    [(4 5) (error 'mdl-on "ON process and which arguments are unsupported in this slice")]
+    [else (error 'mdl-on "ON expects name, applicable and priority")])
+  (define name-value (car args))
+  (define name (mdl-string-snapshot 'mdl-on name-value
+                                    "ON name must be STRING in this slice"))
+  (define action (cadr args))
+  (define priority (caddr args))
+  (unless (or (procedure? action) (mdl-function? action))
+    (error 'mdl-on "unsupported ON applicable; expected FUNCTION or SUBR"))
+  (unless (and (exact-integer? priority) (<= fix-min priority fix-max)
+               (positive? priority))
+    (error 'mdl-on "ON priority must be a positive FIX"))
+  (when (member name unsupported-predefined-interrupt-names)
+    (error 'mdl-on "unsupported predefined EVENT ~a" name))
+  (define header (mdl-enable (mdl-event name-value priority)))
+  (mdl-install-handler header action))
+
+;; Maintainer decision 2026-11-22 (issue #112): SAVE and RESTORE are
+;; intentionally unsupported. They never return "SAVED", never read or
+;; write a file, and fail after ordinary SUBR argument evaluation.
+(define (mdl-save . args)
+  (error 'SAVE
+         "saving a restorable image is not supported (maintainer decision 2026-11-22; issue #112)"))
+
+(define (mdl-restore . args)
+  (error 'RESTORE
+         "restoring a saved image is not supported (maintainer decision 2026-11-22; issue #112)"))
 
 (define (require-oblist who value)
   (unless (mdl-oblist? value)
@@ -3945,6 +3995,9 @@
         "EVENT" mdl-event
         "HANDLER" mdl-install-handler
         "OFF" mdl-off
+        "ON" mdl-on
+        "SAVE" mdl-save
+        "RESTORE" mdl-restore
         "INT-LEVEL" mdl-int-level
         "ENABLE" mdl-enable
         "DISABLE" mdl-disable
