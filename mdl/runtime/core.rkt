@@ -3473,7 +3473,7 @@
      (cond
        [to
         ;; Nit 2: check exact TYPE (not just PRIMTYPE) — Confusion rejects CHTyped to.
-        (unless (string=? (mdl-atom-pname (mdl-type to)) "STRING")
+        (unless (eq? (mdl-type to) (mdl-root-atom "STRING"))
           (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
         (define to-base (mdl-base to))
         ;; Item 2: check destination length before any write.
@@ -3507,7 +3507,7 @@
      (cond
        [to
         ;; Nit 2: check exact TYPE (not just PRIMTYPE) — Confusion rejects CHTyped to.
-        (unless (string=? (mdl-atom-pname (mdl-type to)) (symbol->string kind))
+        (unless (eq? (mdl-type to) (mdl-root-atom (symbol->string kind)))
           (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
         (define to-base (mdl-base to))
         ;; Item 1: UVECTOR → also check element-type compatibility.
