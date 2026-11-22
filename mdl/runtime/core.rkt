@@ -1102,9 +1102,6 @@
 
 (define (mdl-apply-value fn raw-args)
   (cond
-    [(eq? fn mdl-istring) (mdl-istring-raw raw-args)]
-    [(eq? fn mdl-iuvector) (mdl-iuvector-raw raw-args)]
-    [(eq? fn mdl-ivector) (mdl-ivector-raw raw-args)]
     [(mdl-macro? fn)
      (mdl-eval (mdl-apply-interpreted fn raw-args))]
     [(mdl-function? fn)
@@ -1564,9 +1561,6 @@
 ;; in order before the operator is applied (chapter 7.5.2).
 (define (mdl-dispatch-call fn raw-args-thunk arg-thunks)
   (cond
-    [(eq? fn mdl-istring) (mdl-istring-raw (raw-args-thunk))]
-    [(eq? fn mdl-iuvector) (mdl-iuvector-raw (raw-args-thunk))]
-    [(eq? fn mdl-ivector) (mdl-ivector-raw (raw-args-thunk))]
     [(or (mdl-macro? fn) (mdl-function? fn))
      (define result (mdl-apply-interpreted fn (raw-args-thunk)))
      (if (mdl-macro? fn) (mdl-eval result) result)]
@@ -2449,24 +2443,24 @@
     (error 'mdl-ivector "IVECTOR length must be a nonnegative FIX"))
   (apply mdl-vector (for/list ([i (in-range size)]) (make-element))))
 
+;; ILIST/IVECTOR/IUVECTOR/ISTRING are ordinary SUBRs (manual 7.5.4): every
+;; call path (compiled, interpreted, APPLY, MAPF) evaluates the arguments
+;; once before the call, as for any SUBR. The optional second argument's
+;; VALUE is then EVALed once per generated element, in element order, so
+;; `<IVECTOR 3 '<SET A <+ .A 1>>>' counts 1 2 3 while
+;; `<IVECTOR 3 <SET A <+ .A 1>>>' evaluates its argument once and fills
+;; with the self-evaluating result.
+(define (constructor-fill-thunk args default)
+  (if (= (length args) 2)
+      (let ([fill (cadr args)]) (lambda () (mdl-eval fill)))
+      default))
+
 (define (mdl-ivector . args)
   (unless (<= 1 (length args) 2)
     (error 'mdl-ivector "IVECTOR expects length and optional element"))
   (mdl-ivector-build (car args)
-                     (if (= (length args) 2)
-                         (lambda () (cadr args))
-                         (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
-
-(define (mdl-ivector-raw raw-args)
-  (define items (if (or (null? raw-args) (mpair? raw-args))
-                    (mdl-list->list raw-args) raw-args))
-  (unless (<= 1 (length items) 2)
-    (error 'mdl-ivector "IVECTOR expects length and optional expression"))
-  (define size (mdl-eval (car items)))
-  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
-  (mdl-ivector-build size
-                     (if fill (lambda () (mdl-eval fill))
-                         (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
+                     (constructor-fill-thunk
+                      args (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
 
 (define (mdl-uvector . values)
   (define element-type (if (pair? values) (mdl-type (car values))
@@ -2493,20 +2487,8 @@
   (unless (<= 1 (length args) 2)
     (error 'mdl-iuvector "IUVECTOR expects length and optional element"))
   (mdl-iuvector-build (car args)
-                      (if (= (length args) 2)
-                          (lambda () (cadr args))
-                          (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
-
-(define (mdl-iuvector-raw raw-args)
-  (define items (if (or (null? raw-args) (mpair? raw-args))
-                    (mdl-list->list raw-args) raw-args))
-  (unless (<= 1 (length items) 2)
-    (error 'mdl-iuvector "IUVECTOR expects length and optional expression"))
-  (define size (mdl-eval (car items)))
-  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
-  (mdl-iuvector-build size
-                      (if fill (lambda () (mdl-eval fill))
-                          (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
+                      (constructor-fill-thunk
+                       args (lambda () (mdl-chtype 0 (mdl-atom "LOSE"))))))
 
 ;; Unevaluated UVECTOR data may contain SEGMENT placeholders; uniformity is
 ;; enforced when the data is evaluated (see uniform-uvector).
@@ -3020,20 +3002,8 @@
   (unless (<= 1 (length args) 2)
     (error 'mdl-istring "ISTRING expects length and optional CHARACTER"))
   (mdl-istring-build (car args)
-                     (if (= (length args) 2)
-                         (lambda () (cadr args))
-                         (lambda () (mdl-character #\nul)))))
-
-(define (mdl-istring-raw raw-args)
-  (define items (if (or (null? raw-args) (mpair? raw-args))
-                    (mdl-list->list raw-args) raw-args))
-  (unless (<= 1 (length items) 2)
-    (error 'mdl-istring "ISTRING expects length and optional expression"))
-  (define size (mdl-eval (car items)))
-  (define fill (and (= (length items) 2) (mdl-eval (cadr items))))
-  (mdl-istring-build size
-                     (if fill (lambda () (mdl-eval fill))
-                         (lambda () (mdl-character #\nul)))))
+                     (constructor-fill-thunk
+                      args (lambda () (mdl-character #\nul)))))
 
 (define (mdl-printstring buffer [channel (mdl-lval "OUTCHAN")] [count #f])
   (unless (mdl-string? buffer)
