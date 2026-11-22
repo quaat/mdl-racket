@@ -1,11 +1,11 @@
 # BOOT-REF — Fresh-boot reference capture for SMOKE_PARITY
 
-**Branch:** `feat/m3-boot-reference`  
-**Base commit:** `124f60c` (`origin/feat/m3-logical-gc`)  
-**Engine SHA256:** `6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789`  
-**Game SHA:** `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3` (mdlzork_771212)  
-**Candidate artifact:** `docs/evidence/M3/house-boot-candidate.json` (this directory)  
-**Approved golden:** NOT YET — awaiting maintainer approval  
+**Branch:** `feat/m3-boot-reference`
+**Base commit:** `124f60c` (`origin/feat/m3-logical-gc`)
+**Engine SHA256:** `6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789`
+**Game SHA:** `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3` (mdlzork_771212)
+**Candidate artifact:** `docs/evidence/M3/house-boot-candidate.json` (this directory)
+**Approved golden:** NOT YET — awaiting maintainer approval
 
 ---
 
@@ -22,7 +22,7 @@ The existing approved `tests/scenarios/house.json` (ZORK.SAVE restore) is UNCHAN
 
 ## Task 1: Clock control shim
 
-**File:** `scripts/reference/fixed_time.c`  
+**File:** `scripts/reference/fixed_time.c`
 **Binary:** `.cache/build/shim/fixed_time.so` (gitignored — built at run time by `boot_reference.py`)
 
 Confusion (`macros.cpp` lines 7922, 7965) calls `gettimeofday` directly in
@@ -107,8 +107,8 @@ is deterministic across machines and time zones when the shim is active.
 
 ## Task 4: Candidate output
 
-**Run 1:** `python3 scripts/boot_reference.py capture --scenario tests/scenarios/house-boot.json --output artifacts/reference/house-boot.json --timeout 90`  
-**Run 2:** same command  
+**Run 1:** `python3 scripts/boot_reference.py capture --scenario tests/scenarios/house-boot.json --output artifacts/reference/house-boot.json --timeout 90`
+**Run 2:** same command
 **Result:** byte-identical (ignoring `captured_at` timestamp field) ✓
 
 **Full candidate transcript (boot_output + 6 commands):**
@@ -169,9 +169,9 @@ banner compile timestamp is unaffected.
 
 ## Task 5: Make target and pytest
 
-**Makefile target:** `reference-capture-boot` (runs `scripts/boot_reference.py capture`)  
-**Pytest file:** `tests/test_boot_reference.py`  
-**Added to:** `Makefile test-python` target  
+**Makefile target:** `reference-capture-boot` (runs `scripts/boot_reference.py capture`)
+**Pytest file:** `tests/test_boot_reference.py`
+**Added to:** `Makefile test-python` target
 
 Test coverage (all without the native binary; native test skips cleanly):
 - `test_shim_builds_and_exports_symbols` — gcc required, skips if absent
