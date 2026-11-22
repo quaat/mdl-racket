@@ -155,3 +155,64 @@
   (check-exn exn:fail? (lambda () (run "</ 1 0>")))
   (check-equal? calls 0)
   (check-equal? (level) 0))
+
+;; Returning from ERROR via ERRET is a safe point: once ERRET's level is
+;; established, pending occurrences whose priority exceeds it are delivered
+;; exactly once; lower ones stay queued until the level is lowered.
+(define (leave-pending! name priority calls-box)
+  ;; The handler raises on its first call, so the second occurrence stays
+  ;; pending while the level returns to 0.
+  (mdl-apply "HANDLER" (mdl-apply "EVENT" name priority)
+             (lambda (n)
+               (set-box! calls-box (add1 (unbox calls-box)))
+               (when (= (unbox calls-box) 1) (error 'pending "PENDING-BOOM"))))
+  (mdl-apply "INT-LEVEL" 20)
+  (mdl-emit-event! name '(1))
+  (mdl-emit-event! name '(2))
+  (check-exn #rx"PENDING-BOOM" (lambda () (mdl-apply "INT-LEVEL" 0)))
+  (check-equal? (unbox calls-box) 1)
+  (check-equal? (mdl-apply "INT-LEVEL") 0))
+
+(scenario "ERRET delivers pending occurrences above the resumed level"
+  (define high (box 0))
+  (leave-pending! "HIGH" 10 high)
+  (mdl-apply "HANDLER" (mdl-apply "EVENT" "ERROR" 8)
+             (lambda (frame . args) (mdl-apply "ERRET" 1 frame)))
+  (check-equal? (mdl-apply "ERROR" (mdl-atom "PROBE")) 1)
+  (check-equal? (level) 8)
+  (check-equal? (unbox high) 2)
+  (mdl-apply "INT-LEVEL" 0)
+  (check-equal? (unbox high) 2))
+
+(scenario "ERRET keeps pending occurrences at or below the resumed level"
+  (define low (box 0))
+  (leave-pending! "LOW" 8 low)
+  (mdl-apply "HANDLER" (mdl-apply "EVENT" "ERROR" 9)
+             (lambda (frame . args)
+               (mdl-apply "INT-LEVEL" 8)
+               (mdl-apply "ERRET" 1 frame)))
+  (check-equal? (mdl-apply "ERROR" (mdl-atom "PROBE")) 1)
+  (check-equal? (level) 8)
+  (check-equal? (unbox low) 1)
+  (check-equal? (mdl-apply "INT-LEVEL" 0) 8)
+  (check-equal? (unbox low) 2))
+
+;; Nested ERROR and ERRET: the outer handler lowers the level so a second
+;; ERROR is handled; the inner ERRET at level 8 resumes the inner ERROR, and
+;; the outer handler continues at level 8 (ERRET keeps the current level).
+(scenario "nested ERROR with inner ERRET continues the outer handler at 8"
+  (define outer-level-after-inner #f)
+  (define inner-result #f)
+  (mdl-apply "HANDLER" (mdl-apply "EVENT" "ERROR" 8)
+             (lambda (frame tag)
+               (cond
+                 [(eq? tag (mdl-atom "INNER")) (mdl-apply "ERRET" 5 frame)]
+                 [else
+                  (mdl-apply "INT-LEVEL" 0)
+                  (set! inner-result (mdl-apply "ERROR" (mdl-atom "INNER")))
+                  (set! outer-level-after-inner (level))
+                  (mdl-apply "ERRET" 6 frame)])))
+  (check-equal? (mdl-apply "ERROR" (mdl-atom "OUTER")) 6)
+  (check-equal? inner-result 5)
+  (check-equal? outer-level-after-inner 8)
+  (check-equal? (level) 8))

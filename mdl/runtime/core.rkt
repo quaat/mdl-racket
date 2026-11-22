@@ -3098,6 +3098,9 @@
   ;; ran; the handler is responsible for <INT-LEVEL 0> (manual 21.8.11).
   ;; Handler cleanup restored older levels while unwinding; undo that here.
   (set-mdl-interrupt-state-level! (current-interrupt-state) erret-level)
+  ;; Returning from ERROR is a safe point: deliver occurrences eligible at
+  ;; the resumed level (e.g. left pending by an earlier raising handler).
+  (mdl-drain-pending!)
   value)
 
 (define (mdl-erret value frame)
