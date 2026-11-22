@@ -142,13 +142,23 @@
   #rx"^RESTORE: restoring a saved image is not supported \\(maintainer decision 2026-11-22; issue #112\\)$")
 (define (snapshot dir) (sort (map path->string (directory-list dir)) string<?))
 (define scratch (make-temporary-file "on-save-test-~a" 'directory))
+;; Record every write/delete file access the SAVE/RESTORE calls attempt,
+;; anywhere on the filesystem. A guard (rather than a before/after listing
+;; of the shared temp directory) is immune to concurrent processes.
+(define attempted-writes '())
+(define write-recorder
+  (make-security-guard
+   (current-security-guard)
+   (lambda (who path modes)
+     (when (and path (or (memq 'write modes) (memq 'delete modes)))
+       (set! attempted-writes (cons (list who path modes) attempted-writes))))
+   (lambda (who host port mode) (void))))
 (dynamic-wind
  void
  (lambda ()
-   (parameterize ([current-directory scratch])
-     (define temp-dir (find-system-path 'temp-dir))
+   (parameterize ([current-directory scratch]
+                  [current-security-guard write-recorder])
      (define cwd-before (snapshot scratch))
-     (define tmp-before (snapshot temp-dir))
      (for ([source '("<SAVE \"S4PROBE.SAVE\">" "<SAVE>" "<SAVE 1>"
                      "<SAVE \"<MDL>MADADV.SAVE\">" "<APPLY ,SAVE \"S4PROBE.SAVE\">"
                      "<=? <SAVE \"S4PROBE.SAVE\"> \"SAVED\">")])
@@ -158,7 +168,7 @@
        (check-exn restore-rx (lambda () (run source)) source))
      (check-equal? (snapshot scratch) cwd-before)
      (check-equal? cwd-before '())
-     (check-equal? (snapshot temp-dir) tmp-before)
+     (check-equal? attempted-writes '())
      (check-false (file-exists? (build-path scratch "S4PROBE.SAVE")))))
  (lambda () (delete-directory/files scratch)))
 ;; SAVE evaluates its arguments as a SUBR before refusing.

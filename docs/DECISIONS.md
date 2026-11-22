@@ -1099,3 +1099,15 @@ writes no file. `RESTORE` is refused the same way.
 really saves an image; both differences are documented reference deviations.
 A session-owned snapshot (option b) remains a later, separately approved slice.
 No GPLv3 implementation was copied.
+
+**INT-LEVEL after the SAVE error (review note).** SAVE-IT raises the level
+with an ordinary `<INT-LEVEL 100000>` call (77rooms.mud:25) before `<SAVE
+.FN>`, and nothing unwinds it, so after the strict SAVE error the session's
+INT-LEVEL stays 100000, with GC and DIVERT-AGC occurrences masked (queued,
+not delivered). That is faithful to MDL, which would sit in an error loop at
+that level, and SAVE deliberately does not reset it. It is harmless today
+because every test builds a fresh session; any later slice that continues
+the same session past SAVE (for example by calling START) must account for
+it explicitly, after probing what Confusion's RESTORE does to the level,
+instead of letting queued DIVERT-AGC occurrences silently change the GC
+schedule.

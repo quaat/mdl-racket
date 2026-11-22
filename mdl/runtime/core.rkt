@@ -1874,7 +1874,10 @@
 ;; Maintainer decision 2026-11-22 (issue #112): "IPC" may be registered
 ;; (EVENT, HANDLER, ON, OFF all work), but an isolated session has no
 ;; inter-process message source, so an IPC occurrence can never arise.
-;; Any attempt to emit or deliver one is a strict error.
+;; Any attempt to emit or deliver one is a strict error. The emit check is
+;; the enforced boundary; the delivery check in `mdl-deliver-occurrence!` is
+;; defensive (no MDL-level path can queue an IPC occurrence today) and is
+;; kept so that a future event source cannot bypass the decision.
 (define sourceless-predefined-interrupt-names '("IPC"))
 
 (define (check-emittable-event who name)
