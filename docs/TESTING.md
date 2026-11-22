@@ -1,5 +1,17 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 interrupt foundation checkpoint (2026-11-22)
+
+Issue #104 adds `tests/interrupt_dispatch_test.rkt` to the Racket suite.
+Run `TMPDIR=/tmp raco test tests/interrupt_dispatch_test.rkt
+tests/event_registration_test.rkt`, `TMPDIR=/tmp make test`,
+`TMPDIR=/tmp make m2-check`, and `TMPDIR=/tmp make m3-source-progress`.
+The focused deterministic event source exercises priority, FIFO pending
+delivery, removal, disable/enable, interpreted callback values, exception
+cleanup, and session isolation. It is not evidence of a real GC source.
+The loader's underlying exit remains 1 at `EVENT "GC"`; consult
+[INTERRUPT-FOUNDATION.md](evidence/M3/INTERRUPT-FOUNDATION.md).
+
 ## M3 user EVENT/HANDLER registration checkpoint (2026-11-21)
 
 Issue #102 adds `tests/event_registration_test.rkt` to the Racket suite.

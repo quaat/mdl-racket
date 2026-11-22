@@ -13,6 +13,7 @@
          mdl-apply-form mdl-apply-computed mdl-apply-interpreted mdl-function-literal
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
+         mdl-emit-event!
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
@@ -70,10 +71,12 @@
 ;; closures remain the fast path for quoted-formal-free definitions.
 (struct mdl-macro (formals body leading-act decl))
 (struct mdl-function (formals body leading-act decl))
-;; Chapter 21 registration objects. External event generation and dispatch
-;; remain explicit later slices; these objects are never stand-in T values.
+;; Chapter 21 registration objects and session-owned interrupt scheduler.
+;; Automatic event sources, including MDL GC, remain separate later slices.
 (struct mdl-iheader (owner name priority [handlers #:mutable] [enabled? #:mutable]))
 (struct mdl-handler (header applicable [active? #:mutable]))
+(struct mdl-interrupt-state ([level #:mutable] [pending #:mutable]))
+(struct mdl-interrupt-occurrence (header arguments))
 (define compiled-function-formals (make-weak-hasheq))
 (struct mdl-decl-value (bindings result line column positionals) #:transparent)
 (define local-declarations (make-weak-hasheq))
@@ -1681,7 +1684,7 @@
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
 (struct atom-space (initial root named types builtins manifests associations
-                            global-declarations events))
+                            global-declarations events interrupt-state))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1732,15 +1735,114 @@
                          (list root-name oblist-name root)
                          (list initial oblist-name initial-name)
                          (list root oblist-name root-name)))
-              (make-hasheq) (make-hash)))
+              (make-hasheq) (make-hash) (mdl-interrupt-state 0 '())))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
 
-;; User-defined event registration per MDL manual chapter 21. A true event
-;; source must be supplied before external names may be registered; accepting
-;; one would silently lose callbacks on GC or operating-system events.
-(define external-interrupt-names
-  '("GC" "CHAR" "READ" "WRITE" "IPC" "BLOCKED" "ERROR" "CLOCK"))
+;; A true event source must be supplied before predefined names are
+;; registered. GC and DIVERT-AGC are internal MDL interrupts, not OS signals.
+(define unsupported-predefined-interrupt-names
+  '("GC" "CHAR" "READ" "WRITE" "IPC" "BLOCKED" "UNBLOCKED"
+    "ERROR" "CLOCK" "SYSDOWN" "INFERIOR" "RUNT" "REALT"
+    "MPV" "PURE" "ILOPR" "PARITY" "IOC"))
+
+(define (current-interrupt-state)
+  (atom-space-interrupt-state (current-mdl-atom-space)))
+
+(define (active-iheader? header)
+  (and (mdl-iheader-enabled? header)
+       (eq? (hash-ref (atom-space-events (current-mdl-atom-space))
+                      (mdl-iheader-name header) #f)
+            header)))
+
+(define (check-session-iheader who header)
+  (unless (mdl-iheader? header)
+    (error who "expected IHEADER"))
+  (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+    (error who "IHEADER belongs to another MDL session")))
+
+;; Event sources call this only at a safe delivery boundary, with values
+;; already evaluated. Focused tests call it directly; it is not an MDL
+;; primitive or client-facing evaluator, and no fake GC source uses it.
+(define (mdl-emit-event! name arguments [strict? #f])
+  (define header (hash-ref (atom-space-events (current-mdl-atom-space)) name #f))
+  (when (and strict? (not header))
+    (error 'mdl-emit-event! "unknown or unregistered event ~a" name))
+  (define enabled? (and header (active-iheader? header)))
+  ;; Record this occurrence before draining at the source safe point. If an
+  ;; older queued handler raises, the newer occurrence must not disappear.
+  ;; The drain selects the earliest eligible occurrence; a higher-priority
+  ;; nested event can still supersede a lower-priority queued one.
+  (when enabled?
+    (define state (current-interrupt-state))
+    (set-mdl-interrupt-state-pending!
+     state (append (mdl-interrupt-state-pending state)
+                   (list (mdl-interrupt-occurrence header arguments)))))
+  (mdl-drain-pending!)
+  (and enabled? #t))
+
+(define (mdl-deliver-occurrence! occurrence)
+  (define header (mdl-interrupt-occurrence-header occurrence))
+  (when (active-iheader? header)
+    (define state (current-interrupt-state))
+    (define old-level (mdl-interrupt-state-level state))
+    (dynamic-wind
+      (lambda () (set-mdl-interrupt-state-level! state (mdl-iheader-priority header)))
+      (lambda ()
+        ;; Snapshot list order, but re-check active membership before each
+        ;; call so OFF during dispatch suppresses a later action.
+        (for ([handler (in-list (mdl-iheader-handlers header))])
+          (when (and (active-iheader? header) (mdl-handler-active? handler))
+            (mdl-apply-evaluated (mdl-handler-applicable handler)
+                                 (mdl-interrupt-occurrence-arguments occurrence)))))
+      (lambda () (set-mdl-interrupt-state-level! state old-level)))
+    (mdl-drain-pending!)))
+
+(define (mdl-drain-pending!)
+  (define state (current-interrupt-state))
+  (let loop ()
+    (define pending (mdl-interrupt-state-pending state))
+    (define eligible
+      (for/first ([occurrence (in-list pending)]
+                  #:when (or (not (active-iheader?
+                                   (mdl-interrupt-occurrence-header occurrence)))
+                             (> (mdl-iheader-priority
+                                 (mdl-interrupt-occurrence-header occurrence))
+                                (mdl-interrupt-state-level state))))
+        occurrence))
+    (when eligible
+      (set-mdl-interrupt-state-pending!
+       state (remove eligible pending eq?))
+      (mdl-deliver-occurrence! eligible)
+      (loop))))
+
+(define (mdl-int-level . args)
+  (define state (current-interrupt-state))
+  (case (length args)
+    [(0) (mdl-interrupt-state-level state)]
+    [(1)
+     (define new-level (car args))
+     (unless (and (exact-integer? new-level)
+                  (<= fix-min new-level fix-max))
+       (error 'mdl-int-level "INT-LEVEL requires a FIX"))
+     (define old-level (mdl-interrupt-state-level state))
+     (set-mdl-interrupt-state-level! state new-level)
+     ;; Also flush an eligible occurrence after an exceptional handler exit:
+     ;; cleanup restored the level but deliberately preserved the original
+     ;; exception instead of running another handler in its unwind path.
+     (mdl-drain-pending!)
+     old-level]
+    [else (error 'mdl-int-level "INT-LEVEL expects zero or one FIX")]))
+
+(define (mdl-enable header)
+  (check-session-iheader 'mdl-enable header)
+  (set-mdl-iheader-enabled?! header #t)
+  header)
+
+(define (mdl-disable header)
+  (check-session-iheader 'mdl-disable header)
+  (set-mdl-iheader-enabled?! header #f)
+  header)
 
 (define (mdl-event . args)
   (define events (atom-space-events (current-mdl-atom-space)))
@@ -1762,8 +1864,8 @@
      (unless (and (exact-integer? priority) (<= fix-min priority fix-max)
                   (positive? priority))
        (error 'mdl-event "EVENT priority must be a positive FIX"))
-     (when (member name external-interrupt-names)
-       (error 'mdl-event "unsupported external EVENT ~a" name))
+     (when (member name unsupported-predefined-interrupt-names)
+       (error 'mdl-event "unsupported predefined EVENT ~a" name))
      (hash-ref events name
                (lambda ()
                  (define header (mdl-iheader (current-mdl-atom-space)
@@ -2786,6 +2888,9 @@
         "EVENT" mdl-event
         "HANDLER" mdl-install-handler
         "OFF" mdl-off
+        "INT-LEVEL" mdl-int-level
+        "ENABLE" mdl-enable
+        "DISABLE" mdl-disable
         "MAPF" mdl-mapf
         "MAPRET" mdl-mapret
         "MAPSTOP" mdl-mapstop

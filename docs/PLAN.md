@@ -137,9 +137,11 @@ are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
 
-**Current source frontier (2026-11-21):** issue #102's branch completes
+**Current source frontier (2026-11-22):** issue #104's interrupt foundation
+adds session-owned priority dispatch and safe pending-event delivery but
+intentionally keeps `EVENT "GC"` guarded. The unchanged loader still completes
 433 unchanged original forms, zero skipped, fully loading `77act1.mud`,
-`77act2.mud` and `77act3.mud`; the next failure is external
+`77act2.mud` and `77act3.mud`; the next failure is internal
 `EVENT "GC"` in `77rooms.mud` expression 16, tracked in
 [issue #104](https://github.com/quaat/mdl-racket/issues/104).
 This is partial source

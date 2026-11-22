@@ -26,4 +26,5 @@ raco test mdl/runtime/core.rkt \
   tests/nth_decl_test.rkt \
   tests/deferred_decl_type_test.rkt \
   tests/duplicate_decl_test.rkt \
-  tests/event_registration_test.rkt
+  tests/event_registration_test.rkt \
+  tests/interrupt_dispatch_test.rkt
