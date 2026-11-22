@@ -3073,29 +3073,40 @@
     (cond [(mdl-atom? value) (mdl-atom-pname value)]
           [(mdl-string? value) (format "~s" (mdl-string-content value))]
           [else (format "~a" value)]))
-  (call/ec
-   (lambda (resume)
-     (define frame (mdl-error-frame (current-mdl-atom-space) resume #t))
-     (dynamic-wind
-       void
-       (lambda ()
-         (define header (hash-ref (atom-space-events (current-mdl-atom-space))
-                                  "ERROR" #f))
-         (when (and header (active-iheader? header)
-                    (> (mdl-iheader-priority header)
-                       (mdl-interrupt-state-level (current-interrupt-state))))
-           (mdl-emit-event! "ERROR" (cons frame args)))
-         (error 'mdl-error "~a"
-                (if (null? args) "ERROR"
-                    (string-join (map describe args) " "))))
-       (lambda () (set-mdl-error-frame-live?! frame #f))))))
+  (define-values (value erret-level)
+    (call/ec
+     (lambda (resume)
+       (define frame (mdl-error-frame (current-mdl-atom-space) resume #t))
+       (dynamic-wind
+         void
+         (lambda ()
+           (define header (hash-ref (atom-space-events (current-mdl-atom-space))
+                                    "ERROR" #f))
+           ;; ERROR occurrences are never queued (manual 21.8.11): deliver
+           ;; this one now instead of appending it behind older pending
+           ;; occurrences, where it could outlive its FRAME.
+           (when (and header (active-iheader? header)
+                      (> (mdl-iheader-priority header)
+                         (mdl-interrupt-state-level (current-interrupt-state))))
+             (mdl-deliver-occurrence!
+              (mdl-interrupt-occurrence header (cons frame args))))
+           (error 'mdl-error "~a"
+                  (if (null? args) "ERROR"
+                      (string-join (map describe args) " "))))
+         (lambda () (set-mdl-error-frame-live?! frame #f))))))
+  ;; ERRET returns from this ERROR at the interrupt level current when ERRET
+  ;; ran; the handler is responsible for <INT-LEVEL 0> (manual 21.8.11).
+  ;; Handler cleanup restored older levels while unwinding; undo that here.
+  (set-mdl-interrupt-state-level! (current-interrupt-state) erret-level)
+  value)
 
 (define (mdl-erret value frame)
   (unless (and (mdl-error-frame? frame)
                (eq? (mdl-error-frame-owner frame) (current-mdl-atom-space))
                (mdl-error-frame-live? frame))
     (error 'mdl-erret "ERRET requires a live ERROR FRAME in this session"))
-  ((mdl-error-frame-resume frame) value))
+  ((mdl-error-frame-resume frame)
+   value (mdl-interrupt-state-level (current-interrupt-state))))
 
 (define (mdl-map-structured? value)
   (define base (mdl-base value))
