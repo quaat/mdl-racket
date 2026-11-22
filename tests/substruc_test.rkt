@@ -169,11 +169,18 @@
 ;; Non-structured argument
 (check-exn #rx"SUBSTRUC requires a structured"
            (lambda () (run "<SUBSTRUC 42>")))
-;; Item 4: wrong `to` type → "Last arg to SUBSTRUC must be same type as primtype of first arg"
+;; Item 4: wrong PRIMTYPE `to` → "Last arg to SUBSTRUC must be same type as primtype of first arg"
 (check-exn #rx"Last arg to SUBSTRUC must be same type as primtype of first arg"
            (lambda () (run "<SUBSTRUC \"abc\" 0 2 ![1 2]>")))
 (check-exn #rx"Last arg to SUBSTRUC must be same type as primtype of first arg"
            (lambda () (run "<SUBSTRUC ![1 2] 0 2 <ISTRING 2>>")))
+;; Nit 2: CHTyped (NEWTYPE) `to` rejected — Confusion requires the primitive TYPE itself.
+;; NEWTYPE FOO STRING `to` for STRING source → ARG-WRONG-TYPE (TYPE is FOO not STRING)
+(check-exn #rx"Last arg to SUBSTRUC must be same type as primtype of first arg"
+           (lambda () (run "<NEWTYPE FOO STRING> <SUBSTRUC \"abc\" 0 2 <CHTYPE <ISTRING 2> FOO>>")))
+;; NEWTYPE BAR VECTOR `to` for VECTOR source → ARG-WRONG-TYPE (TYPE is BAR not VECTOR)
+(check-exn #rx"Last arg to SUBSTRUC must be same type as primtype of first arg"
+           (lambda () (run "<NEWTYPE BAR VECTOR> <SUBSTRUC [1 2 3] 0 2 <CHTYPE <IVECTOR 2> BAR>>")))
 ;; Item 2 regression: destination too short → error; to is UNCHANGED (no partial write)
 (check-exn #rx"SUBSTRUC destination too short"
            (lambda () (run "<SUBSTRUC \"abcde\" 0 4 <ISTRING 2>>")))
@@ -208,25 +215,12 @@
        "<3 .V>"))
  2)
 
-;; ---- LIST to (Item 5 — Confusion-confirmed) ----
-;; Confusion mutates the first `count` mcars of `to` in-place.
-;; <SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> → (1 2 0)
-(check-equal?
- (run "<SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> <1 .T>")
- 1)
-(check-equal?
- (run "<SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> <2 .T>")
- 2)
-(check-equal?
- (run "<SET T '(0 0 0)> <SUBSTRUC '(1 2 3) 0 2 .T> <3 .T>")
- 0)
-;; Returns to (not from)
-(check-equal?
- (run "<LENGTH <SUBSTRUC '(1 2 3) 0 2 '(0 0 0)>>")
- 3)
-;; LIST to too short → SUBSTRUC destination too short
-(check-exn #rx"SUBSTRUC destination too short"
-           (lambda () (run "<SUBSTRUC '(1 2 3) 0 3 '(0 0)>")))
+;; ---- LIST to (Nit 1: strict error — not implemented) ----
+;; Confusion supports LIST `to` but: (a) overlap writes non-atomically giving a
+;; different result from STRING/VECTOR; (b) too-short is detected AFTER partial
+;; writes.  Since the game never passes a LIST `to`, we refuse with strict error.
+(check-exn #rx"SUBSTRUC: to argument for LIST is not implemented"
+           (lambda () (run "<SUBSTRUC '(1 2 3) 0 2 '(0 0 0)>")))
 
 ;; ---- Interpreted / DEFINE path ----
 ;; Ensure SUBSTRUC is callable from an interpreted MDL function

@@ -3438,9 +3438,13 @@
 ;;   TYPES-DIFFER-IN-UNIFORM-VECTOR → "SUBSTRUC UVECTOR to and from must be same type"
 ;;   ARGUMENT-OUT-OF-RANGE   → "SUBSTRUC destination too short"
 ;;
-;; Supported primitive types: STRING, VECTOR, UVECTOR, LIST (incl. LIST `to`).
+;; Supported primitive types: STRING, VECTOR, UVECTOR, LIST.
+;; LIST `to` is NOT implemented (strict error); see evidence note for Confusion
+;; behaviours (overlap and too-short) that differ from each other and from us.
 ;; Copying is atomic (all source elements are snapshotted before any write).
 ;; This prevents corruption when `from` and `to` are views on the same storage.
+;; `to` must have the primitive TYPE itself (not a NEWTYPE alias); Confusion rejects
+;; CHTyped `to` with ARG-WRONG-TYPE "Last arg to SUBSTRUC must be same type…".
 ;;
 ;; Probe evidence: docs/evidence/M3/S3-SUBSTRUC.md
 ;; Reference SHA: 6df359f6…  source: mdlzork bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3
@@ -3468,10 +3472,10 @@
        (error 'mdl-substruc "SUBSTRUC amount too big for source"))
      (cond
        [to
-        (define to-base (mdl-base to))
-        ;; Item 4: Confusion reports "Last arg … same type as primtype"
-        (unless (mdl-string? to-base)
+        ;; Nit 2: check exact TYPE (not just PRIMTYPE) — Confusion rejects CHTyped to.
+        (unless (string=? (mdl-atom-pname (mdl-type to)) "STRING")
           (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
+        (define to-base (mdl-base to))
         ;; Item 2: check destination length before any write.
         (when (< (mdl-string-length to-base) count)
           (error 'mdl-substruc "SUBSTRUC destination too short"))
@@ -3502,10 +3506,10 @@
      (define src-start (mdl-array-start base))
      (cond
        [to
-        (define to-base (mdl-base to))
-        ;; Item 4: wrong PRIMTYPE → "Last arg … same type as primtype"
-        (unless (and (mdl-array? to-base) (eq? (mdl-array-kind to-base) kind))
+        ;; Nit 2: check exact TYPE (not just PRIMTYPE) — Confusion rejects CHTyped to.
+        (unless (string=? (mdl-atom-pname (mdl-type to)) (symbol->string kind))
           (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
+        (define to-base (mdl-base to))
         ;; Item 1: UVECTOR → also check element-type compatibility.
         (when (eq? kind 'UVECTOR)
           (define src-elem (mdl-array-element-type base))
@@ -3552,20 +3556,12 @@
      (define src-slice (take (drop elems rest) count))
      (cond
        [to
-        ;; Item 5: Confusion supports LIST `to` by mutating the first `count`
-        ;; mcars in-place.  Check length first (atomic: no writes if too short).
-        (define to-base (mdl-base to))
-        (unless (or (null? to-base) (mpair? to-base))
-          (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
-        (define to-elems (mdl-list->list (mdl-list-head to 'mdl-substruc)))
-        (when (< (length to-elems) count)
-          (error 'mdl-substruc "SUBSTRUC destination too short"))
-        ;; src-slice already snapshotted above, so write is safe even if from=to.
-        (let loop ([pairs (mdl-base to)] [items src-slice])
-          (unless (or (null? items) (null? pairs))
-            (set-mcar! pairs (car items))
-            (loop (mcdr pairs) (cdr items))))
-        to]
+        ;; Nit 1: LIST `to` is not implemented (strict error).
+        ;; Confusion supports it but: (a) overlap writes non-atomically giving a
+        ;; different result from STRING/VECTOR; (b) too-short is detected AFTER
+        ;; partial writes.  Since the game never passes a LIST `to`, we refuse
+        ;; rather than copy either Confusion behaviour.  See S3-SUBSTRUC.md §list-to.
+        (error 'mdl-substruc "SUBSTRUC: to argument for LIST is not implemented")]
        [else
         (apply mdl-list src-slice)])]
     [else

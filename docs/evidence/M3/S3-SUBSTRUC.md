@@ -98,10 +98,24 @@ Review probe observations (Confusion-confirmed, items 1-6):
   - `<NEWTYPE BAR VECTOR>` source → result TYPE=VECTOR (confirmed)
   - FORM (`'<+ 1 2>`) SUBSTRUC → LIST (FORM has PRIMTYPE LIST) (confirmed)
 
-**Deviations from spec**: None. The manual says "result type is PRIMTYPE of from"; Confusion
-confirms STRING→STRING, VECTOR→VECTOR, UVECTOR→UVECTOR, LIST→LIST. Manual does not specify
-the return value with `to`; Confusion confirms it is `to` itself. LIST `to` confirmed supported
-(item 5 above); implemented.
+**Deviations from Confusion** (all documented and intentional):
+
+1. **LIST `to` — strict error** (not implemented). Confusion supports LIST `to` but its
+   behaviour is internally inconsistent: (a) overlap (`<SET L (1 2 3 4 5 6)> <SUBSTRUC .L 0 4
+   <REST .L 1>>`) writes non-atomically giving `(1 1 1 1 1 6)` (Confusion) vs `(1 1 2 3 4 6)`
+   (atomic-copy); (b) too-short is detected AFTER partial writes (Confusion partially mutates
+   the list before erroring). We refuse with strict error since the game never passes a LIST
+   `to`. See §list-to-deviation in this note.
+
+2. **CHTyped `to` check order for wrong PRIMTYPE** (nit 3). `<SUBSTRUC "abc" 0 2 [0 0 0]>`
+   gives Confusion "SUBSTRUC destination too short" (Confusion computes string-length of VECTOR
+   as 0, which fires before the type check) but we give "Last arg to SUBSTRUC must be same type
+   as primtype of first arg" (our type check fires first). We do not replicate Confusion's
+   cross-type length calculation; the game never mixes source/to PRIMTYPEs.
+
+3. **Arity / wrong-argument-count errors** are Racket-level arity errors ("required: 1,
+   given: 0", etc.) rather than MDL-level SUBSTRUC errors. This is a runtime-wide property
+   shared with UNPARSE, ASCII, and other builtins; tracked separately.
 
 ## Implementation
 
@@ -113,13 +127,14 @@ Added `mdl-substruc` function handling STRING, VECTOR/UVECTOR, and LIST (incl. L
 - VECTOR/UVECTOR path: snapshot list → `vector-set!` with start offset; GC-tracked via
   `mdl-track-allocation!` on new-storage (VECTOR: `(+ (* 2 count) 2)` words;
   UVECTOR: `(+ count 2)` words); element type preserved from source; UVECTOR `to` type-checked
-- LIST path: `drop`+`take` snapshot; no-to returns `mdl-list`; with-to mutates mcars in-place
-- All `to` paths: length check BEFORE any write; snapshot BEFORE writing (atomic copy)
+- LIST path: `drop`+`take` snapshot; no-to returns `mdl-list`; with-to → strict error
+- For STRING/VECTOR/UVECTOR `to`: TYPE (not just PRIMTYPE) must be exact; CHTyped rejected
+- For STRING/VECTOR/UVECTOR `to`: length check BEFORE any write; snapshot BEFORE writing
 - Registered as `"SUBSTRUC"` in `builtin-table`; exported as `mdl-substruc`
 
 **Changes**:
 - `/mdl/runtime/core.rkt`: add `mdl-substruc`, register in builtin-table, export
-- `/tests/substruc_test.rkt`: 62 tests (initial 42 + 20 review fixes; in smoke suite)
+- `/tests/substruc_test.rkt`: 60 tests (nit-round fixes; in smoke suite)
 - `/scripts/test_racket.sh`: add substruc_test.rkt
 - `/tests/historical_saveit_test.rkt`: update XFAIL anchor to ON
 
@@ -142,6 +157,14 @@ SUBSTRUC tests passed
 raco test: "tests/substruc_test.rkt"
 SUBSTRUC tests passed
 62 tests passed
+```
+
+**After nit fixes** (HEAD):
+```
+raco test: "tests/substruc_test.rkt"
+SUBSTRUC tests passed
+60 tests passed
+EXIT:0
 ```
 
 **SAVE-IT new frontier** (unchanged from initial):
@@ -178,9 +201,11 @@ make m3-source-progress:
 
 ## Supported / unsupported
 
-**Supported**: STRING (all game uses), VECTOR, UVECTOR, LIST (without AND with `to`)  
-**Unsupported (strict error)**: BYTES (not in game path);
-  TUPLE (not tested; raises "SUBSTRUC requires a structured argument")
+**Supported**: STRING (all game uses), VECTOR, UVECTOR, LIST (without `to`)  
+**Unsupported (strict error)**:
+- LIST `to` — raises "SUBSTRUC: to argument for LIST is not implemented"
+- BYTES (not in game path; raises "SUBSTRUC requires a structured argument")
+- TUPLE (raises "SUBSTRUC requires a structured argument")
 
 ## Next frontier
 
@@ -209,12 +234,17 @@ Error messages (Confusion-confirmed):
 - `SUBSTRUC amount cannot be negative`
 - `SUBSTRUC amount too big for source`
 
-Supported primitive types: STRING, VECTOR, UVECTOR, LIST (incl. LIST `to`).
+Supported primitive types: STRING, VECTOR, UVECTOR, LIST (LIST `to` is a strict error).
 
-For STRING: result is a fresh mutable Racket string. With STRING `to`, the view's
-underlying storage is written via `mdl-string-set!`. Copy is atomic: all source
-elements snapshotted before any write (handles overlapping from/to views).
+`to` must have the primitive TYPE itself (not a NEWTYPE alias); Confusion rejects
+CHTyped `to` with ARG-WRONG-TYPE "Last arg to SUBSTRUC must be same type as primtype".
+
+For STRING: result is a fresh mutable Racket string. With STRING `to`, copy is atomic:
+all source chars snapshotted before any write (handles overlapping from/to views).
 For UVECTOR `to`: element type must equal source element type (TYPES-DIFFER error).
-For LIST `to`: mutates first `count` mcars of `to` pairs in-place, returns `to`.
 Destination length is always checked before any write (ARGUMENT-OUT-OF-RANGE if too short).
+
+Known deviation: `<SUBSTRUC "abc" 0 2 [0 0 0]>` gives Confusion "destination too short"
+(cross-type length calculation) but we give "Last arg … same type" (type check first).
+Game never mixes PRIMTYPE across from/to so this is not in the game path.
 ```
