@@ -186,4 +186,19 @@
   ;; Bind the local "5" via a function formal, read it back via .\5.
   (check-equal? (run "<DEFINE F (\\5) .\\5>  <F 99>") 99))
 
+;; ---- Combined #119 + #124: escapes vs leading-dot FLOAT -----
+;; A naive merge read `.\5` as FLOAT 0.5 and `.\.5` as a `..` error.
+(test-case "combined: <SET \\5 3> .\\5 is the LVAL 3, not FLOAT 0.5"
+  (check-equal? (run "<SET \\5 3> .\\5") 3)
+  (check-equal? (mdl-node-kind (car (parse-mdl ".\\5"))) 'local))
+(test-case "combined: .\\.5 is the LVAL of ATOM \".5\""
+  (check-equal? (run "<SET \\.5 7> .\\.5") 7)
+  (define node (car (parse-mdl ".\\.5")))
+  (check-equal? (mdl-node-kind node) 'local)
+  (check-equal? (mdl-node-value node) ".5"))
+(test-case "combined: unescaped .5 is still FLOAT 0.5"
+  (check-equal? (run ".5") 0.5))
+(test-case "combined: literal ..5 is still a strict reader error"
+  (check-exn #rx"LVAL argument must be an ATOM" (lambda () (parse-mdl "..5"))))
+
 (displayln "escaped atom tests passed")

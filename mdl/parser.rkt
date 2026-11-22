@@ -158,9 +158,30 @@
              (node 'global (if (string=? name "") (read-node! c) name))))]
       [(#\.)
        (advance! c)
-       (let-values ([(name _esc) (read-atom! c)])
+       ;; Record the raw character after `.` before read-atom! strips
+       ;; escapes: `.\.5` has PNAME ".5" but its second `.` is escaped.
+       (define first-raw (peek c))
+       (let-values ([(name esc?) (read-atom! c)])
          (when (string=? name "") (parse-error c "empty local reference"))
-         (node 'local name))]
+         ;; `..X`: a literal (unescaped) second `.` is not a delimiter, so
+         ;; read-atom! includes it. Confusion evaluates `..5` as LVAL of FLOAT
+         ;; 0.5 → type mismatch; we raise a strict reader error rather than
+         ;; producing a reachable LVAL. `.\.5` is the LVAL of ATOM ".5".
+         (when (equal? first-raw #\.)
+           (parse-error c "..name: LVAL argument must be an ATOM, not a compound form"))
+         ;; A token `.X` where X consists entirely of digits and an optional
+         ;; exponent (`[0-9]+([Ee][+-]?[0-9]+)?`) is a leading-dot FLOAT literal,
+         ;; NOT an LVAL: `.5` → FLOAT 0.5, `.05` → FLOAT 0.05, `.5E1` → FLOAT 5.0.
+         ;; Any other suffix means LVAL: `.5A` → LVAL atom "5A", `.5.` → LVAL atom
+         ;; "5.", `.5.5` → LVAL atom "5.5", `.1ST` → LVAL atom "1ST".
+         ;; The `(\.[0-9]*)?` group is intentionally absent: an embedded decimal
+         ;; inside the suffix (`.5.`, `.5.5`) is NOT a FLOAT — Confusion yields
+         ;; UNBOUND-VARIABLE LVAL "5."/"5.5" for those.
+         ;; (MDL manual ch.7; Confusion probe I124.)
+         ;; An escaped token is never numeric (I119): `.\5` is LVAL of ATOM "5".
+         (if (and (not esc?) (regexp-match? #px"^[0-9]+([Ee][+-]?[0-9]+)?$" name))
+             (node 'atom (string-append "." name))
+             (node 'local name)))]
       [(#\!)
        (advance! c)
        (cond
