@@ -15,6 +15,7 @@
          mdl-apply mdl-list mdl-list->list
          mdl-emit-event!
          mdl-logical-storage-stats mdl-set-logical-storage-capacity!
+         mdl-recompute-entry-words current-mdl-gc-min mdl-set-used-for-test!
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-make-terminal-channel
@@ -1837,6 +1838,27 @@
     (error 'mdl-set-logical-storage-capacity! "expected nonnegative FIX"))
   (set-mdl-memory-capacity! (current-mdl-memory) words))
 
+(define (mdl-recompute-entry-words)
+  ;; Host-only test hook: independently recompute the total charged words
+  ;; by summing ALL currently-registered entries, bypassing the cached 'used'
+  ;; field. Use this in tests to verify 'used' is consistent with the entry list.
+  (mdl-memory-entry-word-sum (current-mdl-memory)))
+
+(define (mdl-set-used-for-test! words)
+  ;; Host-only test hook: directly set the cached 'used' field WITHOUT
+  ;; registering entries. Use ONLY to simulate near-fix-max ledger state for
+  ;; overflow / cap-clamping tests. Leaves entries inconsistent.
+  (unless (and (exact-integer? words) (>= words 0))
+    (error 'mdl-set-used-for-test! "expected nonnegative integer"))
+  (mdl-memory-set-used-for-test! (current-mdl-memory) words))
+
+;; MDL manual ch.22 §22.5: GC min = minimum free words after a collection.
+;; "A large min will result in fewer total garbage collections."
+;; Initial value: 8192 words. Exposed as a session parameter so tests can
+;; use a small value to reach the fix-max cap case that would otherwise
+;; require fix-max live objects to trigger.
+(define current-mdl-gc-min (make-parameter 8192))
+
 (define (mdl-collect-logical! reason initiator)
   (define-values (reclaimed elapsed) (mdl-memory-collect! (current-mdl-memory)))
   (mdl-emit-event! "GC" (list elapsed reason (mdl-atom initiator)))
@@ -1866,23 +1888,38 @@
         (mdl-collect-logical! 2 initiator))
       ;; Historical MDL asks the host for more space when collection alone
       ;; cannot satisfy a pending request. This capacity is logical only.
-      ;; R2 fix: use amortised geometric growth (factor 3/2, minimum increment)
-      ;; instead of a flat +8192 bump to avoid O(n) collections for a growing
-      ;; live set. The new capacity is capped at fix-max (the MDL 36-bit FIX
-      ;; maximum = 2^35-1). If even the minimum needed exceeds fix-max, raise an
-      ;; explicit MDL-visible error rather than silently wrapping.
-      (when (> (+ (mdl-memory-used memory) words) (mdl-memory-capacity memory))
-        (define needed (+ (mdl-memory-used memory) words))
-        (when (> needed fix-max)
-          (error 'mdl-gc
-                 "storage overflow: ~a logical words needed, exceeds FIX maximum ~a"
-                 needed fix-max))
-        (define grown
-          (min fix-max
-               (max needed
-                    (inexact->exact
-                     (ceiling (* (mdl-memory-capacity memory) 3/2))))))
-        (set-mdl-memory-capacity! memory grown))))
+      ;;
+      ;; R2 fix: after a pressure collection, grow capacity when the remaining
+      ;; free words fall below max(words, gc-min). This is the gc-min policy
+      ;; from MDL manual ch.22: "GC <min:fix …>" — min is "the smallest number
+      ;; of words of 'free' (unclaimed, available for use) movable
+      ;; garbage-collected storage" after collection; initial value 8192 words.
+      ;; "A large min will result in fewer total garbage collections."
+      ;; Without this floor, a live set that exactly fills capacity triggers a
+      ;; full GC on every subsequent allocation (O(n) collections for n allocs).
+      ;;
+      ;; Capacity grows amortised geometrically (factor 3/2) to also avoid
+      ;; O(n²) cost from linear increments against a growing live set.
+      ;; Capped at fix-max (2^35-1). Raises a strict Racket error — not an
+      ;; MDL-level error — when needed > fix-max (unreachable in practice).
+      ;; Key: check free < gc-min UNCONDITIONALLY after any collection attempt,
+      ;; not only when allocation still doesn't fit -- a GC that returns used to
+      ;; cap-2 leaves only 2 free words (below gc-min=8192), causing 499 GCs
+      ;; for 500 garbage allocs at cap-2 without this floor.
+      (let* ([gc-min (current-mdl-gc-min)]  ; MDL manual ch.22, initial 8192
+             [free-after (mdl-memory-free memory)])
+        (when (< free-after (max words gc-min))
+          (define needed (+ (mdl-memory-used memory) (max words gc-min)))
+          (when (> needed fix-max)
+            (error 'mdl-gc
+                   "storage overflow: ~a logical words needed, exceeds FIX maximum ~a"
+                   needed fix-max))
+          (set-mdl-memory-capacity!
+           memory
+           (min fix-max
+                (max needed
+                     (inexact->exact
+                      (ceiling (* (mdl-memory-capacity memory) 3/2))))))))))
   (mdl-memory-register! memory value words))
 
 (define (mdl-deliver-occurrence! occurrence)
