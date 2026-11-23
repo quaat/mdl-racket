@@ -237,6 +237,9 @@
   ;; str-typed
   (check-equal? (v (string-append mys "<MEMBER \"b\" <CHTYPE \"abc\" MYS>>")) "bc")
   (check-equal? (type-of "<MEMBER \"b\" <CHTYPE \"abc\" MYS>>" mys) "STRING")
+  ;; an offset-0 hit on a typed STRING is still TYPE STRING (independent
+  ;; review: a "return the haystack itself at i=0" mutant must fail)
+  (check-equal? (type-of "<MEMBER \"a\" <CHTYPE \"abc\" MYS>>" mys) "STRING")
   (check-equal? (v (string-append mys "<MEMBER <CHTYPE \"b\" MYS> \"abc\">")) "bc")
   (check-equal? (v (string-append mys "<MEMBER <CHTYPE \"b\" MYS> <CHTYPE \"abc\" MYS>>")) "bc")
   (check-true (miss? (string-append mys "<MEMBER <CHTYPE \"b\" MYS> '(\"b\")>"))))
