@@ -47,5 +47,6 @@ raco test mdl/runtime/core.rkt \
   tests/constructor_eval_policy_test.rkt tests/string_view_consumers_test.rkt \
   tests/oblist_identity_test.rkt \
   tests/substruc_test.rkt \
+  tests/on_save_test.rkt \
   tests/escaped_atom_test.rkt \
   tests/unwind_raise_test.rkt

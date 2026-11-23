@@ -1087,6 +1087,36 @@ behavior. The original CONTIN then fails at TENEX?, a global initialized
 by source wrappers before START. Probe that prelude before adding host
 platform state. No GPLv3 implementation was copied.
 
+## ADR-0047: Register IPC without a source; refuse SAVE strictly
+
+**Decision (maintainer, 2026-11-22, issue #112):** (1) `ON` is EVENT plus
+HANDLER per manual chapter 21 and returns the new HANDLER. The predefined
+`"IPC"` may be registered and observed, and OFF removes it, but an isolated
+session has no inter-process message source, so any attempt to emit or
+deliver an IPC occurrence is a strict error. All other refused predefined
+names (CHAR, READ, BLOCKED, ...) stay refused. (2) `SAVE` raises an explicit
+unsupported error naming this decision; it does not return `"SAVED"` and
+writes no file. `RESTORE` is refused the same way.
+
+**Consequence:** the faithful `run.mud` path stops at `<SAVE .FN>`
+(77rooms.mud:26) after ON IPC, HANDLER DIVERT, ISTRING, DEV/SNM and
+`INT-LEVEL 100000`; INITIALIZED is BLOCKED at SAVE. Confusion stubs ON and
+really saves an image; both differences are documented reference deviations.
+A session-owned snapshot (option b) remains a later, separately approved slice.
+No GPLv3 implementation was copied.
+
+**INT-LEVEL after the SAVE error (review note).** SAVE-IT raises the level
+with an ordinary `<INT-LEVEL 100000>` call (77rooms.mud:25) before `<SAVE
+.FN>`, and nothing unwinds it, so after the strict SAVE error the session's
+INT-LEVEL stays 100000, with GC and DIVERT-AGC occurrences masked (queued,
+not delivered). That is faithful to MDL, which would sit in an error loop at
+that level, and SAVE deliberately does not reset it. It is harmless today
+because every test builds a fresh session; any later slice that continues
+the same session past SAVE (for example by calling START) must account for
+it explicitly, after probing what Confusion's RESTORE does to the level,
+instead of letting queued DIVERT-AGC occurrences silently change the GC
+schedule.
+
 ## ADR-0051: UNWIND cleanups run only for MDL transfers, never for raised errors
 
 **Status:** Accepted (maintainer decision 2026-11-23, issue #139, option a).
