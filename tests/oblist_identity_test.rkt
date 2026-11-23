@@ -228,11 +228,10 @@
    (lambda ()
      (call-with-output-file (build-path dir "main.mud")
        (lambda (out) (write-string source out)))
-     (define session (make-mdl-session dir))
+     ;; S13 part B (ADR-0050): an explicit session output port.
      (define port (open-output-string))
-     (define result
-       (parameterize ([current-output-port port])
-         (mdl-session-load! session "main.mud")))
+     (define session (make-mdl-session dir #:output-port port))
+     (define result (mdl-session-load! session "main.mud"))
      (values (hash-ref result 'status)
              (let ([f (hash-ref result 'failure)]) (and f (hash-ref f 'exception)))
              (get-output-string port)))
@@ -295,8 +294,10 @@
    ;; an unimplemented ROOT SUBR.)
    (check-exn #rx"unassigned or non-applicable MDL operator PRINT"
               (lambda () (run "<PRINT \"FOO\">")))
-   (check-exn #rx"unassigned MDL global MEMBER"
-              (lambda () (run ",MEMBER")))))
+   ;; (MEMBER was the example here until S9 implemented it; STRCOMP is
+   ;; still an unimplemented ROOT SUBR.)
+   (check-exn #rx"unassigned MDL global STRCOMP"
+              (lambda () (run ",STRCOMP")))))
 
 (test-case "user INSERT, REMOVE and BLOCK cannot change mdl-root-atom"
   (in-fresh-session

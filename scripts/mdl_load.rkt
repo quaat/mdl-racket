@@ -21,7 +21,12 @@
                                  'file #f 'expression_index #f
                                  'line #f 'column #f 'construct "<session>"
                                  'load_chain '() 'exception (exn-message e))))])
-    (mdl-session-load! (make-mdl-session source-root) entry)))
+    ;; S13 part B (ADR-0050): sessions have no implicit output; the program's
+    ;; terminal output (e.g. VFLOAD's "... loaded" lines) goes to this
+    ;; driver's stdout, passed explicitly.
+    (mdl-session-load! (make-mdl-session source-root
+                                         #:output-port (current-output-port))
+                       entry)))
 (make-directory* (or (path-only report-path) (current-directory)))
 (call-with-output-file report-path #:exists 'truncate/replace
   (lambda (out)
@@ -39,3 +44,7 @@
            (hash-ref failure 'stage) (hash-ref failure 'expression_index)
            (hash-ref failure 'exception))
   (exit 1))
+;; ADR-0054 item 6: the loaded program QUIT; not a PASS and not a load failure.
+(when (equal? (hash-ref result 'status) "QUIT")
+  (eprintf "the program QUIT during the load (last event in the report)\n")
+  (exit 3))

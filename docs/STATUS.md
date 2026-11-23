@@ -1,4 +1,4 @@
-# Status — 2026-11-23 (`main`: M2 PASS, M3 LOADED FAIL; branch stack #141: M3 INITIALIZED/INTERACTIVE scoped PASS)
+# Status — 2026-11-23 (`main`: M2 PASS, M3 LOADED FAIL; branch stack: M3 SMOKE_PARITY and local session smoke PASS (branch evidence, scoped))
 
 ## Current state (2026-11-23)
 
@@ -20,30 +20,34 @@ M0, M1 and M2 gates: **PASS (mainline)**. M3 on `main`:
 | Local session smoke | NOT RUN | |
 | PLAYABLE | NOT RUN | |
 
-### Branch: umbrella #107 and the stack #109 → #111 → #125 → #128 → #130 → #136 → #137 → #138 → #141
+### Branch: umbrella #107 and the stack
 
-The umbrella `feat/m3-logical-gc` (PR #107, `3b52abc`) is merged into every
-stack branch; the stack head is `feat/m3-interactive-io` (PR #141,
-`0e9dafe`; review snapshot was `45c387f`). PR #131 (`feat/m3-boot-reference`, fresh-boot house reference
-capture, candidate for approval) is separate and targets the umbrella.
+Runtime stack (merge order): #107 (umbrella `feat/m3-logical-gc`) → #109 →
+#111 → #125 → #128 → #130 → #136 → #137 → #138 → #141 (S7 host loop + review
+F1/F2) → #144 (S8 session clock) → #145 (S9 MEMBER) → #147 (S11 QUIT/OPEN) →
+#148 (S12 launcher) and #150 (S13 READSTRING `!` and explicit output ports;
+both on #147). Side branches on that stack: #146 (S10 strict
+SMOKE_PARITY gate, on #144), #142 (docs reconciliation, on #141), #143
+(native reference probe evidence, on #141). The integration branch
+`integration/m3-acceptance` merges all of them; #131's capture tooling is
+merged into #146. Nothing below is on `main`.
 
 | M3 stage | State | Evidence |
 |---|---|---|
 | PARSED | PASS (branch evidence) | as on `main` |
-| LOADED | PASS (branch evidence) | umbrella and every stack branch: loader exit 0 after 1,229 original forms, zero skipped (`make m3-source-progress`) |
-| INITIALIZED | PASS (branch evidence, scoped) | #141: the faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>` path completes startup in-session; SAVE is an in-session record (ADR-0048), RESET/PRINC/PRIN1/READSTRING and the host loop per ADR-0050. SAVE-IT returns `,NULL`, the host loop prints it (D1), RDCOM reaches its first READSTRING, and the boot text equals the candidate golden after D1/D2 and date-line normalisation (`make test-m3-interactive`) |
-| INTERACTIVE | PASS (branch evidence, scoped) | #141: the six house-boot commands (`north`, `west`, `open mailbox`, `take leaflet`, `inventory`, `score`) are read by the original RDCOM through the host loop and answered as in the candidate golden; `west` is accepted in its two `<PROB 80>` forms (unfixed clock). Input exhaustion terminates the run: `Beg pardon?`/`>` once, then the strict host error `exn:fail:mdl-input-exhausted` (D3) |
-| SMOKE_PARITY | NOT RUN (not claimed) | needs the session-owned fixed clock (#135); the date line and the `west` text depend on the host clock via DSKDATE → RANDOM → `<PROB 80>` (77rooms.mud:523). The golden is a maintainer-approved **candidate** (gameplay approved 2026-11-22), not yet a strict golden (#131) |
-| Local session smoke | NOT RUN | QUIT, OPEN and MEMBER are not implemented (PLAN WP3/WP4) |
-| PLAYABLE | NOT RUN | |
+| LOADED | PASS (branch evidence) | loader exit 0 after 1,229 original forms, zero skipped (`make m3-source-progress`) |
+| INITIALIZED | PASS (branch evidence, scoped) | faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>`; SAVE is an in-session record (ADR-0048); host loop per ADR-0050; `make test-m3-saveit`, `make test-m3-interactive` |
+| INTERACTIVE | PASS (branch evidence, scoped) | the six house-boot commands read by the original RDCOM and answered exactly (`make test-m3-interactive`) |
+| SMOKE_PARITY | **PASS (branch evidence, scoped)** — #146 | fresh-boot house-boot scenario at the session clock fixed to epoch 250776000, UTC (ADR-0052). One strict comparator (ADR-0053): only D1 (LISTEN banner, `"DONE"`) and D2 (`canonical_text(ONLCR(raw))`) differ; date line, `west` (PROB 80 draw 65), every response, score line and move count exact; the candidate ends by D3 input exhaustion. Fresh native Confusion capture == committed candidate record == this runtime (`make m3-check` 7/7; CI run 45155753586 incl. native comparison). Clock→seed chain: DSKDATE = START seed 10438660480 and the RANDOM sequence equal native ([CLOCK-SEED-REFERENCE](evidence/M3/CLOCK-SEED-REFERENCE.md), `make test-m3-clock-seed`). Gameplay approval of the candidate reused; no new golden content |
+| Local session smoke | **PASS (branch evidence)** — #147/#148 | boot, six commands, `quit`/`n`, `inventory`, `quit`/`y` through the game's own FINISH → RECORD → QUIT; transcript byte-identical to native (D1 only); outcome `'quit`; extra input unread; no file written (OPEN denied per ADR-0055; Confusion writes `MDL/ZORK.LOG` — documented deviation, no visible difference). `make test-m3-session`, `make test-m3-launcher` (CI run 45158909816) |
+| PLAYABLE | NOT RUN | M4 scope ([backlog](evidence/M4/SCENARIO-BACKLOG.md)); known strict gaps below |
 
-`scripts/m3_source_progress.py` does not run SAVE-IT, so its report still
-records INITIALIZED/INTERACTIVE as false; the scoped gate evidence is
-`tests/historical_interactive_test.rkt`. Since 8e3d103 the reference CI
-workflow runs `make test-m3-saveit` and `make test-m3-interactive` (PLAN WP1
-F1, [F1/F2 record](evidence/M3/F1-F2-STACK-FIXES.md)); before that the
-results came from local runs recorded in
-[S7 evidence](evidence/M3/S7-INTERACTIVE.md).
+Known strict gaps on the branch (each fails with an error, never stubbed):
+`put X in …` (unsupported TOP at `77np.mud:126` / CHTYPE conversion);
+`info`/`help` (OPEN "READ"); `script` reports it cannot open the channel; an
+in-game MDL ERROR stops at unsupported PRINT in HANDLE (`77rooms.mud:251`)
+before reaching QUIT; RESTORE unsupported. Local runs used Racket v7.9 BC;
+CI uses the pinned racket:8.10-bc container.
 
 ### Fixed on branch; not integrated into `main`
 
@@ -70,10 +74,17 @@ consolidated into [SEMANTICS](SEMANTICS.md).
 
 ### Next
 
-See [PLAN "Active iteration (2026-11-23)"](PLAN.md): WP1 stack readiness,
-WP2 deterministic SMOKE_PARITY (#131/#135), WP3 session dependencies
-(MEMBER, QUIT, OPEN denial, READSTRING `!`), WP4 local session smoke and
-launcher. M3 formal acceptance needs WP2.
+Active iteration (PLAN "Active iteration (2026-11-23)"): WP1 stack
+readiness done on branch (F1 CI coverage, F2 flush, F3 docs, #55); WP2
+SMOKE_PARITY PASS on branch; WP3 MEMBER, QUIT, OPEN, READSTRING `!` and
+explicit output ports done on branch (#145, #147, #150); WP4 local session smoke and launcher PASS
+on branch; WP5 [M4 backlog](evidence/M4/SCENARIO-BACKLOG.md) drafted.
+
+Integration into `main` requires the maintainer's explicit approval (merge
+in stack order, then rerun the full gate on `main`). Pending maintainer
+decision: promote the schema-3 reference capture (MADADV.SAVE moved to SAVE
+artifacts) over the committed schema-2 candidate record. Next single M4
+scenario: enter the house and open the cellar.
 
 ## Slice history (newest first; each entry as recorded at the time)
 

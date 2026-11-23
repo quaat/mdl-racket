@@ -1257,9 +1257,17 @@ loop").
    use it: count returned, stop character consumed and not stored, full
    buffer leaves the rest of the line unread, no echo, output flushed first.
    The manual's default channel, a FIX stop and the EOF-routine argument are
-   strict errors. A `!` or a non-ASCII character in the input is a strict
-   error (open question: Confusion drops `!` as a reader escape; the manual
-   is silent).
+   strict errors. A non-ASCII character in the input is a strict error.
+   ~~A `!` in the input is a strict error (open question: Confusion drops
+   `!` as a reader escape; the manual is silent).~~ **Amended 2026-11-23
+   (S13 part A, maintainer decision "follow pinned Confusion"):** `!c` is an
+   escape pair that stores `c` in one slot; the `!` is never stored or
+   counted; an escaped stop character still stops the read and is consumed;
+   `!` immediately before end of input is stored literally and sets the
+   end-of-input flag; escape pairing resumes on the next READSTRING after a
+   full buffer; the character after `!` must still be ASCII. Evidence:
+   `evidence/M3/READSTRING-BANG-REFERENCE.md`; contract: SEMANTICS
+   READSTRING; record: `evidence/M3/S13-BANG-OUTPUT.md`.
 4. **End of input, maintainer decision D3 "Mirror, then strict".** A read
    that meets end of input returns the characters read so far (often 0) and
    sets the channel's end-of-input flag, as Confusion does, so the game
@@ -1292,13 +1300,33 @@ by D1: the loop prints the entry value once.
 **Host input port only (independent review follow-up).** Terminal input
 uses only a host-supplied port. READSTRING on a session input CHANNEL with no
 port is a strict error (`... has no host-supplied port ...`); the runtime
-never reads the process's own stdin. Output keeps its pre-S7 behaviour: with
-no session port, OUTCHAN writes to the host's `current-output-port`
+never reads the process's own stdin. ~~Output keeps its pre-S7 behaviour:
+with no session port, OUTCHAN writes to the host's `current-output-port`
 parameter. That parameter is host-controlled and existing tests capture
 output through it. Making output strict as well would change a
 runtime-wide contract that predates S7 (PRINTSTRING, CRLF, VFLOAD tests),
-so it is left for a separate decision. `mdl-session-run-interactive`
-requires both ports to be explicit.
+so it is left for a separate decision.~~ (Superseded below.)
+`mdl-session-run-interactive` requires both ports to be explicit.
+
+**Explicit output port (amended 2026-11-23, S13 part B, maintainer
+decision "explicit output for game sessions").** Terminal output now uses
+only a host-supplied port as well. A PRINT CHANNEL made by `make-mdl-session`
+or `make-mdl-context` without `#:output-port` has no port, and every
+operation that resolves it is a strict error naming ADR-0050 (`... PRINT
+CHANNEL has no host-supplied output port; the runtime never falls back to the
+host's current-output-port (ADR-0050)`): PRINC, PRIN1, PRINTSTRING, TERPRI,
+CRLF, READSTRING's pre-read flush, the host loop's entry-value print and its
+final flush. Nothing is written to a parameterized host port. The only
+exception is an explicit opt-in that `make-mdl-session` and `make-mdl-context`
+do not accept: `mdl-ensure-terminal-channels! #:follow-current-output-port?
+#t`, used by exactly two non-session callers, the process-wide default
+context (end of `core.rkt`, used by core unit tests and host code that never
+creates a context) and `#lang mdl` modules (`mdl/lang/reader.rkt`), which run
+in that ambient context. Their PRINT CHANNEL follows the host's
+`current-output-port` at each operation, as before. F2 is unchanged: a
+strict error from the final flush is a secondary failure when a primary is
+leaving the loop, and is raised only when nothing else was. Record:
+`evidence/M3/S13-BANG-OUTPUT.md`.
 
 **Out of scope (decisions pending):** QUIT, OPEN/CLOSE (D5), UNWIND under
 host errors (issue #139), MEMBER, a fixed clock (#135). No GPLv3
@@ -1356,3 +1384,246 @@ it with ERRET, in which case the transfer completes. Skipped cleanups are
 not reported as diagnostics. The original exception is the only report.
 No game source, upstream provenance, license, deployed service or GPLv3
 code changed. The source LOADED gate is unchanged at 1229 expressions.
+
+## ADR-0052: The wall clock and local time zone are session-owned host dependencies
+
+**Status:** Proposed (issue #135 part 1).
+
+**Decision:** Each MDL session owns a clock and a time zone, stored in its
+atom space next to its RANDOM state. `make-mdl-session` accepts `#:clock`
+(an `mdl-clock`; default `real-mdl-clock`, the host wall clock) and
+`#:time-zone` (`'local`, default, or `'utc`). `make-fixed-mdl-clock seconds
+#:micros m` returns a constant instant that never advances. Only the
+no-argument "now" read of GETTIMEDATE uses the clock. The zone replaces the
+process local zone for GETTIMEDATE's non-UTC decomposition. Explicit
+timestamps keep their values. A truthy UTC argument still selects UTC.
+`mdl-session-random-snapshot` is a host-only, detached copy of the RANDOM
+state for observation.
+
+**Why:** DSKDATE feeds both the "This version created" line and START's
+RANDOM seed, so a deterministic run needs a deterministic clock. A
+process-global parameter or a changed process `TZ` would couple two
+sessions in one process. A fixed clock that does not advance matches the
+reference capture (`scripts/reference/fixed_time.c`, PR #131): its
+`gettimeofday`, `time` and `CLOCK_REALTIME` return the constant
+`MDL_FIXED_EPOCH` with zero microseconds on every call, while monotonic and
+CPU clocks run normally. The reference child runs with `TZ=UTC`, so the
+golden's zone is UTC. Normal local play keeps the real clock and the host
+zone.
+
+**Consequence:** Under a fixed clock, every DSKDATE in a run is equal, so
+GET-TIME reports zero played time, as in the reference capture. The
+supported zone set is minimal: no named or offset zones. Invalid clocks,
+invalid clock reads and unknown zones fail strictly. No game source, game
+global, DSKDATE/START/RANDOM call site, upstream provenance, license or
+GPLv3 code changed.
+
+**Known wall-time input outside the clock (independent review,
+2026-11-23):** the GC interrupt's elapsed-time argument
+(`mdl/runtime/memory.rkt`, `mdl-memory-collect!`) is still measured with
+Racket wall time and is not controlled by the session clock. It does not
+reach this game's output: the only GC handler, `GC-FCN`
+(`77rooms.mud:97-102`), takes its arguments as an unused `"TUPLE" T`, and
+the handler is turned `OFF` at load (`77rooms.mud:104`). A determinism
+claim for another program that reads that argument must not rely on this
+ADR.
+
+## ADR-0053: One strict SMOKE_PARITY comparator; D1 and D2 are the only allowed differences
+
+**Status:** Proposed (S10, issues #131/#135). Builds on ADR-0050 (D1, D2,
+D3) and ADR-0052 (fixed session clock). Evidence:
+`evidence/M3/S10-SMOKE-PARITY.md`.
+
+**Decision:**
+
+1. **One comparator.** Every fresh-boot SMOKE_PARITY comparison goes through
+   `compare_records` in `scripts/smoke_parity.py`: this runtime's candidate
+   against a Confusion reference record, and a fresh Confusion capture
+   against the committed one. `boot_reference.py compare` delegates to it.
+   There is no second comparator.
+2. **Records.** A reference record is a Confusion PTY capture from
+   `scripts/boot_reference.py` (schema 2 or 3; same strict-field layout). A
+   candidate record is built by `candidate_record` from the raw facts of
+   `scripts/m3_house_boot_run.rkt`. That script runs the faithful `run.mud`
+   path through `mdl-session-run-interactive` on the scenario's fixed clock
+   (`fixed_epoch`, zone UTC) and keeps the raw output verbatim. The
+   comparator re-derives every compared candidate field from that raw output,
+   so an edited record fails.
+3. **Allowed presentation differences, and nothing else:**
+   - **D1** (ADR-0050 part 5): the reference `boot_output` must contain
+     `LISTENING-AT-LEVEL 1 PROCESS 1` as its first line and FLOAD's
+     `"DONE"` line exactly once each. Those two lines are removed exactly once,
+     from the reference only. The host's REP print of `,NULL` (the blank line
+     after the date line) is compared, not removed.
+   - **D2** (ADR-0050; `evidence/M3/S7-frontier/golden-compare.txt`): the
+     reference text is `canonical_text` of PTY output, whose line discipline
+     applies ONLCR. The candidate's raw output becomes
+     `canonical_text(ONLCR(raw))`, then splits at RDCOM prompts with the
+     reference's own rule (`^>`). After D2, no CR or ESC may remain in any
+     compared text.
+4. **Exact checks.** These must be equal: scenario name, `fixed_epoch`,
+   `tz`, the entry forms, and the command inputs (order, missing and extra
+   commands). These must be byte-identical after D1/D2: the boot text and
+   every response. Named checks repeat these for the date line (exactly one,
+   identical) and the score line (points, total, moves). The final move count
+   must equal the number of commands. The candidate's `MOVES` global must
+   equal the move count on its score line. There is no date substitution,
+   no alternative `west` text and no whitespace folding.
+5. **Termination (D3).** The candidate run must end by input exhaustion:
+   - exactly one mirrored empty read after the last command (output
+     `Beg pardon?` then `>`);
+   - then `exn:fail:mdl-input-exhausted` with the exact D3 message;
+   - all input consumed, load PASS (1229/0), host-loop events
+     `entry-returned`, `pass`, and the game directory unchanged.
+
+   This is reported as input exhaustion, never as a user QUIT or as success
+   on its own. A run that stops early, times out, errors or returns is a
+   FAIL. The reference PTY capture stops at the last prompt, so the D3 tail
+   is checked against its exact expectation, not against the reference.
+6. **Provenance (reference schema 3).** `provenance.immutable_inputs` holds
+   what is fixed before the boot:
+   - the game files, minus the removed stale `SAVEFILE/ZORK.SAVE` and minus
+     SAVE artifacts;
+   - the hashes of mdli, `fixed_time.c` and the scenario file;
+   - the commands and the entry forms.
+
+   `provenance.save_artifacts` lists the files the run writes
+   (`MDL/MADADV.SAVE`, `77rooms.mud:8-9`) with before and after hashes. The
+   after hash changes between identical Confusion runs, so it is never
+   compared. A capture fails if the run writes any other file. The
+   approved schema-2 record stays unchanged. Its `boot_input_state` still
+   lists `MDL/MADADV.SAVE`, a documented flaw. Its gameplay fields remain
+   comparable.
+7. **`make m3-check`** runs these stages in order, each PASS, FAIL or NOT
+   RUN:
+   - `sources`;
+   - `test-m3-saveit`;
+   - `test-m3-clock-seed`;
+   - `test-m3-interactive`;
+   - the comparator unit tests;
+   - the binary-free strict comparison of this runtime against the
+     committed reference;
+   - optionally, a fresh native capture compared with both. Without mdli or
+     gcc this stage is NOT RUN, never PASS; `M3_NATIVE=require` makes that a
+     FAIL.
+
+   The target exits nonzero on any FAIL and writes
+   `artifacts/m3/m3-check.json`.
+
+**Why:** S7 compared with date normalisation and allowed two `west` texts,
+because the clock was not fixed. ADR-0052 made the clock a session
+dependency, so every tolerance except the two approved presentation
+differences can now go. One comparator keeps the contract in one place.
+Each kind of drift (date, RNG branch, text, command list, score/moves,
+early stop) fails a named negative test.
+
+**Consequence:** A PASS is technical evidence for one scenario: six
+commands, fixed clock 250776000, UTC. It does not cover play under the real
+wall clock, other inputs, save/restore, QUIT or death paths. The gate state
+stays the maintainer's decision in `STATUS.md`. No runtime file, game
+source, upstream provenance, license or GPLv3 code changed.
+## ADR-0054: QUIT is a session-termination signal; the host loop returns a session outcome
+
+**Status:** Proposed (S11). Implements the "ends when the applied code QUITs"
+clause of ADR-0049 part 3 and the QUIT rule anticipated by ADR-0051.
+Contract: SEMANTICS "M3 session end: `QUIT` and the host-loop outcome".
+Evidence: `evidence/M3/SESSION-QUIT-REFERENCE.md` (pinned Confusion
+`6df359f6…`, upstream `bdcd4a67`), implementation record
+`evidence/M3/S11-QUIT-OPEN.md`.
+
+**Decision:**
+1. `<QUIT>` takes exactly zero arguments (every game call site, including
+   FINISH 77rooms.mud:711-712). One argument is a strict unsupported error,
+   two or more `TOO-MANY-ARGUMENTS-SUPPLIED`. It never calls Racket `exit`.
+   It raises `mdl-quit-signal`, a dedicated host struct that is neither an
+   `exn:fail` nor an `exn:break`, so no `exn:fail?` handler of the runtime or
+   loader intercepts it.
+2. QUIT is not an MDL ERROR: no ERROR interrupt is signalled and no MDL ERROR
+   handler (the game's HANDLE) runs. It is a raise, not an MDL transfer, so
+   per ADR-0051 every UNWIND it crosses skips its cleanup (FINISH's cleanup
+   `<QUIT>` and any FLUSH-ME/JIGS-UP cleanup never run, RECORD never runs
+   twice). Host bookkeeping restored by `dynamic-wind`/`parameterize` is
+   still restored.
+3. `mdl-run-host-loop` / `mdl-session-run-interactive` catch exactly that
+   signal at the session boundary and **return** an `mdl-session-outcome`
+   (`kind`, `mdl-errors`). Kind is `'quit`, or `'quit-after-mdl-error` when
+   any MDL ERROR was signalled while the loop ran (resolved by a handler or
+   not); `mdl-errors` lists their messages oldest first. The runtime records
+   each application of the ERROR SUBR in the session for this purpose. An
+   acceptance run must require `'quit`.
+4. Every other ending still raises, unchanged: input exhaustion
+   (`exn:fail:mdl-input-exhausted`, D3), strict host/runtime failures and
+   unresolved MDL ERRORs (their `exn:fail`), the pass bound, host
+   cancellation (`exn:break`).
+5. F2 final flush: after a QUIT there is no primary failure, so a failed final
+   flush is raised (first failure; the rest are its secondaries) and the quit
+   outcome is dropped. A quit whose transcript may be incomplete is never
+   reported as success.
+6. QUIT outside the host loop: during `mdl-session-load!` the loader records
+   a `"QUIT"` event (file, expression, line, column, construct, load chain)
+   and the load report's status is `"QUIT"` (never `"PASS"`; the
+   `scripts/mdl_load.rkt` driver exits 3); during `mdl-session-call` the
+   signal propagates to the host caller unchanged. (Amended after the S11
+   independent review, 2026-11-23.)
+7. An MDL ERROR's outcome record is the message formatted at signal time;
+   the message of an unresolved ERROR's host failure is formatted after
+   handler delivery, as before S11, so a handler that mutates an argument
+   is reflected in it (S11 review).
+
+**Why:** The manual (§23.3) makes QUIT end MDL; Confusion's QUIT is `exit(0)`
+and runs no cleanup (C1, D11). A host process must not exit from inside a
+library call, and a game session needs a structured result that cannot be
+confused with failure. HANDLE (77rooms.mud:213-252) turns an MDL ERROR into
+`FINISH #FALSE (". Error.")` → RECORD → QUIT, an exit status 0 in Confusion;
+the outcome kind makes that path visible instead of letting it look like a
+clean user quit.
+
+**Consequences:** In this runtime HANDLE's ERROR path currently stops before
+FINISH: it applies `PRINT` (77rooms.mud:251), which is unsupported, so that
+path is a strict failure today; the outcome kind covers it once PRINT exists.
+No game source, upstream provenance, license or GPLv3 code changed.
+
+## ADR-0055: OPEN under a virtual no-file policy
+
+**Status:** Proposed (S11). Implements the maintainer-approved policy "OPEN
+returns FALSE, no file" (ADR-0050 D5). Contract: SEMANTICS "M3 file system:
+`OPEN` denial". Evidence: `evidence/M3/OPEN-FAILURE-REFERENCE.md`
+(`open-failure-probe.json`).
+
+**Decision:**
+1. Only RECORD's form is supported: `<OPEN mode name1 name2 device
+   directory>`, five STRING arguments, mode `"READB"`, `"PRINT"` or
+   `"PRINTO"` (77rooms.mud:731, 736, 748). Every other arity (the
+   one-file-spec forms at 316, 392, 412), every other mode (`"READ"` at 350,
+   352, 381, 384, 961; `"PRINTB"` at 392) and every non-STRING argument is a
+   strict error.
+2. OPEN never touches the host file system. It returns the three-element
+   FALSE `#FALSE (reason file-spec status)` with fresh STRINGs and a FIX
+   status, following manual §11.2.1 and Confusion's shape. The file spec is
+   built as Confusion builds it: `directory "/" name1 "." name2`.
+3. **Virtual-file-system policy, not OS equivalence:** the session's virtual
+   directory is empty and read-only. READB → `"No such file or directory"`,
+   2; PRINT and PRINTO → `"Permission denied"`, 13 (the values pinned
+   Confusion returns for an absent log in a read-only directory, D2/D7). The
+   status is never `*600130*` (196696), the only value that sends RECORD
+   (MUDDLE 101) into its SLEEP/AGAIN busy loop. The PRINTO value is fixed by
+   this policy; it is unreachable, because PRINTO follows only a successful
+   READB (Confusion D2 reports ENOENT for PRINTO on an absent file).
+4. Each denied call is recorded host-side (`mdl-session-open-records`); no MDL
+   primitive exposes it.
+5. CLOSE, FILE-LENGTH, ACCESS, SLEEP and file READSTRING stay unsupported.
+   Under the policy RECORD returns T through `<RETURN T .RECORD>` and its
+   UNWIND cleanup stops at the FALSE `.CH`, so CLOSE is never reached. No
+   success-shaped CLOSE exists.
+
+**Deviations recorded:** Confusion creates or appends to `MDL/ZORK.LOG` when
+the game QUITs; this runtime writes nothing. The log is not console output,
+so the C1 transcript is byte-identical. DO-SCRIPT's PRINT
+(77rooms.mud:354) is the same form and would be denied, so `script` would
+print `I can't open the script channel.` where Confusion creates
+`ZORK.SCRIPT` (not exercised). HELP/INFO (FILE-TO-TTY) fail strictly.
+
+**Security:** no file is opened, created, truncated or deleted by any OPEN
+call; the S11 tests run under a security guard that records every write or
+delete attempt and assert there are none. No server or web client can reach
+OPEN or the host loop.

@@ -1,5 +1,22 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 SMOKE_PARITY check (S10, 2026-11-23)
+
+`make m3-check` (`scripts/m3_check.py`) runs, in order, `sources`,
+`test-m3-saveit`, `test-m3-clock-seed`, `test-m3-interactive`, the comparator
+unit tests (`tests/test_smoke_parity.py`), the strict comparison of this
+runtime's fixed-clock run (`scripts/m3_house_boot_run.rkt`) with the committed
+Confusion record `docs/evidence/M3/house-boot-candidate.json`, and, when
+`mdli` and `gcc` exist, a fresh native capture in a disposable copy compared
+with both. Without them that last stage is NOT RUN, never PASS
+(`M3_NATIVE=require` makes it a FAIL; `make m3-native-parity` runs only the
+native part). Every comparison uses the single comparator
+`scripts/smoke_parity.py` (ADR-0053): only D1 and D2 are tolerated, and the
+candidate must end by D3 input exhaustion. The report goes to
+`artifacts/m3/m3-check.json`, with logs in `artifacts/m3/logs/`. The
+comparator unit tests are part of `make test-python` and need neither Racket
+nor mdli. See [S10-SMOKE-PARITY.md](evidence/M3/S10-SMOKE-PARITY.md).
+
 ## M3 branch-stack targets (2026-11-23 reconciliation)
 
 On the stack head (PR #141) the M3 make targets are `m3-source-progress`,
@@ -10,7 +27,7 @@ INITIALIZED/INTERACTIVE evidence; see
 named in the RANDOM checkpoint below was replaced by `test-m3-start-back`
 and no longer exists. Since #141's review fixes (8e3d103) the reference
 workflow runs `test-m3-saveit` and `test-m3-interactive`, and the smoke
-workflow runs the shared `make test-python` (PLAN WP1 F1). There is no `make m3-check` yet (PLAN WP2).
+workflow runs the shared `make test-python` (PLAN WP1 F1). `make m3-check` (S10) is described above.
 
 ## M3 BACK follow-up checkpoint (2026-11-22)
 

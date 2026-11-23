@@ -270,6 +270,6 @@ Not wrapped in the trace, but all registered or special in s6-rep: APPLY, PUT, N
 
 - Pipe-mode probes. The golden is pty-mode; D2 reconciles the two.
 - The trace wrapper changes SUBR values into FUNCTIONs. The game output was unchanged, but frame-sensitive SUBRs were deliberately not wrapped.
-- The scratch walk's stubs are minimal and are not a specification. Its clock was not fixed, so RANDOM differs, although no RNG-visible text appears in the scenario.
+- The scratch walk's stubs are minimal and are not a specification. Its clock was not fixed, so RANDOM differs, although no RNG-visible text appears in the scenario. (Corrected in S7-INTERACTIVE.md and S10-SMOKE-PARITY.md: `west` depends on ROOM-INFO's `<PROB 80>`.)
 - Only the six-command, quit/y and edge scenarios were exercised. Death (JIGS-UP RESET) and SCRIPT/SAVE/RESTORE verbs were not.
 - Sandbox side note: the sandbox shows char-device stub entries under `s6-rep/.claude/` (dated Oct 13, untracked). This investigation did not create or modify them.

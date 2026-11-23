@@ -104,10 +104,10 @@
        (lambda ()
          (display "<FLOAD <REST \"Xchild.mud\" 1>>\n<SETG OUTER-SAW ,CHILD-LOADED>\n")
          (display "<SETG PS <PRINTSTRING <REST \"X<r7>\" 1>>>\n")))
-     (define session (make-mdl-session root))
+     ;; S13 part B (ADR-0050): an explicit session output port.
      (define output (open-output-string))
-     (define report (parameterize ([current-output-port output])
-                      (mdl-session-load! session "outer.mud")))
+     (define session (make-mdl-session root #:output-port output))
+     (define report (mdl-session-load! session "outer.mud"))
      (check-equal? (hash-ref report 'status #f) "PASS" (format "~s" report))
      (check-equal? (mdl-session-global session "OUTER-SAW") 42)
      ;; PRINTSTRING writes only the view's visible characters.

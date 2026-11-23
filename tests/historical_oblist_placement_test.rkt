@@ -45,7 +45,8 @@
     (cons (first entry) (second entry))))
 
 (define (runtime-entries)
-  (define session (make-mdl-session source-root))
+  ;; S13 part B (ADR-0050): an explicit session port (load output discarded).
+  (define session (make-mdl-session source-root #:output-port (open-output-string)))
   (define result (mdl-session-load! session "77loadall.mud"))
   (unless (equal? (hash-ref result 'status) "PASS")
     (error 'placement "source load failed: ~a" (hash-ref result 'failure)))

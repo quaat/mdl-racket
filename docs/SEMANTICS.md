@@ -2054,6 +2054,51 @@ UTC; otherwise host local time is used. Each call captures one timestamp
 before decomposing it. Invalid types and arity fail. This is an explicit
 host compatibility bridge; deterministic cross-engine RNG parity still
 requires a seed strategy and is not implied by matching this API shape.
+Since issue #135 the "now" read and the local-time zone come from the
+session (next section).
+
+## M3 session-owned host clock and time zone (issue #135; ADR-0052)
+
+The original game reads the clock only through GETTIMEDATE: DSKDATE
+(`81tell-repl.mud:57`) packs its result, SAVE-IT builds the "This version
+created" line from it (`77rooms.mud:158`), and START seeds RANDOM with
+`<CHTYPE <DSKDATE> FIX>` (`77rooms.mud:291`). The wall clock is therefore a
+host dependency, owned by each session like its RANDOM state.
+
+- `make-mdl-session` takes `#:clock` (default `real-mdl-clock`, the host wall
+  clock, as before) and `#:time-zone` (`'local`, the default, or `'utc`).
+  Both are stored in the session's atom space; no process-global parameter
+  is involved, so two sessions in one process never share a clock or zone.
+  Any other `#:clock` value (a number, a bare procedure) or zone symbol is
+  rejected at construction.
+- A clock is an `mdl-clock` value wrapping a host thunk that returns
+  `(values epoch-seconds microseconds)`. `make-mdl-clock` wraps a thunk;
+  `make-fixed-mdl-clock seconds #:micros m` (default 0) returns a constant
+  instant: every read yields the same values and it never advances. This
+  matches the reference capture shim (`scripts/reference/fixed_time.c`,
+  PR #131), whose `gettimeofday` returns `MDL_FIXED_EPOCH` with
+  `tv_usec = 0` on every call. Each read is validated: seconds an exact
+  integer in the signed 36-bit FIX range, microseconds 0..999999; anything
+  else is a strict error, never a fallback to real time.
+- Only GETTIMEDATE with no time argument (or a FALSE first argument) reads
+  the session clock, once per call. Explicit FIX or two-FIX UVECTOR
+  timestamps keep their values exactly. Racket monotonic time, timeouts,
+  thread scheduling and CPU time are untouched.
+- Decomposition: a truthy second argument selects UTC, as before. Otherwise
+  the session zone replaces "host local time" for both "now" and explicit
+  timestamps, as `localtime_r` does under the reference process's `TZ`.
+  With the default `'local` zone every result is identical to the previous
+  behaviour. The process `TZ` is never changed. The supported zones are
+  exactly `'local` and `'utc`; named or offset zones are not supported.
+- The zone is independent of the clock: a fixed clock does not imply UTC.
+  The reference golden (`fixed_epoch` 250776000, `tz` UTC) is reproduced
+  with `#:clock (make-fixed-mdl-clock 250776000) #:time-zone 'utc`.
+- Host-only observation: `mdl-session-random-snapshot` returns a detached
+  copy of the session's RANDOM state, so a test can compute later outputs
+  without consuming the game's sequence. No MDL primitive exposes it.
+
+Tests: `tests/session_clock_test.rkt` (no upstream source) and
+`tests/historical_clock_seed_test.rkt` (DSKDATE → START seed → RANDOM state).
 
 ## M3 default terminal CHANNEL bindings (startup)
 
@@ -2071,9 +2116,10 @@ section and in "M3 interactive terminal I/O and the host top-level loop".
 
 Manual chapter 11 allows `PRINTSTRING string [channel [count]]`. It writes
 at most `count` visible characters, or the entire STRING when omitted.
-The CHANNEL must be an output CHANNEL; output goes to that CHANNEL's
-session-owned port (R1 section below; with no injected port, the host's
-`current-output-port` at each operation). The runtime retains the manual's
+The CHANNEL must be an output CHANNEL. This local runner maps its terminal
+channel to the session's host-supplied output port (S13 part B: a session
+without one refuses PRINTSTRING; only the ambient opt-in context follows the
+current Racket output port; see "Host ports" below). The runtime retains the manual's
 character-count return value; pinned Confusion returns the source STRING,
 a recorded deviation already present for one-argument PRINTSTRING. Invalid
 CHANNEL, count, or arity fails. Typed STRING values are accepted after
@@ -2083,10 +2129,10 @@ CHTYPE to STRING, as used by the original TELL definition.
 
 Manual chapter 11 defines CRLF as emitting a terminal newline and returning
 T. It accepts an optional output CHANNEL, like TERPRI, which instead returns
-empty FALSE. The runtime writes a line feed to the CHANNEL's port (R1
-section below) and requires a PRINT-mode CHANNEL. This follows the existing
-documented Unix terminal normalization; an actual carriage-return byte is not
-emitted.
+empty FALSE. The local runner writes a line feed to the CHANNEL's host output
+port (S13 part B: strict error when the session has none) and requires a
+PRINT-mode CHANNEL. This follows the existing documented
+Unix terminal normalization; an actual carriage-return byte is not emitted.
 
 ## M3 execution contexts and session-owned CHANNEL ports (review R1)
 
@@ -2119,8 +2165,11 @@ without the constructor has no INCHAN/OUTCHAN (no hidden fallback).
 owning atom space with a host record: direction, an optional Racket port and,
 for READ channels, the end-of-input flag (ADR-0050).
 `make-mdl-session`/`make-mdl-context` accept `#:output-port`/`#:input-port`.
-Output with no injected port goes to the host's `current-output-port` at
-each operation. Input never falls back: READSTRING on a READ channel without
+Output never falls back either (S13 part B): a session or context made
+without `#:output-port` refuses every terminal write and flush with a strict
+ADR-0050 error; only the process default context and `#lang mdl` modules
+opt in to following `current-output-port` (see "Host ports"). Input never
+falls back: READSTRING on a READ channel without
 a host-supplied port is a strict error, so the runtime never reads the
 process's own stdin (ADR-0050 "Host input port only"). CHTYPE may retype a
 VECTOR as CHANNEL, as in Confusion, but only storage registered in the
@@ -2390,6 +2439,22 @@ RDCOM `<PRINC ">">` and `<READSTRING .INBUF ,INCHAN .STR>` with READER-STRING
 = ESC CR LF (77rooms.mud:598-616), PRINC `!\.` (77rooms.mud:1398), PRINC of a
 FIX (78melee.mud:524), SCORE's PRIN1 of FIX (77rooms.mud:675-680).
 
+**Host ports (ADR-0050 "Host input port only" and, from 2026-11-23, S13 part
+B "Explicit output port").** A terminal CHANNEL reads or writes only the
+Racket port its host supplied. A session or context made without
+`#:input-port` refuses READSTRING; one made without `#:output-port` refuses
+every operation that resolves its PRINT CHANNEL: PRINC, PRIN1, PRINTSTRING,
+TERPRI, CRLF, the pre-read flush of READSTRING, and the host loop's entry
+print and final flush. The message is `<who>: this session's PRINT CHANNEL
+has no host-supplied output port; the runtime never falls back to the host's
+current-output-port (ADR-0050)`, and nothing reaches a parameterized
+`current-output-port`. Explicit opt-in, never a default:
+`mdl-ensure-terminal-channels! #:follow-current-output-port? #t` creates a
+PRINT CHANNEL that writes to the host's `current-output-port` at each
+operation. It is used only by the process-wide default context and by
+`#lang mdl` modules (which run in it); `make-mdl-session` and
+`make-mdl-context` do not accept it. Tests: `tests/session_output_port_test.rkt`.
+
 **Terminal CHANNEL host state.** Each terminal CHANNEL's host record (keyed
 by its backing storage, ADR-0046/#117) gains one mutable end-of-input flag,
 initially clear. It is host state only: no CHANNEL slot shows it (deviation:
@@ -2460,10 +2525,40 @@ forged, foreign or shifted (BACK/REST) view is refused.
   the FIX count stored. Case is preserved, nothing is echoed or written.
 - Overflow: when the buffer fills, the rest of the line stays unread and the
   next READSTRING continues from it (Confusion `readstring-overflow`).
-- A `!` or a character with code above 127 in the input is a strict error.
-  Confusion reads `!x` as `x` (its reader escape, `readstring-bang-and-case`);
-  the manual does not say what READSTRING does with `!`. Recorded as an open
-  question rather than guessed.
+- A character with code above 127 in the input is a strict error.
+- *(Superseded 2026-11-23, S13 part A: this bullet said "a `!` in the input
+  is a strict error".)* **`!` escape (maintainer decision 2026-11-23: follow
+  pinned Confusion; evidence `evidence/M3/READSTRING-BANG-REFERENCE.md`,
+  `readstring-bang-probe.json`).** The manual is silent on `!` in terminal
+  input; this is Confusion's stdio behaviour, adopted by decision, not a
+  manual-backed fact. Reading proceeds one *unit* at a time while the
+  buffer view has room:
+  1. A unit is one character `c`, or `!` followed by one character `c` (the
+     escape pair). Every character can be escaped, including `!` itself,
+     control characters and `\` (`\` is never an escape).
+  2. An escape pair yields `c`: the `!` is never stored or counted, and the
+     pair uses one buffer slot (`Ab!cD` → 4 `"AbcD"`; `!!` → 1 `"!"`;
+     `a!!b` → 3 `"a!b"`; `!a!b!c` → 3 `"abc"`; `a!<TAB>b` stores TAB).
+  3. The stop test uses `c` whether or not it was escaped: an escaped CR, LF
+     or ESC still ends the read, is consumed and is not stored (`ab!<LF>XY<LF>`
+     → 2 `"ab"`, then 2 `"XY"`; `ab!<CR><LF>cd<LF>` → 2, 0, 2).
+  4. `!` immediately followed by end of input is stored as a literal `!` and
+     counted; the read returns there and sets the end-of-input flag, so the
+     next READSTRING raises the D3 exhausted error (`ab!` → 3 `"ab!"`).
+     Unprobed (S13 review): whether that trailing `!` would instead stop the
+     read when the stop STRING itself contains `!`; the game's READER-STRING
+     (ESC CR LF) never does, so the runtime stores it as above.
+  5. A unit begins only when the buffer has room; when the buffer is full the
+     rest stays unread, and escape pairing resumes on the next READSTRING
+     (3 slots, `ab!cd<LF>` → 3 `"abc"`, then 1 `"d"`; 2 slots → `"ab"`, then
+     `"cd"`). Because a pair always fits in the one slot that is left, a `!`
+     is never the last character read before the buffer fills.
+  6. The count is the number of characters stored.
+  The character after `!` passes the same check as any other input: code
+  above 127 is a strict error (`a!é` is refused). Known deviation, unchanged:
+  Confusion stores bytes above 127 raw (`ASCII` gives negative codes) with or
+  without a `!`. Not modelled: a FIX stop (strict here, so `bang-fix-stop`
+  cannot be exercised).
 - CR is a stop character in READER-STRING, so CRLF input yields an extra empty
   read (Confusion `boot-six-crlf`); the host therefore feeds LF-terminated
   lines.
@@ -2503,7 +2598,8 @@ the maintainer's D1 amendment.
    `#:max-passes` bounds the passes (exceeding it is a strict error).
 5. *End.* Only by an exception in this slice: input exhausted, a strict
    error, or any other failure. QUIT is not implemented (out of scope). The
-   output port is flushed on every exit.
+   output port is flushed on every exit. *Amended by S11 (ADR-0054):* a QUIT
+   now ends the loop with a returned session outcome; see "M3 session end".
 6. *Isolation.* Local host API only; no network or web entry point; input
    reaches MDL only through the program's own READSTRING.
 
@@ -2656,3 +2752,174 @@ run inner then outer on a transfer and neither on a raise. An error in a
 cleanup during a transfer surfaces unchanged and skips outer cleanups. A
 handler-resolved error inside the body does not disable a later
 transfer's cleanup. A raised non-`exn` value skips cleanups.
+
+## M3 primitive: `MEMBER` (S9; issue #139 frontier, HANDLE)
+
+Authority: [MDL manual §8.2.2](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+and the pinned Confusion observations in `docs/evidence/M3/MEMBER-REFERENCE.md`
+(`member-probe.json`, 58 cases). Implementation record:
+`docs/evidence/M3/S9-MEMBER.md`.
+
+`<MEMBER object structured>` takes exactly two arguments. It is not an alias
+of `MEMQ`: the comparison is structural `=?` (the runtime's `mdl-equal?`,
+including its cycle boundary from issue #23), never `==?`, and the result is
+never a host Boolean.
+
+Supported subset:
+
+- **Element search.** The haystack is PRIMTYPE LIST (LIST, FORM, any other
+  LIST-primtype TYPE, and a FALSE's payload), VECTOR or UVECTOR, native or a
+  REST view, CHTYPE'd/NEWTYPE'd included. Elements are scanned first to last
+  and compared with `=?`; the first hit wins. The result is the shared
+  `<REST structured i>` view (`mdl-rest`): a PUT through it is visible in the
+  haystack, it is `==?` to `<REST s i>`, and at offset 0 it is `==?` to the
+  haystack itself. Its TYPE is the haystack's PRIMTYPE type (FORM gives LIST,
+  a NEWTYPE of VECTOR gives VECTOR, `#FALSE (1 2)` gives LIST). A miss
+  returns `#FALSE ()`. A STRING needle against a LIST or VECTOR is an element
+  search (`<MEMBER "a" ["abc"]>` misses); `<MEMBER "" ,LEXV>` (77rooms.mud
+  COMMAND) finds the first empty STRING view.
+- **Substring search.** When both arguments are PRIMTYPE STRING (native
+  STRING, REST view, typed STRING), MEMBER returns the shared STRING tail view
+  at the first case-sensitive occurrence of the needle's characters, offset
+  relative to the (possibly REST'd) haystack, TYPE STRING. A needle longer than
+  the haystack, or an empty haystack, returns `#FALSE ()`.
+- **Element search in a STRING.** Any other needle against a STRING haystack
+  is an element search with `=?` against each CHARACTER element: a CHARACTER
+  finds its position (same result as MEMQ); FIX, ATOM, LIST, etc. miss.
+- **Cycles.** Comparison inherits the `=?` cycle boundary: identical cyclic
+  objects match, distinct equal-content cycles raise the explicit
+  unsupported-cyclic-equality error. That error ends the whole search, even
+  if a later element is `==?` to the needle (e.g. `<MEMBER .A (.B .A)>` with
+  `.A` and `.B` distinct one-element cycles): strict, never a silent miss. A LIST haystack is walked pair by pair;
+  a hit before the cycle closes is returned, and revisiting a pair raises an
+  explicit "cyclic LIST" error instead of looping (deviation: unprobed; the
+  reference would not terminate on a miss).
+
+Strict refusals (never a silent FALSE):
+
+- Arity other than two: `TOO-FEW-ARGUMENTS-SUPPLIED` /
+  `TOO-MANY-ARGUMENTS-SUPPLIED` (Confusion raises these MDL ERRORs).
+- A non-structured second argument (FIX, ATOM, CHARACTER, ...): error
+  `Second arg to MEMBER must be structured`, the same host-error style as
+  MEMQ. Confusion prints this text as an internal error without an ERROR frame.
+- An **empty STRING needle with a STRING haystack**. Confusion's result is an
+  out-of-bounds read (it matches at the first NUL in or after the haystack),
+  which differs from the manual's substring definition and is not MDL
+  semantics. The runtime raises a deliberate unsupported error and returns
+  neither the haystack nor `""`. The game never does this.
+- TUPLE haystacks (modelled by the runtime, but MEMBER on them was not probed)
+  and structured kinds the runtime does not model (BYTES, TEMPLATE, ...).
+  These raise an explicit unsupported error until a reference probe exists.
+
+Tests: `tests/member_test.rkt` (smoke suite), one assertion per supported
+reference case plus aliasing, first-match, REST'd offsets, typed values,
+cycles and every refusal.
+
+## M3 session end: `QUIT` and the host-loop outcome (S11; ADR-0054)
+
+Specification written before implementation. Authority: MDL manual §23.3
+(QUIT stops MDL) and §16.2/§16.6; ADR-0051 (UNWIND cleanups only for MDL
+transfers); pinned Confusion observations in
+`docs/evidence/M3/SESSION-QUIT-REFERENCE.md` (`session-quit-probe.json`).
+Implementation record: `docs/evidence/M3/S11-QUIT-OPEN.md`.
+
+**Game call sites.** Every `QUIT` in the game takes no arguments:
+77rooms.mud:50 (SAVE-IT XUNM gate), 279 (START, MUDDLE < 100 only), 427, 428,
+435 (DO-RESTORE), 711 (FINISH after RECORD), 712 (FINISH's UNWIND cleanup),
+952 (JIGS-UP after the third death). FINISH is reached from the `QUIT` verb
+(77dung.mud:2920), from HANDLE (77rooms.mud:231 CONTROL-G, 252 after an MDL
+ERROR), from death paths (338-339, 898, 906) and from DO-SAVE (398).
+
+**`<QUIT>`.**
+- Exactly zero arguments. One argument (Confusion: an exit status) is a strict
+  unsupported error; two or more is `TOO-MANY-ARGUMENTS-SUPPLIED`. Arguments
+  are evaluated first, as for any SUBR.
+- It never calls Racket `exit` and never returns. It raises a dedicated host
+  value, `mdl-quit-signal`, which is **not** an `exn:fail` (nor `exn:break`),
+  so no `exn:fail?` handler of the runtime or loader intercepts it.
+- It is **not** an MDL ERROR: no ERROR interrupt is signalled and no MDL ERROR
+  handler (the game's HANDLE) runs.
+- As a raise it is not an MDL transfer (ADR-0051): every UNWIND it crosses
+  skips its cleanup. FINISH's `<UNWIND <PROG () … <QUIT>> <QUIT>>` therefore
+  never runs its cleanup QUIT, RECORD's own UNWIND cleanup does not run on the
+  QUIT that follows it (RECORD has already returned), and FLUSH-ME/JIGS-UP
+  cleanups never run FINISH/RECORD a second time. Pinned Confusion agrees:
+  its QUIT is `exit(0)` and runs no cleanup.
+- Host bookkeeping restored by `dynamic-wind`/`parameterize` (bindings,
+  activation liveness, ERROR frame liveness, OBLIST path, interrupt level) is
+  still restored while the signal propagates.
+- Outside the host loop (for example during `mdl-session-load!` or
+  `mdl-session-call`) the signal propagates to the host caller unchanged; the
+  host recognises it with `mdl-quit-signal?`.
+
+**Session outcome.** `mdl-run-host-loop` / `mdl-session-run-interactive`
+catch exactly `mdl-quit-signal` at the session boundary and **return** an
+`mdl-session-outcome`; every other ending still raises. The taxonomy:
+
+| Ending | Host sees |
+|---|---|
+| The game QUITs, no MDL ERROR was signalled during the run | returns outcome, kind `'quit` |
+| The game QUITs after at least one MDL ERROR was signalled during the run (e.g. HANDLE → FINISH → QUIT, or a handler that ERRETs and play continues) | returns outcome, kind `'quit-after-mdl-error`; `mdl-session-outcome-mdl-errors` lists each ERROR's message, oldest first |
+| Terminal input exhausted (D3) | raises `exn:fail:mdl-input-exhausted` |
+| Host cancellation (break) | raises the `exn:break` |
+| Strict host/runtime failure, unresolved MDL ERROR, pass bound | raises that `exn:fail` (unchanged object) |
+| QUIT, but the final flush of terminal output fails | raises the first flush failure; the others are its secondary failures (`mdl-host-loop-secondary-failures`). There is no primary failure, and a quit whose transcript may be incomplete is never reported as success. |
+
+"Signalled" means any application of the ERROR SUBR in the session while the
+loop runs, whether or not a handler resolved it. Host strict errors are not
+MDL ERRORs (they never run HANDLE) and always end the run as raised failures.
+An acceptance run must require kind `'quit`.
+
+## M3 file system: `OPEN` denial (virtual no-file policy; S11; ADR-0055)
+
+Specification written before implementation. Authority: MDL manual §11.2.1
+(a failed OPEN returns a FALSE of reason, file specification and status);
+maintainer policy "OPEN returns FALSE, no file"; pinned Confusion observations
+in `docs/evidence/M3/OPEN-FAILURE-REFERENCE.md` (`open-failure-probe.json`).
+
+**Game call sites** (77rooms.mud unless stated):
+
+| Line | Function | Form | This slice |
+|---|---|---|---|
+| 731 | RECORD | `<OPEN "READB" "ZORK" "LOG" .DEV .SNM>` | denied FALSE |
+| 736 | RECORD | `<OPEN "PRINTO" "ZORK" "LOG" .DEV .SNM>` (only after a successful READB) | denied FALSE (unreachable under this policy) |
+| 748 | RECORD | `<OPEN "PRINT" "ZORK" "LOG" .DEV .SNM>` | denied FALSE |
+| 316 | MAKE-SCRIPT | `<OPEN "PRINT" <STRING "MARC;%Z" ,XUNM " >">>` (one file-spec STRING) | strict unsupported |
+| 350, 352, 381, 384 | DO-SCRIPT, DO-SAVE (MUDDLE < 100 only) | `<OPEN "READ" … "DSK" .UNM>` | strict unsupported |
+| 354 | DO-SCRIPT | `<OPEN "PRINT" "ZORK" "SCRIPT" "DSK" .UNM>` | denied FALSE (same 5-STRING PRINT form; not exercised). Visible policy deviation: the game prints `I can't open the script channel.` where Confusion creates `ZORK.SCRIPT` |
+| 392 | DO-SAVE | `<OPEN "PRINTB" <STRING …>>` | strict unsupported |
+| 412 | DO-RESTORE | `<OPEN "READB" .STR>` (one file-spec STRING) | strict unsupported |
+| 961 | FILE-TO-TTY (HELP, INFO, …) | `<OPEN "READ" .FILE1 .FILE2 .DEV .SNM>` | strict unsupported |
+
+**`<OPEN mode name1 name2 device directory>`** (the RECORD form).
+- Exactly five arguments, each a STRING (native or REST view). Mode must be
+  `"READB"`, `"PRINT"` or `"PRINTO"`. Any other arity (including the
+  one-file-spec form), any other mode (`"READ"`, `"PRINTB"`, …) and any
+  non-STRING argument is a strict error. No default arguments.
+- It never touches the host file system: it opens, creates, truncates, stats
+  or deletes nothing, in any directory.
+- It returns a three-element FALSE `#FALSE (reason file-spec status)`:
+  - `reason`: a fresh STRING; `file-spec`: a fresh STRING built as
+    Confusion builds it, `directory "/" name1 "." name2` (the device is not
+    part of it), e.g. `"MDL/ZORK.LOG"`; `status`: a FIX.
+  - **Virtual-file-system policy** (not a claim of OS equivalence): the
+    session's virtual directory is empty and read-only. READB: `"No such file
+    or directory"`, status 2. PRINT and PRINTO: `"Permission denied"`, status
+    13. These are the values pinned Confusion returns for an absent log in a
+    read-only directory (Probe D2/D7), used as fixed constants.
+  - The status is never `*600130*` (196696), the only value that sends RECORD
+    (MUDDLE = 101) into its SLEEP/AGAIN busy loop, and never `*600117*` or
+    `*600123*`.
+- Each call is recorded host-side (mode, file-spec, status), readable with
+  `mdl-session-open-records`; no MDL primitive exposes the record.
+
+**RECORD under this policy.** READB is denied, the busy test `<==? <3 .CH>
+*600130*>` is false, PRINT is denied, the `*600117*` test is false, and the
+last clause `<RETURN T .RECORD>` returns. That RETURN crosses RECORD's UNWIND,
+so its cleanup runs: `<AND .CH …>` stops at the FALSE `.CH`, and **CLOSE is not
+reached**. FINISH then QUITs. Deviation: Confusion writes (or appends to)
+`MDL/ZORK.LOG` here; this runtime writes nothing. The log is not part of the
+console transcript, so no visible output differs.
+
+**CLOSE** and the rest of the file API (FILE-LENGTH, ACCESS, READSTRING from a
+file, SLEEP) stay unsupported (strict). No success-shaped CLOSE exists.

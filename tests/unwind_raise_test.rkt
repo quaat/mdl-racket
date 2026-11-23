@@ -74,9 +74,11 @@
              (lambda () (run "<PROG () <UNWIND <GO NOLABEL> <SETG CL 1>> 1>")))
   (check-equal? (g "CL") 0))
 
-(scenario "unassigned QUIT in the body runs no cleanup"
-  (check-exn #rx"operator QUIT"
-             (lambda () (run "<UNWIND <QUIT> <SETG CL 1>>")))
+(scenario "QUIT in the body (S11 quit signal, ADR-0054) runs no cleanup"
+  (check-pred mdl-quit-signal?
+              (with-handlers ([(lambda (v) #t) values])
+                (run "<UNWIND <QUIT> <SETG CL 1>>")
+                'no-raise))
   (check-equal? (g "CL") 0))
 
 (scenario "ERROR handler that returns normally falls through: no cleanup"
