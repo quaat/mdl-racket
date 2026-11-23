@@ -24,6 +24,10 @@
          mdl-make-terminal-channel mdl-substruc
          exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
          mdl-run-host-loop mdl-host-loop-secondary-failures
+         mdl-quit-signal? mdl-session-outcome? mdl-session-outcome-kind
+         mdl-session-outcome-mdl-errors
+         mdl-open-records mdl-open-record? mdl-open-record-mode
+         mdl-open-record-file-spec mdl-open-record-status
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          mdl-random-state-snapshot
@@ -1773,7 +1777,12 @@
                             [save-records #:mutable]
                             ;; ADR-0052: session-owned host clock and zone
                             ;; for GETTIMEDATE's "now" and local decomposition.
-                            clock time-zone))
+                            clock time-zone
+                            ;; ADR-0055: denied OPEN calls, newest first.
+                            [open-records #:mutable]
+                            ;; ADR-0054: messages of every MDL ERROR signalled
+                            ;; in this session, newest first (host-only).
+                            [mdl-errors #:mutable]))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1856,7 +1865,7 @@
               ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
               ;; (seed-root! fails if either is missing from the inventory).
               (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)
-              '() clock time-zone))
+              '() clock time-zone '() '()))
 
 ;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
 ;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
@@ -2256,6 +2265,57 @@
                           (mdl-interrupt-state-level (current-interrupt-state)))
          records))
   (string-copy "SAVED"))
+
+;; ---------------------------------------------------------------------------
+;; S11 / ADR-0054: QUIT ends the MDL session (manual 23.3). It never calls
+;; Racket `exit`: it raises the dedicated host value mdl-quit-signal, which is
+;; not an exn (so no exn:fail? handler intercepts it) and not an MDL ERROR (so
+;; no MDL ERROR handler, e.g. the game's HANDLE, runs). Being a raise, it is
+;; not an MDL transfer: every UNWIND it crosses skips its cleanup (ADR-0051),
+;; while dynamic-wind host bookkeeping is restored. The host loop catches it
+;; at the session boundary and returns an mdl-session-outcome.
+(struct mdl-quit-signal ())
+(define (mdl-quit . args)
+  (case (length args)
+    [(0) (raise (mdl-quit-signal))]
+    [(1) (error 'QUIT "an exit-status argument is not supported (ADR-0054)")]
+    [else (error 'QUIT "TOO-MANY-ARGUMENTS-SUPPLIED")]))
+
+;; S11 / ADR-0055: OPEN under the maintainer's virtual no-file policy ("OPEN
+;; returns FALSE, no file"). Only RECORD's five-STRING form
+;; <OPEN mode name1 name2 device directory> (77rooms.mud:731, 736, 748) with
+;; mode READB, PRINT or PRINTO is supported. It never touches the host file
+;; system and returns #FALSE (reason file-spec status): the session's virtual
+;; directory is empty and read-only, so READB is "No such file or directory"
+;; (2) and PRINT/PRINTO are "Permission denied" (13), the values pinned
+;; Confusion returns for an absent log in a read-only directory (Probe D2/D7).
+;; The status is never *600130* (196696), RECORD's busy-retry code. The file
+;; spec is built as Confusion builds it: directory "/" name1 "." name2.
+(struct mdl-open-record (mode file-spec status) #:transparent)
+(define (mdl-open-records)
+  (reverse (atom-space-open-records (current-mdl-atom-space))))
+(define open-denials
+  '(("READB" "No such file or directory" 2)
+    ("PRINT" "Permission denied" 13)
+    ("PRINTO" "Permission denied" 13)))
+(define (mdl-open . args)
+  (unless (= (length args) 5)
+    (error 'OPEN
+           "only the five-STRING form <OPEN mode name1 name2 device directory> is supported (ADR-0055)"))
+  (unless (andmap mdl-string? args)
+    (error 'OPEN "every argument must be a STRING (ADR-0055)"))
+  (define-values (mode name1 name2 device directory)
+    (apply values (map mdl-string-content args)))
+  (define denial (assoc mode open-denials))
+  (unless denial
+    (error 'OPEN "mode ~s is not supported; only READB, PRINT and PRINTO are (ADR-0055)" mode))
+  (define file-spec (string-append directory "/" name1 "." name2))
+  (define status (caddr denial))
+  (define space (current-mdl-atom-space))
+  (set-atom-space-open-records!
+   space (cons (mdl-open-record mode (string->immutable-string file-spec) status)
+               (atom-space-open-records space)))
+  (mdl-false (list (string-copy (cadr denial)) (string-copy file-spec) status)))
 
 ;; RESTORE stays intentionally unsupported (ADR-0048): it never reads or
 ;; writes a file and fails after ordinary SUBR argument evaluation.
@@ -3725,16 +3785,24 @@
 ;; evaluator: it applies ENTRY-THUNK (the caller's fixed entry FUNCTION),
 ;; prints the value with PRIN1 and TERPRI to the LVAL of OUTCHAN (maintainer
 ;; decision D1: the REP print of SAVE-IT's ,NULL), then on every pass
-;; re-reads the GVAL of ROOT REP and applies it with no arguments. It ends
-;; only by an exception (input exhausted, a strict error, the pass bound);
-;; QUIT is not modelled yet. Terminal output is flushed on every exit, and
+;; re-reads the GVAL of ROOT REP and applies it with no arguments. It
+;; returns only when the program QUITs (ADR-0054): the boundary catches
+;; exactly mdl-quit-signal and returns an mdl-session-outcome whose kind is
+;; 'quit, or 'quit-after-mdl-error when any MDL ERROR was signalled during
+;; the run (resolved or not; the messages are in mdl-errors, oldest first).
+;; Every other ending raises: input exhausted, a strict error, an unresolved
+;; MDL ERROR, the pass bound, a break. Terminal output is flushed on every
+;; exit, and
 ;; that final flush never replaces the outcome and never runs host code
 ;; (review F2 and its independent review): when a raised value is leaving
 ;; the loop it is re-raised unchanged (same object), and every flush failure
 ;; is recorded as a secondary failure of it, readable with
 ;; mdl-host-loop-secondary-failures; when nothing was raised (a host escape
 ;; out of ON-EVENT) the first flush failure is raised and the rest are its
-;; secondaries. ON-EVENT receives host-only observations:
+;; secondaries. A QUIT is not a failure, so a failed final flush after a
+;; QUIT is raised the same way (the outcome is dropped: a transcript that may
+;; be incomplete is never reported as a clean quit). ON-EVENT receives
+;; host-only observations:
 ;; (entry-returned value), (pass n). It is never called after the loop body
 ;; has been left, so a callback that escapes cannot turn a failure into a
 ;; normal return.
@@ -3745,10 +3813,17 @@
   ;; LEAVING: a box holding the raised value now leaving the loop, set only by
   ;; the boundary handler, so a raise caught inside the loop never counts.
   (define leaving #f)
+  (define space (current-mdl-atom-space))
+  (define errors-before (length (atom-space-mdl-errors space)))
+  (define (quit-outcome)
+    (define all (atom-space-mdl-errors space))
+    (define new (reverse (take all (- (length all) errors-before))))
+    (mdl-session-outcome (if (null? new) 'quit 'quit-after-mdl-error) new))
   (dynamic-wind
    void
    (lambda ()
-    (with-handlers ([(lambda (raised) #t)
+    (with-handlers ([mdl-quit-signal? (lambda (signal) (quit-outcome))]
+                    [(lambda (raised) #t)
                      (lambda (raised) (set! leaving (box raised)) (raise raised))])
      (define value (entry-thunk))
      (on-event (list 'entry-returned value))
@@ -3775,6 +3850,9 @@
            [(pair? failures)
             (record-secondary-failures! (car failures) (cdr failures))
             (raise (car failures))]))))
+
+;; ADR-0054: what a host loop returns when the program QUITs.
+(struct mdl-session-outcome (kind mdl-errors) #:transparent)
 
 ;; Secondary failures of a raised value that ended a host loop, keyed by the
 ;; eq? identity of that value (weakly). Host-only diagnostics: a failed final
@@ -4168,6 +4246,12 @@
     (cond [(mdl-atom? value) (mdl-atom-pname value)]
           [(mdl-string? value) (format "~s" (mdl-string-content value))]
           [else (format "~a" value)]))
+  (define message
+    (if (null? args) "ERROR" (string-join (map describe args) " ")))
+  ;; ADR-0054: every signalled MDL ERROR is recorded, resolved or not, so a
+  ;; session that later QUITs reports it (quit-after-mdl-error).
+  (let ([space (current-mdl-atom-space)])
+    (set-atom-space-mdl-errors! space (cons message (atom-space-mdl-errors space))))
   (define-values (value erret-level)
     (call/ec
      (lambda (resume)
@@ -4185,9 +4269,7 @@
                          (mdl-interrupt-state-level (current-interrupt-state))))
              (mdl-deliver-occurrence!
               (mdl-interrupt-occurrence header (cons frame args))))
-           (error 'mdl-error "~a"
-                  (if (null? args) "ERROR"
-                      (string-join (map describe args) " "))))
+           (error 'mdl-error "~a" message))
          (lambda () (set-mdl-error-frame-live?! frame #f))))))
   ;; ERRET returns from this ERROR at the interrupt level current when ERRET
   ;; ran; the handler is responsible for <INT-LEVEL 0> (manual 21.8.11).
@@ -4416,6 +4498,8 @@
         "ON" mdl-on
         "SAVE" mdl-save
         "RESTORE" mdl-restore
+        "QUIT" mdl-quit
+        "OPEN" mdl-open
         "REP" mdl-default-rep
         "INT-LEVEL" mdl-int-level
         "ENABLE" mdl-enable

@@ -2270,7 +2270,8 @@ the maintainer's D1 amendment.
    `#:max-passes` bounds the passes (exceeding it is a strict error).
 5. *End.* Only by an exception in this slice: input exhausted, a strict
    error, or any other failure. QUIT is not implemented (out of scope). The
-   output port is flushed on every exit.
+   output port is flushed on every exit. *Amended by S11 (ADR-0054):* a QUIT
+   now ends the loop with a returned session outcome; see "M3 session end".
 6. *Isolation.* Local host API only; no network or web entry point; input
    reaches MDL only through the program's own READSTRING.
 
@@ -2483,3 +2484,112 @@ Strict refusals (never a silent FALSE):
 Tests: `tests/member_test.rkt` (smoke suite), one assertion per supported
 reference case plus aliasing, first-match, REST'd offsets, typed values,
 cycles and every refusal.
+
+## M3 session end: `QUIT` and the host-loop outcome (S11; ADR-0054)
+
+Specification written before implementation. Authority: MDL manual §23.3
+(QUIT stops MDL) and §16.2/§16.6; ADR-0051 (UNWIND cleanups only for MDL
+transfers); pinned Confusion observations in
+`docs/evidence/M3/SESSION-QUIT-REFERENCE.md` (`session-quit-probe.json`).
+Implementation record: `docs/evidence/M3/S11-QUIT-OPEN.md`.
+
+**Game call sites.** Every `QUIT` in the game takes no arguments:
+77rooms.mud:50 (SAVE-IT XUNM gate), 279 (START, MUDDLE < 100 only), 427, 428,
+435 (DO-RESTORE), 711 (FINISH after RECORD), 712 (FINISH's UNWIND cleanup),
+952 (JIGS-UP after the third death). FINISH is reached from the `QUIT` verb
+(77dung.mud:2920), from HANDLE (77rooms.mud:231 CONTROL-G, 252 after an MDL
+ERROR), from death paths (338-339, 898, 906) and from DO-SAVE (398).
+
+**`<QUIT>`.**
+- Exactly zero arguments. One argument (Confusion: an exit status) is a strict
+  unsupported error; two or more is `TOO-MANY-ARGUMENTS-SUPPLIED`. Arguments
+  are evaluated first, as for any SUBR.
+- It never calls Racket `exit` and never returns. It raises a dedicated host
+  value, `mdl-quit-signal`, which is **not** an `exn:fail` (nor `exn:break`),
+  so no `exn:fail?` handler of the runtime or loader intercepts it.
+- It is **not** an MDL ERROR: no ERROR interrupt is signalled and no MDL ERROR
+  handler (the game's HANDLE) runs.
+- As a raise it is not an MDL transfer (ADR-0051): every UNWIND it crosses
+  skips its cleanup. FINISH's `<UNWIND <PROG () … <QUIT>> <QUIT>>` therefore
+  never runs its cleanup QUIT, RECORD's own UNWIND cleanup does not run on the
+  QUIT that follows it (RECORD has already returned), and FLUSH-ME/JIGS-UP
+  cleanups never run FINISH/RECORD a second time. Pinned Confusion agrees:
+  its QUIT is `exit(0)` and runs no cleanup.
+- Host bookkeeping restored by `dynamic-wind`/`parameterize` (bindings,
+  activation liveness, ERROR frame liveness, OBLIST path, interrupt level) is
+  still restored while the signal propagates.
+- Outside the host loop (for example during `mdl-session-load!` or
+  `mdl-session-call`) the signal propagates to the host caller unchanged; the
+  host recognises it with `mdl-quit-signal?`.
+
+**Session outcome.** `mdl-run-host-loop` / `mdl-session-run-interactive`
+catch exactly `mdl-quit-signal` at the session boundary and **return** an
+`mdl-session-outcome`; every other ending still raises. The taxonomy:
+
+| Ending | Host sees |
+|---|---|
+| The game QUITs, no MDL ERROR was signalled during the run | returns outcome, kind `'quit` |
+| The game QUITs after at least one MDL ERROR was signalled during the run (e.g. HANDLE → FINISH → QUIT, or a handler that ERRETs and play continues) | returns outcome, kind `'quit-after-mdl-error`; `mdl-session-outcome-mdl-errors` lists each ERROR's message, oldest first |
+| Terminal input exhausted (D3) | raises `exn:fail:mdl-input-exhausted` |
+| Host cancellation (break) | raises the `exn:break` |
+| Strict host/runtime failure, unresolved MDL ERROR, pass bound | raises that `exn:fail` (unchanged object) |
+| QUIT, but the final flush of terminal output fails | raises the first flush failure; the others are its secondary failures (`mdl-host-loop-secondary-failures`). There is no primary failure, and a quit whose transcript may be incomplete is never reported as success. |
+
+"Signalled" means any application of the ERROR SUBR in the session while the
+loop runs, whether or not a handler resolved it. Host strict errors are not
+MDL ERRORs (they never run HANDLE) and always end the run as raised failures.
+An acceptance run must require kind `'quit`.
+
+## M3 file system: `OPEN` denial (virtual no-file policy; S11; ADR-0055)
+
+Specification written before implementation. Authority: MDL manual §11.2.1
+(a failed OPEN returns a FALSE of reason, file specification and status);
+maintainer policy "OPEN returns FALSE, no file"; pinned Confusion observations
+in `docs/evidence/M3/OPEN-FAILURE-REFERENCE.md` (`open-failure-probe.json`).
+
+**Game call sites** (77rooms.mud unless stated):
+
+| Line | Function | Form | This slice |
+|---|---|---|---|
+| 731 | RECORD | `<OPEN "READB" "ZORK" "LOG" .DEV .SNM>` | denied FALSE |
+| 736 | RECORD | `<OPEN "PRINTO" "ZORK" "LOG" .DEV .SNM>` (only after a successful READB) | denied FALSE (unreachable under this policy) |
+| 748 | RECORD | `<OPEN "PRINT" "ZORK" "LOG" .DEV .SNM>` | denied FALSE |
+| 316 | MAKE-SCRIPT | `<OPEN "PRINT" <STRING "MARC;%Z" ,XUNM " >">>` (one file-spec STRING) | strict unsupported |
+| 350, 352, 381, 384 | DO-SCRIPT, DO-SAVE (MUDDLE < 100 only) | `<OPEN "READ" … "DSK" .UNM>` | strict unsupported |
+| 354 | DO-SCRIPT | `<OPEN "PRINT" "ZORK" "SCRIPT" "DSK" .UNM>` | denied FALSE (same 5-STRING PRINT form; not exercised). Visible policy deviation: the game prints `I can't open the script channel.` where Confusion creates `ZORK.SCRIPT` |
+| 392 | DO-SAVE | `<OPEN "PRINTB" <STRING …>>` | strict unsupported |
+| 412 | DO-RESTORE | `<OPEN "READB" .STR>` (one file-spec STRING) | strict unsupported |
+| 961 | FILE-TO-TTY (HELP, INFO, …) | `<OPEN "READ" .FILE1 .FILE2 .DEV .SNM>` | strict unsupported |
+
+**`<OPEN mode name1 name2 device directory>`** (the RECORD form).
+- Exactly five arguments, each a STRING (native or REST view). Mode must be
+  `"READB"`, `"PRINT"` or `"PRINTO"`. Any other arity (including the
+  one-file-spec form), any other mode (`"READ"`, `"PRINTB"`, …) and any
+  non-STRING argument is a strict error. No default arguments.
+- It never touches the host file system: it opens, creates, truncates, stats
+  or deletes nothing, in any directory.
+- It returns a three-element FALSE `#FALSE (reason file-spec status)`:
+  - `reason`: a fresh STRING; `file-spec`: a fresh STRING built as
+    Confusion builds it, `directory "/" name1 "." name2` (the device is not
+    part of it), e.g. `"MDL/ZORK.LOG"`; `status`: a FIX.
+  - **Virtual-file-system policy** (not a claim of OS equivalence): the
+    session's virtual directory is empty and read-only. READB: `"No such file
+    or directory"`, status 2. PRINT and PRINTO: `"Permission denied"`, status
+    13. These are the values pinned Confusion returns for an absent log in a
+    read-only directory (Probe D2/D7), used as fixed constants.
+  - The status is never `*600130*` (196696), the only value that sends RECORD
+    (MUDDLE = 101) into its SLEEP/AGAIN busy loop, and never `*600117*` or
+    `*600123*`.
+- Each call is recorded host-side (mode, file-spec, status), readable with
+  `mdl-session-open-records`; no MDL primitive exposes the record.
+
+**RECORD under this policy.** READB is denied, the busy test `<==? <3 .CH>
+*600130*>` is false, PRINT is denied, the `*600117*` test is false, and the
+last clause `<RETURN T .RECORD>` returns. That RETURN crosses RECORD's UNWIND,
+so its cleanup runs: `<AND .CH …>` stops at the FALSE `.CH`, and **CLOSE is not
+reached**. FINISH then QUITs. Deviation: Confusion writes (or appends to)
+`MDL/ZORK.LOG` here; this runtime writes nothing. The log is not part of the
+console transcript, so no visible output differs.
+
+**CLOSE** and the rest of the file API (FILE-LENGTH, ACCESS, READSTRING from a
+file, SLEEP) stay unsupported (strict). No success-shaped CLOSE exists.

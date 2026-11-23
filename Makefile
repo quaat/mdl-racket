@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -53,6 +53,13 @@ test-m3-saveit: sources
 # INITIALIZED/INTERACTIVE evidence, not a SMOKE_PARITY claim.
 test-m3-interactive: sources
 	@raco test tests/historical_interactive_test.rkt
+
+# S11 (ADR-0054, ADR-0055): a complete local session through the game's own
+# FINISH -> RECORD -> QUIT (OPEN denied, no file written), compared with the
+# pinned Confusion pipe captures; EOF at the quit prompt, unknown words, and an
+# unsupported host operation that must stay a strict failure.
+test-m3-session: sources
+	@raco test tests/historical_session_quit_test.rkt
 
 # Issue #135 part 1 (ADR-0052): fixed session clock -> DSKDATE -> START's
 # RANDOM seed -> RANDOM state, observed host-only.
