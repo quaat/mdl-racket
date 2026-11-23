@@ -19,7 +19,7 @@
          mdl-recompute-entry-words current-mdl-gc-min mdl-set-used-for-test!
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
-         mdl-make-terminal-channel
+         mdl-make-terminal-channel mdl-substruc
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          atom-space-inchan atom-space-outchan
@@ -3426,6 +3426,160 @@
   (newline (channel-output-port 'mdl-crlf channel))
   (mdl-root-atom "T"))
 
+;; SUBSTRUC (MDL manual ch. 7, section 7.1.7)
+;;
+;; Contract: `<SUBSTRUC from rest amount to>` copies `amount` elements of
+;; `from` starting at index `rest` into a fresh structure (or into `to` when
+;; supplied) and returns it.  All arguments except `from` are optional:
+;;   rest   – FIX, default 0.  Must be in [0, length(from)].
+;;   amount – FIX, default remaining length after rest.  Must be in
+;;            [0, length(from)-rest].
+;;   to     – structured of the same PRIMTYPE as `from`; receives the copied
+;;            elements starting at its position 0 (may be a REST view).
+;;            For UVECTOR `to`: element type must equal source element type.
+;;            For LIST `to`: mutates the first `count` mcars in-place.
+;;            Returned as-is after modification.
+;;
+;; Confusion-confirmed error messages (class → message):
+;;   SECOND-ARG-WRONG-TYPE   → "Second argument to SUBSTRUC must be a FIX"
+;;   THIRD-ARG-WRONG-TYPE    → "Third argument to SUBSTRUC must be a FIX"
+;;   "SUBSTRUC rest cannot be negative"
+;;   "SUBSTRUC rest too large"
+;;   "SUBSTRUC amount cannot be negative"
+;;   "SUBSTRUC amount too big for source"
+;;   ARG-WRONG-TYPE          → "Last arg to SUBSTRUC must be same type as primtype of first arg"
+;;   TYPES-DIFFER-IN-UNIFORM-VECTOR → "SUBSTRUC UVECTOR to and from must be same type"
+;;   ARGUMENT-OUT-OF-RANGE   → "SUBSTRUC destination too short"
+;;
+;; Supported primitive types: STRING, VECTOR, UVECTOR, LIST.
+;; LIST `to` is NOT implemented (strict error); see evidence note for Confusion
+;; behaviours (overlap and too-short) that differ from each other and from us.
+;; Copying is atomic (all source elements are snapshotted before any write).
+;; This prevents corruption when `from` and `to` are views on the same storage.
+;; `to` must have the primitive TYPE itself (not a NEWTYPE alias); Confusion rejects
+;; CHTyped `to` with ARG-WRONG-TYPE "Last arg to SUBSTRUC must be same type…".
+;;
+;; Probe evidence: docs/evidence/M3/S3-SUBSTRUC.md
+;; Reference SHA: 6df359f6…  source: mdlzork bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3
+(define (mdl-substruc from [rest 0] [amount #f] [to #f])
+  ;; Item 4: distinguish wrong-type from negative-value errors.
+  (unless (exact-integer? rest)
+    (error 'mdl-substruc "Second argument to SUBSTRUC must be a FIX"))
+  (when (< rest 0)
+    (error 'mdl-substruc "SUBSTRUC rest cannot be negative"))
+  (when amount
+    (unless (exact-integer? amount)
+      (error 'mdl-substruc "Third argument to SUBSTRUC must be a FIX"))
+    (when (< amount 0)
+      (error 'mdl-substruc "SUBSTRUC amount cannot be negative")))
+  (define base (mdl-base from))
+  (cond
+    ;; ---- STRING ----
+    [(mdl-string? base)
+     (define src-len (mdl-string-length base))
+     (when (> rest src-len)
+       (error 'mdl-substruc "SUBSTRUC rest too large"))
+     (define avail (- src-len rest))
+     (define count (or amount avail))
+     (when (> count avail)
+       (error 'mdl-substruc "SUBSTRUC amount too big for source"))
+     (cond
+       [to
+        ;; Nit 2: check exact TYPE (not just PRIMTYPE) — Confusion rejects CHTyped to.
+        (unless (eq? (mdl-type to) (mdl-root-atom "STRING"))
+          (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
+        (define to-base (mdl-base to))
+        ;; Item 2: check destination length before any write.
+        (when (< (mdl-string-length to-base) count)
+          (error 'mdl-substruc "SUBSTRUC destination too short"))
+        ;; Item 3: snapshot all source chars atomically, then write.
+        (define snapshot
+          (for/list ([i (in-range count)])
+            (mdl-string-ref base (+ rest i))))
+        (for ([i (in-range count)] [ch (in-list snapshot)])
+          (mdl-string-set! to-base i ch))
+        to]
+       [else
+        ;; Allocate a fresh independent mutable string.
+        (define result (make-string count))
+        (for ([i (in-range count)])
+          (string-set! result i (mdl-string-ref base (+ rest i))))
+        result])]
+    ;; ---- VECTOR / UVECTOR ----
+    [(mdl-array? base)
+     (define src-len (mdl-array-length base))
+     (when (> rest src-len)
+       (error 'mdl-substruc "SUBSTRUC rest too large"))
+     (define avail (- src-len rest))
+     (define count (or amount avail))
+     (when (> count avail)
+       (error 'mdl-substruc "SUBSTRUC amount too big for source"))
+     (define kind (mdl-array-kind base))
+     (define storage (mdl-array-storage base))
+     (define src-start (mdl-array-start base))
+     (cond
+       [to
+        ;; Nit 2: check exact TYPE (not just PRIMTYPE) — Confusion rejects CHTyped to.
+        (unless (eq? (mdl-type to) (mdl-root-atom (symbol->string kind)))
+          (error 'mdl-substruc "Last arg to SUBSTRUC must be same type as primtype of first arg"))
+        (define to-base (mdl-base to))
+        ;; Item 1: UVECTOR → also check element-type compatibility.
+        (when (eq? kind 'UVECTOR)
+          (define src-elem (mdl-array-element-type base))
+          (define to-elem  (mdl-array-element-type to-base))
+          (unless (or (not src-elem) (not to-elem) (mdl-equal? src-elem to-elem))
+            (error 'mdl-substruc "SUBSTRUC UVECTOR to and from must be same type")))
+        ;; Item 2: check destination length before any write.
+        (when (< (mdl-array-length to-base) count)
+          (error 'mdl-substruc "SUBSTRUC destination too short"))
+        ;; Item 3: snapshot all source elements atomically, then write.
+        (define to-storage (mdl-array-storage to-base))
+        (define to-start   (mdl-array-start to-base))
+        (define snapshot
+          (for/list ([i (in-range count)])
+            (vector-ref storage (+ src-start rest i))))
+        (for ([i (in-range count)] [v (in-list snapshot)])
+          (vector-set! to-storage (+ to-start i) v))
+        to]
+       [else
+        (define new-storage (make-vector count))
+        (for ([i (in-range count)])
+          (vector-set! new-storage i (vector-ref storage (+ src-start rest i))))
+        (define word-count
+          (case kind
+            [(VECTOR) (+ (* 2 count) 2)]
+            [else     (+ count 2)]))      ; UVECTOR
+        (mdl-track-allocation! new-storage word-count (symbol->string kind))
+        ;; Preserve element type for UVECTOR; use #f for VECTOR.
+        (define elem-type
+          (if (eq? kind 'UVECTOR)
+              (mdl-array-element-type base)
+              #f))
+        (new-mdl-array kind new-storage 0 count elem-type)])]
+    ;; ---- LIST ----
+    [(or (null? base) (mpair? base))
+     (define elems (mdl-list->list (mdl-list-head from 'mdl-substruc)))
+     (define src-len (length elems))
+     (when (> rest src-len)
+       (error 'mdl-substruc "SUBSTRUC rest too large"))
+     (define avail (- src-len rest))
+     (define count (or amount avail))
+     (when (> count avail)
+       (error 'mdl-substruc "SUBSTRUC amount too big for source"))
+     (define src-slice (take (drop elems rest) count))
+     (cond
+       [to
+        ;; Nit 1: LIST `to` is not implemented (strict error).
+        ;; Confusion supports it but: (a) overlap writes non-atomically giving a
+        ;; different result from STRING/VECTOR; (b) too-short is detected AFTER
+        ;; partial writes.  Since the game never passes a LIST `to`, we refuse
+        ;; rather than copy either Confusion behaviour.  See S3-SUBSTRUC.md §list-to.
+        (error 'mdl-substruc "SUBSTRUC: to argument for LIST is not implemented")]
+       [else
+        (apply mdl-list src-slice)])]
+    [else
+     (error 'mdl-substruc "SUBSTRUC requires a structured argument")]))
+
 ;; UNPARSE (MDL manual ch. 7, section 7.6.6.4; appendix 2)
 ;;
 ;; Contract: `<UNPARSE any radix:fix>` returns a fresh mutable STRING
@@ -3796,6 +3950,7 @@
         "ASCII" mdl-ascii
         "UNPARSE" mdl-unparse
         "PRINTSTRING" mdl-printstring
+        "SUBSTRUC" mdl-substruc
         "TERPRI" mdl-terpri
         "CRLF" mdl-crlf
         "ERROR" mdl-error
