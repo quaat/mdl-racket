@@ -1704,3 +1704,19 @@ storage, printing, input) — a larger change with no game use. Alternatives
 rejected: accept any code (conflicts with the ASCII and input contract and
 the host string representation); refuse WORD/NEWTYPE sources (the reference
 accepts them and they cost nothing).
+
+**Amendment (independent review, 2026-11-23).** (1) A second game use: the
+balloon's room names `VAIRn` step their digit with `<PUT .S 5 <CHTYPE <+|-
+<CHTYPE <5 .M> FIX> 1> CHARACTER>>` (`77act2.mud:526` rising, `:578`
+falling); the codes are digits ±1 (48–53), inside the range, and a unit case
+covers both directions. (2) FLOAT is refused only as a direct source: a FLOAT
+first CHTYPE'd to WORD or to a NEWTYPE of FLOAT reaches the WORD branch and
+is then governed by the 0–127 range check alone (its bits use this runtime's
+existing FLOAT word encoding); not game-reachable. (3) The 0–127 range binds
+CHTYPE, ASCII and READSTRING; the reader and STRING literals can still carry
+a CHARACTER above 127 (e.g. `!\é`, `<1 "é">`), so `<CHTYPE <CHTYPE !\é FIX>
+CHARACTER>` is refused although the original CHARACTER existed; not
+game-reachable, a candidate for a separate reader slice. (4) Pre-existing:
+a host Racket `char` passed through the embedding API (`mdl-session-call`)
+is typed CHARACTER but CHTYPE of it to FIX/WORD fails in `word-bits-of`; MDL
+code cannot produce host chars.

@@ -216,4 +216,11 @@
    (displayln "interpreted CHTYPE CHARACTER twins passed"))
  (lambda () (delete-directory/files scratch-root #:must-exist? #f)))
 
+;; S3 independent review: the second game use, the balloon's VAIRn room
+;; names (77act2.mud:526 rising, :578 falling), steps the digit with CHTYPE.
+(check-equal? (run "<PROG ((S <ISTRING 5 !\\X>) (M \"VAIR3\")) <SUBSTRUC \"VAIR3\" 0 4 .S> <PUT .S 5 <CHTYPE <+ <CHTYPE <5 .M> FIX> 1> CHARACTER>> .S>")
+              "\"VAIR4\"")
+(check-equal? (run "<PROG ((S <ISTRING 5 !\\X>) (M \"VAIR3\")) <SUBSTRUC \"VAIR3\" 0 4 .S> <PUT .S 5 <CHTYPE <- <CHTYPE <5 .M> FIX> 1> CHARACTER>> .S>")
+              "\"VAIR2\"")
+
 (displayln "chtype character tests passed")
