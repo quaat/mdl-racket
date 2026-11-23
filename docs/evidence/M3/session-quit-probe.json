@@ -1,0 +1,1642 @@
+{
+  "schema_version": 1,
+  "probe": "session",
+  "recorded_at": "2026-11-23T09:52:55.413449+00:00",
+  "interpreter_sha256_before": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "interpreter_sha256_after": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "upstream_mdlzork_checked_out": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "game_dir": "mdlzork_771212/patched_confusion",
+  "shim_src_sha256": "d1fa86520eab80891c95c9cbec8a35401fd1fe55c1d6fa6b18165a30736ab925",
+  "shim": "fixed_time.c from BOOT-REF (feat/m3-boot-reference e616ac0), compiled per run: gcc -shared -fPIC -O2 -o fixed_time.so fixed_time.c -ldl",
+  "protocol": "scripts/probe_session_reference.py (see module docstring)",
+  "cases": [
+    {
+      "name": "C1-session-quit-pipe",
+      "kind": "transcript",
+      "note": "six house-boot commands, quit, n, inventory, quit, y, then an extra 'look' that must not be processed",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C1-session-quit-pipe-_r_1s7y3/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\nn\ninventory\nquit\ny\nlook\n",
+      "input_sha256": "edc26d5fc26e9386328da0e8cede5939e836c7d97e056fd4f1557e311648d687",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "da5c146864e4e28b8c5011fee4f07bba9c3c26711c559702c806fc1409f61a51",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.2,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "7b40a7276b62a8e5ea0b971c0f4ec3a712c555bff85e544cd1ef97edc22ee954",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "8ed56223a60e50f8d9c8752437d1c4ba122d5b3cf71c387fac09bee7c89307c3",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 9 moves, 0 deaths.  In West of House. Quit.\n\n"
+      }
+    },
+    {
+      "name": "C1-session-quit-pty",
+      "kind": "transcript",
+      "note": "same session over a pty with boot_reference.py's pexpect settings; 'y' and 'look' are written in one send",
+      "mode": "pty",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C1-session-quit-pty-yl5fx_ye/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "entry_lines": [
+        "<FLOAD \"77loadall.mud\">",
+        "<SAVE-IT>"
+      ],
+      "boot_output_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n81prim.mud loaded\r\n77defs.mud loaded\r\n77makstr.mud loaded\r\n81tell-repl.mud loaded\r\n77act1.mud loaded\r\n77act2.mud loaded\r\n77act3.mud loaded\r\n77rooms.mud loaded\r\n77patch.mud loaded\r\n77np.mud loaded\r\n78melee.mud loaded\r\n77dung.mud loaded\r\n\"DONE\"\r\nWelcome to Dungeon.\r\r\nThis version created December 12.\r\n\r\nYou are in an open field west of a big white house, with a boarded\r\r\nfront door.\r\nThere is a small mailbox here.\r\n",
+      "boot_output_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\n\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n",
+      "steps": [
+        {
+          "input_bytes": "north\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "You are facing the north side of a white house.  There is no door here,\r\r\nand all the windows are barred.\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "west\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "West of House\r\nThere is a small mailbox here.\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "open mailbox\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "Opening the mailbox reveals a leaflet.\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "take leaflet\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "Taken.\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "inventory\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "You are carrying:\r\nA leaflet\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "score\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "\r\nYour score would be 0 [total of 500 points], in 6 moves.\r\nThis score gives you the rank of Beginner.\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "quit\n",
+          "expected": "yesno",
+          "matched": "expected",
+          "output": "\r\nYour score would be 0 [total of 500 points], in 7 moves.\r\nThis score gives you the rank of Beginner.\r\n",
+          "matched_text": "Do you wish to leave the game? (Y is affirmative): "
+        },
+        {
+          "input_bytes": "n\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "inventory\n",
+          "expected": "prompt",
+          "matched": "expected",
+          "output": "You are carrying:\r\nA leaflet\r\n",
+          "matched_text": ">"
+        },
+        {
+          "input_bytes": "quit\n",
+          "expected": "yesno",
+          "matched": "expected",
+          "output": "\r\nYour score would be 0 [total of 500 points], in 9 moves.\r\nThis score gives you the rank of Beginner.\r\n",
+          "matched_text": "Do you wish to leave the game? (Y is affirmative): "
+        },
+        {
+          "input_bytes": "y\nlook\n",
+          "expected": "eof",
+          "matched": "EOF",
+          "output": "\r\n",
+          "matched_text": null
+        }
+      ],
+      "post_steps_tail": "",
+      "still_alive_after_steps": false,
+      "error": null,
+      "exit_status": 0,
+      "signal_status": null,
+      "elapsed_seconds": 1.82,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "01f0b841a4fd222b37767ecee48fb8a9813787bb97e12d9c74823a1c6d6b40b7",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "8ed56223a60e50f8d9c8752437d1c4ba122d5b3cf71c387fac09bee7c89307c3",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 9 moves, 0 deaths.  In West of House. Quit.\n\n"
+      }
+    },
+    {
+      "name": "C1-session-quit-diag",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC (not a transcript): RANDOM/READSTRING/OPEN/CLOSE/QUIT logged to DIAG.LOG outside the game copy",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C1-session-quit-diag-0tgj_g2x/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/C1-session-quit-diag-0tgj_g2x/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<SETG DIAG-ORIG-OPEN ,OPEN>\n<SETG OPEN <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"OPEN-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-OPEN !.DIAG-A>> <DIAG \"OPEN-RESULT\" <COND (<TYPE? .DIAG-R CHANNEL> CHANNEL) (T .DIAG-R)>> .DIAG-R>>\n<SETG DIAG-ORIG-CLOSE ,CLOSE>\n<SETG CLOSE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"CLOSE-ARG-TYPE\" <TYPE <1 .DIAG-A>>> <APPLY ,DIAG-ORIG-CLOSE !.DIAG-A>>>\n<SETG DIAG-ORIG-QUIT ,QUIT>\n<SETG QUIT <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"QUIT-NARGS\" <LENGTH .DIAG-A>> <CLOSE ,DIAG-CH> <APPLY ,DIAG-ORIG-QUIT !.DIAG-A>>>\n<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\nn\ninventory\nquit\ny\nlook\n",
+      "input_sha256": "928523432b34789c4f4cc53cc973468dd4d0d78176ba765c8987ddfcc262e8b0",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C1-session-quit-diag-0tgj_g2x/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C1-session-quit-diag-0tgj_g2x/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n#SUBR *0000000000000000000162*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"OPEN-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-OPEN !.DIAG-A>> <DIAG \"OPEN-RESULT\" <COND (<TYPE? .DIAG-R CHANNEL> CHANNEL) (T .DIAG-R)>> .DIAG-R)\n#SUBR *0000000000000000000164*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"CLOSE-ARG-TYPE\" <TYPE <1 .DIAG-A>>> <APPLY ,DIAG-ORIG-CLOSE !.DIAG-A>)\n#SUBR *0000000000000000000243*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"QUIT-NARGS\" <LENGTH .DIAG-A>> <CLOSE ,DIAG-CH> <APPLY ,DIAG-ORIG-QUIT !.DIAG-A>)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "ef69360f3d17a5bc975907f732e3393d1c2c4abe56a64ac01ce3277adfe8c4db",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C1-session-quit-diag-0tgj_g2x/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C1-session-quit-diag-0tgj_g2x/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n#SUBR *0000000000000000000162*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"OPEN-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-OPEN !.DIAG-A>> <DIAG \"OPEN-RESULT\" <COND (<TYPE? .DIAG-R CHANNEL> CHANNEL) (T .DIAG-R)>> .DIAG-R)\n#SUBR *0000000000000000000164*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"CLOSE-ARG-TYPE\" <TYPE <1 .DIAG-A>>> <APPLY ,DIAG-ORIG-CLOSE !.DIAG-A>)\n#SUBR *0000000000000000000243*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"QUIT-NARGS\" <LENGTH .DIAG-A>> <CLOSE ,DIAG-CH> <APPLY ,DIAG-ORIG-QUIT !.DIAG-A>)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.19,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 879003,
+            "sha256": "edc6dc1b58c8a95a554693a7fee241ebcdcfa3aa0404001edd1a26c5caf10d05",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "8ed56223a60e50f8d9c8752437d1c4ba122d5b3cf71c387fac09bee7c89307c3",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 9 moves, 0 deaths.  In West of House. Quit.\n\n"
+      },
+      "diag_log": "RANDOM-ARGS (10438660480)\nRANDOM-RESULT 16566282405\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -21802663835\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"open mailbox\"\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"quit\"\nREADSTRING-COUNT 1\nREADSTRING-TEXT \"n\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"quit\"\nREADSTRING-COUNT 1\nREADSTRING-TEXT \"y\"\nOPEN-ARGS (\"READB\" \"ZORK\" \"LOG\" \"DSK\" \"MDL\")\nOPEN-RESULT #FALSE (\"No such file or directory\" \"MDL/ZORK.LOG\" 2)\nOPEN-ARGS (\"PRINT\" \"ZORK\" \"LOG\" \"DSK\" \"MDL\")\nOPEN-RESULT CHANNEL\nCLOSE-ARG-TYPE CHANNEL\nQUIT-NARGS 0\nCLOSE-ARG-TYPE CHANNEL\n"
+    },
+    {
+      "name": "C1b-session-quit-repeat",
+      "kind": "transcript",
+      "note": "repeat of C1 pipe to show byte determinism",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C1b-session-quit-repeat-x3z3g3so/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\nn\ninventory\nquit\ny\nlook\n",
+      "input_sha256": "edc26d5fc26e9386328da0e8cede5939e836c7d97e056fd4f1557e311648d687",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "da5c146864e4e28b8c5011fee4f07bba9c3c26711c559702c806fc1409f61a51",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.21,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "adbd9f431dbc2cf40e5c660aaa4eb56c046f7ae83e3ed3a56997279c88bcc263",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "8ed56223a60e50f8d9c8752437d1c4ba122d5b3cf71c387fac09bee7c89307c3",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 9 moves, 0 deaths.  In West of House. Quit.\n\n"
+      }
+    },
+    {
+      "name": "C2-eof-at-yesno",
+      "kind": "transcript",
+      "note": "input ends while the quit confirmation is pending",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C2-eof-at-yesno-2c36m61c/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\n",
+      "input_sha256": "9c8ad62316bbd33970f1e86d2061505942f6c7637eabdd759fe9ddb61430597d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>",
+      "stdout_sha256": "4143ecdf2b0fbe2e28164d6e418f2847a1151982eff6ffc5d095c67fa101ea68",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.19,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "b2ccb1ee204f8855129abe4bf4cea582d48c38e7b5334f98a9961a9aa475c4ca",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "C2b-eof-at-yesno-diag",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC of C2: READSTRING counts/texts",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C2b-eof-at-yesno-diag-9lfy9wz3/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/C2b-eof-at-yesno-diag-9lfy9wz3/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<SETG DIAG-ORIG-OPEN ,OPEN>\n<SETG OPEN <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"OPEN-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-OPEN !.DIAG-A>> <DIAG \"OPEN-RESULT\" <COND (<TYPE? .DIAG-R CHANNEL> CHANNEL) (T .DIAG-R)>> .DIAG-R>>\n<SETG DIAG-ORIG-QUIT ,QUIT>\n<SETG QUIT <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"QUIT-NARGS\" <LENGTH .DIAG-A>> <CLOSE ,DIAG-CH> <APPLY ,DIAG-ORIG-QUIT !.DIAG-A>>>\n<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\n",
+      "input_sha256": "06e2bb53104f8f5fcd3d38a8d9b0715f76c91d890929f07507cb573aebdacdcc",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C2b-eof-at-yesno-diag-9lfy9wz3/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C2b-eof-at-yesno-diag-9lfy9wz3/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n#SUBR *0000000000000000000162*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"OPEN-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-OPEN !.DIAG-A>> <DIAG \"OPEN-RESULT\" <COND (<TYPE? .DIAG-R CHANNEL> CHANNEL) (T .DIAG-R)>> .DIAG-R)\n#SUBR *0000000000000000000243*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"QUIT-NARGS\" <LENGTH .DIAG-A>> <CLOSE ,DIAG-CH> <APPLY ,DIAG-ORIG-QUIT !.DIAG-A>)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>",
+      "stdout_sha256": "5d878f86e5453d25ebb9d6f18ff1b2ce43666f5725e462fe3d398280d687151c",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C2b-eof-at-yesno-diag-9lfy9wz3/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C2b-eof-at-yesno-diag-9lfy9wz3/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n#SUBR *0000000000000000000162*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"OPEN-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-OPEN !.DIAG-A>> <DIAG \"OPEN-RESULT\" <COND (<TYPE? .DIAG-R CHANNEL> CHANNEL) (T .DIAG-R)>> .DIAG-R)\n#SUBR *0000000000000000000243*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"QUIT-NARGS\" <LENGTH .DIAG-A>> <CLOSE ,DIAG-CH> <APPLY ,DIAG-ORIG-QUIT !.DIAG-A>)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.22,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 877762,
+            "sha256": "21766749d946aa006e2b98b305cbe134cddf7a961b48fcc4ecd678dd6023418f",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {},
+      "diag_log": "READSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"open mailbox\"\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"quit\"\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\n"
+    },
+    {
+      "name": "C2c-yes-without-newline-then-eof",
+      "kind": "transcript",
+      "note": "the answer 'y' is followed by end of input instead of LF",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C2c-yes-without-newline-then-eof-f6gqkf_f/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\ny",
+      "input_sha256": "9262ad97d22023501264d52ae8e1f57fd3ec89cd813323d0f520bb99f32715be",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "ca6270df69fcc64b58e6729c5208bc9a178c15f0b8895d10d248481c06c3dec8",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.21,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "9de4c8a643f81bcb84b1e2caff16cf3e1e1c5f1361699c2f41281e84442b7716",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "b8784e83e0a0e6306ce50bd86d125ffde971e503c03f13a96b2f6699080e4a8d",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 7 moves, 0 deaths.  In West of House. Quit.\n\n"
+      }
+    },
+    {
+      "name": "C2d-empty-answer-line",
+      "kind": "transcript",
+      "note": "an empty line answers the confirmation; INBUF still holds 'quit'",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C2d-empty-answer-line-mqehaijw/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\n\nquit\ny\n",
+      "input_sha256": "67a62265681329e8ebd3df07dfffae4672cbc54de5f0df0d20c4b132ab4c7787",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>\nYour score would be 0 [total of 500 points], in 8 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "4c1af70e324dcee3d8c9ee7a2bc9bb770857bb8e29172bbd855c4b663258f671",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 7 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>\nYour score would be 0 [total of 500 points], in 8 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.2,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "dcc4ee0d7b7a3e0f3069566aa31c7996ce66e5b106815eba95f7187d028550e9",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "686bcd6076a9f8a13d20d88c36d0ecab35f58b405bbe35089f681f4e3c7764b8",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 8 moves, 0 deaths.  In West of House. Quit.\n\n"
+      }
+    },
+    {
+      "name": "C2e-yes-word-answer",
+      "kind": "transcript",
+      "note": "only the first character of the answer is tested",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C2e-yes-word-answer-7s516ha_/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nquit\nyes please\n",
+      "input_sha256": "be320efa15bdd92a7b5b61cbf651183737137c4c2aa17162bb98fdcb27d61506",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>\nYour score would be 0 [total of 500 points], in 1 move.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "5d03ecdc15ea4a5f35cfaf411ce846eb19f6b5e266c56b155df4344c5d917486",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>\nYour score would be 0 [total of 500 points], in 1 move.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "cfd4fc9c32beabe3d364a63cd95d6919e731c996062f31ce0a5f6d119ff9ee54",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "0decb2738fefceb520ef67a5a9cc4948bccbf4cee289d75f190355f692dac3ba",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 1 moves, 0 deaths.  In West of House. Quit.\n\n"
+      }
+    },
+    {
+      "name": "C3-unknown-and-malformed",
+      "kind": "transcript",
+      "note": "XYZZY; FROBOZZLE (lexes to a known 5-letter prefix FROBO); truly unknown BLORFINTZ and QQQ; malformed commands and an empty line, then score/quit",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C3-unknown-and-malformed-rh1sqwzk/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nxyzzy\nfrobozzle\nblorfintz\nqqq\ntake\nopen the\nput leaflet in\n\nnorth west\nscore\nquit\ny\n",
+      "input_sha256": "d1179ad434e0413f8d63432d35cff3ba5047793bd2ed5485c4dab91f73612e77",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>I don't know the word XYZZY\n>The FROBOZZ Corporation created, owns, and operates this dungeon.\n>I don't know the word BLORF\n>I don't know the word QQQ\n>Take what?\n>Opening the mailbox reveals a leaflet.\n>I can't make sense out of that.\n>Beg pardon?\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 10 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "dac5c6af5d0ea59e522e8f42d5e18efac3f5fb2a433a893e8c090c4dbd3ad9b9",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word XYZZY\n>The FROBOZZ Corporation created, owns, and operates this dungeon.\n>I don't know the word BLORF\n>I don't know the word QQQ\n>Take what?\n>Opening the mailbox reveals a leaflet.\n>I can't make sense out of that.\n>Beg pardon?\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 10 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.19,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "30fe5198d40c35482b3042a78642b8939d1312fa2b803cba2ab899e28c58e7e5",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 132,
+            "sha256": "7a082867ef2f3114a3badd903a84ad43fb61059382b89218938511fda0c697a1",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 10 moves, 0 deaths.  In North of House. Quit.\n\n"
+      }
+    },
+    {
+      "name": "C3-unknown-and-malformed-diag",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC of C3: RANDOM and READSTRING log",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/C3-unknown-and-malformed-diag-m3rq3ymu/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/C3-unknown-and-malformed-diag-m3rq3ymu/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nxyzzy\nfrobozzle\nblorfintz\nqqq\ntake\nopen the\nput leaflet in\n\nnorth west\nscore\nquit\ny\n",
+      "input_sha256": "12ee2a28fcb6e8d17468d0cebe138764c1aa68b53cadc1b6ee2512e8928dd8e9",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C3-unknown-and-malformed-diag-m3rq3ymu/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C3-unknown-and-malformed-diag-m3rq3ymu/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>I don't know the word XYZZY\n>The FROBOZZ Corporation created, owns, and operates this dungeon.\n>I don't know the word BLORF\n>I don't know the word QQQ\n>Take what?\n>Opening the mailbox reveals a leaflet.\n>I can't make sense out of that.\n>Beg pardon?\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 10 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "12bc42f00edcfdd78515bccb22459b85ddb8a1f8d8ba9ab12bf7a48389fd6bb1",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C3-unknown-and-malformed-diag-m3rq3ymu/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/C3-unknown-and-malformed-diag-m3rq3ymu/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word XYZZY\n>The FROBOZZ Corporation created, owns, and operates this dungeon.\n>I don't know the word BLORF\n>I don't know the word QQQ\n>Take what?\n>Opening the mailbox reveals a leaflet.\n>I can't make sense out of that.\n>Beg pardon?\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>\nYour score would be 0 [total of 500 points], in 9 moves.\nThis score gives you the rank of Beginner.\n>\nYour score would be 0 [total of 500 points], in 10 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.19,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 877106,
+            "sha256": "a96d0d480eaa095debb9d1165ec410c85262cc2772c1292e8050f2bde2b509b9",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 132,
+            "sha256": "7a082867ef2f3114a3badd903a84ad43fb61059382b89218938511fda0c697a1",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {
+        "MDL/ZORK.LOG": "\n        (MTRZORK)       December 12 at 12:00 PM\nPlayed for 0 seconds.\n0/500 points, 10 moves, 0 deaths.  In North of House. Quit.\n\n"
+      },
+      "diag_log": "RANDOM-ARGS (10438660480)\nRANDOM-RESULT 16566282405\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"xyzzy\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"frobozzle\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"blorfintz\"\nREADSTRING-COUNT 3\nREADSTRING-TEXT \"qqq\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"take\"\nREADSTRING-COUNT 8\nREADSTRING-TEXT \"open the\"\nREADSTRING-COUNT 14\nREADSTRING-TEXT \"put leaflet in\"\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\nREADSTRING-COUNT 10\nREADSTRING-TEXT \"north west\"\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"quit\"\nREADSTRING-COUNT 1\nREADSTRING-TEXT \"y\"\n"
+    }
+  ]
+}
