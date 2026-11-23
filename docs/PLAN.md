@@ -178,6 +178,12 @@ format differences). Save/restore and event seed handling are documented.
 
 ### Active iteration (2026-11-23)
 
+> **Outcome (2026-11-23):** M3 accepted on `main` (`2a86d5d`): SMOKE_PARITY
+> PASS (scoped) and local session smoke PASS; PLAYABLE NOT RUN
+> ([acceptance record](evidence/M3/M3-MAINLINE-ACCEPTANCE.md)). WP1-WP4 are
+> done; WP5 continues as M4 with the scenario "enter the house and open the
+> cellar".
+
 Work packages for the current iteration. They do not change the milestone
 definitions or gates above. **M3 formal acceptance** = the deterministic,
 approved house smoke transcript (WP2) plus documented deviations. A local

@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status (2026-11-23): on `main` (`fdf48e4`) M0, M1 and M2 PASS and M3 LOADED FAILS (433 of 1,229 forms). On the unmerged branch stack the original game loads, initializes, matches native Confusion exactly on the fixed-clock fresh-boot house smoke (SMOKE_PARITY PASS, branch evidence, scoped) and completes a local session that quits through its own code (local session smoke PASS, branch evidence). Not integrated into `main`; PLAYABLE NOT RUN. NOT a complete playable game.** This repository is a starting
+> **Status (2026-11-23): `main` (`2a86d5d`) — M0, M1, M2 PASS; M3 accepted on mainline: the original 1977 game loads, initializes, matches native Confusion exactly on the fixed-clock fresh-boot house smoke (SMOKE_PARITY PASS, scoped) and completes a local session that quits through its own code (local session smoke PASS). PLAYABLE NOT RUN. NOT a complete playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -11,32 +11,26 @@
 
 ## Verified status (2026-11-23)
 
-**Mainline (`main` = `fdf48e4`).** M0, M1, M2: **PASS (mainline)**. M3:
-PARSED PASS (mainline); LOADED **FAIL** (loader exit 1 after 433 forms at
-`77rooms.mud:101`, `EVENT "GC"`); INITIALIZED, INTERACTIVE, SMOKE_PARITY,
-local session smoke and PLAYABLE **NOT RUN**.
+**Mainline (`main` = `2a86d5d`, M3 acceptance 2026-11-23).** M0, M1, M2:
+**PASS (mainline)**. M3, gate rerun on `main` with `M3_NATIVE=require` (local
+Racket v7.9 BC; CI racket:8.10-bc runs 45176163020 and 45176121779;
+[acceptance record](docs/evidence/M3/M3-MAINLINE-ACCEPTANCE.md)):
 
-**Branch (umbrella PR #107 → #109 → #111 → #125 → #128 → #130 → #136 →
-#137 → #138 → #141 → #144 → #145 → #147 → #148 / #150; #146 strict parity gate and
-#142 docs alongside; all combined on `integration/m3-acceptance`).** These
-are **branch evidence**, not mainline results:
-
-| M3 stage | State on the branch stack |
+| M3 stage | State on `main` |
 |---|---|
-| PARSED | PASS (branch evidence) |
-| LOADED | PASS (branch evidence): 1,229 forms, zero skipped |
-| INITIALIZED | PASS (branch evidence, scoped): faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>`; SAVE is an in-session record (ADR-0048) |
-| INTERACTIVE | PASS (branch evidence, scoped): the six house-boot commands through the host loop |
-| SMOKE_PARITY | **PASS (branch evidence, scoped)**: house-boot at the fixed session clock 250776000/UTC; one strict comparator, only D1/D2 differ (ADR-0053); fresh native capture == committed candidate == this runtime (#146) |
-| Local session smoke | **PASS (branch evidence)**: quit/n, a further command, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written (#147, #148) |
+| PARSED | PASS (mainline) |
+| LOADED | PASS (mainline): 1,229 forms, zero skipped |
+| INITIALIZED | PASS (mainline, scoped): faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>`; SAVE is an in-session record (ADR-0048) |
+| INTERACTIVE | PASS (mainline, scoped): the six house-boot commands through the host loop |
+| SMOKE_PARITY | **PASS (mainline, scoped)**: house-boot at the fixed session clock 250776000/UTC; one strict comparator, only D1/D2 differ (ADR-0053); committed schema-3 reference == fresh native capture == this runtime |
+| Local session smoke | **PASS (mainline)**: quit/n, a further command, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written |
 | PLAYABLE | NOT RUN (M4) |
 
-Fixed on the branch but **not integrated into `main`**: #119 (PR #132),
-#124 (PR #133), #139 UNWIND masking (PR #140, ADR-0051), the #113 review
-findings R1-R8/R10, the host-loop flush masking (F2), and the clock (#135
-part 1). See [STATUS](docs/STATUS.md).
+The fixes for #119, #124, #139, the #113 review findings R1-R8/R10, the
+host-loop flush masking (F2) and the session clock (#135 part 1) are on
+`main`. See [STATUS](docs/STATUS.md).
 
-**Supported on the branch:** the S7 terminal subset (RESET, PRINC, PRIN1,
+**Supported on `main`:** the S7 terminal subset (RESET, PRINC, PRIN1,
 READSTRING as RDCOM/YES-NO use it) and the local host loop
 `mdl-session-run-interactive` (explicit ports; no MDL evaluator; never a
 network service); a session-owned clock (`#:clock`, `#:time-zone`,
@@ -73,10 +67,10 @@ The reference CI workflow runs all of these.
 [native reference probes](docs/evidence/M3/), [S7](docs/evidence/M3/S7-INTERACTIVE.md),
 [compatibility inventory](docs/evidence/M3/COMPATIBILITY-INVENTORY.md).
 
-**Next milestone step:** integrate the stack into `main` with the
-maintainer's approval and rerun the gate there (M3 acceptance on mainline);
-then M4, starting with the scenario "enter the house and open the cellar"
-([backlog](docs/evidence/M4/SCENARIO-BACKLOG.md)).
+**Next milestone step:** M4, starting with the scenario "enter the house
+and open the cellar" ([backlog](docs/evidence/M4/SCENARIO-BACKLOG.md)). A
+manual DrRacket run (quit and Stop) would close the remaining GUI
+verification gap.
 
 **Previous M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
 summarised above; details in [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).
@@ -515,10 +509,10 @@ python scripts/compare_transcripts.py \
 ```
 
 **No candidate transcript in this interchange format is produced yet.** On
-the branch stack the original game runs in Racket for the six-command
-house-boot scenario, compared inside `tests/historical_interactive_test.rkt`;
-the strict differential SMOKE_PARITY gate is NOT RUN (see
-[STATUS](docs/STATUS.md)).
+`main` the original game runs in Racket for the six-command
+house-boot scenario; the strict differential SMOKE_PARITY gate uses its own
+record format and comparator (`scripts/smoke_parity.py`, `make m3-check`,
+ADR-0053) and PASSES on `main` (see [STATUS](docs/STATUS.md)).
 
 ## Play locally (preview)
 
@@ -678,15 +672,15 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
 The list above is the M0-M2 baseline. Later M3 slices (NTH repetition,
 declarations, events, interrupts and more on `main`; full source loading,
 SPECIAL/UNSPECIAL wrappers, BLOCK/`.OBLIST`, BACK, STRING views, RANDOM,
-PDP-10 FLOAT word images, startup and terminal I/O on the branch stack) are
+PDP-10 FLOAT word images, startup and terminal I/O; on `main` since the M3 acceptance) are
 specified in [SEMANTICS](docs/SEMANTICS.md) and tracked in
 [STATUS](docs/STATUS.md).
 
-**Not supported yet (2026-11-23, branch stack):** complete original MDL
+**Not supported yet (2026-11-23, `main`):** complete original MDL
 syntax, compile-time macro expansion, `[OPT ...]` declarations, GROW/TOP and
 BYTES views, explicit environments, the `"BIND"`/`"CALL"` activation
-formals, TAG values and `GO` across function boundaries, ILIST, MAX, MEMBER,
-QUIT, OPEN/CLOSE, RESTORE, FLOAT printing and FIX→FLOAT CHTYPE, automatic
+formals, TAG values and `GO` across function boundaries, ILIST, MAX, TOP,
+PRINT, CLOSE and file OPEN modes other than RECORD's denied form, RESTORE, FLOAT printing and FIX→FLOAT CHTYPE, automatic
 event sources other than the logical GC model, an interactive error level,
 gameplay beyond the six-command scenario, and client-side web execution. On
 `main` additionally everything from `77rooms.mud:101` onward is missing.
