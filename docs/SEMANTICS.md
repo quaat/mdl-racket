@@ -3065,3 +3065,83 @@ game-reachable, a candidate for a separate reader slice. (4) Pre-existing:
 a host Racket `char` passed through the embedding API (`mdl-session-call`)
 is typed CHARACTER but CHTYPE of it to FIX/WORD fails in `word-bits-of`; MDL
 code cannot produce host chars.
+
+## M4 S4: TOP of arrays (issue #157; frontier item 3; ADR-0058)
+
+Specification written before implementation. Authority: MDL manual §7.6.2.2
+(`<TOP array>` puts back every element that REST removed: the inverse of
+all RESTs) and the BACK section above ("M3 BACK and terminal CHANNEL
+predecessor"); pinned Confusion observations in
+`docs/evidence/M4/TOP-REFERENCE.md` (`top-probe.json`, script
+`scripts/probe_top_reference.py`). Game uses: SPARSE's dangling preposition
+(`77np.mud:126`, `<TOP <PUT <BACK .PVR> 1 ...>>`, the whole PRSVEC);
+EVERYTHING/VALUABLES (`77rooms.mud:1284, 1330`, `(TUV <TOP .SUV>)` on the
+20-slot OBJECT UVECTOR OBJ-UV, filled downwards with BACK until
+`<==? .SUV .TUV>`); the balloon (`77act2.mud:505, 557`, `(S <TOP ,SCRSTR>)`);
+the script channels (`77rooms.mud:317-369`, `<PUT <TOP ,INCHAN> 1 (.CH)>`,
+only after OPEN "PRINT" succeeds, which ADR-0055 denies).
+
+**Result.** `<TOP x>` takes exactly one argument. For x of PRIMTYPE VECTOR,
+UVECTOR or STRING (a plain array, a REST or BACK view, or a TYPE over one)
+it returns a view of the **same storage** from the storage's first element
+to its end. It is never a copy: a PUT through the result, through x or
+through any other view of the storage is visible in all of them, whether it
+happened before or after TOP. A UVECTOR result shares the element-type
+(UTYPE) cell. x itself is unchanged (a REST view keeps its length).
+
+**TYPE.** The result has x's TYPE: TOP of a NEWTYPE-tagged array (`#FOO
+[...]`, a NEWTYPE of STRING or UVECTOR) is of that NEWTYPE (reference
+`newtype-vector`, `newtype-string-uvector`). REST (including REST 0) of a
+typed array already returns the PRIMTYPE, so `<TOP <REST x>>` is a VECTOR,
+UVECTOR or STRING. The type dispatch is on the value's representation
+(array or STRING storage under at most one TYPE tag), never on a TYPE
+atom's PNAME (ADR-0056/0057).
+
+**Identity.** `==?` on arrays is the same storage, start and length, so the
+TOP result is `==?` to the unrested original, to every other TOP of the
+same storage, and to a BACK that reaches the first element; it is `==?` to
+a NEWTYPE-tagged original only if the TYPEs agree (`<==? <TOP <CHTYPE <REST
+.V 2> FOO>> .V>` is FALSE, the CHTYPE back to VECTOR is T). An equal
+separate array is `=?` but not `==?`. EVERYTHING's `<==? .SUV .TUV>` is T
+exactly when the BACK steps have reached the first slot.
+
+**Known deviation: BACK of a NEWTYPE'd array (independent review,
+2026-11-23).** TOP keeps the argument's TYPE, as pinned Confusion does.
+This runtime's BACK keeps only the CHANNEL TYPE (the M3 BACK decision above,
+following the manual's "BACK yields the array PRIMTYPE"), whereas native BACK
+keeps any TYPE: with `<NEWTYPE FOO VECTOR> <SET F <CHTYPE <REST [1 2 3] 2>
+FOO>>`, native gives `<TYPE <BACK .F 2>>` = FOO and `<==? <TOP .F> <BACK .F
+2>>` = T (also for a NEWTYPE of STRING; probe below), while this runtime gives
+VECTOR and FALSE. The TOP/BACK `==?` identity above therefore holds for
+untyped arrays (all game uses: SPARSE and EVERYTHING BACK plain VECTOR /
+UVECTOR views) but not for NEWTYPE'd arrays. Changing BACK needs a
+maintainer decision because it revises the recorded M3 BACK rule.
+Native check (mdli 6df359f6, bare interpreter): `<TYPE <BACK <CHTYPE <REST
+[1 2 3] 2> FOO> 2>>` → `FOO`; `<==? <TOP .F> <BACK .F 2>>` → `T`;
+`<TYPE <BACK <CHTYPE <REST "abc" 1> BS> 1>>` → `BS`.
+
+**Refusals (strict errors).** Any other argument: LIST-primtype values
+(LIST, a REST of a LIST, FORM, FALSE, SEGMENT), TUPLEs (this runtime's TUPLE
+is a LIST; the reference refuses them too), FIX, ATOM, CHARACTER and other
+non-structured values, and the struct-backed builtins whose PRIMTYPE is
+UVECTOR or VECTOR but which are not arrays here — OBLIST, IHEADER, HANDLER
+(recorded deviation: the reference's TOP would accept an OBLIST; refusing is
+strict and not game-reachable): `mdl-top: Bad type for TOP` (reference text `Bad type
+for TOP`, written to stderr; this runtime raises the error like every other
+refusal). TOP never invents LIST semantics. Arity: `<TOP>` raises
+`TOO-FEW-ARGUMENTS-SUPPLIED`, two or more arguments
+`TOO-MANY-ARGUMENTS-SUPPLIED` (reference: ERROR frames with those names).
+
+**CHANNEL storage (deviation, ADR-0058).** The reference's terminal
+CHANNELs have two slots before element 1; TOP exposes both: slot 1 is the
+LIST of script/echo channels (`()`), slot 2 the FIX 0 that `<1 <BACK
+,INCHAN>>` reads (`<TOP ,INCHAN>` is a CHANNEL of 21 elements, `==?` to
+`<BACK ,INCHAN 2>`). This runtime models only the second (M3, issue #110)
+and implements no echo channels. TOP of any view of a CHANNEL's storage (a
+CHANNEL, or a VECTOR obtained by REST of one) is therefore a strict error
+`mdl-top: TOP of CHANNEL storage is not supported (ADR-0058)` rather than a
+20-element result whose slot 1 would be the wrong slot. The game reaches it
+only in the script code after a successful OPEN "PRINT".
+
+**Not supported / recorded.** GROW is not a SUBR of the pinned reference
+(UNBOUND-VARIABLE) nor of this runtime, so TOP after GROW is not defined.

@@ -1,0 +1,23 @@
+{
+  "name": "top-parser",
+  "description": "M4 S4 scenario, the game's TOP calls in the parser and in 'all' (issue #157; frontier item 3 of docs/evidence/M4/S1-HOUSE-CELLAR-FRONTIER.md). Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, microseconds 0, as house-boot). At West of House: open the mailbox, take the leaflet, `drop leaflet in` (a dangling preposition: SPARSE 77np.mud:124-127 takes the last object back with <BACK .PVR>, rebuilds it as a PHRASE and returns <TOP <PUT <BACK .PVR> 1 ...>>, i.e. the whole PRSVEC; the syntax then does not match, `I can't make sense out of that.`), `put all in mailbox` (the object ALL calls EVERYTHING 77rooms.mud:1283, whose AUX binds TUV to <TOP ,OBJ-UV>, the 20-slot OBJECT UVECTOR of 77rooms.mud:1249, and fills it downwards with BACK until <==? .SUV .TUV>; FROB-LOTS then puts the leaflet in the mailbox and tries the door), `take all` (EVERYTHING's TAKE branch over the room), take the leaflet out of the mailbox, `drop all` (EVERYTHING's DROP branch over the inventory), `take all` (takes the leaflet from the room), `put leaflet in` (SPARSE's TOP again, now with the leaflet carried), inventory. Each command was confirmed by the pinned native reference; see docs/evidence/M4/TOP-PARSER-REFERENCE.md. Input ends after inventory (D3 end-of-input applies). Not reachable here: the balloon's <TOP ,SCRSTR> (77act2.mud:505, 557) and the script channels' <TOP ,INCHAN|,OUTCHAN> (77rooms.mud:317-369, only after a successful OPEN PRINT); both are covered by tests/top_test.rkt and the probe file docs/evidence/M4/top-probe.json.",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": ["<FLOAD \"77loadall.mud\">", "<SAVE-IT>"],
+  "commands": [
+    "open mailbox",
+    "take leaflet",
+    "drop leaflet in",
+    "put all in mailbox",
+    "take all",
+    "take leaflet",
+    "drop all",
+    "take all",
+    "put leaflet in",
+    "inventory"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/top-parser-reference.json",
+    "case": "T1-top-parser-pipe"
+  }
+}

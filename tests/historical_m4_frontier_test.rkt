@@ -27,6 +27,21 @@
 ;;       checkpoints, including the answers to both prompts, is
 ;;       tests/historical_orphan_prompt_test.rkt.
 ;;   No further strict failure is reached on the F2/F2b paths (S3 evidence).
+;;   F-TOP RESOLVED by M4 S4 (docs/evidence/M4/S4-TOP.md): drop leaflet in
+;;       (a dangling preposition) -> SPARSE (77np.mud:124-127)
+;;       <TOP <PUT <BACK .PVR> 1 ...>>. Positive regression: the output
+;;       equals reference prefix P03 of tests/scenarios/top-parser.json
+;;       ("I can't make sense out of that."). Full parity with checkpoints,
+;;       including EVERYTHING's <TOP ,OBJ-UV> (put/take/drop all), is
+;;       tests/historical_top_parser_test.rkt.
+;;   F4 (next strict failure on the TOP path, recorded 2026-11-23, not
+;;     stubbed): `take all` in the living room -> EVERYTHING (77rooms.mud:1283,
+;;     TOP) -> FROB-LOTS (77rooms.mud:1252) -> <APPLY-RANDOM .RA> -> TAKE
+;;     (77rooms.mud:1098) -> APPLY-OBJECT (77rooms.mud:1129) -> SWORD
+;;     (77act1.mud:1899) -> <TYPE? ,SWORD-GLOW NOFFSET> (77act1.mud:1903): TYPE
+;;     of a DEFINEd FUNCTION's GVAL (a host procedure here) is unsupported in
+;;     mdl-type-name (mdl/runtime/core.rkt). Native prints "sword:\n  Taken."
+;;     and goes on. `take sword` alone stops the same way (not TOP-specific).
 ;;   F3 help / info (maintainer decision 2026-11-23: leave strict for now):
 ;;     HELP/INFO -> FILE-TO-TTY (77rooms.mud:954-985) -> <OPEN "READ" "MADADV"
 ;;     "HELP"|"INFO" ...> (77rooms.mud:961) on the pinned MDL/MADADV.HELP /
@@ -136,6 +151,39 @@
                 '("open mailbox" "take leaflet" "throw leaflet")
                 ">Taken.\n>at what?\n>")
 (printf "F2b throw: resolved; output equals reference P03 (D1 only)\n")
+
+;; F-TOP (resolved by S4): positive regression against the pinned top-parser
+;; reference prefix P03.
+(define-runtime-path top-reference-file "../docs/evidence/M4/top-parser-reference.json")
+(check-resolved "F-TOP drop leaflet in" top-reference-file "P03-top-parser-prefix"
+                '("open mailbox" "take leaflet" "drop leaflet in")
+                ">Taken.\n>I can't make sense out of that.\n>")
+(printf "F-TOP drop leaflet in: resolved; output equals reference P03 (D1 only)\n")
+
+;; F4 (next strict failure on the TOP path): TYPE of a FUNCTION GVAL in SWORD.
+;; Up to the failure our output is the start of the pinned native transcript
+;; F4-living-room-take-all-pipe (D1 only), which goes on with "Taken.".
+(let* ([lines '("north" "east" "open window" "west" "west" "take all")]
+       [reference (call-with-input-file top-reference-file read-json)]
+       [c (findf (lambda (c) (equal? (hash-ref c 'name) "F4-living-room-take-all-pipe"))
+                 (hash-ref reference 'cases))]
+       [banner "LISTENING-AT-LEVEL 1 PROCESS 1\n"]
+       [ref-raw (string-replace
+                 (cadr (regexp-match (regexp (string-append "^.*?" (regexp-quote banner) "(.*)$"))
+                                     (hash-ref c 'stdout_raw)))
+                 "\"DONE\"\n" "" #:all? #f)])
+  (check-equal? (hash-ref c 'input)
+                (string-append "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n"
+                               (apply string-append (map (lambda (l) (string-append l "\n")) lines))))
+  (check-true (string-contains? ref-raw ">sword:\r\n  Taken.\nnewspaper:"))
+  (define-values (result raw unread) (run-game lines))
+  (check-pred exn:fail? result)
+  (check-false (exn:fail:mdl-input-exhausted? result))
+  (check-equal? (exn-message result) "mdl-type: unsupported MDL type #<procedure>")
+  (check-true (string-suffix? raw "antiquity.\n>sword:\r\n  "))
+  (check-true (string-prefix? ref-raw raw))
+  (check-equal? unread "")
+  (printf "F4 take all (living room): strict failure as recorded; output so far equals the native F4 transcript\n"))
 
 ;; F3 (strict by maintainer decision): help and info stop at OPEN "READ".
 (check-frontier "F3 help" '("help") "There is a small mailbox here.\n>"

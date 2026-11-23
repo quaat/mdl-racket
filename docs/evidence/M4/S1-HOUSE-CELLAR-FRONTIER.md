@@ -142,6 +142,12 @@ below were superseded by the slice's own probe file
 ### Further constructs visible nearby (static grep, not yet reached)
 
 3. TOP at `77np.mud:126` (`put X in …`; a known gap in STATUS).
+   **Resolved by M4 S4** ([S4-TOP.md](S4-TOP.md)): positive native
+   regression `drop leaflet in` (reference P03 of
+   `tests/scenarios/top-parser.json`) in the frontier test; full parity with
+   checkpoints, including EVERYTHING's `<TOP ,OBJ-UV>` (`put/take/drop all`),
+   in `tests/historical_top_parser_test.rkt`. Next strict failure on the TOP
+   path: F4 below.
 4. MAX (#122) at `78melee.mud:447-448`, reached by actual troll combat with
    a weapon (backlog scenario 4). `kill troll with lamp` currently matches
    native (`Trying to kill a troll with a lamp is suicidal.`).
@@ -204,3 +210,27 @@ are (ADR-0055)`. The maintainer chose to leave this strict for now (options
 considered: read-only root-confined OPEN READ with FILE-LENGTH /
 READSTRING-from-file / CLOSE; or extending the denial so the game prints its
 own "File not found."). Asserted in `tests/historical_m4_frontier_test.rkt`.
+
+## F4 — `take all` / `take sword` in the living room (recorded 2026-11-23, M4 S4)
+
+The next strict failure reached on a TOP path (not stubbed). Reproduction:
+`north`, `east`, `open window`, `west`, `west`, `take all`. Native prints
+`sword:` / `  Taken.`, then the newspaper, carpet and lamp replies
+(reference case `F4-living-room-take-all-pipe` of
+`top-parser-reference.json`). We print the same text up to `>sword:\r\n  `
+and then raise `mdl-type: unsupported MDL type #<procedure>`.
+
+* MDL being executed: SWORD `77act1.mud:1899-1906`,
+  `<PUT ,SWORD-DEMON ,HACTION <COND (<TYPE? ,SWORD-GLOW NOFFSET> ,SWORD-GLOW)
+  (SWORD-GLOW)>>` (`:1903`): TYPE? of the GVAL of the DEFINEd FUNCTION
+  SWORD-GLOW.
+* Call path: RDCOM → object ALL → EVERYTHING (`77rooms.mud:1283`, the TOP)
+  → FROB-LOTS (`77rooms.mud:1252`) → `<APPLY-RANDOM .RA>` → TAKE
+  (`77rooms.mud:1098`) → APPLY-OBJECT (`77rooms.mud:1129`) → SWORD. In
+  Racket: `mdl-type` → `mdl-type-name` (`mdl/runtime/core.rkt`), which has no
+  TYPE for a host procedure (the runtime's representation of a DEFINEd
+  FUNCTION).
+* Not TOP-specific: `take sword` alone stops the same way. The same shape
+  (`<TYPE? ,ROBBER NOFFSET>`) is at `77act1.mud:1529, 1564`.
+* Asserted in `tests/historical_m4_frontier_test.rkt` (exact message, output
+  tail, and our output a prefix of the native F4 transcript).

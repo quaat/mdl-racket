@@ -1720,3 +1720,36 @@ game-reachable, a candidate for a separate reader slice. (4) Pre-existing:
 a host Racket `char` passed through the embedding API (`mdl-session-call`)
 is typed CHARACTER but CHTYPE of it to FIX/WORD fails in `word-bits-of`; MDL
 code cannot produce host chars.
+
+## ADR-0058: TOP is a shared-storage view keeping the TYPE; CHANNEL storage refused
+
+Status: accepted (M4 S4, issue #157, 2026-11-23).
+
+Context: frontier item 3 (`77np.mud:126`, SPARSE's dangling preposition)
+and `take all`/`drop all`/`put all in ...` (EVERYTHING, `77rooms.mud:1284`)
+need the TOP SUBR. The pinned reference
+(`docs/evidence/M4/TOP-REFERENCE.md`) returns the same storage from its first
+element, keeps the argument's TYPE, refuses LIST-primtype values and TUPLEs,
+and shows two hidden slots before a terminal CHANNEL's element 1, of which
+this runtime models one (M3 BACK, issue #110).
+
+Decision: TOP reuses the existing view representation. For an `mdl-array`
+the result is a new view record over the same Racket vector and the same
+UTYPE cell, start 0, length the vector's length; for a STRING it is a view
+over the same backing string from 0 to its end. A TYPE tag
+over the array is re-applied to the result. No element is copied. Everything
+else is a strict `Bad type for TOP` error. Storage that backs a CHANNEL
+(registered when the runtime makes the channel, independent of atom space)
+is refused, because a TOP of it here would yield a 20-element value whose
+slot 1 is the reference's slot 2.
+
+Consequences: SPARSE's TOP returns PRSVEC itself (`==?`), EVERYTHING's
+`<==? .SUV .TUV>` ends its fill loop as in the reference, the balloon's
+`<TOP ,SCRSTR>` writes into SCRSTR's storage. The script commands are
+unaffected (they fail earlier at OPEN). Alternatives rejected: copying
+(breaks `==?` and the SCRSTR/OBJ-UV aliasing the game relies on); returning
+the PRIMTYPE instead of the argument's TYPE (the reference keeps FOO and
+CHANNEL; the manual's general PRIMTYPE remark is not what Confusion does);
+adding the reference's first CHANNEL slot now (it is the echo/script LIST,
+whose effect this runtime does not implement, so a PUT there would be a
+silent no-op; revisit when scripting is supported).
