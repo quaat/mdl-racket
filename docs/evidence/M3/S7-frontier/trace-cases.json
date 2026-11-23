@@ -1,0 +1,52 @@
+{
+  "name": "interactive-subr-trace",
+  "excluded_from_wrapping": [
+    "+",
+    "0?",
+    "AGAIN",
+    "APPLY",
+    "ARGS",
+    "ERRET",
+    "FFRAME",
+    "FRAME",
+    "FUNCT",
+    "GVAL",
+    "LISTEN",
+    "LVAL",
+    "MAPLEAVE",
+    "MAPRET",
+    "MAPSTOP",
+    "NTH",
+    "PUT",
+    "QUIT",
+    "REP",
+    "RETRY",
+    "RETURN",
+    "SETG",
+    "TFFRAME"
+  ],
+  "fsubrs_not_wrappable": [
+    "QUOTE",
+    "COND",
+    "FUNCTION",
+    "DEFINE",
+    "DEFMAC",
+    "BIND",
+    "REPEAT",
+    "PROG",
+    "AND",
+    "OR",
+    "UNWIND",
+    "GDECL"
+  ],
+  "cases": [
+    {
+      "name": "trace-six-quit",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 300,
+      "input": "<FLOAD \"77loadall.mud\">\n<SETG TR-NAMES [\"READSTRING\" \"VALUE\" \"BOUND?\" \"ASSIGNED?\" \"GBOUND?\" \"GASSIGNED?\" \"GUNASSIGN\" \"SET\" \"TYPE\" \"PRIMTYPE\" \"TYPEPRIM\" \"CHTYPE\" \"ALLTYPES\" \"VALID-TYPE?\" \"NEWTYPE\" \"EVALTYPE\" \"APPLYTYPE\" \"PRINTTYPE\" \"LENGTH\" \"REST\" \"GET\" \"SUBSTRUC\" \"LIST\" \"FORM\" \"VECTOR\" \"TUPLE\" \"UVECTOR\" \"STRING\" \"ILIST\" \"IFORM\" \"IVECTOR\" \"IUVECTOR\" \"ISTRING\" \"PUTREST\" \"CONS\" \"BACK\" \"TOP\" \"SORT\" \"UTYPE\" \"CHUTYPE\" \"ASCII\" \"PARSE\" \"UNPARSE\" \"EXPAND\" \"EVAL\" \"MAPF\" \"MAPR\" \"1?\" \"G?\" \"L?\" \"G=?\" \"L=?\" \"==?\" \"N==?\" \"=?\" \"N=?\" \"MEMBER\" \"MEMQ\" \"STRCOMP\" \"*\" \"-\" \"/\" \"MIN\" \"MAX\" \"MOD\" \"RANDOM\" \"FLOAT\" \"FIX\" \"ABS\" \"GETPROP\" \"PUTPROP\" \"MOBLIST\" \"OBLIST?\" \"LOOKUP\" \"ATOM\" \"REMOVE\" \"INSERT\" \"PNAME\" \"SPNAME\" \"ROOT\" \"BLOCK\" \"ENDBLOCK\" \"NOT\" \"AND?\" \"OR?\" \"TYPE?\" \"APPLICABLE?\" \"MONAD?\" \"STRUCTURED?\" \"EMPTY?\" \"LENGTH?\" \"CHANNEL\" \"OPEN\" \"FILE-EXISTS?\" \"CLOSE\" \"RESET\" \"ACCESS\" \"READ\" \"READCHR\" \"NEXTCHR\" \"PRINT\" \"PRIN1\" \"PRINC\" \"TERPRI\" \"FLATSIZE\" \"CRLF\" \"READB\" \"PRINTB\" \"PRINTSTRING\" \"IMAGE\" \"LOAD\" \"FLOAD\" \"SNAME\" \"SAVE\" \"SAVE-EVAL\" \"RESTORE\" \"FILE-LENGTH\" \"DECL?\" \"ERROR\" \"BITS\" \"GETBITS\" \"PUTBITS\" \"ANDB\" \"ORB\" \"XORB\" \"EQVB\" \"LSH\" \"GC\" \"TIME\" \"LOGOUT\" \"GETTIMEOFDAY\" \"GETTIMEDATE\" \"MANIFEST\" \"FREEZE\" \"BLOAT\" \"OFF\" \"EVENT\" \"HANDLER\" \"ON\" \"ENABLE\" \"DISABLE\" \"INT-LEVEL\" \"SLEEP\" \"WARRANTY\" \"COPYING\"]>\n<SETG TR-N <LENGTH ,TR-NAMES>>\n<SETG TR-CNT <IVECTOR ,TR-N 0>>\n<SETG TR-FIRST <IVECTOR ,TR-N -1>>\n<SETG TR-ORD <IVECTOR ,TR-N 0>>\n<SETG TR-SEQ 0>\n<SETG TR-ON <>>\n<DEFINE TR-HIT (I) <COND (,TR-ON <COND (<0? <NTH ,TR-CNT .I>> <PUT ,TR-FIRST .I <NTH ,TR-CNT 1>> <SETG TR-SEQ <+ ,TR-SEQ 1>> <PUT ,TR-ORD .I ,TR-SEQ>)> <PUT ,TR-CNT .I <+ <NTH ,TR-CNT .I> 1>>)> T>\n<DEFINE TR-MK (I ORIG) <CHTYPE <LIST '(\"TUPLE\" TRARGS) <FORM TR-HIT .I> <FORM APPLY <FORM QUOTE .ORIG> <CHTYPE <FORM LVAL TRARGS> SEGMENT>>> FUNCTION>>\n<SETG TR-W <IVECTOR ,TR-N <>>>\n<SETG TR-A <IVECTOR ,TR-N <>>>\n<PROG ((I 1) A) <REPEAT () <COND (<G? .I ,TR-N> <RETURN T>)> <SET A <LOOKUP <NTH ,TR-NAMES .I> <ROOT>>> <COND (<AND .A <GASSIGNED? .A> <TYPE? ,.A SUBR>> <PUT ,TR-A .I .A> <PUT ,TR-W .I <TR-MK .I ,.A>>)> <SET I <+ .I 1>>>>\n<SETG TR-QUIT ,QUIT>\n<DEFINE TR-DUMP (\"TUPLE\" X) <SETG TR-ON <>> <PROG ((I 1)) <REPEAT () <COND (<G? .I ,TR-N> <RETURN T>)> <COND (<NTH ,TR-A .I> <PRINC \"@@TRACE \"> <PRINC <NTH ,TR-NAMES .I>> <PRINC \" \"> <PRIN1 <NTH ,TR-CNT .I>> <PRINC \" \"> <PRIN1 <NTH ,TR-FIRST .I>> <PRINC \" \"> <PRIN1 <NTH ,TR-ORD .I>> <CRLF>)> <SET I <+ .I 1>>>> <APPLY ,TR-QUIT>>\n<PROG ((I 1)) <REPEAT () <COND (<G? .I ,TR-N> <RETURN T>)> <COND (<NTH ,TR-A .I> <SETG <NTH ,TR-A .I> <NTH ,TR-W .I>>)> <SET I <+ .I 1>>>>\n<SETG QUIT ,TR-DUMP>\n<SETG TR-ON T>\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\nquit\ny\n",
+      "note": "SUBR first-hit trace; see make_trace_case.py docstring"
+    }
+  ]
+}

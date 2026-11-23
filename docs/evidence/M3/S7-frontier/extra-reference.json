@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "interactive-extra",
+  "recorded_at": "2026-11-23T06:21:04.365926+00:00",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "protocol": "if_probe.py; one mdli process per case; stdin pipe; cwd fresh $TMPDIR/if-work dir; never .cache/upstream",
+  "cases": [
+    {
+      "name": "boot-null-marker",
+      "note": "SETG NULL to a visible atom before SAVE-IT: shows that the blank line before the first room description is the default REP printing SAVE-IT's value (,NULL) plus TERPRI",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "input": "<FLOAD \"77loadall.mud\">\n<SETG NULL NULLMARK>\n<SAVE-IT>\nlook\n",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nNULLMARK\nWelcome to Dungeon.\r\nThis version created December 12.\nNULLMARK\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nNULLMARK\nWelcome to Dungeon.\nThis version created December 12.\nNULLMARK\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874658,
+            "b85b32cc1290e469f11453acf8bc1c1ef921b619646c0de13438cdca14d1e162"
+          ]
+        }
+      },
+      "workdir": "$TMPDIR/if-work/boot-null-marker-b7vudw5f"
+    },
+    {
+      "name": "boot-rdcom-type",
+      "note": "TYPE of RDCOM and of REP after CONTIN in Confusion (FUNCTION expected), observed through a PRINC-free path: the value is printed by REP before RDCOM runs? no: REP is applied next; so inspect before SAVE-IT",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "input": "<FLOAD \"77loadall.mud\">\n<TYPE ,RDCOM>\n<TYPE ,ROOM-INFO>\n<TYPE ,LEX>\n<TYPE ,EPARSE>\n<TYPE ,TELL>\n,INBUF\n<LENGTH ,INBUF>\n,READER-STRING\n<GASSIGNED? ERRH>\n<TYPE ,ERRH>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nFUNCTION\nFUNCTION\nFUNCTION\nFUNCTION\nFUNCTION\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n\"^[\r\n\"\nT\nATOM\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nFUNCTION\nFUNCTION\nFUNCTION\nFUNCTION\nFUNCTION\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n\"^[\n\"\nT\nATOM\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {},
+      "workdir": "$TMPDIR/if-work/boot-rdcom-type-4c_9rfte"
+    }
+  ]
+}

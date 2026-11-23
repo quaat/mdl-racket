@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0, M1 and M2 gates PASS; M3 source loading PASS on the WIP branch, but initialization and gameplay remain incomplete. NOT a playable game.** This repository is a starting
+> **Status: M0, M1 and M2 gates PASS; M3 source loading PASS; on the S7 WIP branch the original game initializes and answers the six-command house-boot scenario (scoped INITIALIZED/INTERACTIVE PASS), but smoke parity and full play are not reached. NOT a playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -9,7 +9,33 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 S6 inert REP (2026-11-23, `feat/m3-startup-rep`, ADR-0049):**
+**Current M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
+RESET of a terminal CHANNEL, PRINC (STRING/CHARACTER/FIX), PRIN1 (FIX and
+trailer-free ATOM, including the game's `,NULL`) and READSTRING (as RDCOM and
+YES/NO use it) are implemented, with the local host top-level loop
+`mdl-session-run-interactive` (explicit ports only; no MDL evaluator; never
+exposed to a network service). It applies SAVE-IT, prints its value (maintainer
+decision D1: the blank line of `,NULL`; no LISTEN banner or `"DONE"`), then
+applies the GVAL of REP (the game's RDCOM). End of input follows D3 "Mirror,
+then strict": one `Beg pardon?`/`>`, then the host-level
+`exn:fail:mdl-input-exhausted` (never an MDL ERROR, never success).
+**Gate result (scoped): INITIALIZED PASS and INTERACTIVE PASS** on the faithful
+path: `make test-m3-interactive` plays the six approved house-boot commands
+(`north`, `west`, `open mailbox`, `take leaflet`, `inventory`, `score`) and the
+text equals the approved candidate golden as `canonical_text(ONLCR(raw))`, with
+the banner/`"DONE"` lines removed and the date line normalised; 10 raw runs are
+byte-identical to Confusion's pipe transcript under the same normalisation.
+**SMOKE_PARITY is not claimed**: the date line and RANDOM follow the unfixed host
+clock (issue #135), so the `west` response (`<PROB 80>`) varies and is accepted
+in its two source-defined forms. **PLAYABLE has not passed**: QUIT, OPEN/CLOSE
+(RECORD), MEMBER (the game's ERROR handler) and UNWIND under host errors (#139)
+are unsupported; PRINC line breaking, `!` in terminal input and READSTRING's
+default channel/FIX stop/EOF routine are strict errors. Reproduce:
+`export PLTCOLLECTS=":$PWD"; make test-m3-interactive` (needs `make sources`).
+Next: a fixed clock (#135), then a strict SMOKE_PARITY comparison. See
+[S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).
+
+**Previous M3 S6 inert REP (2026-11-23, `feat/m3-startup-rep`, ADR-0049):**
 By maintainer decision ("Inert REP + host loop") every session's GVAL of
 REP is a predefined SUBR (`<TYPE ,REP>` is SUBR, `<SETG SAVEREP ,REP>` then
 `<==? ,REP ,SAVEREP>` is T, as in pinned Confusion), but applying the default

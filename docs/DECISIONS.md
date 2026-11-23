@@ -1232,6 +1232,78 @@ loop next applies REP, instead of dropping into an implementor REPL.
 missing primitive; see `evidence/M3/S6-REP.md`. INITIALIZED remains FAIL.
 No GPLv3 implementation was copied.
 
+## ADR-0050: Terminal RESET, PRINC, PRIN1, READSTRING and the host top-level loop
+
+**Decision (maintainer, 2026-11-23; implements ADR-0049 part 3).** Evidence:
+`evidence/M3/S7-frontier/` (pinned Confusion `6df359f6…`, upstream
+`bdcd4a67`), implementation record `evidence/M3/S7-INTERACTIVE.md`,
+contracts in SEMANTICS ("M3 interactive terminal I/O and the host top-level
+loop").
+
+1. **RESET** of an open terminal CHANNEL of this session returns the same
+   CHANNEL. For the READ channel it clears the host-side end-of-input flag;
+   it never discards queued unread input (no lookahead is ever held, because
+   READSTRING never peeks). It changes no CHANNEL slot, predecessor slot or
+   association. Every other argument (non-CHANNEL, forged or foreign
+   CHANNEL, shifted view, wrong arity) is a strict error.
+2. **PRINC** writes a STRING, CHARACTER or FIX to an open PRINT CHANNEL
+   (default: the LVAL of OUTCHAN) and returns its argument. **PRIN1** writes
+   a FIX, or an ATOM printable without trailers, the same way. Control
+   characters other than CR and LF, and every other TYPE, are strict errors.
+   **No line breaking** is performed (deviation: manual and Confusion break
+   lines at the CHANNEL width; RDCOM sets the width to 1000).
+3. **READSTRING** `<READSTRING buffer channel [stop-string]>` reads the
+   session input port into a mutable STRING view exactly as RDCOM and YES/NO
+   use it: count returned, stop character consumed and not stored, full
+   buffer leaves the rest of the line unread, no echo, output flushed first.
+   The manual's default channel, a FIX stop and the EOF-routine argument are
+   strict errors. A `!` or a non-ASCII character in the input is a strict
+   error (open question: Confusion drops `!` as a reader escape; the manual
+   is silent).
+4. **End of input, maintainer decision D3 "Mirror, then strict".** A read
+   that meets end of input returns the characters read so far (often 0) and
+   sets the channel's end-of-input flag, as Confusion does, so the game
+   prints `Beg pardon?` and `>` once. A READSTRING entered with the flag set
+   raises the host-level `exn:fail:mdl-input-exhausted` ("input exhausted").
+   It is not an MDL ERROR, so no MDL ERROR handler (the game's HANDLE) runs,
+   and a host must report it as a failure, never as success. RESET clears
+   the flag (mirrors Confusion's `eof-sequence-then-reset`).
+5. **Host top-level loop** (`mdl-session-run-interactive`, local only). It
+   requires a session made with explicit input and output ports, applies
+   the entry FUNCTION (for `run.mud`, SAVE-IT) with no arguments, then
+   prints the entry value with PRIN1 and TERPRI to the LVAL of OUTCHAN.
+   **Maintainer decision D1:** that print is kept, because it is the REP
+   print the game's own `,NULL` (an empty-PNAME ATOM) exists for; it yields
+   the golden transcript's blank line. The host never prints the
+   `LISTENING-AT-LEVEL` banner or FLOAD's `"DONE"` value line; a transcript
+   comparator strips those two lines from the Confusion golden. Then each
+   pass re-reads the GVAL of ROOT REP and applies it with no arguments; the
+   default REP SUBR stays the ADR-0049 strict error. The loop exposes no
+   MDL evaluator and is never reachable from a network service.
+
+**Deviations recorded.** Confusion's RESET sets STATUS (slot 11) to 0 and
+rewrites DEVN (slot 9), and drops one lookahead character; our slots are
+untouched (ADR-0046/D8 slot layout) and no lookahead exists. Confusion's
+default EOF action is `Error: Unexpected EOF` and the manual's is an MDL
+ERROR; ours is a host-level strict error. PRINC/PRIN1 do not break lines.
+The ADR-0049 sentence "the loop itself reads and prints nothing" is amended
+by D1: the loop prints the entry value once.
+
+**Host input port only (independent review follow-up).** Terminal input
+uses only a host-supplied port. READSTRING on a session input CHANNEL with no
+port is a strict error (`... has no host-supplied port ...`); the runtime
+never reads the process's own stdin. Output keeps its pre-S7 behaviour: with
+no session port, OUTCHAN writes to the host's `current-output-port`
+parameter. That parameter is host-controlled and existing tests capture
+output through it. Making output strict as well would change a
+runtime-wide contract that predates S7 (PRINTSTRING, CRLF, VFLOAD tests),
+so it is left for a separate decision. `mdl-session-run-interactive`
+requires both ports to be explicit.
+
+**Out of scope (decisions pending):** QUIT, OPEN/CLOSE (D5), UNWIND under
+host errors (issue #139), MEMBER, a fixed clock (#135). No GPLv3
+implementation was copied.
+
 ## ADR-0051: UNWIND cleanups run only for MDL transfers, never for raised errors
 
 **Status:** Accepted (maintainer decision 2026-11-23, issue #139, option a).

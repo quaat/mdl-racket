@@ -22,6 +22,8 @@
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-make-terminal-channel mdl-substruc
+         exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
+         mdl-run-host-loop mdl-host-loop-secondary-failures
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          atom-space-inchan atom-space-outchan
@@ -2786,7 +2788,21 @@
 ;; how the default terminal channels of a non-loader context behave. A
 ;; CHANNEL VECTOR without a host record in the current space (forged by
 ;; CHTYPE, or belonging to another session) is rejected, never written.
-(struct host-channel (direction port))
+;; at-eof? (ADR-0050) is the READ channel's host-side end-of-input flag: set
+;; by a READSTRING that meets end of input, cleared by RESET. No CHANNEL slot
+;; shows it (Confusion keeps it in STATUS, slot 11).
+(struct host-channel (direction port [at-eof? #:mutable]))
+
+;; ADR-0050 (review follow-up): terminal INPUT uses only a host-supplied
+;; port. A session input channel without one is a strict error; READSTRING
+;; never falls back to the process's own stdin. (Output keeps the pre-S7
+;; behaviour: with no session port it writes to the host's current-output-port
+;; parameter.)
+(define (host-channel-port/strict who host)
+  (or (host-channel-port host)
+      (error who
+             "this session's ~a CHANNEL has no host-supplied port; the runtime never falls back to the process's standard input (ADR-0050)"
+             (host-channel-direction host))))
 
 (define (mdl-make-terminal-channel mode [port #f])
   (unless (member mode '("READ" "PRINT"))
@@ -2804,7 +2820,7 @@
                               0 0 80 0 24 0 0 10 0))
   (hash-set! (atom-space-channels (current-mdl-atom-space))
              (mdl-array-storage storage)
-             (host-channel (string->symbol mode) port))
+             (host-channel (string->symbol mode) port #f))
   (mdl-typed-value (mdl-root-atom "CHANNEL") (mdl-rest storage 1)))
 
 ;; Execution contexts. A context is one globals table, one local frame
@@ -2887,6 +2903,45 @@
              [(mdl-crlf) "CRLF"]
              [else who])))
   (or (host-channel-port host) (current-output-port)))
+
+;; ADR-0050: the host record of a CHANNEL registered in this session (TYPE the
+;; ROOT atom CHANNEL, keyed by backing storage). A non-CHANNEL fails with
+;; non-channel-message; a forged or foreign CHANNEL fails as not open.
+(define (registered-channel-host who channel non-channel-message)
+  (unless (and (mdl-typed-value? channel)
+               (equal? (mdl-atom-pname (mdl-typed-value-type channel)) "CHANNEL"))
+    (error who non-channel-message))
+  (define view (mdl-typed-value-value channel))
+  (define host (and (mdl-array? view)
+                    (hash-ref (atom-space-channels (current-mdl-atom-space))
+                              (mdl-array-storage view) #f)))
+  (unless (and host (eq? (mdl-typed-value-type channel) (mdl-root-atom "CHANNEL")))
+    (error who "CHANNEL is not open in this MDL session"))
+  host)
+
+;; Does the CHANNEL view's mode slot (element 2) still name the host
+;; direction? A shifted (REST/BACK) or overwritten view does not.
+(define (channel-mode-intact? channel host)
+  (define view (mdl-typed-value-value channel))
+  (and (>= (mdl-array-length view) 2)
+       (equal? (mdl-nth view 2) (symbol->string (host-channel-direction host)))))
+
+;; ADR-0050 RESET (manual 11.7.7; 77rooms.mud:303, 77defs.mud:433). For an
+;; open terminal CHANNEL of this session it returns the same object. A READ
+;; channel's end-of-input flag is cleared; queued unread input is kept (no
+;; lookahead exists: READSTRING never peeks). No slot, predecessor slot or
+;; association changes (deviation: Confusion zeroes STATUS and rewrites DEVN).
+(define (mdl-reset . args)
+  (unless (= (length args) 1)
+    (error 'RESET "RESET takes exactly one CHANNEL argument (ADR-0050)"))
+  (define channel (car args))
+  (define host (registered-channel-host 'RESET channel
+                                        "argument must be of type CHANNEL"))
+  (unless (channel-mode-intact? channel host)
+    (error 'RESET "CHANNEL is not open in this MDL session"))
+  (when (eq? (host-channel-direction host) 'READ)
+    (set-host-channel-at-eof?! host #f))
+  channel)
 
 (define (mdl-ivector-build size make-element)
   (unless (and (exact-integer? size) (<= 0 size fix-max))
@@ -3535,6 +3590,215 @@
   (newline (channel-output-port 'mdl-crlf channel))
   (mdl-root-atom "T"))
 
+;; ADR-0050 terminal printing. Text reaches the port unchanged only when every
+;; character is printable ASCII, CR or LF: Confusion prints other control
+;; characters in ^X notation and non-ASCII is not a 1977 terminal character,
+;; so both are strict errors here. The whole text is checked before anything
+;; is written. No line breaking is done (CHANNEL slot 13 is ignored).
+(define (terminal-text who content)
+  (for ([ch (in-string content)])
+    (define code (char->integer ch))
+    (when (or (and (< code 32) (not (memv code '(10 13)))) (= code 127))
+      (error who "control character (code ~a) is not supported; Confusion prints ^X notation (ADR-0050)"
+             code))
+    (when (> code 127)
+      (error who "non-ASCII character (code ~a) is not supported (ADR-0050)" code)))
+  content)
+
+;; One or two arguments: the object and an optional output CHANNEL whose
+;; default is the LVAL of OUTCHAN. Returns the port to write to.
+(define (print-arguments who args)
+  (unless (<= 1 (length args) 2)
+    (error who "~a takes an object and an optional CHANNEL (ADR-0050)" who))
+  (channel-output-port who (if (null? (cdr args))
+                               (default-output-channel who)
+                               (cadr args))))
+
+;; PRINC (manual 11.1.2.3): STRING (native or view) without quotes, CHARACTER
+;; bare, FIX in decimal. Returns the object. Every other TYPE is strict.
+(define (princ-text value)
+  (cond [(mdl-string? value) (terminal-text 'PRINC (mdl-string-content value))]
+        [(mdl-character-code value)
+         => (lambda (code) (terminal-text 'PRINC (string (integer->char code))))]
+        [(exact-integer? value) (number->string (check-fix 'PRINC value))]
+        [else (error 'PRINC "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))
+
+(define (mdl-princ . args)
+  (define port (print-arguments 'PRINC args))
+  (write-string (princ-text (car args)) port)
+  (car args))
+
+;; PRIN1 (manual 11.1.2.3): FIX in decimal; an ATOM with an empty PNAME that
+;; is reachable on the OBLIST path prints nothing (Confusion: the game's
+;; ,NULL); any other ATOM follows the UNPARSE ATOM rules (safe PNAME,
+;; reachable, no trailer). Returns the object. Every other TYPE is strict.
+(define (prin1-text value)
+  (cond [(exact-integer? value) (number->string (check-fix 'PRIN1 value))]
+        [(and (mdl-atom? value) (string=? (atom-value-pname value) ""))
+         (unless (atom-reachable? 'PRIN1 value)
+           (error 'PRIN1 "empty-PNAME ATOM not reachable via current OBLIST path; trailer notation not implemented (ADR-0050)"))
+         ""]
+        [(mdl-atom? value) (mdl-unparse-value 'PRIN1 value)]
+        [else (error 'PRIN1 "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))
+
+(define (mdl-prin1 . args)
+  (define port (print-arguments 'PRIN1 args))
+  (write-string (prin1-text (car args)) port)
+  (car args))
+
+;; ADR-0049 part 3 / ADR-0050 host top-level loop, in the current context.
+;; It replaces Confusion's LISTEN for a game session and is never an MDL
+;; evaluator: it applies ENTRY-THUNK (the caller's fixed entry FUNCTION),
+;; prints the value with PRIN1 and TERPRI to the LVAL of OUTCHAN (maintainer
+;; decision D1: the REP print of SAVE-IT's ,NULL), then on every pass
+;; re-reads the GVAL of ROOT REP and applies it with no arguments. It ends
+;; only by an exception (input exhausted, a strict error, the pass bound);
+;; QUIT is not modelled yet. Terminal output is flushed on every exit, and
+;; that final flush never replaces the outcome and never runs host code
+;; (review F2 and its independent review): when a raised value is leaving
+;; the loop it is re-raised unchanged (same object), and every flush failure
+;; is recorded as a secondary failure of it, readable with
+;; mdl-host-loop-secondary-failures; when nothing was raised (a host escape
+;; out of ON-EVENT) the first flush failure is raised and the rest are its
+;; secondaries. ON-EVENT receives host-only observations:
+;; (entry-returned value), (pass n). It is never called after the loop body
+;; has been left, so a callback that escapes cannot turn a failure into a
+;; normal return.
+(define (mdl-run-host-loop entry-thunk #:max-passes [max-passes #f]
+                           #:on-event [on-event void])
+  (unless (or (not max-passes) (exact-positive-integer? max-passes))
+    (raise-argument-error 'mdl-run-host-loop "(or/c #f exact-positive-integer?)" max-passes))
+  ;; LEAVING: a box holding the raised value now leaving the loop, set only by
+  ;; the boundary handler, so a raise caught inside the loop never counts.
+  (define leaving #f)
+  (dynamic-wind
+   void
+   (lambda ()
+    (with-handlers ([(lambda (raised) #t)
+                     (lambda (raised) (set! leaving (box raised)) (raise raised))])
+     (define value (entry-thunk))
+     (on-event (list 'entry-returned value))
+     (define channel (default-output-channel 'host-loop))
+     (mdl-prin1 value channel)
+     (mdl-terpri channel)
+     (define rep-atom (mdl-root-atom "REP"))
+     (let loop ([pass 1])
+       (when (and max-passes (> pass max-passes))
+         (error 'host-loop "the host loop exceeded its bound of ~a passes (ADR-0049)" max-passes))
+       (define rep (global-option rep-atom))
+       (when (eq? rep unassigned)
+         (error 'host-loop "the GVAL of REP is unassigned (ADR-0049)"))
+       (unless (or (procedure? rep) (mdl-function? rep))
+         (error 'host-loop "the GVAL of REP is not an applicable FUNCTION or SUBR (ADR-0049)"))
+       (on-event (list 'pass pass))
+       (mdl-apply-evaluated rep '())
+       (loop (add1 pass)))))
+   (lambda ()
+     (define failures (flush-terminal-output/collect))
+     (cond [leaving
+            ;; The primary outcome continues unchanged after this thunk.
+            (record-secondary-failures! (unbox leaving) failures)]
+           [(pair? failures)
+            (record-secondary-failures! (car failures) (cdr failures))
+            (raise (car failures))]))))
+
+;; Secondary failures of a raised value that ended a host loop, keyed by the
+;; eq? identity of that value (weakly). Host-only diagnostics: a failed final
+;; flush is reported here instead of replacing the primary outcome.
+(define secondary-failures (make-weak-hasheq))
+(define (record-secondary-failures! primary failures)
+  (when (pair? failures)
+    (hash-set! secondary-failures primary
+               (append (hash-ref secondary-failures primary '()) failures))))
+(define (mdl-host-loop-secondary-failures primary)
+  (hash-ref secondary-failures primary '()))
+
+;; ADR-0050 / maintainer decision D3 ("Mirror, then strict"): reading a
+;; terminal CHANNEL whose input already ended. A host-level Racket exception,
+;; never an MDL ERROR, so no MDL ERROR handler (the game's HANDLE) runs; a host
+;; must report it as a failure.
+(struct exn:fail:mdl-input-exhausted exn:fail ())
+(define input-exhausted-message
+  (string-append "READSTRING: input exhausted: the session input ended and the "
+                 "mirrored end-of-input read was already returned "
+                 "(maintainer decision D3; ADR-0050)"))
+
+;; Flush every terminal output port of this session, so a prompt written
+;; with PRINC is visible before a blocking read (Confusion flushes stdout).
+;; Each distinct port once, even if several PRINT channels share it.
+(define (terminal-output-ports)
+  (remove-duplicates
+   (for/list ([host (in-list (hash-values (atom-space-channels (current-mdl-atom-space))))]
+              #:when (eq? (host-channel-direction host) 'PRINT))
+     (or (host-channel-port host) (current-output-port)))
+   eq?))
+(define (flush-terminal-output!)
+  (for-each flush-output (terminal-output-ports)))
+;; The host loop's final flush: try every port, returning every value raised
+;; (in order) instead of stopping at the first, so one failed port does not
+;; leave another unflushed. Any raised value counts, not only exn:fail;
+;; breaks are not caught.
+(define (flush-terminal-output/collect)
+  (for*/list ([port (in-list (terminal-output-ports))]
+              [failure (in-value (with-handlers ([(lambda (v) (not (exn:break? v))) box])
+                                   (flush-output port)
+                                   #f))]
+              #:when failure)
+    (unbox failure)))
+
+;; ADR-0050 READSTRING (manual 11.4.1.2): <READSTRING buffer channel [stop]>
+;; exactly as RDCOM and YES/NO use it. Arguments are validated first; then
+;; output is flushed; then a channel whose end-of-input flag is set raises
+;; exn:fail:mdl-input-exhausted. Otherwise characters are read until the
+;; buffer view is full, a stop character is read (consumed, not stored) or
+;; input ends (flag set, partial count returned). Characters are stored from
+;; the view's position 1; the rest of the buffer is unchanged. No echo.
+(define (mdl-readstring . args)
+  (define n (length args))
+  (unless (<= 2 n 4)
+    (error 'READSTRING
+           "READSTRING takes a buffer, a CHANNEL and an optional stop STRING (ADR-0050)"))
+  (when (= n 4)
+    (error 'READSTRING "an EOF routine argument is not supported (ADR-0050)"))
+  (define buffer (car args))
+  (define channel (cadr args))
+  (define host (registered-channel-host 'READSTRING channel
+                                        "argument must be of type CHANNEL"))
+  (unless (and (eq? (host-channel-direction host) 'READ)
+               (channel-mode-intact? channel host))
+    (error 'READSTRING "READSTRING requires an input channel"))
+  (unless (and (mdl-string? buffer)
+               (not (immutable? (if (mdl-string-view? buffer)
+                                    (mdl-string-view-storage buffer)
+                                    buffer))))
+    (error 'READSTRING "buffer must be a mutable STRING (ADR-0050)"))
+  (define stops
+    (cond [(= n 2) '()]
+          [(mdl-string? (caddr args)) (string->list (mdl-string-content (caddr args)))]
+          [(exact-integer? (caddr args))
+           (error 'READSTRING "a FIX stop is not supported (ADR-0050)")]
+          [else (error 'READSTRING "stop must be a STRING (ADR-0050)")]))
+  (flush-terminal-output!)
+  (when (host-channel-at-eof? host)
+    (raise (exn:fail:mdl-input-exhausted input-exhausted-message
+                                         (current-continuation-marks))))
+  (define port (host-channel-port/strict 'READSTRING host))
+  (define size (mdl-string-length buffer))
+  (let loop ([count 0])
+    (if (>= count size)
+        count
+        (let ([ch (read-char port)])
+          (cond
+            [(eof-object? ch) (set-host-channel-at-eof?! host #t) count]
+            [(char=? ch #\!)
+             (error 'READSTRING
+                    "'!' in terminal input is not supported: pinned Confusion reads \"!x\" as x and the manual is silent (open question; ADR-0050)")]
+            [(> (char->integer ch) 127)
+             (error 'READSTRING "non-ASCII character (code ~a) in terminal input is not supported (ADR-0050)"
+                    (char->integer ch))]
+            [(memv ch stops) count]
+            [else (mdl-string-set! buffer count ch) (loop (add1 count))])))))
+
 ;; SUBSTRUC (MDL manual ch. 7, section 7.1.7)
 ;;
 ;; Contract: `<SUBSTRUC from rest amount to>` copies `amount` elements of
@@ -3722,6 +3986,17 @@
   ;; Escape \ as \\ first, then " as \" — order matters.
   (string-replace (string-replace s "\\" "\\\\") "\"" "\\\""))
 
+;; Is ATOM the one found by looking its PNAME up on the current OBLIST path
+;; (#118: the LVAL of ROOT OBLIST, not the session default)? Only then does
+;; PRINT/UNPARSE/PRIN1 omit the trailer.
+(define (atom-reachable? who atom)
+  (define pname (atom-value-pname atom))
+  (define found
+    (for/or ([oblist (in-list (mdl-list->list (current-lookup-path who)))])
+      (define candidate (mdl-lookup pname oblist))
+      (and (not (mdl-false? candidate)) candidate)))
+  (eq? found atom))
+
 (define (mdl-unparse-value who value)
   (cond
     [(exact-integer? value)
@@ -3746,14 +4021,7 @@
        (error who
               "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"
               pname))
-     ;; #118: the one authoritative search path (LVAL of ROOT OBLIST), not
-     ;; the session default stored in atom-space-lookup.
-     (define lookups (mdl-list->list (current-lookup-path who)))
-     (define found
-       (for/or ([oblist (in-list lookups)])
-         (define candidate (mdl-lookup pname oblist))
-         (and (not (mdl-false? candidate)) candidate)))
-     (unless (eq? found value)
+     (unless (atom-reachable? who value)
        (error who
               "UNPARSE ATOM: trailer notation not implemented; atom ~s not reachable via current OBLIST path"
               pname))
@@ -4062,6 +4330,10 @@
         "SUBSTRUC" mdl-substruc
         "TERPRI" mdl-terpri
         "CRLF" mdl-crlf
+        "RESET" mdl-reset
+        "PRINC" mdl-princ
+        "PRIN1" mdl-prin1
+        "READSTRING" mdl-readstring
         "ERROR" mdl-error
         "ERRET" mdl-erret
         "EVENT" mdl-event

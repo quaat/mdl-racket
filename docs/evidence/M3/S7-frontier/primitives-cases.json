@@ -1,0 +1,140 @@
+{
+  "name": "interactive-primitives",
+  "cases": [
+    {
+      "name": "reset-inchan-return",
+      "input": "<TYPE <RESET ,INCHAN>>\n<==? <RESET ,INCHAN> ,INCHAN>\n<=? <RESET ,INCHAN> ,INCHAN>\n<LENGTH <RESET ,INCHAN>>\n<QUIT>\n"
+    },
+    {
+      "name": "reset-outchan-return",
+      "input": "<TYPE <RESET ,OUTCHAN>>\n<==? <RESET ,OUTCHAN> ,OUTCHAN>\n<QUIT>\n"
+    },
+    {
+      "name": "reset-arg-errors",
+      "input": "<RESET>\n<RESET 1>\n<RESET ,INCHAN ,INCHAN>\n<QUIT>\n"
+    },
+    {
+      "name": "channel-slots",
+      "note": "terminal CHANNEL slot values before/after RESET, and the BACK predecessor",
+      "input": "<CHTYPE ,INCHAN VECTOR>\n<CHTYPE ,OUTCHAN VECTOR>\n<CHTYPE <BACK ,INCHAN> VECTOR>\n<RESET ,INCHAN>\n<CHTYPE ,INCHAN VECTOR>\n<PUT ,OUTCHAN 13 1000>\n<RESET ,OUTCHAN>\n<CHTYPE ,OUTCHAN VECTOR>\n<QUIT>\n"
+    },
+    {
+      "name": "contin-put-then-reset",
+      "note": "CONTIN 77rooms.mud:297 PUT on <1 <BACK ,INCHAN>> then RESET; is the association/slot kept?",
+      "input": "<PUT <1 <BACK ,INCHAN>> 6 #LOSE *12*>\n<GET <1 <BACK ,INCHAN>> 6>\n<RESET ,INCHAN>\n<GET <1 <BACK ,INCHAN>> 6>\n<CHTYPE <BACK ,INCHAN> VECTOR>\n<QUIT>\n"
+    },
+    {
+      "name": "reset-buffer-discard",
+      "note": "Does RESET discard already-buffered stdin? leftover after the form is '\\nabc\\n'",
+      "input": "<SET N <PROG () <RESET ,INCHAN> <READSTRING <SET B <ISTRING 10>> ,INCHAN <STRING <ASCII 10>>>>>\nabc\n.N\n.B\n<QUIT>\n"
+    },
+    {
+      "name": "noreset-buffer-compare",
+      "input": "<SET N <PROG () <READSTRING <SET B <ISTRING 10>> ,INCHAN <STRING <ASCII 10>>>>>\nabc\n.N\n.B\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-basic",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<READSTRING .B ,INCHAN ,RS>Hello\n.B\n<TYPE <READSTRING .B ,INCHAN ,RS>>Ab\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-overflow",
+      "note": "buffer 4, line 'abcdefgh': first call fills buffer; is the rest kept for the next call?",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 4>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B>>abcdefgh\nxy\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-crlf",
+      "note": "input 'ab\\r\\ncd\\n': CR stops the first read; LF left over",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B>>ab\r\ncd\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-esc",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B>>ab\u001bcd\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-bang-and-case",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B>>Ab!cD\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-fix-stop",
+      "input": "<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN 3>> <PRINT .B>>abcdef\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-default-stop",
+      "note": "no stop argument: reads until buffer full (5)",
+      "input": "<SET B <ISTRING 5>>\n<PROG () <PRINT <READSTRING .B ,INCHAN>> <PRINT .B>>ab\ncdefg\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-arg-errors",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<READSTRING>\n<READSTRING 1 ,INCHAN ,RS>\n<READSTRING \"abc\" ,OUTCHAN ,RS>\n<READSTRING \"abc\" ,INCHAN ,RS <> 5>\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-rest-view",
+      "note": "RDCOM reads into ,INBUF (ISTRING 100) then LEX uses <REST .INBUF .INPLEN>",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<SET N <READSTRING <REST .B 2> ,INCHAN ,RS>>xy\n.B\n<QUIT>\n"
+    },
+    {
+      "name": "readstring-eof-partial",
+      "note": "EOF without terminator after 2 chars",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <READSTRING .B ,INCHAN ,RS>>>ab"
+    },
+    {
+      "name": "readstring-eof-empty",
+      "note": "EOF immediately: first READSTRING returns, second raises",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINC \"after\">>"
+    },
+    {
+      "name": "readstring-eof-routine",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS '<PROG () <PRINC \"eof-routine\"> 99>>> <PRINC \"after\">>"
+    },
+    {
+      "name": "reset-after-eof",
+      "note": "does RESET clear the EOF flag on stdin at real EOF?",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <RESET ,INCHAN> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINC \"after\">>"
+    },
+    {
+      "name": "princ-values",
+      "input": "<PRINC \"abc\">\n<PRINC !\\x>\n<PRINC 42>\n<PRINC FOO>\n<PRINC <STRING <ASCII 27> \"z\">>\n<PRINC \"a\r\nb\">\n<PRINC \">\">\n<PRINC \"x\" ,OUTCHAN>\n<TYPE <PRINC \"\">>\n<PRINC (1 \"s\" !\\c)>\n<QUIT>\n"
+    },
+    {
+      "name": "princ-errors",
+      "input": "<PRINC>\n<PRINC \"x\" ,INCHAN>\n<PRINC \"x\" 1>\n<PRINC \"x\" ,OUTCHAN 3>\n<QUIT>\n"
+    },
+    {
+      "name": "princ-linewidth",
+      "note": "line breaking driven by OUTCHAN slot 13 (line width) / 14 (position)",
+      "input": "<13 ,OUTCHAN>\n<14 ,OUTCHAN>\n<PROG () <PUT ,OUTCHAN 13 10> <PRINC \"aaaa\"> <PRINC \"bbbbbbbb\"> <PRINC \"cc\"> <PRINTSTRING \"dddddddddd\"> <PRINC \"ee\"> <PUT ,OUTCHAN 13 0> 1>\n<QUIT>\n"
+    },
+    {
+      "name": "quit-status",
+      "input": "<PRINC \"before\">\n<QUIT>\n<PRINC \"after\">\n"
+    },
+    {
+      "name": "quit-args",
+      "input": "<QUIT 1>\n<PRINC \"still\">\n<QUIT>\n"
+    },
+    {
+      "name": "toplevel-eof",
+      "note": "stdin ends at top level (no QUIT)",
+      "input": "<+ 1 2>\n"
+    },
+    {
+      "name": "toplevel-eof-midform",
+      "input": "<+ 1 2"
+    },
+    {
+      "name": "error-then-eof",
+      "note": "an error at level 1 then EOF: LISTENING-AT-LEVEL 2 then?",
+      "input": "<FOO-UNDEFINED>\n"
+    },
+    {
+      "name": "listen-rep-function-returns",
+      "note": "LISTEN re-applies the new REP each pass; F reads one line per pass",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SETG B <ISTRING 10>>\n<DEFINE F () <PRINC \">\"> <PRINT <READSTRING ,B ,INCHAN ,RS>> T>\n<SETG REP ,F>\nab\ncd\n"
+    },
+    {
+      "name": "rep-value-printing-null-atom",
+      "note": "what the default REP prints for an empty-PNAME atom (CONTIN returns ,NULL)",
+      "input": "<SETG NULL <INSERT <ATOM \"\"> <ROOT>>>\n,NULL\n<PRINC \"|\">\n<QUIT>\n"
+    }
+  ]
+}

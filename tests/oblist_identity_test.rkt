@@ -291,8 +291,10 @@
   (in-fresh-session
    (check-exn #rx"unassigned or non-applicable MDL operator PARSE"
               (lambda () (run "<PARSE \"FOO\">")))
-   (check-exn #rx"unassigned or non-applicable MDL operator PRINC"
-              (lambda () (run "<PRINC \"FOO\">")))
+   ;; (PRINC was the example here until S7 implemented it; PRINT is still
+   ;; an unimplemented ROOT SUBR.)
+   (check-exn #rx"unassigned or non-applicable MDL operator PRINT"
+              (lambda () (run "<PRINT \"FOO\">")))
    (check-exn #rx"unassigned MDL global MEMBER"
               (lambda () (run ",MEMBER")))))
 
