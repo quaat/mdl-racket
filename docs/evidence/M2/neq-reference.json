@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-structural-neq-reference",
+  "recorded_at": "2026-11-20T12:55:32.554541+00:00",
+  "interpreter_sha256": "987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "fix-equal",
+      "expression": "<N=? 3 3>",
+      "input": "<N=? 3 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "fix-unequal",
+      "expression": "<N=? 3 4>",
+      "input": "<N=? 3 4>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "atom-equal",
+      "expression": "<N=? 'SAME 'SAME>",
+      "input": "<N=? 'SAME 'SAME>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "list-equal-distinct",
+      "expression": "<N=? (1 2) (1 2)>",
+      "input": "<N=? (1 2) (1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "list-unequal",
+      "expression": "<N=? (1 2) (1 3)>",
+      "input": "<N=? (1 2) (1 3)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "string-equal-distinct",
+      "expression": "<N=? <STRING \"ab\"> <STRING \"ab\">>",
+      "input": "<N=? <STRING \"ab\"> <STRING \"ab\">>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "typed-equal",
+      "expression": "<NEWTYPE G3-NEQ-X WORD> <N=? <CHTYPE 7 G3-NEQ-X> <CHTYPE 7 G3-NEQ-X>>",
+      "input": "<NEWTYPE G3-NEQ-X WORD> <N=? <CHTYPE 7 G3-NEQ-X> <CHTYPE 7 G3-NEQ-X>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nG3-NEQ-X\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "G3-NEQ-X\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "typed-different-types",
+      "expression": "<NEWTYPE G3-NEQ-X WORD> <NEWTYPE G3-NEQ-Y WORD> <N=? <CHTYPE 7 G3-NEQ-X> <CHTYPE 7 G3-NEQ-Y>>",
+      "input": "<NEWTYPE G3-NEQ-X WORD> <NEWTYPE G3-NEQ-Y WORD> <N=? <CHTYPE 7 G3-NEQ-X> <CHTYPE 7 G3-NEQ-Y>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nG3-NEQ-X\nG3-NEQ-Y\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "G3-NEQ-X\nG3-NEQ-Y\nT\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

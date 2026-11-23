@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m2-flagword-get-initial-oblist-reference",
+  "cases": [
+    {"name": "initial-oblist", "expression": "<GET INITIAL OBLIST>"},
+    {"name": "root-oblist", "expression": "<GET ROOT OBLIST>"},
+    {"name": "ordinary-oblist", "expression": "<GET FOO OBLIST>"},
+    {"name": "lookup-group-glue", "expression": "<LOOKUP \"GROUP-GLUE\" <GET INITIAL OBLIST>>"},
+    {"name": "oblist?-initial", "expression": "<OBLIST? INITIAL>"},
+    {"name": "oblist?-foo", "expression": "<OBLIST? FOO>"}
+  ]
+}

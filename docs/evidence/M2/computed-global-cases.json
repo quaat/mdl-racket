@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-computed-global-reference",
+  "cases": [
+    {"name": "comma-local-global-read", "expression": "<SETG G3-FOO 3> <SET FOO 'G3-FOO> ,.FOO"},
+    {"name": "comma-local-in-form", "expression": "<SETG G3-FOO 3> <SET FOO 'G3-FOO> <+ 1 ,.FOO>"},
+    {"name": "msetg-repeat", "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-FOO 3> <MSETG G3-FOO 3>"}
+  ]
+}

@@ -9,7 +9,8 @@
 
 (struct mdl-node (kind value line column) #:transparent)
 (struct exn:fail:mdl-reader exn:fail (line column) #:transparent)
-(struct cursor (text [pos #:mutable] [line #:mutable] [column #:mutable] source) #:transparent)
+(struct cursor (text [pos #:mutable] [line #:mutable] [column #:mutable]
+                     source read-eval) #:transparent)
 
 (define (peek c)
   (and (< (cursor-pos c) (string-length (cursor-text c)))
@@ -137,8 +138,13 @@
       [(#\') (advance! c) (node 'quote (read-node! c))]
       [(#\,)
        (advance! c)
-       (let ([name (read-atom! c)])
-         (node 'global (if (string=? name "") (read-node! c) name)))]
+       (if (equal? (peek c) #\.)
+           ;; The comma applies GVAL to the following expression. In
+           ;; `,.FOO`, that expression is the local value of FOO, not an
+           ;; ATOM whose PNAME begins with a period (manual chapter 4).
+           (node 'global (read-node! c))
+           (let ([name (read-atom! c)])
+             (node 'global (if (string=? name "") (read-node! c) name))))]
       [(#\.)
        (advance! c)
        (let ([name (read-atom! c)])
@@ -146,10 +152,24 @@
          (node 'local name))]
       [(#\!)
        (advance! c)
-       (if (equal? (peek c) #\[)
-           (begin (advance! c) (node 'uvector (read-delimited! c 'uvector)))
-           (node 'splice (read-node! c #t)))]
-      [(#\%) (advance! c) (node 'percent (read-node! c))]
+       (cond
+         [(equal? (peek c) #\\)
+          (advance! c)
+          (define character (advance! c))
+          (unless character (parse-error c "unterminated CHARACTER notation"))
+          (node 'character character)]
+         [(equal? (peek c) #\[)
+          (advance! c)
+          (node 'uvector (read-delimited! c 'uvector))]
+         [else (node 'splice (read-node! c #t))])]
+      [(#\%)
+       (advance! c)
+       (when (and (cursor-read-eval c) (equal? (peek c) #\%))
+         (parse-error c "unsupported %% reader macro"))
+       (define percent-node (node 'percent (read-node! c)))
+       (if (cursor-read-eval c)
+           ((cursor-read-eval c) percent-node)
+           percent-node)]
       [(#\#)
        (let ([name (read-atom! c)])
          (skip-ws! c)
@@ -173,7 +193,7 @@
             (node 'typed (cons name (read-node! c)))]
            [(and (string-ci=? name "#FALSE") (equal? (peek c) #\())
             (node 'false (mdl-node-value (read-node! c)))]
-           [(and (string-ci=? name "#WORD") (peek c)
+           [(and (regexp-match? #px"^#[A-Za-z]" name) (peek c)
                  (or (char-numeric? (peek c))
                      (memv (peek c) '(#\* #\- #\+))))
             (node 'typed (cons name (read-node! c)))]
@@ -184,8 +204,9 @@
          (when (string=? raw "") (parse-error c "invalid token"))
          (node 'atom raw))])))
 
-(define (make-mdl-node-reader text #:source [source "<string>"])
-  (define c (cursor text 0 1 1 source))
+(define (make-mdl-node-reader text #:source [source "<string>"]
+                              #:read-eval [read-eval #f])
+  (define c (cursor text 0 1 1 source read-eval))
   (lambda ()
     (skip-ws! c)
     (and (peek c) (read-node! c))))

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-structural-neq-reference-errors",
+  "cases": [
+    {"name": "zero-args", "expression": "<N=?>"},
+    {"name": "one-arg", "expression": "<N=? 1>"},
+    {"name": "three-args", "expression": "<N=? 1 2 3>"},
+    {"name": "cyclic-self", "expression": "<SET L (1)> <PUTREST .L .L> <N=? .L .L>"},
+    {"name": "cyclic-distinct", "expression": "<SET A (1)> <PUTREST .A .A> <SET B (1)> <PUTREST .B .B> <N=? .A .B>"}
+  ]
+}

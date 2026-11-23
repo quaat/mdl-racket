@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "name": "m3-andq-eager-error-reference",
+  "cases": [
+    {"name": "late-error-after-false", "expression": "<AND? <> <ERROR ANDQ-LATE>>"}
+  ]
+}

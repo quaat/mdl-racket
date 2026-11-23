@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "name": "m2-mapf-control-success-reference",
+  "recorded_at": "2026-11-20T19:52:00.577581+00:00",
+  "interpreter_sha256": "1d540d2df348479d4740290d4190533b71d94a8308193811b96e52898798b886",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "left-to-right",
+      "expression": "<SETG ORD 0> <MAPF <> <FUNCTION (X) <SETG ORD <+ <* 10 ,ORD> .X>>> '(1 2 3)> ,ORD",
+      "input": "<SETG ORD 0> <MAPF <> <FUNCTION (X) <SETG ORD <+ <* 10 ,ORD> .X>>> '(1 2 3)> ,ORD\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n123\n123\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n123\n123\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "interpreted-final",
+      "expression": "<MAPF <FUNCTION (\"TUPLE\" X) <LENGTH .X>> ,+ '(1 2 3)>",
+      "input": "<MAPF <FUNCTION (\"TUPLE\" X) <LENGTH .X>> ,+ '(1 2 3)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "decl-success",
+      "expression": "<MAPF ,LIST <FUNCTION (X) #DECL ((X) FIX) .X> '(1 2)>",
+      "input": "<MAPF ,LIST <FUNCTION (X) #DECL ((X) FIX) .X> '(1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n(1 2)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "(1 2)\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mapret-zero-false-last",
+      "expression": "<MAPF <> <FUNCTION (X) <MAPRET>> '(1)>",
+      "input": "<MAPF <> <FUNCTION (X) <MAPRET>> '(1)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mapret-one-false",
+      "expression": "<MAPF <> <FUNCTION (X) <MAPRET 9>> '(7)>",
+      "input": "<MAPF <> <FUNCTION (X) <MAPRET 9>> '(7)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n7\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "7\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mapret-zero-after-value",
+      "expression": "<MAPF <> <FUNCTION (X) <COND (<==? .X 2> <MAPRET>)> <* .X 10>> '(1 2)>",
+      "input": "<MAPF <> <FUNCTION (X) <COND (<==? .X 2> <MAPRET>)> <* .X 10>> '(1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n2\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "2\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mapstop-false",
+      "expression": "<MAPF <> <FUNCTION (X) <MAPSTOP 5>> '(1 2)>",
+      "input": "<MAPF <> <FUNCTION (X) <MAPSTOP 5>> '(1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mapstop-false-nontrivial",
+      "expression": "<MAPF <> <FUNCTION (X) <MAPSTOP 9>> '(7)>",
+      "input": "<MAPF <> <FUNCTION (X) <MAPSTOP 9>> '(7)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n7\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "7\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mapstop-zero",
+      "expression": "<MAPF ,LIST <FUNCTION (X) <MAPSTOP>> '(1 2)>",
+      "input": "<MAPF ,LIST <FUNCTION (X) <MAPSTOP>> '(1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mapleave-default",
+      "expression": "<MAPF ,LIST <FUNCTION (X) <MAPLEAVE>> '(1)>",
+      "input": "<MAPF ,LIST <FUNCTION (X) <MAPLEAVE>> '(1)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "unwind-mapleave",
+      "expression": "<SETG U 0> <MAPF ,LIST <FUNCTION (X) <UNWIND <MAPLEAVE 7> <SETG U 1>>> '(1)> ,U",
+      "input": "<SETG U 0> <MAPF ,LIST <FUNCTION (X) <UNWIND <MAPLEAVE 7> <SETG U 1>>> '(1)> ,U\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n7\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "0\n7\n1\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

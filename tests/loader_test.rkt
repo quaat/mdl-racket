@@ -1,5 +1,5 @@
 #lang racket/base
-(require rackunit racket/file racket/path "../mdl/loader.rkt")
+(require rackunit racket/file racket/path "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
 
 (define root (make-temporary-file "/tmp/mdl-loader-test~a" 'directory))
 (define (put relative contents)
@@ -27,6 +27,14 @@
    (check-equal? (status (mdl-session-load! session "interpreted.mud")) "PASS")
    (check-equal? (mdl-session-call session "RAW-ID" 7) 7)
    (check-equal? (mdl-session-call session "DYNAMIC-ID") 9)
+   (put "interpreted-values.mud"
+        "<DEFMAC MAKE-PLAIN () <FORM DEFINE PLAIN-ID (X) <FORM LVAL 'X>>>\n<MAKE-PLAIN>\n")
+   (check-equal? (status (mdl-session-load! session "interpreted-values.mud")) "PASS")
+   (define form-value
+     (mdl-session-call session "FORM" (mdl-session-atom session "+") 1 2))
+   (define list-value (mdl-session-call session "LIST" form-value))
+   (check-eq? (car (mdl-list->list (mdl-session-call session "PLAIN-ID" list-value)))
+              form-value)
    (check-equal? (status (mdl-session-load! session "second.mud")) "PASS")
    (check-equal? (mdl-session-global session "SHARED") 4)
    (define independent (make-mdl-session root))

@@ -73,15 +73,17 @@ Begin with only the FALSE/value primitive in #3. Close each issue on its own
 Confusion-backed tests and evidence; this graph is planning, not a claim that
 later semantics are already implemented.
 
-## M2 — Execution semantics and MDL compilation (CURRENT)
+## M2 — Execution semantics and MDL compilation (PASS)
 
-The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md) passes on
-2026-11-18. [G1](evidence/M2/SOURCE-LOADER.md) implements a root-restricted,
-shared-session loader with sequential top-level execution and nested `FLOAD`.
-G2 [invokes the unmodified pinned `VFLOAD` definition](evidence/M2/HISTORICAL-VFLOAD.md)
-in an explicitly partial-source probe. G3 evaluates the integrated M2 gate
-below after the `#DECL` and subsequent source dependencies are addressed.
-The audit is not an M2 milestone pass.
+The [G0 source-readiness audit](evidence/M2/SOURCE-READINESS.md),
+[G1 shared-session source loader](evidence/M2/SOURCE-LOADER.md), and
+[G2 original VFLOAD probe](evidence/M2/HISTORICAL-VFLOAD.md) pass.
+The [mainline gate](evidence/M2/MAINLINE-GATE.md) passes at the integrated
+`main` code baseline `7d34195`, including 59 original-definition G3
+assertions and the [requirements audit](evidence/M2/REQUIREMENTS-AUDIT.md).
+The complete historical loader separately stops at `EMPTY?` after 24
+completed forms. Prior FAIL decisions remain in the [dated G3 report](evidence/M2/G3-GATE.md)
+and [status history](STATUS.md).
 
 **Build:** `DEFINE` formal arguments including OPTIONAL/AUX/TUPLE,
 `DEFMAC`, `COND`, `PROG`, `REPEAT`, `RETURN`, `AGAIN`, `MAPF`, `UNWIND`,
@@ -92,7 +94,13 @@ loading/linking across source files.
 source definitions, with no loss of semantic aliasing/continuations.
 
 **Tasks:** #12 control flow and activation records, #13 macros,
-#14 function application/binding, #15 source loader, #16 random/event APIs.
+#14 function application/binding, #15 source loader. The earlier task-list
+entry “#16 random/event APIs” was outside this milestone's stated Build
+and Gate; it is now explicitly assigned to
+[M3 issue #71](https://github.com/quaat/mdl-racket/issues/71), where
+unchanged game source and reference observations can define its behavior.
+See ADR-0030 in `docs/DECISIONS.md`. M2 PASS makes no claim about random
+or event runtime parity.
 
 ### M2 first slice and dependency order
 
@@ -128,6 +136,29 @@ proposed dependencies; create focused issues when their semantics and tests
 are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
+
+**Current source frontier (2026-11-22):** issue #104's interrupt foundation
+adds session-owned priority dispatch and safe pending-event delivery but
+intentionally keeps `EVENT "GC"` guarded. The unchanged loader still completes
+433 unchanged original forms, zero skipped, fully loading `77act1.mud`,
+`77act2.mud` and `77act3.mud`; the next failure is internal
+`EVENT "GC"` in `77rooms.mud` expression 16, tracked in
+[issue #104](https://github.com/quaat/mdl-racket/issues/104).
+This is partial source
+execution, not an M3 gate pass. Track PARSED, LOADED, INITIALIZED,
+INTERACTIVE and SMOKE-PARITY separately; the progress report currently
+verifies PARSED and the incomplete loader state while recording the
+remaining stages false. M3 PASS requires the approved house smoke
+scenario, not just source-chain completion.
+
+The first source-progress gate is `make m3-source-progress`. It runs the
+unchanged `77loadall.mud` entry, accepts a new genuine source dependency
+only when the first 24 original expressions remain intact, and records a
+machine-readable file/order/failure report. The M2 regression suite loads
+an explicit SHA-verified original-source prefix and does not pin the
+full loader to its former EMPTY? failure. See
+[`SOURCE-PROGRESS.md`](evidence/M3/SOURCE-PROGRESS.md). The initial
+M3 observation was 24 completed, zero skipped forms; EMPTY? was first.
 
 **Build:** world structures (`defs`, `makstr`, `dung`), vocabulary,
 `np` original parser, actions, room logic, game loop, I/O abstraction.

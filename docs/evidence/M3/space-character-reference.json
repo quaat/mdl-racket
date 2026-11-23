@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "name": "m3-space-character-native-reference",
+  "recorded_at": "2026-11-21T16:38:13.756205+00:00",
+  "interpreter_sha256": "cd7bfffe22265b3f63dfd2713330507c53e6182ec9f41ba4aa3d818127252580",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "type",
+      "expression": "<TYPE !\\ >",
+      "input": "<TYPE !\\ >\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nCHARACTER\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "CHARACTER\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "primtype",
+      "expression": "<PRIMTYPE !\\ >",
+      "input": "<PRIMTYPE !\\ >\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nWORD\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "WORD\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "ascii",
+      "expression": "<ASCII !\\ >",
+      "input": "<ASCII !\\ >\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n32\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "32\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "identity",
+      "expression": "<==? !\\  !\\ >",
+      "input": "<==? !\\  !\\ >\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "T\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "function-value",
+      "expression": "<DEFINE M3CH () !\\ > <ASCII <M3CH>>",
+      "input": "<DEFINE M3CH () !\\ > <ASCII <M3CH>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3CH\n32\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3CH\n32\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

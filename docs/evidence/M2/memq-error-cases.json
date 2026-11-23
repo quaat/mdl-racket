@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-memq-reference-errors",
+  "cases": [
+    {"name": "one-arg", "expression": "<MEMQ 1>"},
+    {"name": "three-args", "expression": "<MEMQ 1 '(1) 2>"},
+    {"name": "non-structured", "expression": "<MEMQ 1 2>"}
+  ]
+}

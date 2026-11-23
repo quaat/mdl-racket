@@ -28,6 +28,8 @@
 (check-equal? (run "<SETG M1-X!-M1-OB 1> <SETG M1-X 2> ,M1-X") 2)
 (check-equal? (run "<SETG M1-A <ATOM \"M1-X\">> <SETG ,M1-A 17> <GVAL ,M1-A>") 17)
 (check-equal? (run "<SETG M1-A <ATOM \"M1-X\">> <SET ,M1-A 17> <LVAL ,M1-A>") 17)
+(check-equal? (run "<SETG G3-FOO 3> <SET FOO 'G3-FOO> ,.FOO") 3)
+(check-equal? (run "<SETG G3-FOO 3> <SET FOO 'G3-FOO> <+ 1 ,.FOO>") 4)
 (check-equal? (run "<SET M1-X 3> <SETG M1-X 12> <GUNASSIGN M1-X> .M1-X") 3)
 (check-true (procedure? (run ",+")))
 (check-exn #rx"unassigned MDL global" (lambda () (run ",M1-NO-GLOBAL")))

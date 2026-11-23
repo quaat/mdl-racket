@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-error-reference",
+  "recorded_at": "2026-11-20T13:12:03.444006+00:00",
+  "interpreter_sha256": "987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "one-atom",
+      "expression": "<ERROR G3-FAIL>",
+      "input": "<ERROR G3-FAIL>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n G3-FAIL \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n G3-FAIL \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "multiple-values",
+      "expression": "<ERROR MSETG G3-FOO ALREADY-GASSIGNED 3>",
+      "input": "<ERROR MSETG G3-FOO ALREADY-GASSIGNED 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n MSETG \n G3-FOO \n ALREADY-GASSIGNED \n 3 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n MSETG \n G3-FOO \n ALREADY-GASSIGNED \n 3 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "original-msetg-conflict",
+      "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-FOO 3> <MSETG G3-FOO 4>",
+      "input": "<FLOAD \"81prim.mud\"> <MSETG G3-FOO 3> <MSETG G3-FOO 4>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\nT\n\n *ERROR* \n MSETG \n G3-FOO \n ALREADY-GASSIGNED \n 3 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\nT\n\n *ERROR* \n MSETG \n G3-FOO \n ALREADY-GASSIGNED \n 3 \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "zero-args",
+      "expression": "<ERROR>",
+      "input": "<ERROR>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

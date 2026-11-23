@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-computed-global-reference",
+  "recorded_at": "2026-11-20T12:58:42.959999+00:00",
+  "interpreter_sha256": "987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "comma-local-global-read",
+      "expression": "<SETG G3-FOO 3> <SET FOO 'G3-FOO> ,.FOO",
+      "input": "<SETG G3-FOO 3> <SET FOO 'G3-FOO> ,.FOO\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\nG3-FOO\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\nG3-FOO\n3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "comma-local-in-form",
+      "expression": "<SETG G3-FOO 3> <SET FOO 'G3-FOO> <+ 1 ,.FOO>",
+      "input": "<SETG G3-FOO 3> <SET FOO 'G3-FOO> <+ 1 ,.FOO>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n3\nG3-FOO\n4\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "3\nG3-FOO\n4\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "msetg-repeat",
+      "expression": "<FLOAD \"81prim.mud\"> <MSETG G3-FOO 3> <MSETG G3-FOO 3>",
+      "input": "<FLOAD \"81prim.mud\"> <MSETG G3-FOO 3> <MSETG G3-FOO 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DONE\"\nT\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"DONE\"\nT\nT\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

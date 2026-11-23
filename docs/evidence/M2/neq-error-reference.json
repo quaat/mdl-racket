@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-structural-neq-reference-errors",
+  "recorded_at": "2026-11-20T12:55:32.749715+00:00",
+  "interpreter_sha256": "987471cf0e568ad7f83a10b893484cd3fa99a86a69444c3b7d5554b16829f475",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "zero-args",
+      "expression": "<N=?>",
+      "input": "<N=?>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "one-arg",
+      "expression": "<N=? 1>",
+      "input": "<N=? 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "three-args",
+      "expression": "<N=? 1 2 3>",
+      "input": "<N=? 1 2 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 10:20:17\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "cyclic-self",
+      "expression": "<SET L (1)> <PUTREST .L .L> <N=? .L .L>",
+      "ok": false,
+      "error": "timeout after 3.0 seconds"
+    },
+    {
+      "name": "cyclic-distinct",
+      "expression": "<SET A (1)> <PUTREST .A .A> <SET B (1)> <PUTREST .B .B> <N=? .A .B>",
+      "ok": false,
+      "error": "timeout after 3.0 seconds"
+    }
+  ],
+  "complete": false
+}

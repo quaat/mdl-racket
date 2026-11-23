@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-original-flagword-mapf-reference",
+  "cases": [
+    {"name": "flagword-empty", "expression": "<FLOAD \"81prim.mud\"> <FLAGWORD>"},
+    {"name": "flagword-false", "expression": "<FLOAD \"81prim.mud\"> <FLAGWORD <>>"}
+  ]
+}

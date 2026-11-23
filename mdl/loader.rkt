@@ -3,10 +3,10 @@
 (require racket/file racket/list racket/path racket/string
          "parser.rkt" "compiler.rkt" "runtime/core.rkt")
 (provide make-mdl-session mdl-session? mdl-session-load!
-         mdl-session-global mdl-session-call exn:fail:mdl-load?
+         mdl-session-atom mdl-session-global mdl-session-call exn:fail:mdl-load?
          exn:fail:mdl-load-diagnostic)
 
-(struct mdl-session (root globals locals atoms namespace events) #:transparent)
+(struct mdl-session (root globals locals atoms namespace events read-values) #:transparent)
 (struct exn:fail:mdl-load exn:fail (diagnostic) #:transparent)
 (define current-load-chain (make-parameter '())) ; canonical paths, entry first
 (define-namespace-anchor anchor)
@@ -17,7 +17,8 @@
   (parameterize ([current-namespace (mdl-session-namespace session)]
                  [current-mdl-globals (mdl-session-globals session)]
                  [current-mdl-locals (mdl-session-locals session)]
-                 [current-mdl-atom-space (mdl-session-atoms session)])
+                 [current-mdl-atom-space (mdl-session-atoms session)]
+                 [current-mdl-read-values (mdl-session-read-values session)])
     (thunk)))
 
 (define (relative-name session path)
@@ -63,7 +64,7 @@
     (raise-argument-error 'make-mdl-session "existing source-root directory" source-root))
   (define session
     (mdl-session root (make-hasheq) (list (make-hasheq))
-                 (make-mdl-atom-space) loader-namespace (box '())))
+                 (make-mdl-atom-space) loader-namespace (box '()) (make-hash)))
   (call-in-session session
     (lambda ()
       ;; Interpreter-supplied globals (MUDDLE, issue #51) intern in THIS
@@ -150,8 +151,21 @@
                          (fail! session "filesystem" "read" file #f #f
                                 (exn-message e)))])
         (file->string path)))
-    (define next-node (make-mdl-node-reader source #:source file))
+    (define reading-index (box 1))
+    (define (read-eval percent-node)
+      (with-handlers ([exn:fail:mdl-load? raise]
+                      [exn:fail?
+                       (lambda (e)
+                         (fail! session "reader" "read-eval" file
+                                (unbox reading-index) percent-node
+                                (exn-message e)))])
+        (define value (eval (compile-expression (mdl-node-value percent-node))))
+        (mdl-node 'read-value (mdl-register-read-value! value)
+                  (mdl-node-line percent-node) (mdl-node-column percent-node))))
+    (define next-node
+      (make-mdl-node-reader source #:source file #:read-eval read-eval))
     (let loop ([index 1])
+      (set-box! reading-index index)
       (if (and max-expressions (> index max-expressions))
           (let ([total
                  ;; Counting skipped forms is diagnostic only. An explicit
@@ -161,7 +175,8 @@
             (set-box! skipped-box (and total (- total max-expressions)))
             (if (and total (= total max-expressions)) "DONE" "PARTIAL"))
           (let ([node
-                 (with-handlers ([exn:fail:mdl-reader?
+                 (with-handlers ([exn:fail:mdl-load? raise]
+                                 [exn:fail:mdl-reader?
                                   (lambda (e)
                                     (fail! session "reader" "parse" file index
                                            (mdl-node 'file #f
@@ -245,6 +260,11 @@
 (define (mdl-session-global session name)
   (call-in-session session (lambda () (mdl-gval name))))
 
+;; Test/introspection boundary: obtain the atom interned by this session's
+;; source reader without exposing arbitrary evaluation.
+(define (mdl-session-atom session name)
+  (call-in-session session (lambda () (mdl-atom name))))
+
 (define (mdl-session-call session name . args)
   (call-in-session
    session
@@ -252,5 +272,5 @@
      (define fn (mdl-gval name))
      (cond
        [(mdl-macro? fn) (mdl-eval (mdl-apply-interpreted fn args))]
-       [(mdl-function? fn) (mdl-apply-interpreted fn args)]
+       [(mdl-function? fn) (mdl-apply-interpreted fn args #t)]
        [else (apply mdl-apply name args)]))))

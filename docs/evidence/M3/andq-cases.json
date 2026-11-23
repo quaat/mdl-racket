@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "name": "m3-andq-native-reference",
+  "cases": [
+    {"name": "zero", "expression": "<AND?>"},
+    {"name": "true-last", "expression": "<AND? 1 2>"},
+    {"name": "zero-truthy", "expression": "<AND? 1 0>"},
+    {"name": "first-false", "expression": "<AND? 1 <> 3>"},
+    {"name": "first-false-payload", "expression": "<AND? #FALSE (A) #FALSE (B) 9>"},
+    {"name": "eager-side-effects", "expression": "<SET X 0> <AND? <SET X 1> <> <SET X 2>> .X"},
+    {"name": "original-msetg", "expression": "<FLOAD \"81prim.mud\"> <AND? <MSETG M3O1 1> <MSETG M3O2 2>> ,M3O2"}
+  ]
+}

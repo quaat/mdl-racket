@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "name": "m2-g3-original-macro-expansion",
+  "cases": [
+    {"name": "g3-expand-trnn", "expression": "<FLOAD \"81prim.mud\"> <FLOAD \"77defs.mud\"> <EXPAND '<TRNN OBJ 2>>"}
+  ]
+}

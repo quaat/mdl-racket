@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "m2-mapf-control-success-reference",
+  "cases": [
+    {"name": "left-to-right", "expression": "<SETG ORD 0> <MAPF <> <FUNCTION (X) <SETG ORD <+ <* 10 ,ORD> .X>>> '(1 2 3)> ,ORD"},
+    {"name": "interpreted-final", "expression": "<MAPF <FUNCTION (\"TUPLE\" X) <LENGTH .X>> ,+ '(1 2 3)>"},
+    {"name": "decl-success", "expression": "<MAPF ,LIST <FUNCTION (X) #DECL ((X) FIX) .X> '(1 2)>"},
+    {"name": "mapret-zero-false-last", "expression": "<MAPF <> <FUNCTION (X) <MAPRET>> '(1)>"},
+    {"name": "mapret-one-false", "expression": "<MAPF <> <FUNCTION (X) <MAPRET 9>> '(7)>"},
+    {"name": "mapret-zero-after-value", "expression": "<MAPF <> <FUNCTION (X) <COND (<==? .X 2> <MAPRET>)> <* .X 10>> '(1 2)>"},
+    {"name": "mapstop-false", "expression": "<MAPF <> <FUNCTION (X) <MAPSTOP 5>> '(1 2)>"},
+    {"name": "mapstop-false-nontrivial", "expression": "<MAPF <> <FUNCTION (X) <MAPSTOP 9>> '(7)>"},
+    {"name": "mapstop-zero", "expression": "<MAPF ,LIST <FUNCTION (X) <MAPSTOP>> '(1 2)>"},
+    {"name": "mapleave-default", "expression": "<MAPF ,LIST <FUNCTION (X) <MAPLEAVE>> '(1)>"},
+    {"name": "unwind-mapleave", "expression": "<SETG U 0> <MAPF ,LIST <FUNCTION (X) <UNWIND <MAPLEAVE 7> <SETG U 1>>> '(1)> ,U"}
+  ]
+}

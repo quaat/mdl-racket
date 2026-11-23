@@ -10,7 +10,7 @@
 ;; DECL? is a SUBR in both the reference and this implementation, and a
 ;; round-paren structure evaluates as LIST data, so the recorded value
 ;; operands run verbatim. Where this implementation fails explicitly on a
-;; construct the reference supports but D3 leaves out of scope (NTH, OPT,
+;; construct the reference supports but D3 leaves out of scope (OPT,
 ;; quoted-object element patterns), the test pins the explicit failure.
 (require rackunit racket/file racket/path racket/list racket/string
          "../mdl/parser.rkt" "../mdl/compiler.rkt"
@@ -138,11 +138,9 @@
            (lambda () (run "<DECL? 3 '<SPECIAL FIX>>")))
 (check-exn #rx"DECL\\?: unsupported declaration pattern UNSPECIAL"
            (lambda () (run "<DECL? 3 '<UNSPECIAL FIX>>")))
-;; NTH repetitions ([fix pat ...]): the reference implements them
-;; (nth-repeat-two-fixes), D3 leaves them a later slice -- explicit failure
-(check-exn #rx"DECL\\?: unsupported declaration pattern NTH"
-           (lambda () (run "<DECL? (1 2 3 4) '<LIST [2 FIX] [REST FIX]>>")))
-(check-exn #rx"DECL\\?: unsupported declaration pattern NTH"
+;; NTH repetition is covered by nth_decl_test.rkt; invalid counts stay strict.
+(check-decl-true (run "<DECL? (1 2 3 4) '<LIST [2 FIX] [REST FIX]>>"))
+(check-exn #rx"DECL\\?: NTH repetition requires a positive count"
            (lambda () (run "<DECL? (1) '<LIST [0 FIX]>>")))
 ;; [OPT ...] is a later slice (reference computes its results but pollutes
 ;; its own stderr with leftover probe prints)
@@ -153,10 +151,11 @@
 ;; element pattern -- recorded deviation, rejected here.
 (check-exn #rx"DECL\\?: structured declaration pattern"
            (lambda () (run "<DECL? () '<LIST>>")))
-;; <<PRIMTYPE struc> elts> and <<OR struc ... struc> elts> compositions
-;; (reference: DECL-ELEMENT-NOT-FORM-OR-ATOM)
-(check-exn #rx"DECL\\?: malformed declaration pattern"
-           (lambda () (run "<DECL? (1 A) '<<PRIMTYPE LIST> [REST FIX ATOM]>>")))
+;; Issue #76 enables the manual's <<PRIMTYPE struc> elts> composition for
+;; NEWTYPE declarations. Pinned Confusion rejects this in explicit DECL?,
+;; although it silently discards a NEWTYPE third-argument declaration.
+(check-decl-true (run "<DECL? (1 A) '<<PRIMTYPE LIST> [REST FIX ATOM]>>"))
+;; <<OR struc ... struc> elts> remains malformed.
 (check-exn #rx"DECL\\?: malformed declaration pattern"
            (lambda () (run "<DECL? (1 2) '<<OR LIST VECTOR> [REST FIX]>>")))
 ;; Quoted-object element patterns (manual example [REST 'T FIX]; D1 rule)
@@ -245,19 +244,16 @@
    ;; The declaration now normalizes at install time: the load PASSes.
    (check-equal? (status (mdl-session-load! session "psetg.mud")) "PASS")
    ;; Invoking the installed PSETG with a valid ATOM argument advances through
-   ;; <SETG .FOO .BAR> (the global is set) and the first-call PURE-LIST
-   ;; initialization, then stops explicitly at <MEMQ ...>: no MEMQ primitive
-   ;; exists in this slice, by scope; adding it belongs to the PSETG slice.
-   ;; First call: PURE-LIST unassigned, so PL becomes () and PURE-LIST ().
+   ;; SETG and completes its MEMQ-backed PURE-LIST update.
    (define psetg-atom (mdl-session-call session "ATOM" "M2-D3-LVAL"))
-   (check-exn #rx"unassigned or non-applicable MDL operator MEMQ"
-              (lambda () (mdl-session-call session "PSETG" psetg-atom 3)))
+   (check-equal? (mdl-session-call session "PSETG" psetg-atom 3) 3)
    (check-equal? (mdl-session-global session psetg-atom) 3)
-   (check-equal? (mdl-session-global session "PURE-LIST") '())
-   ;; Second call: PURE-LIST is GASSIGNED, so PL binds (,PURE-LIST) = ()
-   ;; and the same MEMQ stop is reached again.
-   (check-exn #rx"unassigned or non-applicable MDL operator MEMQ"
-              (lambda () (mdl-session-call session "PSETG" psetg-atom 4)))
+   (check-equal? (mdl-list->list (mdl-session-global session "PURE-LIST"))
+                 (list psetg-atom))
+   ;; The repeat call updates the value without duplicating membership.
+   (check-equal? (mdl-session-call session "PSETG" psetg-atom 4) 4)
+   (check-equal? (mdl-list->list (mdl-session-global session "PURE-LIST"))
+                 (list psetg-atom))
    (check-equal? (mdl-session-global session psetg-atom) 4))
  (lambda () (delete-directory/files scratch-root)))
 

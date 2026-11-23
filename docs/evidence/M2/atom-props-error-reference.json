@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "name": "m2-atom-properties-reference-errors",
+  "recorded_at": "2026-11-20T07:46:35.247483+00:00",
+  "interpreter_sha256": "a29c756df5c973e462a6ad2b318e28ec265934e89e72d825bc7672387317e629",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "put-too-few-args",
+      "expression": "<PUT RAPPLIC>",
+      "input": "<PUT RAPPLIC>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "getprop-too-many-args",
+      "expression": "<PUT RAPPLIC P V> <GETPROP RAPPLIC Q 'FALLBACK 77>",
+      "input": "<PUT RAPPLIC P V> <GETPROP RAPPLIC Q 'FALLBACK 77>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nRAPPLIC\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Too many ARGS in GETPROP\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "RAPPLIC\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "put-structured-fix-index-out-of-range",
+      "expression": "<PUT '(1 2 3) 9 'X>",
+      "input": "<PUT '(1 2 3) 9 'X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "PUT index too large\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "put-string-non-character",
+      "expression": "<PUT \"ab\" 1 3>",
+      "input": "<PUT \"ab\" 1 3>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Error in PUT: Strings may only contain CHARACTER type\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "get-structured-with-exp",
+      "expression": "<GET '(1 2 3) 1 'X>",
+      "input": "<GET '(1 2 3) 1 'X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \n \"No EXP allowed for GET on structure\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \n \"No EXP allowed for GET on structure\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "rapplic-gval-unassigned-with-decl-prop",
+      "expression": "<PUT RAPPLIC DECL 'FIX> ,RAPPLIC",
+      "input": "<PUT RAPPLIC DECL 'FIX> ,RAPPLIC\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nRAPPLIC\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"GVAL\" \n RAPPLIC \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 19 2026 @ 18:25:33\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "RAPPLIC\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"GVAL\" \n RAPPLIC \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

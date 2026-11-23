@@ -1,0 +1,8 @@
+{"schema_version":1,"name":"d5-final-local-review","cases":[
+ {"name":"subr-association","expression":"<PUT ,+ REVIEW-P 9> <GET ,+ REVIEW-P>"},
+ {"name":"subr-type","expression":"<TYPE ,+>"},
+ {"name":"subr-fix-indicator","expression":"<PUT ,+ 7 9> <GET ,+ 7>"},
+ {"name":"subr-fix-removal","expression":"<PUT ,+ 7 9> <PUT ,+ 7> <GET ,+ 7>"},
+ {"name":"function-association","expression":"<SETG REVIEW-FN <FUNCTION (X) .X>> <PUT ,REVIEW-FN REVIEW-P 7> <GET ,REVIEW-FN REVIEW-P>"},
+ {"name":"function-fix-get","expression":"<SETG REVIEW-FN <FUNCTION (X) .X>> <GET ,REVIEW-FN 1>"}
+]}

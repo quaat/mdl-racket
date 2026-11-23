@@ -1,7 +1,8 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
-(require racket/mpair racket/list)
+(require racket/mpair racket/list racket/string)
 (provide current-mdl-globals current-mdl-locals
+         current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
          mdl-setg! mdl-gval mdl-define!
          mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings mdl-type
@@ -9,18 +10,19 @@
          mdl-with-function-scope mdl-with-prog-activation
          mdl-return mdl-again mdl-go mdl-unwind
          mdl-eval mdl-make-form mdl-form? mdl-macro? mdl-function?
-         mdl-apply-form mdl-apply-interpreted
+         mdl-apply-form mdl-apply-computed mdl-apply-interpreted mdl-function-literal
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
-         mdl-make-declaration
-         mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-putrest!
+         mdl-emit-event!
+         mdl-make-declaration mdl-gdecl
+         mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
          mdl-segment mdl-segment? mdl-segment-payload mdl-segment-line
          mdl-segment-column mdl-make-segment mdl-splice-result
          mdl-splice-result-value mdl-splice-list mdl-splice-vector
          mdl-splice-uvector
-         mdl-word mdl-word? mdl-word-bits
+         mdl-word mdl-word? mdl-word-bits mdl-chtype mdl-character
          mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
          current-mdl-atom-space make-mdl-atom-space
          mdl-false mdl-false? mdl-false-payload
@@ -38,6 +40,21 @@
 
 (define current-mdl-globals (make-parameter (make-hasheq)))
 (define current-mdl-locals (make-parameter (list (make-hasheq))))
+(define current-mdl-read-values (make-parameter #f))
+
+(define (mdl-register-read-value! value)
+  (define values (current-mdl-read-values))
+  (unless (hash? values)
+    (error 'mdl-register-read-value! "no executable MDL reader session"))
+  (define key (hash-count values))
+  (hash-set! values key value)
+  key)
+
+(define (mdl-read-value key)
+  (define values (current-mdl-read-values))
+  (unless (and (hash? values) (hash-has-key? values key))
+    (error 'mdl-read-value "read-time value is not in this MDL session"))
+  (hash-ref values key))
 ;; kind distinguishes PROG/REPEAT frames from function activations: a bare
 ;; RETURN/AGAIN/GO transfer only ever targets 'prog frames, matching the
 ;; reference's LASTPROG lookup, while explicit activation targets may select
@@ -54,13 +71,23 @@
 ;; closures remain the fast path for quoted-formal-free definitions.
 (struct mdl-macro (formals body leading-act decl))
 (struct mdl-function (formals body leading-act decl))
-(struct mdl-decl-value (bindings result line column) #:transparent)
+;; Chapter 21 registration objects and session-owned interrupt scheduler.
+;; Automatic event sources, including MDL GC, remain separate later slices.
+(struct mdl-iheader (owner name priority [handlers #:mutable] [enabled? #:mutable]))
+(struct mdl-handler (header applicable [active? #:mutable]))
+(struct mdl-interrupt-state ([level #:mutable] [pending #:mutable]))
+(struct mdl-interrupt-occurrence (header arguments))
+(define compiled-function-formals (make-weak-hasheq))
+(struct mdl-decl-value (bindings result line column positionals) #:transparent)
 (define local-declarations (make-weak-hasheq))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
 (define current-mdl-activations (make-parameter '()))
 (define unassigned (gensym 'mdl-unassigned))
 (define restart-token (gensym 'mdl-restart))
 (define goto-token (gensym 'mdl-goto))
+(struct mdl-map-transfer (kind values))
+(define current-mdl-map-step (make-parameter #f))
+(define current-mdl-map-leave (make-parameter #f))
 
 (define (binding-atom who value)
   (cond [(mdl-atom? value) value]
@@ -96,10 +123,25 @@
     (mdl-nth bracket (add1 i))))
 
 ;; Normalizes `<struc elts>`: (structure TYPE-ATOM required-pats rest-spec).
-;; required-pats is a list of normalized patterns; rest-spec is #f or the
+;; required-pats is a list of normalized patterns or counted (nth n pats)
+;; sequences; rest-spec is #f or the
 ;; list of normalized patterns of the trailing `[REST pat ... pat]`.
 (define (normalize-decl-structure items line column origin)
-  (define type-atom (car items))
+  (define head (car items))
+  (define primitive-head? (mdl-form? head))
+  (define type-atom
+    (if primitive-head?
+        (let ()
+          (define head-items (form-elements head))
+          (unless (and (= (length head-items) 2)
+                       (eq? (car head-items) (mdl-atom "PRIMTYPE")))
+            (decl-error origin line column "malformed declaration pattern"))
+          (define normalized (normalize-decl-pattern head line column origin))
+          (unless (eq? (car normalized) 'primtype)
+            (decl-error origin line column
+                        "structured declaration head must be PRIMTYPE"))
+          (cadr normalized))
+        head))
   (define raw-elements (cdr items))
   (when (null? raw-elements)
     ;; Confusion reads the empty `<struc>` and matches any value of the TYPE,
@@ -110,7 +152,8 @@
                 (mdl-atom-pname type-atom)))
   (let loop ([rest raw-elements] [required '()] [rest-spec #f])
     (cond
-      [(null? rest) (list 'structure type-atom (reverse required) rest-spec)]
+      [(null? rest) (list (if primitive-head? 'structure-primtype 'structure)
+                          type-atom (reverse required) rest-spec)]
       [(mdl-array? (car rest))
        ;; The `[...]` repetition construction: an NTH count, [OPT ...], or
        ;; [REST ...]. Only a VECTOR-typed bracket is a repetition
@@ -158,30 +201,59 @@
           ;; results but pollutes stderr with its own leftover probes).
           (decl-error origin line column "unsupported declaration pattern OPT")]
          [(nth)
-          ;; `[fix pat ... pat]` repetition: a later slice (the reference
-          ;; implements it, including its non-positive-count BAD-TYPE-
-          ;; SPECIFICATION4 error).
-          (decl-error origin line column "unsupported declaration pattern NTH")])]
+          (unless (positive? first-item)
+            (decl-error origin line column "NTH repetition requires a positive count"))
+          (when (null? (cdr bracket-items))
+            (decl-error origin line column "NTH repetition requires at least one element pattern"))
+          (loop (cdr rest)
+                (cons (list 'nth first-item
+                            (map (lambda (item)
+                                   (normalize-decl-pattern item line column origin))
+                                 (cdr bracket-items)))
+                      required)
+                rest-spec)])]
       [else
        (loop (cdr rest)
              (cons (normalize-decl-pattern (car rest) line column origin)
                    required)
              rest-spec)])))
 
+(define current-decl-alias-path (make-parameter '()))
+;; Only attached atom-list declarations retain forward TYPE names. DECL?
+;; and positional metadata continue to reject unknown names immediately.
+(define current-decl-defer-unknown? (make-parameter #f))
+
 (define (normalize-decl-pattern pattern line column
                                  [origin "DECL"])
   (cond
     [(mdl-atom? pattern)
      (cond [(string=? (mdl-atom-pname pattern) "ANY") '(any)]
+           [(string=? (mdl-atom-pname pattern) "APPLICABLE") '(applicable)]
            [(hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern)
             (list 'type pattern)]
-           [else (decl-error origin line column "unknown declaration type ~a"
-                             (mdl-atom-pname pattern))])]
+           [else
+            (define associated (association-lookup pattern (mdl-atom "DECL")))
+            (cond
+              [(not associated)
+               (if (current-decl-defer-unknown?)
+                   (list 'unresolved pattern line column)
+                   (decl-error origin line column "unknown declaration type ~a"
+                               (mdl-atom-pname pattern)))]
+              [else
+               (when (memq pattern (current-decl-alias-path))
+                 (decl-error origin line column "cyclic DECL association at ~a"
+                             (mdl-atom-pname pattern)))
+               (parameterize ([current-decl-alias-path
+                               (cons pattern (current-decl-alias-path))])
+                 (normalize-decl-pattern (cdr associated) line column origin))])])]
     [(mdl-form? pattern)
      (define items (form-elements pattern))
-     (unless (and (pair? items) (mdl-atom? (car items)))
+     (unless (and (pair? items)
+                  (or (mdl-atom? (car items)) (mdl-form? (car items))))
        (decl-error origin line column "malformed declaration pattern"))
-     (case (string->symbol (mdl-atom-pname (car items)))
+     (if (mdl-form? (car items))
+         (normalize-decl-structure items line column origin)
+         (case (string->symbol (mdl-atom-pname (car items)))
        [(OR)
         (when (null? (cdr items)) (decl-error origin line column "empty OR pattern"))
         (cons 'or (map (lambda (item) (normalize-decl-pattern item line column origin))
@@ -195,33 +267,71 @@
        [(LIST VECTOR UVECTOR TUPLE)
         (normalize-decl-structure items line column origin)]
        [else (decl-error origin line column "unsupported declaration pattern ~a"
-                         (mdl-atom-pname (car items)))])]
+                         (mdl-atom-pname (car items)))]))]
     [else (decl-error origin line column "unsupported declaration pattern")]))
+
+(define (mdl-make-positional-declaration items line column)
+  ;; RSUBR-style metadata attached to an interpreted FUNCTION has no
+  ;; ATOM binding checks. Validate and retain it instead of treating its
+  ;; leading STRING as an ATOM-list (manual §14.9; pinned Confusion).
+  (unless (and (pair? items) (string? (car items))
+               (string=? (car items) "VALUE") (pair? (cdr items)))
+    (decl-error "DECL" line column "positional declaration must start with VALUE and a Pattern"))
+  (define value-pattern (normalize-decl-pattern (cadr items) line column))
+  (define required '())
+  (define optional '())
+  (define in-optional? #f)
+  (for ([item (in-list (cddr items))])
+    (cond
+      [(string? item)
+       (unless (and (string=? item "OPTIONAL") (not in-optional?))
+         (decl-error "DECL" line column
+                     "unsupported positional declaration marker ~a" item))
+       (set! in-optional? #t)]
+      [else
+       (define pattern (normalize-decl-pattern item line column))
+       (if in-optional?
+           (set! optional (cons pattern optional))
+           (set! required (cons pattern required)))]))
+  (when (and in-optional? (null? optional))
+    (decl-error "DECL" line column "OPTIONAL requires a Pattern"))
+  (mdl-decl-value (make-hasheq) #f line column
+                  (list value-pattern (reverse required) (reverse optional))))
 
 (define (mdl-make-declaration payload line column)
   (define items (mdl-list->list payload))
-  (unless (and (pair? items) (even? (length items)))
-    (decl-error "DECL" line column "expected atom-list/pattern pairs"))
-  (define bindings (make-hasheq))
-  (define result #f)
-  (for ([i (in-range 0 (length items) 2)])
-    (define names (list-ref items i))
-    (unless (and (mpair? names) (pair? (mdl-list->list names)))
-      (decl-error "DECL" line column "expected a nonempty atom list"))
-    (define pattern (normalize-decl-pattern (list-ref items (add1 i)) line column))
-    (for ([name (in-list (mdl-list->list names))])
-      (unless (mdl-atom? name)
-        (decl-error "DECL" line column "declaration name must be an ATOM"))
-      (if (string=? (mdl-atom-pname name) "VALUE")
-          (begin
-            (when result (decl-error "DECL" line column "duplicate VALUE declaration"))
-            (set! result pattern))
-          (begin
-            (when (hash-has-key? bindings name)
-              (decl-error "DECL" line column "duplicate declaration for ~a"
-                          (mdl-atom-pname name)))
-            (hash-set! bindings name pattern)))))
-  (mdl-decl-value bindings result line column))
+  (if (and (pair? items) (string? (car items)))
+      (mdl-make-positional-declaration items line column)
+      (let ()
+        (unless (and (pair? items) (even? (length items)))
+          (decl-error "DECL" line column "expected atom-list/pattern pairs"))
+        (define bindings (make-hasheq))
+        (define result #f)
+        (for ([i (in-range 0 (length items) 2)])
+          (define names (list-ref items i))
+          (unless (and (mpair? names) (pair? (mdl-list->list names)))
+            (decl-error "DECL" line column "expected a nonempty atom list"))
+          (define pattern
+            (parameterize ([current-decl-defer-unknown? #t])
+              (normalize-decl-pattern (list-ref items (add1 i)) line column)))
+          (for ([name (in-list (mdl-list->list names))])
+            (unless (mdl-atom? name)
+              (decl-error "DECL" line column "declaration name must be an ATOM"))
+            (if (string=? (mdl-atom-pname name) "VALUE")
+                (begin
+                  (when result (decl-error "DECL" line column "duplicate VALUE declaration"))
+                  (set! result pattern))
+                (begin
+                  ;; Repeated ATOM pairs retain every constraint. This is
+                  ;; necessary for original BALLOON's two M declarations.
+                  (hash-set! bindings name
+                             (if (hash-has-key? bindings name)
+                                 (let ([old (hash-ref bindings name)])
+                                   (if (eq? (car old) 'all)
+                                       (append old (list pattern))
+                                       (list 'all old pattern)))
+                                 pattern))))))
+        (mdl-decl-value bindings result line column #f))))
 
 ;; Structured pattern matching (issue #48). `decl-match` returns #t on a
 ;; match, #f on a simple failure (DECL? then keeps the D1 (value pattern)
@@ -240,6 +350,7 @@
   ;; failures are records (bare #FALSE ()), so they never reach here.
   (case (car pattern)
     [(type) (cadr pattern)]
+    [(applicable) (mdl-atom "APPLICABLE")]
     [(or) (decl-failure-leaf (last (cdr pattern)))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
@@ -261,7 +372,24 @@
     (error 'mdl-decl "declaration pattern nesting exceeds traversal limit ~a"
            decl-match-max-depth))
   (case (car pattern)
+    [(unresolved)
+     (decl-match value
+                 (parameterize ([current-decl-defer-unknown? #f])
+                   (normalize-decl-pattern (cadr pattern)
+                                           (caddr pattern) (cadddr pattern)))
+                 budget)]
+    [(all)
+     (let loop ([constraints (cdr pattern)])
+       (cond [(null? constraints) #t]
+             [else
+              (define result (decl-match value (car constraints) budget))
+              (if (eq? result #t)
+                  (loop (cdr constraints))
+                  result)]))]
     [(any) #t]
+    [(applicable)
+     (or (mdl-function? value) (mdl-macro? value)
+         (procedure? value) (exact-integer? value))]
     [(type) (eq? (mdl-type value) (cadr pattern))]
     ;; The reference's PRIMTYPE check returns the plain FALSE, so a failing
     ;; <PRIMTYPE ...> surfaces as a bare #FALSE () — the (list 'type)
@@ -279,7 +407,8 @@
               (define m (decl-match value (car alts) (sub1 budget)))
               (cond [(eq? m #t) #t]
                     [else (loop (cdr alts) m)])]))]
-    [(structure) (decl-match-structure value pattern (sub1 budget))]
+    [(structure structure-primtype)
+     (decl-match-structure value pattern (sub1 budget))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
 ;; `<struc elts>` matching: the value's MDL TYPE must equal the pattern's
@@ -296,55 +425,76 @@
 ;; Arrays cannot be cyclic; their element references are read by index.
 (define (decl-match-structure value pattern budget)
   (define type-atom (cadr pattern))
-  (if (not (eq? (mdl-type value) type-atom))
+  (define type-matches?
+    (if (eq? (car pattern) 'structure-primtype)
+        (eq? (mdl-primtype value) (mdl-typeprim type-atom))
+        (eq? (mdl-type value) type-atom)))
+  (if (not type-matches?)
       (list 'type)
-      (let ([required (caddr pattern)]
+      (let ([base (mdl-base value)]
+            [required (caddr pattern)]
             [rest-spec (cadddr pattern)])
         (cond
-          [(mdl-tuple-value? value)
-           (decl-match-chain (mdl-tuple-value-payload value) required rest-spec budget)]
-          [(or (null? value) (mpair? value))
-           (decl-match-chain value required rest-spec budget)]
-          [(mdl-array? value)
+          [(mdl-tuple-value? base)
+           (decl-match-chain (mdl-tuple-value-payload base) required rest-spec budget)]
+          [(or (null? base) (mpair? base))
+           (decl-match-chain base required rest-spec budget)]
+          [(mdl-array? base)
            (decl-match-sequence
-            (for/list ([i (in-range (mdl-array-length value))])
-              (mdl-nth value (add1 i)))
+            (for/list ([i (in-range (mdl-array-length base))])
+              (mdl-nth base (add1 i)))
             required rest-spec budget)]
           [else (error 'mdl-decl "unsupported structured value")]))))
 
-;; Required-prefix walking over a LIST-primtype chain: consumes at most
-;; (length required) cells in place, so a cyclic chain never runs away
-;; while patterns remain; only the REST tail is materialized (cycle-guarded).
+;; Unfold a counted sequence only as its corresponding value elements are
+;; consumed. This bounds work for an enormous count and a short value.
+(define (decl-next-required pats)
+  (cond
+    [(null? pats) (values #f '())]
+    [(eq? (caar pats) 'nth)
+     (define entry (car pats))
+     (define count (cadr entry))
+     (define sequence (caddr entry))
+     (decl-next-required
+      (append sequence
+              (if (> count 1) (list (list 'nth (sub1 count) sequence)) '())
+              (cdr pats)))]
+    [else (values (car pats) (cdr pats))]))
+
+;; Required-prefix walking over a LIST-primtype chain consumes one cell at a
+;; time, so a cyclic chain is bounded when there is no REST tail.
 (define (decl-match-chain chain required rest-spec budget)
   (let loop ([cursor chain] [pats required])
+    (define-values (pat remaining) (decl-next-required pats))
     (cond
-      [(null? pats)
+      [(not pat)
        (if rest-spec
            (decl-match-rest (mdl-list->list cursor) rest-spec budget)
            #t)]
       [(null? cursor) (list 'short)]
       [else
-       (define m (decl-match (mcar cursor) (car pats) budget))
+       (define m (decl-match (mcar cursor) pat budget))
        (cond
-         [(eq? m #t) (loop (mcdr cursor) (cdr pats))]
-         [(eq? m #f) (list 'element (mcar cursor) (decl-failure-leaf (car pats)))]
+         [(eq? m #t) (loop (mcdr cursor) remaining)]
+         [(eq? m #f) (list 'element (mcar cursor) (decl-failure-leaf pat))]
          [else m])])))
 
 ;; Required-prefix matching over an extracted array-element sequence
 ;; (arrays are finite; the reference walks them by NTH similarly).
 (define (decl-match-sequence elements required rest-spec budget)
   (let loop ([els elements] [pats required])
+    (define-values (pat remaining) (decl-next-required pats))
     (cond
-      [(null? pats)
+      [(not pat)
        (if (or (not rest-spec) (null? els))
            #t
            (decl-match-rest els rest-spec budget))]
       [(null? els) (list 'short)]
       [else
-       (define m (decl-match (car els) (car pats) budget))
+       (define m (decl-match (car els) pat budget))
        (cond
-         [(eq? m #t) (loop (cdr els) (cdr pats))]
-         [(eq? m #f) (list 'element (car els) (decl-failure-leaf (car pats)))]
+         [(eq? m #t) (loop (cdr els) remaining)]
+         [(eq? m #f) (list 'element (car els) (decl-failure-leaf pat))]
          [else m])])))
 
 ;; `[REST pat ... pat]` repetition: the sequence restarts after each period
@@ -371,12 +521,29 @@
 ;; () on an overall TYPE mismatch, and #FALSE carrying the offending ELEMENT
 ;; and its element pattern on a structured element mismatch; simple-pattern
 ;; failures keep the D1 #FALSE (value pattern) payload.
+;;
+;; D5 (issue #53): when the PATTERN argument is an ATOM carrying a DECL
+;; association (the 77defs.mud:5 NEWTYPE-annotation mechanism), the property
+;; value is the actual pattern (pinned mdl_decl.cpp:66), so <DECL? <CHTYPE 1
+;; NOFFSET> RAPPLIC> matches RAPPLIC's <OR ATOM FALSE NOFFSET> property and
+;; the miss payload carries the resolved pattern's leaf: #FALSE (3 NOFFSET)
+;; (declq-consults-atom-decl). Attached #DECL checking does not consult atom
+;; properties in this slice. SETG likewise ignores them (the recorded
+;; setg-ignores-atom-decl case, consistent with D1's non-enforcement).
 (define (mdl-decl? value pattern)
-  (define normalized (normalize-decl-pattern pattern #f #f "DECL?"))
+  (define resolved?
+    (and (mdl-atom? pattern)
+         (not (hash-has-key? (atom-space-types (current-mdl-atom-space)) pattern))
+         (association-lookup pattern (mdl-atom "DECL"))))
+  (define normalized
+    (normalize-decl-pattern pattern #f #f "DECL?"))
   (define result (decl-match value normalized decl-match-max-depth))
   (cond
     [(eq? result #t) (mdl-atom "T")]
-    [(eq? result #f) (mdl-false (list value pattern))]
+    [(eq? result #f)
+     (if resolved?
+         (mdl-false (list value (decl-failure-leaf normalized)))
+         (mdl-false (list value pattern)))]
     [(eq? (car result) 'element)
      (mdl-false (list (cadr result) (caddr result)))]
     [else (mdl-false '())]))
@@ -705,7 +872,7 @@
        (mdl-nth value (add1 i)))]
     [(string? value)
      (for/list ([ch (in-string value)])
-       (mdl-typed-value (mdl-atom "CHARACTER") (char->integer ch)))]
+       (mdl-character ch))]
     [else
      (error 'mdl-segment
             "ILLEGAL-SEGMENT: Segment evaluated to nonstructured type")]))
@@ -914,8 +1081,28 @@
      (mdl-apply-interpreted fn raw-args)]
     [(procedure? fn)
      (apply fn (assemble-args raw-args (lambda (item) (mdl-eval item))))]
+    [(exact-integer? fn)
+     (mdl-apply-evaluated fn
+                          (assemble-args raw-args (lambda (item) (mdl-eval item))))]
     [else (error 'mdl-apply-value "unassigned or non-applicable MDL operator ~a"
                  (if (mdl-atom? fn) (mdl-atom-pname fn) fn))]))
+
+;; MAPF already has values from NTH. Send those values directly to an
+;; interpreted FUNCTION; routing them through mdl-eval would rebuild LISTs
+;; and VECTORs and could execute embedded FORMs a second time.
+(define (mdl-apply-evaluated fn values)
+  (cond [(mdl-function? fn) (mdl-apply-interpreted fn values #t)]
+        [(procedure? fn) (apply fn values)]
+        [(exact-integer? fn)
+         (case (length values)
+           [(1) (mdl-nth (car values) fn)]
+           [(2)
+            (unless (mdl-map-structured? (car values))
+              (error 'mdl-apply-evaluated "First argument to PUT must be structured"))
+            (mdl-put-element! (car values) fn (cadr values))]
+           [(0) (error 'mdl-apply-evaluated "TOO-FEW-ARGUMENTS-SUPPLIED to FIX")]
+           [else (error 'mdl-apply-evaluated "TOO-MANY-ARGUMENTS-SUPPLIED to FIX")])]
+        [else (error 'mdl-apply-evaluated "NON-APPLICABLE-TYPE ~a" fn)]))
 
 ;; Call arguments assemble like the reference's LIST assembly for a SUBR:
 ;; items evaluate in order and SEGMENT objects contribute their elements,
@@ -1007,12 +1194,15 @@
            (error 'mdl-bind-interpreted
                   "2-list defaults are allowed only in OPTIONAL or AUX sections"))
          (define name (car pair))
-         (when (quoted-formal-name name)
-           (error 'mdl-bind-interpreted "quoted formal cannot take a default"))
-         (unless (mdl-atom? name)
+         (define quoted-name (quoted-formal-name name))
+         (when (and quoted-name (not (eq? section 'optional)))
+           (error 'mdl-bind-interpreted "quoted formal not allowed in this section"))
+         (unless (or quoted-name (mdl-atom? name))
            (error 'mdl-bind-interpreted "formal name must be an ATOM"))
-         (add-name! name)
-         (set! specs (cons (list section name (cadr pair)) specs))
+         (define formal-name (or quoted-name name))
+         (add-name! formal-name)
+         (set! specs (cons (list (if quoted-name 'quoted-optional section)
+                                 formal-name (cadr pair)) specs))
          (loop (cdr items) section)]
         [else (error 'mdl-bind-interpreted "unsupported formal argument")])))
   (reverse specs))
@@ -1032,7 +1222,7 @@
 ;; expression by expression. The invocation owns a function activation so
 ;; NAME formals and explicit RETURN/AGAIN targets work; AGAIN re-runs the
 ;; body without re-binding.
-(define (mdl-apply-interpreted fn raw-args)
+(define (mdl-apply-interpreted fn raw-args [already-evaluated? #f])
   (define formals (if (mdl-macro? fn) (mdl-macro-formals fn) (mdl-function-formals fn)))
   (define body (if (mdl-macro? fn) (mdl-macro-body fn) (mdl-function-body fn)))
   (define decl (if (mdl-macro? fn) (mdl-macro-decl fn) (mdl-function-decl fn)))
@@ -1046,12 +1236,14 @@
   ;; branch, which never evaluates or expands the argument list — a SEGMENT
   ;; in a macro call binds as the SEGMENT object (PR #49 review).
   (define raw-list
-    (if (mdl-macro? fn)
+    (if already-evaluated?
+        (map (lambda (item) (cons 'value item)) raw-args)
+        (if (mdl-macro? fn)
         (map (lambda (item) (cons 'raw item))
              (if (or (null? raw-args) (mpair? raw-args))
                  (mdl-list->list raw-args)
                  raw-args))
-        (expand-arg-items raw-args)))
+        (expand-arg-items raw-args))))
   (define (arg-value entry evaluate)
     ;; entry: (cons 'value v) for a spliced element, or (cons 'raw data) for
     ;; a plain argument (evaluated in the caller only when asked).
@@ -1186,10 +1378,27 @@
           (error 'mdl-eval "UNWIND expects a value and cleanup expression"))
         (mdl-unwind (lambda () (mdl-eval (car args)))
                     (lambda () (mdl-eval (cadr args))))]
+       [(FUNCTION) (runtime-function-literal args)]
        [(DEFINE) (runtime-define args #f)]
        [(DEFMAC) (runtime-define args #t)]
        [else (mdl-apply-value (resolve-operator op) args)])]
     [else (mdl-apply-value (mdl-eval (car elements)) (cdr elements))]))
+
+(define (mdl-function-literal formals body [leading-act #f] [decl #f])
+  (interpreted-formal-specs formals leading-act)
+  (when (null? body) (error 'mdl-function "FUNCTION requires a body"))
+  (mdl-function formals body leading-act decl))
+
+(define (runtime-function-literal operands)
+  (unless (and (pair? operands) (pair? (cdr operands)))
+    (error 'mdl-function "FUNCTION requires formals and body"))
+  (define leading-act (and (mdl-atom? (car operands)) (car operands)))
+  (define formals (if leading-act (cadr operands) (car operands)))
+  (define body (if leading-act (cddr operands) (cdr operands)))
+  (unless (or (null? formals) (mpair? formals))
+    (error 'mdl-function "FUNCTION requires a formal LIST"))
+  (define decl (and (pair? body) (mdl-decl-value? (car body)) (car body)))
+  (mdl-function-literal formals (if decl (cdr body) body) leading-act decl))
 
 ;; Runtime DEFINE and DEFMAC store interpreted definitions. The optional
 ;; leading activation atom between the name and the formal list binds the
@@ -1323,23 +1532,28 @@
 ;; not run; procedure applications evaluate the compiled thunks in order.
 ;; Splice markers among the thunk results assemble into the argument list
 ;; in order before the operator is applied (chapter 7.5.2).
-(define (mdl-apply-form name raw-args-thunk arg-thunks)
-  (define atom (binding-atom 'mdl-apply-form name))
-  (define fn (resolve-operator atom))
+(define (mdl-dispatch-call fn raw-args-thunk arg-thunks)
   (cond
     [(or (mdl-macro? fn) (mdl-function? fn))
      (define result (mdl-apply-interpreted fn (raw-args-thunk)))
      (if (mdl-macro? fn) (mdl-eval result) result)]
-    [(procedure? fn)
+    [(or (procedure? fn) (exact-integer? fn))
      (define results (map (lambda (thunk) (thunk)) arg-thunks))
-     (apply fn
-            (append*
-             (for/list ([value (in-list results)])
-               (if (mdl-splice-result? value)
-                   (segment-elements (mdl-splice-result-value value))
-                   (list value)))))]
-    [else (error 'mdl-apply-form "unassigned or non-applicable MDL operator ~a"
-                 (mdl-atom-pname atom))]))
+     (mdl-apply-evaluated
+      fn
+      (append*
+       (for/list ([value (in-list results)])
+         (if (mdl-splice-result? value)
+             (segment-elements (mdl-splice-result-value value))
+             (list value)))))]
+    [else (error 'mdl-dispatch-call "NON-APPLICABLE-TYPE ~a" fn)]))
+
+(define (mdl-apply-form name raw-args-thunk arg-thunks)
+  (define atom (binding-atom 'mdl-apply-form name))
+  (mdl-dispatch-call (resolve-operator atom) raw-args-thunk arg-thunks))
+
+(define (mdl-apply-computed fn raw-args-thunk arg-thunks)
+  (mdl-dispatch-call fn raw-args-thunk arg-thunks))
 
 (define (mdl-defmac! name formals body [leading-act #f] [decl #f])
   (require-atom 'mdl-defmac name)
@@ -1374,6 +1588,13 @@
 (define (mdl-setg! name value)
   (define atom (binding-atom 'mdl-setg name))
   (define globals (current-mdl-globals))
+  (define declared
+    (hash-ref (atom-space-global-declarations (current-mdl-atom-space)) atom #f))
+  (when declared
+    (define pattern (normalize-decl-pattern declared #f #f "SETG"))
+    (unless (matches-decl? value pattern)
+      (error 'mdl-setg "value does not satisfy GDECL declaration for ~a"
+             (mdl-atom-pname atom))))
   (define old (hash-ref globals atom unassigned))
   (define redefine (hash-ref globals (mdl-atom "REDEFINE") unassigned))
   (when (and (hash-has-key? (atom-space-manifests (current-mdl-atom-space)) atom)
@@ -1385,9 +1606,50 @@
   (hash-set! globals atom value)
   value)
 
+(define (mdl-gdecl raw-args)
+  (define items (mdl-list->list raw-args))
+  (unless (and (pair? items) (even? (length items)))
+    (error 'mdl-gdecl "GDECL requires ATOM-list/declaration pairs"))
+  (define staged (make-hasheq))
+  (for ([i (in-range 0 (length items) 2)])
+    (define names (list-ref items i))
+    (define pattern (list-ref items (add1 i)))
+    (unless (and (mpair? names) (pair? (mdl-list->list names)))
+      (error 'mdl-gdecl "GDECL requires a nonempty ATOM list"))
+    (check-decl-pattern-shape pattern 'mdl-gdecl)
+    (for ([name (in-list (mdl-list->list names))])
+      (unless (mdl-atom? name)
+        (error 'mdl-gdecl "GDECL name must be an ATOM"))
+      (when (hash-has-key? staged name)
+        (error 'mdl-gdecl "duplicate GDECL name ~a" (mdl-atom-pname name)))
+      (define current (hash-ref (current-mdl-globals) name unassigned))
+      (unless (eq? current unassigned)
+        (unless (matches-decl?
+                 current (normalize-decl-pattern pattern #f #f "GDECL"))
+          (error 'mdl-gdecl "existing value does not satisfy GDECL for ~a"
+                 (mdl-atom-pname name))))
+      (hash-set! staged name pattern)))
+  (define declarations
+    (atom-space-global-declarations (current-mdl-atom-space)))
+  (for ([(name pattern) (in-hash staged)])
+    (hash-set! declarations name pattern)
+    (unless (hash-has-key? (current-mdl-globals) name)
+      (hash-set! (current-mdl-globals) name unassigned)))
+  (mdl-atom "T"))
+
 (define (mdl-gassigned? name)
   (define atom (binding-atom 'mdl-gassigned? name))
   (mdl-boolean (not (eq? (global-option atom) unassigned))))
+
+(define (mdl-assigned? . args)
+  (when (null? args)
+    (error 'mdl-assigned? "Not enough arguments to ASSIGNED?"))
+  (when (pair? (cdr args))
+    (error 'mdl-assigned? "ASSIGNED? ENV frame argument unsupported"))
+  (define atom (car args))
+  (unless (mdl-atom? atom)
+    (error 'mdl-assigned? "First arg to ASSIGNED? must be ATOM"))
+  (mdl-boolean (not (eq? (local-option atom) unassigned))))
 
 (define (mdl-manifest . names)
   (for ([name (in-list names)])
@@ -1414,12 +1676,15 @@
   (hash-set! (current-mdl-globals) atom unassigned)
   atom)
 
-(define (mdl-define! name fn)
+(define (mdl-define! name fn [formal-kinds '()])
+  (when (procedure? fn)
+    (hash-set! compiled-function-formals fn formal-kinds))
   (mdl-setg! name fn))
 
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
-(struct atom-space (initial root named types builtins manifests))
+(struct atom-space (initial root named types builtins manifests associations
+                            global-declarations events interrupt-state))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1437,6 +1702,8 @@
   (hash-set! (oblist-value-entries root) "INITIAL" initial-name)
   (define initial (oblist-value initial-name (make-hash) 151))
   (hash-set! named initial-name initial)
+  (define oblist-name (atom-value "OBLIST" root))
+  (hash-set! (oblist-value-entries root) "OBLIST" oblist-name)
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
@@ -1449,14 +1716,212 @@
                           ("TUPLE" . "TUPLE")
                           ("MACRO" . "LIST")
                           ("FUNCTION" . "LIST")
-                          ("ACTIVATION" . "FRAME")))])
-    (define type-atom (atom-value (car entry) initial))
-    (hash-set! (oblist-value-entries initial) (car entry) type-atom)
+                          ("ACTIVATION" . "FRAME")
+                          ("IHEADER" . "VECTOR")
+                          ("HANDLER" . "VECTOR")))])
+    (define type-atom
+      (if (string=? (car entry) "OBLIST")
+          oblist-name
+          (atom-value (car entry) initial)))
+    (unless (eq? type-atom oblist-name)
+      (hash-set! (oblist-value-entries initial) (car entry) type-atom))
     (hash-set! types type-atom (cdr entry))
     (hash-set! builtins type-atom #t))
-  (atom-space initial root named types builtins (make-hasheq)))
+  (atom-space initial root named types builtins (make-hasheq)
+              ;; Session-owned association entries. Key comparison must use
+              ;; mdl-identical?, which is broader than Racket eq? for WORDs
+              ;; and independently constructed REST views.
+              (box (list (list initial-name oblist-name initial)
+                         (list root-name oblist-name root)
+                         (list initial oblist-name initial-name)
+                         (list root oblist-name root-name)))
+              (make-hasheq) (make-hash) (mdl-interrupt-state 0 '())))
 
 (define current-mdl-atom-space (make-parameter (make-mdl-atom-space)))
+
+;; A true event source must be supplied before predefined names are
+;; registered. GC and DIVERT-AGC are internal MDL interrupts, not OS signals.
+(define unsupported-predefined-interrupt-names
+  '("GC" "CHAR" "READ" "WRITE" "IPC" "BLOCKED" "UNBLOCKED"
+    "ERROR" "CLOCK" "SYSDOWN" "INFERIOR" "RUNT" "REALT"
+    "MPV" "PURE" "ILOPR" "PARITY" "IOC"))
+
+(define (current-interrupt-state)
+  (atom-space-interrupt-state (current-mdl-atom-space)))
+
+(define (active-iheader? header)
+  (and (mdl-iheader-enabled? header)
+       (eq? (hash-ref (atom-space-events (current-mdl-atom-space))
+                      (mdl-iheader-name header) #f)
+            header)))
+
+(define (check-session-iheader who header)
+  (unless (mdl-iheader? header)
+    (error who "expected IHEADER"))
+  (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+    (error who "IHEADER belongs to another MDL session")))
+
+;; Event sources call this only at a safe delivery boundary, with values
+;; already evaluated. Focused tests call it directly; it is not an MDL
+;; primitive or client-facing evaluator, and no fake GC source uses it.
+(define (mdl-emit-event! name arguments [strict? #f])
+  (define header (hash-ref (atom-space-events (current-mdl-atom-space)) name #f))
+  (when (and strict? (not header))
+    (error 'mdl-emit-event! "unknown or unregistered event ~a" name))
+  (define enabled? (and header (active-iheader? header)))
+  ;; Record this occurrence before draining at the source safe point. If an
+  ;; older queued handler raises, the newer occurrence must not disappear.
+  ;; The drain selects the earliest eligible occurrence; a higher-priority
+  ;; nested event can still supersede a lower-priority queued one.
+  (when enabled?
+    (define state (current-interrupt-state))
+    (set-mdl-interrupt-state-pending!
+     state (append (mdl-interrupt-state-pending state)
+                   (list (mdl-interrupt-occurrence header arguments)))))
+  (mdl-drain-pending!)
+  (and enabled? #t))
+
+(define (mdl-deliver-occurrence! occurrence)
+  (define header (mdl-interrupt-occurrence-header occurrence))
+  (when (active-iheader? header)
+    (define state (current-interrupt-state))
+    (define old-level (mdl-interrupt-state-level state))
+    (dynamic-wind
+      (lambda () (set-mdl-interrupt-state-level! state (mdl-iheader-priority header)))
+      (lambda ()
+        ;; Snapshot list order, but re-check active membership before each
+        ;; call so OFF during dispatch suppresses a later action.
+        (for ([handler (in-list (mdl-iheader-handlers header))])
+          (when (and (active-iheader? header) (mdl-handler-active? handler))
+            (mdl-apply-evaluated (mdl-handler-applicable handler)
+                                 (mdl-interrupt-occurrence-arguments occurrence)))))
+      (lambda () (set-mdl-interrupt-state-level! state old-level)))
+    (mdl-drain-pending!)))
+
+(define (mdl-drain-pending!)
+  (define state (current-interrupt-state))
+  (let loop ()
+    (define pending (mdl-interrupt-state-pending state))
+    (define eligible
+      (for/first ([occurrence (in-list pending)]
+                  #:when (or (not (active-iheader?
+                                   (mdl-interrupt-occurrence-header occurrence)))
+                             (> (mdl-iheader-priority
+                                 (mdl-interrupt-occurrence-header occurrence))
+                                (mdl-interrupt-state-level state))))
+        occurrence))
+    (when eligible
+      (set-mdl-interrupt-state-pending!
+       state (remove eligible pending eq?))
+      (mdl-deliver-occurrence! eligible)
+      (loop))))
+
+(define (mdl-int-level . args)
+  (define state (current-interrupt-state))
+  (case (length args)
+    [(0) (mdl-interrupt-state-level state)]
+    [(1)
+     (define new-level (car args))
+     (unless (and (exact-integer? new-level)
+                  (<= fix-min new-level fix-max))
+       (error 'mdl-int-level "INT-LEVEL requires a FIX"))
+     (define old-level (mdl-interrupt-state-level state))
+     (set-mdl-interrupt-state-level! state new-level)
+     ;; Also flush an eligible occurrence after an exceptional handler exit:
+     ;; cleanup restored the level but deliberately preserved the original
+     ;; exception instead of running another handler in its unwind path.
+     (mdl-drain-pending!)
+     old-level]
+    [else (error 'mdl-int-level "INT-LEVEL expects zero or one FIX")]))
+
+(define (mdl-enable header)
+  (check-session-iheader 'mdl-enable header)
+  (set-mdl-iheader-enabled?! header #t)
+  header)
+
+(define (mdl-disable header)
+  (check-session-iheader 'mdl-disable header)
+  (set-mdl-iheader-enabled?! header #f)
+  header)
+
+(define (mdl-event . args)
+  (define events (atom-space-events (current-mdl-atom-space)))
+  (case (length args)
+    [(1)
+     (define header (car args))
+     (unless (mdl-iheader? header)
+       (error 'mdl-event "EVENT requires IHEADER or name and priority"))
+     (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+       (error 'mdl-event "IHEADER belongs to another MDL session"))
+     (hash-set! events (mdl-iheader-name header) header)
+     (set-mdl-iheader-enabled?! header #t)
+     header]
+    [(2)
+     (define name (car args))
+     (define priority (cadr args))
+     (unless (string? name)
+       (error 'mdl-event "EVENT name must be STRING in this slice"))
+     (unless (and (exact-integer? priority) (<= fix-min priority fix-max)
+                  (positive? priority))
+       (error 'mdl-event "EVENT priority must be a positive FIX"))
+     (when (member name unsupported-predefined-interrupt-names)
+       (error 'mdl-event "unsupported predefined EVENT ~a" name))
+     (hash-ref events name
+               (lambda ()
+                 (define header (mdl-iheader (current-mdl-atom-space)
+                                             name priority '() #t))
+                 (hash-set! events name header)
+                 header))]
+    [else (error 'mdl-event "EVENT expects IHEADER or name and priority")]))
+
+(define (mdl-install-handler . args)
+  (unless (= (length args) 2)
+    (error 'mdl-handler "HANDLER expects IHEADER and APPLICABLE"))
+  (define header (car args))
+  (define action (cadr args))
+  (unless (mdl-iheader? header)
+    (error 'mdl-handler "HANDLER first argument must be IHEADER"))
+  (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+    (error 'mdl-handler "IHEADER belongs to another MDL session"))
+  (define handler
+    (cond
+      [(mdl-handler? action)
+       (unless (and (eq? (mdl-handler-header action) header)
+                    (not (mdl-handler-active? action)))
+         (error 'mdl-handler "HANDLER already in use or belongs to another IHEADER"))
+       (set-mdl-handler-active?! action #t)
+       action]
+      [(or (procedure? action) (mdl-function? action))
+       (mdl-handler header action #t)]
+      [else (error 'mdl-handler "unsupported HANDLER action; expected FUNCTION or SUBR")]))
+  (set-mdl-iheader-handlers! header
+                             (cons handler (mdl-iheader-handlers header)))
+  handler)
+
+(define (mdl-off . args)
+  (unless (= (length args) 1)
+    (error 'mdl-off "OFF expects one IHEADER or HANDLER"))
+  (define object (car args))
+  (cond
+    [(mdl-handler? object)
+     (define header (mdl-handler-header object))
+     (unless (eq? (mdl-iheader-owner header) (current-mdl-atom-space))
+       (error 'mdl-off "HANDLER belongs to another MDL session"))
+     (set-mdl-iheader-handlers! header
+       (filter (lambda (entry) (not (eq? entry object)))
+               (mdl-iheader-handlers header)))
+     (set-mdl-handler-active?! object #f)
+     object]
+    [(mdl-iheader? object)
+     (unless (eq? (mdl-iheader-owner object) (current-mdl-atom-space))
+       (error 'mdl-off "IHEADER belongs to another MDL session"))
+     (define events (atom-space-events (current-mdl-atom-space)))
+     (unless (eq? (hash-ref events (mdl-iheader-name object) #f) object)
+       (error 'mdl-off "IHEADER has no active event association"))
+     (hash-remove! events (mdl-iheader-name object))
+     (set-mdl-iheader-enabled?! object #f)
+     object]
+    [else (error 'mdl-off "OFF expects IHEADER or HANDLER")]))
 
 (define (require-oblist who value)
   (unless (mdl-oblist? value)
@@ -1476,6 +1941,11 @@
               (define oblist (oblist-value name (make-hash) size))
               (hash-set! named name oblist)
               oblist)))
+
+(define (mdl-root . args)
+  (unless (null? args)
+    (error 'mdl-root "Too many arguments to ROOT"))
+  (atom-space-root (current-mdl-atom-space)))
 
 (define (mdl-lookup name oblist)
   (unless (string? name) (error 'mdl-lookup "expected a STRING PNAME"))
@@ -1704,6 +2174,35 @@
 (define (mdl-base value)
   (if (mdl-typed-value? value) (mdl-typed-value-value value) value))
 
+;; STRING extraction and SEGMENT expansion must expose the same MDL
+;; CHARACTER value. A host character remains accepted at the API boundary,
+;; but source-visible extraction uses the typed WORD representation.
+(define (mdl-character ch)
+  (mdl-typed-value (mdl-atom "CHARACTER") (char->integer ch)))
+
+(define (mdl-character-code value)
+  (cond
+    [(char? value) (char->integer value)]
+    [(and (mdl-typed-value? value)
+          (eq? (mdl-typed-value-type value) (mdl-atom "CHARACTER")))
+     (define code (mdl-base value))
+     (and (exact-integer? code)
+          (<= 0 code #x10ffff)
+          (not (<= #xd800 code #xdfff))
+          code)]
+    [else #f]))
+
+(define (mdl-ascii value)
+  (cond
+    [(exact-integer? value)
+     (unless (<= 0 value 127)
+       (error 'mdl-ascii "Value for ASCII out of range"))
+     (mdl-character (integer->char value))]
+    [else
+     (define code (mdl-character-code value))
+     (unless code (error 'mdl-ascii "Argument to ASCII must be FIX or CHARACTER"))
+     code]))
+
 (define (mdl-type-name value)
   (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
         [(mdl-activation? value) "ACTIVATION"]
@@ -1713,6 +2212,8 @@
         [(mdl-tuple-value? value) "TUPLE"]
         [(mdl-macro? value) "MACRO"]
         [(mdl-function? value) "FUNCTION"]
+        [(mdl-iheader? value) "IHEADER"]
+        [(mdl-handler? value) "HANDLER"]
         [(mdl-decl-value? value) "DECL"]
         [(mdl-atom? value) "ATOM"]
         [(mdl-oblist? value) "OBLIST"]
@@ -1720,6 +2221,7 @@
         [(mdl-array? value) (symbol->string (mdl-array-kind value))]
         [(exact-integer? value) (check-fix 'mdl-type value) "FIX"]
         [(and (real? value) (inexact? value)) "FLOAT"]
+        [(char? value) "CHARACTER"]
         [(string? value) "STRING"]
         [else (error 'mdl-type "unsupported MDL type ~a" value)]))
 
@@ -1757,7 +2259,7 @@
 (define (mdl-length value)
   (define base (mdl-base value))
   (cond [(mdl-array? base) (mdl-array-length base)]
-        [(string? value) (string-length value)]
+        [(string? base) (string-length base)]
         [else (length (mdl-list->list (mdl-list-head value 'mdl-length)))]))
 
 (define (mdl-rest value [offset 1])
@@ -1790,24 +2292,139 @@
 (define (mdl-nth value [index 1])
   (mdl-check-index 'mdl-nth value index)
   (define base (mdl-base value))
-  (if (mdl-array? base)
-      (vector-ref (mdl-array-storage base) (+ (mdl-array-start base) (sub1 index)))
-      (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth) (sub1 index) 'mdl-nth))))
+  (cond [(mdl-array? base)
+         (vector-ref (mdl-array-storage base) (+ (mdl-array-start base) (sub1 index)))]
+        [(string? base) (mdl-character (string-ref base (sub1 index)))]
+        [else (mcar (mdl-list-tail (mdl-list-head value 'mdl-nth)
+                                   (sub1 index) 'mdl-nth))]))
 
-(define (mdl-put! value index item)
-  (mdl-check-index 'mdl-put value index)
+;; Association (property) storage (issue #53, D5; manual chapter 13). A PUT
+;; whose dispatch does not reach the element store pairs the evaluated value
+;; with an arbitrary (item indicator) pair; GET retrieves it. Both sides
+;; match by ==?  identity (mdl-identical?): interning makes equal atom PNAMEs
+;; the same atom, while reader-generated structures and strings stay
+;; distinct, so a fresh (1 2 3) LIST and a new "abc" STRING miss, exactly as
+;; recorded in docs/evidence/M2/atom-props-reference.json
+;; (identity-keyed-retrieval, string-item-identity-miss). The table lives in
+;; the atom space, so every session starts property-free; associations never
+;; touch GVAL assignment (the recorded ,RAPPLIC UNBOUND-VARIABLE case) and
+;; have no printed representation (no #ASOC output in the pinned build).
+;; Strong item/indicator references are a documented garbage-collection
+;; deviation until a weak store honoring MDL ==? can be established.
+(define (mdl-association-table)
+  (atom-space-associations (current-mdl-atom-space)))
+
+;; Entries are (item indicator value). Lookup compares both keys using MDL
+;; ==? and returns an (indicator . value) pair; the pair itself distinguishes
+;; a stored FALSE value from an absent association.
+(define (same-association? entry item indicator)
+  (and (mdl-identical? (first entry) item)
+       (mdl-identical? (second entry) indicator)))
+
+(define (association-lookup item indicator)
+  (for/first ([entry (in-list (unbox (mdl-association-table)))]
+              #:when (same-association? entry item indicator))
+    (cons (second entry) (third entry))))
+
+(define (mdl-put-association! item indicator value)
+  (set-box! (mdl-association-table)
+            (cons (list item indicator value)
+                  (for/list ([entry (in-list (unbox (mdl-association-table)))]
+                             #:unless (same-association? entry item indicator))
+                    entry)))
+  item)
+
+;; Two-argument PUT is the documented removal (manual 13.1.3); the pinned
+;; build echoes the item, not the old value
+;; (association-remove-two-arg-put).
+(define (mdl-remove-association! item indicator)
+  (set-box! (mdl-association-table)
+            (for/list ([entry (in-list (unbox (mdl-association-table)))]
+                       #:unless (same-association? entry item indicator))
+              entry))
+  item)
+
+;; PUT/GET dispatch on structured primtypes: a FIX indicator on one of these
+;; items reaches the original element store; every other indicator is an
+;; association, including a FIX indicator on a non-structured item (the
+;; recorded <PUT 5 DECL 'FIX> reference case). Pinned dispatch
+;; mdl_builtin_eval_put, macros.cpp:4320-4330
+;; (mdl_primtype_structured(arg->pt) && FIX/OFFSET indicator); OFFSET
+;; indicators are out of this slice's scope and stay on the association path.
+(define (mdl-structured-primtype? value)
+  (and ;; Native SUBRs are represented as host procedures; they are
+       ;; unstructured MDL items and may carry FIX-keyed associations.
+       (not (procedure? value))
+       (member (mdl-atom-pname (mdl-primtype value))
+               '("LIST" "VECTOR" "UVECTOR" "TUPLE" "STRING"))
+       #t))
+
+;; PUT (manual 13.1): <PUT item indicator value> stores, <PUT item indicator>
+;; removes, <PUT item> is TOO-FEW-ARGUMENTS-SUPPLIED (recorded diagnostic).
+(define (mdl-put! . args)
+  (case (length args)
+    [(1) (error 'mdl-put "TOO-FEW-ARGUMENTS-SUPPLIED")]
+    [(2)
+     (define item (car args))
+     (when (and (exact-integer? (cadr args)) (mdl-structured-primtype? item))
+       (error 'mdl-put "TOO-FEW-ARGUMENTS-SUPPLIED"))
+     (mdl-remove-association! item (cadr args))
+     item]
+    [(3)
+     (define item (car args))
+     (define indicator (cadr args))
+     (define new-value (caddr args))
+     (if (and (exact-integer? indicator) (mdl-structured-primtype? item))
+         (mdl-put-element! item indicator new-value)
+         (mdl-put-association! item indicator new-value))]
+    [else (error 'mdl-put "TOO-MANY-ARGUMENTS-SUPPLIED")]))
+
+;; The unchanged element store, with the reference's stderr diagnostics
+;; (put-structured-fix-index-out-of-range and put-string-non-character).
+(define (mdl-put-element! value index item)
+  (unless (and (exact-integer? index) (>= index 1) (<= index (mdl-length value)))
+    (error 'mdl-put "PUT index too large"))
   (define base (mdl-base value))
-  (if (mdl-array? base)
-      (begin
-        (when (and (eq? (mdl-array-kind base) 'UVECTOR)
-                   (not (eq? (mdl-type item)
-                             (mdl-array-element-type base))))
-          (error 'mdl-put "UVECTOR PUT type violation"))
-        (vector-set! (mdl-array-storage base)
-                     (+ (mdl-array-start base) (sub1 index)) item))
-      (set-mcar! (mdl-list-tail (mdl-list-head value 'mdl-put)
-                                 (sub1 index) 'mdl-put) item))
+  (cond
+    [(string? base)
+     (define code (mdl-character-code item))
+     (unless code
+       (error 'mdl-put "Error in PUT: Strings may only contain CHARACTER type"))
+     (when (immutable? base)
+       (error 'mdl-put "immutable STRING literal cannot be mutated"))
+     (string-set! base (sub1 index) (integer->char code))]
+    [(mdl-array? base)
+     (when (and (eq? (mdl-array-kind base) 'UVECTOR)
+                (not (eq? (mdl-type item) (mdl-array-element-type base))))
+       (error 'mdl-put "UVECTOR PUT type violation"))
+     (vector-set! (mdl-array-storage base)
+                  (+ (mdl-array-start base) (sub1 index)) item)]
+    [else
+     (set-mcar! (mdl-list-tail (mdl-list-head value 'mdl-put)
+                                (sub1 index) 'mdl-put) item)])
   value)
+
+;; GET (manual 13.1, inverse of PUT): a FIX indicator on a structured item
+;; reads element `index` and rejects the optional exp with the recorded
+;; diagnostic; otherwise the ==?-keyed association retrieval returns the
+;; stored value, the exp value on a miss (get-exp-fallback), or #FALSE ()
+;; (get-missing-property-false). Only the two-argument form and this one
+;; optional exp exist in the pinned sources (grep evidence in ATOM-PROPS.md).
+(define (mdl-get item [indicator unassigned] [exp unassigned])
+  (when (and (eq? indicator unassigned) (not (mdl-structured-primtype? item)))
+    (error 'mdl-get "GET requires an indicator for non-structured item"))
+  (define selector (if (eq? indicator unassigned) 1 indicator))
+  (cond
+    [(and (exact-integer? selector) (mdl-structured-primtype? item))
+     (unless (eq? exp unassigned)
+       (error 'mdl-get "No EXP allowed for GET on structure"))
+     (mdl-nth item selector)]
+    [else
+     (let ([found (association-lookup item selector)])
+       (cond
+         [found (cdr found)]
+         [(not (eq? exp unassigned)) exp]
+         [else (mdl-false '())]))]))
 
 ;; PUTREST rewires the tail of a LIST-primtype head. A TUPLE is its own
 ;; primitive type, so tuples must not expose or splice their payload
@@ -1828,7 +2445,11 @@
   head)
 
 (define (mdl-identical? left right)
-  (cond [(and (mdl-typed-value? left) (mdl-typed-value? right))
+  (define left-character (mdl-character-code left))
+  (define right-character (mdl-character-code right))
+  (cond [(and left-character right-character)
+         (= left-character right-character)]
+        [(and (mdl-typed-value? left) (mdl-typed-value? right))
          (and (eq? (mdl-typed-value-type left) (mdl-typed-value-type right))
               (mdl-identical? (mdl-base left) (mdl-base right)))]
         [(or (mdl-typed-value? left) (mdl-typed-value? right)) #f]
@@ -1846,6 +2467,18 @@
            (= (mdl-array-start left) (mdl-array-start right))
            (= (mdl-array-length left) (mdl-array-length right)))]
         [else (eq? left right)]))
+
+(define (mdl-memq item structure)
+  (define base (mdl-base structure))
+  (when (string? base)
+    (error 'mdl-memq "unsupported STRING MEMQ"))
+  (unless (or (null? base) (mpair? base) (mdl-array? base)
+              (mdl-false? base) (mdl-tuple-value? base))
+    (error 'mdl-memq "Second arg to MEMQ must be structured"))
+  (or (for/or ([offset (in-range (mdl-length structure))])
+        (and (mdl-identical? item (mdl-nth structure (add1 offset)))
+             (mdl-rest structure offset)))
+      (mdl-false '())))
 
 (define (mdl-equal? left right)
   (define active (make-hasheq))
@@ -1921,13 +2554,73 @@
 (define (mdl-primtype value)
   (mdl-typeprim (mdl-type value)))
 
-(define (mdl-newtype name base-type)
+(define (check-decl-pattern-shape pattern who)
+  ;; Referenced type ATOMs may be declared later in the same source file.
+  ;; Reject unsupported syntax now; resolve those ATOMs on CHTYPE.
+  (define (bad)
+    (error who "unsupported declaration pattern"))
+  (define (check-structure-elements elements)
+    (when (null? elements) (bad))
+    (for ([element (in-list elements)] [index (in-naturals)])
+      (cond
+        [(mdl-array? element)
+         (unless (eq? (mdl-array-kind element) 'VECTOR) (bad))
+         (define bracket (decl-bracket-items element))
+         (unless (and (>= (length bracket) 2)
+                      (or (and (eq? (car bracket) (mdl-atom "REST"))
+                               (= index (sub1 (length elements))))
+                          (and (exact-integer? (car bracket))
+                               (positive? (car bracket)))))
+           (bad))
+         (for ([part (in-list (cdr bracket))]) (check part))]
+        [else (check element)])))
+  (define (check value)
+    (cond
+      [(mdl-atom? value) (void)]
+      [(mdl-form? value)
+       (define items (form-elements value))
+       (unless (pair? items) (bad))
+       (define head (car items))
+       (cond
+         [(mdl-atom? head)
+          (case (string->symbol (mdl-atom-pname head))
+            [(OR)
+             (when (null? (cdr items)) (bad))
+             (for ([part (in-list (cdr items))]) (check part))]
+            [(PRIMTYPE)
+             (unless (and (= (length items) 2) (mdl-atom? (cadr items)))
+               (bad))]
+            [(LIST VECTOR UVECTOR TUPLE)
+             (check-structure-elements (cdr items))]
+            [else (bad)])]
+         [(mdl-form? head)
+          (define head-items (form-elements head))
+          (unless (and (= (length head-items) 2)
+                       (eq? (car head-items) (mdl-atom "PRIMTYPE"))
+                       (mdl-atom? (cadr head-items)))
+            (bad))
+          (check-structure-elements (cdr items))]
+         [else (bad)])]
+      [else (bad)]))
+  (check pattern))
+
+(define (mdl-newtype name base-type . declaration)
   (require-atom 'mdl-newtype name)
+  (when (> (length declaration) 1)
+    (error 'mdl-newtype "TOO-MANY-ARGUMENTS-SUPPLIED"))
   (define prim (mdl-typeprim base-type))
   (define types (atom-space-types (current-mdl-atom-space)))
-  (when (hash-has-key? types name)
-    (error 'mdl-newtype "MDL TYPE already exists: ~a" (mdl-atom-pname name)))
+  (when (and (hash-has-key? types name)
+             (not (string=? (hash-ref types name) (mdl-atom-pname prim))))
+    (error 'mdl-newtype "MDL TYPE already exists with another primitive type: ~a"
+           (mdl-atom-pname name)))
+  (when (pair? declaration)
+    (check-decl-pattern-shape (car declaration) 'mdl-newtype))
   (hash-set! types name (mdl-atom-pname prim))
+  ;; The historical Pattern may refer to types defined later in the same
+  ;; source file. Store its unevaluated value now and resolve it on CHTYPE.
+  (when (pair? declaration)
+    (mdl-put-association! name (mdl-atom "DECL") (car declaration)))
   name)
 
 (define (mdl-chtype value type)
@@ -1935,7 +2628,8 @@
   (define desired-prim (mdl-typeprim type))
   (unless (eq? (mdl-primtype value) desired-prim)
     (error 'mdl-chtype "primitive type mismatch"))
-  (if (eq? (mdl-type value) type)
+  (define converted
+    (if (eq? (mdl-type value) type)
       value
       (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
         (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
@@ -1963,6 +2657,12 @@
               [(member (mdl-atom-pname desired-prim) '("LIST" "VECTOR" "UVECTOR"))
                (mdl-typed-value type base)]
               [else (error 'mdl-chtype "unsupported primitive type conversion")]))))
+  (define declared (association-lookup type (mdl-atom "DECL")))
+  (when declared
+    (define pattern (normalize-decl-pattern (cdr declared) #f #f "CHTYPE"))
+    (unless (matches-decl? converted pattern)
+      (error 'mdl-chtype "TYPE-MISMATCH: value does not satisfy NEWTYPE declaration")))
+  converted)
 
 (define (mdl-utype value)
   (define base (mdl-base value))
@@ -1973,9 +2673,13 @@
       (mdl-false '())))
 
 (define (mdl-string . pieces)
-  (unless (andmap string? pieces)
-    (error 'mdl-string "STRING expects STRING arguments; CHARACTER is unsupported"))
-  (apply string-append pieces))
+  (apply string-append
+         (for/list ([piece (in-list pieces)])
+           (cond [(string? piece) piece]
+                 [(mdl-character-code piece)
+                  (string (integer->char (mdl-character-code piece)))]
+                 [else (error 'mdl-string
+                              "STRING expects STRING or CHARACTER arguments")]))))
 
 (define (mdl-printstring buffer)
   (unless (string? buffer)
@@ -1989,14 +2693,172 @@
   (newline)
   (mdl-false '()))
 
+(define (mdl-error . args)
+  ;; ERROR transfers control out of the current evaluation. The native
+  ;; reference enters a resumable error level; this local runtime has no
+  ;; error-frame/ERRET support, so preserve the failure as an exception.
+  (define (describe value)
+    (cond [(mdl-atom? value) (mdl-atom-pname value)]
+          [(string? value) (format "~s" value)]
+          [else (format "~a" value)]))
+  (error 'mdl-error "~a"
+         (if (null? args) "ERROR" (string-join (map describe args) " "))))
+
+(define (mdl-map-structured? value)
+  (define base (mdl-base value))
+  (or (null? base) (mpair? base) (mdl-array? base)
+      (string? base) (mdl-false? base) (mdl-tuple-value? base)))
+
+(define (mdl-mapret . values)
+  (define step (current-mdl-map-step))
+  (unless step (error 'mdl-mapret "No map in MAPRET"))
+  (step (mdl-map-transfer 'continue values)))
+
+(define (mdl-mapstop . values)
+  (define step (current-mdl-map-step))
+  (unless step (error 'mdl-mapstop "No map in MAPSTOP"))
+  (step (mdl-map-transfer 'stop values)))
+
+(define (mdl-mapleave . values)
+  (unless (<= (length values) 1)
+    (error 'mdl-mapleave "TOO-MANY-ARGUMENTS-SUPPLIED"))
+  (define leave (current-mdl-map-leave))
+  (unless leave (error 'mdl-mapleave "No map in MAPLEAVE"))
+  (leave (if (null? values) (mdl-atom "T") (car values))))
+
+(define (mdl-mapf finalf loopf . structures)
+  (for ([structure (in-list structures)])
+    (unless (mdl-map-structured? structure)
+      (error 'mdl-mapf "Arguments to MAPF must be structured")))
+  (let/ec leave
+    (let loop ([index 1] [collected '()] [last-value (mdl-false '())])
+      (define exhausted?
+        (for/or ([structure (in-list structures)])
+          (> index (mdl-length structure))))
+      (if exhausted?
+          (if (mdl-false? finalf)
+              last-value
+              (mdl-apply-evaluated finalf (reverse collected)))
+          (let* ([step-values
+                  (for/list ([structure (in-list structures)])
+                    (mdl-nth structure index))]
+                 [step-result
+                  (let/ec step
+                    (parameterize ([current-mdl-map-step step]
+                                   [current-mdl-map-leave leave])
+                      (mdl-map-transfer
+                       'normal
+                       (list (mdl-apply-evaluated loopf step-values)))))]
+                 [new-collected
+                  (if (mdl-false? finalf)
+                      '()
+                      (append (reverse (mdl-map-transfer-values step-result))
+                              collected))]
+                 [values (mdl-map-transfer-values step-result)]
+                 [new-last
+                  (if (and (mdl-false? finalf)
+                           (not (eq? (mdl-map-transfer-kind step-result) 'normal)))
+                      ;; Pinned Confusion returns the current first input
+                      ;; when MAPRET/MAPSTOP transfers under FALSE finalf,
+                      ;; even when control supplied different values.
+                      (if (null? step-values) last-value (car step-values))
+                      (if (null? values) last-value (last values)))])
+            (if (eq? (mdl-map-transfer-kind step-result) 'stop)
+                (if (mdl-false? finalf)
+                    new-last
+                    (mdl-apply-evaluated finalf (reverse new-collected)))
+                (loop (add1 index) new-collected new-last)))))))
+
+(define (mdl-typeq . args)
+  (when (null? args)
+    (error 'mdl-typeq "Not enough arguments to TYPE?"))
+  (define actual (mdl-type (car args)))
+  (if (member actual (cdr args) eq?) actual (mdl-false '())))
+
+(define (mdl-andq . args)
+  ;; mdl-dispatch-call evaluates the complete SUBR argument list before
+  ;; invoking this procedure, including arguments after the first FALSE.
+  (let loop ([remaining args])
+    (cond [(null? remaining) (mdl-atom "T")]
+          [(not (mdl-truthy? (car remaining))) (car remaining)]
+          [(null? (cdr remaining)) (car remaining)]
+          [else (loop (cdr remaining))])))
+
+(define (mdl-emptyq . args)
+  (case (length args)
+    [(0) (error 'mdl-emptyq "Not enough arguments to EMPTY?")]
+    [(1) (void)]
+    [else (error 'mdl-emptyq "Too many args to EMPTY?")])
+  (define object (car args))
+  (unless (mdl-map-structured? object)
+    (error 'mdl-emptyq "First arg to EMPTY? must be structured"))
+  (define base (mdl-base object))
+  (define empty?
+    (if (or (mdl-array? base) (string? base))
+        (zero? (mdl-length object))
+        (null? (mdl-list-head object 'mdl-emptyq))))
+  (if empty? (mdl-atom "T") (mdl-false '())))
+
+(define (mdl-lengthq . args)
+  (case (length args)
+    [(0 1) (error 'mdl-lengthq "Not enough arguments to LENGTH?")]
+    [(2) (void)]
+    [else (error 'mdl-lengthq "Too many args to LENGTH?")])
+  (define object (car args))
+  (define maximum (cadr args))
+  (unless (mdl-map-structured? object)
+    (error 'mdl-lengthq "First arg to LENGTH? must be structured"))
+  (unless (and (exact-integer? maximum) (<= fix-min maximum fix-max))
+    (error 'mdl-lengthq "Second arg to LENGTH? must be FIX"))
+  (define base (mdl-base object))
+  (cond
+    [(or (mdl-array? base) (string? base))
+     (define count (mdl-length object))
+     (if (or (zero? count) (<= count maximum)) count (mdl-false '()))]
+    [else
+     ;; Stop after MAX+1 cells; LENGTH itself need not terminate on a
+     ;; circular LIST. Empty input is checked before MAX, matching the
+     ;; pinned reference's empty/negative-MAX result of FIX 0.
+     (let loop ([remaining (mdl-list-head object 'mdl-lengthq)] [count 0])
+       (cond [(null? remaining) count]
+             [(not (mpair? remaining))
+              (error 'mdl-lengthq "improper structured LIST")]
+             [(>= count maximum) (mdl-false '())]
+             [else (loop (mcdr remaining) (add1 count))]))]))
+
+(define (mdl-apply-subr . args)
+  (when (null? args)
+    (error 'mdl-apply-subr "TOO-FEW-ARGUMENTS-SUPPLIED in APPLY"))
+  (define fn (car args))
+  (when (mdl-macro? fn)
+    (error 'mdl-apply-subr "Can't use APPLY with MACROs"))
+  (define formal-kinds
+    (cond [(mdl-function? fn)
+           (map first
+                (runtime-formal-specs (mdl-function-formals fn)))]
+          [(procedure? fn)
+           (hash-ref compiled-function-formals fn '())]
+          [else '()]))
+  (when (or (memq 'quoted formal-kinds)
+            (memq 'quoted-optional formal-kinds))
+    (error 'mdl-apply-subr "Can't use APPLY to call a function with quoted arguments"))
+  (when (memq 'rest-args formal-kinds)
+    (error 'mdl-apply-subr "ARGS not allowed when called from APPLY"))
+  (mdl-apply-evaluated fn (cdr args)))
+
 (define builtin-table
   (hash "TYPE" mdl-type
+        "TYPE?" mdl-typeq
+        "AND?" mdl-andq
+        "EMPTY?" mdl-emptyq
+        "LENGTH?" mdl-lengthq
         "LVAL" mdl-lval
         "GVAL" mdl-gval
         "VALUE" mdl-value
         "SET" mdl-set!
         "SETG" mdl-setg!
         "GASSIGNED?" mdl-gassigned?
+        "ASSIGNED?" mdl-assigned?
         "MANIFEST" mdl-manifest
         "DECL?" mdl-decl?
         "GUNASSIGN" mdl-gunassign!
@@ -2019,12 +2881,31 @@
         "VECTOR" mdl-vector
         "UVECTOR" mdl-uvector
         "STRING" mdl-string
+        "ASCII" mdl-ascii
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
+        "ERROR" mdl-error
+        "EVENT" mdl-event
+        "HANDLER" mdl-install-handler
+        "OFF" mdl-off
+        "INT-LEVEL" mdl-int-level
+        "ENABLE" mdl-enable
+        "DISABLE" mdl-disable
+        "MAPF" mdl-mapf
+        "MAPRET" mdl-mapret
+        "MAPSTOP" mdl-mapstop
+        "MAPLEAVE" mdl-mapleave
+        "APPLY" mdl-apply-subr
         "LENGTH" mdl-length
         "REST" mdl-rest
         "NTH" mdl-nth
         "PUT" mdl-put!
+        "GET" mdl-get
+        "MEMQ" (lambda args
+                 (case (length args)
+                   [(2) (mdl-memq (car args) (cadr args))]
+                   [(0 1) (error 'mdl-memq "TOO-FEW-ARGUMENTS-SUPPLIED")]
+                   [else (error 'mdl-memq "TOO-MANY-ARGUMENTS-SUPPLIED")]))
         "PUTREST" mdl-putrest!
         "FORM" (lambda elems (mdl-make-form (apply mdl-list elems)))
         "EXPAND" mdl-expand
@@ -2032,6 +2913,7 @@
                  (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
                  (atom-value name #f))
         "MOBLIST" mdl-moblist
+        "ROOT" mdl-root
         "LOOKUP" mdl-lookup
         "INSERT" mdl-insert
         "REMOVE" mdl-remove
@@ -2047,6 +2929,11 @@
         "G?" (lambda (a b) (mdl-boolean (> a b)))
         "G=?" (lambda (a b) (mdl-boolean (>= a b)))
         "=?" (lambda (a b) (mdl-boolean (mdl-equal? a b)))
+        "N=?" (lambda args
+                 (case (length args)
+                   [(2) (mdl-boolean (not (mdl-equal? (car args) (cadr args))))]
+                   [(0 1) (error 'mdl-neq "TOO-FEW-ARGUMENTS-SUPPLIED")]
+                   [else (error 'mdl-neq "TOO-MANY-ARGUMENTS-SUPPLIED")]))
         "==?" (lambda (a b) (mdl-boolean (mdl-identical? a b)))
         "N==?" (lambda (a b) (mdl-boolean (not (mdl-identical? a b))))))
 
@@ -2054,10 +2941,12 @@
   (define atom (binding-atom 'mdl-apply name))
   (define global (global-option atom))
   (define fn (if (eq? global unassigned) (local-option atom) global))
-  (unless (procedure? fn)
+  (when (eq? fn unassigned)
     (error 'mdl-apply "unassigned or non-applicable MDL operator ~a"
            (mdl-atom-pname atom)))
-  (apply fn args))
+  (when (mdl-macro? fn)
+    (error 'mdl-apply "raw MACRO arguments are unavailable through the value API"))
+  (mdl-apply-evaluated fn args))
 
 (module+ test
   (require rackunit)

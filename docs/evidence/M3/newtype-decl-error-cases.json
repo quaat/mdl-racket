@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m3-newtype-declaration-deliberate-errors",
+  "cases": [
+    {"name": "missing-both", "expression": "<NEWTYPE>"},
+    {"name": "missing-primitive", "expression": "<NEWTYPE M3N>"},
+    {"name": "too-many", "expression": "<NEWTYPE M3N VECTOR 3 4>"},
+    {"name": "unknown-primitive", "expression": "<NEWTYPE M3N M3UNKNOWN>"},
+    {"name": "incompatible-redefinition", "expression": "<NEWTYPE M3N VECTOR> <NEWTYPE M3N FIX>"},
+    {"name": "non-atom-name", "expression": "<NEWTYPE 3 VECTOR>"}
+  ]
+}

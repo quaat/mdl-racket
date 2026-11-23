@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "m3-assignedq-clean-reference",
+  "cases": [
+    {"name": "unbound", "expression": "<ASSIGNED? M3A>"},
+    {"name": "top-level-set", "expression": "<SET M3A 3> <ASSIGNED? M3A>"},
+    {"name": "global-only", "expression": "<SETG M3A 3> <ASSIGNED? M3A>"},
+    {"name": "unassigned-prog-aux", "expression": "<PROG (M3A) <ASSIGNED? M3A>>"},
+    {"name": "assigned-prog-aux", "expression": "<PROG ((M3A 3)) <ASSIGNED? M3A>>"},
+    {"name": "assigned-after-set", "expression": "<PROG (M3A) <SET M3A 0> <ASSIGNED? M3A>>"},
+    {"name": "inner-unassigned-shadows-outer", "expression": "<PROG ((M3A 3)) <PROG (M3A) <ASSIGNED? M3A>>>"},
+    {"name": "function-unassigned-aux", "expression": "<DEFINE M3F (X \"AUX\" Y) <ASSIGNED? Y>> <M3F 3>"},
+    {"name": "function-assigned-aux", "expression": "<DEFINE M3F (X \"AUX\" Y) <SET Y 4> <ASSIGNED? Y>> <M3F 3>"}
+  ]
+}

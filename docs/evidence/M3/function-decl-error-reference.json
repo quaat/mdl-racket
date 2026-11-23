@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "name": "m3-function-style-decl-deliberate-errors",
+  "recorded_at": "2026-11-21T16:30:25.094478+00:00",
+  "interpreter_sha256": "cd7bfffe22265b3f63dfd2713330507c53e6182ec9f41ba4aa3d818127252580",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "wrong-argument",
+      "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX) .X> <M3FD \"BAD\">",
+      "input": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX) .X> <M3FD \"BAD\">\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3FD\n\"BAD\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3FD\n\"BAD\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "wrong-result",
+      "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX) \"BAD\"> <M3FD 1>",
+      "input": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX) \"BAD\"> <M3FD 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3FD\n\"BAD\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3FD\n\"BAD\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "wrong-optional",
+      "expression": "<DEFINE M3FD (X \"OPTIONAL\" (Y 2)) #DECL (\"VALUE\" FIX FIX \"OPTIONAL\" FIX) .X> <M3FD 1 \"BAD\">",
+      "input": "<DEFINE M3FD (X \"OPTIONAL\" (Y 2)) #DECL (\"VALUE\" FIX FIX \"OPTIONAL\" FIX) .X> <M3FD 1 \"BAD\">\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3FD\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3FD\n1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "extra-pattern",
+      "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX FIX) .X> <M3FD 1>",
+      "input": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX FIX) .X> <M3FD 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3FD\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3FD\n1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "missing-pattern",
+      "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX) .X> <M3FD 1>",
+      "input": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX) .X> <M3FD 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3FD\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3FD\n1\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

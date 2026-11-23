@@ -788,9 +788,11 @@ rejected here because the manual's BNF requires at least one element
 pattern, while Confusion accepts it and matches any value of the TYPE;
 `DECL?` keeps a strict two-operand arity where Confusion silently
 ignores surplus operands spliced into its call; structured pattern heads
-are restricted to LIST/VECTOR/UVECTOR/TUPLE where Confusion accepts any
-NEWTYPE with a structured PRIMTYPE — extended only when a historical
-source needs it. Confusion's broken `ANY`/`STRUCTURED` compound names
+initially supported only LIST/VECTOR/UVECTOR/TUPLE, later extended in
+issue #76 to `<<PRIMTYPE ...> ...>` for original NEWTYPE declarations.
+Confusion accepts any NEWTYPE with a structured PRIMTYPE but rejects the
+explicit PRIMTYPE-headed DECL? composition in the pinned probe; this
+extension follows the manual. Confusion's broken `ANY`/`STRUCTURED` compound names
 are not reproduced; `ANY` as a simple pattern keeps its manual semantics
 from D1.
 
@@ -807,3 +809,797 @@ evaluating `USE` — which is unbound in the reference and stays an
 explicit error here. Changing the value requires new reference evidence,
 not a source edit; the reference's own environment is the reproducible
 baseline for the original 1977 version number.
+
+## M2 D5 specification: atom-property PUT/GET associations
+
+MDL association storage pairs an arbitrary *item* with an arbitrary
+*indicator* and a value, matched by `==?` identity — never structural
+`=?`. The runtime dispatch mirrors the pinned reference (evidence:
+[`evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md), 18 success and 6
+deliberate-error Confusion observations):
+
+- `PUT` — structured item (LIST/VECTOR/UVECTOR/STRING via primtype) with a
+  FIX indicator keeps the existing index-based element store (with the
+  reference's `PUT index too large` and CHARACTER-type stderr diagnostics);
+  every other indicator on a structured item, and every indicator on a
+  non-structured item (including FIX indicators on non-structured items,
+  e.g. `<PUT 5 DECL 'FIX>`), is an association. A two-argument
+  `<PUT item indicator>` removes the association and echoes the item;
+  one-argument PUT raises TOO-FEW-ARGUMENTS-SUPPLIED. Property PUT returns
+  the item.
+- `GET` — structured item with a FIX indicator returns the element
+  (three-argument GET on a structure is the reference's error `No EXP
+  allowed for GET on structure`); an association selector returns the
+  stored value, the evaluated optional exp on a miss, or `#FALSE ()`.
+  Retrieval preserves the stored object's exact identity (a quoted FORM
+  comes back as the same FORM, `<OR ATOM FALSE NOFFSET>`).
+  A structured item without an indicator selects its first element, as
+  pinned Confusion does. Indexed STRING retrieval returns a CHARACTER
+  (`TYPE` CHARACTER, `PRIMTYPE` WORD); a mutable STRING accepts that
+  CHARACTER through indexed PUT. Immutable host string literals remain an
+  explicit mutation limit.
+  Final-head review probes show that a STRING element retrieved by GET and
+  the same element produced by STRING SEGMENT expansion are `==?` in pinned
+  Confusion; indexed PUT accepts either. Both paths must use one CHARACTER
+  value representation, with WORD primtype and code-point identity. The
+  cases and red-to-green test are in `evidence/M2/character-review-*` and
+  `tests/atom_props_test.rkt`.
+- Associations live in a session-owned list searched with `mdl-identical?`
+  for **both** item and indicator. A weak `eq?` table was rejected after
+  reference-backed regressions showed misses for separately constructed
+  equal WORD values and VECTOR/UVECTOR REST views of the same storage.
+  Entries hold strong references to item, indicator, and value until
+  removed or the session ends. This differs from the manual's association
+  garbage collection when keys become unreachable; key lifetime remains
+  unsupported until a weak store with MDL `==?` equivalence is proven.
+- `DECL?` consults an atom's `DECL` association when the atom names a type
+  (the `77defs.mud:5` `<PUT RAPPLIC DECL ...>` NEWTYPE-annotation
+  mechanism): the stored pattern is normalized by the existing D1/D3
+  matcher, a matching leaf carries the resolved pattern's leaf in the
+  `#FALSE` payload (reference: `#FALSE (3 NOFFSET)`), and recursion
+  through association-derived declarations is cycle-bounded. `SETG` does
+  NOT enforce an atom's DECL association; the property only feeds `DECL?`.
+  PUTting a property never assigns the atom as a global and never changes
+  its TYPE or PRIMTYPE.
+  Registered TYPE atoms retain their intrinsic meaning even if they carry
+  a `DECL` association. Unregistered alias atoms follow successive `DECL`
+  associations until a pattern is reached; cycles raise a bounded explicit
+  error (pinned Confusion loops on an A-to-B-to-A cycle in a timed probe).
+  The same normalization applies to attached `#DECL` patterns.
+  Two-argument PUT on a structured item with a FIX indicator is a
+  TOO-FEW-ARGUMENTS-SUPPLIED error, not association removal.
+- `GETPROP`/`PUTPROP` and the chapter 13.4 examination machinery
+  (`ASSOCIATIONS`, `NEXT`, `ITEM`, `INDICATOR`, `AVALUE`, `#ASOC`
+  printing) remain explicit unimplemented failures — the pinned load set
+  never uses them.
+
+Final-head review of issue #53 (issue #67) adds a FIX-indicator dispatch
+case: a native SUBR is an unstructured MDL item even though the Racket
+runtime represents it as a host procedure. Pinned Confusion accepts
+`<PUT ,+ 7 9> <GET ,+ 7>` and returns `9`; a two-argument PUT removes
+that association and GET returns `#FALSE ()`. A FIX selector on this
+unstructured item must reach association storage without querying an
+unsupported host procedure's MDL primtype. Indexed FIX selectors on
+LIST/VECTOR/UVECTOR/STRING retain element dispatch. Tests must fail on
+the current D5 head and pass after the narrow dispatch correction.
+
+Deviations from the manual are adjudicated in
+[`evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md): the reference's
+augmented `#FALSE (leaf)` DECL? miss is followed over the manual's plain
+`#FALSE ()` (it carries useful diagnostic information and the pinned
+source flags it as deliberate); the two-argument PUT removal echoes the
+item as the reference does (the manual's "returns the previous value"
+wording was checked — the reference returns the item; we follow the
+reference); and GET's exp is honored only on the association branch.
+
+## M2 G3 corrective slice: structural `N=?` (issue #57)
+
+The [MDL manual chapter 8](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+defines `N=?` as the Boolean complement of structural `=?` (not the
+identity complement `N==?`). On finite values it returns MDL `T` when
+the two arguments differ structurally and `#FALSE ()` when equal. The
+reference rejects fewer than two arguments with
+`TOO-FEW-ARGUMENTS-SUPPLIED` and more than two with
+`TOO-MANY-ARGUMENTS-SUPPLIED`.
+
+The original `81prim.mud` MSETG guard calls `<N=? .BAR ,.FOO>` on a
+reassignment. Pinned Confusion returns `T` from MSETG on an equal repeat,
+and raises the source's ALREADY-GASSIGNED error on a conflicting repeat.
+Racket must use its existing `mdl-equal?` relation and MDL truth values;
+the first G3 integration probe failed before implementation because `N=?`
+was unassigned. The focused tests must cover scalar, atom, separately
+allocated equal/unequal LIST and STRING, and typed values, plus these two
+original-source MSETG paths and arity errors.
+
+Two bounded cyclic Confusion `N=?` probes (self and distinct equal-content
+LIST cycles) timed out after three seconds. The existing Racket `=?`
+boundary already returns T for a cycle compared with itself and raises an
+explicit unsupported-cyclic-equality error for two distinct equal cycles.
+`N=?` follows the documented complement of that bounded relation: FALSE
+for self and the same explicit error for unsupported distinct equal cycles.
+This differs from the tested pinned Confusion timeout but prevents a hang;
+it is not evidence of general cyclic parity. Reference inputs, outputs,
+source hashes, and commands are in `evidence/M2/NEQ.md`.
+
+## M2 G3 corrective reader slice: computed global `,.FOO` (issue #58)
+
+The [MDL manual chapter 4](https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/)
+says comma abbreviates GVAL of the following expression, and explicitly
+shows `,.FOO` reading the GVAL of the ATOM held in FOO's local value.
+Pinned Confusion confirms this: after `<SETG G3-FOO 3>` and
+`<SET FOO 'G3-FOO>`, `,.FOO` returns 3 and `<+ 1 ,.FOO>` returns 4.
+The exact original `81prim.mud` MSETG uses `,.FOO` in its N=? guard and
+ALREADY-GASSIGNED error path. With N=? available, the current reader's
+literal-name parse of `.FOO` causes a false unassigned-global error.
+
+Parse immediate comma-period as a `global` node containing a `local` node;
+the existing compiler/runtime paths then evaluate local FOO to an ATOM
+and retrieve that ATOM's global value. Preserve plain `,FOO` and computed
+`,<FORM>` behavior. Unknown/unassigned names continue to raise explicit
+errors. Tests must cover reader AST shape, compiled expression behavior,
+and the source-defined MSETG equal-repeat path. Its conflicting-repeat
+path reaches a separate unsupported `ERROR` primitive (issue #60); it is
+not part of this reader slice. Reference inputs
+and outputs are in `evidence/M2/computed-global-*` and the G3 reference
+files; final validation belongs in `evidence/M2/COMPUTED-GLOBAL.md`.
+
+## M2 G3 corrective primitive: `ERROR` (issue #60)
+
+The [MDL manual chapter 1](https://mdl-language.readthedocs.io/en/latest/01-basic-introduction/)
+describes an error as interrupting evaluation and entering an error state;
+chapter 21 describes interrupt handlers and `ERRET` recovery. The pinned
+Confusion probe accepts zero or more evaluated arguments to `ERROR`, prints
+each one in order, and enters `LISTENING-AT-LEVEL 2`. The exact original
+MSETG conflict in `81prim.mud` prints `MSETG`, the target atom,
+`ALREADY-GASSIGNED`, and the old value `3`. See `evidence/M2/error-*`.
+
+This initial slice must evaluate arguments in order and raise a host
+exception carrying those values in readable form, so the source-defined
+error is observable and cannot silently return. A zero-argument call
+must also fail. Racket does not yet reproduce MDL's resumable error
+level, interrupt handlers, or `ERRET`; those are explicit deviations.
+Tests must first fail for unassigned `ERROR`, then pass for zero and
+multiple arguments, evaluation side effects, and the exact source-defined
+MSETG conflicting-repeat path. No error branch may be converted into a
+FALSE or ignored form.
+
+## M2 G3 corrective primitive: `MEMQ` (issue #63)
+
+The [MDL manual chapter 8](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+defines `MEMQ` as `MEMBER` using `==?` identity. It returns the `REST`
+view beginning at the first identical element, or `#FALSE ()` on a miss.
+Pinned Confusion confirms LIST hit `(B C)`, miss `#FALSE ()`, structurally
+equal but distinct LIST miss, mutable LIST tail aliasing, VECTOR `[2 3]`,
+UVECTOR `![2 3!]`, and original `PSETG` returning `3` with `PURE-LIST`
+`(G3-P)`. Reference data: `evidence/M2/memq-*`.
+
+For this corrective slice, scan LIST/VECTOR/UVECTOR left-to-right using
+`mdl-identical?`; return `mdl-rest` at the matching zero-based offset to
+preserve aliasing and primitive structure kind. Reject non-structured
+second arguments explicitly. The one-argument reference crashes with
+signal 11, so the Racket runtime must raise a deliberate arity error
+rather than reproducing that crash. A three-argument call reports too many
+arguments in Confusion. STRING/other structured MEMQ requires a separate
+reference-backed representation decision if reached; never return a false
+miss merely because that representation is unsupported. Tests must cover
+the first match, miss, identity versus structural equality, aliasing,
+sequence kinds, arity/type boundaries, and exact-source PSETG.
+The implemented slice passes these tests and the exact-source PSETG
+first/repeat paths. `MEMQ` on STRING still raises an explicit unsupported
+error; see `evidence/M2/MEMQ.md`. G3 now fails at original FLAGWORD's
+unassigned `MAPF`, rather than at PSETG.
+## M2 MAPF, FUNCTION literals, and map control (issue #65)
+
+The [MDL manual, chapter 10.2–10.3](https://mdl-language.readthedocs.io/en/latest/10-looping/)
+defines `<MAPF finalf loopf s1 ... sN>` as a simultaneous left-to-right
+walk over structured arguments, ending when the first input is exhausted.
+Each step applies the already evaluated `loopf` to the current first
+elements. A true applicable `finalf` receives the recorded results as
+already evaluated arguments; a FALSE `finalf` discards them and returns
+the last loop value, or `#FALSE ()` if the loop never ran. With no input
+structures, the loop continues until explicit map control exits it.
+
+The pinned Confusion results in `evidence/M2/mapf-reference.json` confirm
+LIST, VECTOR, UVECTOR, differing lengths, empty inputs, scalar and
+structured final values, interpreted FUNCTION literals and values,
+outer local access, nested MAPF, indexed applicable `1`, and preservation
+of LIST/VECTOR elements passed to interpreted loop functions. A FUNCTION
+literal has formal bindings, optional AUX/defaults and a body; its #DECL
+is checked at the same boundaries as an interpreted DEFINE. MAPF must
+invoke an already evaluated applicable with already evaluated elements;
+evaluating those elements again changes structure contents and is wrong.
+
+`MAPRET` ends the current loop-function invocation and adds zero or more
+arguments to the final argument stream. `MAPSTOP` does the same and then
+invokes `finalf` immediately. `MAPLEAVE` exits the MAPF directly, discards
+the collected values, and returns its argument (or T if omitted). The
+reference shows nested map control targets the current map; outside a
+live map these operations error (`evidence/M2/mapf-error-reference.json`).
+The runtime must discard map control state on ordinary and abnormal exits.
+The additional bounded control corpus (`evidence/M2/mapf-control-reference.json`)
+shows a pinned Confusion quirk: with FALSE `finalf`, a MAPRET or MAPSTOP
+transfer returns the current first input element, even if control supplied
+another value. The runtime follows that observed behavior. It also confirms
+left-to-right steps, interpreted final functions, declaration checking,
+MAPLEAVE default T, and UNWIND cleanup on nonlocal exit. A FUNCTION value
+used after its defining PROG has returned does not capture the expired
+local binding in Confusion (`mapf-function-context-reference.json`), so
+the Racket runtime does not claim implicit lexical closure capture.
+
+The original `81prim.mud` `FLAGWORD` initializes `TOT=1`, `CNT=1`, then
+uses `MAPF <>` over tuple `FS` with an inline FUNCTION. On an ATOM it may
+call the original MSETG, doubles TOT, increments CNT, and checks for
+overflow. The function result is discarded by FALSE finalf. The return
+is CNT: no arguments give 1, one FALSE or ATOM gives 2, and FALSE plus
+ATOM gives 3 in the recorded native cases. No source substitution is used.
+
+### G3 follow-on: TYPE?
+
+The original FLAGWORD inline FUNCTION calls `<TYPE? .F ATOM>`. The MDL
+Primer section 7.3 describes the predicate as returning the object's TYPE
+on a candidate hit and FALSE otherwise. Pinned Confusion evidence in
+`evidence/M2/typeq-reference.json` confirms ATOM/FIX/FALSE and user-defined
+TYPE hits, misses, a late candidate hit, and a no-candidate miss. It also
+returns FALSE for numeric or unregistered candidate values; the only
+observed deliberate error is a missing value argument
+(`evidence/M2/typeq-error-reference.json`). Implement this as evaluated
+argument comparison with the actual TYPE atom, without coercing candidate
+values or treating a non-hit as an exception.
+
+### G3 follow-on: startup OBLIST associations
+
+After TYPE?, original FLAGWORD calls `<LOOKUP "GROUP-GLUE" <GET INITIAL OBLIST>>`.
+Pinned Confusion initializes the reciprocal `OBLIST` associations for
+INITIAL/ROOT and their OBLIST values before source execution
+(`macros.cpp`, `mdl_interp_init`; observed in
+`evidence/M2/get-initial-oblist-reference.json`). Thus GET on INITIAL
+with indicator OBLIST yields the initial OBLIST, and GROUP-GLUE lookup
+there returns FALSE. An ordinary ATOM has no such association. Seed these
+specific associations in each fresh Racket session's atom space so the
+original source can observe the same startup state; leave general GET
+dispatch and user associations intact.
+
+## M2 indirect APPLY and computed FORM heads (issue #69)
+
+The [MDL manual section 9.10](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+defines `<APPLY object arg-1 ...>` as evaluating the applicable object
+and every argument, then applying it. It rejects FSUBR/MACRO and
+FUNCTION formals that require raw arguments, notably quoted formals and
+`"ARGS"`/`"CALL"`. A computed FORM head evaluates to an applicable
+object before argument dispatch; unlike APPLY, it may invoke an
+interpreted FUNCTION with quoted formals because the original raw
+argument forms remain available. The operator and each evaluated
+argument are visited left to right exactly once.
+
+Pinned Confusion `evidence/M2/indirect-apply-reference.json` records
+native SUBR, interpreted FUNCTION, MAPF and numeric indexed applicable
+calls; a structured LIST argument remains a value rather than being
+re-evaluated. A FIX head with one argument reads that index; with two
+arguments it writes the indexed element and returns the structure.
+The computed-head cases include local/global FUNCTION values, quoted
+formals, and a RETURN to an outer activation. The separate
+`indirect-apply-error-reference.json` records missing APPLY target,
+non-applicable target, quoted/ARGS/MACRO restrictions, and FIX excess
+arity as deliberate failures. Unknown applicable kinds must continue
+to fail explicitly.
+
+The implemented dispatcher shares evaluated-value application between
+MAPF, APPLY, computed FORM heads and the host `mdl-apply` API. A compiled
+DEFINE keeps its formal-kind metadata so APPLY also rejects its ARGS
+formal; TUPLE remains allowed. The shared-session call API now passes
+already evaluated values to interpreted FUNCTIONs without rebuilding
+structured contents. A FIX head with two arguments invokes indexed PUT
+on a structured target directly; it cannot fall through to a PUT
+association on a non-structured item. Red-to-green observations and
+remaining limits are in `evidence/M2/INDIRECT-APPLY.md`.
+
+## M3 EMPTY? predicate (issue #75; specification before implementation)
+
+The [MDL manual predefined SUBR entry](https://mdl-language.readthedocs.io/en/latest/appendix-2-predefined-subroutines/)
+declares `EMPTY? (OBJECT)` with a STRUCTURED argument and a result of
+`T` or empty FALSE. It is true exactly when the structure has zero
+elements. The exact original `81prim.mud` SHA256
+`8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571`
+defines NEWSTRUC at line 35. Its line-43 `<EMPTY? .ELEM>` checks the
+remaining ARGS LIST while `77defs.mud` expression 15 constructs ROOM.
+
+The pinned Confusion clean corpus in
+`evidence/M3/emptyq-reference.json` has 16/16 exit-0 cases. Empty
+LIST, VECTOR, UVECTOR, STRING, FALSE, REST-end LIST, TUPLE and a typed
+LIST return `T`; their nonempty counterparts return `#FALSE ()`.
+The circular LIST case returns FALSE promptly; EMPTY? must inspect only
+whether a first cell exists, without traversing the whole LIST.
+The original source-defined NEWSTRUC succeeds on a controlled VECTOR
+definition after FLOAD of the unchanged 81prim file. Deliberate invalid
+cases are separate in `emptyq-error-reference.json`: no argument writes
+`Not enough arguments to EMPTY?` to stderr; two arguments write
+`Too many args to EMPTY?`; ATOM, FIX and WORD enter an error level with
+`FIRST-ARG-WRONG_TYPE` and a structured-argument diagnostic. Those
+error-level captures have `ok=false` by design, even when the native
+process exits 0 after `<QUIT>`.
+
+Implementation tests must cover each supported structured representation,
+including typed wrappers and TUPLE, and require explicit errors for wrong
+arity or unstructured values. Return the session's canonical `T` atom or
+an empty MDL FALSE; do not coerce host truth values. The unchanged full
+loader must advance beyond 24 completed forms with zero skipped forms.
+This predicate alone does not imply NEWSTRUC, world, or game parity.
+
+## M3 LENGTH? bounded structured length (issue #75 follow-on)
+
+The [MDL manual predefined SUBR entry](https://mdl-language.readthedocs.io/en/latest/appendix-2-predefined-subroutines/)
+declares `LENGTH? (OBJECT MAX)` with STRUCTURED and FIX arguments. It
+returns the actual length as FIX when that length is at most MAX, and
+empty FALSE otherwise. Unlike a full LENGTH traversal, it must stop
+after finding more than MAX elements; the manual explicitly discusses
+using it on circular LISTs. Original NEWSTRUC in pinned `81prim.mud`
+calls `<LENGTH? .ELEM 1>` after the EMPTY? check to reject a one-slot
+remainder. The first post-EMPTY? loader run reaches this unassigned
+operator in `77defs.mud` expression 15, still after 24 completed forms.
+
+The 16 clean pinned Confusion cases in
+`evidence/M3/lengthq-reference.json` cover LIST, VECTOR, UVECTOR,
+STRING, FALSE, TUPLE, typed LIST, REST view, and a circular LIST. A
+length of two with MAX 1 returns `#FALSE ()`; with MAX 2 or 3 it
+returns FIX `2`. A circular LIST with MAX 3 returns empty FALSE in a
+bounded process. The five separate deliberate-error cases in
+`lengthq-error-reference.json` record missing/extra argument messages,
+the structured first-argument requirement, and FIX second-argument
+requirement. Native stderr carries those diagnostics while its process
+may still exit 0 after `<QUIT>`; the probe marks them `ok=false`.
+
+**Observed reference/manual edge:** Confusion returns FIX `0` for an
+empty LIST with negative MAX, although the manual's mathematical
+less-than-or-equal rule would imply FALSE. It returns FALSE for a
+nonempty LIST with negative MAX. This runtime follows that pinned
+observable behavior for the reconstructed target and records the
+deviation; NEWSTRUC passes positive MAX 1. Implement a bounded walk
+over LIST-like values, checking for emptiness before the bound, so
+cyclic lists terminate and the empty/negative case matches the reference.
+Do not call the general `LENGTH` path on an unbounded cyclic LIST.
+
+## M3 ASSIGNED? local binding predicate (issue #75 follow-on)
+
+The [MDL manual's function chapter](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+and predefined SUBR entry specify `ASSIGNED? (ATOM "OPTIONAL" ENV)`.
+Without an ENV, it tests whether the ATOM has an assigned local binding
+in the current environment, returning `T` or empty FALSE. A global-only
+binding does not count. A nearer unassigned local shadows an assigned
+outer local. The original `NEWSTRUC` in SHA-verified `81prim.mud` uses
+`<ASSIGNED? RR>` for its initially unassigned AUX local. The first
+loader run after EMPTY? and LENGTH? reaches this expression.
+
+The nine clean pinned Confusion cases in
+`evidence/M3/assignedq-reference.json` establish unbound, top-level SET,
+global-only SETG, PROG local assignment and shadowing, and function AUX
+behavior. Four separate deliberate-error cases in
+`assignedq-error-reference.json` show the missing-argument error and
+that the first argument must be ATOM; a supplied second FIX is rejected
+because the optional argument must be a frame. These native error-level
+captures are marked `ok=false` even where the process exits zero after
+QUIT. The initial implementation supports the one-argument form used by
+original source; a supplied ENV fails explicitly until frame semantics
+are separately specified and tested. Tests must assert the local/global
+distinction, unassigned shadow, wrong type, and arity before runtime code.
+
+## M3 ROOT startup OBLIST (issue #75 NEWSTRUC dependency)
+
+The manual's OBLIST chapter describes ROOT as the system's root OBLIST.
+The original `NEWSTRUC` calls `<LOOKUP "COMPILE" <ROOT>>` to select a
+compiled or interpreted type definition. On a clean pinned Confusion
+session, the five cases in `evidence/M3/root-reference.json` establish
+that zero-argument ROOT has type OBLIST, is identical to both
+`<MOBLIST 'ROOT>` and `<GET ROOT OBLIST>`, contains the ROOT atom, and
+does not contain COMPILE. The deliberate extra-argument case in
+`root-error-reference.json` writes `Too many arguments to ROOT`.
+Implementation returns the existing session root OBLIST and rejects any
+argument. It must preserve identity, not construct another OBLIST.
+
+## M3 three-argument NEWTYPE declaration (issue #76; specification before implementation)
+
+The [MDL manual, §14.6](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+says the optional third argument is a quoted declaration Pattern. It is
+stored as the type atom's `DECL` association and checked on every
+`CHTYPE` into that type, including a cast into the value's current type.
+Calling `NEWTYPE` again for the same type and primitive type may replace
+the Pattern. The original `77defs.mud` expression 17, line 66, uses
+`<NEWTYPE EXIT VECTOR '<<PRIMTYPE VECTOR> [REST ATOM <OR ROOM CEXIT NEXIT>]>>`.
+The pattern's referenced types are defined later, so storage precedes
+full validation; check its shape on NEWTYPE and resolve names when a
+value is cast. A `<<PRIMTYPE VECTOR> ...>` structure head matches a
+value by primitive type while its element patterns use the existing
+declaration matcher. A bad pattern must fail explicitly.
+
+**Pinned Confusion/manual deviation:** the seven clean cases in
+`evidence/M3/newtype-decl-reference.json` show Confusion accepts the
+third argument and same-primitive redefinition, but `<GET M3N DECL>`
+still returns empty FALSE and a cast violating a FIX-only pattern
+succeeds. The pinned `confusion_patched/macros.cpp` function
+`mdl_builtin_eval_newtype` reads `desc` but calls `mdl_internal_newtype`
+with only name and primitive type. Six deliberate-error cases in
+`newtype-decl-error-reference.json` establish missing/extra arguments,
+unknown primitive, incompatible redefinition, and non-atom type-name
+errors. This Racket slice preserves the manual's declaration association
+and enforces it; it therefore intentionally differs from this incomplete
+Confusion implementation. Do not silently discard the third argument
+to match that reference defect. Tests must cover storage, valid and
+invalid casts, same-type recheck, redefinition, malformed patterns,
+wrong arity and primitive type, and the unchanged original-source load.
+
+## M3 GDECL global value declarations (issue #78; specification before implementation)
+
+The [MDL manual §14.5.1](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines `GDECL` as an FSUBR with alternating nonempty ATOM lists and
+declaration Patterns. It installs Patterns on global value slots; a
+later `SETG` must satisfy the Pattern when declaration checking is on.
+Declaring an unassigned name creates its global slot without assigning a
+value. A wrong current value must be rejected before installation, and
+a failed later `SETG` must preserve the previous value. `GDECL` consumes
+source forms as data: it must not evaluate the ATOM list or Pattern. The
+first unchanged source call is `77defs.mud` expression 27, line 139,
+for `ORPHANS` with a five-element VECTOR Pattern. A later original
+GDECL declares three score globals as FIX. This initial slice supports
+the existing declaration matcher (simple type, OR, PRIMTYPE,
+LIST/VECTOR/UVECTOR/TUPLE with required and REST patterns); unsupported
+pattern shapes fail explicitly. `GET-DECL`/`PUT-DECL`, dynamic
+declaration-check switching, and global locatives are separate work.
+
+**Pinned Confusion/manual deviation:** the ten clean local cases in
+`evidence/M3/gdecl-reference.json` show pinned Confusion's GDECL always
+returns `T`, including empty or malformed inputs and a later SETG
+violating a FIX declaration. Its implementation in
+`confusion_patched/macros.cpp` explicitly marks GDECL unimplemented and
+returns `T` without inspecting the unevaluated form. The Racket runtime
+implements the manual operation rather than making a silent no-op. Tests
+must cover strict input shape, slot creation versus assignment,
+multiple names and patterns, existing value validation, SETG
+enforcement, and source-loader advance with zero skipped forms.
+
+## M3 eager AND? (issue #80; specification before implementation)
+
+The [MDL manual §8.2.3](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+defines `AND?` as the SUBR counterpart of short-circuit FSUBR `AND`:
+every argument is evaluated, left to right, before truth is tested.
+With no arguments it returns the session's `T` atom. Otherwise it
+returns the first FALSE argument, preserving its payload and identity,
+or the final argument if all are true; FIX zero is true. The unchanged
+`77defs.mud` expression 28, line 146, wraps five `<MSETG ...>` calls
+in AND? so every global assignment must occur, even if an earlier
+argument is FALSE. A later error must still propagate after an earlier
+FALSE because argument evaluation is eager.
+
+Seven clean pinned Confusion cases in `evidence/M3/andq-reference.json`
+cover zero arguments, last-value return, zero truth, first-FALSE
+payload, eager SET side effects, and original MSETG definitions loaded
+from the unchanged `81prim.mud`. The separate deliberate-error capture
+in `andq-error-reference.json` shows `<AND? <> <ERROR ANDQ-LATE>>`
+enters the native error level; the probe marks that case `ok=false` by
+design. The existing runtime dispatcher evaluates all arguments before
+calling a SUBR. `AND?` must use that path, not compile as short-circuit
+`AND`. Tests must pin both side effects and returned MDL values before
+the runtime addition, then rerun the unchanged loader.
+
+## M3 quoted OPTIONAL defaults (issue #82; specification before implementation)
+
+The [MDL manual §9.9](https://mdl-language.readthedocs.io/en/latest/09-functions/)
+permits a two-element OPTIONAL formal whose first element is a quoted
+ATOM, for example `('X 'A)`. If a call supplies that argument, `X`
+receives the raw, unevaluated call form and its default is not evaluated.
+If omitted, the default expression is evaluated once in the new function
+frame, after earlier formals have been bound, and the resulting value
+is bound to `X`. A default can therefore read an earlier local or perform
+a side effect. The quoted form is legal only in OPTIONAL, while an
+unquoted two-element form remains legal in OPTIONAL and AUX. Malformed
+quoted names, duplicate names, and incorrect sections remain errors.
+
+The unchanged `77defs.mud` expression 61, line 338, defines `TAKE-OBJECT`
+with `('WINNER ',WINNER)` and is the first source barrier. The pinned
+Confusion reference confirms six focused cases: omitted atom default,
+raw explicit FORM without invoking `ERROR`, default side effect, skipped
+default on explicit argument, default reading an earlier local, and the
+original `',WINNER` shape returning a FORM. Save those inputs and outputs
+under `evidence/M3/`, add failing focused tests before implementation,
+then verify exact-source loader progress with zero skipped forms. This
+slice does not change quoted required formals or ordinary OPTIONAL/AUX
+binding.
+
+## M3 APPLICABLE declaration Pattern (issue #84; specification before implementation)
+
+The [MDL manual §14.1](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines `APPLICABLE` as a compound type name in a declaration Pattern:
+it accepts values whose TYPE can legally be called as the operator of a
+FORM. This includes FIX (position application), FUNCTION, MACRO and SUBR;
+ordinary ATOM and LIST values do not match. An `APPLICABLE` alternative
+inside `<OR ...>` must obey normal OR matching and preserve strict
+declaration checking at function binding. The first unchanged source
+use is `77defs.mud` expression 78, line 448, the `FN` parameter of
+`DA`, with `<OR APPLICABLE ATOM FIX>`. This slice only adds the
+declaration Pattern; it does not claim `APPLICABLE?` as a runtime SUBR,
+custom APPLYTYPE, CLOSURE, OFFSET or RSUBR support.
+
+The pinned Confusion `APPLICABLE?` predicate returns T for FIX,
+FUNCTION, MACRO and SUBR, and FALSE for ATOM and LIST in six isolated
+cases (`evidence/M3/applicable-predicate-reference.json`). Direct
+`DECL?` probes of `APPLICABLE`, including the original OR shape,
+instead enter `BAD-TYPE-SPECIFICATION1` with an `Atom REP has neither
+LVAL nor GVAL` diagnostic (`applicable-decl-reference.json`), an
+explicit reference defect or unsupported path. The Racket declaration
+matcher follows the manual and the reference's type-applicability
+observations. Tests must fail first at unknown declaration type, then
+cover positive and negative values, OR, attached declaration checking,
+and unchanged source progress with zero skipped forms.
+
+## M3 `%<>` reader macro value (issue #86; specification before implementation)
+
+The [MDL manual §17.1.1](https://mdl-language.readthedocs.io/en/latest/17-macro-operations/)
+states that a single `%` immediately evaluates the following object
+during READ and substitutes the resulting object. In particular, `%<>`
+substitutes the canonical empty FALSE object, because evaluating the
+empty FORM `<>` yields empty FALSE. Every occurrence denotes that
+canonical value; it can be used in data or expression positions, and a
+function definition containing it retains the same value on each call.
+Six pinned Confusion cases in `evidence/M3/percent-empty-reference.json`
+confirm TYPE FALSE, false truth, identity across occurrences and calls,
+and use inside a source-shaped argument list. The first unchanged
+source use is `77makstr.mud` expression 6, line 73, in `SOBJECT`.
+
+This vertical slice recognizes only a `%` whose payload is the empty
+FORM. It substitutes the canonical empty FALSE value at compilation
+of each loaded source expression, which has the same observable result
+for this side-effect-free form. Other `%` payloads and `%%` remain
+explicitly unsupported; the broader read-time evaluation mechanism
+must be designed and tested before later source uses such as
+`%<STRING <ASCII 10>>` or `%,OVISON` are admitted. Tests must fail
+first at the unsupported percent node, then cover data and expression
+positions, identity, and rejection of other percent forms.
+
+## M3 custom WORD-primtype `#type` literal (issue #88; specification before implementation)
+
+The [MDL manual §6.2–6.3.4](https://mdl-language.readthedocs.io/en/latest/06-data-types/)
+defines `#type representation` as reading a value in the TYPE's
+primitive representation and changing its TYPE to `type`. The
+unchanged `81tell-repl.mud` expression 1 registers `PSTRING` with
+`NEWTYPE PSTRING WORD`; expression 2 uses `(OBJ #PSTRING 0)` as an
+ordinary two-element AUX formal with a typed WORD default. The parser
+must read `#PSTRING 0` as one typed-literal node, and evaluation must
+produce a PSTRING value with PRIMTYPE WORD and 36-bit zero data.
+Decimal and octal integer WORD representations use the existing
+36-bit range checks. An unregistered type or a type with another
+primitive storage class must fail explicitly. This slice does not
+support custom STRING/LIST/VECTOR typed representations or FLOAT bit
+reinterpretation.
+
+Six clean pinned Confusion probes in
+`evidence/M3/pstring-literal-reference.json` confirm TYPE PSTRING,
+PRIMTYPE WORD, equality to a CHTYPEd #WORD value, and binding through
+an AUX default. Its unknown-type case enters an error. Confusion also
+accepts a PSTRING declared with LIST primitive and a FLOAT-shaped
+representation in the retained deliberate cases; the Racket slice
+keeps the manual's primitive-type safety check and integer-only WORD
+representation. Tests must demonstrate the existing split-token
+failure first, then verify reader shape, source evaluation, 36-bit
+data, AUX binding, and strict rejection of unsupported typed forms.
+
+## M3 positional `#DECL` metadata on FUNCTION (issue #90; specification before implementation)
+
+The [MDL manual §14.9](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines an RSUBR-style `#DECL` as positional metadata beginning with
+the STRING `"VALUE"`, followed by a result Pattern, required argument
+Patterns, and optionally the STRING `"OPTIONAL"` before optional
+argument Patterns. It is distinct from the ATOM declaration's
+alternating `(ATOM ...) Pattern` pairs. The manual says this positional
+form is useful on RSUBR/RSUBR-ENTRY, not on an interpreted FUNCTION.
+The unchanged `81tell-repl.mud` expression 10 attaches this form to
+`DEFINE TELL`; the loader must parse it as typed declaration data
+rather than misinterpret the leading STRING as an ATOM-list.
+
+Pinned Confusion accepts the positional form on a FUNCTION but does
+not enforce its argument or result Patterns there: four clean cases
+and five deliberately mismatched cases all complete without errors
+(`evidence/M3/function-decl-*-reference.json`). The Racket runtime
+will validate the supported `"VALUE"`/`"OPTIONAL"` grammar and
+Patterns, preserve the positional declaration as metadata, and apply
+no ATOM-variable checks when it is attached to a FUNCTION. This is an
+observed placement rule, not a general no-op for unsupported syntax.
+`"QUOTE"`, `"TUPLE"`, `"ARGS"` and `"CALL"` positional markers,
+and actual RSUBR application, remain separate work and must fail
+explicitly if encountered in this slice. Tests must fail first at
+the current atom-list/pattern error, then cover valid metadata,
+non-enforcement on FUNCTION, malformed markers and strict Pattern
+validation before measuring unchanged source progress.
+
+## M3 `!\` CHARACTER reader notation (issue #92; specification before implementation)
+
+The [MDL manual §7](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/)
+defines `!\` followed by one ASCII character as a CHARACTER value of
+PRIMTYPE WORD. The following character is consumed even when it is a
+separator such as space. The unchanged `81tell-repl.mud` expression 23,
+line 45, uses `<PRINC !\ >` to output one space. This is distinct
+from `!<...>` and `!.X` SEGMENT notation, which must retain their
+existing behavior. An `!\` at end of input is a reader error.
+
+Five isolated pinned Confusion cases in
+`evidence/M3/space-character-reference.json` show `!\ ` has TYPE
+CHARACTER, PRIMTYPE WORD, ASCII code 32, value identity across
+occurrences, and remains a CHARACTER returned from a function.
+The Racket reader must produce a dedicated CHARACTER node, and the
+compiler must construct the existing runtime CHARACTER value in data
+and expression positions. Tests must fail first at unsupported SEGMENT
+notation, then check reader shape, space and ordinary characters,
+value operations, incomplete input and SEGMENT non-regression before
+unchanged source validation.
+
+# M3 issue #94 specification: session-aware `%` READ evaluation
+
+The [MDL manual §17.1.1](https://mdl-language.readthedocs.io/en/latest/17-macro-operations/)
+requires a single `%` to evaluate the following object immediately during
+READ at any nesting depth, substituting the resulting MDL object. The
+syntax-only parser continues to record a percent node; the executable
+reader invokes a session callback as soon as its payload has been read.
+The callback must finish before the reader consumes the next sibling. It
+must preserve the resulting object, including identity, for the lifetime
+of the loaded definition. Errors in that evaluation stop reading at the
+percent source position. `%%` is separate and remains unsupported.
+After substitution, the enclosing expression treats the object exactly
+like any object read there: a substituted FORM or structured object in
+expression position undergoes ordinary MDL evaluation, while quoted
+data retains the object. Syntax-sensitive constructs such as DEFINE
+must inspect the substituted object's actual type and contents; an
+opaque reference cannot be treated as an unknown formal/name token.
+If `%` yields a SEGMENT object in an evaluated structure or call-argument
+position, its payload is evaluated and spliced by the existing SEGMENT
+rules. The same object in a standalone expression is an explicit
+ILLEGAL-SEGMENT error. A read-time substitute must keep this positional
+distinction rather than always calling ordinary `mdl-eval` on SEGMENT.
+
+The original `81tell-repl.mud:46` needs `%<STRING <ASCII 10>>`. The manual's
+`ASCII` conversion is bidirectional: a FIX ASCII code becomes a CHARACTER;
+a CHARACTER becomes its FIX code. The supported code range is 0–127, as
+confirmed by pinned Confusion (128, 256 and -1 report out of range).
+`STRING` concatenates STRING and CHARACTER arguments after normal left to
+right evaluation; zero arguments yield the empty STRING. Unsupported types
+raise an error. Existing STRING data is represented by Racket strings and
+CHARACTER by the existing typed WORD value.
+
+Native cases in `evidence/M3/percent-read-reference.json` verify type,
+conversion, newline length, read-before-evaluation, adjacent order,
+once-only function substitution, quoted LIST identity, nested LIST, and
+the prior `%<>` behavior. Deliberate errors are retained in
+`evidence/M3/percent-read-errors-reference.json`; their probe command
+exits 1 because the tool treats native stderr as a failed clean case.
+The regression test must first fail on the original percent construct,
+then pass for these cases and prove that syntax-only parsing has no MDL
+side effects. Arbitrary reader table changes, `%%`, and READ-time channel
+control remain outside this slice and must fail explicitly.
+
+## M3 NTH declaration repetition (issue #96; specification before implementation)
+
+The [MDL manual §14.1](https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/)
+defines `[number:fix Pattern ...]` inside a structured declaration as
+the Pattern sequence repeated that positive number of times. Each
+repeated position is required; a following ordinary Pattern applies
+after the repeats, and `[REST ...]` may constrain the remaining tail.
+Additional undeclared elements are allowed. Zero/negative counts and
+an empty Pattern sequence are errors. A large count must not require
+allocating that many pattern copies merely to reject a short value.
+
+Thirteen clean pinned Confusion observations in
+`evidence/M3/nth-decl-reference.json` confirm positive count,
+multi-Pattern order, prefix/suffix placement, trailing REST, short
+values, mismatched elements and extra undeclared elements. Four
+deliberate error-level cases in `evidence/M3/nth-decl-errors-reference.json`
+confirm invalid count and empty sequence diagnostics. Confusion's
+explicit `DECL?` rejects `ANY` as BAD-TYPE-SPECIFICATION1, while its
+attached `#DECL` accepts `[3 ANY]` but does not reject a two-element
+argument. The manual and this runtime's existing `ANY` Pattern and
+attached-declaration enforcement require a three-element minimum.
+This is an explicit manual/reference deviation, not silent parity.
+
+Focused tests must first fail on NTH normalization, then cover the
+manual rule in DECL?, attached FUNCTION declarations, zero/negative
+counts, malformed brackets, large counts, and the existing REST rule.
+The unchanged original source is the final progression check.
+
+## M3 deferred attached declaration type names (issue #98; specification before implementation)
+
+An attached `#DECL` is a data value that may name a TYPE atom declared
+later. Preserve such an unresolved ATOM Pattern at definition time and
+resolve it when checking a bound argument, assignment, or result. If it is
+still neither a registered TYPE nor an atom with a `DECL` association,
+checking raises `unknown declaration type`; it must never match as `ANY`.
+The same rule applies inside OR and structured Patterns. Explicit `DECL?`
+continues to normalize and validate its Pattern immediately. Malformed
+structure, unsupported Pattern forms, aliases with cycles, and positional
+metadata retain their existing strict behavior.
+
+Pinned Confusion accepts a FUNCTION definition with `#DECL ((X) PRSOBJ)`
+and a call with `1`, but its explicit `DECL?` on `PRSOBJ` enters
+`BAD-TYPE-SPECIFICATION1`. It does not enforce attached declarations,
+while this runtime follows the manual's attached-check rule. Delaying only
+the TYPE name resolution lets the original source definition load without
+discarding the declaration or changing later checking. Tests must first
+show the original strict-definition error, then verify definition,
+late registration, strict call-time failure, explicit `DECL?` failure,
+and the unchanged source progression.
+
+## M3 duplicate attached ATOM declarations (issue #100; specification before implementation)
+
+The original `77act2.mud:424` `BALLOON` function declares `M` twice in one
+`#DECL`, first as `<OR FALSE <PRIMTYPE VECTOR>>`, then as a narrower
+`<OR FALSE <<PRIMTYPE VECTOR> ANY ROOM>>`. The MDL manual §14 describes
+an ATOM declaration as repeated `(atoms:list Pattern)` pairs and does not
+specify a duplicate-name rule. Pinned Confusion accepts a duplicate
+declaration value and function definition, but omits attached checking,
+so it cannot distinguish precedence during a call. Conservatively retain
+both Patterns and require a value to satisfy each, in source order. This
+does not silently discard either original constraint. The special VALUE
+duplicate rule stays unchanged in this bounded slice. Malformed and
+unsupported Patterns remain strict errors.
+
+Tests must first fail at the existing duplicate-name error, then verify
+both constraints, source-order failure, acceptance of the original
+`BALLOON` declaration, and source-load progression. This conjunction is
+an explicit inference from the manual's pairing semantics, not a claim of
+verified historical precedence.
+
+## M3 EVENT/HANDLER registration (issue #102; specification before implementation)
+
+The [MDL manual chapter 21](https://mdl-language.readthedocs.io/en/latest/21-interrupts/)
+defines `EVENT name priority` as creating or retrieving an enabled IHEADER,
+`HANDLER iheader applicable` as prepending a HANDLER, and `OFF` on a HANDLER
+or IHEADER as removing it from the active list or name association while
+returning the same object. EVENT on an IHEADER re-associates it; HANDLER on
+an existing detached HANDLER reattaches it. Both types have VECTOR primitive
+type and object identity. The event registry belongs to one MDL session.
+
+This bounded slice supports registration and removal for user-defined
+STRING-named events, a positive FIX priority, and FUNCTION/SUBR-like
+callables in the current PROCESS. Other APPLICABLE types are explicitly
+unsupported. It rejects unimplemented predefined events such as `"GC"`,
+`"CHAR"`, `"READ"`, `"WRITE"`, `"IPC"` and `"BLOCKED"` explicitly until
+their event sources and scheduling can be implemented. Handler dispatch,
+process-targeted handlers, and `INTERRUPT` remain unsupported and must not
+silently become no-ops. This allows the original `"DIVERT-AGC"` setup to
+be represented faithfully while making the next missing internal event
+explicit. Native Confusion's EVENT/HANDLER/OFF/ON return `T` for even invalid
+arguments, and its INTERRUPT is unbound; those are reference limitations,
+not the manual semantics implemented here. The `INTERRUPTS` OBLIST,
+name-to-IHEADER `GET` association and structural indexing/mutation of
+IHEADER/HANDLER values remain unimplemented; only STRING name lookup through
+EVENT is supported. Tests must establish identity,
+removal, reattachment, session isolation, strict unsupported
+paths, and source progression before claiming the slice.
+
+## M3 interrupt dispatcher (issue #104; specification before implementation)
+
+The [MDL manual chapter 21](https://mdl-language.readthedocs.io/en/latest/21-interrupts/)
+sets normal interrupt level to zero. An enabled event occurrence dispatches
+at a safe interpreter point when its IHEADER priority exceeds the current
+level; otherwise it is queued. Pending occurrences retain already evaluated
+arguments and occurrence order. Lowering `INT-LEVEL`, or finishing a handler,
+delivers eligible pending occurrences before normal execution resumes.
+Handlers run newest first at the IHEADER priority; the previous level is
+restored even on an error. `OFF` during dispatch prevents a removed, pending
+handler from running. A disabled or disassociated header does not dispatch;
+if disabled before queued delivery, its pending occurrence is suppressed.
+Each MDL session owns its interrupt level and queue.
+If a handler raises, its queued events remain pending while that exception
+propagates. A later `INT-LEVEL` call is a safe delivery point even when it
+sets the level to its current value, so eligible events cannot remain stuck.
+A later event-source call also drains older eligible occurrences before
+dispatching the new occurrence, preserving occurrence order after recovery.
+The new occurrence enters the queue before draining; if an older callback
+raises, the new occurrence remains pending for another safe point.
+
+`INT-LEVEL` with no arguments returns the current FIX level; with one FIX
+it sets the level and returns the old one. `ENABLE` and `DISABLE` require a
+session-owned IHEADER and return it. Focused tests call the host-only
+event-source API deterministically. Callback arguments go
+through the ordinary evaluated-argument application path. This slice keeps
+`"GC"` guarded until real collection and after-collection dispatch exist.
+The manual classifies `"GC"` and `"DIVERT-AGC"` as internal interrupts.
+All other named predefined interrupts in manual chapter 21 remain guarded
+until their sources exist. The earlier source-loading slice permits
+`"DIVERT-AGC"` registration because the original handler is immediately
+removed; its automatic event source remains unimplemented and unclaimed.
+Process-targeted handlers, `DISMISS`, and automatic sources remain unsupported.

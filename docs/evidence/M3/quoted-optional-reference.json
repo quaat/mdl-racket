@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "name": "m3-quoted-optional-research",
+  "recorded_at": "2026-11-21T15:11:53.349631+00:00",
+  "interpreter_sha256": "cd7bfffe22265b3f63dfd2713330507c53e6182ec9f41ba4aa3d818127252580",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "default-atom",
+      "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X 'A)) .X> <M3Q>",
+      "input": "<DEFINE M3Q (\"OPTIONAL\" ('X 'A)) .X> <M3Q>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3Q\nA\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3Q\nA\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "explicit-raw-form",
+      "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X 'A)) <TYPE .X>> <M3Q <ERROR NO-EVAL>>",
+      "input": "<DEFINE M3Q (\"OPTIONAL\" ('X 'A)) <TYPE .X>> <M3Q <ERROR NO-EVAL>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3Q\nFORM\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3Q\nFORM\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "default-side-effect",
+      "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X <SETG M3FLAG 1>)) .X> <M3Q> ,M3FLAG",
+      "input": "<DEFINE M3Q (\"OPTIONAL\" ('X <SETG M3FLAG 1>)) .X> <M3Q> ,M3FLAG\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3Q\n1\n1\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3Q\n1\n1\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "explicit-skips-default",
+      "expression": "<DEFINE M3Q (\"OPTIONAL\" ('X <SETG M3FLAG 1>)) .X> <M3Q 9> <GASSIGNED? M3FLAG>",
+      "input": "<DEFINE M3Q (\"OPTIONAL\" ('X <SETG M3FLAG 1>)) .X> <M3Q 9> <GASSIGNED? M3FLAG>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3Q\n9\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3Q\n9\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "default-uses-earlier-local",
+      "expression": "<DEFINE M3Q (A \"OPTIONAL\" ('X .A)) .X> <M3Q 7>",
+      "input": "<DEFINE M3Q (A \"OPTIONAL\" ('X .A)) .X> <M3Q 7>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3Q\n7\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3Q\n7\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "original-default-shape",
+      "expression": "<SETG WINNER 4> <DEFINE M3Q (\"OPTIONAL\" ('X ',WINNER)) <TYPE .X>> <M3Q>",
+      "input": "<SETG WINNER 4> <DEFINE M3Q (\"OPTIONAL\" ('X ',WINNER)) <TYPE .X>> <M3Q>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n4\nM3Q\nFORM\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 21 2026 @ 10:28:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "4\nM3Q\nFORM\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

@@ -45,10 +45,10 @@
 ;; The complete original file now loads in full: since D3 (structured
 ;; declaration patterns, issue #48) the PSETG declaration <LIST [REST ATOM]>
 ;; at 11:9 normalizes at install time, so all eight expressions of
-;; 81prim.mud load. Since D4 (issue #51) the 77loadall.mud chain passes the
-;; 77defs.mud:1 MUDDLE guard (short-circuits with ,MUDDLE = 101) and now
-;; stops at 77defs.mud expression 3's atom-property PUT - the assertions
-;; below pin both the full 81prim load and the new chain barrier.
+;; 81prim.mud load. Since D5 (issue #53) the atom-property PUT at
+;; 77defs.mud:5 stores the RAPPLIC DECL association. The assertions below
+;; pin full 81prim execution and a bounded 77defs prefix; M3 tracks the
+;; complete chain's changing failure separately.
 (define root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
 (dynamic-wind
  void
@@ -65,9 +65,8 @@
    (check (hash-ref report 'status) "PASS")
    (check (hash-ref report 'completed_expressions) 8)
    ;; The original MSETG definition, from the pinned bytes, is retained and
-   ;; executes; the PSETG definition installs with its compound declaration
-   ;; and, when invoked, stops explicitly at its <MEMQ .FOO .PL> (no MEMQ
-   ;; primitive in this slice, by scope).
+   ;; executes; PSETG installs with its compound declaration and now
+   ;; completes its first MEMQ-backed invocation.
    (check-exn-verb
     (lambda () (mdl-session-call session "MSETG" "bad" 3))
     #rx"DECL.*FOO")
@@ -75,13 +74,13 @@
    (check (mdl-atom-pname (mdl-session-call session "MSETG" atom 3)) "T")
    (check (mdl-session-global session atom) 3)
    (define psetg-atom (mdl-session-call session "ATOM" "M2-D3-LVAL"))
-   (check-exn-verb
-    (lambda () (mdl-session-call session "PSETG" psetg-atom 3))
-    #rx"unassigned or non-applicable MDL operator MEMQ")
+   (check (mdl-session-call session "PSETG" psetg-atom 3) 3)
    (check (mdl-session-global session psetg-atom) 3)
+   (check (mdl-list->list (mdl-session-global session "PURE-LIST"))
+          (list psetg-atom))
 
-   ;; The pinned 77loadall chain: copy the exact bytes of the entry and the
-   ;; two files its load chain reaches, then assert the new failure exactly.
+   ;; A bounded original-source prefix keeps this M2 declaration regression
+   ;; independent of later full-loader progress in M3.
    (define source-root
      (build-path ".cache" "upstream" "mdlzork" "mdlzork_771212"
                  "patched_confusion"))
@@ -90,25 +89,24 @@
        (lambda (out)
          (write-bytes (file->bytes (build-path source-root name)) out))))
    (define chain-session (make-mdl-session root))
-   (define chain-report
-     (mdl-session-load! chain-session "77loadall.mud"))
-   (check (hash-ref chain-report 'status) "FAIL")
-   ;; Since D4 (the interpreter-supplied MUDDLE global, issue #51) the
-   ;; 77defs.mud:1 guard <L? ,MUDDLE 100> is false with ,MUDDLE = 101, so the
-   ;; AND short-circuits and the chain advances past it; the next blocker is
-   ;; 77defs.mud expression 3, <PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>,
-   ;; whose atom-property PUT form is a later slice.
-   (check (hash-ref chain-report 'completed_expressions) 12)
-   (define failure (hash-ref chain-report 'failure))
-   (check (hash-ref failure 'file) "77defs.mud")
-   (check (hash-ref failure 'expression_index) 3)
-   (check (hash-ref failure 'stage) "execute")
-   (check (hash-ref failure 'construct) "PUT")
-   (check (hash-ref failure 'line) 5)
-   (check (hash-ref failure 'column) 1)
-   (check (string-contains? (hash-ref failure 'exception)
-                            "index out of range")
-          #t))
+   (define entry-report
+     (mdl-session-load! chain-session "77loadall.mud" #:max-expressions 1))
+   (define prim-report (mdl-session-load! chain-session "81prim.mud"))
+   (define defs-report
+     (mdl-session-load! chain-session "77defs.mud" #:max-expressions 14))
+   (check (hash-ref entry-report 'status) "PARTIAL")
+   (check (hash-ref entry-report 'completed_expressions) 1)
+   (check (hash-ref prim-report 'status) "PASS")
+   (check (hash-ref prim-report 'completed_expressions) 8)
+   (check (hash-ref defs-report 'status) "PARTIAL")
+   (check (hash-ref defs-report 'completed_expressions) 14)
+   (check (hash-ref defs-report 'failure) #f)
+   (check (mdl-atom-pname
+           (mdl-session-call chain-session "TYPE"
+                             (mdl-session-call chain-session "GET"
+                                               (mdl-session-atom chain-session "RAPPLIC")
+                                               (mdl-session-atom chain-session "DECL"))))
+          "FORM"))
  (lambda ()
    (with-handlers ([exn:fail? void])
      (delete-directory/files root))))

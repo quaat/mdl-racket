@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "m2-typeq-deliberate-errors",
+  "recorded_at": "2026-11-20T19:48:24.476076+00:00",
+  "interpreter_sha256": "1d540d2df348479d4740290d4190533b71d94a8308193811b96e52898798b886",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "no-value",
+      "expression": "<TYPE?>",
+      "input": "<TYPE?>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Not enough arguments to TYPE?\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "non-atom-candidate",
+      "expression": "<TYPE? 3 4>",
+      "input": "<TYPE? 3 4>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "unknown-type-candidate",
+      "expression": "<TYPE? 3 XYZZY-TYPE>",
+      "input": "<TYPE? 3 XYZZY-TYPE>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FALSE ()\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": false
+}

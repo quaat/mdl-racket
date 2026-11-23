@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "m2-mapf-function-context-reference",
+  "recorded_at": "2026-11-20T19:52:57.503956+00:00",
+  "interpreter_sha256": "1d540d2df348479d4740290d4190533b71d94a8308193811b96e52898798b886",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "nested-direct-function",
+      "expression": "<DEFINE MAP-HELP (X) <+ .X 10>> <MAPF ,LIST <FUNCTION (Y) <MAP-HELP .Y>> '(1 2)>",
+      "input": "<DEFINE MAP-HELP (X) <+ .X 10>> <MAPF ,LIST <FUNCTION (Y) <MAP-HELP .Y>> '(1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nMAP-HELP\n(11 12)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "MAP-HELP\n(11 12)\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "function-value-in-prog",
+      "expression": "<PROG ((N 10)) <MAPF ,LIST <FUNCTION (X) <+ .N .X>> '(1 2)>>",
+      "input": "<PROG ((N 10)) <MAPF ,LIST <FUNCTION (X) <+ .N .X>> '(1 2)>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n(11 12)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "(11 12)\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "escaping-function",
+      "expression": "<SETG F <PROG ((N 10)) <FUNCTION (X) <+ .N .X>>>> <MAPF ,LIST ,F '(1 2)>",
+      "input": "<SETG F <PROG ((N 10)) <FUNCTION (X) <+ .N .X>>>> <MAPF ,LIST ,F '(1 2)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FUNCTION ((X) <+ .N .X>)\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n N \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 20 2026 @ 15:29:55\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#FUNCTION ((X) <+ .N .X>)\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"LVAL\" \n N \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ],
+  "complete": false
+}

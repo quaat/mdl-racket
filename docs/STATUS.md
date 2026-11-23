@@ -1,4 +1,269 @@
-# Status — 2026-11-19 (M2 declarations merged; SEGMENT slice open)
+# Status — 2026-11-22 (M2 mainline PASS; M3 source execution partial)
+
+## Current state (2026-11-22)
+
+| M3 stage | Current evidence |
+|---|---|
+| PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
+| LOADED | FAIL: loader exit 1 after 433 original forms, zero skipped |
+| INITIALIZED | NOT RUN: source chain has not completed |
+| INTERACTIVE | NOT RUN: original startup/game loop unavailable |
+| SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
+| PLAYABLE | NOT RUN: original game has not booted in Racket |
+
+- **Issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
+  scoped Gate A PASS after independent review; Gate B BLOCKED and M3
+  incomplete.** Session-owned
+  priority dispatch, pending occurrences, `INT-LEVEL`, `ENABLE`, and
+  `DISABLE` have focused red-to-green tests. Independent review findings
+  were fixed for queued delivery after a handler exception,
+  event-order preservation, and strict predefined event registration.
+  The verified source frontier remains **433 completed forms, zero
+  skipped**, with loader exit 1 at `77rooms.mud` expression 16, line 101:
+  `EVENT "GC"` stays guarded until an actual post-collection event source
+  and defensible `<GC>` return semantics exist. The blocker is missing
+  MDL reclaimed-word accounting and automatic collection scheduling;
+  options and the recommended bounded ledger feasibility probe are in
+  [ADR-0043](DECISIONS.md). `make m3-source-progress`
+  exits 0 only as a partial measurement. M2 remains PASS; source loading,
+  initialization, interactive input and parity are unverified. See
+  [interrupt evidence](evidence/M3/INTERRUPT-FOUNDATION.md) and
+  [issue #104](https://github.com/quaat/mdl-racket/issues/104).
+
+- **Issue #102 user EVENT/HANDLER registration slice PASS on
+  `feat/m3-event-handler`; full M3 gate incomplete:** session-owned
+  IHEADER and HANDLER objects support registration, identity, removal
+  and reattachment for user-defined STRING events. The manual supplies
+  these rules; pinned Confusion stubs the related operators as `T`, so
+  native output is a documented reference deviation. Automatic events,
+  callback dispatch and process-targeted handlers remain unsupported.
+  The unchanged loader completes **433 original forms, zero skipped**,
+  up from 430, then exits 1 at `77rooms.mud` expression 16, line 101:
+  `EVENT "GC"` is explicitly unsupported until real GC callback delivery.
+  The blocker is absent automatic GC scheduling; the options are to
+  implement verifiable delivery or keep registration unsupported. The
+  recommended next action is a GC callback probe and implementation,
+  with the source stop retained until verified.
+  `make m3-source-progress` exits 0 only as a partial measurement. See
+  [evidence](evidence/M3/EVENT-REGISTRATION.md) and next
+  [issue #104](https://github.com/quaat/mdl-racket/issues/104) under
+  [event issue #71](https://github.com/quaat/mdl-racket/issues/71).
+  Full load, initialization, interactive input and parity remain unverified.
+- **Issue #100 duplicate ATOM declaration slice PASS on
+  `feat/m3-duplicate-decl`; full M3 gate incomplete:** duplicate names
+  retain both Patterns and enforce their conjunction in source order.
+  Manual precedence is unspecified and the conjunction is documented as
+  an inference; pinned Confusion accepts the syntax but does not enforce
+  attached declarations. The unchanged loader completes **430 original
+  forms, zero skipped**, up from 363, fully loading `77act1.mud`,
+  `77act2.mud` and `77act3.mud`. It exits 1 at `77rooms.mud`
+  expression 13, line 92: unassigned `HANDLER`. `make m3-source-progress`
+  exits 0 as a partial measurement only. See
+  [evidence](evidence/M3/DUPLICATE-DECL.md) and next
+  [issue #102](https://github.com/quaat/mdl-racket/issues/102) under
+  [event issue #71](https://github.com/quaat/mdl-racket/issues/71).
+  Full load, initialization, interactive input and parity remain unverified.
+- **Issue #98 deferred attached TYPE names PASS on
+  `feat/m3-deferred-decl-type`; full M3 gate incomplete:** an unresolved
+  TYPE atom remains in an attached declaration and is resolved only when
+  checking a value. It raises an error if still unknown; explicit `DECL?`
+  remains immediate. Four clean and two error-level pinned Confusion probes
+  support the distinction, with attached enforcement retained as a manual
+  rule and reference deviation. The unchanged loader completes **363
+  original forms, zero skipped**, up from 233, and fully loads
+  `77act1.mud`. It exits 1 at `77act2.mud` expression 39, line 424:
+  duplicate declaration for `M`. `make m3-source-progress` exits 0 as a
+  partial measurement only. See [evidence](evidence/M3/DEFERRED-DECL-TYPE.md)
+  and next [issue #100](https://github.com/quaat/mdl-racket/issues/100).
+  Full load, initialization, interactive input and parity remain unverified.
+- **Issue #96 NTH declaration slice PASS on `feat/m3-nth-declaration`;
+  full M3 gate incomplete:** positive-count repeated Pattern sequences
+  match lazily and reject short values; NTH also works in NEWTYPE's stored
+  Pattern. Thirteen clean and four error-level pinned Confusion observations
+  are retained. Its attached `[3 ANY]` accepts a short vector, a documented
+  reference deviation from the manual and this runtime. The unchanged
+  loader completes **233 original forms, zero skipped**, up from 188,
+  and exits 1 at `77act1.mud` expression 55, line 740: unknown
+  declaration type `PRSOBJ`. `make m3-source-progress` exits 0 only as a
+  partial-progress measurement. The next bounded task is
+  [issue #98](https://github.com/quaat/mdl-racket/issues/98). See
+  [NTH evidence](evidence/M3/NTH-DECL.md). Full loading, initialization,
+  interactive input and game parity remain unverified.
+- **Issue #94 session-aware `%` READ slice PASS on
+  `feat/m3-read-time-percent`; full M3 gate incomplete:** executable
+  reading evaluates `%` before consuming the next sibling, retaining the
+  actual substituted object per session. `ASCII` and CHARACTER-capable
+  `STRING` satisfy the original `81tell-repl.mud:46` expression. Native
+  probes confirm ordering, once-only substitution, identity and errors.
+  The unchanged loader completes 188 original forms with zero skips,
+  fully loads `81tell-repl.mud`, and exits 1 at `77act1.mud`
+  expression 10, line 78: unsupported NTH declaration Pattern
+  `[3 ANY]`. `make m3-source-progress` exits 0 as a partial-progress
+  measurement. Full load, initialization and gameplay remain unverified.
+  See [issue #94 evidence](evidence/M3/PERCENT-READ.md),
+  [next issue #96](https://github.com/quaat/mdl-racket/issues/96), and the
+  [compatibility inventory](evidence/M3/COMPATIBILITY-INVENTORY.md).
+- **Issue #92 `!\` CHARACTER reader slice PASS; full M3 gate
+  incomplete:** `!\ ` now reads as a CHARACTER with code 32, distinct
+  from SEGMENT syntax. Five native cases corroborate TYPE, primitive
+  type, ASCII code and identity. `make test` passes 1,160 Racket and
+  22 Python tests; `make m2-check` passes. The unchanged loader still
+  completes 157 forms, zero skipped: the first failure moves within
+  `81tell-repl.mud` expression 23 from `!\ ` at line 45 to the
+  distinct `%<STRING <ASCII 10>>` read macro at line 46. This slice
+  has **no completed-form increase**. See
+  [evidence](evidence/M3/SPACE-CHARACTER.md) and
+  [next issue #94](https://github.com/quaat/mdl-racket/issues/94).
+- **Issue #90 positional `#DECL` metadata slice PASS; full M3 gate
+  incomplete:** the RSUBR-style `"VALUE"`/`"OPTIONAL"` Pattern list
+  is validated and retained on FUNCTION, without ATOM-variable
+  enforcement, matching nine pinned Confusion observations. `make
+  test` passes 1,148 Racket and 22 Python tests; `make m2-check`
+  passes. The unchanged loader completes 157 forms, zero skipped,
+  then stops at `!\ ` in `81tell-repl.mud` expression 23, line 45.
+  See [evidence](evidence/M3/FUNCTION-DECL.md) and
+  [next issue #92](https://github.com/quaat/mdl-racket/issues/92).
+- **Issue #88 custom WORD-primtype literal slice PASS; full M3 gate
+  incomplete:** the parser reads `#PSTRING 0` as one typed object in
+  the original two-element AUX default. Six native cases confirm its
+  PSTRING TYPE, WORD primitive, data and binding; a deliberate
+  wrong-primitive native observation differs from manual CHTYPE
+  safety, which Racket retains. `make test` passes 1,135 Racket and
+  22 Python tests; `make m2-check` passes. The unchanged loader
+  completes 144 original forms, zero skipped, then stops at a
+  function-style `#DECL` in `81tell-repl.mud` expression 10, line 27.
+  See [evidence](evidence/M3/PSTRING-LITERAL.md) and
+  [next issue #90](https://github.com/quaat/mdl-racket/issues/90).
+- **Issue #86 `%<>` reader macro value slice PASS; full M3 gate
+  incomplete:** the side-effect-free empty FORM after `%` becomes
+  canonical empty FALSE in data or expression position. Six native
+  cases corroborate TYPE, truth and identity; other `%`/`%%` forms
+  still fail strictly. `make test` passes 1,121 Racket and 22 Python
+  tests; `make m2-check` passes. The unchanged loader completes 136
+  original forms, zero skipped, fully loading `77makstr.mud` before a
+  three-element typed AUX formal in `81tell-repl.mud` expression 2,
+  line 3. See [evidence](evidence/M3/PERCENT-EMPTY.md) and
+  [next issue #88](https://github.com/quaat/mdl-racket/issues/88).
+- **Issue #84 APPLICABLE declaration Pattern slice PASS; full M3 gate
+  incomplete:** the manual's compound type name now matches the callable
+  values represented by this runtime, including FIX, FUNCTION, MACRO and
+  SUBR, in simple, OR and structured Patterns. Six native `APPLICABLE?`
+  cases corroborate type applicability; direct Confusion `DECL?`
+  APPLICABLE probes instead enter an error, a documented deviation.
+  `make test` passes 1,113 Racket and 22 Python tests; `make m2-check`
+  passes. The unchanged loader completes 112 original forms, zero
+  skipped, fully loading `77defs.mud`. The next failure is `%<>` in
+  `77makstr.mud` expression 6, line 73. See
+  [evidence](evidence/M3/APPLICABLE-DECL.md) and
+  [next issue #86](https://github.com/quaat/mdl-racket/issues/86).
+- **Issue #82 quoted OPTIONAL default slice PASS; full M3 gate incomplete:**
+  the manual and six pinned Confusion cases establish raw explicit
+  arguments and evaluated defaults in the growing frame. Focused tests
+  pass; `make test` passes 1,097 Racket checks and 22 Python tests;
+  `make m2-check` passes. The unchanged loader now completes 87 forms,
+  zero skipped, then stops at `APPLICABLE` in `77defs.mud` expression
+  78, line 448. See [evidence](evidence/M3/QUOTED-OPTIONAL.md) and
+  [next issue #84](https://github.com/quaat/mdl-racket/issues/84).
+- **Issue #80 eager AND? slice PASS; full M3 gate incomplete:**
+  seven clean native cases, one deliberate late-error case and a
+  SHA-verified original-source regression establish eager argument
+  evaluation and all five `MSETG` global side effects in `77defs.mud`
+  expression 28. `make test` passes 1,086 Racket checks and 22 Python
+  tests. The unchanged loader reaches 70 completed forms, zero skipped;
+  the next failure is a quoted OPTIONAL default in `77defs.mud`
+  expression 61, line 338. See [evidence](evidence/M3/ANDQ.md) and
+  [next issue #82](https://github.com/quaat/mdl-racket/issues/82).
+- **Issue #78 GDECL slice PASS; full M3 gate incomplete:** original
+  `GDECL` is a source-data FSUBR that installs global value Patterns and
+  checks later `SETG`. Pinned Confusion's GDECL is an explicit no-op, so
+  this is a documented manual/reference deviation. `make test` passes
+  1,077 Racket checks and 22 Python tests; the unchanged loader completes
+  37 forms with zero skips and then stopped at `AND?` in `77defs.mud`
+  expression 28, line 146. See [evidence](evidence/M3/GDECL.md) and
+  [next issue #80](https://github.com/quaat/mdl-racket/issues/80).
+- **Issue #76 source-backed slice PASS; full M3 gate incomplete:**
+  three-argument `NEWTYPE` stores and enforces a declaration Pattern,
+  including `<<PRIMTYPE VECTOR> ...>` structure heads and same-primitive
+  redeclaration. The pinned Confusion reference ignores this third
+  argument, a documented manual/reference deviation. The unchanged loader
+  reached 36 forms with zero skips, then stopped at `GDECL` in
+  `77defs.mud` expression 27, line 139. See [evidence](evidence/M3/NEWTYPE-DECL.md)
+  and [next issue #78](https://github.com/quaat/mdl-racket/issues/78).
+- **First M3 source-backed slice PASS; full M3 gate remains incomplete:**
+  issue #75 adds native-backed `EMPTY?`, bounded `LENGTH?`, current-frame
+  `ASSIGNED?`, and startup `ROOT`. `make test` passes 1,046 Racket checks
+  and 22 Python tests; `make m2-check` passes its G3 58 assertions and
+  native probes/capture. `make m3-source-progress` measures 26 completed,
+  zero skipped forms, two beyond the accepted prefix. The first remaining
+  barrier at that checkpoint was `77defs.mud` expression 17, line 66: three-argument
+  `NEWTYPE`, tracked in [issue #76](https://github.com/quaat/mdl-racket/issues/76).
+  See [slice evidence](evidence/M3/EMPTYQ.md). The optional
+  `ASSIGNED?` ENV form, full loader, initialization, and play are not
+  supported or established.
+
+- **M2 gate PASS on integrated `main` code baseline `7d34195`:**
+  [mainline report](evidence/M2/MAINLINE-GATE.md) records the eight
+  authorized merges, requirements audit, all command exits, source hashes,
+  reference comparisons, CI and limits. G0/G1/G2 and G3 pass; G3 executes
+  59 same-session exact-source assertions. `make m2-check` exits 0 with
+  986 Racket checks and 13 Python tests; the final `main` harness run
+  44889721673 succeeds.
+- **First M3 source barrier:** the unchanged `77loadall.mud` chain exits 1
+  after 24 completed and zero skipped forms at unassigned `EMPTY?` inside
+  original `NEWSTRUC`, `77defs.mud` expression 15, line 37 (execute).
+  This is not game initialization or a playable session.
+- **M3 progress infrastructure:** issue #73 makes the M2 regression suite
+  independent of full-loader progress and adds a machine-readable M3
+  source-progress target. `make m2-check` now passes with 986 Racket, 22 Python and
+  58 original-source G3 assertions; `make m3-source-progress` passes with
+  the authentic 24-form EMPTY? report. See [M3 source progress](evidence/M3/SOURCE-PROGRESS.md).
+- **Earlier next action:** implement EMPTY? from native evidence. Random/event APIs are tracked in
+  [M3 issue #71](https://github.com/quaat/mdl-racket/issues/71), with no
+  parity claim. The pinned Confusion reference loads the full 12-file
+  chain to `DONE`.
+
+## Earlier branch checkpoints (retained for provenance)
+
+The [branch acceptance report](evidence/M2/BRANCH-ACCEPTANCE.md) records
+the last stacked-head result before integration. The independent D5 review
+and issue #67 correction are in [D5-FINAL-REVIEW.md](evidence/M2/D5-FINAL-REVIEW.md).
+The [G3-GATE-MAPF.md](evidence/M2/G3-GATE-MAPF.md) report records the
+first branch-level 59-assertion G3 PASS; the [requirements audit](evidence/M2/REQUIREMENTS-AUDIT.md)
+traces the accepted M2 surface. Older FAIL checkpoints below preserve their
+original observations and must not be read as current blockers.
+
+## Earlier checkpoints (retained for provenance)
+- **Earlier N=? local slice:** `make test` 879 Racket checks and 13 Python tests;
+  focused `neq_test.rkt` 13 checks. Original MSETG advanced from `N=?`
+  to `,.FOO`; see [evidence](evidence/M2/NEQ.md). The next action is
+  issue #58, then repeat G3. M3 `EMPTY?` waits for G3.
+- **Earlier issue #58 stacked reader slice:** `,.FOO` parses as GVAL of the local
+  value FOO. `make test` passes 884 Racket checks and 13 Python tests;
+  `make test-historical` passes exact-source MSETG first/equal-repeat paths
+  alongside VFLOAD and DECL. The original conflicting-repeat path now reaches
+  unassigned `ERROR`; G3 is still FAIL. See
+  [computed-global evidence](evidence/M2/COMPUTED-GLOBAL.md). Next: probe
+  and implement `ERROR` as a separate source-backed slice (issue #60), then
+  rerun G3.
+- **Earlier issue #60 stacked ERROR slice:** `make test` passes 888 Racket checks
+  and 13 Python tests; `make test-historical` includes the hash-verified
+  original MSETG conflict and passes. Confusion's `ERROR` enters a
+  resumable level; this Racket slice raises a non-resumable exception with
+  evaluated arguments. See [evidence](evidence/M2/ERROR.md). The integrated
+  G3 was rerun and fails at `MEMQ`; no gate PASS claim is possible.
+- **Earlier current-head G3 rerun:** `make test-m2-g3` exits 2 after 48 passing
+  integrated assertions; original MSETG first/equal/conflict paths pass,
+  while original PSETG reaches unassigned `MEMQ` after its initial SETG
+  and PURE-LIST side effects. **G3 FAIL**. See
+  [gate evidence](evidence/M2/G3-GATE.md); focused correction issue #63.
+- **Current MEMQ/G3 rerun:** `make test` passes 903 Racket checks and 13
+  Python tests; `make test-historical` passes VFLOAD 23, DECL 21, MSETG,
+  and PSETG. `make test-m2-g3` exits 2 after 52 passing assertions because
+  original FLAGWORD reaches unassigned `MAPF`. **G3 FAIL**. See
+  [MEMQ evidence](evidence/M2/MEMQ.md) and [G3 gate](evidence/M2/G3-GATE.md).
+- **Not demonstrated:** full integrated M2 state invariants, game boot,
+  parser, puzzle behavior, RNG parity.
+
 
 ## M2 source execution audit (G0)
 
@@ -498,3 +763,34 @@ eager interpreted segment-payload evaluation) are recorded in
 slice's close the structured declaration patterns (issue #48, recorded
 above) were the next dependency; general APPLY/DISPATCH and original game
 execution remained open.
+
+## M2 issue #53: atom-property PUT/GET associations (D5)
+
+**Local slice: PASS (branch `feat/m2-atom-props`). M2 milestone: NOT YET
+PASS.** The D5 slice implements MDL association space: `PUT` and `GET`
+dispatch exactly as the pinned reference classifies (structured item +
+FIX indicator is the element store; every other combination — including
+FIX indicators on non-structured items — is an association;
+two-argument PUT removes and echoes the item; one-argument PUT is
+TOO-FEW-ARGUMENTS-SUPPLIED; three-argument GET on a structure errors).
+Associations match by `==?` identity via `mdl-identical?` on both item
+and indicator in a session-owned entry list — fresh sessions start
+property-free. A weak `eq?` table failed review regressions for WORDs and
+array REST views; the corrected store retains keys until removal or session
+end, a documented GC-lifetime deviation. `DECL?` consults an atom's `DECL` association through
+the existing D1/D3 matcher and carries the resolved leaf in the `#FALSE`
+payload; `SETG` deliberately does not enforce it. `GETPROP`/`PUTPROP`
+and chapter 13.4 machinery remain explicit unimplemented failures.
+The historical `77defs.mud` expression 3
+`<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` now executes; the pinned
+load advances from twelve to **twenty-four completed expressions** and
+stops at `77defs.mud` expression 15 (`EMPTY?` inside the original
+`NEWSTRUC`). `make test` passes 864 Racket checks and 13 Python tests.
+Eighteen initial and eleven review-derived pinned Confusion success cases,
+plus six initial deliberate errors, one review-derived error and one bounded
+alias-cycle timeout back the semantics; the two manual-vs-reference conflicts
+(removal returns the item, not the previous value; augmented `#FALSE
+(leaf)` DECL? misses) are adjudicated toward the reference in
+[`docs/evidence/M2/ATOM-PROPS.md`](evidence/M2/ATOM-PROPS.md) and ADR-0023.
+Full details in `docs/SEMANTICS.md` (M2 D5 section). The integrated G3
+gate and original game execution remain open.

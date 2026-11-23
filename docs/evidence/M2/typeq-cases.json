@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "m2-typeq-success-reference",
+  "cases": [
+    {"name": "atom-hit", "expression": "<TYPE? 'A ATOM>"},
+    {"name": "atom-miss", "expression": "<TYPE? 'A FIX>"},
+    {"name": "multiple-late-hit", "expression": "<TYPE? 3 ATOM FIX>"},
+    {"name": "false-hit", "expression": "<TYPE? <> FALSE>"},
+    {"name": "no-candidates", "expression": "<TYPE? 3>"},
+    {"name": "newtype-hit", "expression": "<NEWTYPE TQTEST VECTOR> <TYPE? <CHTYPE '[1] TQTEST> TQTEST>"}
+  ]
+}

@@ -9,4 +9,22 @@ raco test mdl/runtime/core.rkt \
   tests/prog_test.rkt tests/equality_cycle_test.rkt tests/repeat_test.rkt \
   tests/activation_target_test.rkt tests/formals_test.rkt \
   tests/control_test.rkt tests/macro_test.rkt tests/loader_test.rkt tests/muddle_test.rkt \
-  tests/declaration_test.rkt tests/declaration_pattern_test.rkt tests/segment_test.rkt
+  tests/declaration_test.rkt tests/declaration_pattern_test.rkt tests/segment_test.rkt \
+  tests/atom_props_test.rkt tests/neq_test.rkt tests/error_test.rkt \
+  tests/memq_test.rkt tests/mapf_test.rkt tests/typeq_test.rkt \
+  tests/startup_oblist_assoc_test.rkt tests/indirect_apply_test.rkt \
+  tests/emptyq_test.rkt tests/lengthq_test.rkt tests/assignedq_test.rkt \
+  tests/root_test.rkt tests/newtype_decl_test.rkt tests/gdecl_test.rkt \
+  tests/andq_test.rkt \
+  tests/quoted_optional_test.rkt \
+  tests/applicable_decl_test.rkt \
+  tests/percent_empty_test.rkt \
+  tests/pstring_literal_test.rkt \
+  tests/function_decl_metadata_test.rkt \
+  tests/space_character_test.rkt \
+  tests/percent_read_test.rkt \
+  tests/nth_decl_test.rkt \
+  tests/deferred_decl_type_test.rkt \
+  tests/duplicate_decl_test.rkt \
+  tests/event_registration_test.rkt \
+  tests/interrupt_dispatch_test.rkt

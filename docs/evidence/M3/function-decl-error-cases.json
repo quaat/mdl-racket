@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "m3-function-style-decl-deliberate-errors",
+  "cases": [
+    {"name": "wrong-argument", "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX) .X> <M3FD \"BAD\">"},
+    {"name": "wrong-result", "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX) \"BAD\"> <M3FD 1>"},
+    {"name": "wrong-optional", "expression": "<DEFINE M3FD (X \"OPTIONAL\" (Y 2)) #DECL (\"VALUE\" FIX FIX \"OPTIONAL\" FIX) .X> <M3FD 1 \"BAD\">"},
+    {"name": "extra-pattern", "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX FIX) .X> <M3FD 1>"},
+    {"name": "missing-pattern", "expression": "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX) .X> <M3FD 1>"}
+  ]
+}

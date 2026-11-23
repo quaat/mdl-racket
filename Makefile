@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -21,11 +21,42 @@ test-racket:
 	@bash scripts/test_racket.sh
 
 test-python:
-	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py
+	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py
 
 test-historical: sources
 	@racket tests/historical_vfload_test.rkt
 	@racket tests/historical_decl_test.rkt
+	@racket tests/historical_computed_global_test.rkt
+	@racket tests/historical_error_test.rkt
+	@racket tests/historical_memq_test.rkt
+
+test-m2-g3: sources
+	@racket tests/historical_g3_test.rkt
+
+test-m3-andq: sources
+	@racket tests/historical_andq_test.rkt
+
+# Complete local M2 technical check. Build the native reference once with
+# `make reference-build` before using this target. Milestone acceptance also
+# requires review, authorized integration, and verification on main.
+m2-check:
+	@$(MAKE) doctor
+	@$(MAKE) sources
+	@MDL_SWEEP_OUTPUT=artifacts/m2/reader-sweep.json $(MAKE) check-source
+	@$(MAKE) test
+	@$(MAKE) test-historical
+	@$(MAKE) test-m2-g3
+	@$(MAKE) reference-probe
+	@$(MAKE) reference-capture
+	@git diff --check
+
+# A valid incomplete load is progress evidence, not a successful game boot.
+# The validator rejects regressions, skips, malformed reports and false DONE.
+m3-source-progress: sources
+	@MDL_SWEEP_OUTPUT=artifacts/m3/reader-sweep.json $(MAKE) check-source
+	@$(MAKE) test-m2-g3
+	@$(MAKE) test-m3-andq
+	@$(PYTHON) scripts/m3_source_progress.py
 
 check-source:
 	@if raco help make >/dev/null 2>&1; then raco make scripts/mdl_check.rkt; fi

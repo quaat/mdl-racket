@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "m2-indirect-apply-deliberate-errors",
+  "cases": [
+    {"name": "apply-no-args", "expression": "<APPLY>"},
+    {"name": "apply-nonapplicable", "expression": "<APPLY 'FOO 1>"},
+    {"name": "apply-quoted-formal", "expression": "<APPLY <FUNCTION ('X) .X> 1>"},
+    {"name": "apply-args-formal", "expression": "<APPLY <FUNCTION (\"ARGS\" X) .X> 1>"},
+    {"name": "apply-defined-args", "expression": "<DEFINE ARGS-F (\"ARGS\" X) .X> <APPLY ,ARGS-F 1>"},
+    {"name": "apply-macro", "expression": "<DEFMAC M (X) .X> <APPLY ,M 1>"},
+    {"name": "computed-nonapplicable", "expression": "<SET F 'FOO> <.F 1>"},
+    {"name": "computed-index-arity", "expression": "<1 '(A B) '(C D) 3>"},
+    {"name": "rebound-native-to-index", "expression": "<SETG + 9> <+ 1 2>"}
+  ]
+}

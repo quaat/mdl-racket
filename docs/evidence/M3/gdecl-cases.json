@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "m3-gdecl-native-reference",
+  "cases": [
+    {"name": "single", "expression": "<GDECL (M3G) FIX>"},
+    {"name": "assignment-accepted-despite-decl", "expression": "<GDECL (M3G) FIX> <SETG M3G \"x\">"},
+    {"name": "no-assignment", "expression": "<GDECL (M3G) FIX> <GASSIGNED? M3G>"},
+    {"name": "valid-assignment", "expression": "<GDECL (M3G) FIX> <SETG M3G 3> <GASSIGNED? M3G>"},
+    {"name": "redeclare", "expression": "<GDECL (M3G) FIX> <GDECL (M3G) STRING>"},
+    {"name": "empty", "expression": "<GDECL>"},
+    {"name": "invalid-pattern", "expression": "<GDECL (M3G) 3>"},
+    {"name": "missing-pattern", "expression": "<GDECL (M3G)>"},
+    {"name": "two-bindings", "expression": "<GDECL (M3G) FIX (M3H) STRING>"},
+    {"name": "fsubr-does-not-evaluate", "expression": "<GDECL (M3G) <ERROR M3G-ERROR>>"}
+  ]
+}

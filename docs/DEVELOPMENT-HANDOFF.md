@@ -1,26 +1,158 @@
 # Development handoff — MDL on Racket
 
-Durable cross-session state. Update at every meaningful checkpoint; link to
-evidence instead of duplicating logs. Last updated 2026-11-19 (post-D1 merge,
-D2 in progress).
+**Current handoff, 2026-11-21:** M2 remains PASS; M3 is partial. Issue #102
+adds real user EVENT/HANDLER registration and advances the SHA-verified
+original loader from 430 to 433 completed forms with zero skips. It now
+stops explicitly at external `EVENT "GC"` in `77rooms.mud` expression 16,
+line 101. See [`EVENT-REGISTRATION.md`](evidence/M3/EVENT-REGISTRATION.md)
+and next [issue #104](https://github.com/quaat/mdl-racket/issues/104).
+Full game load,
+initialization, and parity remain unverified.
 
-- **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), and
-  the agent definitions (PR #47) are all **merged into `main`** (current
-  main `89ab9cd`, post-merge CI green); issues #44/#46/#48 closed.
-  Integrated M3-style gate NOT RUN. M2 milestone NOT YET PASS.
-- **Active issues/PRs:** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
-  (D2 SEGMENT) — review findings fixed, CI green on head `c4a1d63`,
-  **awaiting maintainer merge decision**;
+Durable cross-session state. Update at every meaningful checkpoint; link to
+evidence instead of duplicating logs. Last updated 2026-11-21.
+
+**Earlier checkpoint (2026-11-21):** M0/M1/M2 PASS on integrated `main`
+at `74effec5744a44f43ae9c6a308b2ab37013ec7b0`; M3 incomplete.
+The issue #94 branch advances the unchanged loader from 157 to 188
+original forms, zero skipped. Four files fully load (`81prim.mud`,
+`77defs.mud`, `77makstr.mud`, `81tell-repl.mud`); `77loadall.mud`
+and `77act1.mud` are partial. The first failure is in
+`77act1.mud` expression 10, line 78, unsupported NTH declaration
+Pattern. The source locks remain MIT Zork
+`d94501340842e006791fce0757dc0043b8ec8916` and Confusion
+`bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`. See
+[`SPACE-CHARACTER.md`](evidence/M3/SPACE-CHARACTER.md) and current
+`artifacts/m3/source-progress.json`. No full load, initialization,
+interactive loop or game parity has been verified.
+
+**Issue #94 branch checkpoint:** `feat/m3-read-time-percent` implements
+session-aware `%` READ evaluation and the original `ASCII`/`STRING`
+dependency. Native probes and architecture ADR-0042 preceded the change.
+`make test` exits 0 (1,200 Racket, 23 Python); `make m2-check` exits 0;
+`make m3-source-progress` exits 0 as partial progress. The unchanged
+loader exits 1 after 188 forms, zero skipped; `81tell-repl.mud` is now
+fully loaded. `77act1.mud` expression 10, line 78 fails at unsupported
+NTH declaration repetition `[3 ANY]`. See
+[`PERCENT-READ.md`](evidence/M3/PERCENT-READ.md),
+[`source-progress-percent-read.json`](evidence/M3/source-progress-percent-read.json),
+and [`COMPATIBILITY-INVENTORY.md`](evidence/M3/COMPATIBILITY-INVENTORY.md).
+Next: review/integrate issue #94, then probe the NTH declaration Pattern
+in [issue #96](https://github.com/quaat/mdl-racket/issues/96).
+The fresh HTTPS clone attempt exited 128 because DNS could not resolve
+`github.com`; the existing checkout and GitHub integration both verified
+the same main SHA. Local `gh auth status` exits 1 because its token is
+invalid; the connected GitHub integration can read issue #94. User
+untracked `.claude/worktrees/` and `tests/fixtures/mytest.mdl` remain
+untouched. Issue #67 was closed after its D5 fix and final-head evidence
+were verified integrated; issue #71 still tracks random/event APIs.
+PR #55 remains open and unmerged because its GLM-specific routing is
+separate from this runtime task.
+
+## Earlier checkpoints (retained for provenance)
+
+**Latest correction (issue #60):** `feat/m2-error-primitive` adds a strict
+`ERROR` builtin. Four deliberate native error cases are saved in
+`docs/evidence/M2/error-*`; the Racket `ERROR` raises a non-resumable
+exception. The hash-verified original MSETG conflicting-repeat path now
+passes. `make test` passes 888 Racket and 13 Python checks;
+`make test-historical` passes all four probes. The integrated G3 branch
+still needs a current-head run, so G3 remains FAIL and M3 is not started.
+Next: update and rerun G3, then act only on its observed first failure.
+
+**Latest M2 correction (issue #63):** `feat/m2-memq` implements `MEMQ`
+for LIST, VECTOR, UVECTOR and list-primitive structured values with
+`==?` identity and REST aliasing. Eight clean Confusion cases and three
+deliberate error cases (including one reference segfault) are saved in
+`docs/evidence/M2/memq-*`. `make test` passes 903 Racket and 13 Python
+checks; `make test-historical` passes VFLOAD 23, DECL 21, MSETG, PSETG.
+The updated G3 test passes 52 assertions then exits 2: original FLAGWORD
+reaches unassigned `MAPF` (issue #65). See `docs/evidence/M2/MEMQ.md`
+and `G3-GATE.md`. G3 FAIL; M3 unstarted.
+
+**Current G3 rerun:** `feat/m2-g3-current` carries the saved integration
+test onto `3589652`. `make test-m2-g3` exits 2 after 48 passing assertions;
+original MSETG first/equal/conflict paths pass, while original PSETG
+reaches unassigned `MEMQ` after initial side effects. Issue #63 is the
+next focused correction. See `docs/evidence/M2/G3-GATE.md`. G3 FAIL;
+do not begin M3.
+
+**Latest correction (issue #58):** `feat/m2-computed-global` reads `,.FOO`
+as GVAL of FOO's local value. Three pinned Confusion cases, reader and
+binding regressions, and a hash-verified original MSETG equal-repeat probe
+pass. `make test`: 884 Racket and 13 Python checks; `make test-historical`:
+VFLOAD, DECL, and MSETG equal-repeat pass. The conflicting-repeat path
+reaches unassigned `ERROR` (issue #60), so G3 remains FAIL. Evidence:
+`docs/evidence/M2/COMPUTED-GLOBAL.md`. Next: focused `ERROR` primitive,
+then rerun G3. Do not begin M3; D5 PR #54 remains unmerged.
+
+**Latest correction (issue #57):** `feat/m2-structural-neq` adds the
+reference-backed structural `N=?` primitive. Eight clean Confusion cases,
+three deliberate arity errors, and two bounded cyclic timeouts are in
+`docs/evidence/M2/NEQ.md`. `make test` passes 879 Racket checks and 13
+Python tests; 13 focused tests fail before and pass after. The exact
+original MSETG advances to a distinct `,.FOO` computed-global reader
+failure (issue #58). G3 remains FAIL. D5 PR #54 remains unmerged pending
+explicit maintainer approval; do not begin M3 EMPTY?.
+
+**D5 local review update (issue #67):** The native SUBR FIX-indicator
+association bug is fixed and documented in
+`docs/evidence/M2/D5-FINAL-REVIEW.md`. Its final-head CI and maintainer
+approval remain pending.
+
+- **Milestone / gate:** M2. D1 (PR #45), D2 (PR #49), D3 (PR #50), D4
+  (PR #52), and the agent definitions (PR #47) are all **merged into
+  `main`** (current main `419fc5c`); issues #44/#46/#48/#51 closed.
+  Pre-merge G3 FAIL: `N=?` issue #57 is locally corrected, then original
+  MSETG reaches the distinct `,.FOO` reader gap (issue #58). M2 NOT PASS.
+- **Active issues/PRs:** issue **#53** and [PR #54](https://github.com/quaat/mdl-racket/pull/54)
+  (D5 atom-property `PUT`/`GET`) —
+  reference evidence, implementation, focused tests, and independent review
+  fixes are on `feat/m2-atom-props` (base `419fc5c`, head `e6d295d`).
+  Both PR workflows passed on that corrected head; the requested
+  final-head Codex review was declined by the service's usage limit.
+  Issue
+  #11 was closed as completed on 2026-11-20.
+- **D5 state (implemented, main-session-verified on
+  `feat/m2-atom-props`):** Confusion reference evidence (18 success + 6
+  deliberate-error observations; `docs/evidence/M2/ATOM-PROPS.md`) plus
+  the implementation (commit `676f488`) and focused tests
+  (`tests/atom_props_test.rkt`, commit `a3ce79f`). Independent review found
+  the weak `eq?` item-key mismatch, structured two-arg PUT dispatch, and
+  DECL alias/precedence gaps; review regressions and pinned Confusion
+  evidence are under `atom-props-review-*`. A further final-head review
+  found inconsistent CHARACTER extraction from STRING GET versus SEGMENT;
+  four clean Confusion probes and two red-to-green tests now cover the fix.
+  An independent local final-head review fixed the native-SUBR FIX
+  association dispatch (issue #67); see `docs/evidence/M2/D5-FINAL-REVIEW.md`.
+  Fresh suites: 868
+  Racket checks, 13 Python tests, `make test-historical` green
+  (VFLOAD 23 + DECL 20 assertions). The pinned `77loadall.mud` load
+  completes **twenty-four expressions** — `81prim.mud` in full plus
+  `77defs.mud` 1–14, including the historical
+  `<PUT RAPPLIC DECL '<OR ATOM FALSE NOFFSET>>` — and stops at
+  `77defs.mud` expression 15 (`<NEWSTRUC ROOM VECTOR ...>`, line 37):
+  the original source-defined `NEWSTRUC` calls the unassigned `EMPTY?`
+  primitive (execute stage). Architect decisions: follow the reference
+  over the manual where they conflict (removal returns the item;
+  augmented `#FALSE (leaf)` DECL? misses); session-owned strong-reference
+  association entries compared with MDL `==?` on both keys; `SETG` does not
+  enforce DECL associations; GETPROP/PUTPROP and chapter 13.4 machinery
+  explicitly unimplemented. See ADR-0023 and the M2 D5 section of
+  `docs/SEMANTICS.md`.
+- **Exact next action:** implement issue #65 MAPF against the pinned
+  reference, then rerun G3; merge D5
+  only after explicit
+  maintainer approval and final-head review. M3 `EMPTY?` waits for G3.
+- **Active issues/PRs (historical, D2/D3 era — superseded by the header
+  above):** [PR #49](https://github.com/quaat/mdl-racket/pull/49)
+  (D2 SEGMENT) and
   [PR #47](https://github.com/quaat/mdl-racket/pull/47) (Flash subagent
-  definitions) green, **awaiting maintainer merge decision**; issue #44
-  closed (D1 merged); issue #46 implemented (PR #49); issue #48 (D3
-  structured declaration patterns) **implemented and main-session-verified**
-  on stacked branch `feat/m2-decl-patterns` (Flash subagent branch
-  `feat/m2-decl-patterns-impl` merged; reference evidence `325bc09`,
-  implementation merge on top) — D3 PR to open next.
-- **Latest integrated commit:** `f87d160` on `main` (merge of PR #45,
-  declarations; post-merge CI green, run 44615298096). Local `main` is
-  up to date.
+  definitions) were green awaiting merge; issue #48 (D3) was implemented
+  on stacked branches. All have since merged.
+- **Latest integrated commit (historical, D1 era):** `f87d160` on `main`
+  (merge of PR #45, declarations; post-merge CI green, run 44615298096);
+  superseded by `419fc5c` (merge of PR #52).
 - **D3 state (implemented, main-session-verified):** Confusion
   reference evidence (22 success + 14 error observations, reproduced
   byte-identically) plus the Flash implementer's tests-first slice,
@@ -75,32 +207,22 @@ D2 in progress).
   sandbox); in-sandbox Racket needs `PLTCOLLECTS=":$PWD"`; the smoke CI
   container does not provision `.cache/upstream/`, so pinned-source
   assertions live only in `make test-historical` (reference workflow).
-- **First failing source construct:** the unassigned global `MUDDLE` in
-  `77defs.mud` expression 1 (`<AND <L? ,MUDDLE 100> ...>`, execute stage)
-  — `81prim.mud` now loads in full; invoking the installed `PSETG` stops
-  at `<MEMQ .FOO .PL>` (no MEMQ primitive yet).
+- **First failing source construct (historical, D3 era):** the unassigned
+  global `MUDDLE` in `77defs.mud` expression 1 (`<AND <L? ,MUDDLE 100>
+  ...>`, execute stage) — `81prim.mud` now loads in full; invoking the
+  installed `PSETG` stops at `<MEMQ .FOO .PL>` (no MEMQ primitive yet).
 - **Known semantic decisions:** see `docs/SEMANTICS.md` (M2 D1 section) and
   `docs/evidence/M2/DECLARATIONS.md`; deviations: attached-declaration
   enforcement follows the manual over non-enforcing pinned Confusion;
   `DECL?` false payload follows Confusion (`#FALSE (value pattern)`).
-- **D4 state (implemented and verified on `feat/m2-muddle`, main-agent
-  change):** `MUDDLE` seeded as FIX `101` per the reference, interned in
-  each session's atom space; the chain completes **twelve** expressions
-  and stops at `77defs.mud` expression 3 (`<PUT RAPPLIC DECL '...>>` —
-  atom-property PUT, the next dependency). Fresh suites: 802 Racket
+- **D4 state (merged, historical):** `MUDDLE` seeded as FIX `101` per the
+  reference, interned in each session's atom space (PR #52); at D4 close
+  the chain completed **twelve** expressions and stopped at
+  `77defs.mud` expression 3 (`<PUT RAPPLIC DECL '...>>` — atom-property
+  PUT, the next dependency). Fresh suites at that point: 802 Racket
   checks (muddle suite 9), loader 57, historical 23 + 20, Python 13,
   `git diff --check` clean. **The pinned reference loads the entire
   12-file chain to `DONE` — the concrete parity target.**
-- **First failing source construct:** atom-property `PUT` at
-  `77defs.mud` expression 3 (`<PUT RAPPLIC DECL '<OR ATOM FALSE
-  NOFFSET>>`, execute stage, 5:1) — the chain is at twelve completed
-  expressions.
-- **Exact next action:** commit and push the D4 branch, open the D4 PR
-  referencing issue #51, run CI and independent review; then create the
-  atom-property PUT issue (chapter 13: atom properties/associations —
-  probe Confusion for `PUT`/`GET`/`GETPROP` on atoms), delegate to the
-  Flash implementer, and advance toward the reference's full-chain
-  `DONE` parity target.
 - **Full evidence:** `docs/evidence/M2/DECLARATIONS.md` (D1 slice),
   `docs/evidence/M2/SESSION-RECOVERY-2026-11-19.md` (recovery),
   `docs/evidence/M2/SOURCE-EXECUTION.md` (live execution inventory),
