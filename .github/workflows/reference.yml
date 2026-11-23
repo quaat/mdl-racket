@@ -119,6 +119,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m4-orphan-prompt 2>&1 | tee artifacts/ci-logs/test-m4-orphan-prompt.log
+      - name: M4 S4 scenario (TOP in the parser and in 'all')
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-top-parser 2>&1 | tee artifacts/ci-logs/test-m4-top-parser.log
       - name: Build and capture native reference
         run: |
           make reference-build

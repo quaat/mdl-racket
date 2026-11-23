@@ -2927,6 +2927,12 @@
            "a host-made ~a CHANNEL requires a Racket port (ADR-0050)" mode))
   (make-terminal-channel mode port))
 
+;; ADR-0058: every backing vector of a CHANNEL made by make-terminal-channel,
+;; in any atom space.
+;; TOP refuses these: the reference has two slots before CHANNEL element 1
+;; (the first is the script/echo channel LIST), this runtime models one.
+(define channel-storages (make-weak-hasheq))
+
 (define (make-terminal-channel mode [port #f])
   (unless (member mode '("READ" "PRINT"))
     (error 'mdl-make-terminal-channel "expected READ or PRINT mode"))
@@ -2945,6 +2951,7 @@
   (hash-set! (atom-space-channels (current-mdl-atom-space))
              (mdl-array-storage storage)
              (host-channel (string->symbol mode) port #f))
+  (hash-set! channel-storages (mdl-array-storage storage) #t)
   (mdl-typed-value (mdl-root-atom "CHANNEL") (mdl-rest storage 1)))
 
 ;; Execution contexts. A context is one globals table, one local frame
@@ -3238,6 +3245,36 @@
          (mdl-typed-value (mdl-root-atom "CHANNEL") result)
          result)]
     [else (error 'mdl-back "BACK requires an array")]))
+
+;; TOP (manual 7.6.2.2; SEMANTICS "M4 S4", ADR-0058): the inverse of every
+;; REST. A new view over the SAME storage from its first element to its end
+;; (never a copy; a UVECTOR keeps its shared UTYPE cell), re-tagged with the
+;; argument's TYPE. Only the array PRIMTYPEs; LIST-primtype values, TUPLEs
+;; and non-structured values are refused, as in the reference.
+(define mdl-top
+  (case-lambda
+    [(value)
+     (define base (mdl-base value))
+     (define top
+       (cond
+         [(mdl-tuple-value? value) #f]
+         [(mdl-string? base)
+          (define storage (if (mdl-string-view? base) (mdl-string-view-storage base) base))
+          (mdl-string-view storage 0 (string-length storage))]
+         [(mdl-array? base)
+          (when (hash-ref channel-storages (mdl-array-storage base) #f)
+            (error 'mdl-top "TOP of CHANNEL storage is not supported (ADR-0058)"))
+          (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                          0 (vector-length (mdl-array-storage base))
+                          (mdl-array-type-cell base))]
+         [else #f]))
+     (unless top
+       (error 'mdl-top "Bad type for TOP: TOP requires a VECTOR, UVECTOR or STRING PRIMTYPE value"))
+     (if (mdl-typed-value? value)
+         (mdl-typed-value (mdl-typed-value-type value) top)
+         top)]
+    [() (error 'mdl-top "TOO-FEW-ARGUMENTS-SUPPLIED")]
+    [(value . more) (error 'mdl-top "TOO-MANY-ARGUMENTS-SUPPLIED")]))
 
 (define (mdl-check-index who value index)
   (unless (and (exact-integer? index) (<= 1 index) (<= index (mdl-length value)))
@@ -4637,6 +4674,7 @@
         "LENGTH" mdl-length
         "REST" mdl-rest
         "BACK" mdl-back
+        "TOP" mdl-top
         "NTH" mdl-nth
         "PUT" mdl-put!
         "GET" mdl-get

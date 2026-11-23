@@ -199,35 +199,24 @@
 (check-equal? (open-records c2) '())
 (check-equal? (global c2 "MOVES") 7)
 
-;; === C3 (prefix): unknown words and parser replies, then quit/y ======================
-;; The reference C3 input continues with "put leaflet in", which reaches the
-;; unsupported TOP (77np.mud:126, SPARSE); that line is left out here (see
-;; docs/evidence/M3/S11-QUIT-OPEN.md). Each reply is compared with the C3
-;; reference segment for the same command in the same state; the quit segment
-;; is C3's with the move count of this shorter session (7, not 10).
-(define c3-words '("xyzzy" "frobozzle" "blorfintz" "qqq" "take" "open the"))
-(define c3 (run-game (append c3-words '("quit" "y"))))
+;; === C3: unknown words and parser replies, then quit/y =============================
+;; The whole reference C3 session. Its "put leaflet in" reaches SPARSE's TOP
+;; (77np.mud:126); before M4 S4 (docs/evidence/M4/S4-TOP.md) that line, and
+;; everything after it but the quit, was left out here.
+(define c3-lines '("xyzzy" "frobozzle" "blorfintz" "qqq" "take" "open the" "put leaflet in" ""
+                   "north west" "score" "quit" "y"))
+(define c3 (run-game c3-lines))
 (check-clean-run c3 "C3")
 (check-equal? (and (mdl-session-outcome? (run-result-result c3))
                    (mdl-session-outcome-kind (run-result-result c3)))
               'quit)
-(define c3-ref-segments
-  (string-split (reference-transcript
-                 "C3-unknown-and-malformed"
-                 '("xyzzy" "frobozzle" "blorfintz" "qqq" "take" "open the" "put leaflet in" ""
-                   "north west" "score" "quit" "y"))
-                ">" #:trim? #f))
-(check-equal? (length c3-ref-segments) 12)
-(define c3-ref-quit (list-ref c3-ref-segments 11))
-(check-true (string-contains? c3-ref-quit "in 10 moves."))
-(define c3-expected
-  (string-join (append (take c3-ref-segments 7)
-                       (list (string-replace c3-ref-quit "in 10 moves." "in 7 moves.")))
-               ">"))
+(define c3-expected (reference-transcript "C3-unknown-and-malformed" c3-lines))
+(check-true (string-contains? c3-expected ">Opening the mailbox reveals a leaflet.\n>I can't make sense out of that.\n>"))
+(check-true (string-contains? c3-expected "in 10 moves."))
 (check-equal? (run-result-raw c3) c3-expected)
 (check-true (string-contains? (run-result-raw c3) ">I don't know the word XYZZY\n>"))
 (check-true (string-contains? (run-result-raw c3) ">I don't know the word BLORF\n>"))
-(check-equal? (global c3 "MOVES") 7)
+(check-equal? (global c3 "MOVES") 10)
 (check-equal? (open-records c3) '(("READB" "MDL/ZORK.LOG" 2) ("PRINT" "MDL/ZORK.LOG" 13)))
 
 ;; === an unsupported host operation stays a strict failure ============================
