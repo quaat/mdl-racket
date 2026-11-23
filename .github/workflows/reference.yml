@@ -68,6 +68,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m3-session 2>&1 | tee artifacts/ci-logs/test-m3-session.log
+      - name: Local launcher (run-zork, CLI exit codes, break)
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-launcher 2>&1 | tee artifacts/ci-logs/test-m3-launcher.log
       - name: Build and capture native reference
         run: |
           make reference-build
