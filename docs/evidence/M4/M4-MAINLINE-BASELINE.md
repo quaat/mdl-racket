@@ -4,7 +4,7 @@
 The M4 comprehensive-equivalence gate is **NOT YET PASSED**; **PLAYABLE: NOT
 RUN** (no separately defined playability gate has been executed).
 
-Gate run on `main` = **`c8964bfdd`** (`c8964bf`, merge of #155). This record
+Gate run on `main` = **`c8964bfc2d556e0d3f5d7968dcc2695de81fa64f`** (merge of #155). This record
 is added by a documentation-only commit afterwards.
 
 ## Integration (maintainer approval, 2026-11-23)
