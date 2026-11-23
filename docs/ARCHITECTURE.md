@@ -45,8 +45,9 @@ resource-isolated game process.
 For G2, an explicit `#:max-expressions` loader option executes a source
 prefix and reports `PARTIAL` with a skipped count. The historical VFLOAD
 test uses exact copied bytes of a hash-verified pinned file in a disposable
-root; the full source file still fails at `#DECL`. Text output uses the local
-current output port, with no network or arbitrary channel exposure.
+root; the full source file still fails at `#DECL`. Text output uses the
+session's explicit host output port (S13 part B, ADR-0050: a session without
+one refuses terminal output), with no network or arbitrary channel exposure.
 
 `#lang mdl` uses a custom reader to create a Racket module. Parsing a source
 file does not imply that the compiler understands all its forms. The M0

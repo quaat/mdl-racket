@@ -18,10 +18,9 @@
        (error 'historical-gc "pinned source missing: ~a" source))
      (call-with-output-file (build-path root name) #:exists 'truncate/replace
        (lambda (out) (write-bytes (file->bytes source) out))))
-   (define session (make-mdl-session root))
-   (define report
-     (parameterize ([current-output-port (open-output-string)])
-       (mdl-session-load! session "77loadall.mud")))
+   ;; S13 part B (ADR-0050): an explicit session port (load output discarded).
+   (define session (make-mdl-session root #:output-port (open-output-string)))
+   (define report (mdl-session-load! session "77loadall.mud"))
    (check-equal? (hash-ref report 'status) "PASS")
    (check-equal? (hash-ref report 'completed_expressions) 1229)
    (check-equal? (hash-ref report 'skipped_expressions) 0)

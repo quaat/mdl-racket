@@ -29,8 +29,11 @@ byte-identical to Confusion's pipe transcript under the same normalisation.
 clock (issue #135), so the `west` response (`<PROB 80>`) varies and is accepted
 in its two source-defined forms. **PLAYABLE has not passed**: QUIT, OPEN/CLOSE
 (RECORD), MEMBER (the game's ERROR handler) and UNWIND under host errors (#139)
-are unsupported; PRINC line breaking, `!` in terminal input and READSTRING's
-default channel/FIX stop/EOF routine are strict errors. Reproduce:
+are unsupported; PRINC line breaking and READSTRING's default channel/FIX
+stop/EOF routine are strict errors. (S13, `feat/m3-bang-output`: a typed `!`
+now follows pinned Confusion, `nor!th` reads as `north`, and a session without
+an explicit output port refuses all terminal output; see
+[S13 evidence](docs/evidence/M3/S13-BANG-OUTPUT.md).) Reproduce:
 `export PLTCOLLECTS=":$PWD"; make test-m3-interactive` (needs `make sources`).
 Next: a fixed clock (#135), then a strict SMOKE_PARITY comparison. See
 [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).

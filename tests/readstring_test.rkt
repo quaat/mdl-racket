@@ -182,9 +182,8 @@
          "<READSTRING ,B <CHTYPE [0 \"READ\"] CHANNEL> ,RS>")
 (refused #rx"^READSTRING: a FIX stop is not supported" "<READSTRING ,B ,INCHAN 3>")
 (refused #rx"^READSTRING: stop must be a STRING" "<READSTRING ,B ,INCHAN FOO>")
-;; '!' is Confusion's reader escape ("Ab!cD" reads "AbcD"); the manual is
-;; silent, so it is refused rather than guessed. Non-ASCII is refused.
-(refused #rx"^READSTRING: '!' in terminal input is not supported" rd #:input "Ab!cD\n")
+;; Non-ASCII is refused. (The `!` escape is no longer refused: S13 part A
+;; follows pinned Confusion; see tests/readstring_bang_test.rkt.)
 (refused #rx"^READSTRING: non-ASCII character \\(code 233\\)" rd #:input "café\n")
 ;; Arguments are validated before the end-of-input check.
 (refused #rx"^READSTRING: buffer must be a mutable STRING"
