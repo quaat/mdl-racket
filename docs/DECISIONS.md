@@ -1354,3 +1354,46 @@ it with ERRET, in which case the transfer completes. Skipped cleanups are
 not reported as diagnostics. The original exception is the only report.
 No game source, upstream provenance, license, deployed service or GPLv3
 code changed. The source LOADED gate is unchanged at 1229 expressions.
+
+## ADR-0052: The wall clock and local time zone are session-owned host dependencies
+
+**Status:** Proposed (issue #135 part 1).
+
+**Decision:** Each MDL session owns a clock and a time zone, stored in its
+atom space next to its RANDOM state. `make-mdl-session` accepts `#:clock`
+(an `mdl-clock`; default `real-mdl-clock`, the host wall clock) and
+`#:time-zone` (`'local`, default, or `'utc`). `make-fixed-mdl-clock seconds
+#:micros m` returns a constant instant that never advances. Only the
+no-argument "now" read of GETTIMEDATE uses the clock. The zone replaces the
+process local zone for GETTIMEDATE's non-UTC decomposition. Explicit
+timestamps keep their values. A truthy UTC argument still selects UTC.
+`mdl-session-random-snapshot` is a host-only, detached copy of the RANDOM
+state for observation.
+
+**Why:** DSKDATE feeds both the "This version created" line and START's
+RANDOM seed, so a deterministic run needs a deterministic clock. A
+process-global parameter or a changed process `TZ` would couple two
+sessions in one process. A fixed clock that does not advance matches the
+reference capture (`scripts/reference/fixed_time.c`, PR #131): its
+`gettimeofday`, `time` and `CLOCK_REALTIME` return the constant
+`MDL_FIXED_EPOCH` with zero microseconds on every call, while monotonic and
+CPU clocks run normally. The reference child runs with `TZ=UTC`, so the
+golden's zone is UTC. Normal local play keeps the real clock and the host
+zone.
+
+**Consequence:** Under a fixed clock, every DSKDATE in a run is equal, so
+GET-TIME reports zero played time, as in the reference capture. The
+supported zone set is minimal: no named or offset zones. Invalid clocks,
+invalid clock reads and unknown zones fail strictly. No game source, game
+global, DSKDATE/START/RANDOM call site, upstream provenance, license or
+GPLv3 code changed.
+
+**Known wall-time input outside the clock (independent review,
+2026-11-23):** the GC interrupt's elapsed-time argument
+(`mdl/runtime/memory.rkt`, `mdl-memory-collect!`) is still measured with
+Racket wall time and is not controlled by the session clock. It does not
+reach this game's output: the only GC handler, `GC-FCN`
+(`77rooms.mud:97-102`), takes its arguments as an unused `"TUPLE" T`, and
+the handler is turned `OFF` at load (`77rooms.mud:104`). A determinism
+claim for another program that reads that argument must not rely on this
+ADR.
