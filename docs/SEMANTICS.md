@@ -55,9 +55,9 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | `GO` / `UNWIND` | GO to labels in the current function's PROG/REPEAT; UNWIND cleanup on MDL transfers only, never on raised errors (ADR-0051) | TAG values, GO across function boundaries | M2 control slice |
 | MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
-| `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
-| `SAVE` / `RESTORE` | not supported | stable per-player snapshots; validated against reference | **NOT IMPLEMENTED** |
-| random/time/events | not supported | determinism and original turn-based scheduling | **NOT IMPLEMENTED** |
+| `READSTRING` / `LEX` / `EPARSE` | branch stack #141 only: READSTRING `<READSTRING buffer channel [stop-string]>` from a host-supplied port (ADR-0050); the original LEX/parser runs for the six house-boot commands (scoped INTERACTIVE PASS); not on `main` | default channel, FIX stop, EOF routine, `!` in input (open: pinned Confusion treats it as an escape), parser coverage beyond the six commands | ADR-0050, `evidence/M3/S7-INTERACTIVE.md` |
+| `SAVE` / `RESTORE` | branch only: SAVE is an in-session record returning `"SAVED"`, no file (ADR-0048); RESTORE strict error | stable per-player snapshots; validated against reference | ADR-0048 |
+| random/time/events | branch only: session-owned 36-bit RANDOM; GETTIMEDATE reads the host clock; user EVENT/HANDLER, dispatcher, logical GC events (dispatcher and registration also on `main`) | fixed session clock (#135), determinism proof, original turn-based scheduling | `evidence/M3/RANDOM-START.md` |
 
 ## Priority Confusion probes
 
@@ -988,8 +988,9 @@ miss merely because that representation is unsupported. Tests must cover
 the first match, miss, identity versus structural equality, aliasing,
 sequence kinds, arity/type boundaries, and exact-source PSETG.
 The implemented slice passes these tests and the exact-source PSETG
-first/repeat paths. `MEMQ` on STRING still raises an explicit unsupported
-error; see `evidence/M2/MEMQ.md`. G3 now fails at original FLAGWORD's
+first/repeat paths. At M2, `MEMQ` on STRING raised an explicit unsupported
+error; see `evidence/M2/MEMQ.md` (2026-11-23: implemented on the M3 branch
+stack, see "M3 startup: UNPARSE, MEMQ on STRING and SUBSTRUC"). G3 now fails at original FLAGWORD's
 unassigned `MAPF`, rather than at PSETG.
 ## M2 MAPF, FUNCTION literals, and map control (issue #65)
 
@@ -1645,6 +1646,26 @@ historical GC timing. Host-initiated automatic collections alone do not
 create MDL events. `GC` arguments beyond the no-argument form remain
 unsupported until the manual's parameter changes can be modeled.
 
+**Capacity growth policy (review R2/R10, PR #123; consolidated 2026-11-23
+from `evidence/M3/review/R2.md`).** When a tracked allocation of `words`
+would exceed logical capacity: (1) `DIVERT-AGC` is emitted; if its handler's
+`BLOAT` makes room, the allocation proceeds with no sweep and gc-min does
+not apply. (2) Otherwise a host major collection and ledger sweep run and
+`GC` is emitted. (3) Only after such a sweep, if free words are below
+`max(words, gc-min)` (gc-min = 8192, manual §22.5), capacity grows to
+`min(fix-max, max(used + max(words, gc-min), ceil(capacity × 3/2)))`;
+geometric growth keeps a steadily growing live set from triggering a
+quadratic number of sweeps. If `used + max(words, gc-min)` exceeds the FIX
+maximum, a strict host error (`storage overflow`) is raised, not an MDL
+ERROR. Explicit `<GC>` sweeps without growing capacity; `BLOAT` sets an
+explicit free-word floor and is independent of this policy. Reported
+`used`/`free`/capacity values are an approximation of PDP-10 accounting, not
+equivalent to it. Not checked: a handler's `BLOAT` that would push capacity
+past the FIX maximum. Tests must not assert exact host-collection counts
+that depend on BC/CS liveness (R10). Code: `mdl/runtime/core.rkt`
+(`current-mdl-gc-min`, allocation pressure path); tests
+`tests/logical_gc_test.rkt`.
+
 ## M3 SPECIAL and UNSPECIAL declaration wrappers (source `77rooms.mud:189`)
 
 Manual chapter 14 permits `<SPECIAL Pattern>` and `<UNSPECIAL Pattern>` at
@@ -1700,6 +1721,29 @@ suppression, session isolation, and stale-frame rejection. Pinned Confusion
 stubs EVENT/HANDLER so it cannot certify callback delivery; the manual is
 the behavioral specification.
 
+**Delivery and ERRET level (review R8, PR #116; consolidated 2026-11-23
+from `evidence/M3/review/R8.md`).** ERROR occurrences are delivered
+synchronously by the ERROR call and never enter the session pending queue,
+so an older pending occurrence cannot capture one and no occurrence can
+outlive its FRAME. ERRET resumes the ERROR call at the interrupt level that
+is current when ERRET runs (following manual 21.8.11, where a resolving
+handler does `<INT-LEVEL 0>` first); it does not restore the pre-interrupt
+level. Returning from ERROR is a safe point: pending occurrences eligible at
+the resumed level are delivered exactly once, lower ones stay queued. A
+normal handler return, or a host exception leaving a handler, still restores
+the previous level; FRAME liveness ends when the ERROR call is left in every
+case. Nested errors follow the same rule literally. "ERRET keeps the current
+level" is a documented **inference** (§21.8.11, §21.7.3), not an explicit
+manual rule, and Confusion cannot confirm it (EVENT/HANDLER are stubs).
+RETURN, AGAIN or GO from a handler to an outer activation still restore the
+previous level through delivery cleanup; that asymmetry is a documented
+deviation risk. `DISMISS`, error-level LISTEN, FRAME/FFRAME traversal, ERRET
+without a FRAME and FINISH are unsupported. SUBR failures, unassigned
+variables and arity errors remain strict host failures that do not raise the
+"ERROR" interrupt; this affects the source's ^G/TTY recovery and crash-report
+paths in HANDLE. Tests: `tests/erret_interrupt_cleanup_test.rkt`,
+`tests/error_interrupt_test.rkt`.
+
 ## M3 built-in CHANNEL type declaration (source `77rooms.mud:270`)
 
 Manual chapter 11 defines CHANNEL as a built-in VECTOR-primitive type.
@@ -1732,14 +1776,33 @@ original STRING. Pinned Confusion confirms a three-character NUL fill,
 character fill, an empty STRING at REST length, and a PUT through a REST
 view changing `"XXX"` to `"XYX"`.
 
-The runtime will represent a REST view by backing STRING plus start and
+The runtime represents a REST view by backing STRING plus start and
 length, keeping value TYPE STRING. `LENGTH`, NTH, PUT, EMPTY?, LENGTH?,
-STRING concatenation and text output must read the view's visible range.
+STRING concatenation and text output read the view's visible range.
 Identity compares backing storage and range; structural equality compares
 visible characters. A valid offset is from zero through length; wrong
 length or fill types raise errors. The source-loading form uses omitted
-fill. Re-evaluation of supplied expressions requires the raw FORM at the
-compiled call boundary, and must not accidentally evaluate only once.
+fill. ISTRING is an ordinary SUBR: its arguments are evaluated once on
+every call path, and the fill value is then EVALed once per character (see
+"M3 constructor evaluation policy (review R5)" below). No raw FORM is
+needed at any call boundary. (Corrected 2026-11-23: an earlier version of
+this section required the raw FORM at the compiled boundary; R5, PR #114,
+removed that special path.)
+
+**STRING views as primitive arguments and PNAME snapshots (review R7, PR
+#114; consolidated 2026-11-23 from `evidence/M3/review/R5R7.md`).** Any
+primitive that takes a STRING accepts a native STRING or a shared REST view;
+other TYPEs, including CHTYPEd STRING-primtype values, fail explicitly
+unless a section below says otherwise. A primitive that retains a name takes
+an immutable snapshot of the visible characters at the call
+(`mdl-string-snapshot`): INSERT and ATOM (the PNAME), LOOKUP and REMOVE (the
+OBLIST key), EVENT and ON (the event name), FLOAD (the host path) and SAVE (the
+recorded file-spec, ADR-0048). A PNAME therefore never aliases user
+storage; a later PUT on the original STRING or any view of it changes
+neither the atom's name nor OBLIST lookup. The parent STRING and its views
+keep sharing storage with each other. Evidence:
+`evidence/M3/review/r7-string-view-reference.json`; tests
+`tests/string_view_consumers_test.rkt`.
 
 ## M3 registered structured TYPE heads in declarations (`77rooms.mud:725`)
 
@@ -1773,6 +1836,61 @@ expression at a time, so runtime atom resolution can follow the active
 search list. This slice does not implement DEFAULT insertion redirection,
 READ's explicit lookup argument, or print-time minimal trailer selection.
 
+## M3 authoritative OBLIST path, ROOT identity and read-time atoms (review R3/R4)
+
+Consolidated 2026-11-23 from `evidence/M3/review/R3R4.md` (PR #118); it
+refines the BLOCK/ENDBLOCK section above.
+
+**One search path.** The manual (15.3) says READ resolves PNAMEs through
+the LVAL of OBLIST. That LVAL is the only search path: the innermost binding
+of the session's ROOT `OBLIST` atom, including the session top-level frame;
+with no binding, the startup list `(INITIAL ROOT)` applies. There is no
+separate cached copy. PROG/AUX/formal bindings, SET, BLOCK and ENDBLOCK all
+act on the ordinary LVAL, so normal exit, RETURN/AGAIN, ERROR unwinding and
+host exceptions restore resolution together with the binding. A
+bound-but-unassigned OBLIST is unassigned. BLOCK pushes the current path and
+SETs; ENDBLOCK pops and SETs; both are independent of function frames
+(15.6). SET of OBLIST requires a nonempty LIST of OBLISTs (stricter than
+Confusion, which defers the failure to the next read); atom resolution fails
+explicitly when the current LVAL is unassigned or not such a LIST.
+
+**Read-time atoms.** Atoms are identified when their top-level expression is
+read: compiled code resolves every user-text ATOM of an expression once,
+before it runs, so function bodies keep their read-time atoms when OBLIST is
+rebound later. FLOAD inside a binding of OBLIST reads the file under that
+binding. Reader-macro heads (LVAL, GVAL, QUOTE) are ROOT atoms. `A!-` (empty
+trailer) names ROOT and inserts into ROOT on a miss; `A!-B` looks up B
+through the current path.
+
+**ROOT identity.** Following 15.5 and pinned Confusion, each session seeds
+ROOT at creation with the complete startup ROOT inventory of pinned
+Confusion (`mdl/runtime/root-names.rktd`, 240 names), whether or not the
+primitive is implemented; INITIAL starts empty. An unimplemented name is a
+ROOT atom without a GVAL and fails strictly when applied. Runtime-internal
+names (T, type names, DECL/OBLIST indicators, REDEFINE, QUOTE, GC
+initiators, interpreter globals, INCHAN/OUTCHAN, REP) are always the cached
+ROOT atoms (`mdl-root-atom`): never looked up through `.OBLIST`, never
+interned into a user OBLIST, unaffected by later REMOVE/INSERT on ROOT. A
+built-in SUBR is the GVAL of its ROOT atom only; a same-named atom on another
+OBLIST, or an uninterned one, is unbound, and GVAL queries never intern.
+After the full source load, OBLIST placement matches pinned Confusion
+(`tests/historical_oblist_placement_test.rkt`) except two allowlisted,
+separately tracked differences: `;` comment objects are not READ by this
+reader, and Confusion's startup INTERRUPTS OBLIST contents are not modelled.
+(The former allowlist entries for backslash-escaped trailers and `.5` were
+removed when #119 and #124 were fixed on the umbrella branch.)
+
+**Deviations and gaps.** Compiler special forms and the interpreted FSUBR
+dispatch are recognised by PNAME, not ROOT identity (under a BLOCK that omits
+ROOT, `<DEFINE ...>` still compiles as DEFINE). `%` read-eval runs mid-form,
+before the enclosing form's atoms are hoisted. The compiler's compile-time
+check for substituted ATOM names may intern a stray atom before raising its
+unsupported error. Not implemented: OBLIST's GVAL, DEFAULT insertion
+redirection, READ's look-up argument, `PARSE`/`READ` SUBRs and print-time
+trailer selection. Evidence: `evidence/M3/review/R3R4-oblist-reference.json`,
+`R3R4-oblist-error-reference.json`, `confusion-root-names.json`; tests
+`tests/oblist_identity_test.rkt`.
+
 ## M3 IUVECTOR and CHUTYPE (`77rooms.mud:1249`)
 
 Manual chapter 7 defines `IUVECTOR length [expression]` as a UVECTOR with
@@ -1804,6 +1922,32 @@ omission fills each slot with the zero-word LOSE value. The source's LEXV
 allocation passes a quoted REST expression whose evaluation must create
 ten distinct empty STRING views. Wrong arity or length fails explicitly.
 
+## M3 constructor evaluation policy (review R5)
+
+Consolidated 2026-11-23 from `evidence/M3/review/R5R7.md` (PR #114). Manual
+§7.5.4 defines ILIST, IVECTOR, IUVECTOR and ISTRING as SUBRs; ILIST is not
+implemented (when added it must reuse `constructor-fill-thunk`). Every call
+path (compiled call, interpreted FORM or FUNCTION body, APPLY, MAPF)
+evaluates the arguments once, including `!` SEGMENT splicing, before the
+procedure runs. The optional second argument's **value** is then EVALed
+once per generated element, in element order: `<IVECTOR 3 '<SET A <+ .A
+1>>>` yields `[1 2 3]`, while `<IVECTOR 3 <SET A <+ .A 1>>>` evaluates its
+argument once and yields `[1 1 1]`. A VECTOR fill is rebuilt per element
+(`=?` but not `==?`). ISTRING requires each per-element result to be a
+CHARACTER. IUVECTOR validates each value as it is produced: the first value
+fixes the UTYPE, STRING is never permitted, and a mismatched value fails at
+once, so later fills are not evaluated. No dispatcher special-cases these
+constructors (`mdl/runtime/core.rkt` `constructor-fill-thunk`).
+
+Pinned Confusion agrees for IVECTOR and ISTRING on all paths and for the
+IUVECTOR failure counts. **Recorded deviation:** on success, Confusion's
+IUVECTOR evaluates the fill once extra to fix the type (`<IUVECTOR 3 '<SET A
+<+ .A 1>>>` gives `![2 3 4!]`, A=4), contradicting the manual's own example;
+the runtime follows the manual (`![1 2 3!]`, A=3). No original-source call
+is affected. Evidence: `evidence/M3/review/r5-constructor-eval-reference.json`,
+`r5-iuvector-uniform-reference.json`; tests
+`tests/constructor_eval_policy_test.rkt`.
+
 ## M3 MAPR (`77rooms.mud`)
 
 Manual chapter 10 defines MAPR with MAPF's final function, loop function,
@@ -1824,15 +1968,41 @@ ATOM returns the underlying ATOM. A different PRIMTYPE remains an error.
 
 ## M3 MIN (`77dung.mud:57`)
 
+Replaced 2026-11-23 with the contract implemented by review R6 (PR #115;
+evidence `evidence/M3/review/R6.md`). The earlier FLOAT-typed WORD
+sentinel and its "other arithmetic not implemented" limitation no longer
+exist.
+
 Manual chapter 3 defines MIN over any number of FIX/FLOAT arguments, with
-FLOAT contagion; zero arguments return the greatest FLOAT identity. The
-source casts that identity to FIX and divides by two. On a 36-bit target,
-the cast produces the greatest FIX, 34359738367. Pinned Confusion uses a
-64-bit host representation and yields 9218868437227405311 for the cast,
-so its magnitude is a documented reference deviation. The runtime stores
-the zero-argument identity as a FLOAT-typed word sentinel for this cast;
-ordinary MIN calls return numeric FIX or FLOAT values. Other arithmetic on
-the sentinel is not implemented.
+FLOAT contagion; zero arguments return the greatest FLOAT. The runtime models
+the 36-bit target: `<MIN>` is the ordinary FLOAT (2^27−1)·2^100, the greatest
+PDP-10 single-precision value, held exactly as a host flonum. It takes part
+in arithmetic, comparison, `==?`/`=?` and MIN like any FLOAT.
+
+CHTYPE from FLOAT to a WORD-primtype TYPE (FIX, WORD, user WORD NEWTYPEs)
+reinterprets the FLOAT's PDP-10 single-precision word image: sign bit,
+excess-128 exponent in bits 1–8, normalized 27-bit fraction, negative values
+as the two's complement of the whole word. `<CHTYPE 1.0 FIX>` is
+201400000000₈ and `<CHTYPE <MIN> FIX>` is 377777777777₈ = 34359738367, so
+the source's BIGFIX (77dung.mud:57) is 17179869183. A host flonum with no
+exact 36-bit image (more than 27 fraction bits, e.g. `0.1`, or an exponent
+outside the excess-128 range, or NaN/infinity) makes CHTYPE fail with
+"FLOAT has no exact PDP-10 FLOAT word image"; it is never rounded. CHUTYPE
+of a FLOAT UVECTOR converts every element this way and changes nothing if
+any element fails. The format is checked against the MIT PDP-10 Info file
+"Floating-Point". `FLOAT` requires a FIX argument (manual 3.4; Confusion
+"Arg to FLOAT must be FIX").
+
+Pinned Confusion reinterprets the 64-bit host double instead: `<MIN>` is
+`DBL_MAX` and the cast gives 9218868437227405311. This magnitude difference
+is a documented reference deviation. Not supported: CHTYPE from FIX/WORD to
+FLOAT, bit operations (ANDB etc.) on FLOAT, a PDP-10 overflow range in FLOAT
+arithmetic (host doubles overflow only at IEEE limits, so `<* <MIN> 2>`
+succeeds here), PDP-10 27-bit rounding of computed FLOATs, FLOAT printing
+(UNPARSE/PRIN1 refuse FLOAT), and negative zero (encodes as the zero word;
+separate open issue). Code: `mdl/runtime/core.rkt` (`float-word-bits`,
+`mdl-min`); evidence `evidence/M3/review/r6-min-float-reference.json`; tests
+`tests/min_test.rkt`.
 
 ## M3 CHTYPE for STRING-primitive NEWTYPE (`77dung.mud:69`)
 
@@ -1936,16 +2106,19 @@ Confusion initializes root ATOMs INCHAN and OUTCHAN with session-local
 CHANNEL values and both LVAL and GVAL bindings. Each CHANNEL is a VECTOR
 primitive with the documented channel slots. The default read and print
 channels provide mode, terminal device name, empty file names, and basic
-position and radix fields. The Racket session will create analogous local
-values on construction; this is host environment state, not a change to
-the historical game source. Terminal I/O operations are separate work.
+position and radix fields. Each Racket execution context creates analogous
+values on construction (see "M3 execution contexts and session-owned CHANNEL
+ports (review R1)" below); this is host environment state, not a change to
+the historical game source. Terminal I/O operations are specified in the R1
+section and in "M3 interactive terminal I/O and the host top-level loop".
 
 ## M3 PRINTSTRING terminal CHANNEL and count (`77rooms.mud:286`)
 
 Manual chapter 11 allows `PRINTSTRING string [channel [count]]`. It writes
 at most `count` visible characters, or the entire STRING when omitted.
-The CHANNEL must be an output CHANNEL. This local runner maps its terminal
-channel to the current Racket output port. The runtime retains the manual's
+The CHANNEL must be an output CHANNEL; output goes to that CHANNEL's
+session-owned port (R1 section below; with no injected port, the host's
+`current-output-port` at each operation). The runtime retains the manual's
 character-count return value; pinned Confusion returns the source STRING,
 a recorded deviation already present for one-argument PRINTSTRING. Invalid
 CHANNEL, count, or arity fails. Typed STRING values are accepted after
@@ -1955,9 +2128,67 @@ CHTYPE to STRING, as used by the original TELL definition.
 
 Manual chapter 11 defines CRLF as emitting a terminal newline and returning
 T. It accepts an optional output CHANNEL, like TERPRI, which instead returns
-empty FALSE. The local runner writes a line feed to the current Racket output
-port and requires a PRINT-mode CHANNEL. This follows the existing documented
-Unix terminal normalization; an actual carriage-return byte is not emitted.
+empty FALSE. The runtime writes a line feed to the CHANNEL's port (R1
+section below) and requires a PRINT-mode CHANNEL. This follows the existing
+documented Unix terminal normalization; an actual carriage-return byte is not
+emitted.
+
+## M3 execution contexts and session-owned CHANNEL ports (review R1)
+
+Consolidated 2026-11-23 from `evidence/M3/review/R1.md` (PR #117), updated
+for the S7 terminal input slice (ADR-0050).
+
+**Manual and Confusion.** Manual §11.2.7 makes the default channel of the
+output SUBRs the **local** value of OUTCHAN; INCHAN and OUTCHAN also have
+global values, initially the same terminal CHANNELs. Pinned Confusion puts
+both ATOMs on ROOT; its PRINT-family SUBRs read only the LVAL, so SETG does
+not change the default and a PROG binding does
+(`evidence/M3/review/r1-channel-reference.json`).
+
+**Execution contexts.** An execution context is one globals table, one local
+frame stack and one atom space. INCHAN and OUTCHAN are the seeded ROOT atoms
+(`mdl-root-atom`), never resolved through `.OBLIST`; a user OUTCHAN that
+shadows ROOT in a BLOCK is a different, unbound atom and does not redirect
+the default. Each context starts with both ATOMs bound, as top-level LVAL and
+GVAL, to one READ/PRINT pair of terminal CHANNELs owned by that context. The
+bindings are created by `make-mdl-context` (also used by `make-mdl-session`),
+for the process-wide default context when the runtime loads, and by the
+idempotent `mdl-ensure-terminal-channels!` that begins every `#lang mdl`
+module (it binds only an ATOM that has neither binding). GDECL, MANIFEST,
+SETG, `ASSIGNED?` and `GASSIGNED?` treat them like any other binding.
+`#lang mdl` modules share the ambient context's channels as they share all
+globals; separate contexts never share channels. A context assembled by hand
+without the constructor has no INCHAN/OUTCHAN (no hidden fallback).
+
+**Host channels.** Each CHANNEL's backing VECTOR storage is registered in its
+owning atom space with a host record: direction, an optional Racket port and,
+for READ channels, the end-of-input flag (ADR-0050).
+`make-mdl-session`/`make-mdl-context` accept `#:output-port`/`#:input-port`.
+Output with no injected port goes to the host's `current-output-port` at
+each operation. Input never falls back: READSTRING on a READ channel without
+a host-supplied port is a strict error, so the runtime never reads the
+process's own stdin (ADR-0050 "Host input port only"). CHTYPE may retype a
+VECTOR as CHANNEL, as in Confusion, but only storage registered in the
+current session acts as an open channel; REST of a CHANNEL is a VECTOR.
+
+**PRINTSTRING, TERPRI and CRLF** take an optional channel defaulting to
+`.OUTCHAN` (ROOT atom, LVAL only) and write only to that channel's port. The
+channel is checked first, in Confusion's order: a non-CHANNEL fails ("attempt
+to write to non-channel"), then a CHANNEL not registered in this session
+("not open"), then a direction or mode slot (NTH 2) other than PRINT
+("requires an output channel"); PRINTSTRING then checks its STRING and count.
+PRINTSTRING returns the count written (recorded deviation: Confusion returns
+the STRING); TERPRI returns `#FALSE ()`; CRLF returns `T`; both emit LF only.
+
+**Deviations and unmodelled behaviour.** This runtime's GDECL checks an
+existing value and its SETG refuses to change an assigned MANIFEST
+(Confusion does neither). Binding OUTCHAN for the duration of output
+(§11.2.7 "PRINT binds OUTCHAN") is not modelled. Output is flushed only
+before each READSTRING and when the host loop exits, not after every SUBR.
+Line-width and other slots (e.g. `<PUT ,OUTCHAN 13 80>`) are stored but not
+interpreted (no PRINC/PRIN1 line breaking, ADR-0050). Tests:
+`tests/channel_port_test.rkt`, `tests/channel_root_identity_test.rkt`,
+`tests/printstring_channel_test.rkt`, `tests/terminal_channel_test.rkt`.
 
 ## M3 session-owned 36-bit RANDOM (`77rooms.mud:291`; issue #108)
 
@@ -2007,6 +2238,53 @@ association dispatch. This host representation is not a puzzle-rule change.
 Tests must first fail on unassigned BACK, then assert shared view mutation,
 strict bounds and types, terminal CHANNEL metadata, and the next actual
 original START failure. TOP and RESET are separate source dependencies.
+
+## M3 startup: UNPARSE, MEMQ on STRING and SUBSTRUC (issue #112 S1–S3)
+
+Consolidated 2026-11-23 from `evidence/M3/S1-UNPARSE.md` (PR #125),
+`evidence/M3/S1-MEMQ-STRING.md` (PR #128) and `evidence/M3/S3-SUBSTRUC.md`
+(PR #130); branch-only, not on `main`.
+
+**UNPARSE** (manual 7.6.6.4) `<UNPARSE any [radix]>` returns a fresh mutable
+STRING with the characters PRINT would output, without line-width breaks.
+Exact against pinned Confusion for: FIX in decimal (including the 36-bit
+extremes); STRING, quoted with `\"` and `\\`; CHARACTER as `!\c`; FALSE;
+LIST (recursive); and a plain ATOM whose PNAME is non-empty ASCII
+`[A-Za-z0-9-]`, does not parse as a number, and is found as the same atom
+on the current OBLIST path (LVAL of ROOT OBLIST, R3/R4). Strict errors: a
+radix other than 10 (Confusion ignores the radix; deviation, not copied);
+ATOMs needing escapes or a trailer; control characters in STRING/CHARACTER
+(Confusion prints `^X`); FLOAT, VECTOR, UVECTOR, WORD, FORM and other types.
+Source use: 77rooms.mud:164 only (a day-of-month FIX). Tests:
+`tests/unparse_test.rkt`.
+
+**MEMQ on STRING** (manual ch. 13; amends the M2 MEMQ section above). With a
+CHARACTER needle, MEMQ compares each element by `==?` (character code). On a
+hit at position i it returns the STRING REST'd to i, a view sharing storage
+with the original, so BACK and PUT alias it; on a miss it returns `#FALSE
+()`. A non-CHARACTER needle (FIX, STRING, ...) can never be `==?` to a
+CHARACTER element and returns `#FALSE ()`, as pinned Confusion does; the
+manual does not address the type mismatch. MEMBER is not implemented.
+Evidence: `evidence/M3/memq-string-reference.json`; tests
+`tests/memq_string_test.rkt`.
+
+**SUBSTRUC** (manual 7.1.7) `<SUBSTRUC from [rest] [amount] [to]>` copies
+elements. `rest` (FIX, default 0) must be in [0, length]; `amount` (FIX,
+default the remainder) in [0, length − rest]. Without `to` it returns a fresh
+structure of `from`'s PRIMTYPE that never shares storage with `from`. With
+`to` (which must have the primitive TYPE itself, not a NEWTYPE; Confusion
+"Last arg to SUBSTRUC must be same type as primtype"), the elements are
+written to positions [0, amount) and `to` is returned; the destination length
+is checked before any write, a UVECTOR `to` must have the source's element
+type, and a STRING copy snapshots all source characters first, so overlapping
+views copy atomically. Supported: STRING, VECTOR, UVECTOR, LIST without `to`.
+Strict errors: LIST with `to`, BYTES, TUPLE, wrong argument TYPEs and the
+Confusion-confirmed range errors (`SUBSTRUC rest cannot be negative`, `rest
+too large`, `amount cannot be negative`, `amount too big for source`).
+Recorded deviation: `<SUBSTRUC "abc" 0 2 [0 0 0]>` reports the type mismatch
+first where Confusion reports "destination too short"; the game never mixes
+PRIMTYPEs. Evidence: `evidence/M3/substruc-reference.json`; tests
+`tests/substruc_test.rkt`.
 
 ## M3 startup: ON (IPC) and SAVE
 

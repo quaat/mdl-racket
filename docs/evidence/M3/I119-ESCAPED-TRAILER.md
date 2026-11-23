@@ -1,5 +1,7 @@
 # I119 — Backslash-escaped OBLIST trailer PNAME fix
 
+> **Reconciliation note (2026-11-23).** Consolidated into [SEMANTICS §M3 reader: backslash escapes in atom names (issue #119)](../../SEMANTICS.md). Fixed by PR #132, merged into the umbrella `feat/m3-logical-gc` and every stack branch; not integrated into `main` (issue #119 stays open until then).
+
 **Branch**: `fix/m3-119-escaped-trailer`
 **Base commit**: `124f60c82007ef9f07213850d8c78d3ee9f08b13` (origin/feat/m3-logical-gc umbrella)
 **Reference binary**: pinned Confusion `6df359f6…` (full SHA256 `b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda83b177`)

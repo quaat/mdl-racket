@@ -1,5 +1,7 @@
 # I124 — Leading-dot FLOAT literals (`.5` read as LVAL of atom `5`)
 
+> **Reconciliation note (2026-11-23).** Consolidated into [SEMANTICS §M3 reader: leading-dot FLOAT vs LVAL (issue #124)](../../SEMANTICS.md). Fixed by PR #133, merged into the umbrella `feat/m3-logical-gc` and every stack branch; not integrated into `main` (issue #124 stays open until then).
+
 ## Finding
 
 `78melee.mud:369` contains `<FIX <+ .5 …>>` where `.5` is the MDL FLOAT `0.5`.

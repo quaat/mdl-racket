@@ -1,5 +1,7 @@
 # S1-UNPARSE: Implement UNPARSE SUBR
 
+> **Reconciliation note (2026-11-23).** Consolidated into [SEMANTICS §M3 startup: UNPARSE, MEMQ on STRING and SUBSTRUC](../../SEMANTICS.md). On the branch stack (PR #125 and later); not on `main`. The proposed section below is history.
+
 **Branch:** `feat/m3-startup-unparse`  
 **Base commit:** `9d6ff41dff86329abd8f3cc1830da5000cb29b90` (PR #111 head: #107 + #109 RANDOM + #111 BACK)  
 **RID:** S1-UNPARSE  
