@@ -1768,7 +1768,20 @@ inconsistency found in the S4 review.
 
 ## ADR-0059: Zero-argument MAX is the negation of `<MIN>`
 
-Status: proposed (M4 S5a, issue #122, 2026-11-23).
+Status: accepted (maintainer decision, 2026-11-23; M4 S5a, issue #122,
+PR #159).
+
+Acceptance scope: the maintainer approved keeping this zero-argument
+`<MAX>` behaviour and its recorded deviation from pinned Confusion. The
+approval covers only the zero-argument `<MAX>` discrepancy. It does not
+authorize other deviations from Confusion or any relaxation of strict
+unsupported behaviour. The pinned reference and the parity tests are
+unchanged. Regression coverage for both identities stays explicit:
+`tests/min_test.rkt` and `tests/max_test.rkt` pin the exact value, TYPE
+FLOAT, PRIMTYPE WORD, the CHTYPE FIX/WORD images and the comparison
+boundaries. "Least FLOAT" here means the least FLOAT this runtime
+represents and converts (the negation of `<MIN>`); the wording note below
+still applies.
 
 Context: the manual (§3.5) gives "the least FLOAT" as MAX's zero-argument
 identity, symmetric to MIN's "greatest FLOAT". R6 decided `<MIN>` is the

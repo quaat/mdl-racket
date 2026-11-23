@@ -28,8 +28,9 @@ results when the first argument is FLOAT (`<MAX -1.5 -2.5>` → `0.0000000`).
 ## Semantics and decision
 
 SEMANTICS "M4 S5a: MAX (issue #122; ADR-0059)", written before the
-implementation. ADR-0059 (status *proposed*, needs orchestrator
-acceptance): `<MAX>` is −(2^27−1)·2^100, the least PDP-10 FLOAT and the
+implementation. ADR-0059 (accepted by maintainer decision on
+2026-11-23, limited to the zero-argument `<MAX>` discrepancy; originally
+*proposed*): `<MAX>` is −(2^27−1)·2^100, the least PDP-10 FLOAT and the
 exact negation of R6's `<MIN>`; CHTYPE FIX image 400000000001₈ =
 −34359738367. Chosen because R6 already decided MIN's identity from the
 same manual sentence; the reference's DBL_MIN is neither the 36-bit target
