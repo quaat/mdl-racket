@@ -1,7 +1,11 @@
 # M4 scenario backlog (plan, 2026-11-23)
 
-Status: **PLAN ONLY.** No scenario below has been run in either engine; no
-reference transcript exists yet for any of them. This orders the first M4
+Status (updated 2026-11-23): scenario 1 is **executed and PASS on `main`**
+(#153, `make test-m4-house-cellar`); two further scenarios grew out of its
+frontier and also PASS on `main`: **mailbox-drop** (S2, #154) and
+**orphan-prompt** (S3, #155) — see the [M4 baseline](M4-MAINLINE-BASELINE.md).
+Rows 2–5 below remain planned. Original status when drafted: plan only; no
+scenario had been run in either engine. This orders the first M4
 slices after M3 acceptance (deterministic house smoke) and the local session
 smoke (PLAN WP4). It is not a PLAYABLE claim.
 
@@ -28,7 +32,10 @@ Source paths below are relative to
 
 ## First concrete scenario: enter the house and open the cellar
 
-Commands (to be confirmed by the reference capture, not guessed):
+Commands as drafted (the executed sequence, confirmed natively, is in
+`tests/scenarios/house-cellar.json`: `north`, `east`, `open window`, `west`,
+`west`, `take lamp`, `move rug`, `open trap door`, `turn on lamp`, `down`,
+`score`):
 `north`, `east`, `open window`, `enter` (or `west`), `west`, `take lamp`,
 `move rug`, `open trap door`, `turn on lamp`, `down`, `score`.
 
