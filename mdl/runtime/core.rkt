@@ -3603,6 +3603,24 @@
   (write-string (princ-text (car args)) port)
   (car args))
 
+;; PRIN1 (manual 11.1.2.3): FIX in decimal; an ATOM with an empty PNAME that
+;; is reachable on the OBLIST path prints nothing (Confusion: the game's
+;; ,NULL); any other ATOM follows the UNPARSE ATOM rules (safe PNAME,
+;; reachable, no trailer). Returns the object. Every other TYPE is strict.
+(define (prin1-text value)
+  (cond [(exact-integer? value) (number->string (check-fix 'PRIN1 value))]
+        [(and (mdl-atom? value) (string=? (atom-value-pname value) ""))
+         (unless (atom-reachable? 'PRIN1 value)
+           (error 'PRIN1 "empty-PNAME ATOM not reachable via current OBLIST path; trailer notation not implemented (ADR-0050)"))
+         ""]
+        [(mdl-atom? value) (mdl-unparse-value 'PRIN1 value)]
+        [else (error 'PRIN1 "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))
+
+(define (mdl-prin1 . args)
+  (define port (print-arguments 'PRIN1 args))
+  (write-string (prin1-text (car args)) port)
+  (car args))
+
 ;; ADR-0050 / maintainer decision D3 ("Mirror, then strict"): reading a
 ;; terminal CHANNEL whose input already ended. A host-level Racket exception,
 ;; never an MDL ERROR, so no MDL ERROR handler (the game's HANDLE) runs; a host
@@ -3860,6 +3878,17 @@
   ;; Escape \ as \\ first, then " as \" — order matters.
   (string-replace (string-replace s "\\" "\\\\") "\"" "\\\""))
 
+;; Is ATOM the one found by looking its PNAME up on the current OBLIST path
+;; (#118: the LVAL of ROOT OBLIST, not the session default)? Only then does
+;; PRINT/UNPARSE/PRIN1 omit the trailer.
+(define (atom-reachable? who atom)
+  (define pname (atom-value-pname atom))
+  (define found
+    (for/or ([oblist (in-list (mdl-list->list (current-lookup-path who)))])
+      (define candidate (mdl-lookup pname oblist))
+      (and (not (mdl-false? candidate)) candidate)))
+  (eq? found atom))
+
 (define (mdl-unparse-value who value)
   (cond
     [(exact-integer? value)
@@ -3884,14 +3913,7 @@
        (error who
               "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"
               pname))
-     ;; #118: the one authoritative search path (LVAL of ROOT OBLIST), not
-     ;; the session default stored in atom-space-lookup.
-     (define lookups (mdl-list->list (current-lookup-path who)))
-     (define found
-       (for/or ([oblist (in-list lookups)])
-         (define candidate (mdl-lookup pname oblist))
-         (and (not (mdl-false? candidate)) candidate)))
-     (unless (eq? found value)
+     (unless (atom-reachable? who value)
        (error who
               "UNPARSE ATOM: trailer notation not implemented; atom ~s not reachable via current OBLIST path"
               pname))
@@ -4202,6 +4224,7 @@
         "CRLF" mdl-crlf
         "RESET" mdl-reset
         "PRINC" mdl-princ
+        "PRIN1" mdl-prin1
         "READSTRING" mdl-readstring
         "ERROR" mdl-error
         "ERRET" mdl-erret
