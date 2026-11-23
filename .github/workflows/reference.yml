@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: racket/racket:8.10-bc@sha256:8c527e0cca4650a6bdd73f3f73fe203ede6317c82f3f3f33bc861cec981e8b2d
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Install native build tools
         run: |
@@ -75,11 +75,39 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m3-launcher 2>&1 | tee artifacts/ci-logs/test-m3-launcher.log
+      # S10 (ADR-0053): the M3 SMOKE_PARITY technical check. Runs its own
+      # stages in order (sources, test-m3-saveit, test-m3-clock-seed,
+      # test-m3-interactive, comparator unit tests, this runtime's run vs the
+      # committed Confusion record through the single strict comparator).
+      # No native binary exists yet at this point, so the native stage is
+      # reported NOT RUN (never PASS). Each stage is bounded by
+      # M3_STAGE_TIMEOUT; the step limit is a second, coarser bound.
+      - name: M3 SMOKE_PARITY check (binary-free stages)
+        timeout-minutes: 20
+        shell: bash
+        env:
+          M3_STAGE_TIMEOUT: '480'
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make m3-check 2>&1 | tee artifacts/ci-logs/m3-check.log
       - name: Build and capture native reference
         run: |
           make reference-build
           make reference-capture
           make reference-probe
+      # Fresh pinned-Confusion capture in a disposable copy under the fixed
+      # clock, compared strictly with the committed record and with this
+      # runtime's run (required here: a missing binary is a failure).
+      - name: M3 SMOKE_PARITY native fresh-capture comparison
+        timeout-minutes: 8
+        shell: bash
+        env:
+          M3_STAGE_TIMEOUT: '300'
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make m3-native-parity 2>&1 | tee artifacts/ci-logs/m3-native-parity.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -90,3 +118,4 @@ jobs:
             artifacts/reference/primitives.json
             docs/evidence/M0/reader-sweep.json
             artifacts/ci-logs/
+            artifacts/m3/
