@@ -1754,7 +1754,7 @@ adding the reference's first CHANNEL slot now (it is the echo/script LIST,
 whose effect this runtime does not implement, so a PUT there would be a
 silent no-op; revisit when scripting is supported).
 
-## ADR-0059: Zero-argument MAX is the least PDP-10 FLOAT, the negation of `<MIN>`
+## ADR-0059: Zero-argument MAX is the negation of `<MIN>`
 
 Status: proposed (M4 S5a, issue #122, 2026-11-23).
 
@@ -1774,9 +1774,18 @@ negation of `<MIN>`, an ordinary host flonum like every other FLOAT. Its
 PDP-10 word image (CHTYPE to FIX/WORD) is 400000000001₈ (FIX −34359738367).
 Non-empty MAX folds from its first argument (never from a seed), so negative
 FLOAT arguments give the largest argument.
+Wording note (independent review): this is described as the negation of
+`<MIN>`, not as "the least PDP-10 FLOAT". PDP-10 negative FLOATs are two's
+complement, so the word 400000000000₈ (−2^127) is very likely also a valid
+normalized negative below 400000000001₈; it is a rejected candidate here
+because this runtime's checked word-image conversion (`float-word-bits`,
+R6) refuses exponent field 256, and the symmetry with the decided `<MIN>`
+is the stated rationale. This could not be verified against MUDDLE's ARITH
+source (not in the pinned sources).
 
-Consequences: MIN and MAX are symmetric identities, `<MAX <MAX> x>` is x
-(as FLOAT), and the value takes part in arithmetic, comparison and CHTYPE
+Consequences: MIN and MAX are symmetric; `<MAX <MAX> x>` is x (as FLOAT)
+for every x in the PDP-10 FLOAT range (the reader can produce FLOATs below
+it, for which the result is the sentinel, as for R6's `<MIN>`), and the value takes part in arithmetic, comparison and CHTYPE
 like `<MIN>`. Recorded deviation from the reference for `<MAX>` itself and
 for all-negative FLOAT MAX with a FLOAT first argument; no game expression
 reaches either. Alternatives rejected: copying the reference's DBL_MIN

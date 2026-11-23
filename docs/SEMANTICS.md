@@ -3174,7 +3174,8 @@ TYPE (`<MAX 7>` FIX 7, `<MAX 2.5>` FLOAT 2.5). The game's expressions give
 **Zero arguments (ADR-0059).** `<MAX>` is the ordinary FLOAT
 −(2^27−1)·2^100, the least PDP-10 single-precision FLOAT and the exact
 negation of `<MIN>` (held exactly as a host flonum). It is the identity for
-MAX: `<MAX <MAX> x>` is x as FLOAT. `<CHTYPE <MAX> FIX>` is the two's
+MAX: `<MAX <MAX> x>` is x as FLOAT for every x in the PDP-10 FLOAT range
+(below it the sentinel wins, as for `<MIN>`). `<CHTYPE <MAX> FIX>` is the two's
 complement of 377777777777₈, i.e. the word 400000000001₈ = −34359738367.
 
 **Refusals.** Any non-number argument (STRING, ATOM, LIST, FALSE,
@@ -3187,8 +3188,10 @@ turns such a literal into FLOAT, M1 issue #8).
 **Recorded reference deviations.** (1) Pinned Confusion's `<MAX>` is the
 host `DBL_MIN` (smallest positive double; prints `0.0000000`, CHTYPE FIX
 4503599627370496, `G?` 0 is T); it is not an identity for MAX. (2) The same
-DBL_MIN seed leaks into results when the first argument is FLOAT and every
-argument is negative: the reference gives `<MAX -1.5 -2.5>`, `<MAX -1.5>`
+DBL_MIN seed leaks into results when the first argument is FLOAT and no
+argument exceeds DBL_MIN (all negative, or the largest is 0.0 — native
+`<CHTYPE <MAX 0.0 -1.0> FIX>` is 4503599627370496, this runtime gives 0.0 and
+FIX 0): the reference gives `<MAX -1.5 -2.5>`, `<MAX -1.5>`
 and `<MAX -1.5 -2>` as DBL_MIN (`0.0000000`), but `<MAX -2 -1.5>` as `-1.5`.
 This runtime returns the largest argument (`-1.5`) in every order; no game
 expression has a FLOAT argument. (3) Confusion FIX is a 64-bit host integer

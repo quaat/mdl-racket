@@ -38,6 +38,11 @@
 (check* (check-equal? (run "<MAX 0 -5>") 0))
 (check* (check-equal? (run "<MAX -7 -7>") -7))
 (check* (check-equal? (run "<MAX -1 1>") 1))
+;; Independent review: the DBL_MIN leak case with 0.0 as the largest argument
+;; (native CHTYPE FIX 4503599627370496); this runtime returns 0.0, FIX 0.
+(check* (check-equal? (run "<MAX 0.0 -1.0>") 0.0))
+(check* (check-equal? (run "<CHTYPE <MAX 0.0 -1.0> FIX>") 0))
+(check* (check-equal? (name "<PRIMTYPE <MAX>>") "WORD"))
 
 ;; --- Three or more FIX (probe fix-many) ----------------------------------
 (check* (check-equal? (run "<MAX 1 5 3>") 5))
