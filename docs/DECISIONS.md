@@ -465,6 +465,11 @@ rule, public license, deployed service, or GPLv3 reference code changed.
 
 ## ADR-0018: Function activations, manual-based GO, and flagged-wind UNWIND
 
+> **Superseded in part by ADR-0051 (issue #139):** UNWIND cleanups no longer
+> run for raised errors. The "or an error" clause and the error paragraph
+> under **Why** below are historical. Their probe was misread, as ADR-0051
+> explains.
+
 **Decision:** Give every activation frame a kind. PROG/REPEAT frames are
 eligible bare targets as before; function activations created for a leading
 activation ATOM or `"NAME"`/`"ACT"` marker are only reachable by explicit
@@ -1111,3 +1116,54 @@ the same session past SAVE (for example by calling START) must account for
 it explicitly, after probing what Confusion's RESTORE does to the level,
 instead of letting queued DIVERT-AGC occurrences silently change the GC
 schedule.
+
+## ADR-0051: UNWIND cleanups run only for MDL transfers, never for raised errors
+
+**Status:** Accepted (maintainer decision 2026-11-23, issue #139, option a).
+Supersedes the error clause of ADR-0018 ("cleanup runs only when a
+transfer or an error crosses below it"). The rest of ADR-0018 stands.
+
+**Decision:** An UNWIND cleanup runs only when an MDL transfer of control
+leaves the guarded expression through the UNWIND frame. In this runtime
+those transfers are RETURN, AGAIN, GO and MAPLEAVE/MAPRET/MAPSTOP,
+including transfers made by an ERROR or other interrupt handler. ERRET to
+an ERROR frame lies above the UNWIND and crosses none. Anything that
+leaves by a Racket `raise` propagates unchanged and runs no cleanup. That
+covers an MDL ERROR no handler resolves, host strict errors for
+unsupported constructs, nested-load failures, and any future QUIT, which
+must be a raised non-`exn:fail` signal. `mdl-unwind` marks a raise passing
+through its body with `call-with-exception-handler`, which returns the
+value so the raise continues to the next handler, and its `dynamic-wind`
+post skips the cleanup when the mark is set. Host bookkeeping (activation
+liveness, bindings, OBLIST path and interrupt level) is still restored on
+a raise. An error inside a cleanup during a transfer propagates unchanged.
+It abandons the pending transfer and any outer cleanups on that path.
+"Unchanged" refers to UNWIND: it neither catches nor rewraps the raise. A
+raise out of a nested FLOAD still reaches its caller as the loader's
+`exn:fail:mdl-load` wrapper, which is a loader behaviour, not UNWIND's.
+
+**Why:** The MDL manual §16.2 makes ERROR a nested LISTEN on the intact
+stack. In §16.4/§16.5 only ERRET and RETRY strip the stack. The §16.6
+FLOAD cleanup runs "if the user attempts to ERRET", and in §23.3 QUIT
+stops MDL. Pinned Confusion (`6df359f6…`) runs no cleanup on entering an
+error level, at EOF from that level, on QUIT, or for C-level internal
+errors. It runs the cleanup only on ERRET or a RETURN typed at the error
+level that crosses the UNWIND (`docs/evidence/M3/I139-UNWIND.md`). ADR-0018
+misread its probe `unwind-cleanup-on-error`. The probe read `,M2-C` while
+still at error level 2, where the manual also runs no cleanup, so the
+manual and Confusion never disagreed. The old rule also broke strict
+failure. A cleanup error replaced the body's error, and a cleanup that
+RETURNed past the UNWIND turned a strict error into a normal value. If QUIT
+had followed that rule, the game's FLUSH-ME/JIGS-UP/FINISH cleanups would
+have run FINISH and RECORD a second time.
+
+**Consequence:** Raised errors are terminal and keep their original
+message. This runtime has no interactive error level, so it cannot model
+ERRET with no arguments, ERRET to a frame below the UNWIND, RETRY, or a
+RETURN typed at level 2. These are documented deviations, never emulated.
+Confusion keeps a transfer pending when its cleanup errors and completes it
+after ERRET. Here that error is terminal, unless an ERROR handler resolves
+it with ERRET, in which case the transfer completes. Skipped cleanups are
+not reported as diagnostics. The original exception is the only report.
+No game source, upstream provenance, license, deployed service or GPLv3
+code changed. The source LOADED gate is unchanged at 1229 expressions.
