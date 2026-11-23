@@ -1,0 +1,26 @@
+{
+  "name": "house-quit",
+  "description": "Complete local session ending in QUIT (S11, ADR-0054/ADR-0055). Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, as house-boot), the six house-boot commands, a declined quit (quit, n), one ordinary deterministic command (inventory: its text is fixed by state alone and it calls no RANDOM, per the reference diagnostic log), an affirmative quit (quit, y), then one extra line (look) that must never be read. It is the input of the pinned Confusion case C1-session-quit-pipe, so the transcript is compared with that reference. house-boot.json and its golden are unchanged.",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": ["<FLOAD \"77loadall.mud\">", "<SAVE-IT>"],
+  "commands": [
+    "north",
+    "west",
+    "open mailbox",
+    "take leaflet",
+    "inventory",
+    "score",
+    "quit",
+    "n",
+    "inventory",
+    "quit",
+    "y",
+    "look"
+  ],
+  "unread_after_quit": "look\n",
+  "reference": {
+    "file": "docs/evidence/M3/session-quit-probe.json",
+    "case": "C1-session-quit-pipe"
+  }
+}

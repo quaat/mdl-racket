@@ -11,7 +11,11 @@
          exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
          mdl-session-random-snapshot random36-state-words
          mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock
-         mdl-host-loop-secondary-failures)
+         mdl-host-loop-secondary-failures
+         mdl-quit-signal? mdl-session-outcome? mdl-session-outcome-kind
+         mdl-session-outcome-mdl-errors
+         mdl-session-open-records mdl-open-record? mdl-open-record-mode
+         mdl-open-record-file-spec mdl-open-record-status)
 
 ;; input-port/output-port: the explicit host ports given to make-mdl-session
 ;; (#f when omitted); the host top-level loop requires both (ADR-0050).
@@ -239,7 +243,20 @@
                                           (fail! session "compiler" "compile"
                                                  file index node (exn-message e)))])
                          (compile-expression node))])
-                  (with-handlers ([exn:fail:mdl-load?
+                  (with-handlers ([mdl-quit-signal?
+                                   ;; ADR-0054 item 6 (S11 review): a QUIT while
+                                   ;; loading ends the program; record where,
+                                   ;; then re-raise the same signal.
+                                   (lambda (q)
+                                     (record! session
+                                              (hash 'status "QUIT" 'file file
+                                                    'expression_index index
+                                                    'line (mdl-node-line node)
+                                                    'column (mdl-node-column node)
+                                                    'construct (construct-name node)
+                                                    'load_chain (chain-names session)))
+                                     (raise q))]
+                                  [exn:fail:mdl-load?
                                    (lambda (e)
                                      (record! session
                                               (hash-set
@@ -276,15 +293,21 @@
     (lambda ()
       (parameterize ([current-load-chain '()])
         (define failure #f)
+        (define quit? #f)
         (define result #f)
         (define skipped (box 0))
         (with-handlers ([exn:fail:mdl-load?
                          (lambda (e)
                            (set! failure (exn:fail:mdl-load-diagnostic e))
-                           (void))])
+                           (void))]
+                        ;; ADR-0054 item 6: the program QUIT during the load;
+                        ;; the report says so (status "QUIT", never "PASS")
+                        ;; and its last event locates the QUIT.
+                        [mdl-quit-signal? (lambda (q) (set! quit? #t))])
           (set! result (load-internal! session entry max-expressions skipped)))
         (define events (reverse (unbox (mdl-session-events session))))
         (hash 'status (cond [failure "FAIL"]
+                            [quit? "QUIT"]
                             [(equal? result "PARTIAL") "PARTIAL"]
                             [else "PASS"])
               'entry entry
@@ -307,6 +330,12 @@
 (define (mdl-session-random-snapshot session)
   (call-in-session session mdl-random-state-snapshot))
 
+;; Test/introspection boundary (ADR-0055): the session's denied OPEN calls
+;; (mode, file spec, status), oldest first. Host-only; no MDL primitive
+;; exposes them.
+(define (mdl-session-open-records session)
+  (call-in-session session mdl-open-records))
+
 ;; Test/introspection boundary (ADR-0048): the session's SAVE records,
 ;; oldest first. Host-only; no MDL primitive exposes them.
 (define (mdl-session-save-records session)
@@ -328,8 +357,12 @@
 ;; GVAL applied with no arguments (for run.mud: "SAVE-IT", after the caller
 ;; has loaded 77loadall.mud). The session must have been made with explicit
 ;; #:input-port and #:output-port, so the loop never reads the process's own
-;; standard input. It ends only by an exception; exhausted input is
-;; exn:fail:mdl-input-exhausted, which a host reports as a failure.
+;; standard input. It returns an mdl-session-outcome only when the program
+;; QUITs: kind 'quit, or 'quit-after-mdl-error when an MDL ERROR was
+;; signalled during the run (ADR-0054; an acceptance run requires 'quit).
+;; Every other ending raises: exhausted input is exn:fail:mdl-input-exhausted,
+;; strict failures keep their exn, a break stays a break; a host reports each
+;; as a failure.
 (define (mdl-session-run-interactive session entry #:max-passes [max-passes #f]
                                      #:on-event [on-event void])
   (unless (mdl-session? session)
