@@ -273,6 +273,8 @@
   (define a0 (field s player "AOBJS"))
   (mdl-session-call s "TAKE-OBJECT" leaf player)
   (check-equal? (oids s (field s player "AOBJS")) "(ADVER)")
+  ;; a0 is (): this ==? check is trivially true (S2 review); the LAMP check
+  ;; below, against a non-empty AOBJS, is the one that proves tail sharing.
   (check-true (same? (mdl-session-call s "REST" (field s player "AOBJS")) a0))
   (check-equal? (render s (field s leaf "OROOM")) "#FALSE ()")
   (define a1 (field s player "AOBJS"))

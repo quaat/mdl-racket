@@ -159,7 +159,7 @@
 (check-equal? (run (string-append L+S "<==? <REST <EV <FORM LIST 1 .S>>> .L>")) "#FALSE ()")
 (check-equal? (run (string-append L+S "<EV <FORM LIST .S>>")) "(6 7 8)")
 (check-equal? (run (string-append L+S "<==? <EV <FORM LIST .S>> .L>")) "#FALSE ()")
-(check-exn #rx"(?i:too-many|too many|arguments)"
+(check-exn #rx"TOO-MANY-ARGUMENTS"
            (lambda () (run (string-append L+S "<EV <FORM PUT <FORM LVAL L> 1 .S>>"))))
 
 ;; --- eval-function-args ----------------------------------------------------------
@@ -246,5 +246,18 @@
    (check-equal? (render (mdl-session-call session "BACKL" seg)) "(LVAL L)")
    (displayln "interpreted CHTYPE SEGMENT twins passed"))
  (lambda () (delete-directory/files scratch-root #:must-exist? #f)))
+
+;; S2 independent review: a TYPE atom merely NAMED SEGMENT (not ROOT's) with
+;; PRIMTYPE VECTOR is an ordinary user TYPE: CHTYPE tags the VECTOR and does
+;; not take the built-in SEGMENT (LIST) branch; with PRIMTYPE LIST it does not
+;; splice. The same holds for a user TYPE named LIST.
+(check-equal? (run "<SET A <ATOM \"SEGMENT\">> <NEWTYPE .A VECTOR> <SPNAME <TYPE <CHTYPE [1 2] .A>>>")
+              "\"SEGMENT\"")
+(check-equal? (run "<SET A <ATOM \"SEGMENT\">> <NEWTYPE .A VECTOR> <==? <TYPE <CHTYPE [1 2] .A>> SEGMENT>")
+              (run "<==? 1 2>"))
+(check-equal? (run "<SET L <ATOM \"LIST\">> <NEWTYPE .L VECTOR> <LENGTH <CHTYPE [1 2 3] .L>>")
+              "3")
+(check-equal? (run "<SET A <ATOM \"SEGMENT\">> <NEWTYPE .A LIST> <SET Q (5 6)> <LENGTH (0 <CHTYPE (.Q) .A>)>")
+              "2")
 
 (displayln "chtype segment tests passed")

@@ -930,16 +930,13 @@
 ;; like a FORM. Its payload is a FORM view over the same cells.
 (struct mdl-splice-result (value line column) #:transparent)
 
-;; The ROOT SEGMENT atom of every atom space (registered by
-;; make-mdl-atom-space; weak, so a finished session's space can be
-;; collected). The test is by atom identity, never by PNAME, and does not
-;; depend on which space is current, so a host inspecting a session's values
-;; from outside it sees the same answer as the session itself.
-(define segment-type-atoms (make-weak-hasheq))
-
+;; Identity test against the CURRENT atom space's ROOT SEGMENT, exactly as
+;; mdl-form? tests ROOT FORM (S2 independent review): a value from another
+;; session is never treated as a splice here, and a user TYPE atom that is
+;; merely named SEGMENT is never one.
 (define (mdl-segment? value)
   (and (mdl-typed-value? value)
-       (hash-ref segment-type-atoms (mdl-typed-value-type value) #f)))
+       (eq? (mdl-typed-value-type value) (mdl-root-atom "SEGMENT"))))
 
 (define (mdl-segment-payload segment)
   (mdl-make-form (mdl-typed-value-value segment)))
@@ -1870,7 +1867,6 @@
     (define type-atom (seed-root! (car entry)))
     (hash-set! types type-atom (cdr entry))
     (hash-set! builtins type-atom #t))
-  (hash-set! segment-type-atoms (seed-root! "SEGMENT") #t)
   (for ([name (in-hash-keys builtin-table)]) (seed-root! name))
   (for-each seed-root! root-internal-names)
   (atom-space initial root named types builtins (make-hasheq)
@@ -3669,8 +3665,13 @@
   (define converted
     (if (eq? (mdl-type value) type)
       value
-      (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
-        (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
+      ;; TARGET is the PNAME of a ROOT built-in TYPE, or #f for any other TYPE
+      ;; atom (S2 review: a user TYPE merely named SEGMENT/LIST/FALSE must not
+      ;; take a built-in conversion branch).
+      (let* ([base (mdl-base value)]
+             [builtin? (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)]
+             [target (and builtin? (mdl-atom-pname type))])
+        (when (and builtin?
                    (not (member target '("ATOM" "LIST" "FALSE" "VECTOR" "UVECTOR" "STRING"
                                          "FIX" "WORD" "LOSE" "CHANNEL"
                                          "SEGMENT"))))
@@ -3685,23 +3686,23 @@
                  (if (flonum? base)
                      (float-word-bits 'mdl-chtype base)
                      (word-bits-of base)))
-               (cond [(string=? target "FIX")
+               (cond [(equal? target "FIX")
                       (word-signed bits)]
-                     [(string=? target "WORD")
+                     [(equal? target "WORD")
                       (mdl-word bits)]
                      [(or (exact-integer? base) (mdl-word? base) (flonum? base))
                       (mdl-typed-value type (mdl-word bits))]
                      [else (error 'mdl-chtype "unsupported WORD reinterpretation")])]
-              [(string=? target "LIST")
+              [(equal? target "LIST")
                (mdl-list-head base 'mdl-chtype)]
-              [(string=? target "FALSE")
+              [(equal? target "FALSE")
                (mdl-false (mdl-list-head base 'mdl-chtype))]
               ;; A SEGMENT tags the same LIST cells, like a FORM (ADR-0056).
-              [(string=? target "SEGMENT")
+              [(equal? target "SEGMENT")
                (mdl-typed-value type (mdl-list-head base 'mdl-chtype))]
-              [(string=? target "ATOM") base]
-              [(string=? target "STRING") base]
-              [(or (string=? target "VECTOR") (string=? target "UVECTOR"))
+              [(equal? target "ATOM") base]
+              [(equal? target "STRING") base]
+              [(or (equal? target "VECTOR") (equal? target "UVECTOR"))
                base]
               [(member (mdl-atom-pname desired-prim) '("ATOM" "LIST" "VECTOR" "UVECTOR" "STRING"))
                (mdl-typed-value type base)]

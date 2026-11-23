@@ -340,7 +340,10 @@
    (check-equal? (status (mdl-session-load! session "macros.mud")) "PASS")
    (put "macrocall.mud" "<SETG AVAL '(9)>\n<SETG MACQ <QX !,AVAL>>\n")
    (check-equal? (status (mdl-session-load! session "macrocall.mud")) "PASS")
-   (check-true (mdl-segment? (mdl-session-global session "MACQ")))
+   ;; Checked inside the session: SEGMENT identity is per session (S2 review).
+   (check-equal? (mdl-atom-pname (mdl-session-call session "TYPE"
+                                                   (mdl-session-global session "MACQ")))
+                 "SEGMENT")
 
    (displayln "loader segment tests passed"))
  (lambda () (delete-directory/files scratch-root)))

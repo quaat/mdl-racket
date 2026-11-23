@@ -1665,3 +1665,11 @@ is dropped (unused). Printing SEGMENTs stays strict. Alternatives rejected:
 a second CHTYPE-only segment struct (two representations of one MDL TYPE,
 diverging TYPE/NTH/`==?` behaviour); copying the cells on CHTYPE (the
 reference shares, and INSERT-OBJECT relies on the shared tail).
+
+**Amendment (independent review, 2026-11-23):** SEGMENT identity is tested
+against the current atom space's ROOT SEGMENT atom, exactly as FORM is
+(`mdl-form?`): a SEGMENT value from another session is not spliced here, and
+a user TYPE atom merely named SEGMENT (or LIST/FALSE) never takes a built-in
+CHTYPE branch — CHTYPE dispatches on the target being a ROOT built-in TYPE,
+not on its PNAME. Hosts that inspect session values check TYPE inside the
+session (e.g. `mdl-session-call session "TYPE" v`).
