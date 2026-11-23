@@ -11,7 +11,7 @@ and break tests.
 | `(run-zork)`, then `quit` / `y` returns control to the DrRacket REPL | **PASS** | Maintainer run, 2026-11-23 (transcript below) |
 | Stop interrupts a running game without terminating DrRacket | NOT YET REPORTED | — |
 
-Automated stand-ins that already pass (not a substitute for the two open rows):
+Automated stand-ins that already pass (not a substitute for the open Stop row):
 `tests/launcher_test.rkt` (run-zork returns `'quit`; a `break-thread` during
 the blocking read ends the game thread with `exn:break` and the test process
 continues).
