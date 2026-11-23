@@ -3105,10 +3105,28 @@ a NEWTYPE-tagged original only if the TYPEs agree (`<==? <TOP <CHTYPE <REST
 separate array is `=?` but not `==?`. EVERYTHING's `<==? .SUV .TUV>` is T
 exactly when the BACK steps have reached the first slot.
 
+**Known deviation: BACK of a NEWTYPE'd array (independent review,
+2026-11-23).** TOP keeps the argument's TYPE, as pinned Confusion does.
+This runtime's BACK keeps only the CHANNEL TYPE (the M3 BACK decision above,
+following the manual's "BACK yields the array PRIMTYPE"), whereas native BACK
+keeps any TYPE: with `<NEWTYPE FOO VECTOR> <SET F <CHTYPE <REST [1 2 3] 2>
+FOO>>`, native gives `<TYPE <BACK .F 2>>` = FOO and `<==? <TOP .F> <BACK .F
+2>>` = T (also for a NEWTYPE of STRING; probe below), while this runtime gives
+VECTOR and FALSE. The TOP/BACK `==?` identity above therefore holds for
+untyped arrays (all game uses: SPARSE and EVERYTHING BACK plain VECTOR /
+UVECTOR views) but not for NEWTYPE'd arrays. Changing BACK needs a
+maintainer decision because it revises the recorded M3 BACK rule.
+Native check (mdli 6df359f6, bare interpreter): `<TYPE <BACK <CHTYPE <REST
+[1 2 3] 2> FOO> 2>>` → `FOO`; `<==? <TOP .F> <BACK .F 2>>` → `T`;
+`<TYPE <BACK <CHTYPE <REST "abc" 1> BS> 1>>` → `BS`.
+
 **Refusals (strict errors).** Any other argument: LIST-primtype values
 (LIST, a REST of a LIST, FORM, FALSE, SEGMENT), TUPLEs (this runtime's TUPLE
 is a LIST; the reference refuses them too), FIX, ATOM, CHARACTER and other
-non-structured values: `mdl-top: Bad type for TOP` (reference text `Bad type
+non-structured values, and the struct-backed builtins whose PRIMTYPE is
+UVECTOR or VECTOR but which are not arrays here — OBLIST, IHEADER, HANDLER
+(recorded deviation: the reference's TOP would accept an OBLIST; refusing is
+strict and not game-reachable): `mdl-top: Bad type for TOP` (reference text `Bad type
 for TOP`, written to stderr; this runtime raises the error like every other
 refusal). TOP never invents LIST semantics. Arity: `<TOP>` raises
 `TOO-FEW-ARGUMENTS-SUPPLIED`, two or more arguments
