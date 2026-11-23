@@ -243,7 +243,20 @@
                                           (fail! session "compiler" "compile"
                                                  file index node (exn-message e)))])
                          (compile-expression node))])
-                  (with-handlers ([exn:fail:mdl-load?
+                  (with-handlers ([mdl-quit-signal?
+                                   ;; ADR-0054 item 6 (S11 review): a QUIT while
+                                   ;; loading ends the program; record where,
+                                   ;; then re-raise the same signal.
+                                   (lambda (q)
+                                     (record! session
+                                              (hash 'status "QUIT" 'file file
+                                                    'expression_index index
+                                                    'line (mdl-node-line node)
+                                                    'column (mdl-node-column node)
+                                                    'construct (construct-name node)
+                                                    'load_chain (chain-names session)))
+                                     (raise q))]
+                                  [exn:fail:mdl-load?
                                    (lambda (e)
                                      (record! session
                                               (hash-set
@@ -280,15 +293,21 @@
     (lambda ()
       (parameterize ([current-load-chain '()])
         (define failure #f)
+        (define quit? #f)
         (define result #f)
         (define skipped (box 0))
         (with-handlers ([exn:fail:mdl-load?
                          (lambda (e)
                            (set! failure (exn:fail:mdl-load-diagnostic e))
-                           (void))])
+                           (void))]
+                        ;; ADR-0054 item 6: the program QUIT during the load;
+                        ;; the report says so (status "QUIT", never "PASS")
+                        ;; and its last event locates the QUIT.
+                        [mdl-quit-signal? (lambda (q) (set! quit? #t))])
           (set! result (load-internal! session entry max-expressions skipped)))
         (define events (reverse (unbox (mdl-session-events session))))
         (hash 'status (cond [failure "FAIL"]
+                            [quit? "QUIT"]
                             [(equal? result "PARTIAL") "PARTIAL"]
                             [else "PASS"])
               'entry entry

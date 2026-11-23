@@ -4246,12 +4246,15 @@
     (cond [(mdl-atom? value) (mdl-atom-pname value)]
           [(mdl-string? value) (format "~s" (mdl-string-content value))]
           [else (format "~a" value)]))
-  (define message
+  (define (message)
     (if (null? args) "ERROR" (string-join (map describe args) " ")))
   ;; ADR-0054: every signalled MDL ERROR is recorded, resolved or not, so a
-  ;; session that later QUITs reports it (quit-after-mdl-error).
+  ;; session that later QUITs reports it (quit-after-mdl-error). The record
+  ;; is a snapshot taken at signal time; the fall-through failure message
+  ;; below is still formatted after handler delivery, as before S11, so a
+  ;; handler that mutates an argument is reflected there (S11 review).
   (let ([space (current-mdl-atom-space)])
-    (set-atom-space-mdl-errors! space (cons message (atom-space-mdl-errors space))))
+    (set-atom-space-mdl-errors! space (cons (message) (atom-space-mdl-errors space))))
   (define-values (value erret-level)
     (call/ec
      (lambda (resume)
@@ -4269,7 +4272,7 @@
                          (mdl-interrupt-state-level (current-interrupt-state))))
              (mdl-deliver-occurrence!
               (mdl-interrupt-occurrence header (cons frame args))))
-           (error 'mdl-error "~a" message))
+           (error 'mdl-error "~a" (message)))
          (lambda () (set-mdl-error-frame-live?! frame #f))))))
   ;; ERRET returns from this ERROR at the interrupt level current when ERRET
   ;; ran; the handler is responsible for <INT-LEVEL 0> (manual 21.8.11).

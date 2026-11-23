@@ -363,5 +363,31 @@ MDL
   (check-pred mdl-quit-signal?
               (with-handlers ([(lambda (v) #t) values]) (mdl-session-call s "QUITTER") 'no)))
 
+;; --- S11 independent review -------------------------------------------------
+;; (1) A QUIT during a load: the report says QUIT (never PASS) and its last
+;; event locates the QUIT; later forms do not run.
+(let ([dir (make-temporary-file "mdl-quit-load~a" 'directory)])
+  (call-with-output-file (build-path dir "loadquit.mud")
+    (lambda (port) (write-string "<SETG A 1>\n<QUIT>\n<SETG B 2>\n" port) (void)))
+  (define s (make-mdl-session dir))
+  (define report (mdl-session-load! s "loadquit.mud"))
+  (check-equal? (hash-ref report 'status) "QUIT")
+  (check-equal? (hash-ref report 'completed_expressions) 1)
+  (define last-event (last (hash-ref report 'events)))
+  (check-equal? (hash-ref last-event 'status) "QUIT")
+  (check-equal? (hash-ref last-event 'expression_index) 2)
+  (check-equal? (hash-ref last-event 'line) 2)
+  (check-equal? (mdl-session-global s "A") 1)
+  (check-exn #rx"unassigned MDL global B" (lambda () (mdl-session-global s "B")))
+  (delete-directory/files dir))
+;; (2) The unresolved ERROR's host message is formatted after handler
+;; delivery (pre-S11 behaviour); the outcome record is the signal-time text.
+(scenario "unresolved ERROR message reflects a mutating handler"
+  (run "<SETG S <STRING \"abc\">>")
+  (run "<HANDLER <EVENT \"ERROR\" 9> <FUNCTION (FR \"TUPLE\" T) <PUT ,S 1 !\\Z>>>")
+  (define e (raised (lambda () (run "<ERROR FOO ,S>"))))
+  (check-pred exn:fail? e)
+  (check-regexp-match #rx"FOO \"Zbc\"" (exn-message e)))
+
 (delete-directory/files root)
 (delete-directory/files scratch)
