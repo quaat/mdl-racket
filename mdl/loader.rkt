@@ -10,7 +10,8 @@
          mdl-session-run-interactive
          exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
          mdl-session-random-snapshot random36-state-words
-         mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock)
+         mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock
+         mdl-host-loop-secondary-failures)
 
 ;; input-port/output-port: the explicit host ports given to make-mdl-session
 ;; (#f when omitted); the host top-level loop requires both (ADR-0050).
