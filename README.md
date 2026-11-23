@@ -39,7 +39,7 @@ outcome (`'quit` / `'quit-after-mdl-error`, ADR-0054); OPEN under a virtual
 no-file policy (RECORD's form only, ADR-0055); SAVE as an in-session record.
 
 **Unsupported (strict errors):** RESTORE, CLOSE and other file I/O (`info`,
-`help`), TOP (`put X in …`), PRINT (the game's ERROR handler path), non-ASCII
+`help`), PRINT (the game's ERROR handler path), non-ASCII
 terminal input, a session without an explicit output port (S13, ADR-0050),
 and every MDL construct not listed in [SEMANTICS](docs/SEMANTICS.md). Typed
 `!` follows pinned Confusion (S13: `nor!th` reads as `north`).
@@ -67,10 +67,20 @@ The reference CI workflow runs all of these.
 [native reference probes](docs/evidence/M3/), [S7](docs/evidence/M3/S7-INTERACTIVE.md),
 [compatibility inventory](docs/evidence/M3/COMPATIBILITY-INVENTORY.md).
 
-**Next milestone step:** M4, starting with the scenario "enter the house
-and open the cellar" ([backlog](docs/evidence/M4/SCENARIO-BACKLOG.md)). A
-manual DrRacket run (quit and Stop) would close the remaining GUI
-verification gap.
+**M4 (in progress; M4 gate NOT YET PASSED, PLAYABLE NOT RUN):** native
+scenarios compared prefix by prefix with pinned Confusion plus state
+checkpoints, each PASS (scenario-scoped): enter the house and open the cellar
+(`make test-m4-house-cellar`), drop (`test-m4-mailbox-drop`, SEGMENT),
+orphan prompts (`test-m4-orphan-prompt`, CHARACTER), TOP and the parser
+(`test-m4-top-parser`), take the sword (`test-m4-sword-glow`, FUNCTION/SUBR
+TYPEs) and troll combat with the sword (`test-m4-troll-combat`, one combat
+branch). Also on `main`: MAX (ADR-0059), BACK/TOP keep the TYPE (ADR-0058).
+The manual DrRacket checks (quit, Stop) passed. Evidence:
+[docs/evidence/M4](docs/evidence/M4/), [STATUS](docs/STATUS.md).
+
+**Next milestone step:** more M4 scenarios from the
+[backlog](docs/evidence/M4/SCENARIO-BACKLOG.md): parser ambiguity, death and
+recovery, scoring, lamp countdown and clock events.
 
 **Previous M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
 summarised above; details in [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).
@@ -677,13 +687,12 @@ specified in [SEMANTICS](docs/SEMANTICS.md) and tracked in
 [STATUS](docs/STATUS.md).
 
 **Not supported yet (2026-11-23, `main`):** complete original MDL
-syntax, compile-time macro expansion, `[OPT ...]` declarations, GROW/TOP and
+syntax, compile-time macro expansion, `[OPT ...]` declarations, GROW and
 BYTES views, explicit environments, the `"BIND"`/`"CALL"` activation
-formals, TAG values and `GO` across function boundaries, ILIST, MAX, TOP,
+formals, TAG values and `GO` across function boundaries, ILIST,
 PRINT, CLOSE and file OPEN modes other than RECORD's denied form, RESTORE, FLOAT printing and FIX→FLOAT CHTYPE, automatic
 event sources other than the logical GC model, an interactive error level,
-gameplay beyond the six-command scenario, and client-side web execution. On
-`main` additionally everything from `77rooms.mud:101` onward is missing.
+gameplay beyond the recorded M4 scenarios, and client-side web execution.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.
 

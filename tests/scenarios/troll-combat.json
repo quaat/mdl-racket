@@ -1,0 +1,35 @@
+{
+  "name": "troll-combat",
+  "description": "M4 S6 scenario, fight the troll with the elvish sword. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, microseconds 0, as house-boot). The sword-glow path (tests/scenarios/sword-glow.json) into the troll room, then `kill troll with sword` three times: KILLER (77act1.mud:1699) -> BLOW (78melee.mud:377) for the hero, the troll's counterattack through the demon FIGHTING (78melee.mud:282) -> BLOW, the troll's action TROLL (77act1.mud:360), and PRES (78melee.mud:351) choosing each remark with RANDOM. Under the fixed clock and seed the fight is deterministic: the first attack only pinks the troll (light wound, MAX at 78melee.mud:447) and the troll misses; the second knocks the axe to the floor and the troll recovers it; the third kills the troll (black fog, the carcass disappears, the sword stops glowing). Then `diagnose`, `score`, `inventory`, `look`, `take axe` (the axe vanished with the troll) and `east` out of the troll room. Each command was confirmed by the pinned native reference; see docs/evidence/M4/TROLL-COMBAT-REFERENCE.md. Input ends after `east` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": ["<FLOAD \"77loadall.mud\">", "<SAVE-IT>"],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take sword",
+    "inventory",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "east",
+    "kill troll with sword",
+    "kill troll with sword",
+    "kill troll with sword",
+    "diagnose",
+    "score",
+    "inventory",
+    "look",
+    "take axe",
+    "east"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/troll-combat-reference.json",
+    "case": "T1-troll-combat-pipe"
+  }
+}

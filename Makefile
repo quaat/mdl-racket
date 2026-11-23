@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -95,6 +95,15 @@ test-m4-top-parser: sources
 # and the game's applicables typed after FLOAD.
 test-m4-sword-glow: sources
 	@racket tests/historical_sword_glow_test.rkt
+
+# M4 S6 (troll combat): the sword-glow path, then `kill troll with sword` until
+# the troll dies (KILLER 77act1.mud:1699, BLOW 78melee.mud:377, the FIGHTING
+# demon 78melee.mud:282, TROLL 77act1.mud:360), then diagnose/score/inventory/
+# look/take axe/east; every command prefix compared with the pinned Confusion
+# captures (D1 only) plus read-only state checkpoints (troll strength and
+# flags, axe location, hero strength, cure clock, glow level).
+test-m4-troll-combat: sources
+	@racket tests/historical_troll_combat_test.rkt
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,
