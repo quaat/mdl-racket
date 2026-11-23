@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "name": "m3-S6-rep",
+  "description": "S6 (ADR-0049) probe cases: the predefined GVAL of REP in a fresh pinned Confusion session, CONTIN's <SETG SAVEREP ,REP>, BLO's TYPE? check, and what applying the default REP does in the reference. No case writes a file.",
+  "cases": [
+    {"name": "rep-type", "expression": "<TYPE ,REP>"},
+    {"name": "rep-gassigned", "expression": "<GASSIGNED? REP>"},
+    {"name": "rep-oblist", "expression": "<==? <OBLIST? REP> <ROOT>>"},
+    {"name": "saverep-gassigned-before", "expression": "<GASSIGNED? SAVEREP>"},
+    {"name": "saverep-type", "expression": "<SETG SAVEREP ,REP>\n<TYPE ,SAVEREP>"},
+    {"name": "saverep-identical", "expression": "<SETG SAVEREP ,REP>\n<==? ,REP ,SAVEREP>"},
+    {"name": "rep-typeq-blo", "expression": "<TYPE? ,REP SUBR FSUBR>"},
+    {"name": "rep-primtype", "expression": "<PRIMTYPE ,REP>"},
+    {"name": "subr-typeprim", "expression": "<TYPEPRIM SUBR>"},
+    {"name": "builtin-type-subr", "expression": "<TYPE ,TYPE>"},
+    {"name": "listen-applies-new-rep", "expression": "<DEFINE F () <PRINC \"F-APPLIED\"> <QUIT>>\n<SETG SAVEREP ,REP>\n<SETG REP ,F>\n<+ 5 6>"},
+    {"name": "rep-apply-direct-nested-repl", "expression": "<REP>\n<+ 1 2>"},
+    {"name": "rep-apply-subr-nested-repl", "expression": "<APPLY ,REP>\n<+ 3 4>"}
+  ]
+}

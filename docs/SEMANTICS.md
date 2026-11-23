@@ -2031,6 +2031,70 @@ suppressed. On the observed faithful path no occurrence was pending there
 at 77rooms.mud:301 on the unassigned GVAL of REP. See
 `evidence/M3/S5-SAVE-RECORD.md`.
 
+## M3 startup: inert REP and the host top-level loop (ADR-0049)
+
+**Reference.** In pinned Confusion (`evidence/M3/S6-rep-reference.json`,
+binary `6df359f6…`, upstream `bdcd4a67`) a fresh session has
+`<GASSIGNED? REP>` = T, `<TYPE ,REP>` = SUBR, REP on ROOT, `<TYPE? ,REP
+SUBR FSUBR>` = SUBR, `<PRIMTYPE ,REP>` = WORD; after `<SETG SAVEREP ,REP>`
+(which prints `#SUBR *…227*`) `<TYPE ,SAVEREP>` = SUBR and `<==? ,REP
+,SAVEREP>` = T. `<REP>` and `<APPLY ,REP>` each perform one real
+read-eval-print step on the terminal and return the value. Confusion's
+LISTEN loop re-reads the GVAL of REP on every pass: after `<SETG REP ,F>`
+the next pass applies F (the following `<+ 5 6>` is never read).
+
+**REP value (implemented).** Every session's GVAL of ROOT `REP` is one
+predefined SUBR value until the program SETGs or GUNASSIGNs REP:
+
+- `<GASSIGNED? REP>` → T; `<TYPE ,REP>` → SUBR (the ROOT atom);
+  `<TYPE? ,REP SUBR FSUBR>` → SUBR; it matches the `APPLICABLE` Pattern;
+- `<SETG SAVEREP ,REP>` stores the same object: `<==? ,REP ,SAVEREP>` → T;
+- SETG of REP in one session never affects another session; each fresh
+  session starts with the default REP.
+- **Applying it is a strict error** (decision, not reference): `<REP ...>`,
+  `<APPLY ,REP ...>`, a HANDLER/ON action that is the default REP, a host
+  `mdl-apply`, and any path that restores it into REP and applies it. Arguments
+  are evaluated first as for any SUBR; then the call raises
+  `REP: the default REP SUBR is inert; this runtime never provides a raw MDL
+  read-eval-print loop (maintainer decision 2026-11-23; ADR-0049)`.
+  It never reads a channel, evaluates input, prints or returns a value.
+- Not supported (strict errors, unchanged): `<PRIMTYPE ,REP>`,
+  `<TYPEPRIM SUBR>` (Confusion: WORD), CHTYPE of REP, DECL Patterns naming
+  SUBR or FSUBR, UNPARSE/PRINT of REP. Other built-in SUBRs remain host
+  procedures whose TYPE is still an unsupported-type error.
+
+**Host top-level loop (specified, not implemented in S6).** The loop
+replaces Confusion's LISTEN for a game session. Contract for the slice that
+implements it (after RESET, PRINC and READSTRING exist):
+
+1. *Start.* It starts only after the session's entry form returns normally
+   (for `run.mud`, after `<SAVE-IT>` returns from the faithful path, at which
+   point CONTIN has set REP to `,RDCOM`). If the entry form raises, the loop
+   never starts and the failure is reported.
+2. *Each pass.* It re-reads the session's current GVAL of ROOT `REP` (never a
+   cached value) and applies it with no arguments, exactly like an MDL
+   `<APPLY ,REP>`. An unassigned or non-applicable GVAL is a strict error. The
+   default REP SUBR is never applied by the loop: meeting it is the ADR-0049
+   strict error. The pass's value is discarded; the loop itself reads and
+   prints nothing.
+3. *End.* The loop ends normally only when the applied code QUITs (the game's
+   QUIT/FINISH path). Exhausted terminal input (for example READSTRING at EOF,
+   which Confusion reports as `Unexpected EOF`) is a strict error, never a
+   silent success. Any other error raised during a pass propagates; there is
+   no LISTEN error level, retry or recovery. A host test may bound the number
+   of passes; exceeding the bound is a strict error.
+4. *Isolation.* The loop runs locally in the host process against the
+   session's own channels. It is never exposed to a network server or web
+   client, and it provides no MDL evaluator: whatever input it sees reaches
+   MDL only through the program's own READSTRING/RDCOM code.
+
+**Source paths that restore SAVEREP.** Only 77rooms.mud:222, in the ERROR
+handler HANDLE: `<AND <GASSIGNED? SAVEREP> <SETG REP ,SAVEREP>>`, taken when
+XUNM is unassigned or in WINNERS and `<PC>` (T) holds. On that path the next
+loop pass meets the default REP and fails loudly (ADR-0049), where Confusion
+drops into its REPL. BLO (77act1.mud:3) acts only while REP is a SUBR or FSUBR;
+after CONTIN REP is RDCOM (a FUNCTION), and BLOCKED never fires (ADR-0048).
+
 ## M3 reader: backslash escapes in atom names (issue #119)
 
 **Contract** (MDL manual chapter 15, confirmed by pinned Confusion binary

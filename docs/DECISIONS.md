@@ -1178,3 +1178,51 @@ pending (DIVERT-CNT stayed 0). The run then stops in CONTIN at
 77rooms.mud:301 on the unassigned GVAL of REP; see
 `evidence/M3/S5-SAVE-RECORD.md`. INITIALIZED remains FAIL. No GPLv3
 implementation was copied.
+
+## ADR-0049: Inert REP and a host top-level loop
+
+**Decision (maintainer, 2026-11-23, "Inert REP + host loop"):**
+
+1. **REP is a real predefined SUBR in every session.** The GVAL of ROOT `REP`
+   is a SUBR value: `<GASSIGNED? REP>` is T, `<TYPE ,REP>` is SUBR, it matches
+   the APPLICABLE declaration Pattern, and `<SETG SAVEREP ,REP>` stores that
+   same object (`<==? ,REP ,SAVEREP>` is T). This is what CONTIN needs at
+   77rooms.mud:301 and what BLO tests at 77act1.mud:3
+   (`<TYPE? ,REP SUBR FSUBR>`). Pinned Confusion agrees on all four
+   observations (`evidence/M3/S6-rep-reference.json`).
+2. **Applying the default REP is a strict error.** Applying it directly
+   (`<REP>`), through `<APPLY ,REP>`, as a HANDLER action, or by any later
+   path that restores it (for example `<SETG REP ,SAVEREP>`, 77rooms.mud:222)
+   evaluates the arguments as for any SUBR and then raises
+   `REP: the default REP SUBR is inert; this runtime never provides a raw MDL
+   read-eval-print loop (maintainer decision 2026-11-23; ADR-0049)`.
+   The runtime never provides a raw MDL REPL.
+3. **A host top-level loop applies the current GVAL of REP.** Its contract is
+   specified in SEMANTICS ("M3 startup: inert REP and the host top-level
+   loop"). It is *not implemented* in this slice: it cannot be exercised before
+   RESET, PRINC and READSTRING exist. In summary, it starts only after the
+   session's entry form returns normally, re-reads GVAL REP on every pass,
+   applies it with no arguments, never applies the default REP (that is the
+   strict error above), ends when the applied code QUITs, fails strictly when
+   terminal input is exhausted or anything raises, and is local-only: no
+   server or web client may reach it or any MDL evaluator.
+
+**Scope limits.** Only REP is represented as a SUBR value. Other built-in
+SUBRs are still host procedures whose TYPE is an explicit unsupported-type
+error, as before. TYPEPRIM SUBR and PRIMTYPE of REP stay strict errors
+(Confusion: WORD); SUBR is not registered in the TYPE table, so CHTYPE,
+DECL patterns naming SUBR and UNPARSE of REP fail strictly.
+
+**Deviations recorded.** In Confusion `<REP>` performs one real
+read-eval-print step on the terminal (`<REP>` followed by `<+ 1 2>` prints
+3, then LISTEN prints REP's value 3), and its LISTEN loop applies the new
+GVAL of REP on the very next pass (`listen-applies-new-rep`). This runtime
+refuses the default REP by decision. Paths in the game that restore
+`SAVEREP` (only 77rooms.mud:222, in the ERROR handler HANDLE, for an
+unassigned XUNM or an XUNM in WINNERS) will therefore fail loudly when the
+loop next applies REP, instead of dropping into an implementor REPL.
+
+**Consequence.** The faithful SAVE-IT path passes 77rooms.mud:301-302
+(SAVEREP holds the REP SUBR; REP becomes RDCOM) and stops at the next
+missing primitive; see `evidence/M3/S6-REP.md`. INITIALIZED remains FAIL.
+No GPLv3 implementation was copied.

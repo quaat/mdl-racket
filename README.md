@@ -9,7 +9,26 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 S5 SAVE session record (2026-11-23, `feat/m3-startup-save-record`, ADR-0048):**
+**Current M3 S6 inert REP (2026-11-23, `feat/m3-startup-rep`, ADR-0049):**
+By maintainer decision ("Inert REP + host loop") every session's GVAL of
+REP is a predefined SUBR (`<TYPE ,REP>` is SUBR, `<SETG SAVEREP ,REP>` then
+`<==? ,REP ,SAVEREP>` is T, as in pinned Confusion), but applying the default
+REP by any path is a strict error: the runtime never provides a raw MDL
+read-eval-print loop. The host top-level loop that will apply the current
+GVAL of REP (by then the game's RDCOM) is specified in `docs/SEMANTICS.md`
+but **not implemented**. The faithful `<SAVE-IT>` path now passes
+77rooms.mud:301-302 (SAVEREP holds the REP SUBR, REP is RDCOM) and stops at
+`<RESET ,INCHAN>` (77rooms.mud:303) with `mdl-eval: unassigned or
+non-applicable MDL operator RESET` (known XFAIL, `make test-m3-saveit`).
+Gate result for this slice: sandboxed checks only (see
+`docs/evidence/M3/S6-REP.md`); the full gate has to be run outside the
+sandbox before it can be called PASS. RESET, the host loop, PRINC,
+READSTRING, interactive input and smoke parity are unsupported.
+**INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have not passed; M3 is
+incomplete.** Next: RESET of INCHAN. See
+[S6 evidence](docs/evidence/M3/S6-REP.md).
+
+**Previous M3 S5 SAVE session record (2026-11-23, `feat/m3-startup-save-record`, ADR-0048):**
 By maintainer decision `<SAVE file-spec>` returns a fresh `"SAVED"`, writes
 no file, performs no GC and no interrupt side effect, and appends a
 host-visible session record (sequence, file-spec, INT-LEVEL); RESTORE stays
