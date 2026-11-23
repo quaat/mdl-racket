@@ -62,6 +62,10 @@ runs for RETURN/AGAIN transfers and errors alike.
   process; this runtime rejects the same shapes at compile time (carried
   over from the formals slice). `atom-after-name` in Confusion reports
   "Unexpected ATOM in formal argument list" at call time.
+- **Superseded by ADR-0051 (issue #139, 2026-11-23).** The bullet below
+  misread the probe: at error level 2 the manual also runs no cleanup, and
+  Confusion runs it after ERRET. The runtime now skips cleanups for raised
+  errors; see `docs/evidence/M3/I139-UNWIND.md`. Historical text follows.
 - **Confusion does not run UNWIND cleanup on errors**: the
   `unwind-cleanup-on-error` probe shows `,M2-C` still 0 after the error
   REPL, because Confusion's `mdl_error` jumps directly to the initial frame

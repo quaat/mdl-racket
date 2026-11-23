@@ -484,7 +484,9 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
   without re-binding.
 - `GO` to top-level labels in the current function's PROG/REPEAT bodies,
   with labels skipped in normal flow, and `UNWIND` cleanup expressions that
-  run when a nonlocal transfer or error crosses below them.
+  run when an MDL nonlocal transfer (RETURN, AGAIN, GO, MAPLEAVE/MAPRET/MAPSTOP)
+  crosses below them. A raised error never runs them and propagates
+  unchanged ([ADR-0051](docs/DECISIONS.md), [evidence](docs/evidence/M3/I139-UNWIND.md)).
 - `DEFMAC` calls with runtime expansion, FORM values and `EXPAND`, quoted
   formals, and caller-frame evaluation of plain and TUPLE arguments.
 - An intentionally incomplete compatibility runtime.

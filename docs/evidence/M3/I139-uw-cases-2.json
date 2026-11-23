@@ -1,0 +1,30 @@
+{
+  "name": "unwind-frontier-internal",
+  "cases": [
+    {
+      "name": "internal-error-in-body",
+      "input": "<UNWIND <QUIT 1> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "C-level mdl_error ('Too many arguments to QUIT') inside UNWIND body"
+    },
+    {
+      "name": "internal-error-in-body-eof",
+      "input": "<UNWIND <QUIT 1> <PRINC \"CLEANUP\">>\n",
+      "note": "Same, stdin then ends"
+    },
+    {
+      "name": "internal-error-in-cleanup",
+      "input": "<PROG () <UNWIND <RETURN 1> <QUIT 1>>>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "C-level mdl_error inside the cleanup of a RETURN transfer"
+    },
+    {
+      "name": "error-level-then-internal-error",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<QUIT 1>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "At MDL error level 2 under an UNWIND, a C-level mdl_error resets to toplevel: cleanup?"
+    },
+    {
+      "name": "erret-noargs-level-after",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<ERRET>\n<UNWIND <ERROR BAR> <PRINC \"CLEANUP2\">>\n<ERRET 4>\n<QUIT>\n",
+      "note": "Level numbering after ERRET-noargs; ERRET value under a second UNWIND"
+    }
+  ]
+}
