@@ -1,4 +1,4 @@
-# Status — 2026-11-23 (`main` = `b6b86d0`: M3 accepted; M4 S1–S6 PASS (mainline, scenario-scoped); S7 parser ambiguity PASS (branch, this PR); M4 gate NOT YET PASSED; PLAYABLE NOT RUN)
+# Status — 2026-11-24 (`main` = `b74588d`: M3 accepted; M4 S1–S6 PASS (mainline, scenario-scoped); S7 parser ambiguity merged (#164); WP4 replay persistence proof of concept PASS (branch `feat/m4-replay-persistence`); M4 gate NOT YET PASSED; PLAYABLE NOT RUN)
 
 ## Current state (2026-11-23)
 
@@ -42,6 +42,7 @@ checkpoints ([M4 baseline record](evidence/M4/M4-MAINLINE-BASELINE.md)):
 | S6 troll combat with the sword | **PASS (mainline, scenario-scoped)** | #162; `make test-m4-troll-combat` (23 prefixes + checkpoints; troll dies on the third blow); [S6 record](evidence/M4/S6-TROLL-COMBAT.md) |
 | S7 parser rejection and ambiguity (`Which door?`) | **PASS (branch evidence, scenario-scoped)** | `make test-m4-parser-ambiguity` (35 prefixes + checkpoints: LEXV, PRSVEC, PARSE-WON, ORPHANS, MOVES); no runtime change; [S7 record](evidence/M4/S7-PARSER-AMBIGUITY.md) |
 | Manual DrRacket checks (quit, Stop) | **PASS** | [record](evidence/M4/DRRACKET-MANUAL-CHECK.md) |
+| WP4 host persistence by deterministic replay (ADR-0061; WP4.1–4.5 + WP4.6 regressions) | **PASS (branch evidence, proof of concept, scenario-scoped)** | `feat/m4-replay-persistence`; `make test-m4-replay-persistence` (troll combat saved at the RDCOM prompt before the first kill, restored in-process and in a fresh process: both RNG words, MOVES, 34-field state and transcript digests verified; pre-save + post-restore output = native T1; save after combat; pending lamp event; resumed clock; tampering; independence; 0.85 s replay per 100 commands + 6 s boot); `replay_clock_test`, `replay_checkpoint_test` in `make test`; player-facing SAVE/LOAD not implemented (needs an ADR-0055 amendment); [WP4 record](evidence/M4/WP4-REPLAY-PERSISTENCE.md) |
 | M4 comprehensive-equivalence gate | NOT YET PASSED | scenario, state, save/restore and completion criteria not met |
 | PLAYABLE | NOT RUN | no playability gate executed |
 

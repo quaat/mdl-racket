@@ -19,7 +19,9 @@
 ;;   h. no duplicate output, no file writes;
 ;;   i. independent restored sessions, the same checkpoint twice, a failed
 ;;      restore beside a live session;
-;;   j. replay cost (seconds per 100 commands).
+;;   j. replay cost (seconds per 100 commands);
+;; and the save boundary in the game: refused after `Kill what?`, at YES/NO and
+;; after an over-long line; a save after the YES/NO round trip restores.
 ;; (e, explicit RANDOM reseed, is in tests/replay_checkpoint_test.rkt: the game
 ;; never reseeds after START.)
 ;; Every game run is guarded (no file write or delete, empty temporary cwd,
@@ -427,6 +429,50 @@
 (check-equal? (hash-ref (unbox live-at) 'state) (hash-ref ver13 'state))
 (set! live-result #f)
 (printf "i. a live restored game, a failed restore and a second restore are independent\n")
+
+;; === the save boundary in the game ===========================================================
+;; Saves only at the RDCOM command prompt with nothing pending: refused at the
+;; prompt after an orphan question (`Kill what?`), at the YES/NO question of
+;; `quit`, and after a line longer than INBUF (100 characters; the rest of the
+;; line is pending input). A checkpoint taken after the YES/NO round trip
+;; (which RESETs INCHAN) restores and continues exactly.
+(define boundary-commands (list "kill" "quit" "n" "look" (make-string 101 #\x) "look" "inventory"))
+(define boundary-refusals (make-hash))
+(define boundary-cp #f)
+(define boundary-out (open-output-string))
+(void (guarded
+       (lambda ()
+         (zork-record #:input (open-input-string (lines boundary-commands)) #:output boundary-out
+                      #:clock fixed-source #:time-zone 'utc #:boot-clock "fixed:250776000"
+                      #:on-prompt
+                      (lambda (p)
+                        (define refusal (replay-prompt-refusal p))
+                        (hash-set! boundary-refusals (replay-prompt-turn p) refusal)
+                        (if refusal
+                            (check-exn exn:fail:replay-save-refused? (lambda () (replay-prompt-checkpoint p)))
+                            (when (= (replay-prompt-turn p) 3)
+                              (set! boundary-cp (replay-prompt-checkpoint p)))))))))
+(define (refusal-at k) (hash-ref boundary-refusals k))
+;; 7 lines, 8 READSTRING units (the over-long line takes two), 9 prompts
+(check-equal? (sort (hash-keys boundary-refusals) <) (range 9))
+(check-false (refusal-at 0))
+(check-regexp-match #rx"orphan question is pending" (refusal-at 1))
+(check-regexp-match #rx"not RDCOM's own" (refusal-at 2))
+(check-false (refusal-at 3))
+(check-false (refusal-at 4))
+(check-regexp-match #rx"filled its buffer" (refusal-at 5))
+(check-false (refusal-at 6))
+(check-false (refusal-at 7))
+(check-false (refusal-at 8))
+(define boundary-text (get-output-string boundary-out))
+(check-regexp-match #rx"Kill what\\?" boundary-text)
+(check-regexp-match #rx"Do you wish to leave the game\\?" boundary-text)
+(define boundary-pre (hash-ref (hash-ref (canonical-json-parse boundary-cp) 'verification) 'transcript_bytes))
+(define-values (r-boundary post-boundary) (restore boundary-cp (drop boundary-commands 3)))
+(set! r-boundary #f)
+(check-equal? (string-append (substring boundary-text 0 boundary-pre) post-boundary) boundary-text
+              "a save after the YES/NO round trip restores and continues exactly")
+(printf "save boundary: refused after `Kill what?`, at YES/NO and after an over-long line; a save after YES/NO restores exactly\n")
 
 ;; === j. replay cost ==========================================================================
 ;; 100 commands around the house, saved at the 101st prompt; the restore time
