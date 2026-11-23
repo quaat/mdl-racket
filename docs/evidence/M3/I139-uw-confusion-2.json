@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "name": "unwind-frontier-internal",
+  "recorded_at": "2026-11-23T06:36:37.441926+00:00",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "protocol": "uw_probe.py; one mdli process per case; stdin pipe; cwd fresh empty $TMPDIR/uw-work dir",
+  "cases": [
+    {
+      "name": "internal-error-in-body",
+      "note": "C-level mdl_error ('Too many arguments to QUIT') inside UNWIND body",
+      "input": "<UNWIND <QUIT 1> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Too many arguments to QUIT\n",
+      "files_left": []
+    },
+    {
+      "name": "internal-error-in-body-eof",
+      "note": "Same, stdin then ends",
+      "input": "<UNWIND <QUIT 1> <PRINC \"CLEANUP\">>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Too many arguments to QUIT\nError: Unexpected EOF\n",
+      "files_left": []
+    },
+    {
+      "name": "internal-error-in-cleanup",
+      "note": "C-level mdl_error inside the cleanup of a RETURN transfer",
+      "input": "<PROG () <UNWIND <RETURN 1> <QUIT 1>>>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Too many arguments to QUIT\n",
+      "files_left": []
+    },
+    {
+      "name": "error-level-then-internal-error",
+      "note": "At MDL error level 2 under an UNWIND, a C-level mdl_error resets to toplevel: cleanup?",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<QUIT 1>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nToo many arguments to QUIT\n",
+      "files_left": []
+    },
+    {
+      "name": "erret-noargs-level-after",
+      "note": "Level numbering after ERRET-noargs; ERRET value under a second UNWIND",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<ERRET>\n<UNWIND <ERROR BAR> <PRINC \"CLEANUP2\">>\n<ERRET 4>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\n4\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\n4\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    }
+  ]
+}
