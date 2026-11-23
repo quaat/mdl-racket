@@ -1,7 +1,7 @@
 ---
 name: mdl-segment-implementer
 description: Implements the historical MDL SEGMENT (! splice) semantics slice (issue-driven, currently issue #46) in an isolated worktree - failing tests first, then the smallest correct change to mdl/parser.rkt, mdl/compiler.rkt, mdl/runtime/core.rkt plus focused tests.
-model: glm-5.3-flash:cloud
+model: inherit
 isolation: worktree
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---
