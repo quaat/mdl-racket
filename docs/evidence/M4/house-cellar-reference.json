@@ -1,0 +1,2284 @@
+{
+  "schema_version": 1,
+  "kind": "m4-scenario-reference",
+  "scenario": "house-cellar",
+  "scenario_file": "tests/scenarios/house-cellar.json",
+  "engine": "confusion-patched-1977",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "score"
+  ],
+  "recorded_at": "2026-11-23T12:54:19.635671+00:00",
+  "interpreter": ".cache/build/confusion_patched/mdli",
+  "interpreter_sha256_before": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "interpreter_sha256_after": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "upstream_mdlzork_checked_out": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "game_dir": "mdlzork_771212/patched_confusion",
+  "shim_src_sha256": "d1fa86520eab80891c95c9cbec8a35401fd1fe55c1d6fa6b18165a30736ab925",
+  "shim": "scripts/reference/fixed_time.c compiled per capture: gcc -shared -fPIC -O2 -o fixed_time.so fixed_time.c -ldl; LD_PRELOAD, MDL_FIXED_EPOCH=250776000, TZ=UTC",
+  "protocol": "scripts/probe_house_cellar_reference.py (module docstring); run_case from scripts/probe_session_reference.py",
+  "checks": {
+    "t1_exit_status": 0,
+    "t1_equals_t1b_bytes": true,
+    "diag_game_part_equals_t1_game_part_bytes": true,
+    "diag_checkpoint_count": 13,
+    "expected_checkpoint_count": 13,
+    "prefix_runs_consistent_with_t1": true,
+    "prefix_exit_statuses": [
+      0
+    ],
+    "t1_files_changed": [
+      "MDL/MADADV.SAVE"
+    ],
+    "t1_files_removed": []
+  },
+  "transcript": {
+    "source_case": "T1-house-cellar-pipe",
+    "stdout_sha256": "ef0753277d267d55f9bf199b21ae74c5b5bac5ff05f1625f346e3ca79227fda6",
+    "game_output_raw": "Welcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\r\neast, and a crawlway to the south.  On the west is the bottom of a\r\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+    "game_output_canonical": "Welcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\neast, and a crawlway to the south.  On the west is the bottom of a\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+    "split": {
+      "opening": "Welcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n",
+      "commands": [
+        {
+          "input": "north",
+          "output": "You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n"
+        },
+        {
+          "input": "east",
+          "output": "You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n"
+        },
+        {
+          "input": "open window",
+          "output": "With great effort, you open the window far enough to allow entry.\n"
+        },
+        {
+          "input": "west",
+          "output": "You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n"
+        },
+        {
+          "input": "west",
+          "output": "You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n"
+        },
+        {
+          "input": "take lamp",
+          "output": "Taken.\n"
+        },
+        {
+          "input": "move rug",
+          "output": "With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n"
+        },
+        {
+          "input": "open trap door",
+          "output": "The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n"
+        },
+        {
+          "input": "turn on lamp",
+          "output": "The lamp is now on.\n"
+        },
+        {
+          "input": "down",
+          "output": "You are in a dark and damp cellar with a narrow passageway leading\neast, and a crawlway to the south.  On the west is the bottom of a\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n"
+        },
+        {
+          "input": "score",
+          "output": "\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n"
+        }
+      ],
+      "after_last_command": [
+        "Beg pardon?\n",
+        ""
+      ]
+    }
+  },
+  "diagnostic": {
+    "source_case": "X1-house-cellar-diag",
+    "diag_forms": "<SETG DIAG-CH <OPEN \"PRINT\" \"@LOG@\">>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-N 0>\n<PROG () <SETG DIAG-RUG <FIND-OBJ \"RUG\">> <SETG DIAG-DOOR <FIND-OBJ \"DOOR\">> <SETG DIAG-LAMP <FIND-OBJ \"LAMP\">> <SETG DIAG-LROOM <FIND-ROOM \"LROOM\">> T>\n<SETG DIAG-STATE <FUNCTION () <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-RSEEN\" <RSEEN? ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-KITCHEN-WINDOW\" ,KITCHEN-WINDOW!-FLAG> <DIAG \"CP-RUG-ORAND\" <ORAND ,DIAG-RUG>> <DIAG \"CP-DOOR-OVISON\" <OVIS? ,DIAG-DOOR>> <DIAG \"CP-DOOR-OFLAGS\" <CHTYPE <OFLAGS ,DIAG-DOOR> FIX>> <DIAG \"CP-DOOR-OTOUCH\" <OTOUCH? ,DIAG-DOOR>> <DIAG \"CP-TRAP-DOOR\" ,TRAP-DOOR!-FLAG> <DIAG \"CP-LAMP-OLIGHT\" <OLIGHT? ,DIAG-LAMP>> <DIAG \"CP-LAMP-IN-LROOM\" <COND (<MEMQ ,DIAG-LAMP <ROBJS ,DIAG-LROOM>> T)>> <DIAG \"CP-LIT\" <LIT? ,HERE>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n",
+    "random_draws": [
+      {
+        "index": 0,
+        "args": "(10438660480)",
+        "result": 16566282405,
+        "mod100": 5,
+        "mod8": 5,
+        "before_checkpoint": 0
+      }
+    ],
+    "checkpoints": [
+      {
+        "n": 0,
+        "here": "WHOUS!-ROOMS",
+        "rseen": "T",
+        "aobjs": "()",
+        "kitchen_window": "#FALSE ()",
+        "rug_orand": "#FALSE ()",
+        "door_ovison": "#FALSE ()",
+        "door_oflags": "72",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "T",
+        "lit": "T",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "0"
+      },
+      {
+        "n": 1,
+        "here": "NHOUS!-ROOMS",
+        "rseen": "T",
+        "aobjs": "()",
+        "kitchen_window": "#FALSE ()",
+        "rug_orand": "#FALSE ()",
+        "door_ovison": "#FALSE ()",
+        "door_oflags": "72",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "T",
+        "lit": "T",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "1"
+      },
+      {
+        "n": 2,
+        "here": "EHOUS!-ROOMS",
+        "rseen": "T",
+        "aobjs": "()",
+        "kitchen_window": "#FALSE ()",
+        "rug_orand": "#FALSE ()",
+        "door_ovison": "#FALSE ()",
+        "door_oflags": "72",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "T",
+        "lit": "T",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "2"
+      },
+      {
+        "n": 3,
+        "here": "EHOUS!-ROOMS",
+        "rseen": "T",
+        "aobjs": "()",
+        "kitchen_window": "T",
+        "rug_orand": "#FALSE ()",
+        "door_ovison": "#FALSE ()",
+        "door_oflags": "72",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "T",
+        "lit": "T",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "3"
+      },
+      {
+        "n": 4,
+        "here": "KITCH!-ROOMS",
+        "rseen": "T",
+        "aobjs": "()",
+        "kitchen_window": "T",
+        "rug_orand": "#FALSE ()",
+        "door_ovison": "#FALSE ()",
+        "door_oflags": "72",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "T",
+        "lit": "T",
+        "raw_score": "10",
+        "ascore": "10",
+        "moves": "4"
+      },
+      {
+        "n": 5,
+        "here": "LROOM!-ROOMS",
+        "rseen": "T",
+        "aobjs": "()",
+        "kitchen_window": "T",
+        "rug_orand": "#FALSE ()",
+        "door_ovison": "#FALSE ()",
+        "door_oflags": "72",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "T",
+        "lit": "T",
+        "raw_score": "10",
+        "ascore": "10",
+        "moves": "5"
+      },
+      {
+        "n": 6,
+        "here": "LROOM!-ROOMS",
+        "rseen": "T",
+        "aobjs": "(LAMP!-OBJECTS)",
+        "kitchen_window": "T",
+        "rug_orand": "#FALSE ()",
+        "door_ovison": "#FALSE ()",
+        "door_oflags": "72",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "#FALSE ()",
+        "lit": "T",
+        "raw_score": "10",
+        "ascore": "10",
+        "moves": "6"
+      },
+      {
+        "n": 7,
+        "here": "LROOM!-ROOMS",
+        "rseen": "T",
+        "aobjs": "(LAMP!-OBJECTS)",
+        "kitchen_window": "T",
+        "rug_orand": "T",
+        "door_ovison": "T",
+        "door_oflags": "73",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "#FALSE ()",
+        "lit": "T",
+        "raw_score": "10",
+        "ascore": "10",
+        "moves": "7"
+      },
+      {
+        "n": 8,
+        "here": "LROOM!-ROOMS",
+        "rseen": "T",
+        "aobjs": "(LAMP!-OBJECTS)",
+        "kitchen_window": "T",
+        "rug_orand": "T",
+        "door_ovison": "T",
+        "door_oflags": "73",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "T",
+        "lamp_olight": "-1",
+        "lamp_in_lroom": "#FALSE ()",
+        "lit": "T",
+        "raw_score": "10",
+        "ascore": "10",
+        "moves": "8"
+      },
+      {
+        "n": 9,
+        "here": "LROOM!-ROOMS",
+        "rseen": "T",
+        "aobjs": "(LAMP!-OBJECTS)",
+        "kitchen_window": "T",
+        "rug_orand": "T",
+        "door_ovison": "T",
+        "door_oflags": "73",
+        "door_otouch": "#FALSE ()",
+        "trap_door": "T",
+        "lamp_olight": "1",
+        "lamp_in_lroom": "#FALSE ()",
+        "lit": "T",
+        "raw_score": "10",
+        "ascore": "10",
+        "moves": "9"
+      },
+      {
+        "n": 10,
+        "here": "CELLA!-ROOMS",
+        "rseen": "T",
+        "aobjs": "(LAMP!-OBJECTS)",
+        "kitchen_window": "T",
+        "rug_orand": "T",
+        "door_ovison": "T",
+        "door_oflags": "73",
+        "door_otouch": "T",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "1",
+        "lamp_in_lroom": "#FALSE ()",
+        "lit": "T",
+        "raw_score": "35",
+        "ascore": "35",
+        "moves": "10"
+      },
+      {
+        "n": 11,
+        "here": "CELLA!-ROOMS",
+        "rseen": "T",
+        "aobjs": "(LAMP!-OBJECTS)",
+        "kitchen_window": "T",
+        "rug_orand": "T",
+        "door_ovison": "T",
+        "door_oflags": "73",
+        "door_otouch": "T",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "1",
+        "lamp_in_lroom": "#FALSE ()",
+        "lit": "T",
+        "raw_score": "35",
+        "ascore": "35",
+        "moves": "11"
+      },
+      {
+        "n": 12,
+        "here": "CELLA!-ROOMS",
+        "rseen": "T",
+        "aobjs": "(LAMP!-OBJECTS)",
+        "kitchen_window": "T",
+        "rug_orand": "T",
+        "door_ovison": "T",
+        "door_oflags": "73",
+        "door_otouch": "T",
+        "trap_door": "#FALSE ()",
+        "lamp_olight": "1",
+        "lamp_in_lroom": "#FALSE ()",
+        "lit": "T",
+        "raw_score": "35",
+        "ascore": "35",
+        "moves": "11"
+      }
+    ],
+    "readstring": [
+      {
+        "READSTRING-COUNT": "5"
+      },
+      {
+        "READSTRING-TEXT": "\"north\""
+      },
+      {
+        "READSTRING-COUNT": "4"
+      },
+      {
+        "READSTRING-TEXT": "\"east\""
+      },
+      {
+        "READSTRING-COUNT": "11"
+      },
+      {
+        "READSTRING-TEXT": "\"open window\""
+      },
+      {
+        "READSTRING-COUNT": "4"
+      },
+      {
+        "READSTRING-TEXT": "\"west\""
+      },
+      {
+        "READSTRING-COUNT": "4"
+      },
+      {
+        "READSTRING-TEXT": "\"west\""
+      },
+      {
+        "READSTRING-COUNT": "9"
+      },
+      {
+        "READSTRING-TEXT": "\"take lamp\""
+      },
+      {
+        "READSTRING-COUNT": "8"
+      },
+      {
+        "READSTRING-TEXT": "\"move rug\""
+      },
+      {
+        "READSTRING-COUNT": "14"
+      },
+      {
+        "READSTRING-TEXT": "\"open trap door\""
+      },
+      {
+        "READSTRING-COUNT": "12"
+      },
+      {
+        "READSTRING-TEXT": "\"turn on lamp\""
+      },
+      {
+        "READSTRING-COUNT": "4"
+      },
+      {
+        "READSTRING-TEXT": "\"down\""
+      },
+      {
+        "READSTRING-COUNT": "5"
+      },
+      {
+        "READSTRING-TEXT": "\"score\""
+      },
+      {
+        "READSTRING-COUNT": "0"
+      },
+      {
+        "READSTRING-TEXT": "\"\""
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "T1-house-cellar-pipe",
+      "kind": "transcript",
+      "note": "transcript: faithful entry + scenario commands, then EOF",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/T1-house-cellar-pipe-h0ztaupb/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\nopen trap door\nturn on lamp\ndown\nscore\n",
+      "input_sha256": "e82d382f10a9ed75dbf6e859cc3b8ee451f531fa84e6e8067ff91cefe82c1514",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\r\neast, and a crawlway to the south.  On the west is the bottom of a\r\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+      "stdout_sha256": "ef0753277d267d55f9bf199b21ae74c5b5bac5ff05f1625f346e3ca79227fda6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\neast, and a crawlway to the south.  On the west is the bottom of a\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "c0bb52035522f0362ffddc65fd90ba36596e5c10effde9ec892bd05a6c8a09d7",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "T1b-house-cellar-pipe-repeat",
+      "kind": "transcript",
+      "note": "repeat of T1 to show byte determinism",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/T1b-house-cellar-pipe-repeat-c_okzak8/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\nopen trap door\nturn on lamp\ndown\nscore\n",
+      "input_sha256": "e82d382f10a9ed75dbf6e859cc3b8ee451f531fa84e6e8067ff91cefe82c1514",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\r\neast, and a crawlway to the south.  On the west is the bottom of a\r\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+      "stdout_sha256": "ef0753277d267d55f9bf199b21ae74c5b5bac5ff05f1625f346e3ca79227fda6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\neast, and a crawlway to the south.  On the west is the bottom of a\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "899c5d4f60fde15304c33f705e4fdba24d388b4129dc006680223c9aed5da1b0",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "X1-house-cellar-diag",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC (not a transcript): RANDOM and READSTRING wrapped after FLOAD, before SAVE-IT; read-only state checkpoint at every READSTRING entry; log in DIAG.LOG outside the game copy",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/X1-house-cellar-diag-72i9u51u/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/house-cellar-probes/X1-house-cellar-diag-72i9u51u/DIAG.LOG\">>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-N 0>\n<PROG () <SETG DIAG-RUG <FIND-OBJ \"RUG\">> <SETG DIAG-DOOR <FIND-OBJ \"DOOR\">> <SETG DIAG-LAMP <FIND-OBJ \"LAMP\">> <SETG DIAG-LROOM <FIND-ROOM \"LROOM\">> T>\n<SETG DIAG-STATE <FUNCTION () <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-RSEEN\" <RSEEN? ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-KITCHEN-WINDOW\" ,KITCHEN-WINDOW!-FLAG> <DIAG \"CP-RUG-ORAND\" <ORAND ,DIAG-RUG>> <DIAG \"CP-DOOR-OVISON\" <OVIS? ,DIAG-DOOR>> <DIAG \"CP-DOOR-OFLAGS\" <CHTYPE <OFLAGS ,DIAG-DOOR> FIX>> <DIAG \"CP-DOOR-OTOUCH\" <OTOUCH? ,DIAG-DOOR>> <DIAG \"CP-TRAP-DOOR\" ,TRAP-DOOR!-FLAG> <DIAG \"CP-LAMP-OLIGHT\" <OLIGHT? ,DIAG-LAMP>> <DIAG \"CP-LAMP-IN-LROOM\" <COND (<MEMQ ,DIAG-LAMP <ROBJS ,DIAG-LROOM>> T)>> <DIAG \"CP-LIT\" <LIT? ,HERE>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\nopen trap door\nturn on lamp\ndown\nscore\n",
+      "input_sha256": "9292ea8900439a0eb68ef1b41c27d6e7317103f7cf0511da8960f7593f947905",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#CHANNEL [4 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/house-cellar-probes/X1-house-cellar-diag-72i9u51u/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/house-cellar-probes/X1-house-cellar-diag-72i9u51u/\" 0 0 0 0 0 0 0 10 0]\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n0\nT\n#FUNCTION (() <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-RSEEN\" <RSEEN? ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-KITCHEN-WINDOW\" ,KITCHEN-WINDOW!-FLAG> <DIAG \"CP-RUG-ORAND\" <ORAND ,DIAG-RUG>> <DIAG \"CP-DOOR-OVISON\" <OVIS? ,DIAG-DOOR>> <DIAG \"CP-DOOR-OFLAGS\" <CHTYPE <OFLAGS ,DIAG-DOOR> FIX>> <DIAG \"CP-DOOR-OTOUCH\" <OTOUCH? ,DIAG-DOOR>> <DIAG \"CP-TRAP-DOOR\" ,TRAP-DOOR!-FLAG> <DIAG \"CP-LAMP-OLIGHT\" <OLIGHT? ,DIAG-LAMP>> <DIAG \"CP-LAMP-IN-LROOM\" <COND (<MEMQ ,DIAG-LAMP <ROBJS ,DIAG-LROOM>> T)>> <DIAG \"CP-LIT\" <LIT? ,HERE>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\r\neast, and a crawlway to the south.  On the west is the bottom of a\r\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+      "stdout_sha256": "c4a9ed976c9f94517379b2afa0ce30f9c726176734ad9c2e95f0c044d90c5b6d",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#CHANNEL [4 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/house-cellar-probes/X1-house-cellar-diag-72i9u51u/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/house-cellar-probes/X1-house-cellar-diag-72i9u51u/\" 0 0 0 0 0 0 0 10 0]\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n0\nT\n#FUNCTION (() <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-RSEEN\" <RSEEN? ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-KITCHEN-WINDOW\" ,KITCHEN-WINDOW!-FLAG> <DIAG \"CP-RUG-ORAND\" <ORAND ,DIAG-RUG>> <DIAG \"CP-DOOR-OVISON\" <OVIS? ,DIAG-DOOR>> <DIAG \"CP-DOOR-OFLAGS\" <CHTYPE <OFLAGS ,DIAG-DOOR> FIX>> <DIAG \"CP-DOOR-OTOUCH\" <OTOUCH? ,DIAG-DOOR>> <DIAG \"CP-TRAP-DOOR\" ,TRAP-DOOR!-FLAG> <DIAG \"CP-LAMP-OLIGHT\" <OLIGHT? ,DIAG-LAMP>> <DIAG \"CP-LAMP-IN-LROOM\" <COND (<MEMQ ,DIAG-LAMP <ROBJS ,DIAG-LROOM>> T)>> <DIAG \"CP-LIT\" <LIT? ,HERE>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\neast, and a crawlway to the south.  On the west is the bottom of a\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>\nYour score would be 35 [total of 500 points], in 11 moves.\nThis score gives you the rank of Amateur Adventurer.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.19,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 880163,
+            "sha256": "752f129dce292e929757c8d4aef189a8b252d2368bd865d46be7879264925121",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {},
+      "diag_log": "RANDOM-ARGS (10438660480)\nRANDOM-RESULT 16566282405\nCP-BEGIN 0\nCP-HERE WHOUS!-ROOMS\nCP-RSEEN T\nCP-AOBJS ()\nCP-KITCHEN-WINDOW #FALSE ()\nCP-RUG-ORAND #FALSE ()\nCP-DOOR-OVISON #FALSE ()\nCP-DOOR-OFLAGS 72\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM T\nCP-LIT T\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 0\nCP-END 0\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nCP-BEGIN 1\nCP-HERE NHOUS!-ROOMS\nCP-RSEEN T\nCP-AOBJS ()\nCP-KITCHEN-WINDOW #FALSE ()\nCP-RUG-ORAND #FALSE ()\nCP-DOOR-OVISON #FALSE ()\nCP-DOOR-OFLAGS 72\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM T\nCP-LIT T\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 1\nCP-END 1\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"east\"\nCP-BEGIN 2\nCP-HERE EHOUS!-ROOMS\nCP-RSEEN T\nCP-AOBJS ()\nCP-KITCHEN-WINDOW #FALSE ()\nCP-RUG-ORAND #FALSE ()\nCP-DOOR-OVISON #FALSE ()\nCP-DOOR-OFLAGS 72\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM T\nCP-LIT T\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 2\nCP-END 2\nREADSTRING-COUNT 11\nREADSTRING-TEXT \"open window\"\nCP-BEGIN 3\nCP-HERE EHOUS!-ROOMS\nCP-RSEEN T\nCP-AOBJS ()\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND #FALSE ()\nCP-DOOR-OVISON #FALSE ()\nCP-DOOR-OFLAGS 72\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM T\nCP-LIT T\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 3\nCP-END 3\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nCP-BEGIN 4\nCP-HERE KITCH!-ROOMS\nCP-RSEEN T\nCP-AOBJS ()\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND #FALSE ()\nCP-DOOR-OVISON #FALSE ()\nCP-DOOR-OFLAGS 72\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM T\nCP-LIT T\nCP-RAW-SCORE 10\nCP-ASCORE 10\nCP-MOVES 4\nCP-END 4\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nCP-BEGIN 5\nCP-HERE LROOM!-ROOMS\nCP-RSEEN T\nCP-AOBJS ()\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND #FALSE ()\nCP-DOOR-OVISON #FALSE ()\nCP-DOOR-OFLAGS 72\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM T\nCP-LIT T\nCP-RAW-SCORE 10\nCP-ASCORE 10\nCP-MOVES 5\nCP-END 5\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"take lamp\"\nCP-BEGIN 6\nCP-HERE LROOM!-ROOMS\nCP-RSEEN T\nCP-AOBJS (LAMP!-OBJECTS)\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND #FALSE ()\nCP-DOOR-OVISON #FALSE ()\nCP-DOOR-OFLAGS 72\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM #FALSE ()\nCP-LIT T\nCP-RAW-SCORE 10\nCP-ASCORE 10\nCP-MOVES 6\nCP-END 6\nREADSTRING-COUNT 8\nREADSTRING-TEXT \"move rug\"\nCP-BEGIN 7\nCP-HERE LROOM!-ROOMS\nCP-RSEEN T\nCP-AOBJS (LAMP!-OBJECTS)\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND T\nCP-DOOR-OVISON T\nCP-DOOR-OFLAGS 73\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM #FALSE ()\nCP-LIT T\nCP-RAW-SCORE 10\nCP-ASCORE 10\nCP-MOVES 7\nCP-END 7\nREADSTRING-COUNT 14\nREADSTRING-TEXT \"open trap door\"\nCP-BEGIN 8\nCP-HERE LROOM!-ROOMS\nCP-RSEEN T\nCP-AOBJS (LAMP!-OBJECTS)\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND T\nCP-DOOR-OVISON T\nCP-DOOR-OFLAGS 73\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR T\nCP-LAMP-OLIGHT -1\nCP-LAMP-IN-LROOM #FALSE ()\nCP-LIT T\nCP-RAW-SCORE 10\nCP-ASCORE 10\nCP-MOVES 8\nCP-END 8\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"turn on lamp\"\nCP-BEGIN 9\nCP-HERE LROOM!-ROOMS\nCP-RSEEN T\nCP-AOBJS (LAMP!-OBJECTS)\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND T\nCP-DOOR-OVISON T\nCP-DOOR-OFLAGS 73\nCP-DOOR-OTOUCH #FALSE ()\nCP-TRAP-DOOR T\nCP-LAMP-OLIGHT 1\nCP-LAMP-IN-LROOM #FALSE ()\nCP-LIT T\nCP-RAW-SCORE 10\nCP-ASCORE 10\nCP-MOVES 9\nCP-END 9\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"down\"\nCP-BEGIN 10\nCP-HERE CELLA!-ROOMS\nCP-RSEEN T\nCP-AOBJS (LAMP!-OBJECTS)\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND T\nCP-DOOR-OVISON T\nCP-DOOR-OFLAGS 73\nCP-DOOR-OTOUCH T\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT 1\nCP-LAMP-IN-LROOM #FALSE ()\nCP-LIT T\nCP-RAW-SCORE 35\nCP-ASCORE 35\nCP-MOVES 10\nCP-END 10\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nCP-BEGIN 11\nCP-HERE CELLA!-ROOMS\nCP-RSEEN T\nCP-AOBJS (LAMP!-OBJECTS)\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND T\nCP-DOOR-OVISON T\nCP-DOOR-OFLAGS 73\nCP-DOOR-OTOUCH T\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT 1\nCP-LAMP-IN-LROOM #FALSE ()\nCP-LIT T\nCP-RAW-SCORE 35\nCP-ASCORE 35\nCP-MOVES 11\nCP-END 11\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\nCP-BEGIN 12\nCP-HERE CELLA!-ROOMS\nCP-RSEEN T\nCP-AOBJS (LAMP!-OBJECTS)\nCP-KITCHEN-WINDOW T\nCP-RUG-ORAND T\nCP-DOOR-OVISON T\nCP-DOOR-OFLAGS 73\nCP-DOOR-OTOUCH T\nCP-TRAP-DOOR #FALSE ()\nCP-LAMP-OLIGHT 1\nCP-LAMP-IN-LROOM #FALSE ()\nCP-LIT T\nCP-RAW-SCORE 35\nCP-ASCORE 35\nCP-MOVES 11\nCP-END 12\n"
+    },
+    {
+      "name": "P00-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 0 commands, then EOF (state at end of input = checkpoint 0; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P00-house-cellar-prefix-8h157v4e/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n",
+      "input_sha256": "6610c125774e46b6133d2c7a06b932b9978c9fd920025f3c2a7f13c1b4801edf",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_sha256": "6354e0c158b8889f134856cfb060a19257066551d6e2bd1bfe3f5f95765e9bd6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "27715ce091884d5bc3db20af3e7487d7885087b93a2b9b53d94f00aaa2504474",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P01-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 1 commands, then EOF (state at end of input = checkpoint 1; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P01-house-cellar-prefix-y44kzhg1/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\n",
+      "input_sha256": "e84ccb06d61eb83cbb50d01c418d19d73e1bdc6f3f31168f63947f08c1b84d82",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stdout_sha256": "c6d87c96df55b322b5162213b4d0ee7c9a8421e3aafd7d29ff66577283d3edf3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "6fe152e44abd505650c9120b89b627fd60599d3542ac102c396ef0d99db10c25",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P02-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 2 commands, then EOF (state at end of input = checkpoint 2; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P02-house-cellar-prefix-gi97tvnk/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\n",
+      "input_sha256": "e86baf7f5df59e356224c3d56f34f3fdc4066980825db708a4f67a59732a0b8c",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>Beg pardon?\n>",
+      "stdout_sha256": "f48c65898a632f8c20faabf5721ea6661f3b0f9328294ed3d51b6066a48c76cd",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "ee46cf947dd6396ddfbc157fce3ec4beee289e2b0f88e3d47faa483d3ebccad0",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P03-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 3 commands, then EOF (state at end of input = checkpoint 3; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P03-house-cellar-prefix-kbqz3hku/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\n",
+      "input_sha256": "3f93abf5f6dcf63cda5ac356e52e941f653306d8f437af255ddd5ea6697f1863",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>Beg pardon?\n>",
+      "stdout_sha256": "de195b18db31e07cfdec17dbfd0445068ba1fe305860a733213652d8b6f5bda2",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "0fc192cdc216059f0a5d6e367c38e3775361a33bd6fa1956bcbce3ff74117133",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P04-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 4 commands, then EOF (state at end of input = checkpoint 4; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P04-house-cellar-prefix-o35qpmrl/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\n",
+      "input_sha256": "d2b63ade212f0fc67037cb5d5fde1c04503b5f266a9b2bee52af90cb5b700147",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>Beg pardon?\n>",
+      "stdout_sha256": "d7fd46cdfe030c293f896f7bd435016a78a64c36f3149e96c40da7b0635cde7c",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "cc3cf31c76774d7baca86d1a62ffba962f7267ae31029f60515430fc290d4f5d",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P05-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 5 commands, then EOF (state at end of input = checkpoint 5; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P05-house-cellar-prefix-69bdzn_i/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\n",
+      "input_sha256": "f5152ec12717a7a743f03adaa5fac58823e38be6052cf184743858e4acd5e68e",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Beg pardon?\n>",
+      "stdout_sha256": "333033822f2bcb6604541e4616878bd247be994d55b5d170810d0defb834b7f7",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "fd565834c1e9c7576e418c54953db48a24137b2b0cb00458a785d155b5e3e859",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P06-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 6 commands, then EOF (state at end of input = checkpoint 6; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P06-house-cellar-prefix-2s65s5d2/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\n",
+      "input_sha256": "a3682451a9a45667db1e81f633422267d3126598582f55faede034418d72bd2a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>Beg pardon?\n>",
+      "stdout_sha256": "1e712c3008f33cb17a53ae946d56e358426d9561c2a66313b94aae6f635d9c23",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "ac66c738e8bb44dd0220780973058cb21136c68eb6e2d805d6b18a5b88787d24",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P07-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 7 commands, then EOF (state at end of input = checkpoint 7; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P07-house-cellar-prefix-i8br5v2b/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\n",
+      "input_sha256": "9fbd0d999e4aa2891ca3f6ffb52d4e09632f17d0ea6bf09cb2f48bc3118cefd6",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>Beg pardon?\n>",
+      "stdout_sha256": "d77dc148a3eff0e2dd706dd5e870031e124f84c1a1c0d19e71b8c2f2a3d159dd",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "68678eca5637d0ada55977802e8e3efbf0855f05eeaafa2f2d915ba62e75cb49",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P08-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 8 commands, then EOF (state at end of input = checkpoint 8; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P08-house-cellar-prefix-49nmrci4/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\nopen trap door\n",
+      "input_sha256": "bb08d4cf64a8f71d281dcda78ebccf7eae0590af56e66f0457fac3110dde8eb3",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>Beg pardon?\n>",
+      "stdout_sha256": "a6aa7994da2507d5aa6032d1c84aebe3db38d3fd4108807b5bc99c1e74940fcc",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "8636e34da1b6fb139ef8ebfd175d025dc0786a7aad7dd6861a4c80303f9135f2",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P09-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 9 commands, then EOF (state at end of input = checkpoint 9; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P09-house-cellar-prefix-1el9dnxk/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\nopen trap door\nturn on lamp\n",
+      "input_sha256": "09b762905186705f2df28ada9c95e630899a2a7478e57435a98fab7df38786c7",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>The lamp is now on.\n>Beg pardon?\n>",
+      "stdout_sha256": "5b68ca9cf9884733216d39141474686a0c74d8a59bf07369f55a4e59e86223e0",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>The lamp is now on.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "9f38fe64582e4a3d4114b459cf8edc1a468e8a05cb1960993cdf7982d6340091",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "P10-house-cellar-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 10 commands, then EOF (state at end of input = checkpoint 10; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P10-house-cellar-prefix-kg9fcapm/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\nopen trap door\nturn on lamp\ndown\n",
+      "input_sha256": "23b0afcf79c99fbe114436235a38e96eb1032acb0652511ff407619bd2d159cf",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\r\neast, and a crawlway to the south.  On the west is the bottom of a\r\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>Beg pardon?\n>",
+      "stdout_sha256": "eaaedb3859bf10b2c333dff2cd06652c18783114a7dcea42c7addba0a4adac92",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\neast, and a crawlway to the south.  On the west is the bottom of a\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.19,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "1f9394e87eebcca0e1e3a195603f5f20a7ad4efe6c860754c51e63e12072755f",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    }
+  ]
+}
