@@ -2235,12 +2235,17 @@ content, zero-offset and beyond-start errors, and the host terminal
 CHANNEL's one preceding slot. Confusion retains the argument's TYPE on BACK
 — CHANNEL for INCHAN, and any NEWTYPE of VECTOR, UVECTOR or STRING — despite
 the manual's general statement that BACK changes to the array PRIMTYPE.
+INCHAN's preceding slot reads as FIX 0 in the pinned bare
+interpreter; the original source's PUT on that FIX uses the existing
+association dispatch. This host representation is not a puzzle-rule change.
+
 *Amended 2026-11-23 (maintainer decision; ADR-0058 amendment):* BACK keeps
 the argument's exact TYPE (by TYPE atom, never PNAME) for every array-backed
 value, as TOP does; REST drops it. Previously only CHANNEL was kept. The
-manual discrepancy is acknowledged and the reference is followed. Its preceding slot reads as FIX 0 in the pinned bare
-interpreter; the original source's PUT on that FIX uses the existing
-association dispatch. This host representation is not a puzzle-rule change.
+manual discrepancy is acknowledged and the reference is followed. A
+NEWTYPE's DECL is checked only at CHTYPE, never when BACK, TOP or PUT
+exposes or changes elements (as in Confusion), so a BACK can expose a
+removed element that the DECL would reject (independent review).
 
 Tests must first fail on unassigned BACK, then assert shared view mutation,
 strict bounds and types, terminal CHANNEL metadata, and the next actual
