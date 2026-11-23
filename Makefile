@@ -142,11 +142,11 @@ reference-capture-boot:
 		--output artifacts/reference/house-boot.json
 
 # Opt-in native BOOT-REF gate (not part of `make test`): regenerate the capture,
-# compare its gameplay view with the committed candidate, then run the native
-# pytest tests (two more captures; determinism + candidate equality).
+# compare its gameplay view with the committed (promoted schema-3) reference,
+# then run the native pytest tests (two more captures; determinism + equality).
 test-boot-reference: reference-capture-boot
 	@$(PYTHON) scripts/boot_reference.py compare \
-		docs/evidence/M3/house-boot-candidate.json artifacts/reference/house-boot.json
+		docs/evidence/M3/house-boot-reference.json artifacts/reference/house-boot.json
 	@$(PYTHON) -m pytest -q -m native tests/test_boot_reference.py
 
 compare:
