@@ -9,7 +9,27 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 BACK follow-up (2026-11-22, `feat/m3-back-continuation`):**
+**Current M3 S5 SAVE session record (2026-11-23, `feat/m3-startup-save-record`, ADR-0048):**
+By maintainer decision `<SAVE file-spec>` returns a fresh `"SAVED"`, writes
+no file, performs no GC and no interrupt side effect, and appends a
+host-visible session record (sequence, file-spec, INT-LEVEL); RESTORE stays
+refused. `"BLOCKED"` registers like IPC but can never fire. The faithful
+path (`<FLOAD "77loadall.mud">` then `<SAVE-IT>`) now records SAVE of
+`"<MDL>MADADV.SAVE"` at INT-LEVEL 100000, runs `<INT-LEVEL 0>`
+(77rooms.mud:26), GETSYS, `ON "BLOCKED"` and START (welcome text), then
+stops in CONTIN at `77rooms.mud:301` with `mdl-gval: unassigned MDL global
+REP` (known XFAIL, `make test-m3-saveit`, 27 assertions). Gate result for
+this slice: full gate PASS outside the sandbox at `fe495b1` (`make test`,
+`test-historical`, `m3-source-progress`, `test-m3-historical-gc`,
+`test-m3-start-back`, `test-m3-saveit`, `test-m3-andq`: all exit 0; see
+`docs/evidence/M3/S5-SAVE-RECORD.md`). RESET, the
+LISTEN/REP loop, PRINC, READSTRING, interactive input and smoke parity are
+unsupported. **INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have not
+passed; M3 is incomplete.** Next: a maintainer decision and slice for the
+GVAL of REP and the LISTEN loop that applies it. See
+[S5 evidence](docs/evidence/M3/S5-SAVE-RECORD.md).
+
+**Previous M3 BACK follow-up (2026-11-22, `feat/m3-back-continuation`):**
 The unchanged source chain still loads 1,229 forms with zero skips.
 Manual and pinned Confusion cases support BACK on shared array views and
 the terminal CHANNEL predecessor slot. Direct original START now passes

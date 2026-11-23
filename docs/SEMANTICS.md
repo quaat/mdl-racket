@@ -1975,28 +1975,64 @@ applicable and a positive FIX priority before registering anything. By
 maintainer decision (2026-11-22, issue #112, ADR-0047) the predefined
 `"IPC"` may be registered through ON or EVENT, but the session has no
 inter-process message source: emitting or delivering an IPC occurrence is a
-strict error. Every other refused predefined name stays refused. `SAVE` and
-`RESTORE` are strict, intentional unsupported SUBRs: after evaluating their
-arguments they raise `SAVE: saving a restorable image is not supported
-(maintainer decision 2026-11-22; issue #112)` (RESTORE analogously), never
-return `"SAVED"` and never touch files. Pinned Confusion stubs ON, EVENT and
-HANDLER (`T`, TYPE ATOM, even for invalid arguments) and its SAVE writes an
-image and returns `"SAVED"` (`<SAVE 1>` crashes it); see
-`evidence/M3/on-save-reference.json`. These are recorded deviations. The
-faithful `<SAVE-IT>` therefore stops at 77rooms.mud:26, so INITIALIZED is
-BLOCKED at SAVE.
+strict error. By maintainer decision (2026-11-23, ADR-0048) `"BLOCKED"`
+receives the same treatment: registration through ON/EVENT/HANDLER and OFF
+work, but the session has no blocked-input source, so emitting or delivering
+a BLOCKED occurrence is a strict error naming ADR-0048. Every other refused
+predefined name (CHAR, READ, WRITE, UNBLOCKED, CLOCK, ...) stays refused.
 
-**INT-LEVEL after the SAVE error (review note).** SAVE-IT raises the level
-with an ordinary `<INT-LEVEL 100000>` call (77rooms.mud:25) before `<SAVE
-.FN>`, and nothing unwinds it, so after the strict SAVE error the session's
-INT-LEVEL stays 100000, with GC and DIVERT-AGC occurrences masked (queued,
-not delivered). That is faithful to MDL, which would sit in an error loop at
-that level, and SAVE deliberately does not reset it. It is harmless today
-because every test builds a fresh session; any later slice that continues
-the same session past SAVE (for example by calling START) must account for
-it explicitly, after probing what Confusion's RESTORE does to the level,
-instead of letting queued DIVERT-AGC occurrences silently change the GC
-schedule.
+**SAVE (ADR-0048, supersedes ADR-0047 part 2).** Manual 11.6.1 defines
+`<SAVE file-spec:string gc?:false-or-any>` and the multi-name form `<SAVE
+name1 name2 device dir gc?>` (all STRINGs optional, defaulting to "MUDDLE",
+"SAVE", "DSK" and the SNM value); a FALSE `gc?` "causes no garbage
+collection to occur before SAVEing", and SAVE returns `"SAVED"`. Manual
+11.6.2 defines RESTORE. The multi-name and zero-argument forms are not
+needed by the game and are strict errors here. Arguments are evaluated as for
+any SUBR. The runtime accepts exactly one STRING file-spec (native or REST
+view), optionally followed by a FALSE `gc?` (an explicit request not to
+collect, which is what this SAVE always does). `<SAVE>`, a non-STRING
+file-spec, a non-FALSE `gc?` and more than two arguments are strict errors,
+raised before anything is recorded. A valid call:
+
+- returns a **fresh** mutable STRING `"SAVED"` (`<==? <SAVE "X"> <SAVE "X">>`
+  is false, `=?` is true; mutating a result does not affect later results);
+- writes, opens or deletes no file and creates no channel;
+- performs no garbage collection and has no interrupt side effect (INT-LEVEL
+  unchanged; nothing emitted, queued or drained);
+- appends a record `(sequence file-spec int-level)` to the current session:
+  a 1-based per-session counter, an immutable snapshot of the file-spec's
+  visible characters (later mutation of the argument does not change it),
+  and the INT-LEVEL at the call. Host code reads the records, oldest first,
+  with `mdl-save-records` (core) or `mdl-session-save-records` (loader);
+  no MDL primitive exposes them.
+
+`RESTORE` stays a strict, intentional unsupported SUBR: after evaluating its
+arguments it raises `RESTORE: restoring a saved image is not supported
+(maintainer decision 2026-11-23; ADR-0048)` and never touches files.
+
+**Reference behavior and deviations.** Pinned Confusion stubs ON, EVENT and
+HANDLER (`T`, TYPE ATOM, even for invalid arguments; `<ON "BLOCKED" ,TYPE
+100>` is `T`). Its SAVE writes an image file, ignores `gc?`, returns
+`"SAVED"`, returns `#FALSE ()` when the file cannot be opened, writes
+`MUDDLE.SAVE` for `<SAVE>` and crashes (SIGSEGV) on `<SAVE 1>`; see
+`evidence/M3/on-save-reference.json` and
+`evidence/M3/S5-SAVE-FRONTIER.md`. On RESTORE Confusion swaps the heap and
+re-enters LISTEN applying `,REP`, so the original SAVE never returns again;
+the manual instead says SAVE returns a second time with `"RESTORED"`. The
+runtime models neither; the disagreement is recorded for a future RESTORE
+slice. The manual's GC on SAVE is not performed.
+
+**Faithful SAVE-IT path.** The patched 77rooms.mud SAVE-IT has one COND
+clause, `(<=? <SAVE .FN> "SAVED"> <INT-LEVEL 0> ...)`, so a session-record
+SAVE continues in the same session: SAVE is recorded with file-spec
+`"<MDL>MADADV.SAVE"` and INT-LEVEL 100000, then `<INT-LEVEL 0>` at
+77rooms.mud:26 lowers the level. Lowering the level is an ordinary MDL safe
+point: any GC or DIVERT-AGC occurrence queued while the level was 100000 is
+delivered there (Confusion has no such occurrences). This is not
+suppressed. On the observed faithful path no occurrence was pending there
+(DIVERT-CNT stayed 0); the run continues through START and stops in CONTIN
+at 77rooms.mud:301 on the unassigned GVAL of REP. See
+`evidence/M3/S5-SAVE-RECORD.md`.
 
 ## M3 reader: backslash escapes in atom names (issue #119)
 

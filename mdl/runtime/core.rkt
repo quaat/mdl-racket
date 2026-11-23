@@ -15,6 +15,8 @@
          mdl-expand mdl-defmac! mdl-define-interpreted!
          mdl-apply mdl-list mdl-list->list
          mdl-emit-event!
+         mdl-save-records mdl-save-record? mdl-save-record-sequence
+         mdl-save-record-file-spec mdl-save-record-int-level
          mdl-logical-storage-stats mdl-set-logical-storage-capacity!
          mdl-recompute-entry-words current-mdl-gc-min mdl-set-used-for-test!
          mdl-make-declaration mdl-gdecl
@@ -1763,7 +1765,9 @@
 (struct atom-space (initial root named types builtins manifests associations
                             global-declarations events interrupt-state memory
                             random-state internal lookup [lookup-stack #:mutable]
-                            inchan outchan channels))
+                            inchan outchan channels
+                            ;; ADR-0048: SAVE session records, newest first.
+                            [save-records #:mutable]))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1840,7 +1844,8 @@
               (mcons initial (mcons root '())) '()
               ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
               ;; (seed-root! fails if either is missing from the inventory).
-              (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)))
+              (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)
+              '()))
 
 ;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
 ;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
@@ -1880,24 +1885,29 @@
 ;; A true event source must be supplied before predefined names are
 ;; registered. GC and DIVERT-AGC are internal MDL interrupts, not OS signals.
 (define unsupported-predefined-interrupt-names
-  '("CHAR" "READ" "WRITE" "BLOCKED" "UNBLOCKED"
+  '("CHAR" "READ" "WRITE" "UNBLOCKED"
     "CLOCK" "SYSDOWN" "INFERIOR" "RUNT" "REALT"
     "MPV" "PURE" "ILOPR" "PARITY" "IOC"))
 
-;; Maintainer decision 2026-11-22 (issue #112): "IPC" may be registered
-;; (EVENT, HANDLER, ON, OFF all work), but an isolated session has no
-;; inter-process message source, so an IPC occurrence can never arise.
-;; Any attempt to emit or deliver one is a strict error. The emit check is
-;; the enforced boundary; the delivery check in `mdl-deliver-occurrence!` is
-;; defensive (no MDL-level path can queue an IPC occurrence today) and is
-;; kept so that a future event source cannot bypass the decision.
-(define sourceless-predefined-interrupt-names '("IPC"))
+;; Predefined names that may be registered (EVENT, HANDLER, ON, OFF all
+;; work) although an isolated session has no source for them, so an
+;; occurrence can never arise. Any attempt to emit or deliver one is a
+;; strict error naming the decision. The emit check is the enforced
+;; boundary; the delivery check in `mdl-deliver-occurrence!` is defensive
+;; (no MDL-level path can queue such an occurrence today) and is kept so
+;; that a future event source cannot bypass the decision.
+;;   "IPC"     maintainer decision 2026-11-22 (issue #112, ADR-0047)
+;;   "BLOCKED" maintainer decision 2026-11-23 (ADR-0048)
+(define sourceless-predefined-interrupts
+  '(("IPC" . "this session has no inter-process message source; IPC occurrences cannot be emitted (maintainer decision 2026-11-22; issue #112)")
+    ("BLOCKED" . "this session has no blocked-input source; BLOCKED occurrences cannot be emitted (maintainer decision 2026-11-23; ADR-0048)")))
+(define sourceless-predefined-interrupt-names
+  (map car sourceless-predefined-interrupts))
 
 (define (check-emittable-event who name)
-  (when (member name sourceless-predefined-interrupt-names)
-    (error who
-           "~a: this session has no inter-process message source; ~a occurrences cannot be emitted (maintainer decision 2026-11-22; issue #112)"
-           name name)))
+  (define entry (assoc name sourceless-predefined-interrupts))
+  (when entry
+    (error who "~a: ~a" name (cdr entry))))
 
 (define (current-interrupt-state)
   (atom-space-interrupt-state (current-mdl-atom-space)))
@@ -2208,16 +2218,39 @@
   (define header (mdl-enable (mdl-event name-value priority)))
   (mdl-install-handler header action))
 
-;; Maintainer decision 2026-11-22 (issue #112): SAVE and RESTORE are
-;; intentionally unsupported. They never return "SAVED", never read or
-;; write a file, and fail after ordinary SUBR argument evaluation.
-(define (mdl-save . args)
-  (error 'SAVE
-         "saving a restorable image is not supported (maintainer decision 2026-11-22; issue #112)"))
+;; ADR-0048 host-only view of the session's SAVE records (never an MDL
+;; primitive): immutable records, oldest first.
+(struct mdl-save-record (sequence file-spec int-level) #:transparent)
+(define (mdl-save-records)
+  (reverse (atom-space-save-records (current-mdl-atom-space))))
 
+;; ADR-0048 (maintainer decision 2026-11-23, superseding ADR-0047 part 2):
+;; <SAVE file-spec:STRING [gc?:FALSE]> (manual 11.6.1) records a session
+;; save and returns a fresh "SAVED". It writes no file, performs no GC and
+;; has no interrupt side effect (INT-LEVEL is only read). Arguments arrive
+;; already evaluated (ordinary SUBR) and are validated before recording.
+(define (mdl-save . args)
+  (unless (<= 1 (length args) 2)
+    (error 'SAVE "SAVE expects a file-spec STRING and an optional FALSE gc? (ADR-0048)"))
+  (define file-spec
+    (mdl-string-snapshot 'SAVE (car args)
+                         "SAVE file-spec must be STRING (ADR-0048)"))
+  (unless (or (null? (cdr args)) (mdl-false? (cadr args)))
+    (error 'SAVE "SAVE gc? must be FALSE; this session never collects on SAVE (ADR-0048)"))
+  (define space (current-mdl-atom-space))
+  (define records (atom-space-save-records space))
+  (set-atom-space-save-records!
+   space
+   (cons (mdl-save-record (add1 (length records)) file-spec
+                          (mdl-interrupt-state-level (current-interrupt-state)))
+         records))
+  (string-copy "SAVED"))
+
+;; RESTORE stays intentionally unsupported (ADR-0048): it never reads or
+;; writes a file and fails after ordinary SUBR argument evaluation.
 (define (mdl-restore . args)
   (error 'RESTORE
-         "restoring a saved image is not supported (maintainer decision 2026-11-22; issue #112)"))
+         "restoring a saved image is not supported (maintainer decision 2026-11-23; ADR-0048)"))
 
 (define (require-oblist who value)
   (unless (mdl-oblist? value)
@@ -4250,3 +4283,20 @@
 
 ;; Initialize the process-wide default context (see "Execution contexts").
 (mdl-ensure-terminal-channels!)
+
+;; Delivery-path guard for sourceless predefined events (ADR-0047 IPC,
+;; ADR-0048 BLOCKED). No MDL-level path can queue such an occurrence, so this
+;; host-level test injects one directly to prove the defensive check bites.
+(module+ test
+  (for ([name (in-list '("IPC" "BLOCKED"))]
+        [priority (in-list '(1 100))])
+    (parameterize ([current-mdl-globals (make-hasheq)]
+                   [current-mdl-locals (list (make-hasheq))]
+                   [current-mdl-atom-space (make-mdl-atom-space)])
+      (define header (mdl-event name priority))
+      (check-exn (regexp (string-append "^mdl-deliver-occurrence!: " name ": "))
+                 (lambda ()
+                   (mdl-deliver-occurrence!
+                    (mdl-interrupt-occurrence header '()))))
+      (check-exn (regexp (string-append name ": "))
+                 (lambda () (mdl-emit-event! name '()))))))
