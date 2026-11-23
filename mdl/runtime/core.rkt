@@ -2245,7 +2245,10 @@
 ;; procedures. It is a Racket procedure, so every application path (FORM
 ;; call, APPLY, MAPF, HANDLER delivery, host mdl-apply) reaches `proc` after
 ;; ordinary SUBR argument evaluation, and APPLICABLE declarations match it.
-(struct mdl-subr (name proc) #:property prop:procedure (struct-field-index proc))
+(struct mdl-subr (name proc)
+  #:property prop:procedure (struct-field-index proc)
+  ;; Racket diagnostics name the SUBR (e.g. #<procedure:REP>), not a source line.
+  #:property prop:object-name (struct-field-index name))
 
 ;; The default GVAL of ROOT REP. CONTIN stores it (<SETG SAVEREP ,REP>,
 ;; 77rooms.mud:301) and BLO tests its TYPE (77act1.mud:3), but applying it is
@@ -2253,7 +2256,7 @@
 ;; loop. It reads no channel, evaluates nothing and prints nothing.
 (define mdl-default-rep
   (mdl-subr
-   "REP"
+   'REP
    (lambda args
      (error 'REP
             "the default REP SUBR is inert; this runtime never provides a raw MDL read-eval-print loop (maintainer decision 2026-11-23; ADR-0049)"))))

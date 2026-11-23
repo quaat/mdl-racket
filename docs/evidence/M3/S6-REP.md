@@ -167,3 +167,45 @@ for this slice: **NOT RUN** (full gate) until then.
   later `TYPE?` on REP or on built-ins will fail strictly until that is fixed.
 - The default REP value is one module-level object that all sessions share.
   It is immutable, and associations on it are owned by each session.
+
+## Unsandboxed full gate (orchestrator, 2026-11-23)
+
+Run outside the sandbox as the normal user, with `PLTCOLLECTS=":$PWD" TMPDIR=/tmp
+PYTHON=/usr/bin/python3 PYTHONPATH=$PWD/.sandbox-pydeps/lib`, at `1f3e66c` and again
+with the review follow-ups below:
+
+| command | exit |
+|---|---|
+| `make test` | 0 |
+| `make test-historical` | 0 (placement matches pinned Confusion, 2350 entries) |
+| `make m3-source-progress` | 0 |
+| `make test-m3-historical-gc` | 0 |
+| `make test-m3-start-back` | 0 |
+| `make test-m3-saveit` | 0 (31 tests passed) |
+| `make test-m3-andq` | 0 |
+| `git diff --check` | 0 |
+
+No log contained `test failures`, `FAILURE` or `raised an exception`.
+
+**Full gate: PASS.** This is not an INITIALIZED claim: startup stops at 77rooms.mud:303.
+
+## Independent review (APPROVE WITH NITS) and follow-ups
+
+The reviewer exercised every apply route and all raised the ADR-0049 error:
+- `<REP>`, `<,REP>` and a local alias;
+- APPLY, including nested;
+- MAPF and MAPR;
+- HANDLER delivery;
+- a direct host call.
+
+The reviewer also confirmed that associations on the shared REP object stay
+per-session. Follow-ups:
+
+- `mdl-subr` sets `prop:object-name`, so Racket diagnostics print
+  `#<procedure:REP>` instead of a source location.
+- `rep_test` now covers MAPR, a direct host call (also checking
+  `object-name` is `REP`), and cross-session association isolation (PUT in
+  one session, GET in another is FALSE). The file now has 58 tests.
+- Not changed: after CONTIN, BLO's `<TYPE? ,REP SUBR FSUBR>` would raise an
+  error, because RDCOM is a host procedure without an MDL TYPE. This is
+  harmless while BLOCKED never fires (ADR-0048). It is recorded under Risks.

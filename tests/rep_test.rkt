@@ -113,6 +113,23 @@
               ("<UNPARSE ,REP>" . #rx"UNPARSE: unsupported MDL type SUBR"))])
   (check-exn (cdr case) (lambda () (run (car case))) (car case)))
 
+;; --- review follow-ups: MAPR, host call, object name, association isolation --
+(check-rep-refused "<MAPR <> ,REP '(1)>")
+;; Calling the REP value directly from host code is refused too.
+(session
+ (lambda ()
+   (define rep (eval-source ",REP"))
+   (check-equal? (object-name rep) 'REP)
+   (check-exn (regexp rep-error) (lambda () (rep)))))
+;; The REP object is shared by all sessions, but associations on it are
+;; per-session: a PUT in one session is not visible in another.
+(session
+ (lambda ()
+   (check-equal? (eval-source "<PUT ,REP FOO 42> <GET ,REP FOO>") 42)))
+(session
+ (lambda ()
+   (check-true (mdl-false? (eval-source "<GET ,REP FOO>")))))
+
 ;; --- every session has its own REP binding ----------------------------------
 (define-values (rep-a rep-b)
   (values (run "<SETG REP <FUNCTION () 1>> <GVAL REP>") (run ",REP")))

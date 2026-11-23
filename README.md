@@ -20,9 +20,10 @@ but **not implemented**. The faithful `<SAVE-IT>` path now passes
 77rooms.mud:301-302 (SAVEREP holds the REP SUBR, REP is RDCOM) and stops at
 `<RESET ,INCHAN>` (77rooms.mud:303) with `mdl-eval: unassigned or
 non-applicable MDL operator RESET` (known XFAIL, `make test-m3-saveit`).
-Gate result for this slice: sandboxed checks only (see
-`docs/evidence/M3/S6-REP.md`); the full gate has to be run outside the
-sandbox before it can be called PASS. RESET, the host loop, PRINC,
+Gate result for this slice: full gate PASS outside the sandbox (`make test`,
+`test-historical`, `m3-source-progress`, `test-m3-historical-gc`,
+`test-m3-start-back`, `test-m3-saveit`, `test-m3-andq`: all exit 0; see
+`docs/evidence/M3/S6-REP.md`). RESET, the host loop, PRINC,
 READSTRING, interactive input and smoke parity are unsupported.
 **INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have not passed; M3 is
 incomplete.** Next: RESET of INCHAN. See
