@@ -665,10 +665,11 @@ function frames. `GO` follows the MDL manual chapter 10: top-level atoms in
 PROG/REPEAT bodies are labels skipped in normal flow, and GO resumes at the
 following expression in the nearest owned frame; the pinned Confusion has no
 GO or TAG, a recorded reference deviation, and TAG values remain
-unsupported. `UNWIND` runs its cleanup when a nonlocal transfer or an error
-crosses below it and returns the guarded expression's value otherwise;
-Confusion skips the cleanup on errors, a deviation the Racket runtime does
-not copy (manual chapter 16). `make test` passes 465 Racket checks and 13
+unsupported. `UNWIND` runs its cleanup when a nonlocal transfer crosses
+below it and returns the guarded expression's value otherwise. (This slice
+originally also ran it on errors; issue #139 / ADR-0051 corrected that: a
+raised error runs no cleanup, matching the manual and Confusion; see
+[I139 evidence](evidence/M3/I139-UNWIND.md).) `make test` passes 465 Racket checks and 13
 Python tests under the documented sandbox environment after both Codex
 review fixes (PUTREST TUPLE rejection in PR #32 and octal-token label
 exclusion here); the 36/36 reader
