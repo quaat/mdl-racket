@@ -1,0 +1,813 @@
+{
+  "schema_version": 1,
+  "name": "m3-bang-reference",
+  "recorded_at": "2026-11-23T09:47:37.749958+00:00",
+  "interpreter": ".cache/build/confusion_patched/mdli",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "upstream_mdlzork_commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "upstream_mit_zork_commit": "d94501340842e006791fce0757dc0043b8ec8916",
+  "protocol": "member-bang-probe.py; one mdli process per case; cwd fresh $TMPDIR/mb-probe-work dir (game cases: byte copy of patched_confusion); never .cache/upstream; pipe stdin unless mode=pty",
+  "cases": [
+    {
+      "name": "bang-mid",
+      "note": "maintainer example: expect AbcD",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-mid-fdxqm13z, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>Ab!cD\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e41622163440a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n4 \n\"AbcD......\" \n[65 98 99 68 46 46 46 46 46 46] [65 98 99 68 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n4 \n\"AbcD......\" \n[65 98 99 68 46 46 46 46 46 46] [65 98 99 68 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n4 \n\"AbcD......\" \n[65 98 99 68 46 46 46 46 46 46] [65 98 99 68 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-double",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-double-fi7hspoc, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>!!\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e21210a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] [33 46 46 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] [33 46 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] [33 46 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-double-between",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-double-between-pbe_x5mf, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>a!!b\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e612121620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"a!b.......\" \n[97 33 98 46 46 46 46 46 46 46] [97 33 98 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"a!b.......\" \n[97 33 98 46 46 46 46 46 46 46] [97 33 98 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"a!b.......\" \n[97 33 98 46 46 46 46 46 46 46] [97 33 98 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-multiple",
+      "note": "multiple escapes; count vs stored",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-multiple-wjgg4in7, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>!a!b!c\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e2161216221630a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"abc.......\" \n[97 98 99 46 46 46 46 46 46 46] [97 98 99 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"abc.......\" \n[97 98 99 46 46 46 46 46 46 46] [97 98 99 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"abc.......\" \n[97 98 99 46 46 46 46 46 46 46] [97 98 99 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-lf",
+      "note": "escaped LF: stop or stored?",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-lf-7extuhc5, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\nXY\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162210a58590a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-cr",
+      "note": "escaped CR (stop char)",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-cr-mhieryc8, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\rXY\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162210d58590a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-crlf",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-crlf-4oejay94, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\r\ncd\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162210d0a63640a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n0 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"cd........\" \n[99 100 46 46 46 46 46 46 46 46] [99 100 46 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n0 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"cd........\" \n[99 100 46 46 46 46 46 46 46 46] [99 100 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n0 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"cd........\" \n[99 100 46 46 46 46 46 46 46 46] [99 100 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-esc",
+      "note": "escaped ESC (altmode, stop char)",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-esc-v0x9s4gv, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\u001bXY\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162211b58590a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-tab",
+      "note": "escaped non-stop control char",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-tab-5u288xo1, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>a!\tb\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e612109620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"a\tb.......\" \n[97 9 98 46 46 46 46 46 46 46] [97 9 98 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"a\tb.......\" \n[97 9 98 46 46 46 46 46 46 46] [97 9 98 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"a\tb.......\" \n[97 9 98 46 46 46 46 46 46 46] [97 9 98 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-backslash",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-backslash-h6nwfw4u, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>a!\\b\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e61215c620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"a\\\\b.......\" \n[97 92 98 46 46 46 46 46 46 46] [97 92 98 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"a\\\\b.......\" \n[97 92 98 46 46 46 46 46 46 46] [97 92 98 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"a\\\\b.......\" \n[97 92 98 46 46 46 46 46 46 46] [97 92 98 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "backslash-plain",
+      "note": "\\ is not an escape in READSTRING?",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/backslash-plain-yipe8cmo, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>a\\b\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e615c620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"a\\\\b.......\" \n[97 92 98 46 46 46 46 46 46 46] [97 92 98 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"a\\\\b.......\" \n[97 92 98 46 46 46 46 46 46 46] [97 92 98 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"a\\\\b.......\" \n[97 92 98 46 46 46 46 46 46 46] [97 92 98 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-eof",
+      "note": "trailing ! immediately before EOF",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-eof-6zj6gprj, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e616221",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"ab!.......\" \n[97 98 33 46 46 46 46 46 46 46] ",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"ab!.......\" \n[97 98 33 46 46 46 46 46 46 46] ",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"ab!.......\" \n[97 98 33 46 46 46 46 46 46 46] ",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-only-eof",
+      "note": "lone ! then EOF",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-only-eof-dxcbksdz, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>!",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e21",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] ",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] ",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] ",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-buffer-boundary-last-slot",
+      "note": "!c pair lands in the last buffer slot",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-buffer-boundary-last-slot-v5w3xsgr, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 3 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!cd\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e47203320215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e61622163640a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"...\"\n\n3 \n\"abc\" \n[97 98 99] \n1 \n\"dbc\" \n[100 98 99] [100 98 99]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"...\"\n\n3 \n\"abc\" \n[97 98 99] \n1 \n\"dbc\" \n[100 98 99] [100 98 99]\n",
+      "result_after_listening": "\"^[\n\"\n\"...\"\n\n3 \n\"abc\" \n[97 98 99] \n1 \n\"dbc\" \n[100 98 99] [100 98 99]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-buffer-boundary-straddle",
+      "note": "buffer fills after 'ab'; the next read starts at '!'",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-buffer-boundary-straddle-axnco2jk, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 2 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!cd\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e47203220215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e61622163640a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..\"\n\n2 \n\"ab\" \n[97 98] \n2 \n\"cd\" \n[99 100] [99 100]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..\"\n\n2 \n\"ab\" \n[97 98] \n2 \n\"cd\" \n[99 100] [99 100]\n",
+      "result_after_listening": "\"^[\n\"\n\"..\"\n\n2 \n\"ab\" \n[97 98] \n2 \n\"cd\" \n[99 100] [99 100]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-buffer-boundary-2",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-buffer-boundary-2-f4ti_2ad, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 2 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>a!bc\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e47203220215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e612162630a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..\"\n\n2 \n\"ab\" \n[97 98] \n1 \n\"cb\" \n[99 98] [99 98]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..\"\n\n2 \n\"ab\" \n[97 98] \n1 \n\"cb\" \n[99 98] [99 98]\n",
+      "result_after_listening": "\"^[\n\"\n\"..\"\n\n2 \n\"ab\" \n[97 98] \n1 \n\"cb\" \n[99 98] [99 98]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "nonascii-latin1",
+      "note": "single byte 0xE9",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/nonascii-latin1-nxco2n_z, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>aéb\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e61e9620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "nonascii-utf8",
+      "note": "UTF-8 e-acute (2 bytes)",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/nonascii-utf8-5fmgoi6o, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>aÃ©b\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e61c3a9620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n4 \n\"aÃ©b......\" \n[97 -61 -87 98 46 46 46 46 46 46] [97 -61 -87 98 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n4 \n\"aÃ©b......\" \n[97 -61 -87 98 46 46 46 46 46 46] [97 -61 -87 98 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n4 \n\"aÃ©b......\" \n[97 -61 -87 98 46 46 46 46 46 46] [97 -61 -87 98 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-before-nonascii",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-before-nonascii-4ysze3zc, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>a!éb\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6121e9620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "nul-and-del",
+      "note": "NUL and DEL bytes",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/nul-and-del-z2uoy33o, stdin=pipe",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>a\u0000bc\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6100627f630a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"..........\"\n\n5 \n\"a^@b^¿c.....\" \n[97 0 98 127 99 46 46 46 46 46] [97 0 98 127 99 46 46 46 46 46]\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"..........\"\n\n5 \n\"a^@b^¿c.....\" \n[97 0 98 127 99 46 46 46 46 46] [97 0 98 127 99 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\"\n\"..........\"\n\n5 \n\"a^@b^¿c.....\" \n[97 0 98 127 99 46 46 46 46 46] [97 0 98 127 99 46 46 46 46 46]\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "bang-fix-stop",
+      "note": "FIX stop count with ! (not used by the game)",
+      "mode": "pipe",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/bang-fix-stop-84wmibpu, stdin=pipe",
+      "input": "<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN 3>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>!abcd\n<QUIT>\n",
+      "input_hex": "3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e20333e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e21616263640a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"..........\"\n\n3 \n\"abc.......\" \n[97 98 99 46 46 46 46 46 46 46] [97 98 99 46 46 46 46 46 46 46]\nd\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"..........\"\n\n3 \n\"abc.......\" \n[97 98 99 46 46 46 46 46 46 46] [97 98 99 46 46 46 46 46 46 46]\nd\n",
+      "result_after_listening": "\"..........\"\n\n3 \n\"abc.......\" \n[97 98 99 46 46 46 46 46 46 46] [97 98 99 46 46 46 46 46 46 46]\nd\n",
+      "stderr_raw": "",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-bang-mid",
+      "note": "",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-bang-mid-oyg9h7c2, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>Ab!cD\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e41622163440a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"..........\"\r\n\r\n4 \r\n\"AbcD......\" \r\n[65 98 99 68 46 46 46 46 46 46] [65 98 99 68 46 46 46 46 46 46]\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"..........\"\n\n4 \n\"AbcD......\" \n[65 98 99 68 46 46 46 46 46 46] [65 98 99 68 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\n\"\n\"..........\"\n\n4 \n\"AbcD......\" \n[65 98 99 68 46 46 46 46 46 46] [65 98 99 68 46 46 46 46 46 46]\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-bang-double",
+      "note": "",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-bang-double-8ks0_35s, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>!!\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e21210a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"..........\"\r\n\r\n1 \r\n\"!.........\" \r\n[33 46 46 46 46 46 46 46 46 46] [33 46 46 46 46 46 46 46 46 46]\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] [33 46 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\n\"\n\"..........\"\n\n1 \n\"!.........\" \n[33 46 46 46 46 46 46 46 46 46] [33 46 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-bang-before-lf",
+      "note": "",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-bang-before-lf-03q5h7pb, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\nXY\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162210a58590a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"..........\"\r\n\r\n2 \r\n\"ab........\" \r\n[97 98 46 46 46 46 46 46 46 46] \r\n2 \r\n\"XY........\" \r\n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-bang-before-cr",
+      "note": "pty ICRNL maps CR to LF",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-bang-before-cr-_zj699wi, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\rXY\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162210d58590a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"..........\"\r\n\r\n2 \r\n\"ab........\" \r\n[97 98 46 46 46 46 46 46 46 46] \r\n2 \r\n\"XY........\" \r\n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-bang-before-esc",
+      "note": "",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-bang-before-esc-np0xf_kd, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\u001bXY\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162211b58590a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"..........\"\r\n\r\n2 \r\n\"ab........\" \r\n[97 98 46 46 46 46 46 46 46 46] \r\n2 \r\n\"XY........\" \r\n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\n\"\n\"..........\"\n\n2 \n\"ab........\" \n[97 98 46 46 46 46 46 46 46 46] \n2 \n\"XY........\" \n[88 89 46 46 46 46 46 46 46 46] [88 89 46 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-bang-before-eof",
+      "note": "first ^D pushes the partial line 'ab!', the second gives EOF",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-bang-before-eof-2n6c0_gh, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!\u0004\u0004",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e6162210404",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"..........\"\r\n\r\n3 \r\n\"ab!.......\" \r\n[97 98 33 46 46 46 46 46 46 46] Error: Unexpected EOF\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"..........\"\n\n3 \n\"ab!.......\" \n[97 98 33 46 46 46 46 46 46 46] Error: Unexpected EOF\n",
+      "result_after_listening": "\"^[\n\n\"\n\"..........\"\n\n3 \n\"ab!.......\" \n[97 98 33 46 46 46 46 46 46 46] Error: Unexpected EOF\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-bang-buffer-boundary",
+      "note": "",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-bang-buffer-boundary-v12wa8f1, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 3 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>ab!cd\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e47203320215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e61622163640a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"...\"\r\n\r\n3 \r\n\"abc\" \r\n[97 98 99] \r\n1 \r\n\"dbc\" \r\n[100 98 99] [100 98 99]\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"...\"\n\n3 \n\"abc\" \n[97 98 99] \n1 \n\"dbc\" \n[100 98 99] [100 98 99]\n",
+      "result_after_listening": "\"^[\n\n\"\n\"...\"\n\n3 \n\"abc\" \n[97 98 99] \n1 \n\"dbc\" \n[100 98 99] [100 98 99]\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "pty-nonascii-latin1",
+      "note": "",
+      "mode": "pty",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-nonascii-latin1-l2uecmvc, stdin=pty",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10 !\\.>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT .B> <PRINT <MAPF ,VECTOR ,ASCII .B>>>aéb\n<QUIT>\n",
+      "input_hex": "3c53455447205253203c535452494e47203c41534349492032373e203c41534349492031333e203c41534349492031303e3e3e0a3c5345542042203c49535452494e4720313020215c2e3e3e0a3c50524f47202829203c5052494e54203c52454144535452494e47202e42202c494e4348414e202c52533e3e203c5052494e54202e423e203c5052494e54203c4d415046202c564543544f52202c4153434949202e423e3e3e61e9620a3c515549543e0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n\"^[\r\r\n\"\r\n\"..........\"\r\n\r\n3 \r\n\"aéb.......\" \r\n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "result_after_listening": "\"^[\n\n\"\n\"..........\"\n\n3 \n\"aéb.......\" \n[97 -23 98 46 46 46 46 46 46 46] [97 -23 98 46 46 46 46 46 46 46]\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {}
+    },
+    {
+      "name": "game-baseline-north",
+      "note": "control: unescaped command",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-baseline-north-zfr11i9i, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a6e6f7274680a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "02d1748d25468486875ead80cd849b9a8585b6890d977926af3d223b6464ca82"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-bang-mid-word",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-bang-mid-word-tkr54dqo, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnor!th\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a6e6f722174680a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "27d94f83e6f6890e4f59223499ab1d7b610a5d046f5b0dd5e2f8a9e91a40c021"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-bang-first",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-bang-first-1scquyjl, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n!north\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a216e6f7274680a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "43e697b99fe740d8c51699142ef69fb71d4d8679dfc1aab5be692100a73e8889"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-mixed-case-bang",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-mixed-case-bang-s_i6jb_s, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nAb!cD\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a41622163440a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>I don't know the word ABCD\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word ABCD\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word ABCD\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "d686d0fb50afba80a4c786a8a91bd678394bc7e8f2cc5503ef97cb2aefd920fb"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-bang-double",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-bang-double-78pjpfbd, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n!!\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a21210a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Huh?\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Huh?\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Huh?\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "08b56201f71ea9c420b756dcf73b6d7d92ae4921705283f6feb6f6675684fa28"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-bang-before-lf",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-bang-before-lf-j8ux6og1, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth!\nwest\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a6e6f727468210a776573740a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "04422971b4467114659a4e79472f6196cdc9095eba384f35f7c0efdc20733e36"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-bang-before-esc",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-bang-before-esc-kuy58zzv, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth!\u001bwest\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a6e6f727468211b776573740a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "a9ae902332f8555d3f6a299ee8804174f94c42b3d7d65afede4e6854fb82f729"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-bang-before-eof",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-bang-before-eof-fuup5r36, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth!",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a6e6f72746821",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "6a6a9850514ae27fae8a0afcffc4968445b58330556f866fbf6ae5616edcc1db"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-buffer-boundary",
+      "note": "INBUF is ISTRING 100 (77rooms.mud); !y lands in slot 100",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-buffer-boundary-_3vqqg8j, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!yz\nlook\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a78787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787821797a0a6c6f6f6b0a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>I don't know the word XXXXX\n>I don't know the word Z\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word XXXXX\n>I don't know the word Z\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word XXXXX\n>I don't know the word Z\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "1b9b10fd4a389b7906331547592659aa3e7ea944fee73b1384aa89ae02f62aaf"
+          ]
+        }
+      }
+    },
+    {
+      "name": "game-nonascii",
+      "note": "",
+      "mode": "pipe",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/game-nonascii-q7cx70is, stdin=pipe",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnoréth\nnorth\n",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a6e6f72e974680a6e6f7274680a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>I don't know the word NORéT\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word NORéT\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>I don't know the word NORéT\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "b2886b92cc0cbcc0a903306c520e437f4e428b01a99579298bde80b43c8daca1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pty-game-bang-mid-word",
+      "note": "",
+      "mode": "pty",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "interpreter_sha256_checked": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+      "command": "<repo>/.cache/build/confusion_patched/mdli (no args), cwd=$TMPDIR/mb-probe-work/pty-game-bang-mid-word-fecg0i39, stdin=pty",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnor!th\n\u0004",
+      "input_hex": "3c464c4f4144202237376c6f6164616c6c2e6d7564223e0a3c534156452d49543e0a6e6f722174680a04",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\r\nCopyright 2009 Matthew T. Russotto\r\nThis Confusion created Nov 22 2026 @ 20:58:42\r\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\r\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\r\n\r\n\r\nLISTENING-AT-LEVEL 1 PROCESS 1\r\n81prim.mud loaded\r\n77defs.mud loaded\r\n77makstr.mud loaded\r\n81tell-repl.mud loaded\r\n77act1.mud loaded\r\n77act2.mud loaded\r\n77act3.mud loaded\r\n77rooms.mud loaded\r\n77patch.mud loaded\r\n77np.mud loaded\r\n78melee.mud loaded\r\n77dung.mud loaded\r\n\"DONE\"\r\nWelcome to Dungeon.\r\r\nThis version created December 12.\r\n\r\nYou are in an open field west of a big white house, with a boarded\r\r\nfront door.\r\nThere is a small mailbox here.\r\n>You are facing the north side of a white house.  There is no door here,\r\r\nand all the windows are barred.\r\n>Beg pardon?\r\n>Error: Unexpected EOF\r\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\n\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n>Beg pardon?\n>Error: Unexpected EOF\n",
+      "result_after_listening": "81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\n\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n>Beg pardon?\n>Error: Unexpected EOF\n",
+      "stderr_raw": "(pty: stderr is merged into stdout_raw)",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "4e6caa54df739782a67f1b53b4e061965cca93148097ffa05be12fa56e54d076"
+          ]
+        }
+      }
+    }
+  ]
+}
