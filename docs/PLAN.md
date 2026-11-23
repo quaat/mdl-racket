@@ -195,22 +195,28 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
     ([F1/F2 record](evidence/M3/F1-F2-STACK-FIXES.md)).
   - F3: documentation consolidation (this reconciliation: present-tense
     SEMANTICS/STATUS/PLAN/README/inventory match the code).
-  - #55: agent-configuration revision.
+  - #55: agent-configuration revision (done: provider-neutral roles,
+    `model: inherit`).
 - **WP2 — deterministic fresh-boot SMOKE_PARITY (#131, #135).**
   Host-injected, session-owned clock with epoch 250776000 (UTC); a proof
   chain clock → DSKDATE → START seed → RNG; immutable boot inputs separated
   from SAVE side effects; a strict comparator with negative checks; a
-  `make m3-check` aggregate target (does not exist yet).
+  `make m3-check` aggregate target. **Done on branch (#144, #146):**
+  SMOKE_PARITY PASS (branch evidence, scoped); see STATUS.
 - **WP3 — session dependencies.** MEMBER, including STRING substring
   search; QUIT per ADR-0051 as a raised non-`exn:fail` session signal; OPEN
   denial that returns a FALSE with reason, file-spec and status chosen so
   RECORD avoids its `*600130*` busy branch (CLOSE stays unsupported);
   READSTRING `!` escape per pinned Confusion; an explicit output port for
   game sessions. Each needs a SEMANTICS entry and reference probes first.
+  **Status:** MEMBER (#145), QUIT and OPEN (#147) done on branch;
+  READSTRING `!` and explicit output in progress (S13).
 - **WP4 — local session smoke and launcher.** A scenario covering
   `quit` answered n, continue, then `quit` answered y, with no file writes;
   a thin CLI/DrRacket launcher over `make-mdl-session` and
   `mdl-session-run-interactive`. No raw REPL, no web service.
+  **Done on branch (#147, #148):** local session smoke PASS (branch
+  evidence).
 - **WP5 — M4 scenario backlog.** Collect scenarios for the M4 corpus as a
   backlog only; M4 gate work waits for M3 acceptance (AGENTS.md step 9).
   Draft: [M4 scenario backlog](evidence/M4/SCENARIO-BACKLOG.md) (first

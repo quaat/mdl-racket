@@ -30,7 +30,7 @@ row marked "Branch" is not on `main`. Scoped gate results are in
 | `77rooms.mud:301-303` (CONTIN) | Startup | GVAL REP, RESET of INCHAN | Branch: inert default REP SUBR (ADR-0049); RESET implemented (ADR-0050) |
 | `77rooms.mud:598-616`, `675-680` | Game loop | PRINC/PRIN1 of STRING, CHARACTER, FIX, `,NULL` | Branch: implemented without line breaking (ADR-0050) |
 | `77rooms.mud:521-525` | Room description | `<PROB 80>` via RANDOM seeded from DSKDATE | Branch: works; text varies with the host clock until a session-owned fixed clock exists (#135) |
-| `77rooms.mud:220` (HANDLE), `33-50`, `279`, `316-353` (QUIT/FINISH/RECORD paths) | ERROR handler, game end | MEMBER, QUIT, OPEN/CLOSE | Not implemented (strict errors); planned in PLAN "Active iteration" WP3 |
+| `77rooms.mud:220` (HANDLE), `33-50`, `279`, `316-353` (QUIT/FINISH/RECORD paths) | ERROR handler, game end | MEMBER, QUIT, OPEN/CLOSE | Branch: MEMBER (#145), QUIT as a session outcome and OPEN under the no-file policy (#147) implemented; the quit path FINISH → RECORD → QUIT runs byte-identical to native. CLOSE unsupported (not reached). HANDLE stops at unsupported PRINT (`77rooms.mud:251`) before QUIT |
 
 Locked source revision: mdlzork/Confusion
 `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`.
