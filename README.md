@@ -74,13 +74,15 @@ checkpoints, each PASS (scenario-scoped): enter the house and open the cellar
 orphan prompts (`test-m4-orphan-prompt`, CHARACTER), TOP and the parser
 (`test-m4-top-parser`), take the sword (`test-m4-sword-glow`, FUNCTION/SUBR
 TYPEs) and troll combat with the sword (`test-m4-troll-combat`, one combat
-branch). Also on `main`: MAX (ADR-0059), BACK/TOP keep the TYPE (ADR-0058).
+branch); on its branch, parser rejection and ambiguity
+(`test-m4-parser-ambiguity`: unknown words, truncation, empty and blank
+lines, `Which door?`; no runtime change). Also on `main`: MAX (ADR-0059), BACK/TOP keep the TYPE (ADR-0058).
 The manual DrRacket checks (quit, Stop) passed. Evidence:
 [docs/evidence/M4](docs/evidence/M4/), [STATUS](docs/STATUS.md).
 
 **Next milestone step:** more M4 scenarios from the
-[backlog](docs/evidence/M4/SCENARIO-BACKLOG.md): parser ambiguity, death and
-recovery, scoring, lamp countdown and clock events.
+[backlog](docs/evidence/M4/SCENARIO-BACKLOG.md): death and recovery,
+scoring, lamp countdown and clock events.
 
 **Previous M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
 summarised above; details in [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).

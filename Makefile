@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -104,6 +104,16 @@ test-m4-sword-glow: sources
 # flags, axe location, hero strength, cure clock, glow level).
 test-m4-troll-combat: sources
 	@racket tests/historical_troll_combat_test.rkt
+
+# M4 S7 (parser rejection and ambiguity): unknown words, 5-letter truncation,
+# empty and blank lines, buzz words, orphan continuations, dangling adjective,
+# too many objects, double preposition, quoting, the 10-word LEXV, darkness,
+# and `Which door?` (GET-OBJECT 77np.mud:363 -> SPARSE 77np.mud:88) answered
+# by an adjective; every command prefix compared with the pinned Confusion
+# captures (D1 only) plus read-only state checkpoints (LEXV, PRSVEC,
+# PARSE-WON, ORPHANS, trap door, MOVES).
+test-m4-parser-ambiguity: sources
+	@racket tests/historical_parser_ambiguity_test.rkt
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,

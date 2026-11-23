@@ -140,6 +140,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m4-troll-combat 2>&1 | tee artifacts/ci-logs/test-m4-troll-combat.log
+      - name: M4 S7 scenario (parser rejection and ambiguity)
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-parser-ambiguity 2>&1 | tee artifacts/ci-logs/test-m4-parser-ambiguity.log
       - name: Build and capture native reference
         run: |
           make reference-build

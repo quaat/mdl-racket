@@ -1,4 +1,4 @@
-# Status — 2026-11-23 (`main` = `18e2047`: M3 accepted; M4 S1–S5b PASS (mainline, scenario-scoped); S6 troll combat PASS (branch, this PR); M4 gate NOT YET PASSED; PLAYABLE NOT RUN)
+# Status — 2026-11-23 (`main` = `b6b86d0`: M3 accepted; M4 S1–S6 PASS (mainline, scenario-scoped); S7 parser ambiguity PASS (branch, this PR); M4 gate NOT YET PASSED; PLAYABLE NOT RUN)
 
 ## Current state (2026-11-23)
 
@@ -24,7 +24,7 @@ Racket v7.9 BC; CI: racket:8.10-bc (runs 45176163020, 45176121779).
 | Local session smoke | **PASS (mainline)** | quit/n, inventory, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written (`make test-m3-session`, `make test-m3-launcher`) |
 | PLAYABLE | NOT RUN | M4 ([backlog](evidence/M4/SCENARIO-BACKLOG.md)) |
 
-### M4 on `main` = `18e2047` (2026-11-23)
+### M4 on `main` = `b6b86d0` (2026-11-23)
 
 M4 scenarios run on `main` with the session clock fixed at 250776000 UTC,
 compared prefix by prefix with pinned native Confusion and read-only state
@@ -39,7 +39,8 @@ checkpoints ([M4 baseline record](evidence/M4/M4-MAINLINE-BASELINE.md)):
 | BACK keeps the argument's TYPE (maintainer decision) | **PASS (mainline)** | #160; ADR-0058 amendment; `tests/back_test.rkt`, `tests/top_test.rkt` |
 | S5a MAX | **PASS (mainline)** | #159 (#122 closed); ADR-0059 accepted (zero-argument `<MAX>` only); `tests/max_test.rkt` |
 | S5b TYPE of DEFINEd functions (FUNCTION) and built-ins (SUBR); take sword | **PASS (mainline, scenario-scoped)** | #161; `make test-m4-sword-glow` (14 prefixes); ADR-0060 |
-| S6 troll combat with the sword | **PASS (branch evidence, gate on `98a1a2b`)** | `make test-m4-troll-combat` (23 prefixes + checkpoints; troll dies on the third blow); [S6 record](evidence/M4/S6-TROLL-COMBAT.md) |
+| S6 troll combat with the sword | **PASS (mainline, scenario-scoped)** | #162; `make test-m4-troll-combat` (23 prefixes + checkpoints; troll dies on the third blow); [S6 record](evidence/M4/S6-TROLL-COMBAT.md) |
+| S7 parser rejection and ambiguity (`Which door?`) | **PASS (branch evidence, scenario-scoped)** | `make test-m4-parser-ambiguity` (35 prefixes + checkpoints: LEXV, PRSVEC, PARSE-WON, ORPHANS, MOVES); no runtime change; [S7 record](evidence/M4/S7-PARSER-AMBIGUITY.md) |
 | Manual DrRacket checks (quit, Stop) | **PASS** | [record](evidence/M4/DRRACKET-MANUAL-CHECK.md) |
 | M4 comprehensive-equivalence gate | NOT YET PASSED | scenario, state, save/restore and completion criteria not met |
 | PLAYABLE | NOT RUN | no playability gate executed |
@@ -51,8 +52,11 @@ the M3 targets, run sequentially, exit 0) and CI green before merge. Strict by
 decision: `help`/`info` (OPEN "READ"), RESTORE, file operations. S6 covers one
 combat branch only (the troll dies; the hero is never hit): hero wounds,
 death (JIGS-UP), unconsciousness and staggering are not reached under this
-seed and timing. Next (Phase E): parser ambiguity / "Which X?", death and
-recovery, scoring and inventory, lamp countdown and clock events.
+seed and timing. S7 (branch) covers the parser's rejection messages, the
+5-letter truncation, empty versus blank lines (only a non-empty line is a
+move) and one `Which door?` question answered by adjectives; it needed no
+runtime change. Next (Phase E): death and recovery, scoring and inventory,
+lamp countdown and clock events.
 
 The sections below describe the branch stack as it was integrated; they are
 kept as the integration history.
