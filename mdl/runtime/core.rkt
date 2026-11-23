@@ -3564,6 +3564,44 @@
   (newline (channel-output-port 'mdl-crlf channel))
   (mdl-root-atom "T"))
 
+;; ADR-0050 terminal printing. Text reaches the port unchanged only when every
+;; character is printable ASCII, CR or LF: Confusion prints other control
+;; characters in ^X notation and non-ASCII is not a 1977 terminal character,
+;; so both are strict errors here. The whole text is checked before anything
+;; is written. No line breaking is done (CHANNEL slot 13 is ignored).
+(define (terminal-text who content)
+  (for ([ch (in-string content)])
+    (define code (char->integer ch))
+    (when (or (and (< code 32) (not (memv code '(10 13)))) (= code 127))
+      (error who "control character (code ~a) is not supported; Confusion prints ^X notation (ADR-0050)"
+             code))
+    (when (> code 127)
+      (error who "non-ASCII character (code ~a) is not supported (ADR-0050)" code)))
+  content)
+
+;; One or two arguments: the object and an optional output CHANNEL whose
+;; default is the LVAL of OUTCHAN. Returns the port to write to.
+(define (print-arguments who args)
+  (unless (<= 1 (length args) 2)
+    (error who "~a takes an object and an optional CHANNEL (ADR-0050)" who))
+  (channel-output-port who (if (null? (cdr args))
+                               (default-output-channel who)
+                               (cadr args))))
+
+;; PRINC (manual 11.1.2.3): STRING (native or view) without quotes, CHARACTER
+;; bare, FIX in decimal. Returns the object. Every other TYPE is strict.
+(define (princ-text value)
+  (cond [(mdl-string? value) (terminal-text 'PRINC (mdl-string-content value))]
+        [(mdl-character-code value)
+         => (lambda (code) (terminal-text 'PRINC (string (integer->char code))))]
+        [(exact-integer? value) (number->string (check-fix 'PRINC value))]
+        [else (error 'PRINC "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))
+
+(define (mdl-princ . args)
+  (define port (print-arguments 'PRINC args))
+  (write-string (princ-text (car args)) port)
+  (car args))
+
 ;; SUBSTRUC (MDL manual ch. 7, section 7.1.7)
 ;;
 ;; Contract: `<SUBSTRUC from rest amount to>` copies `amount` elements of
@@ -4092,6 +4130,7 @@
         "TERPRI" mdl-terpri
         "CRLF" mdl-crlf
         "RESET" mdl-reset
+        "PRINC" mdl-princ
         "ERROR" mdl-error
         "ERRET" mdl-erret
         "EVENT" mdl-event
