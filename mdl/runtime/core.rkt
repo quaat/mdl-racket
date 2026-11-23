@@ -3237,30 +3237,35 @@
                                (mdl-array-type-cell base))))
          (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))]))
 
+;; BACK (manual 7.6.2): the inverse of REST over the same storage. It keeps
+;; the argument's exact TYPE (the TYPE atom itself, never its PNAME), as TOP
+;; does and as pinned Confusion does; REST drops it (maintainer decision
+;; 2026-11-23, ADR-0058 amendment; SEMANTICS "M3 BACK"). This covers the
+;; terminal CHANNEL (previously the only TYPE kept) and every NEWTYPE of
+;; VECTOR, UVECTOR or STRING.
 (define (mdl-back value [offset 1])
   (unless (and (exact-integer? offset) (positive? offset) (<= offset fix-max))
     (error 'mdl-back "BACK requires a positive FIX offset"))
   (define base (mdl-base value))
+  (define (retag result)
+    (if (mdl-typed-value? value)
+        (mdl-typed-value (mdl-typed-value-type value) result)
+        result))
   (cond
     [(mdl-string? base)
      (define start (if (mdl-string-view? base) (mdl-string-view-start base) 0))
      (when (> offset start)
        (error 'mdl-back "BACK offset exceeds removed prefix"))
-     (mdl-string-view (mdl-string-view-storage base)
-                      (- start offset)
-                      (+ (mdl-string-length base) offset))]
+     (retag (mdl-string-view (mdl-string-view-storage base)
+                             (- start offset)
+                             (+ (mdl-string-length base) offset)))]
     [(mdl-array? base)
      (when (> offset (mdl-array-start base))
        (error 'mdl-back "BACK offset exceeds removed prefix"))
-     (define result
-       (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
-                       (- (mdl-array-start base) offset)
-                       (+ (mdl-array-length base) offset)
-                       (mdl-array-type-cell base)))
-     (if (and (mdl-typed-value? value)
-              (eq? (mdl-typed-value-type value) (mdl-root-atom "CHANNEL")))
-         (mdl-typed-value (mdl-root-atom "CHANNEL") result)
-         result)]
+     (retag (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                            (- (mdl-array-start base) offset)
+                            (+ (mdl-array-length base) offset)
+                            (mdl-array-type-cell base)))]
     [else (error 'mdl-back "BACK requires an array")]))
 
 ;; TOP (manual 7.6.2.2; SEMANTICS "M4 S4", ADR-0058): the inverse of every
