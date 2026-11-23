@@ -1,5 +1,5 @@
 #lang racket/base
-;; Historical regression: SAVE-IT frontier after the 1,229-form load.
+;; Historical regression: the faithful SAVE-IT entry after the 1,229-form load.
 ;;
 ;; Tracks source progress toward INITIALIZED on the faithful run.mud entry
 ;; path (<FLOAD "77loadall.mud"> then <SAVE-IT>).
@@ -21,32 +21,32 @@
 (check-equal? (hash-ref load-report 'completed_expressions) 1229)
 (check-equal? (hash-ref load-report 'skipped_expressions) 0)
 
-;; Known XFAIL frontier (S6-REP, ADR-0049; SAVE per ADR-0048). SAVE is a
-;; session record: <SAVE .FN> returns a fresh "SAVED", writes no file, and is
-;; recorded with INT-LEVEL 100000. The patched SAVE-IT has a single COND
-;; clause, so it continues in the same session: <INT-LEVEL 0> (77rooms.mud:26),
-;; STARTER, GETSYS (56), ON "BLOCKED" (59; registers, never fires), START (60).
+;; S7 (ADR-0050): SAVE-IT now returns. SAVE is a session record (ADR-0048):
+;; <SAVE .FN> returns a fresh "SAVED", writes no file, and is recorded with
+;; INT-LEVEL 100000. The patched SAVE-IT has a single COND clause, so it
+;; continues in the same session: <INT-LEVEL 0> (77rooms.mud:26), STARTER,
+;; GETSYS (56), ON "BLOCKED" (59; registers, never fires), START (60).
 ;; ADR-0049: the GVAL of REP is the predefined, inert REP SUBR, so CONTIN's
-;; <SETG SAVEREP ,REP> (301) and <SETG REP ,RDCOM> (302) complete.
-;; INITIALIZED remains FAIL: the run stops at <RESET ,INCHAN> (303), the
-;; first reference to the still-unimplemented RESET SUBR.
+;; <SETG SAVEREP ,REP> (301) and <SETG REP ,RDCOM> (302) complete. ADR-0050:
+;; <RESET ,INCHAN> (303) returns INCHAN, and CONTIN returns ,NULL (306), the
+;; value SAVE-IT returns. The game loop itself (RDCOM, applied by the host
+;; top-level loop) is tested in historical_interactive_test.rkt.
 ;;
 ;; Call chain: SAVE-IT (77rooms.mud:60) -> START (77rooms.mud:293)
-;;   -> CONTIN (77rooms.mud:303) <RESET ,INCHAN>  <- XFAIL here
-;; This test asserts the XFAIL message so progress is tracked without claiming
-;; INITIALIZED. No host top-level loop is run (ADR-0049: specified only).
+;;   -> CONTIN (77rooms.mud:296-306) -> returns ,NULL
+;; No host top-level loop is run here.
 (define (listing dir) (sort (map path->string (directory-list dir)) string<?))
 (define source-before (listing source-root))
 (check-equal? (mdl-session-global session "ALT-FLAG") (mdl-session-atom session "T"))
 (check-equal? (mdl-session-save-records session) '())
 (define output (open-output-string))
-(define failure
-  (with-handlers ([exn:fail? values])
-    (parameterize ([current-output-port output])
-      (mdl-session-call session "SAVE-IT"))))
-(check-true (exn:fail? failure))
-(check-equal? (exn-message failure)
-              "mdl-eval: unassigned or non-applicable MDL operator RESET")
+(define returned
+  (parameterize ([current-output-port output])
+    (mdl-session-call session "SAVE-IT")))
+;; SAVE-IT returns CONTIN's ,NULL: the ATOM with an empty PNAME that
+;; 81tell-repl.mud inserts on ROOT.
+(check-eq? returned (mdl-session-global session "NULL"))
+(check-equal? (mdl-atom-pname returned) "")
 ;; SAVE (77rooms.mud:26) ran once, returned "SAVED" (the COND clause was
 ;; taken) and was recorded with the file-spec and INT-LEVEL 100000.
 (define records (mdl-session-save-records session))
@@ -72,7 +72,7 @@
 ;; XUNAME/GET-NAME as in the Confusion trace (S5-SAVE-FRONTIER.md Q3 step 6).
 (check-equal? (mdl-session-global session "XUNM") "MTRZORK")
 (check-equal? (mdl-session-global session "USER-NAME") "")
-;; CONTIN 77rooms.mud:296-302 ran; 303 did not complete.
+;; CONTIN 77rooms.mud:296-306 ran.
 (check-true (mdl-false? (mdl-session-global session "ALT-FLAG")))
 (define (type-of value) (mdl-atom-pname (mdl-session-call session "TYPE" value)))
 ;; 301: SAVEREP holds the predefined REP SUBR (ADR-0049) ...
@@ -86,9 +86,9 @@
 ;; unsupported-type error, a pre-existing limit recorded in S6-REP.md.)
 (check-exn #rx"mdl-type: unsupported MDL type"
            (lambda () (type-of (mdl-session-global session "REP"))))
-;; 303: RESET is still unassigned (not implemented in this slice).
-(check-exn #rx"unassigned MDL global RESET"
-           (lambda () (mdl-session-global session "RESET")))
+;; 303: RESET returned the same INCHAN; 304-305 completed.
+(check-eq? (mdl-session-global session "WINNER") (mdl-session-global session "PLAYER"))
+(check-true (mdl-false? (mdl-session-call session "NTH" (mdl-session-global session "PRSVEC") 2)))
 ;; State established by 77rooms.mud:13-21 before SAVE was reached.
 (check-equal? (mdl-session-global session "DEV") "DSK")
 (check-equal? (mdl-session-global session "SNM") "MDL")

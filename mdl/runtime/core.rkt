@@ -2773,7 +2773,10 @@
 ;; how the default terminal channels of a non-loader context behave. A
 ;; CHANNEL VECTOR without a host record in the current space (forged by
 ;; CHTYPE, or belonging to another session) is rejected, never written.
-(struct host-channel (direction port))
+;; at-eof? (ADR-0050) is the READ channel's host-side end-of-input flag: set
+;; by a READSTRING that meets end of input, cleared by RESET. No CHANNEL slot
+;; shows it (Confusion keeps it in STATUS, slot 11).
+(struct host-channel (direction port [at-eof? #:mutable]))
 
 (define (mdl-make-terminal-channel mode [port #f])
   (unless (member mode '("READ" "PRINT"))
@@ -2791,7 +2794,7 @@
                               0 0 80 0 24 0 0 10 0))
   (hash-set! (atom-space-channels (current-mdl-atom-space))
              (mdl-array-storage storage)
-             (host-channel (string->symbol mode) port))
+             (host-channel (string->symbol mode) port #f))
   (mdl-typed-value (mdl-root-atom "CHANNEL") (mdl-rest storage 1)))
 
 ;; Execution contexts. A context is one globals table, one local frame
@@ -2874,6 +2877,45 @@
              [(mdl-crlf) "CRLF"]
              [else who])))
   (or (host-channel-port host) (current-output-port)))
+
+;; ADR-0050: the host record of a CHANNEL registered in this session (TYPE the
+;; ROOT atom CHANNEL, keyed by backing storage). A non-CHANNEL fails with
+;; non-channel-message; a forged or foreign CHANNEL fails as not open.
+(define (registered-channel-host who channel non-channel-message)
+  (unless (and (mdl-typed-value? channel)
+               (equal? (mdl-atom-pname (mdl-typed-value-type channel)) "CHANNEL"))
+    (error who non-channel-message))
+  (define view (mdl-typed-value-value channel))
+  (define host (and (mdl-array? view)
+                    (hash-ref (atom-space-channels (current-mdl-atom-space))
+                              (mdl-array-storage view) #f)))
+  (unless (and host (eq? (mdl-typed-value-type channel) (mdl-root-atom "CHANNEL")))
+    (error who "CHANNEL is not open in this MDL session"))
+  host)
+
+;; Does the CHANNEL view's mode slot (element 2) still name the host
+;; direction? A shifted (REST/BACK) or overwritten view does not.
+(define (channel-mode-intact? channel host)
+  (define view (mdl-typed-value-value channel))
+  (and (>= (mdl-array-length view) 2)
+       (equal? (mdl-nth view 2) (symbol->string (host-channel-direction host)))))
+
+;; ADR-0050 RESET (manual 11.7.7; 77rooms.mud:303, 77defs.mud:433). For an
+;; open terminal CHANNEL of this session it returns the same object. A READ
+;; channel's end-of-input flag is cleared; queued unread input is kept (no
+;; lookahead exists: READSTRING never peeks). No slot, predecessor slot or
+;; association changes (deviation: Confusion zeroes STATUS and rewrites DEVN).
+(define (mdl-reset . args)
+  (unless (= (length args) 1)
+    (error 'RESET "RESET takes exactly one CHANNEL argument (ADR-0050)"))
+  (define channel (car args))
+  (define host (registered-channel-host 'RESET channel
+                                        "argument must be of type CHANNEL"))
+  (unless (channel-mode-intact? channel host)
+    (error 'RESET "CHANNEL is not open in this MDL session"))
+  (when (eq? (host-channel-direction host) 'READ)
+    (set-host-channel-at-eof?! host #f))
+  channel)
 
 (define (mdl-ivector-build size make-element)
   (unless (and (exact-integer? size) (<= 0 size fix-max))
@@ -4049,6 +4091,7 @@
         "SUBSTRUC" mdl-substruc
         "TERPRI" mdl-terpri
         "CRLF" mdl-crlf
+        "RESET" mdl-reset
         "ERROR" mdl-error
         "ERRET" mdl-erret
         "EVENT" mdl-event
