@@ -1,15 +1,17 @@
 #lang racket/base
 ;; Local, root-restricted MDL source execution. No network entry point.
 (require racket/file racket/list racket/path racket/string
-         "parser.rkt" "compiler.rkt" "runtime/core.rkt" "runtime/clock.rkt")
+         "parser.rkt" "compiler.rkt" "runtime/core.rkt" "runtime/clock.rkt"
+         (only-in "runtime/random36.rkt" random36-state-words))
 (provide make-mdl-session mdl-session? mdl-session-load!
          mdl-session-atom mdl-session-global mdl-session-call
          mdl-session-save-records exn:fail:mdl-load?
          exn:fail:mdl-load-diagnostic
          mdl-session-run-interactive
          exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
-         mdl-session-random-snapshot
-         mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock)
+         mdl-session-random-snapshot random36-state-words
+         mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock
+         mdl-host-loop-secondary-failures)
 
 ;; input-port/output-port: the explicit host ports given to make-mdl-session
 ;; (#f when omitted); the host top-level loop requires both (ADR-0050).

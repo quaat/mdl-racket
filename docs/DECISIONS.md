@@ -1388,6 +1388,16 @@ invalid clock reads and unknown zones fail strictly. No game source, game
 global, DSKDATE/START/RANDOM call site, upstream provenance, license or
 GPLv3 code changed.
 
+**Known wall-time input outside the clock (independent review,
+2026-11-23):** the GC interrupt's elapsed-time argument
+(`mdl/runtime/memory.rkt`, `mdl-memory-collect!`) is still measured with
+Racket wall time and is not controlled by the session clock. It does not
+reach this game's output: the only GC handler, `GC-FCN`
+(`77rooms.mud:97-102`), takes its arguments as an unused `"TUPLE" T`, and
+the handler is turned `OFF` at load (`77rooms.mud:104`). A determinism
+claim for another program that reads that argument must not rely on this
+ADR.
+
 ## ADR-0053: One strict SMOKE_PARITY comparator; D1 and D2 are the only allowed differences
 
 **Status:** Proposed (S10, issues #131/#135). Builds on ADR-0050 (D1, D2,
