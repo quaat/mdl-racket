@@ -38,6 +38,10 @@
 (check* (check-equal? (run "<MIN>") greatest-float))
 (check* (check-equal? (name "<TYPE <MIN>>") "FLOAT"))
 (check* (check-equal? (name "<PRIMTYPE <MIN>>") "WORD"))
+;; Independent MAX review: MIN mirror cases probed in S5a.
+(check* (check-equal? (run "<MIN 2 2.0>") 2.0))
+(check* (check-equal? (run "<MIN 3 2.0>") 2.0))
+(check* (check-equal? (run "<MIN -1.5 -2.5>") -2.5))
 (check* (check-equal? (name (string-append "<==? <MIN> " greatest-expr ">")) "T"))
 (check* (check-equal? (name (string-append "<=? <MIN> " greatest-expr ">")) "T"))
 (check* (check-equal? (name "<==? <MIN> <MIN>>") "T"))

@@ -3147,6 +3147,64 @@ only in the script code after a successful OPEN "PRINT".
 **Not supported / recorded.** GROW is not a SUBR of the pinned reference
 (UNBOUND-VARIABLE) nor of this runtime, so TOP after GROW is not defined.
 
+## M4 S5a: MAX (issue #122; ADR-0059)
+
+Specification written before implementation. Authority: MDL manual chapter
+3 (§3.4 FLOAT contagion; §3.5 MIN and MAX over any number of FIX/FLOAT
+arguments, zero-argument identities "`0`, `0`, `1`, `1`, the greatest
+`FLOAT`, and the least `FLOAT`" for `+ - * / MIN MAX`, as quoted in
+`evidence/M3/review/R6.md`), the M3 MIN section above (R6), and pinned
+Confusion observations in `docs/evidence/M4/MAX-REFERENCE.md`
+(`max-probe.json`, script `scripts/probe_max_reference.py`). Game uses, both
+with FIX arguments only: BLOW's wound recovery `78melee.mud:447-448`
+(`<SET DEF <MAX 0 <- .DEF 1>>>`, `<MAX 0 <- .DEF 2>>`; DEF is DECLed FIX at
+`:381`) and RECORD's `<ACCESS .CH <MAX 0 <- .FL 1>>>` (`77rooms.mud:741`,
+behind an OPEN "PRINTO" that ADR-0055 denies). Zero-argument MAX does not
+occur in the source.
+
+**Result.** `<MAX x1 ... xn>` (n ≥ 1) returns the largest argument. Every
+argument must be a FIX in the signed 36-bit range or a FLOAT (the shared
+`check-number`, as for MIN and `+`). If all arguments are FIX the result is
+that FIX (equal operands give that value; negatives order normally). If any
+argument is FLOAT the result is FLOAT whichever operand is largest
+(`<MAX 3 2.0>` is `3.0`, `<MAX 2 2.0>` and `<MAX 2.0 2>` are `2.0`), exactly
+as MIN and the reference behave. A single argument is returned with its
+TYPE (`<MAX 7>` FIX 7, `<MAX 2.5>` FLOAT 2.5). The game's expressions give
+`<MAX 0 <- .DEF 1>>` = DEF−1 for DEF ≥ 1 and 0 otherwise, as FIX.
+
+**Zero arguments (ADR-0059).** `<MAX>` is the ordinary FLOAT
+−(2^27−1)·2^100, the least PDP-10 single-precision FLOAT and the exact
+negation of `<MIN>` (held exactly as a host flonum). It is the identity for
+MAX: `<MAX <MAX> x>` is x as FLOAT for every x in the PDP-10 FLOAT range
+(below it the sentinel wins, as for `<MIN>`). `<CHTYPE <MAX> FIX>` is the two's
+complement of 377777777777₈, i.e. the word 400000000001₈ = −34359738367.
+
+**Refusals.** Any non-number argument (STRING, ATOM, LIST, FALSE,
+CHARACTER, VECTOR, ...) in any position, including a single argument:
+`mdl-max: expected MDL FIX or FLOAT` (reference text `Arguments to MAX must
+be FIX OR FLOAT`, written to stderr). A host integer outside the 36-bit FIX
+range: `mdl-max: FIX overflow` (not reachable from MDL text: the reader
+turns such a literal into FLOAT, M1 issue #8).
+
+**Recorded reference deviations.** (1) Pinned Confusion's `<MAX>` is the
+host `DBL_MIN` (smallest positive double; prints `0.0000000`, CHTYPE FIX
+4503599627370496, `G?` 0 is T); it is not an identity for MAX. (2) The same
+DBL_MIN seed leaks into results when the first argument is FLOAT and no
+argument exceeds DBL_MIN (all negative, or the largest is 0.0 — native
+`<CHTYPE <MAX 0.0 -1.0> FIX>` is 4503599627370496, this runtime gives 0.0 and
+FIX 0): the reference gives `<MAX -1.5 -2.5>`, `<MAX -1.5>`
+and `<MAX -1.5 -2>` as DBL_MIN (`0.0000000`), but `<MAX -2 -1.5>` as `-1.5`.
+This runtime returns the largest argument (`-1.5`) in every order; no game
+expression has a FLOAT argument. (3) Confusion FIX is a 64-bit host integer
+(`<MAX 34359738368 0>` is FIX 34359738368 there, FLOAT here by the M1 reader
+rule).
+
+**Not supported / out of scope.** Negative zero (separate open issue, as for
+MIN); a PDP-10 FLOAT range or 27-bit rounding of FLOAT arguments (MAX only
+selects, it does not compute new FLOATs other than FIX→FLOAT contagion);
+FLOAT printing. Code: `mdl/runtime/core.rkt` (`mdl-max`,
+`pdp10-least-float`); tests `tests/max_test.rkt`.
+
 ## M4 S5b: TYPE of applicable values (frontier F4; ADR-0060)
 
 Specification written before implementation. Authority: MDL manual §9.1

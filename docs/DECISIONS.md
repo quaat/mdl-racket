@@ -1766,6 +1766,60 @@ discrepancy is acknowledged and the reference is followed. It revises the M3
 BACK rule (CHANNEL-only), which was the source of the TOP/BACK `==?`
 inconsistency found in the S4 review.
 
+## ADR-0059: Zero-argument MAX is the negation of `<MIN>`
+
+Status: accepted (maintainer decision, 2026-11-23; M4 S5a, issue #122,
+PR #159).
+
+Acceptance scope: the maintainer approved keeping this zero-argument
+`<MAX>` behaviour and its recorded deviation from pinned Confusion. The
+approval covers only the zero-argument `<MAX>` discrepancy. It does not
+authorize other deviations from Confusion or any relaxation of strict
+unsupported behaviour. The pinned reference and the parity tests are
+unchanged. Regression coverage for both identities stays explicit:
+`tests/min_test.rkt` and `tests/max_test.rkt` pin the exact value, TYPE
+FLOAT, PRIMTYPE WORD, the CHTYPE FIX/WORD images and the comparison
+boundaries. "Least FLOAT" here means the least FLOAT this runtime
+represents and converts (the negation of `<MIN>`); the wording note below
+still applies.
+
+Context: the manual (§3.5) gives "the least FLOAT" as MAX's zero-argument
+identity, symmetric to MIN's "greatest FLOAT". R6 decided `<MIN>` is the
+ordinary FLOAT (2^27−1)·2^100, the greatest PDP-10 single-precision value
+(SEMANTICS "M3 MIN"). Pinned Confusion's `<MAX>` is the host `DBL_MIN`, the
+smallest *positive* double (`docs/evidence/M4/MAX-REFERENCE.md`, case
+`zero`): it is greater than every negative number, so it is not an identity
+for MAX, and the same seed makes the reference return `0.0000000` for
+`<MAX -1.5 -2.5>` (case `float-negative`). No source form calls MAX with
+zero arguments; the game's uses are two-argument FIX (`78melee.mud:447-448`,
+`77rooms.mud:741`).
+
+Decision: `<MAX>` returns `pdp10-least-float` = −(2^27−1)·2^100, the exact
+negation of `<MIN>`, an ordinary host flonum like every other FLOAT. Its
+PDP-10 word image (CHTYPE to FIX/WORD) is 400000000001₈ (FIX −34359738367).
+Non-empty MAX folds from its first argument (never from a seed), so negative
+FLOAT arguments give the largest argument.
+Wording note (independent review): this is described as the negation of
+`<MIN>`, not as "the least PDP-10 FLOAT". PDP-10 negative FLOATs are two's
+complement, so the word 400000000000₈ (−2^127) is very likely also a valid
+normalized negative below 400000000001₈; it is a rejected candidate here
+because this runtime's checked word-image conversion (`float-word-bits`,
+R6) refuses exponent field 256, and the symmetry with the decided `<MIN>`
+is the stated rationale. This could not be verified against MUDDLE's ARITH
+source (not in the pinned sources).
+
+Consequences: MIN and MAX are symmetric; `<MAX <MAX> x>` is x (as FLOAT)
+for every x in the PDP-10 FLOAT range (the reader can produce FLOATs below
+it, for which the result is the sentinel, as for R6's `<MIN>`), and the value takes part in arithmetic, comparison and CHTYPE
+like `<MIN>`. Recorded deviation from the reference for `<MAX>` itself and
+for all-negative FLOAT MAX with a FLOAT first argument; no game expression
+reaches either. Alternatives rejected: copying the reference's DBL_MIN
+(not the 36-bit target, not an identity, and the cause of the reference's
+negative-FLOAT results; the PDP-10 analogue, the smallest positive FLOAT
+0.5·2^-128, has the same defect); a strict error for `<MAX>` (consistent
+with "do not invent", but asymmetric with the decided `<MIN>` although the
+manual defines both identities in the same sentence).
+
 ## ADR-0060: TYPE of compiled DEFINEs and host built-ins by representation registry
 
 Status: accepted (M4 S5b, frontier F4, 2026-11-23). (ADR-0059 is reserved by
