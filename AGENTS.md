@@ -75,6 +75,38 @@ Do not implement the whole language in one PR. Preferred vertical slices:
 reader -> semantic primitive -> reference probe -> property test -> translation
 -> differential validation. See `docs/PLAN.md` for acceptance gates.
 
+## Agent roles and subagent delegation
+
+Roles, isolation and review are fixed; the model or provider behind each
+role is not. Sessions choose models through their own tool configuration.
+
+- **The main session orchestrates and is accountable for every merged
+  change, whatever wrote it:** maintaining `docs/STATUS.md` and
+  `docs/PLAN.md`, choosing the next slice and its acceptance criteria,
+  architecture and integration decisions, semantic adjudications (manual
+  vs. reference conflicts), verification and evidence review, and
+  issue/PR management. Merges follow the escalation policy below.
+- **Bounded slices may be delegated** to subagents, including the
+  project definitions in `.claude/agents/` (`mdl-reference-investigator`
+  for read-only Confusion probe recording; `mdl-segment-implementer`,
+  `mdl-declaration-implementer` for worktree-isolated, tests-first
+  implementation). These definitions use `model: inherit`; do not pin a
+  model or provider in a checked-in definition unless every supported
+  environment can serve it. If a configured agent type cannot run in the
+  current environment, use a general-purpose subagent with the same
+  brief rather than skipping the role.
+- Subagents work in isolated worktrees or non-overlapping scopes. Two
+  agents must never concurrently edit `mdl/runtime/core.rkt` (or any
+  single file) without coordination. The main session reviews every
+  subagent diff in full and re-runs the suites.
+- Reference probes that can reach SAVE, OPEN, RECORD or other file I/O
+  run in a disposable copy of the game directory under `$TMPDIR`, never
+  with an upstream checkout as the writable working directory.
+- Changes affecting equality, association storage, declarations, shared
+  mutation, control flow, channel ownership or error handling always get
+  an independent review of the implementation and its invariants — not
+  just passing tests. Self-review is not labelled independent.
+
 ## Escalation policy
 
 Do not request routine confirmations when a safe, reversible choice is obvious.
