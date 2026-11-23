@@ -1,5 +1,12 @@
 # S10-SMOKE-PARITY — deterministic fresh-boot comparison (WP2; issues #131/#135)
 
+> **Promotion (2026-11-23, maintainer decision).** The committed strict reference is now
+> `docs/evidence/M3/house-boot-reference.json`: the schema-3 S10 capture with only `candidate`,
+> `candidate_note` and a `promotion` record changed. The schema-2 candidate below stays unchanged
+> as the historical baseline; baseline, promoted reference and fresh native capture are strictly
+> equal under ADR-0053 (D1/D2 only). See [M3 mainline acceptance](M3-MAINLINE-ACCEPTANCE.md).
+
+
 **RID**: S10-SMOKE-PARITY (local task record; the orchestrator owns the issue/PR and commits)
 **Branch**: feat/m3-smoke-parity, base `a4e72ba` (changes uncommitted when this record was written)
 **Decision**: [ADR-0053](../../DECISIONS.md) (proposed), building on ADR-0050 (D1/D2/D3) and

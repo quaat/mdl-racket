@@ -297,3 +297,46 @@ def test_m3_check_native_stage_without_mdli(tmp_path: Path, monkeypatch: pytest.
     assert "native prerequisites absent" in stage["reason"]
     assert data["overall"] == ("PASS" if mode == "auto" else "FAIL")
     assert data["mdli_sha256"] is None
+
+
+# ---------------------------------------------------------------------------
+# Schema-3 promotion (maintainer decision 2026-11-23)
+# ---------------------------------------------------------------------------
+PROMOTED_PATH = ROOT / "docs/evidence/M3/house-boot-reference.json"
+
+
+def _sha256(path: Path) -> str:
+    import hashlib
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_promoted_reference_is_the_schema3_capture_marked_approved() -> None:
+    promoted = json.loads(PROMOTED_PATH.read_text(encoding="utf-8"))
+    assert promoted["schema_version"] == 3 and promoted["candidate"] is False
+    promo = promoted["promotion"]
+    assert promo["changed_fields"] == ["candidate", "candidate_note", "promotion"]
+    assert promo["promoted_from"]["file"] == "docs/evidence/M3/S10-house-boot-reference.json"
+    assert promo["promoted_from"]["sha256"] == _sha256(FRESH_PATH)
+    assert promo["supersedes_as_committed_reference"]["sha256"] == _sha256(REFERENCE_PATH)
+    # Every other field, provenance included, is the S10 capture byte for byte.
+    rest = {k: v for k, v in promoted.items() if k not in promo["changed_fields"]}
+    assert rest == {k: v for k, v in FRESH.items() if k not in promo["changed_fields"]}
+    inputs = promoted["provenance"]["immutable_inputs"]["game_files"]
+    assert "MDL/MADADV.SAVE" not in inputs
+    assert set(promoted["provenance"]["save_artifacts"]["files"]) == {"MDL/MADADV.SAVE"}
+
+
+def test_three_way_strict_parity_baseline_promoted_capture(tmp_path: Path) -> None:
+    # schema-2 baseline == promoted schema-3 reference == S10 fresh capture,
+    # through the single strict comparator (D1/D2 only), in both directions.
+    for exp, act in ((REFERENCE_PATH, PROMOTED_PATH), (PROMOTED_PATH, FRESH_PATH),
+                     (PROMOTED_PATH, REFERENCE_PATH)):
+        assert sp.compare_files(exp, act, tmp_path / "r.json") == 0, (exp, act)
+
+
+def test_m3_check_compares_against_the_promoted_reference() -> None:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("m3_check", ROOT / "scripts/m3_check.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod.COMMITTED_REFERENCE == "docs/evidence/M3/house-boot-reference.json"

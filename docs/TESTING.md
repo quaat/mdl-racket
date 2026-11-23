@@ -6,7 +6,10 @@
 `test-m3-saveit`, `test-m3-clock-seed`, `test-m3-interactive`, the comparator
 unit tests (`tests/test_smoke_parity.py`), the strict comparison of this
 runtime's fixed-clock run (`scripts/m3_house_boot_run.rkt`) with the committed
-Confusion record `docs/evidence/M3/house-boot-candidate.json`, and, when
+Confusion record `docs/evidence/M3/house-boot-reference.json` (the schema-3
+reference promoted 2026-11-23; the schema-2 approved candidate
+`house-boot-candidate.json` is kept as the historical baseline and compared
+with it in `tests/test_smoke_parity.py`), and, when
 `mdli` and `gcc` exist, a fresh native capture in a disposable copy compared
 with both. Without them that last stage is NOT RUN, never PASS
 (`M3_NATIVE=require` makes it a FAIL; `make m3-native-parity` runs only the

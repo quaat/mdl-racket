@@ -1,5 +1,12 @@
 # BOOT-REF — Fresh-boot reference capture for SMOKE_PARITY
 
+> **Promotion (2026-11-23, maintainer decision).** The committed strict reference is now
+> `docs/evidence/M3/house-boot-reference.json`: the schema-3 S10 capture with only `candidate`,
+> `candidate_note` and a `promotion` record changed. The schema-2 candidate below stays unchanged
+> as the historical baseline; baseline, promoted reference and fresh native capture are strictly
+> equal under ADR-0053 (D1/D2 only). See [M3 mainline acceptance](M3-MAINLINE-ACCEPTANCE.md).
+
+
 **Branch:** `feat/m3-boot-reference` (PR #131, base `feat/m3-logical-gc`)
 **Upstream source (pinned, `sources.lock.json`):** mdlzork `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`
 **Boot-input state (post-cleanup manifest hash):** `7f8589c80882da1ed6ed2db5104a9e6cad891fe6e617baa1af32247b6fb21260`

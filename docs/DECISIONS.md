@@ -1522,6 +1522,16 @@ commands, fixed clock 250776000, UTC. It does not cover play under the real
 wall clock, other inputs, save/restore, QUIT or death paths. The gate state
 stays the maintainer's decision in `STATUS.md`. No runtime file, game
 source, upstream provenance, license or GPLv3 code changed.
+
+**Amendment (2026-11-23, maintainer decision — schema-3 promotion):** the
+committed reference compared by `make m3-check` is
+`docs/evidence/M3/house-boot-reference.json`, the schema-3 S10 capture with
+only `candidate`, `candidate_note` and a `promotion` record changed. The
+schema-2 approved candidate `house-boot-candidate.json` (sha256 `eb194115…`)
+is kept unchanged as the historical baseline. The comparison contract, the
+six-command transcript and D1/D2 are unchanged; baseline, promoted reference
+and a fresh native capture at epoch 250776000 UTC compare strictly equal.
+
 ## ADR-0054: QUIT is a session-termination signal; the host loop returns a session outcome
 
 **Status:** Proposed (S11). Implements the "ends when the applied code QUITs"

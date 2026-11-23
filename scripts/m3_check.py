@@ -39,7 +39,10 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "artifacts/m3"
 LOGS = OUT / "logs"
 SCENARIO = "tests/scenarios/house-boot.json"
-COMMITTED_REFERENCE = "docs/evidence/M3/house-boot-candidate.json"
+# Promoted 2026-11-23 (maintainer decision): the schema-3 reference. The
+# schema-2 approved candidate house-boot-candidate.json is kept unchanged as
+# the historical baseline and is compared with this record in the tests.
+COMMITTED_REFERENCE = "docs/evidence/M3/house-boot-reference.json"
 CANDIDATE = "artifacts/m3/house-boot-racket-candidate.json"
 MDLI = ROOT / ".cache/build/confusion_patched/mdli"
 NOT_RUN_EXIT = 3          # smoke_parity.py native: prerequisites absent
