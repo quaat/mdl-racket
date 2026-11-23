@@ -2897,7 +2897,18 @@
          (error who
                 "this session's PRINT CHANNEL has no host-supplied output port; the runtime never falls back to the host's current-output-port (ADR-0050)")]))
 
-(define (mdl-make-terminal-channel mode [port #f])
+;; Exported host API (S13 review): a terminal CHANNEL made by a host must
+;; carry a real port. A port-less PRINT channel registered beside OUTCHAN
+;; would make every READSTRING pre-read flush and the final flush fail with
+;; a misleading error; the only port-less terminal channels are a context's
+;; own INCHAN/OUTCHAN, made by mdl-ensure-terminal-channels! below.
+(define (mdl-make-terminal-channel mode port)
+  (unless (or (input-port? port) (output-port? port))
+    (error 'mdl-make-terminal-channel
+           "a host-made ~a CHANNEL requires a Racket port (ADR-0050)" mode))
+  (make-terminal-channel mode port))
+
+(define (make-terminal-channel mode [port #f])
   (unless (member mode '("READ" "PRINT"))
     (error 'mdl-make-terminal-channel "expected READ or PRINT mode"))
   (when (and port
@@ -2963,6 +2974,8 @@
 (define (mdl-ensure-terminal-channels! #:output-port [output-port #f]
                                        #:input-port [input-port #f]
                                        #:follow-current-output-port? [follow? #f])
+  (unless (boolean? follow?)
+    (raise-argument-error 'mdl-ensure-terminal-channels! "boolean?" follow?))
   (when (and follow? output-port)
     (error 'mdl-ensure-terminal-channels!
            "give either #:output-port or #:follow-current-output-port?, not both (ADR-0050)"))
@@ -2975,7 +2988,7 @@
         [port (in-list (list input-port
                              (if follow? follow-current-output-port output-port)))])
     (unless (or (hash-has-key? top-frame atom) (hash-has-key? globals atom))
-      (define channel (mdl-make-terminal-channel mode port))
+      (define channel (make-terminal-channel mode port))
       (hash-set! top-frame atom channel)
       (mdl-setg! atom channel)))
   (void))

@@ -231,4 +231,28 @@ MDL
         [else (check-regexp-match no-port-rx (exn-message raised))
               (check-equal? text "")]))
 
+;; S13 independent review: (1) a host-made terminal CHANNEL must carry a real
+;; port, so no stray port-less PRINT channel can break READSTRING's pre-read
+;; flush or the final flush of a session whose OUTCHAN has a port; (4) the
+;; opt-in keyword takes a boolean only.
+(check-exn #rx"requires a Racket port"
+           (lambda () (mdl-make-terminal-channel "PRINT" #f)))
+(check-exn #rx"requires a Racket port"
+           (lambda () (mdl-make-terminal-channel "READ" #f)))
+(check-exn #rx"boolean\\?"
+           (lambda ()
+             (parameterize ([current-mdl-globals (make-hasheq)]
+                            [current-mdl-locals (list (make-hasheq))]
+                            [current-mdl-atom-space (make-mdl-atom-space)])
+               (mdl-ensure-terminal-channels! #:follow-current-output-port? 'no))))
+;; A host-made PRINT channel with a real port leaves READSTRING working.
+(let* ([out (open-output-string)]
+       [ctx (make-mdl-context #:output-port out #:input-port (open-input-string "ab\n"))])
+  (call-with-mdl-context
+   ctx
+   (lambda ()
+     (mdl-make-terminal-channel "PRINT" (open-output-string))
+     (parameterize ([current-namespace ns])
+       (check-equal? (run-mdl "<READSTRING <ISTRING 5> .INCHAN <STRING <ASCII 10>>>") 2)))))
+
 (delete-directory/files root)
