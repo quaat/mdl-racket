@@ -137,9 +137,12 @@
 (check-equal?
  (run "<SETG M2-C 0> <SETG M2-D 0> <PROG M2-OUT () <SETG M2-C <+ ,M2-C 1>> <COND (<==? ,M2-C 2> <RETURN ,M2-C>)> <UNWIND <PROG M2-IN () <AGAIN .M2-OUT> 1> <SETG M2-D <+ ,M2-D 1>>>> ,M2-D")
  1)
-;; The manual (chapter 16, the FLOAD example) runs the cleanup when an
-;; error unwinds below UNWIND; pinned Confusion skips it, a recorded
-;; reference deviation. The Racket runtime follows the manual.
+;; A raised error is not an MDL transfer: the manual's ERROR is a nested
+;; LISTEN on the intact stack (16.2) and only ERRET/RETRY strip it (16.4,
+;; the FLOAD cleanup runs "if the user attempts to ERRET"). Pinned Confusion
+;; also runs no cleanup on entering the error level. This runtime has no
+;; error level, so the original error propagates and the cleanup is skipped
+;; (ADR-0051, issue #139; superseding ADR-0018's cleanup-on-error rule).
 (define unwind-error-globals (make-hasheq))
 (define unwind-error-space (make-mdl-atom-space))
 (check-exn #rx"unassigned or non-applicable"
@@ -157,7 +160,7 @@
  (parameterize ([current-mdl-globals unwind-error-globals]
                 [current-mdl-atom-space unwind-error-space])
    (mdl-gval (mdl-atom "M2-C")))
- 1)
+ 0)
 (check-exn #rx"UNWIND expects"
            (lambda () (compile-program (parse-mdl "<UNWIND 5>"))))
 (check-exn #rx"UNWIND expects"
