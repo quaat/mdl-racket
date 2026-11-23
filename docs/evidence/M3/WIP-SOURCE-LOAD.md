@@ -1,5 +1,7 @@
 # M3 WIP: full source load, startup frontier
 
+> **Reconciliation note (2026-11-23).** The startup frontier described here was superseded on the branch stack by RANDOM, BACK, S1-S7 (see [STATUS](../../STATUS.md) and [S7 evidence](S7-INTERACTIVE.md)). The LOADED result (1,229 forms, zero skips) still holds.
+
 Date: 2026-11-22. Base `main` commit:
 `fdf48e4a5d1baa4f02faf00b824aa1e275f2e365`. Implementation WIP commit:
 `c5a6027a56017c12f7081e1025937490a9fbc164` on

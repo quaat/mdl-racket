@@ -17,6 +17,18 @@ candidate must end by D3 input exhaustion. The report goes to
 comparator unit tests are part of `make test-python` and need neither Racket
 nor mdli. See [S10-SMOKE-PARITY.md](evidence/M3/S10-SMOKE-PARITY.md).
 
+## M3 branch-stack targets (2026-11-23 reconciliation)
+
+On the stack head (PR #141) the M3 make targets are `m3-source-progress`,
+`test-m3-andq`, `test-m3-historical-gc`, `test-m3-start-back` (direct-START
+XFAIL at TENEX?), `test-m3-saveit` and `test-m3-interactive` (scoped
+INITIALIZED/INTERACTIVE evidence; see
+[S7](evidence/M3/S7-INTERACTIVE.md)). The `make test-m3-start-random` target
+named in the RANDOM checkpoint below was replaced by `test-m3-start-back`
+and no longer exists. Since #141's review fixes (8e3d103) the reference
+workflow runs `test-m3-saveit` and `test-m3-interactive`, and the smoke
+workflow runs the shared `make test-python` (PLAN WP1 F1). `make m3-check` (S10) is described above.
+
 ## M3 BACK follow-up checkpoint (2026-11-22)
 
 `tests/back_test.rkt` covers manual and pinned reference array BACK

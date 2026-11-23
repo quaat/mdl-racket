@@ -1,33 +1,92 @@
-# Status — 2026-11-23 (M2 mainline PASS; M3 source load WIP PASS; S7 INITIALIZED/INTERACTIVE scoped PASS)
+# Status — 2026-11-23 (`main`: M2 PASS, M3 LOADED FAIL; branch stack: M3 SMOKE_PARITY and local session smoke PASS (branch evidence, scoped))
 
 ## Current state (2026-11-23)
 
-| M3 stage | Current evidence |
-|---|---|
-| PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
-| LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | PASS (scoped) on S7 branch `feat/m3-interactive-io`: faithful `<FLOAD "77loadall.mud">` + SAVE-IT returns `,NULL` through CONTIN's RESET (ADR-0050); the host loop prints it (D1) and RDCOM reaches its first READSTRING; boot text equals the approved golden after D1/D2 normalisation; since S8 (issue #135 part 1, ADR-0052) the run uses the golden's fixed session clock (250776000, UTC) and the date line is compared exactly, without normalisation (`make test-m3-interactive`) |
-| INTERACTIVE | PASS (scoped) on S7 branch: all six house-boot commands are read by the original RDCOM and answered exactly as in the approved golden (S8: fixed session clock; `west` is compared exactly, its `<PROB 80>` draw is 65); end of input gives `Beg pardon?`/`>` then the strict host error `exn:fail:mdl-input-exhausted` (D3) |
-| SMOKE_PARITY | NOT CLAIMED: the clock dependency is resolved on S8 branch `feat/m3-session-clock` (DSKDATE, START seed 10438660480 and 12 RANDOM values agree with native Confusion Probe E; `make test-m3-clock-seed`), but the golden is still a candidate and no strict SMOKE_PARITY comparison has been run |
-| PLAYABLE | NOT RUN: QUIT, OPEN/CLOSE (RECORD), MEMBER (HANDLE) and UNWIND under host errors (#139) are missing |
+States used below: **PASS (mainline)** = verified on `main`; **PASS (branch
+evidence)** = verified on an unmerged branch only; **FAIL**; **BLOCKED**;
+**NOT RUN**. A branch PASS is not a mainline result.
 
-- **S13 on `feat/m3-bang-output` (WIP; ADR-0050 amended 2026-11-23):**
-  (A) typed `!` in READSTRING follows pinned Confusion by maintainer decision
-  (`!c` stores `c` in one slot; escaped stop characters still stop; `!` before
-  EOF is stored; non-ASCII after `!` stays strict); the game's RDCOM reads
-  `nor!th` exactly like `north` (`make test-m3-bang`, 9 reference game cases,
-  exit 0). (B) sessions and contexts have no implicit terminal output: without
-  `#:output-port` every write and flush is a strict ADR-0050 error; only the
-  process-wide default context and `#lang mdl` modules opt in to the host's
-  `current-output-port`. See [S13 evidence](evidence/M3/S13-BANG-OUTPUT.md).
+### Mainline: `main` = `fdf48e4` (PR #106)
 
-- **S8 session clock on `feat/m3-session-clock` (WIP, issue #135 part 1,
-  ADR-0052):** `make-mdl-session #:clock #:time-zone` (default real clock,
-  host zone); `make-fixed-mdl-clock` is a constant instant. Only GETTIMEDATE's
-  "now" reads it. With the golden's clock, DSKDATE = START's RANDOM seed =
-  10438660480 and the following RANDOM values match native Confusion. The
-  house-boot run now matches the golden exactly with no date normalisation.
-  See [S8 evidence](evidence/M3/S8-SESSION-CLOCK.md).
+M0, M1 and M2 gates: **PASS (mainline)**. M3 on `main`:
+
+| M3 stage | State | Evidence |
+|---|---|---|
+| PARSED | PASS (mainline) | 36 historical text files parsed; 4 non-text files identified |
+| LOADED | FAIL | loader exit 1 after 433 original forms, zero skipped, at `77rooms.mud` expression 16, line 101 (`EVENT "GC"`) |
+| INITIALIZED | NOT RUN | source chain does not complete on `main` |
+| INTERACTIVE | NOT RUN | |
+| SMOKE_PARITY | NOT RUN | |
+| Local session smoke | NOT RUN | |
+| PLAYABLE | NOT RUN | |
+
+### Branch: umbrella #107 and the stack
+
+Runtime stack (merge order): #107 (umbrella `feat/m3-logical-gc`) → #109 →
+#111 → #125 → #128 → #130 → #136 → #137 → #138 → #141 (S7 host loop + review
+F1/F2) → #144 (S8 session clock) → #145 (S9 MEMBER) → #147 (S11 QUIT/OPEN) →
+#148 (S12 launcher) and #150 (S13 READSTRING `!` and explicit output ports;
+both on #147). Side branches on that stack: #146 (S10 strict
+SMOKE_PARITY gate, on #144), #142 (docs reconciliation, on #141), #143
+(native reference probe evidence, on #141). The integration branch
+`integration/m3-acceptance` merges all of them; #131's capture tooling is
+merged into #146. Nothing below is on `main`.
+
+| M3 stage | State | Evidence |
+|---|---|---|
+| PARSED | PASS (branch evidence) | as on `main` |
+| LOADED | PASS (branch evidence) | loader exit 0 after 1,229 original forms, zero skipped (`make m3-source-progress`) |
+| INITIALIZED | PASS (branch evidence, scoped) | faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>`; SAVE is an in-session record (ADR-0048); host loop per ADR-0050; `make test-m3-saveit`, `make test-m3-interactive` |
+| INTERACTIVE | PASS (branch evidence, scoped) | the six house-boot commands read by the original RDCOM and answered exactly (`make test-m3-interactive`) |
+| SMOKE_PARITY | **PASS (branch evidence, scoped)** — #146 | fresh-boot house-boot scenario at the session clock fixed to epoch 250776000, UTC (ADR-0052). One strict comparator (ADR-0053): only D1 (LISTEN banner, `"DONE"`) and D2 (`canonical_text(ONLCR(raw))`) differ; date line, `west` (PROB 80 draw 65), every response, score line and move count exact; the candidate ends by D3 input exhaustion. Fresh native Confusion capture == committed candidate record == this runtime (`make m3-check` 7/7; CI run 45155753586 incl. native comparison). Clock→seed chain: DSKDATE = START seed 10438660480 and the RANDOM sequence equal native ([CLOCK-SEED-REFERENCE](evidence/M3/CLOCK-SEED-REFERENCE.md), `make test-m3-clock-seed`). Gameplay approval of the candidate reused; no new golden content |
+| Local session smoke | **PASS (branch evidence)** — #147/#148 | boot, six commands, `quit`/`n`, `inventory`, `quit`/`y` through the game's own FINISH → RECORD → QUIT; transcript byte-identical to native (D1 only); outcome `'quit`; extra input unread; no file written (OPEN denied per ADR-0055; Confusion writes `MDL/ZORK.LOG` — documented deviation, no visible difference). `make test-m3-session`, `make test-m3-launcher` (CI run 45158909816) |
+| PLAYABLE | NOT RUN | M4 scope ([backlog](evidence/M4/SCENARIO-BACKLOG.md)); known strict gaps below |
+
+Known strict gaps on the branch (each fails with an error, never stubbed):
+`put X in …` (unsupported TOP at `77np.mud:126` / CHTYPE conversion);
+`info`/`help` (OPEN "READ"); `script` reports it cannot open the channel; an
+in-game MDL ERROR stops at unsupported PRINT in HANDLE (`77rooms.mud:251`)
+before reaching QUIT; RESTORE unsupported. Local runs used Racket v7.9 BC;
+CI uses the pinned racket:8.10-bc container.
+
+### Fixed on branch; not integrated into `main`
+
+These fixes are merged into the umbrella `feat/m3-logical-gc` and present in
+every stack branch. Their issues stay open until the umbrella reaches
+`main`.
+
+| Item | Fix | Record |
+|---|---|---|
+| #119 backslash-escaped atom names | PR #132 | [I119](evidence/M3/I119-ESCAPED-TRAILER.md) |
+| #124 leading-dot FLOAT | PR #133 | [I124](evidence/M3/I124-LEADING-DOT.md) |
+| #139 UNWIND cleanups masking raised errors | PR #140, ADR-0051 | [I139](evidence/M3/I139-UNWIND.md) |
+| #113 R1 session-owned CHANNEL ports | PR #117 | [R1](evidence/M3/review/R1.md) |
+| #113 R2/R10 GC growth, robust GC tests | PR #123 | [R2](evidence/M3/review/R2.md) |
+| #113 R3/R4 OBLIST authority, ROOT identity | PR #118 | [R3R4](evidence/M3/review/R3R4.md) |
+| #113 R5/R7 constructor evaluation, STRING views | PR #114 | [R5R7](evidence/M3/review/R5R7.md) |
+| #113 R6 MIN as an ordinary PDP-10 FLOAT | PR #115 | [R6](evidence/M3/review/R6.md) |
+| #113 R8 ERROR delivery, ERRET level | PR #116 | [R8](evidence/M3/review/R8.md) |
+| #113 R9 reference probe evidence | unknown: the branch `evidence/m3-107-reference-probes` named in #113 is not on `origin`; per-finding probes are in each R record | — |
+
+The issue #113 body still lists R2-R4 as "review running" and R6/R8 nits
+as open; the merges above supersede that table. The contracts are
+consolidated into [SEMANTICS](SEMANTICS.md).
+
+### Next
+
+Active iteration (PLAN "Active iteration (2026-11-23)"): WP1 stack
+readiness done on branch (F1 CI coverage, F2 flush, F3 docs, #55); WP2
+SMOKE_PARITY PASS on branch; WP3 MEMBER, QUIT, OPEN, READSTRING `!` and
+explicit output ports done on branch (#145, #147, #150); WP4 local session smoke and launcher PASS
+on branch; WP5 [M4 backlog](evidence/M4/SCENARIO-BACKLOG.md) drafted.
+
+Integration into `main` requires the maintainer's explicit approval (merge
+in stack order, then rerun the full gate on `main`). Pending maintainer
+decision: promote the schema-3 reference capture (MADADV.SAVE moved to SAVE
+artifacts) over the committed schema-2 candidate record. Next single M4
+scenario: enter the house and open the cellar.
+
+## Slice history (newest first; each entry as recorded at the time)
 
 - **S7 interactive terminal I/O on `feat/m3-interactive-io` (WIP, ADR-0050):**
   RESET (terminal CHANNEL; clears the host end-of-input flag), PRINC (STRING,
@@ -39,8 +98,7 @@
   `make test-m3-interactive` exit 0 (30 checks); 10 raw runs are byte-identical
   to Confusion's pipe output after removing `"DONE"` and the date. The `west`
   response is RNG-dependent (`<PROB 80>`, 77rooms.mud:523) until #135. Strict
-  and unsupported: QUIT, OPEN/CLOSE, MEMBER, PRINC line breaking, `!` in input
-  (superseded by S13: `!` now follows Confusion),
+  and unsupported: QUIT, OPEN/CLOSE, MEMBER, PRINC line breaking, `!` in input,
   READSTRING default channel/FIX stop/EOF routine. See
   [S7 evidence](evidence/M3/S7-INTERACTIVE.md).
 

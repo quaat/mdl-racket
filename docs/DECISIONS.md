@@ -1330,7 +1330,9 @@ leaving the loop, and is raised only when nothing else was. Record:
 
 **Out of scope (decisions pending):** QUIT, OPEN/CLOSE (D5), UNWIND under
 host errors (issue #139), MEMBER, a fixed clock (#135). No GPLv3
-implementation was copied.
+implementation was copied. (2026-11-23: #139 was since decided by ADR-0051
+and merged into this branch; the others remain pending, see PLAN "Active
+iteration" WP2/WP3.)
 
 ## ADR-0051: UNWIND cleanups run only for MDL transfers, never for raised errors
 

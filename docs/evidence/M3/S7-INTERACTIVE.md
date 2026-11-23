@@ -1,5 +1,7 @@
 # S7-INTERACTIVE — terminal RESET, PRINC, PRIN1, READSTRING, end of input and the host loop
 
+> **Reconciliation note (2026-11-23).** Since this record was written: the slice is now PR #141 (`feat/m3-interactive-io` -> `feat/m3-startup-rep`). The #139 UNWIND risk under "Risks and open questions" is resolved on this branch: PR #140 (ADR-0051) was merged into the umbrella and propagated to #141 at `45c387f`. The gate labels below are unchanged. Current status: [STATUS](../../STATUS.md).
+
 **RID**: S7-INTERACTIVE (local task record; no GitHub issue/PR was opened for this slice)
 **Branch**: feat/m3-interactive-io
 **Base commit**: aea622a (PR #138, S6 review nits)
