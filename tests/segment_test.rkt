@@ -38,7 +38,10 @@
   (string=? (mdl-atom-pname (mdl-type value)) name))
 (define (render value)
   (cond
-    [(mdl-segment? value) (segment-notation value)]
+    ;; SEGMENT identity is per session (ADR-0056 amendment); RUN returns values
+    ;; out of a fresh atom space, so check the TYPE by PNAME here.
+    [(typed-name? value "SEGMENT")
+     (segment-notation value)]
     [(mdl-atom? value) (mdl-atom-pname value)]
     [(string? value) (format "~s" value)]
     [(or (null? value) (mpair? value))
@@ -162,8 +165,8 @@
 ;; --- quoted structures keep segments as unevaluated data -------------------
 (let ([quoted (run "<SET X '![9 9]> <SET A '![5 5]> '(1 !.X !.A)")])
   (check-equal? (render quoted) "(1 !.X !.A)")
-  (check-true (mdl-segment? (second (mdl-list->list quoted))))
-  (check-true (mdl-segment? (third (mdl-list->list quoted)))))
+  (check-true (typed-name? (second (mdl-list->list quoted)) "SEGMENT"))
+  (check-true (typed-name? (third (mdl-list->list quoted)) "SEGMENT")))
 (check-equal? (render (run "<SET X '![9 9]> '<PROG () !.X>")) "<PROG () !.X>")
 ;; A plain element that evaluates to a segment object is stored, not spliced
 ;; (pinned Confusion: `(1 ,Y 2)` with Y = `!.A` gives `(1 !.A 2)`).
