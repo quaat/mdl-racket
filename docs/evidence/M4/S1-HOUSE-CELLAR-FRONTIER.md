@@ -113,6 +113,11 @@ text below is the original S1 record.
 
 ### F2 (rank 2): `<CHTYPE fix CHARACTER>`, FIX → CHARACTER
 
+**Resolved by M4 S3** ([S3-CHTYPE-CHARACTER.md](S3-CHTYPE-CHARACTER.md));
+the text below is the original S1 record. The native range observations
+below were superseded by the slice's own probe file
+(`CHARACTER-CHTYPE-REFERENCE.md`: CHTYPE accepts any WORD value).
+
 * Reproduction: S1 without `score`, then `east`, `kill troll`. Native
   prints `with what?` (orphan prompt). We print the troll room and `>`,
   then raise `mdl-chtype: unsupported built-in TYPE conversion`.
@@ -186,3 +191,16 @@ Security and licensing: the work is local only, with no network or exposed
 evaluator. Confusion (GPLv3) is run only as a reference binary, and none of
 its source is copied. Unresolved: README/STATUS were not updated in this
 slice (that is for the orchestrator), and the full `make test` was not run.
+
+## F3 — `help` / `info` (recorded 2026-11-23; strict by maintainer decision)
+
+`help` and `info` call FILE-TO-TTY (`77rooms.mud:954-985`), which does
+`<OPEN "READ" "MADADV" "HELP"|"INFO" ,DEV ,SNM>` (`77rooms.mud:961`) on the
+pinned game files `MDL/MADADV.HELP` (4,274 bytes) and `MDL/MADADV.INFO`
+(1,527 bytes) and copies them to the terminal; native prints the text. This
+runtime's OPEN supports only RECORD's denied write modes (ADR-0055), so both
+stop with `OPEN: mode "READ" is not supported; only READB, PRINT and PRINTO
+are (ADR-0055)`. The maintainer chose to leave this strict for now (options
+considered: read-only root-confined OPEN READ with FILE-LENGTH /
+READSTRING-from-file / CLOSE; or extending the denial so the game prints its
+own "File not found."). Asserted in `tests/historical_m4_frontier_test.rkt`.

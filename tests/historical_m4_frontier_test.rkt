@@ -12,14 +12,26 @@
 ;;       pinned reference prefix P03 of tests/scenarios/mailbox-drop.json
 ;;       (D1 only) and the run ends by input exhaustion. Full parity with
 ;;       checkpoints is tests/historical_mailbox_drop_test.rkt.
-;;   F2  kill troll (from the cellar) -> ORTELL (77np.mud:226) -> PRSTR ->
-;;       FOOSTR (77np.mud:241) <CHTYPE <+ 32 <ASCII ...>> CHARACTER>:
-;;       FIX -> CHARACTER is an unsupported built-in conversion. Native
-;;       prints "with what?".
-;;   F2b the same construct is the next failure next to the drop path: throw
-;;       leaflet (DROPPER's sibling verb THROW, no indirect object) -> ORTELL
-;;       -> PRSTR -> FOOSTR. Native prints "at what?" (ad-hoc native run,
-;;       S2-CHTYPE-SEGMENT.md).
+;;   F2  RESOLVED by M4 S3 (docs/evidence/M4/S3-CHTYPE-CHARACTER.md): kill
+;;       troll (from the cellar) -> ORTELL (77np.mud:226) -> PRSTR -> FOOSTR
+;;       (77np.mud:241) <CHTYPE <+ 32 <ASCII ...>> CHARACTER>. Now a positive
+;;       regression: S1 without `score`, `east`, `kill troll`, the answer
+;;       `lamp`; the output equals the pinned reference case
+;;       F2-kill-troll-pipe of docs/evidence/M4/orphan-prompt-reference.json
+;;       ("with what?", then "Trying to kill a troll with a lamp is
+;;       suicidal."), D1 only, ending by input exhaustion.
+;;   F2b RESOLVED by M4 S3: throw leaflet (DROPPER's sibling verb THROW, no
+;;       indirect object) -> ORTELL -> PRSTR -> FOOSTR. Positive regression:
+;;       the output equals reference prefix P03 of
+;;       tests/scenarios/orphan-prompt.json ("at what?"). Full parity with
+;;       checkpoints, including the answers to both prompts, is
+;;       tests/historical_orphan_prompt_test.rkt.
+;;   No further strict failure is reached on the F2/F2b paths (S3 evidence).
+;;   F3 help / info (maintainer decision 2026-11-23: leave strict for now):
+;;     HELP/INFO -> FILE-TO-TTY (77rooms.mud:954-985) -> <OPEN "READ" "MADADV"
+;;     "HELP"|"INFO" ...> (77rooms.mud:961) on the pinned MDL/MADADV.HELP /
+;;     MDL/MADADV.INFO. OPEN supports only RECORD's denied write modes
+;;     (ADR-0055), so this is a strict error. Native prints the file text.
 ;;
 ;; (The game sources have CRLF line ends; a multi-line string literal keeps its
 ;; CR, exactly as Confusion prints it.)
@@ -70,6 +82,7 @@
   (check-equal? (hash-ref (first outcome) 'status) "PASS")
   (values (second outcome) (get-output-string output) (port->string input)))
 
+;; An unresolved frontier case.
 (define (check-frontier label lines expected-tail expected-message)
   (define-values (result raw unread) (run-game lines))
   (check-pred exn:fail? result label)
@@ -81,38 +94,51 @@
   (check-equal? unread "" label)
   (printf "~a: strict failure as recorded: ~a\n" label expected-message))
 
-;; F1 (resolved): positive regression against the pinned reference prefix.
-(define-runtime-path drop-reference-file "../docs/evidence/M4/mailbox-drop-reference.json")
-(let* ([reference (call-with-input-file drop-reference-file read-json)]
-       [p03 (findf (lambda (c) (equal? (hash-ref c 'name) "P03-mailbox-drop-prefix"))
-                   (hash-ref reference 'cases))]
-       [lines '("open mailbox" "take leaflet" "drop leaflet")]
-       [ref-raw (hash-ref p03 'stdout_raw)]
-       [banner "LISTENING-AT-LEVEL 1 PROCESS 1\n"]
-       [expected (string-replace (cadr (regexp-match (regexp (string-append "^.*?" (regexp-quote banner)
-                                                                            "(.*)$"))
-                                                     ref-raw))
-                                 "\"DONE\"\n" "" #:all? #f)])
+;; A resolved frontier case: the output equals a pinned reference transcript
+;; (D1 only) and the run ends by input exhaustion with all input consumed.
+(define (check-resolved label reference-file case-name lines must-contain)
+  (define reference (call-with-input-file reference-file read-json))
+  (define c (findf (lambda (c) (equal? (hash-ref c 'name) case-name)) (hash-ref reference 'cases)))
+  (define ref-raw (hash-ref c 'stdout_raw))
+  (define banner "LISTENING-AT-LEVEL 1 PROCESS 1\n")
+  (define expected
+    (string-replace (cadr (regexp-match (regexp (string-append "^.*?" (regexp-quote banner) "(.*)$"))
+                                        ref-raw))
+                    "\"DONE\"\n" "" #:all? #f))
   (check-equal? (hash-ref reference 'interpreter_sha256_before)
-                "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789")
-  (check-equal? (hash-ref p03 'input)
+                "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789" label)
+  (check-equal? (hash-ref c 'input)
                 (string-append "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n"
-                               (apply string-append (map (lambda (l) (string-append l "\n")) lines))))
+                               (apply string-append (map (lambda (l) (string-append l "\n")) lines)))
+                label)
   (define-values (result raw unread) (run-game lines))
   (check-pred exn:fail:mdl-input-exhausted? result
               (if (exn? result) (exn-message result) (format "~a" result)))
-  (check-true (string-contains? raw ">Dropped.\n>"))
-  (check-equal? raw expected)
-  (check-equal? unread "")
-  (printf "F1 drop: resolved; output equals reference P03 (D1 only)\n"))
+  (check-true (string-contains? raw must-contain) label)
+  (check-equal? raw expected label)
+  (check-equal? unread "" label))
 
-(check-frontier "F2 orphan prompt"
+;; F1 (resolved by S2): positive regression against the pinned reference prefix.
+(define-runtime-path drop-reference-file "../docs/evidence/M4/mailbox-drop-reference.json")
+(check-resolved "F1 drop" drop-reference-file "P03-mailbox-drop-prefix"
+                '("open mailbox" "take leaflet" "drop leaflet") ">Dropped.\n>")
+(printf "F1 drop: resolved; output equals reference P03 (D1 only)\n")
+
+;; F2 and F2b (resolved by S3): positive regressions against the pinned
+;; orphan-prompt reference.
+(define-runtime-path orphan-reference-file "../docs/evidence/M4/orphan-prompt-reference.json")
+(check-resolved "F2 orphan prompt" orphan-reference-file "F2-kill-troll-pipe"
                 '("north" "east" "open window" "west" "west" "take lamp" "move rug"
-                  "open trap door" "turn on lamp" "down" "east" "kill troll")
-                "A nasty-looking troll, brandishing a bloody axe, blocks all passages\r\nout of the room.\n>"
-                "mdl-chtype: unsupported built-in TYPE conversion")
-
-(check-frontier "F2b throw (next to the drop path)"
+                  "open trap door" "turn on lamp" "down" "east" "kill troll" "lamp")
+                "out of the room.\n>with what?\n>Trying to kill a troll with a lamp is suicidal.\n>")
+(printf "F2 orphan prompt: resolved; output equals reference F2-kill-troll-pipe (D1 only)\n")
+(check-resolved "F2b throw" orphan-reference-file "P03-orphan-prompt-prefix"
                 '("open mailbox" "take leaflet" "throw leaflet")
-                ">Opening the mailbox reveals a leaflet.\n>Taken.\n>"
-                "mdl-chtype: unsupported built-in TYPE conversion")
+                ">Taken.\n>at what?\n>")
+(printf "F2b throw: resolved; output equals reference P03 (D1 only)\n")
+
+;; F3 (strict by maintainer decision): help and info stop at OPEN "READ".
+(check-frontier "F3 help" '("help") "There is a small mailbox here.\n>"
+              "OPEN: mode \"READ\" is not supported; only READB, PRINT and PRINTO are (ADR-0055)")
+(check-frontier "F3 info" '("info") "There is a small mailbox here.\n>"
+              "OPEN: mode \"READ\" is not supported; only READB, PRINT and PRINTO are (ADR-0055)")

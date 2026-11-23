@@ -1673,3 +1673,50 @@ a user TYPE atom merely named SEGMENT (or LIST/FALSE) never takes a built-in
 CHTYPE branch — CHTYPE dispatches on the target being a ROOT built-in TYPE,
 not on its PNAME. Hosts that inspect session values check TYPE inside the
 session (e.g. `mdl-session-call session "TYPE" v`).
+
+## ADR-0057: CHTYPE to CHARACTER keeps the 0–127 CHARACTER range
+
+Status: accepted (M4 S3, 2026-11-23).
+
+Context: frontier F2/F2b (every `<prep> what?` orphan prompt and every
+PRSTR use) needs `<CHTYPE fix CHARACTER>` (FOOSTR, `77np.mud:241`). The
+pinned reference treats CHARACTER as a raw retag of a 36-bit WORD: any
+value is accepted and comes back unchanged through ASCII, and out-of-range
+CHARACTERs print implementation bytes
+(`docs/evidence/M4/CHARACTER-CHTYPE-REFERENCE.md`). This runtime's
+documented CHARACTER contract is ASCII 0–127: `ASCII` FIX → CHARACTER is
+0–127 (the reference agrees there), READSTRING refuses input codes above
+127, and UNPARSE/PRINC are specified only for that range.
+
+Decision: CHTYPE to the ROOT CHARACTER TYPE accepts a WORD-primtype value
+(FIX, WORD, CHARACTER, NEWTYPE of WORD; not FLOAT) whose signed value is
+0–127 and returns the runtime's one CHARACTER representation (the typed
+WORD value made by `mdl-character`), so `==?`, STRING PUT and MEMQ treat it
+exactly like `!\c`. Other codes are a strict error. CHARACTER → FIX/WORD
+was already supported and is unchanged.
+
+Consequences: the game-reachable values (at most 122: PNAME characters ≤ 90
+plus 32, recorded by the reference probe `game-word-pname-range`) behave as
+in the reference; out-of-range CHTYPEs, which the reference accepts, fail
+loudly instead of producing an unprintable value. Following the reference
+would have required widening CHARACTER to a 36-bit code everywhere (STRING
+storage, printing, input) — a larger change with no game use. Alternatives
+rejected: accept any code (conflicts with the ASCII and input contract and
+the host string representation); refuse WORD/NEWTYPE sources (the reference
+accepts them and they cost nothing).
+
+**Amendment (independent review, 2026-11-23).** (1) A second game use: the
+balloon's room names `VAIRn` step their digit with `<PUT .S 5 <CHTYPE <+|-
+<CHTYPE <5 .M> FIX> 1> CHARACTER>>` (`77act2.mud:526` rising, `:578`
+falling); the codes are digits ±1 (48–53), inside the range, and a unit case
+covers both directions. (2) FLOAT is refused only as a direct source: a FLOAT
+first CHTYPE'd to WORD or to a NEWTYPE of FLOAT reaches the WORD branch and
+is then governed by the 0–127 range check alone (its bits use this runtime's
+existing FLOAT word encoding); not game-reachable. (3) The 0–127 range binds
+CHTYPE, ASCII and READSTRING; the reader and STRING literals can still carry
+a CHARACTER above 127 (e.g. `!\é`, `<1 "é">`), so `<CHTYPE <CHTYPE !\é FIX>
+CHARACTER>` is refused although the original CHARACTER existed; not
+game-reachable, a candidate for a separate reader slice. (4) Pre-existing:
+a host Racket `char` passed through the embedding API (`mdl-session-call`)
+is typed CHARACTER but CHTYPE of it to FIX/WORD fails in `word-bits-of`; MDL
+code cannot produce host chars.

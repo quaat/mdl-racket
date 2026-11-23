@@ -1,0 +1,950 @@
+{
+  "schema_version": 1,
+  "kind": "m4-scenario-reference",
+  "scenario": "orphan-prompt",
+  "scenario_file": "tests/scenarios/orphan-prompt.json",
+  "engine": "confusion-patched-1977",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "open mailbox",
+    "take leaflet",
+    "throw leaflet",
+    "mailbox",
+    "look",
+    "take leaflet",
+    "kill mailbox",
+    "leaflet",
+    "inventory"
+  ],
+  "f2_commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "east",
+    "kill troll",
+    "lamp"
+  ],
+  "recorded_at": "2026-11-23T16:27:05.248919+00:00",
+  "interpreter": ".cache/build/confusion_patched/mdli",
+  "interpreter_sha256_before": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "interpreter_sha256_after": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "upstream_mdlzork_checked_out": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "game_dir": "mdlzork_771212/patched_confusion",
+  "shim_src_sha256": "d1fa86520eab80891c95c9cbec8a35401fd1fe55c1d6fa6b18165a30736ab925",
+  "shim": "scripts/reference/fixed_time.c compiled per capture: gcc -shared -fPIC -O2 -o fixed_time.so fixed_time.c -ldl; LD_PRELOAD, MDL_FIXED_EPOCH=250776000, TZ=UTC",
+  "protocol": "scripts/probe_orphan_prompt_reference.py (module docstring); run_case from scripts/probe_session_reference.py",
+  "checks": {
+    "t1_exit_status": 0,
+    "t1_equals_t1b_bytes": true,
+    "diag_game_part_equals_t1_game_part_bytes": true,
+    "diag_checkpoint_count": 11,
+    "expected_checkpoint_count": 11,
+    "prefix_runs_consistent_with_t1": true,
+    "prefix_exit_statuses": [
+      0
+    ],
+    "f2_exit_status": 0,
+    "t1_files_changed": [
+      "MDL/MADADV.SAVE"
+    ],
+    "t1_files_removed": []
+  },
+  "transcript": {
+    "source_case": "T1-orphan-prompt-pipe",
+    "stdout_sha256": "3513a55e2c87373e473191f9df2b62403eb47ea0b71af86035f5e7326a96d21d",
+    "game_output_raw": "Welcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+    "game_output_canonical": "Welcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+    "split": {
+      "opening": "Welcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n",
+      "commands": [
+        {
+          "input": "open mailbox",
+          "output": "Opening the mailbox reveals a leaflet.\n"
+        },
+        {
+          "input": "take leaflet",
+          "output": "Taken.\n"
+        },
+        {
+          "input": "throw leaflet",
+          "output": "at what?\n"
+        },
+        {
+          "input": "mailbox",
+          "output": "Thrown.\n"
+        },
+        {
+          "input": "look",
+          "output": "You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n"
+        },
+        {
+          "input": "take leaflet",
+          "output": "Taken.\n"
+        },
+        {
+          "input": "kill mailbox",
+          "output": "with what?\n"
+        },
+        {
+          "input": "leaflet",
+          "output": "Trying to kill a mailbox with a leaflet is suicidal.\n"
+        },
+        {
+          "input": "inventory",
+          "output": "You are carrying:\nA leaflet\n"
+        }
+      ],
+      "after_last_command": [
+        "Beg pardon?\n",
+        ""
+      ]
+    }
+  },
+  "diagnostic": {
+    "source_case": "X1-orphan-prompt-diag",
+    "diag_forms": "<SETG DIAG-CH <OPEN \"PRINT\" \"@LOG@\">>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-N 0>\n<PROG () <SETG DIAG-LEAF <FIND-OBJ \"ADVER\">> <SETG DIAG-MBOX <FIND-OBJ \"MAILB\">> <SETG DIAG-WHOUS <FIND-ROOM \"WHOUS\">> T>\n<SETG DIAG-OBJ <FUNCTION (DIAG-O) <COND (<NOT .DIAG-O> .DIAG-O) (<TYPE? .DIAG-O OBJECT> <OID .DIAG-O>) (T <TYPE .DIAG-O>)>>>\n<SETG DIAG-STATE <FUNCTION (\"AUX\" (DIAG-OR ,ORPHANS)) <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-WHOUS-ROBJS\" <MAPF ,LIST ,OID <ROBJS ,DIAG-WHOUS>>> <DIAG \"CP-MAILBOX-OCONTENTS\" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-MBOX>>> <DIAG \"CP-MAILBOX-OOPEN\" <OOPEN? ,DIAG-MBOX>> <DIAG \"CP-LEAFLET-OROOM\" <COND (<OROOM ,DIAG-LEAF> <RID <OROOM ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OCAN\" <COND (<OCAN ,DIAG-LEAF> <OID <OCAN ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OTOUCH\" <OTOUCH? ,DIAG-LEAF>> <DIAG \"CP-ORPHAN-FLAG\" <NTH .DIAG-OR ,OFLAG>> <DIAG \"CP-ORPHAN-VERB\" <COND (<NTH .DIAG-OR ,OVERB> <VNAME <NTH .DIAG-OR ,OVERB>>)>> <DIAG \"CP-ORPHAN-SLOT1\" <DIAG-OBJ <NTH .DIAG-OR ,OSLOT1>>> <DIAG \"CP-ORPHAN-PREP\" <COND (<NTH .DIAG-OR ,OPREP> <CHTYPE <NTH .DIAG-OR ,OPREP> ATOM>)>> <DIAG \"CP-ORPHAN-NAME\" <NTH .DIAG-OR ,ONAME>> <DIAG \"CP-SCRSTR-CODES\" <MAPF ,LIST ,ASCII <BACK ,SCRSTR 5>>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-CHTYPE ,CHTYPE>\n<SETG CHTYPE <FUNCTION (DIAG-A DIAG-B) <COND (<==? .DIAG-B CHARACTER> <DIAG \"CHTYPE-CHARACTER\" .DIAG-A>)> <APPLY ,DIAG-ORIG-CHTYPE .DIAG-A .DIAG-B>>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n",
+    "chtype_character": [
+      {
+        "arg": 97,
+        "char": "a",
+        "before_checkpoint": 3
+      },
+      {
+        "arg": 116,
+        "char": "t",
+        "before_checkpoint": 3
+      },
+      {
+        "arg": 119,
+        "char": "w",
+        "before_checkpoint": 7
+      },
+      {
+        "arg": 105,
+        "char": "i",
+        "before_checkpoint": 7
+      },
+      {
+        "arg": 116,
+        "char": "t",
+        "before_checkpoint": 7
+      },
+      {
+        "arg": 104,
+        "char": "h",
+        "before_checkpoint": 7
+      }
+    ],
+    "random_draws": [
+      {
+        "index": 0,
+        "args": "(10438660480)",
+        "result": 16566282405,
+        "mod100": 5,
+        "mod8": 5,
+        "before_checkpoint": 0
+      },
+      {
+        "index": 1,
+        "args": "()",
+        "result": -21802663835,
+        "mod100": 65,
+        "mod8": 5,
+        "before_checkpoint": 5
+      }
+    ],
+    "checkpoints": [
+      {
+        "n": 0,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "()",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "(ADVER!-OBJECTS)",
+        "mailbox_oopen": "#FALSE ()",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "MAILB!-OBJECTS",
+        "leaflet_otouch": "#FALSE ()",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 0 0 0 0)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "0"
+      },
+      {
+        "n": 1,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "()",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "(ADVER!-OBJECTS)",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "MAILB!-OBJECTS",
+        "leaflet_otouch": "#FALSE ()",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 0 0 0 0)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "1"
+      },
+      {
+        "n": 2,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "(ADVER!-OBJECTS)",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 0 0 0 0)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "2"
+      },
+      {
+        "n": 3,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "(ADVER!-OBJECTS)",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "T",
+        "orphan_verb": "THROW!-ACTIONS",
+        "orphan_slot1": "ADVER!-OBJECTS",
+        "orphan_prep": "AT!-WORDS",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 0 0 97 116)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "3"
+      },
+      {
+        "n": 4,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "()",
+        "whous_robjs": "(ADVER!-OBJECTS FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "WHOUS!-ROOMS",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 0 0 97 116)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "4"
+      },
+      {
+        "n": 5,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "()",
+        "whous_robjs": "(ADVER!-OBJECTS FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "WHOUS!-ROOMS",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 0 0 97 116)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "5"
+      },
+      {
+        "n": 6,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "(ADVER!-OBJECTS)",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 0 0 97 116)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "6"
+      },
+      {
+        "n": 7,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "(ADVER!-OBJECTS)",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "T",
+        "orphan_verb": "KILL!-ACTIONS",
+        "orphan_slot1": "MAILB!-OBJECTS",
+        "orphan_prep": "WITH!-WORDS",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 119 105 116 104)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "7"
+      },
+      {
+        "n": 8,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "(ADVER!-OBJECTS)",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 119 105 116 104)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "8"
+      },
+      {
+        "n": 9,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "(ADVER!-OBJECTS)",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 119 105 116 104)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "9"
+      },
+      {
+        "n": 10,
+        "here": "WHOUS!-ROOMS",
+        "aobjs": "(ADVER!-OBJECTS)",
+        "whous_robjs": "(FDOOR!-OBJECTS MAILB!-OBJECTS)",
+        "mailbox_ocontents": "()",
+        "mailbox_oopen": "T",
+        "leaflet_oroom": "#FALSE ()",
+        "leaflet_ocan": "#FALSE ()",
+        "leaflet_otouch": "T",
+        "orphan_flag": "#FALSE ()",
+        "orphan_verb": "#FALSE ()",
+        "orphan_slot1": "#FALSE ()",
+        "orphan_prep": "#FALSE ()",
+        "orphan_name": "#FALSE ()",
+        "scrstr_codes": "(0 119 105 116 104)",
+        "raw_score": "0",
+        "ascore": "0",
+        "moves": "9"
+      }
+    ],
+    "readstring": [
+      {
+        "READSTRING-COUNT": "12"
+      },
+      {
+        "READSTRING-TEXT": "\"open mailbox\""
+      },
+      {
+        "READSTRING-COUNT": "12"
+      },
+      {
+        "READSTRING-TEXT": "\"take leaflet\""
+      },
+      {
+        "READSTRING-COUNT": "13"
+      },
+      {
+        "READSTRING-TEXT": "\"throw leaflet\""
+      },
+      {
+        "READSTRING-COUNT": "7"
+      },
+      {
+        "READSTRING-TEXT": "\"mailbox\""
+      },
+      {
+        "READSTRING-COUNT": "4"
+      },
+      {
+        "READSTRING-TEXT": "\"look\""
+      },
+      {
+        "READSTRING-COUNT": "12"
+      },
+      {
+        "READSTRING-TEXT": "\"take leaflet\""
+      },
+      {
+        "READSTRING-COUNT": "12"
+      },
+      {
+        "READSTRING-TEXT": "\"kill mailbox\""
+      },
+      {
+        "READSTRING-COUNT": "7"
+      },
+      {
+        "READSTRING-TEXT": "\"leaflet\""
+      },
+      {
+        "READSTRING-COUNT": "9"
+      },
+      {
+        "READSTRING-TEXT": "\"inventory\""
+      },
+      {
+        "READSTRING-COUNT": "0"
+      },
+      {
+        "READSTRING-TEXT": "\"\""
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "T1-orphan-prompt-pipe",
+      "kind": "transcript",
+      "note": "transcript: faithful entry + scenario commands, then EOF",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/T1-orphan-prompt-pipe-4ex8s_6w/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\nlook\ntake leaflet\nkill mailbox\nleaflet\ninventory\n",
+      "input_sha256": "856158a3f400eb2a8d409895c9036f7e7c77f650a45078cf84d056b84fad01f6",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+      "stdout_sha256": "3513a55e2c87373e473191f9df2b62403eb47ea0b71af86035f5e7326a96d21d",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.19,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "df7736642d80991686ea2b3c6f0d03ff4d66bdc80c014c335e5d92673c6a4923",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "T1b-orphan-prompt-pipe-repeat",
+      "kind": "transcript",
+      "note": "repeat of T1 to show byte determinism",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/T1b-orphan-prompt-pipe-repeat-tte96o0n/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\nlook\ntake leaflet\nkill mailbox\nleaflet\ninventory\n",
+      "input_sha256": "856158a3f400eb2a8d409895c9036f7e7c77f650a45078cf84d056b84fad01f6",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+      "stdout_sha256": "3513a55e2c87373e473191f9df2b62403eb47ea0b71af86035f5e7326a96d21d",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.19,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "e5800e37d60adfde571c398b1bb0ec755f50c1bf67f26cd1d0da1b07ab249834",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "X1-orphan-prompt-diag",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC (not a transcript): RANDOM, READSTRING and CHTYPE wrapped after FLOAD, before SAVE-IT; read-only state checkpoint at every READSTRING entry; CHTYPE ... CHARACTER arguments logged; log in DIAG.LOG outside the game copy",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/X1-orphan-prompt-diag-fk1b5b6f/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/orphan-prompt-probes/X1-orphan-prompt-diag-fk1b5b6f/DIAG.LOG\">>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-N 0>\n<PROG () <SETG DIAG-LEAF <FIND-OBJ \"ADVER\">> <SETG DIAG-MBOX <FIND-OBJ \"MAILB\">> <SETG DIAG-WHOUS <FIND-ROOM \"WHOUS\">> T>\n<SETG DIAG-OBJ <FUNCTION (DIAG-O) <COND (<NOT .DIAG-O> .DIAG-O) (<TYPE? .DIAG-O OBJECT> <OID .DIAG-O>) (T <TYPE .DIAG-O>)>>>\n<SETG DIAG-STATE <FUNCTION (\"AUX\" (DIAG-OR ,ORPHANS)) <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-WHOUS-ROBJS\" <MAPF ,LIST ,OID <ROBJS ,DIAG-WHOUS>>> <DIAG \"CP-MAILBOX-OCONTENTS\" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-MBOX>>> <DIAG \"CP-MAILBOX-OOPEN\" <OOPEN? ,DIAG-MBOX>> <DIAG \"CP-LEAFLET-OROOM\" <COND (<OROOM ,DIAG-LEAF> <RID <OROOM ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OCAN\" <COND (<OCAN ,DIAG-LEAF> <OID <OCAN ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OTOUCH\" <OTOUCH? ,DIAG-LEAF>> <DIAG \"CP-ORPHAN-FLAG\" <NTH .DIAG-OR ,OFLAG>> <DIAG \"CP-ORPHAN-VERB\" <COND (<NTH .DIAG-OR ,OVERB> <VNAME <NTH .DIAG-OR ,OVERB>>)>> <DIAG \"CP-ORPHAN-SLOT1\" <DIAG-OBJ <NTH .DIAG-OR ,OSLOT1>>> <DIAG \"CP-ORPHAN-PREP\" <COND (<NTH .DIAG-OR ,OPREP> <CHTYPE <NTH .DIAG-OR ,OPREP> ATOM>)>> <DIAG \"CP-ORPHAN-NAME\" <NTH .DIAG-OR ,ONAME>> <DIAG \"CP-SCRSTR-CODES\" <MAPF ,LIST ,ASCII <BACK ,SCRSTR 5>>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-CHTYPE ,CHTYPE>\n<SETG CHTYPE <FUNCTION (DIAG-A DIAG-B) <COND (<==? .DIAG-B CHARACTER> <DIAG \"CHTYPE-CHARACTER\" .DIAG-A>)> <APPLY ,DIAG-ORIG-CHTYPE .DIAG-A .DIAG-B>>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\nlook\ntake leaflet\nkill mailbox\nleaflet\ninventory\n",
+      "input_sha256": "cbafa64d60224c59f1f3a30dd85d8158247af149de23d729ecfeba1e4a91c311",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#CHANNEL [4 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/orphan-prompt-probes/X1-orphan-prompt-diag-fk1b5b6f/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/orphan-prompt-probes/X1-orphan-prompt-diag-fk1b5b6f/\" 0 0 0 0 0 0 0 10 0]\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n0\nT\n#FUNCTION ((DIAG-O) <COND (<NOT .DIAG-O> .DIAG-O) (<TYPE? .DIAG-O OBJECT> <OID .DIAG-O>) (T <TYPE .DIAG-O>)>)\n#FUNCTION ((\"AUX\" (DIAG-OR ,ORPHANS)) <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-WHOUS-ROBJS\" <MAPF ,LIST ,OID <ROBJS ,DIAG-WHOUS>>> <DIAG \"CP-MAILBOX-OCONTENTS\" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-MBOX>>> <DIAG \"CP-MAILBOX-OOPEN\" <OOPEN? ,DIAG-MBOX>> <DIAG \"CP-LEAFLET-OROOM\" <COND (<OROOM ,DIAG-LEAF> <RID <OROOM ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OCAN\" <COND (<OCAN ,DIAG-LEAF> <OID <OCAN ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OTOUCH\" <OTOUCH? ,DIAG-LEAF>> <DIAG \"CP-ORPHAN-FLAG\" <NTH .DIAG-OR ,OFLAG>> <DIAG \"CP-ORPHAN-VERB\" <COND (<NTH .DIAG-OR ,OVERB> <VNAME <NTH .DIAG-OR ,OVERB>>)>> <DIAG \"CP-ORPHAN-SLOT1\" <DIAG-OBJ <NTH .DIAG-OR ,OSLOT1>>> <DIAG \"CP-ORPHAN-PREP\" <COND (<NTH .DIAG-OR ,OPREP> <CHTYPE <NTH .DIAG-OR ,OPREP> ATOM>)>> <DIAG \"CP-ORPHAN-NAME\" <NTH .DIAG-OR ,ONAME>> <DIAG \"CP-SCRSTR-CODES\" <MAPF ,LIST ,ASCII <BACK ,SCRSTR 5>>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000017*\n#FUNCTION ((DIAG-A DIAG-B) <COND (<==? .DIAG-B CHARACTER> <DIAG \"CHTYPE-CHARACTER\" .DIAG-A>)> <APPLY ,DIAG-ORIG-CHTYPE .DIAG-A .DIAG-B>)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+      "stdout_sha256": "c85091e4418bdb71d59164380cce31a570249eb97a84ce490454724145f07cf2",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#CHANNEL [4 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/orphan-prompt-probes/X1-orphan-prompt-diag-fk1b5b6f/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/orphan-prompt-probes/X1-orphan-prompt-diag-fk1b5b6f/\" 0 0 0 0 0 0 0 10 0]\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n0\nT\n#FUNCTION ((DIAG-O) <COND (<NOT .DIAG-O> .DIAG-O) (<TYPE? .DIAG-O OBJECT> <OID .DIAG-O>) (T <TYPE .DIAG-O>)>)\n#FUNCTION ((\"AUX\" (DIAG-OR ,ORPHANS)) <DIAG \"CP-BEGIN\" ,DIAG-N> <DIAG \"CP-HERE\" <RID ,HERE>> <DIAG \"CP-AOBJS\" <MAPF ,LIST ,OID <AOBJS ,WINNER>>> <DIAG \"CP-WHOUS-ROBJS\" <MAPF ,LIST ,OID <ROBJS ,DIAG-WHOUS>>> <DIAG \"CP-MAILBOX-OCONTENTS\" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-MBOX>>> <DIAG \"CP-MAILBOX-OOPEN\" <OOPEN? ,DIAG-MBOX>> <DIAG \"CP-LEAFLET-OROOM\" <COND (<OROOM ,DIAG-LEAF> <RID <OROOM ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OCAN\" <COND (<OCAN ,DIAG-LEAF> <OID <OCAN ,DIAG-LEAF>>)>> <DIAG \"CP-LEAFLET-OTOUCH\" <OTOUCH? ,DIAG-LEAF>> <DIAG \"CP-ORPHAN-FLAG\" <NTH .DIAG-OR ,OFLAG>> <DIAG \"CP-ORPHAN-VERB\" <COND (<NTH .DIAG-OR ,OVERB> <VNAME <NTH .DIAG-OR ,OVERB>>)>> <DIAG \"CP-ORPHAN-SLOT1\" <DIAG-OBJ <NTH .DIAG-OR ,OSLOT1>>> <DIAG \"CP-ORPHAN-PREP\" <COND (<NTH .DIAG-OR ,OPREP> <CHTYPE <NTH .DIAG-OR ,OPREP> ATOM>)>> <DIAG \"CP-ORPHAN-NAME\" <NTH .DIAG-OR ,ONAME>> <DIAG \"CP-SCRSTR-CODES\" <MAPF ,LIST ,ASCII <BACK ,SCRSTR 5>>> <DIAG \"CP-RAW-SCORE\" ,RAW-SCORE> <DIAG \"CP-ASCORE\" <ASCORE ,WINNER>> <DIAG \"CP-MOVES\" ,MOVES> <DIAG \"CP-END\" ,DIAG-N> <SETG DIAG-N <+ ,DIAG-N 1>> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000017*\n#FUNCTION ((DIAG-A DIAG-B) <COND (<==? .DIAG-B CHARACTER> <DIAG \"CHTYPE-CHARACTER\" .DIAG-A>)> <APPLY ,DIAG-ORIG-CHTYPE .DIAG-A .DIAG-B>)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG-STATE> <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>You are carrying:\nA leaflet\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.2,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 882842,
+            "sha256": "c1c0256297e6d62f951fcc9e6371a3985c247a49de63ca2a33979a77904170d1",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "diag_log": "RANDOM-ARGS (10438660480)\nRANDOM-RESULT 16566282405\nCP-BEGIN 0\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS ()\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS (ADVER!-OBJECTS)\nCP-MAILBOX-OOPEN #FALSE ()\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN MAILB!-OBJECTS\nCP-LEAFLET-OTOUCH #FALSE ()\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 0 0 0 0)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 0\nCP-END 0\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"open mailbox\"\nCP-BEGIN 1\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS ()\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS (ADVER!-OBJECTS)\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN MAILB!-OBJECTS\nCP-LEAFLET-OTOUCH #FALSE ()\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 0 0 0 0)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 1\nCP-END 1\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nCP-BEGIN 2\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS (ADVER!-OBJECTS)\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 0 0 0 0)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 2\nCP-END 2\nREADSTRING-COUNT 13\nREADSTRING-TEXT \"throw leaflet\"\nCHTYPE-CHARACTER 97\nCHTYPE-CHARACTER 116\nCP-BEGIN 3\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS (ADVER!-OBJECTS)\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG T\nCP-ORPHAN-VERB THROW!-ACTIONS\nCP-ORPHAN-SLOT1 ADVER!-OBJECTS\nCP-ORPHAN-PREP AT!-WORDS\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 0 0 97 116)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 3\nCP-END 3\nREADSTRING-COUNT 7\nREADSTRING-TEXT \"mailbox\"\nCP-BEGIN 4\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS ()\nCP-WHOUS-ROBJS (ADVER!-OBJECTS FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM WHOUS!-ROOMS\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 0 0 97 116)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 4\nCP-END 4\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"look\"\nRANDOM-ARGS ()\nRANDOM-RESULT -21802663835\nCP-BEGIN 5\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS ()\nCP-WHOUS-ROBJS (ADVER!-OBJECTS FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM WHOUS!-ROOMS\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 0 0 97 116)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 5\nCP-END 5\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nCP-BEGIN 6\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS (ADVER!-OBJECTS)\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 0 0 97 116)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 6\nCP-END 6\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"kill mailbox\"\nCHTYPE-CHARACTER 119\nCHTYPE-CHARACTER 105\nCHTYPE-CHARACTER 116\nCHTYPE-CHARACTER 104\nCP-BEGIN 7\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS (ADVER!-OBJECTS)\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG T\nCP-ORPHAN-VERB KILL!-ACTIONS\nCP-ORPHAN-SLOT1 MAILB!-OBJECTS\nCP-ORPHAN-PREP WITH!-WORDS\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 119 105 116 104)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 7\nCP-END 7\nREADSTRING-COUNT 7\nREADSTRING-TEXT \"leaflet\"\nCP-BEGIN 8\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS (ADVER!-OBJECTS)\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 119 105 116 104)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 8\nCP-END 8\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nCP-BEGIN 9\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS (ADVER!-OBJECTS)\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 119 105 116 104)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 9\nCP-END 9\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\nCP-BEGIN 10\nCP-HERE WHOUS!-ROOMS\nCP-AOBJS (ADVER!-OBJECTS)\nCP-WHOUS-ROBJS (FDOOR!-OBJECTS MAILB!-OBJECTS)\nCP-MAILBOX-OCONTENTS ()\nCP-MAILBOX-OOPEN T\nCP-LEAFLET-OROOM #FALSE ()\nCP-LEAFLET-OCAN #FALSE ()\nCP-LEAFLET-OTOUCH T\nCP-ORPHAN-FLAG #FALSE ()\nCP-ORPHAN-VERB #FALSE ()\nCP-ORPHAN-SLOT1 #FALSE ()\nCP-ORPHAN-PREP #FALSE ()\nCP-ORPHAN-NAME #FALSE ()\nCP-SCRSTR-CODES (0 119 105 116 104)\nCP-RAW-SCORE 0\nCP-ASCORE 0\nCP-MOVES 9\nCP-END 10\n"
+    },
+    {
+      "name": "F2-kill-troll-pipe",
+      "kind": "transcript",
+      "note": "frontier F2 transcript (not the scenario): S1 without score, east, kill troll, lamp, then EOF",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/F2-kill-troll-pipe-49anj5d8/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\neast\nopen window\nwest\nwest\ntake lamp\nmove rug\nopen trap door\nturn on lamp\ndown\neast\nkill troll\nlamp\n",
+      "input_sha256": "15abd5ba3106af92a91c0d41c16602f2bbb267aa52f7acb51e9052a643292b4d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\r\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\r\nbeen used recently for the preparation of food.  A passage leads to\r\nthe west and a dark staircase can be seen leading upward.  To the\r\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\r\ndoor with strange gothic lettering to the west, which appears to be\r\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\r\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\r\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\r\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\r\neast, and a crawlway to the south.  On the west is the bottom of a\r\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>You are in a small room with passages off in all directions. \r\nBloodstains and deep scratches (perhaps made by an axe) mar the\r\nwalls.\nA nasty-looking troll, brandishing a bloody axe, blocks all passages\r\nout of the room.\n>with what?\n>Trying to kill a troll with a lamp is suicidal.\n>Beg pardon?\n>",
+      "stdout_sha256": "cfddd111af91b0ff08be46cbdbaa4d76f8a85174363c6f325ddba727b23438a8",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are behind the white house.  In one corner of the house there\nis a small window which is slightly ajar.\n>With great effort, you open the window far enough to allow entry.\n>You are in the kitchen of the white house.  A table seems to have\nbeen used recently for the preparation of food.  A passage leads to\nthe west and a dark staircase can be seen leading upward.  To the\neast is a small window which is open.\nOn the table is an elongated brown sack, smelling of hot peppers.\nA bottle is sitting on the table.\nThe glass bottle contains:\n A quantity of water\n>You are in the living room.  There is a door to the east, a wooden\ndoor with strange gothic lettering to the west, which appears to be\nnailed shut, and a large oriental rug in the center of the room.\nThere is a trophy case here.\nA battery-powered brass lantern is on the trophy case.\nThere is an issue of US NEWS & DUNGEON REPORT dated 12/12/77 here.\nOn hooks above the mantelpiece hangs an elvish sword of great\nantiquity.\n>Taken.\n>With a great effort, the rug is moved to one side of the room.\nWith the rug moved, the dusty cover of a closed trap-door appears.\n>The door reluctantly opens to reveal a rickety staircase descending\ninto darkness.\n>The lamp is now on.\n>You are in a dark and damp cellar with a narrow passageway leading\neast, and a crawlway to the south.  On the west is the bottom of a\nsteep metal ramp which is unclimbable.\nThe trap door crashes shut, and you hear someone barring it.\n>You are in a small room with passages off in all directions. \nBloodstains and deep scratches (perhaps made by an axe) mar the\nwalls.\nA nasty-looking troll, brandishing a bloody axe, blocks all passages\nout of the room.\n>with what?\n>Trying to kill a troll with a lamp is suicidal.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "75bbe34c2a6785b9557bb815b94366b0e687b2953707c9279da1aaf7522f094f",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P00-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 0 commands, then EOF (state at end of input = checkpoint 0; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P00-orphan-prompt-prefix-2tbj7osa/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n",
+      "input_sha256": "6610c125774e46b6133d2c7a06b932b9978c9fd920025f3c2a7f13c1b4801edf",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_sha256": "6354e0c158b8889f134856cfb060a19257066551d6e2bd1bfe3f5f95765e9bd6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.16,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "d6a7005a4f070d4516757fbb7945f4bf756a3dddef807566d3e51073d1d34cbf",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P01-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 1 commands, then EOF (state at end of input = checkpoint 1; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P01-orphan-prompt-prefix-k4bmmdfr/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\n",
+      "input_sha256": "9d43842c3391a61da346411f4173fefcaee0c14c6316b3156ce7d556de34e457",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Beg pardon?\n>",
+      "stdout_sha256": "11702f26bf93a7e9c5fc0773234892125f623b6e4d1f108eae7d7599124600bb",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.16,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "d7462681153e872d8a6230aa1bac79a9f25b8c0480c2e6b7d877790ccb57f990",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P02-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 2 commands, then EOF (state at end of input = checkpoint 2; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P02-orphan-prompt-prefix-eq8junbd/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\n",
+      "input_sha256": "521278dc69ed936f8e80e23e1c4a5c23b481567ec342f52f14dbecf8f0f90d9d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>Beg pardon?\n>",
+      "stdout_sha256": "6b3da647026bd88df05e6a6029983e7b79ebff8a77bb1c1f69e4c0d37449dbaf",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.16,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "81444c0a34de40012dc56059f248792ab26d71d75bcb778c31a1a4165c98843c",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P03-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 3 commands, then EOF (state at end of input = checkpoint 3; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P03-orphan-prompt-prefix-5oqyero_/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\n",
+      "input_sha256": "6bf72bc49bd4e4739b187c97f8afa6a0eb438acc66177993fa82600c85c1b565",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Beg pardon?\n>",
+      "stdout_sha256": "85daaa82c22d2f107aaa171a49c39f30eaa6f46de24bfbe3c694155297220500",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "9926fcd0c96017293512c2a825e0a076c7a58e58e4b146d34574bee06418775b",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P04-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 4 commands, then EOF (state at end of input = checkpoint 4; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P04-orphan-prompt-prefix-nzjearh3/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\n",
+      "input_sha256": "178f4b154ac8c2ce149f4483f657898f7e897c5525eb424509392ceeb3dba31b",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>Beg pardon?\n>",
+      "stdout_sha256": "088916d38e3ccc2e7de319faf56d64b851a4ef9b84dbfa5ae335cc36c44d6aff",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "9635ecd980b75a61f88ae04627a63576eec599c6af5de8a9a8934047ceef8ee2",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P05-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 5 commands, then EOF (state at end of input = checkpoint 5; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P05-orphan-prompt-prefix-zkqlkou2/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\nlook\n",
+      "input_sha256": "a7956281b8f41377cc677d0daf13747d87f3cbef2de3cd6f17542a72cb8f2e83",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_sha256": "89372992283dee1fbc3eb6b5f83649b47f4e55980959ce55ceb69b20e7743d5b",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "5e1146e60d2650b334ec698777b0dd8c402fd14ef6c8b96533ac76d6c118a12e",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P06-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 6 commands, then EOF (state at end of input = checkpoint 6; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P06-orphan-prompt-prefix-lvc97ddv/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\nlook\ntake leaflet\n",
+      "input_sha256": "bea2981252d304d196e6fd1e1d0c725b24988eff68c1bee1e2412c094357b2c5",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>Beg pardon?\n>",
+      "stdout_sha256": "90308bc9bfa65e6c614d1177b9d4511d5949fbb75207e414b1de8de4d01fe340",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "19a891e0501a53970f0c64f68d6c270ca9ee9e5b7c729cf4b06d5ccb5c17c791",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P07-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 7 commands, then EOF (state at end of input = checkpoint 7; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P07-orphan-prompt-prefix-mpji2ge1/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\nlook\ntake leaflet\nkill mailbox\n",
+      "input_sha256": "9a152c782dd3992f8da053956022caae447f050c047ec5b6d0d875ff4ed0dd2e",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Beg pardon?\n>",
+      "stdout_sha256": "255c8a4dd7fc5c5255a589163ca38cee18d401572cc77667b9bdb5541ea17cbd",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "ddbb2a4e06c507e5ce1301d90fa5a22b015b141a33ce1fa81048a8059fc9aa55",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    },
+    {
+      "name": "P08-orphan-prompt-prefix",
+      "kind": "transcript",
+      "note": "transcript of the first 8 commands, then EOF (state at end of input = checkpoint 8; used by per-prefix candidate runs)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/P08-orphan-prompt-prefix-85yof7xc/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nopen mailbox\ntake leaflet\nthrow leaflet\nmailbox\nlook\ntake leaflet\nkill mailbox\nleaflet\n",
+      "input_sha256": "6d3f618814c4c0ae095dd3b066fbdd93c888298a35d5e338999777d3687c9b38",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>Beg pardon?\n>",
+      "stdout_sha256": "ff54a400b5820158adfa4fdfb6377aa17220afd67e0e4ae777d79236cbb75fc0",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>at what?\n>Thrown.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small leaflet here.\nThere is a small mailbox here.\n>Taken.\n>with what?\n>Trying to kill a mailbox with a leaflet is suicidal.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.19,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "179e24753c8d7335e0b89bf21ae871a041320c797de55e10d08b278d71149681",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": []
+    }
+  ]
+}
