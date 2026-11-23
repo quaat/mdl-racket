@@ -98,6 +98,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make m3-check 2>&1 | tee artifacts/ci-logs/m3-check.log
+      - name: M4 scenario 1 (enter the house, open the cellar) and the recorded frontier
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-house-cellar 2>&1 | tee artifacts/ci-logs/test-m4-house-cellar.log
       - name: Build and capture native reference
         run: |
           make reference-build
