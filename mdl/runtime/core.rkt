@@ -3413,6 +3413,136 @@
   (newline (channel-output-port 'mdl-crlf channel))
   (mdl-root-atom "T"))
 
+;; UNPARSE (MDL manual ch. 7, section 7.6.6.4; appendix 2)
+;;
+;; Contract: `<UNPARSE any radix:fix>` returns a fresh mutable STRING
+;; containing the character sequence PRINT would have output for `any`,
+;; without the carriage-returns PRINT inserts for line-width control.
+;;
+;; Radix (manual contract): the optional FIX argument selects the number base
+;; for FIX values, default 10. Pinned Confusion DEVIATES from the manual —
+;; it ignores the radix argument completely (`<UNPARSE 22 8>` → "22", not "26";
+;; `<UNPARSE 255 16>` → "255", not "FF"). We follow the manual, not Confusion:
+;; radix=10 or omitted → decimal; any other valid radix → strict unsupported
+;; error (the game never supplies a non-10 radix). Non-FIX radix → error.
+;; The Confusion deviation is a reference implementation bug, not a semantic
+;; contract (AGENTS.md: Confusion is the observable reference; the manual is
+;; the semantic contract; record where they differ).
+;;
+;; Types implemented exactly against Confusion:
+;;   FIX → decimal digits (radix 10 or omitted; non-10 radix → strict error)
+;;   ATOM → PNAME, only for pnames in [A-Za-z0-9-] whitelist, non-numeric,
+;;           AND reachable eq? via current OBLIST chain (B2 + B1);
+;;           else strict unsupported error
+;;   STRING → double-quoted with \" and \\ escaping; B4: control chars → strict error
+;;   FALSE → "#FALSE ()" or "#FALSE (elem …)"
+;;   CHARACTER → "!\" followed by the character; B3: control chars → strict error
+;;   LIST → "(elem …)" with space-separated elements (recursive)
+;;
+;; Strict unsupported error for all other types (FLOAT, VECTOR, UVECTOR,
+;; WORD, FORM, FUNCTION, …). Do not fall back to Racket's printer.
+
+(define (mdl-unparse-escape-string s)
+  ;; Escape \ as \\ first, then " as \" — order matters.
+  (string-replace (string-replace s "\\" "\\\\") "\"" "\\\""))
+
+(define (mdl-unparse-value who value)
+  (cond
+    [(exact-integer? value)
+     ;; FIX: decimal string.
+     (check-fix who value)
+     (number->string value)]
+    [(mdl-atom? value)
+     ;; B2: whitelist — only PNAMEs made of [A-Za-z0-9-], non-empty, and not
+     ;; parseable as a number.  Atoms outside this set would require \-escaping
+     ;; (not implemented) or cannot be round-tripped as ATOMs.
+     ;;
+     ;; B1: reachability — emit the bare PNAME only when looking the PNAME up
+     ;; on the current OBLIST search path finds this exact atom (eq?).
+     ;; Otherwise Confusion appends a "!-oblist" trailer, which is not
+     ;; implemented; strict error.
+     (define pname (atom-value-pname value))
+     (unless (and (not (string=? pname ""))
+                  (for/and ([ch (in-string pname)])
+                    (or (char<=? #\A ch #\Z) (char<=? #\a ch #\z)
+                        (char<=? #\0 ch #\9) (char=? ch #\-)))
+                  (not (string->number pname)))
+       (error who
+              "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"
+              pname))
+     ;; #118: the one authoritative search path (LVAL of ROOT OBLIST), not
+     ;; the session default stored in atom-space-lookup.
+     (define lookups (mdl-list->list (current-lookup-path who)))
+     (define found
+       (for/or ([oblist (in-list lookups)])
+         (define candidate (mdl-lookup pname oblist))
+         (and (not (mdl-false? candidate)) candidate)))
+     (unless (eq? found value)
+       (error who
+              "UNPARSE ATOM: trailer notation not implemented; atom ~s not reachable via current OBLIST path"
+              pname))
+     pname]
+    [(mdl-string? value)
+     ;; STRING: double-quoted, internal " and \ escaped.
+     ;; B4: control characters (codes 0-31, 127) in string content require the
+     ;; Confusion "^A…" embedded-control notation, which is not implemented.
+     (define content (mdl-string-content value))
+     (for ([ch (in-string content)])
+       (define code (char->integer ch))
+       (when (or (< code 32) (= code 127))
+         (error who
+                "UNPARSE STRING: control character (code ~a) not implemented; Confusion uses \"^A\" notation"
+                code)))
+     (string-append "\"" (mdl-unparse-escape-string content) "\"")]
+    [(mdl-false? value)
+     ;; FALSE: "#FALSE ()" or "#FALSE (…)" for non-empty payload.
+     (define items (mdl-false-payload value))
+     (if (null? items)
+         "#FALSE ()"
+         (string-append "#FALSE ("
+                        (string-join (map (lambda (v) (mdl-unparse-value who v)) items) " ")
+                        ")"))]
+    [(or (char? value)
+         (and (mdl-typed-value? value)
+              (eq? (mdl-typed-value-type value) (mdl-root-atom "CHARACTER"))))
+     ;; CHARACTER: "!\" followed by the character (Confusion: !\A → "!\\A").
+     ;; The returned string contains !, \, char (3 chars for printable ASCII).
+     ;; B3: control characters (codes 0-31, 127) require Confusion's "!\^A"
+     ;; notation, which is not implemented; strict error.
+     (define code (mdl-character-code value))
+     (unless code (error who "UNPARSE CHARACTER: invalid character code"))
+     (when (or (< code 32) (= code 127))
+       (error who
+              "UNPARSE CHARACTER: control character (code ~a) not implemented; Confusion uses !\\^A notation"
+              code))
+     (string-append "!\\" (string (integer->char code)))]
+    [(or (null? value) (mpair? value))
+     ;; LIST: "(elem1 elem2 …)" with space-separated recursive elements.
+     (define items (mdl-list->list value))
+     (string-append "("
+                    (string-join (map (lambda (v) (mdl-unparse-value who v)) items) " ")
+                    ")")]
+    [else
+     (error who "UNPARSE: unsupported MDL type ~a; strict-failure per AGENTS.md"
+            (mdl-type-name value))]))
+
+(define (mdl-unparse value [radix #f])
+  ;; Radix must be a FIX in [2,36] if supplied. Per the MDL manual, it
+  ;; selects the base for FIX conversion; Confusion incorrectly ignores it
+  ;; (reference deviation — see docs/evidence/M3/S1-UNPARSE.md). We follow
+  ;; the manual: radix=10 (or omitted) → decimal output; any other valid
+  ;; FIX radix → strict unsupported error (the game never uses non-10 radix).
+  (when radix
+    (unless (and (exact-integer? radix) (<= 2 radix 36))
+      (error 'mdl-unparse "UNPARSE radix must be a FIX in range 2-36"))
+    (unless (= radix 10)
+      (error 'mdl-unparse
+             "UNPARSE: non-decimal radix ~a not implemented; strict-failure per AGENTS.md"
+             radix)))
+  ;; Return a fresh mutable STRING so callers may PUT into it (Confusion
+  ;; probe: `<PUT <UNPARSE 42> 1 !\\X>` succeeds).
+  (string-copy (mdl-unparse-value 'mdl-unparse value)))
+
 (define (mdl-error . args)
   ;; ERROR is undeferable: a registered handler runs only above the current
   ;; level. A normal handler return falls through to the original failure.
@@ -3651,6 +3781,7 @@
         "GC" mdl-gc
         "BLOAT" mdl-bloat
         "ASCII" mdl-ascii
+        "UNPARSE" mdl-unparse
         "PRINTSTRING" mdl-printstring
         "TERPRI" mdl-terpri
         "CRLF" mdl-crlf

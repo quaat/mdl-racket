@@ -41,6 +41,7 @@ raco test mdl/runtime/core.rkt \
   tests/gettimedate_test.rkt tests/terminal_channel_test.rkt \
   tests/printstring_channel_test.rkt tests/crlf_test.rkt \
   tests/random36_test.rkt tests/back_test.rkt \
+  tests/unparse_test.rkt \
   tests/channel_port_test.rkt tests/channel_root_identity_test.rkt \
   tests/constructor_eval_policy_test.rkt tests/string_view_consumers_test.rkt \
   tests/oblist_identity_test.rkt \
