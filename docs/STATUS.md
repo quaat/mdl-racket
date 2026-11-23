@@ -1,4 +1,4 @@
-# Status — 2026-11-23 (`main` = `2a86d5d`: M3 SMOKE_PARITY (scoped) and local session smoke PASS on mainline; PLAYABLE NOT RUN)
+# Status — 2026-11-23 (`main` = `c8964bf`: M3 accepted; M4 S1–S3 PASS (mainline, scenario-scoped); M4 gate NOT YET PASSED; PLAYABLE NOT RUN)
 
 ## Current state (2026-11-23)
 
@@ -23,6 +23,26 @@ Racket v7.9 BC; CI: racket:8.10-bc (runs 45176163020, 45176121779).
 | SMOKE_PARITY | **PASS (mainline, scoped)** | house-boot at the session clock 250776000/UTC; one strict comparator, D1/D2 only (ADR-0053); promoted schema-3 reference `house-boot-reference.json`; `M3_NATIVE=require make m3-check` 7/7 incl. native fresh capture |
 | Local session smoke | **PASS (mainline)** | quit/n, inventory, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written (`make test-m3-session`, `make test-m3-launcher`) |
 | PLAYABLE | NOT RUN | M4 ([backlog](evidence/M4/SCENARIO-BACKLOG.md)) |
+
+### M4 on `main` = `c8964bf` (2026-11-23)
+
+M4 scenarios run on `main` with the session clock fixed at 250776000 UTC,
+compared prefix by prefix with pinned native Confusion and read-only state
+checkpoints ([M4 baseline record](evidence/M4/M4-MAINLINE-BASELINE.md)):
+
+| M4 item | State | Evidence |
+|---|---|---|
+| S1 enter the house and open the cellar | **PASS (mainline, scenario-scoped)** | #153; `make test-m4-house-cellar` (12 prefixes, 13 checkpoints) |
+| S2 CHTYPE to SEGMENT; drop | **PASS (mainline, scenario-scoped)** | #154; `make test-m4-mailbox-drop` (9 prefixes); ADR-0056 |
+| S3 CHTYPE to/from CHARACTER; orphan prompts | **PASS (mainline, scenario-scoped)** | #155; `make test-m4-orphan-prompt` (10 prefixes); ADR-0057 |
+| Manual DrRacket checks (quit, Stop) | **PASS** | [record](evidence/M4/DRRACKET-MANUAL-CHECK.md) |
+| M4 comprehensive-equivalence gate | NOT YET PASSED | scenario, state, save/restore and completion criteria not met |
+| PLAYABLE | NOT RUN | no playability gate executed |
+
+Gate on `c8964bf`: every target exit 0 locally (Racket v7.9 BC,
+`M3_NATIVE=require`) and in CI (racket:8.10-bc, runs 45230824479,
+45230779719). Strict by decision: `help`/`info` (OPEN "READ"), RESTORE, file
+operations. Next: S4 TOP (`77np.mud:126`), S5 MAX (#122) and troll combat.
 
 The sections below describe the branch stack as it was integrated; they are
 kept as the integration history.

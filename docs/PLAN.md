@@ -230,6 +230,14 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
 
 ## M4 — Comprehensive behavioral equivalence
 
+> **Progress (2026-11-23, `main` = `c8964bf`):** scenarios S1 (house and
+> cellar), S2 (SEGMENT / drop) and S3 (CHARACTER / orphan prompts) PASS on
+> mainline, scenario-scoped ([baseline](evidence/M4/M4-MAINLINE-BASELINE.md)).
+> The M4 gate itself is NOT YET PASSED. Next slices, each separately
+> reviewable: S4 TOP and the parser path (`77np.mud:126`); S5 MAX (#122) and
+> weapon combat with the troll; then corpus expansion (parser ambiguity,
+> death/recovery, scoring/inventory, lamp countdown and clock events).
+
 **Build:** scripted paths across map/puzzles; inventory, game death,
 NPCs, lamp/timers, parser edge cases, randomness, scoring, save/restore,
 500-point completion. Instrument read-only debug state in BOTH engines where
