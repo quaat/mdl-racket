@@ -31,6 +31,7 @@
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          mdl-random-state-snapshot
+         mdl-max
          atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
@@ -2706,6 +2707,23 @@
             (exact->inexact result)
             result))))
 
+;; M4 S5a (issue #122): MAX mirrors MIN: the same checked FIX/FLOAT
+;; arguments, FLOAT contagion, a fold from the first argument. ADR-0059:
+;; zero arguments give the least PDP-10 FLOAT, the exact negation of <MIN>
+;; (not the pinned reference's host DBL_MIN, which is no identity for MAX).
+(define pdp10-least-float (- pdp10-greatest-float))
+
+(define (mdl-max . values)
+  (if (null? values)
+      pdp10-least-float
+      (for/fold ([largest (check-number 'mdl-max (car values))])
+                ([value (in-list (cdr values))])
+        (check-number 'mdl-max value)
+        (define result (max largest value))
+        (if (or (inexact? largest) (inexact? value))
+            (exact->inexact result)
+            result))))
+
 (define (mdl-random . seeds)
   (when (> (length seeds) 2)
     (error 'mdl-random "RANDOM takes at most two FIX seeds"))
@@ -4709,6 +4727,7 @@
         "*" mdl-mul
         "/" mdl-div
         "MIN" mdl-min
+        "MAX" mdl-max
         "RANDOM" mdl-random
         "GETTIMEDATE" mdl-gettimedate
         "MOD" mdl-mod

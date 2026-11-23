@@ -1753,3 +1753,35 @@ CHANNEL; the manual's general PRIMTYPE remark is not what Confusion does);
 adding the reference's first CHANNEL slot now (it is the echo/script LIST,
 whose effect this runtime does not implement, so a PUT there would be a
 silent no-op; revisit when scripting is supported).
+
+## ADR-0059: Zero-argument MAX is the least PDP-10 FLOAT, the negation of `<MIN>`
+
+Status: proposed (M4 S5a, issue #122, 2026-11-23).
+
+Context: the manual (§3.5) gives "the least FLOAT" as MAX's zero-argument
+identity, symmetric to MIN's "greatest FLOAT". R6 decided `<MIN>` is the
+ordinary FLOAT (2^27−1)·2^100, the greatest PDP-10 single-precision value
+(SEMANTICS "M3 MIN"). Pinned Confusion's `<MAX>` is the host `DBL_MIN`, the
+smallest *positive* double (`docs/evidence/M4/MAX-REFERENCE.md`, case
+`zero`): it is greater than every negative number, so it is not an identity
+for MAX, and the same seed makes the reference return `0.0000000` for
+`<MAX -1.5 -2.5>` (case `float-negative`). No source form calls MAX with
+zero arguments; the game's uses are two-argument FIX (`78melee.mud:447-448`,
+`77rooms.mud:741`).
+
+Decision: `<MAX>` returns `pdp10-least-float` = −(2^27−1)·2^100, the exact
+negation of `<MIN>`, an ordinary host flonum like every other FLOAT. Its
+PDP-10 word image (CHTYPE to FIX/WORD) is 400000000001₈ (FIX −34359738367).
+Non-empty MAX folds from its first argument (never from a seed), so negative
+FLOAT arguments give the largest argument.
+
+Consequences: MIN and MAX are symmetric identities, `<MAX <MAX> x>` is x
+(as FLOAT), and the value takes part in arithmetic, comparison and CHTYPE
+like `<MIN>`. Recorded deviation from the reference for `<MAX>` itself and
+for all-negative FLOAT MAX with a FLOAT first argument; no game expression
+reaches either. Alternatives rejected: copying the reference's DBL_MIN
+(not the 36-bit target, not an identity, and the cause of the reference's
+negative-FLOAT results; the PDP-10 analogue, the smallest positive FLOAT
+0.5·2^-128, has the same defect); a strict error for `<MAX>` (consistent
+with "do not invent", but asymmetric with the decided `<MIN>` although the
+manual defines both identities in the same sentence).
