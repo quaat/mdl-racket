@@ -1,0 +1,24 @@
+{
+  "name": "house-cellar",
+  "description": "M4 scenario 1, 'enter the house and open the cellar' (docs/evidence/M4/SCENARIO-BACKLOG.md). Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, microseconds 0, as house-boot). From West of House: north (NHOUS), east (EHOUS), open the kitchen window (WINDOW-FUNCTION, 77act1.mud:39), west through the window CEXIT (KITCH, RVAL 10), west (LROOM), take the lamp, move the rug (RUG, 77act1.mud:303), open the trap door (TRAP-DOOR, 77act1.mud:211), turn on the lamp (TURN ON -> LANTERN/LAMP-ON), down through the TRAP-DOOR CEXIT (CELLA, RVAL 25; CELLAR slams the door, 77act1.mud:270), score. Each command was confirmed accepted by the pinned native reference; see docs/evidence/M4/HOUSE-CELLAR-REFERENCE.md. Input ends after score (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": ["<FLOAD \"77loadall.mud\">", "<SAVE-IT>"],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "score"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/house-cellar-reference.json",
+    "case": "T1-house-cellar-pipe"
+  }
+}

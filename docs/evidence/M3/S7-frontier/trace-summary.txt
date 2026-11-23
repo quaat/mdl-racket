@@ -1,0 +1,57 @@
+  1 L?           calls=   22 first-phase=0 (boot) registered
+  2 GETTIMEDATE  calls=    5 first-phase=0 (boot) registered
+  3 BITS         calls=   40 first-phase=0 (boot) registered
+  4 /            calls=   13 first-phase=0 (boot) registered
+  5 *            calls=   16 first-phase=0 (boot) registered
+  6 PUTBITS      calls=   20 first-phase=0 (boot) registered
+  7 SET          calls=  453 first-phase=0 (boot) special-form
+  8 MOD          calls=    9 first-phase=0 (boot) registered
+  9 GETBITS      calls=   20 first-phase=0 (boot) registered
+ 10 CHTYPE       calls=  211 first-phase=0 (boot) registered
+ 11 UNPARSE      calls=    1 first-phase=0 (boot) registered
+ 12 STRING       calls=    4 first-phase=0 (boot) registered
+ 13 TYPE?        calls=  111 first-phase=0 (boot) registered
+ 14 LOOKUP       calls=   44 first-phase=0 (boot) registered
+ 15 GASSIGNED?   calls=   30 first-phase=0 (boot) registered
+ 16 MEMQ         calls=   92 first-phase=0 (boot) registered
+ 17 BACK         calls=   12 first-phase=0 (boot) registered
+ 18 ==?          calls=  184 first-phase=0 (boot) registered
+ 19 REST         calls=  172 first-phase=0 (boot) registered
+ 20 LENGTH       calls=  255 first-phase=0 (boot) registered
+ 21 -            calls=   53 first-phase=0 (boot) registered
+ 22 SUBSTRUC     calls=   10 first-phase=0 (boot) registered
+ 23 ON           calls=    2 first-phase=0 (boot) registered
+ 24 HANDLER      calls=    1 first-phase=0 (boot) registered
+ 25 G?           calls=   85 first-phase=0 (boot) registered
+ 26 ISTRING      calls=    1 first-phase=0 (boot) registered
+ 27 INT-LEVEL    calls=    3 first-phase=0 (boot) registered
+ 28 SAVE         calls=    1 first-phase=0 (boot) registered
+ 29 =?           calls=    1 first-phase=0 (boot) registered
+ 30 MAPF         calls=   51 first-phase=0 (boot) registered
+ 31 ASCII        calls=   96 first-phase=0 (boot) registered
+ 32 INSERT       calls=    1 first-phase=0 (boot) registered
+ 33 EMPTY?       calls=   45 first-phase=0 (boot) registered
+ 34 ANDB         calls=  227 first-phase=0 (boot) registered
+ 35 NOT          calls=  116 first-phase=0 (boot) special-form
+ 36 PRINTSTRING  calls=   15 first-phase=0 (boot) registered
+ 37 ASSIGNED?    calls=   22 first-phase=0 (boot) registered
+ 38 CRLF         calls=   22 first-phase=0 (boot) registered
+ 39 RANDOM       calls=    2 first-phase=0 (boot) registered
+ 40 RESET        calls=    2 first-phase=0 (boot) MISSING
+ 41 N==?         calls=  188 first-phase=0 (boot) registered
+ 42 FORM         calls= 1112 first-phase=0 (boot) registered
+ 43 PRINC        calls=   49 first-phase=0 (boot) MISSING
+ 44 READSTRING   calls=    8 first-phase=0 (boot) MISSING
+ 45 MAPR         calls=   23 first-phase=1 (north) registered
+ 46 MIN          calls=    9 first-phase=1 (north) registered
+ 47 L=?          calls=   42 first-phase=1 (north) registered
+ 48 XORB         calls=   54 first-phase=1 (north) registered
+ 49 FIX          calls=    1 first-phase=4 (take leaflet) registered
+ 50 PRIN1        calls=   14 first-phase=6 (score) MISSING
+ 51 1?           calls=    6 first-phase=6 (score) registered
+ 52 FLOAT        calls=    4 first-phase=6 (score) registered
+ 53 VALUE        calls=    4 first-phase=8 (y (YES/NO, RECORD, QUIT)) registered
+ 54 OPEN         calls=    2 first-phase=8 (y (YES/NO, RECORD, QUIT)) MISSING
+ 55 N=?          calls=    1 first-phase=8 (y (YES/NO, RECORD, QUIT)) registered
+ 56 G=?          calls=    1 first-phase=8 (y (YES/NO, RECORD, QUIT)) registered
+ 57 CLOSE        calls=    1 first-phase=8 (y (YES/NO, RECORD, QUIT)) MISSING

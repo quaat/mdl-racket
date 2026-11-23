@@ -33,7 +33,7 @@
 (check-exn #rx"out of range" (lambda () (run "<REST (1) 2>")))
 (check-exn #rx"UVECTOR" (lambda () (run "<PUT ![1 2!] 1 \"bad\">")))
 (check-exn #rx"UVECTOR" (lambda () (run "![1 \"bad\"!]")))
-(check-exn #rx"unsupported" (lambda () (run "<REST \"abc\">")))
+(check-equal? (run "<STRING <REST \"abc\">>") "bc")
 
 (for ([n (in-range 2 11)])
   (define values (range n))

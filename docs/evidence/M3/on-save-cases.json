@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "name": "S4-ON-SAVE reference probe (isolated empty $TMPDIR cwd per case)",
+  "cases": [
+    {"name": "on-ipc-type", "expression": "<TYPE <ON \"IPC\" ,TYPE 1>>"},
+    {"name": "on-ipc-value", "expression": "<ON \"IPC\" ,TYPE 1>"},
+    {"name": "on-user-type", "expression": "<TYPE <ON \"M3-USER\" ,TYPE 7>>"},
+    {"name": "on-off-user", "expression": "<OFF <ON \"M3-USER\" ,TYPE 7>>"},
+    {"name": "on-invalid-action", "expression": "<ON \"IPC\" 1 1>"},
+    {"name": "on-invalid-name", "expression": "<ON 1 ,TYPE 1>"},
+    {"name": "on-zero-priority", "expression": "<ON \"IPC\" ,TYPE 0>"},
+    {"name": "on-string-priority", "expression": "<ON \"IPC\" ,TYPE \"X\">"},
+    {"name": "on-too-few", "expression": "<ON \"IPC\" ,TYPE>"},
+    {"name": "on-too-many", "expression": "<ON \"IPC\" ,TYPE 1 2 3 4>"},
+    {"name": "event-ipc-type", "expression": "<TYPE <EVENT \"IPC\" 1>>"},
+    {"name": "handler-ipc-type", "expression": "<TYPE <HANDLER <EVENT \"IPC\" 1> ,TYPE>>"},
+    {"name": "on-blocked-type", "expression": "<TYPE <ON \"BLOCKED\" ,TYPE 100>>"},
+    {"name": "save-string", "expression": "<SAVE \"S4PROBE.SAVE\">"},
+    {"name": "save-type", "expression": "<TYPE <SAVE \"S4PROBE2.SAVE\">>"},
+    {"name": "save-no-args", "expression": "<SAVE>"},
+    {"name": "save-fix", "expression": "<SAVE 1>"},
+    {"name": "restore-missing", "expression": "<RESTORE \"S4-MISSING.SAVE\">"}
+  ]
+}

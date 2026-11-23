@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: racket/racket:8.10-bc@sha256:8c527e0cca4650a6bdd73f3f73fe203ede6317c82f3f3f33bc861cec981e8b2d
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Install native build tools
         run: |
@@ -25,18 +25,103 @@ jobs:
           make sources
           make check-source
       - name: Install Racket runtime test libraries
-        run: raco pkg install --auto --no-docs compatibility-lib rackunit-lib
+        run: raco pkg install --auto --no-docs compiler-lib compatibility-lib rackunit-lib
       - name: Execute pinned historical VFLOAD definition slice
         run: make test-historical
       - name: Execute M2 G3 original-definition gate
         run: make test-m2-g3
       - name: Validate M3 original-source progress
         run: make m3-source-progress
+      - name: Test historical GC handlers against pinned source
+        run: make test-m3-historical-gc
+      - name: Verify original START frontier after BACK
+        run: make test-m3-start-back
+      # The faithful run.mud startup (FLOAD + SAVE-IT) and the six house-boot
+      # commands through the host loop (S7). The test itself bounds the game
+      # with a 300 s watchdog (a hang is a failure); the step limit is a
+      # second, coarser bound. Logs are kept as artifacts on failure.
+      - name: Execute faithful SAVE-IT startup
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-saveit 2>&1 | tee artifacts/ci-logs/test-m3-saveit.log
+      - name: Prove the fixed-clock DSKDATE seed and RANDOM chain
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-clock-seed 2>&1 | tee artifacts/ci-logs/test-m3-clock-seed.log
+      - name: Execute the six house-boot commands through the host loop
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-interactive 2>&1 | tee artifacts/ci-logs/test-m3-interactive.log
+      - name: Complete local quit session through the game's own FINISH/RECORD/QUIT
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-session 2>&1 | tee artifacts/ci-logs/test-m3-session.log
+      - name: Local launcher (run-zork, CLI exit codes, break)
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-launcher 2>&1 | tee artifacts/ci-logs/test-m3-launcher.log
+      - name: Typed ! escape read by the game's own RDCOM
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-bang 2>&1 | tee artifacts/ci-logs/test-m3-bang.log
+      # S10 (ADR-0053): the M3 SMOKE_PARITY technical check. Runs its own
+      # stages in order (sources, test-m3-saveit, test-m3-clock-seed,
+      # test-m3-interactive, comparator unit tests, this runtime's run vs the
+      # committed Confusion record through the single strict comparator).
+      # No native binary exists yet at this point, so the native stage is
+      # reported NOT RUN (never PASS). Each stage is bounded by
+      # M3_STAGE_TIMEOUT; the step limit is a second, coarser bound.
+      - name: M3 SMOKE_PARITY check (binary-free stages)
+        timeout-minutes: 20
+        shell: bash
+        env:
+          M3_STAGE_TIMEOUT: '480'
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make m3-check 2>&1 | tee artifacts/ci-logs/m3-check.log
+      - name: M4 scenario 1 (enter the house, open the cellar) and the recorded frontier
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-house-cellar 2>&1 | tee artifacts/ci-logs/test-m4-house-cellar.log
       - name: Build and capture native reference
         run: |
           make reference-build
           make reference-capture
           make reference-probe
+      # Fresh pinned-Confusion capture in a disposable copy under the fixed
+      # clock, compared strictly with the committed record and with this
+      # runtime's run (required here: a missing binary is a failure).
+      - name: M3 SMOKE_PARITY native fresh-capture comparison
+        timeout-minutes: 8
+        shell: bash
+        env:
+          M3_STAGE_TIMEOUT: '300'
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make m3-native-parity 2>&1 | tee artifacts/ci-logs/m3-native-parity.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -46,3 +131,5 @@ jobs:
             artifacts/reference/house.json
             artifacts/reference/primitives.json
             docs/evidence/M0/reader-sweep.json
+            artifacts/ci-logs/
+            artifacts/m3/

@@ -43,17 +43,12 @@
      (call-with-output-file (build-path root name) #:exists 'truncate/replace
        (lambda (out)
          (write-bytes (file->bytes (build-path source-root name)) out))))
-   (define session (make-mdl-session root))
+   ;; S13 part B (ADR-0050): the session writes only to its explicit port.
    (define out (open-output-string))
-   (define entry
-     (parameterize ([current-output-port out])
-       (mdl-session-load! session "77loadall.mud" #:max-expressions 1)))
-   (define prim
-     (parameterize ([current-output-port out])
-       (mdl-session-load! session "81prim.mud")))
-   (define defs
-     (parameterize ([current-output-port out])
-       (mdl-session-load! session "77defs.mud" #:max-expressions 28)))
+   (define session (make-mdl-session root #:output-port out))
+   (define entry (mdl-session-load! session "77loadall.mud" #:max-expressions 1))
+   (define prim (mdl-session-load! session "81prim.mud"))
+   (define defs (mdl-session-load! session "77defs.mud" #:max-expressions 28))
    (check-equal? (hash-ref entry 'status) "PARTIAL")
    (check-equal? (hash-ref prim 'status) "PASS")
    (check-equal? (hash-ref defs 'status) "PARTIAL")

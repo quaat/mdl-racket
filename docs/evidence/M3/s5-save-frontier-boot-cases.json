@@ -1,0 +1,49 @@
+{
+  "name": "save-frontier-boot",
+  "cases": [
+    {
+      "name": "boot-plain",
+      "cwd": "game",
+      "note": "faithful entry: <FLOAD \"run.mud\"> then one game command on stdin",
+      "input": "<FLOAD \"run.mud\">\nlook\n",
+      "timeout": 120
+    },
+    {
+      "name": "restore-madadv-from-boot",
+      "reuse": "boot-plain",
+      "argv": [
+        "-r",
+        "MDL/MADADV.SAVE"
+      ],
+      "note": "restore the image SAVE-IT just wrote: where does execution continue?",
+      "input": "<PRIN1 <INT-LEVEL>>\n<PRIN1 <GVAL REP>>\n<PRIN1 ,VERS>\n<QUIT>\n",
+      "timeout": 60
+    },
+    {
+      "name": "boot-traced",
+      "cwd": "game",
+      "note": "run.mud's two forms with a GVAL-wrapper tracing prelude in between",
+      "input": "<FLOAD \"77loadall.mud\">\n\n<SETG SF-N 0>\n<SETG O-INT-LEVEL ,INT-LEVEL>\n<DEFINE SF-ARG (X) <COND (<TYPE? .X CHANNEL> <PRINC \" #CHANNEL\">) (<TYPE? .X STRING> <PRINC \" \"> <PRIN1 .X>) (<TYPE? .X FIX ATOM FALSE> <PRINC \" \"> <PRIN1 .X>) (T <PRINC \" #\"> <PRINC <TYPE .X>>)>>\n<DEFINE SF-TRC (NAME \"TUPLE\" A) <SETG SF-N <+ ,SF-N 1>> <PRINC \"{\"> <PRIN1 ,SF-N> <PRINC \" \"> <PRINC .NAME> <PRINC \" il=\"> <PRIN1 <O-INT-LEVEL>> <MAPF <> ,SF-ARG .A> <PRINC \"}\"> T>\n<DEFINE SF-RET (NAME R) <PRINC \"{=> \"> <PRINC .NAME> <SF-ARG .R> <PRINC \"}\"> .R>\n<SETG O-SAVE ,SAVE>\n<SETG SAVE <FUNCTION (\"TUPLE\" A) <SF-TRC \"SAVE\" !.A> <SF-RET \"SAVE\" <COND (<EMPTY? .A> <O-SAVE>) (T <O-SAVE !.A>)>>>>\n<SETG O-INT-LEVEL ,INT-LEVEL>\n<SETG INT-LEVEL <FUNCTION (\"TUPLE\" A) <SF-TRC \"INT-LEVEL\" !.A> <SF-RET \"INT-LEVEL\" <COND (<EMPTY? .A> <O-INT-LEVEL>) (T <O-INT-LEVEL !.A>)>>>>\n<SETG O-ON ,ON>\n<SETG ON <FUNCTION (\"TUPLE\" A) <SF-TRC \"ON\" !.A> <SF-RET \"ON\" <COND (<EMPTY? .A> <O-ON>) (T <O-ON !.A>)>>>>\n<SETG O-OFF ,OFF>\n<SETG OFF <FUNCTION (\"TUPLE\" A) <SF-TRC \"OFF\" !.A> <SF-RET \"OFF\" <COND (<EMPTY? .A> <O-OFF>) (T <O-OFF !.A>)>>>>\n<SETG O-HANDLER ,HANDLER>\n<SETG HANDLER <FUNCTION (\"TUPLE\" A) <SF-TRC \"HANDLER\" !.A> <SF-RET \"HANDLER\" <COND (<EMPTY? .A> <O-HANDLER>) (T <O-HANDLER !.A>)>>>>\n<SETG O-EVENT ,EVENT>\n<SETG EVENT <FUNCTION (\"TUPLE\" A) <SF-TRC \"EVENT\" !.A> <SF-RET \"EVENT\" <COND (<EMPTY? .A> <O-EVENT>) (T <O-EVENT !.A>)>>>>\n<SETG O-DSKDATE ,DSKDATE>\n<SETG DSKDATE <FUNCTION () <SF-TRC \"DSKDATE\"> <SF-RET \"DSKDATE\" <O-DSKDATE>>>>\n<SETG O-GETTIMEDATE ,GETTIMEDATE>\n<SETG GETTIMEDATE <FUNCTION () <SF-TRC \"GETTIMEDATE\"> <SF-RET \"GETTIMEDATE\" <O-GETTIMEDATE>>>>\n<SETG O-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" A) <SF-TRC \"RANDOM\" !.A> <SF-RET \"RANDOM\" <COND (<EMPTY? .A> <O-RANDOM>) (T <O-RANDOM !.A>)>>>>\n<SETG O-RESET ,RESET>\n<SETG RESET <FUNCTION (\"TUPLE\" A) <SF-TRC \"RESET\" !.A> <SF-RET \"RESET\" <COND (<EMPTY? .A> <O-RESET>) (T <O-RESET !.A>)>>>>\n<SETG O-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" A) <SF-TRC \"READSTRING\" !.A> <SF-RET \"READSTRING\" <COND (<EMPTY? .A> <O-READSTRING>) (T <O-READSTRING !.A>)>>>>\n<SETG O-QUIT ,QUIT>\n<SETG QUIT <FUNCTION (\"TUPLE\" A) <SF-TRC \"QUIT\" !.A> <SF-RET \"QUIT\" <COND (<EMPTY? .A> <O-QUIT>) (T <O-QUIT !.A>)>>>>\n<SETG O-GETSYS ,GETSYS>\n<SETG GETSYS <FUNCTION () <SF-TRC \"GETSYS\"> <SF-RET \"GETSYS\" <O-GETSYS>>>>\n<SETG O-STARTER ,STARTER>\n<SETG STARTER <FUNCTION () <SF-TRC \"STARTER\"> <SF-RET \"STARTER\" <O-STARTER>>>>\n<SETG O-XUNAME ,XUNAME>\n<SETG XUNAME <FUNCTION () <SF-TRC \"XUNAME\"> <SF-RET \"XUNAME\" <O-XUNAME>>>>\n<SETG O-GET-NAME ,GET-NAME>\n<SETG GET-NAME <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"GET-NAME\" .X> <SF-RET \"GET-NAME\" <O-GET-NAME .X>>) (T <SF-TRC \"GET-NAME\"> <SF-RET \"GET-NAME\" <O-GET-NAME>>)>>>\n<SETG O-START ,START>\n<SETG START <FUNCTION (RM ST) <SF-TRC \"START\" .RM .ST> <SF-RET \"START\" <O-START .RM .ST>>>>\n<SETG O-CONTIN ,CONTIN>\n<SETG CONTIN <FUNCTION () <SF-TRC \"CONTIN\"> <SF-RET \"CONTIN\" <O-CONTIN>>>>\n<SETG O-ROOM-INFO ,ROOM-INFO>\n<SETG ROOM-INFO <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"ROOM-INFO\" .X> <SF-RET \"ROOM-INFO\" <O-ROOM-INFO .X>>) (T <SF-TRC \"ROOM-INFO\"> <SF-RET \"ROOM-INFO\" <O-ROOM-INFO>>)>>>\n<SETG O-RDCOM ,RDCOM>\n<SETG RDCOM <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"RDCOM\" .X> <SF-RET \"RDCOM\" <O-RDCOM .X>>) (T <SF-TRC \"RDCOM\"> <SF-RET \"RDCOM\" <O-RDCOM>>)>>>\n<SETG O-ISTRING ,ISTRING>\n<SETG ISTRING <FUNCTION (\"TUPLE\" A) <SF-TRC \"ISTRING\" !.A> <SF-RET \"ISTRING\" <COND (<EMPTY? .A> <O-ISTRING>) (T <O-ISTRING !.A>)>>>>\n<SETG O-SNAME ,SNAME>\n<SETG SNAME <FUNCTION (\"TUPLE\" A) <SF-TRC \"SNAME\" !.A> <SF-RET \"SNAME\" <COND (<EMPTY? .A> <O-SNAME>) (T <O-SNAME !.A>)>>>>\n<SETG O-FINISH ,FINISH>\n<SETG FINISH <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"FINISH\" .X> <SF-RET \"FINISH\" <O-FINISH .X>>) (T <SF-TRC \"FINISH\"> <SF-RET \"FINISH\" <O-FINISH>>)>>>\n<SAVE-IT>\nlook\n",
+      "timeout": 120
+    },
+    {
+      "name": "boot-no-mdl-dir",
+      "cwd": "game",
+      "pre_remove": "MDL",
+      "note": "SAVE fails (#FALSE) if <MDL> directory is missing: what does patched SAVE-IT do?",
+      "input": "<FLOAD \"77loadall.mud\">\n\n<SETG SF-N 0>\n<SETG O-INT-LEVEL ,INT-LEVEL>\n<DEFINE SF-ARG (X) <COND (<TYPE? .X CHANNEL> <PRINC \" #CHANNEL\">) (<TYPE? .X STRING> <PRINC \" \"> <PRIN1 .X>) (<TYPE? .X FIX ATOM FALSE> <PRINC \" \"> <PRIN1 .X>) (T <PRINC \" #\"> <PRINC <TYPE .X>>)>>\n<DEFINE SF-TRC (NAME \"TUPLE\" A) <SETG SF-N <+ ,SF-N 1>> <PRINC \"{\"> <PRIN1 ,SF-N> <PRINC \" \"> <PRINC .NAME> <PRINC \" il=\"> <PRIN1 <O-INT-LEVEL>> <MAPF <> ,SF-ARG .A> <PRINC \"}\"> T>\n<DEFINE SF-RET (NAME R) <PRINC \"{=> \"> <PRINC .NAME> <SF-ARG .R> <PRINC \"}\"> .R>\n<SETG O-SAVE ,SAVE>\n<SETG SAVE <FUNCTION (\"TUPLE\" A) <SF-TRC \"SAVE\" !.A> <SF-RET \"SAVE\" <COND (<EMPTY? .A> <O-SAVE>) (T <O-SAVE !.A>)>>>>\n<SETG O-INT-LEVEL ,INT-LEVEL>\n<SETG INT-LEVEL <FUNCTION (\"TUPLE\" A) <SF-TRC \"INT-LEVEL\" !.A> <SF-RET \"INT-LEVEL\" <COND (<EMPTY? .A> <O-INT-LEVEL>) (T <O-INT-LEVEL !.A>)>>>>\n<SETG O-ON ,ON>\n<SETG ON <FUNCTION (\"TUPLE\" A) <SF-TRC \"ON\" !.A> <SF-RET \"ON\" <COND (<EMPTY? .A> <O-ON>) (T <O-ON !.A>)>>>>\n<SETG O-OFF ,OFF>\n<SETG OFF <FUNCTION (\"TUPLE\" A) <SF-TRC \"OFF\" !.A> <SF-RET \"OFF\" <COND (<EMPTY? .A> <O-OFF>) (T <O-OFF !.A>)>>>>\n<SETG O-HANDLER ,HANDLER>\n<SETG HANDLER <FUNCTION (\"TUPLE\" A) <SF-TRC \"HANDLER\" !.A> <SF-RET \"HANDLER\" <COND (<EMPTY? .A> <O-HANDLER>) (T <O-HANDLER !.A>)>>>>\n<SETG O-EVENT ,EVENT>\n<SETG EVENT <FUNCTION (\"TUPLE\" A) <SF-TRC \"EVENT\" !.A> <SF-RET \"EVENT\" <COND (<EMPTY? .A> <O-EVENT>) (T <O-EVENT !.A>)>>>>\n<SETG O-DSKDATE ,DSKDATE>\n<SETG DSKDATE <FUNCTION () <SF-TRC \"DSKDATE\"> <SF-RET \"DSKDATE\" <O-DSKDATE>>>>\n<SETG O-GETTIMEDATE ,GETTIMEDATE>\n<SETG GETTIMEDATE <FUNCTION () <SF-TRC \"GETTIMEDATE\"> <SF-RET \"GETTIMEDATE\" <O-GETTIMEDATE>>>>\n<SETG O-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" A) <SF-TRC \"RANDOM\" !.A> <SF-RET \"RANDOM\" <COND (<EMPTY? .A> <O-RANDOM>) (T <O-RANDOM !.A>)>>>>\n<SETG O-RESET ,RESET>\n<SETG RESET <FUNCTION (\"TUPLE\" A) <SF-TRC \"RESET\" !.A> <SF-RET \"RESET\" <COND (<EMPTY? .A> <O-RESET>) (T <O-RESET !.A>)>>>>\n<SETG O-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" A) <SF-TRC \"READSTRING\" !.A> <SF-RET \"READSTRING\" <COND (<EMPTY? .A> <O-READSTRING>) (T <O-READSTRING !.A>)>>>>\n<SETG O-QUIT ,QUIT>\n<SETG QUIT <FUNCTION (\"TUPLE\" A) <SF-TRC \"QUIT\" !.A> <SF-RET \"QUIT\" <COND (<EMPTY? .A> <O-QUIT>) (T <O-QUIT !.A>)>>>>\n<SETG O-GETSYS ,GETSYS>\n<SETG GETSYS <FUNCTION () <SF-TRC \"GETSYS\"> <SF-RET \"GETSYS\" <O-GETSYS>>>>\n<SETG O-STARTER ,STARTER>\n<SETG STARTER <FUNCTION () <SF-TRC \"STARTER\"> <SF-RET \"STARTER\" <O-STARTER>>>>\n<SETG O-XUNAME ,XUNAME>\n<SETG XUNAME <FUNCTION () <SF-TRC \"XUNAME\"> <SF-RET \"XUNAME\" <O-XUNAME>>>>\n<SETG O-GET-NAME ,GET-NAME>\n<SETG GET-NAME <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"GET-NAME\" .X> <SF-RET \"GET-NAME\" <O-GET-NAME .X>>) (T <SF-TRC \"GET-NAME\"> <SF-RET \"GET-NAME\" <O-GET-NAME>>)>>>\n<SETG O-START ,START>\n<SETG START <FUNCTION (RM ST) <SF-TRC \"START\" .RM .ST> <SF-RET \"START\" <O-START .RM .ST>>>>\n<SETG O-CONTIN ,CONTIN>\n<SETG CONTIN <FUNCTION () <SF-TRC \"CONTIN\"> <SF-RET \"CONTIN\" <O-CONTIN>>>>\n<SETG O-ROOM-INFO ,ROOM-INFO>\n<SETG ROOM-INFO <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"ROOM-INFO\" .X> <SF-RET \"ROOM-INFO\" <O-ROOM-INFO .X>>) (T <SF-TRC \"ROOM-INFO\"> <SF-RET \"ROOM-INFO\" <O-ROOM-INFO>>)>>>\n<SETG O-RDCOM ,RDCOM>\n<SETG RDCOM <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"RDCOM\" .X> <SF-RET \"RDCOM\" <O-RDCOM .X>>) (T <SF-TRC \"RDCOM\"> <SF-RET \"RDCOM\" <O-RDCOM>>)>>>\n<SETG O-ISTRING ,ISTRING>\n<SETG ISTRING <FUNCTION (\"TUPLE\" A) <SF-TRC \"ISTRING\" !.A> <SF-RET \"ISTRING\" <COND (<EMPTY? .A> <O-ISTRING>) (T <O-ISTRING !.A>)>>>>\n<SETG O-SNAME ,SNAME>\n<SETG SNAME <FUNCTION (\"TUPLE\" A) <SF-TRC \"SNAME\" !.A> <SF-RET \"SNAME\" <COND (<EMPTY? .A> <O-SNAME>) (T <O-SNAME !.A>)>>>>\n<SETG O-FINISH ,FINISH>\n<SETG FINISH <FUNCTION (\"OPTIONAL\" X) <COND (<ASSIGNED? X> <SF-TRC \"FINISH\" .X> <SF-RET \"FINISH\" <O-FINISH .X>>) (T <SF-TRC \"FINISH\"> <SF-RET \"FINISH\" <O-FINISH>>)>>>\n<SAVE-IT>\nlook\n",
+      "timeout": 120
+    },
+    {
+      "name": "restore-zork-save",
+      "cwd": "game",
+      "argv": [
+        "-r",
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "note": "reference_runner boot image: initial output before first READSTRING",
+      "input": "look\n",
+      "timeout": 60
+    }
+  ]
+}

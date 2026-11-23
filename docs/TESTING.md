@@ -1,5 +1,68 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 SMOKE_PARITY check (S10, 2026-11-23)
+
+`make m3-check` (`scripts/m3_check.py`) runs, in order, `sources`,
+`test-m3-saveit`, `test-m3-clock-seed`, `test-m3-interactive`, the comparator
+unit tests (`tests/test_smoke_parity.py`), the strict comparison of this
+runtime's fixed-clock run (`scripts/m3_house_boot_run.rkt`) with the committed
+Confusion record `docs/evidence/M3/house-boot-reference.json` (the schema-3
+reference promoted 2026-11-23; the schema-2 approved candidate
+`house-boot-candidate.json` is kept as the historical baseline and compared
+with it in `tests/test_smoke_parity.py`), and, when
+`mdli` and `gcc` exist, a fresh native capture in a disposable copy compared
+with both. Without them that last stage is NOT RUN, never PASS
+(`M3_NATIVE=require` makes it a FAIL; `make m3-native-parity` runs only the
+native part). Every comparison uses the single comparator
+`scripts/smoke_parity.py` (ADR-0053): only D1 and D2 are tolerated, and the
+candidate must end by D3 input exhaustion. The report goes to
+`artifacts/m3/m3-check.json`, with logs in `artifacts/m3/logs/`. The
+comparator unit tests are part of `make test-python` and need neither Racket
+nor mdli. See [S10-SMOKE-PARITY.md](evidence/M3/S10-SMOKE-PARITY.md).
+
+## M3 branch-stack targets (2026-11-23 reconciliation)
+
+On the stack head (PR #141) the M3 make targets are `m3-source-progress`,
+`test-m3-andq`, `test-m3-historical-gc`, `test-m3-start-back` (direct-START
+XFAIL at TENEX?), `test-m3-saveit` and `test-m3-interactive` (scoped
+INITIALIZED/INTERACTIVE evidence; see
+[S7](evidence/M3/S7-INTERACTIVE.md)). The `make test-m3-start-random` target
+named in the RANDOM checkpoint below was replaced by `test-m3-start-back`
+and no longer exists. Since #141's review fixes (8e3d103) the reference
+workflow runs `test-m3-saveit` and `test-m3-interactive`, and the smoke
+workflow runs the shared `make test-python` (PLAN WP1 F1). `make m3-check` (S10) is described above.
+
+## M3 BACK follow-up checkpoint (2026-11-22)
+
+`tests/back_test.rkt` covers manual and pinned reference array BACK
+semantics without upstream fixtures. `make test-m3-start-back` requires
+`make sources`, checks all 1,229 original forms and zero skips, then
+records the known direct-START XFAIL at TENEX? in `77rooms.mud:298`.
+The required Native Confusion reference workflow runs this target after
+source preparation. See [BACK-CONTIN.md](evidence/M3/BACK-CONTIN.md).
+
+## M3 RANDOM follow-up checkpoint (2026-11-22)
+
+`tests/random36_test.rkt` uses temporary session roots and belongs to the
+source-independent Racket suite. `make test-m3-start-random` runs only after
+`make sources` and asserts the unchanged 1,229-form load and known XFAIL
+frontier at BACK in `77rooms.mud:297`. The required Native Confusion
+reference workflow runs this target after source preparation. Pinned
+RANDOM observations and the 36-bit negative-seed deviation are in
+[RANDOM-START.md](evidence/M3/RANDOM-START.md).
+
+## M3 source-load review checkpoint (2026-11-22)
+
+`TMPDIR=/tmp make test` is source independent: terminal CHANNEL tests create
+temporary source roots and the historical GC handler test is excluded. The
+required Native Confusion reference workflow runs `make sources`, then
+`make m3-source-progress` and `make test-m3-historical-gc`; the latter also
+depends on `sources` locally and fails if any pinned file is missing. It
+asserts the complete 1,229-form load, zero skips, and all 13 files in order.
+Use `TMPDIR=/tmp make m2-check` for the existing M2 and native reference
+regression. The scope and current START failure are recorded in
+[WIP-SOURCE-LOAD.md](evidence/M3/WIP-SOURCE-LOAD.md).
+
 ## M3 interrupt foundation checkpoint (2026-11-22)
 
 Issue #104 adds `tests/interrupt_dispatch_test.rkt` to the Racket suite.
@@ -405,11 +468,14 @@ validation deviation.
 The control slice adds `tests/control_test.rkt` for activation formals
 (leading ATOM and `"NAME"`/`"ACT"`), explicit RETURN/AGAIN to a function's
 own activation, bare transfers skipping function frames, GO labels and
-transfers, and UNWIND cleanup on transfers and errors; frame, GO, and UNWIND
+transfers, and UNWIND cleanup on transfers; frame, GO, and UNWIND
 invariants are in `mdl/runtime/core.rkt`'s test submodule. Sixteen
 successful Confusion observations and seven error observations are under
-`docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO and
-UNWIND-on-error reference deviations.
+`docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO reference
+deviation. Issue #139 adds `tests/unwind_raise_test.rkt`: raised errors
+(MDL ERROR, host strict errors, non-`exn` raises) propagate unchanged and
+run no UNWIND cleanup, while every MDL transfer runs it exactly once
+(ADR-0051, `docs/evidence/M3/I139-UNWIND.md`).
 The macro slice adds `tests/macro_test.rkt` to `make test-racket` for DEFMAC,
 FORM, EXPAND, quoted formals, caller-frame argument evaluation, ARGS/TUPLE,
 and an expansion that defines a function. Twenty-five successful Confusion

@@ -1,0 +1,1454 @@
+{
+  "schema_version": 1,
+  "probe": "seed",
+  "recorded_at": "2026-11-23T09:48:35.952130+00:00",
+  "interpreter_sha256_before": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "interpreter_sha256_after": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "upstream_mdlzork_checked_out": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "game_dir": "mdlzork_771212/patched_confusion",
+  "shim_src_sha256": "d1fa86520eab80891c95c9cbec8a35401fd1fe55c1d6fa6b18165a30736ab925",
+  "shim": "fixed_time.c from BOOT-REF (feat/m3-boot-reference e616ac0), compiled per run: gcc -shared -fPIC -O2 -o fixed_time.so fixed_time.c -ldl",
+  "protocol": "scripts/probe_session_reference.py (see module docstring)",
+  "cases": [
+    {
+      "name": "E1-seed-diag-epoch-A",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC: RANDOM wrapped before FLOAD, DSKDATE wrapped after FLOAD; six house-boot commands then EOF",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E1-seed-diag-epoch-A-atth44ty/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/E1-seed-diag-epoch-A-atth44ty/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-GETTIMEDATE ,GETTIMEDATE>\n<SETG GETTIMEDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<FLOAD \"77loadall.mud\">\n<SETG DIAG-ORIG-DSKDATE ,DSKDATE>\n<SETG DSKDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R>>\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\n",
+      "input_sha256": "1e084b371d772b90dbae6afc92f9d674832dd3b758950b141cde054ec7ccc8d7",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1-seed-diag-epoch-A-atth44ty/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1-seed-diag-epoch-A-atth44ty/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stdout_sha256": "74eb6261491edf33378b750fb77c7b4565c53fc5538024bb12be362d394ddac8",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1-seed-diag-epoch-A-atth44ty/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1-seed-diag-epoch-A-atth44ty/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 878292,
+            "sha256": "f35495bcc3d8249afb8e8176c51eed2fc870405d19108d1110084c7888d264fa",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {},
+      "diag_log": "GETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nRANDOM-ARGS (10438660480)\nRANDOM-RESULT 16566282405\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -21802663835\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"open mailbox\"\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\n"
+    },
+    {
+      "name": "E1b-seed-diag-epoch-A-repeat",
+      "kind": "diagnostic",
+      "note": "repeat of E1",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E1b-seed-diag-epoch-A-repeat-8uaatkp4/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/E1b-seed-diag-epoch-A-repeat-8uaatkp4/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-GETTIMEDATE ,GETTIMEDATE>\n<SETG GETTIMEDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<FLOAD \"77loadall.mud\">\n<SETG DIAG-ORIG-DSKDATE ,DSKDATE>\n<SETG DSKDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R>>\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\n",
+      "input_sha256": "a04e22cb61529ee5c9edd2c4e10bd6a9b8ae82e420c9cdf0146aced9162f7d8d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1b-seed-diag-epoch-A-repeat-8uaatkp4/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1b-seed-diag-epoch-A-repeat-8uaatkp4/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stdout_sha256": "84760b3b5ebaee6cd1e25f3c3b2921e57ceb8728302c4ed375e064abf0bbdc0a",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1b-seed-diag-epoch-A-repeat-8uaatkp4/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E1b-seed-diag-epoch-A-repeat-8uaatkp4/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 878290,
+            "sha256": "5f96fb2b737bb8373300af2672f93917ffb858c447b75f5047372f9f6c9fb86e",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {},
+      "diag_log": "GETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nRANDOM-ARGS (10438660480)\nRANDOM-RESULT 16566282405\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -21802663835\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"open mailbox\"\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\n"
+    },
+    {
+      "name": "E2-seed-diag-epoch-B",
+      "kind": "diagnostic",
+      "note": "second distinct epoch",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 251036100,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E2-seed-diag-epoch-B-c9pt35et/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/E2-seed-diag-epoch-B-c9pt35et/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-GETTIMEDATE ,GETTIMEDATE>\n<SETG GETTIMEDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<FLOAD \"77loadall.mud\">\n<SETG DIAG-ORIG-DSKDATE ,DSKDATE>\n<SETG DSKDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R>>\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\n",
+      "input_sha256": "f7ae3147908c97e5356d3bbeae90193919fc98650d0fed6bfdf36e9250cc437c",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E2-seed-diag-epoch-B-c9pt35et/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E2-seed-diag-epoch-B-c9pt35et/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\r\nThis version created December 15.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>You are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stdout_sha256": "5f278ffff3a5ae12ed978b9479b58e3b2c637ccfbf35297eeea90747058cf4cf",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E2-seed-diag-epoch-B-c9pt35et/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E2-seed-diag-epoch-B-c9pt35et/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\nThis version created December 15.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>You are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 878321,
+            "sha256": "dad9cb968cf9b52bdcdb2d2e3731fdc08935a596dca90da576c96c9b1dc3333e",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {},
+      "diag_log": "GETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 15 12 15 12 1977 0!]\nDSKDATE-RESULT-FIX 10439448712\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 15 12 15 12 1977 0!]\nDSKDATE-RESULT-FIX 10439448712\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 15 12 15 12 1977 0!]\nDSKDATE-RESULT-FIX 10439448712\nRANDOM-ARGS (10439448712)\nRANDOM-RESULT 16565494189\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -21802005015\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"open mailbox\"\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\n"
+    },
+    {
+      "name": "E3-seed-diag-epoch-A-TZ-NY",
+      "kind": "diagnostic",
+      "note": "same epoch, TZ=America/New_York: localtime reaches the seed",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "America/New_York"
+      },
+      "cwd": "$TMPDIR/session-probes/E3-seed-diag-epoch-A-TZ-NY-w7ecm2_8/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/E3-seed-diag-epoch-A-TZ-NY-w7ecm2_8/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-GETTIMEDATE ,GETTIMEDATE>\n<SETG GETTIMEDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<FLOAD \"77loadall.mud\">\n<SETG DIAG-ORIG-DSKDATE ,DSKDATE>\n<SETG DSKDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R>>\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\n",
+      "input_sha256": "3a0bbb8f45a1c44d236f19eac2d156faca3f721eed012c9d8476b6dc61f0afd5",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E3-seed-diag-epoch-A-TZ-NY-w7ecm2_8/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E3-seed-diag-epoch-A-TZ-NY-w7ecm2_8/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stdout_sha256": "8c4c1570a2d347a9e42adf3ec4fc9981690e295839dfdff7757bf487990b6439",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E3-seed-diag-epoch-A-TZ-NY-w7ecm2_8/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E3-seed-diag-epoch-A-TZ-NY-w7ecm2_8/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 878288,
+            "sha256": "a38359bdb0de8c220ad09754bd22fc79ccd89cd9683b4742805fc8e25270110f",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {},
+      "diag_log": "GETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 7 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438624480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 7 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438624480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 7 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438624480\nRANDOM-ARGS (10438624480)\nRANDOM-RESULT 16566255045\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -21802737739\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"open mailbox\"\nREADSTRING-COUNT 12\nREADSTRING-TEXT \"take leaflet\"\nREADSTRING-COUNT 9\nREADSTRING-TEXT \"inventory\"\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"score\"\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\n"
+    },
+    {
+      "name": "E4-walk-diag-epoch-A",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC: 12 alternating moves; each entry to a seen room calls PROB 80",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E4-walk-diag-epoch-A-ftq76y0x/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DIAG-CH <OPEN \"PRINT\" \"$TMPDIR/session-probes/E4-walk-diag-epoch-A-ftq76y0x/DIAG.LOG\">>\n<SETG DIAG-OPENS 0>\n<SETG DIAG <FUNCTION (DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T>>\n<SETG DIAG-ORIG-RANDOM ,RANDOM>\n<SETG RANDOM <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-GETTIMEDATE ,GETTIMEDATE>\n<SETG GETTIMEDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R>>\n<SETG DIAG-ORIG-READSTRING ,READSTRING>\n<SETG READSTRING <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R>>\n<FLOAD \"77loadall.mud\">\n<SETG DIAG-ORIG-DSKDATE ,DSKDATE>\n<SETG DSKDATE <FUNCTION (\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R>>\n<SAVE-IT>\nnorth\nwest\nnorth\nwest\nnorth\nwest\nnorth\nwest\nnorth\nwest\nnorth\nwest\n",
+      "input_sha256": "d20abbaa0e0ac28e31387f94ed158f804563cee20a8cf8ede31b6a43672fb00c",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E4-walk-diag-epoch-A-ftq76y0x/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E4-walk-diag-epoch-A-ftq76y0x/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_sha256": "50a578b9c083c429418a16845f4e14881e67cb1ea3673a0541c31bc6a889df82",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"PRINT\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E4-walk-diag-epoch-A-ftq76y0x/\" \"DIAG\" \"LOG\" \"DSK\" \"$TMPDIR/session-probes/E4-walk-diag-epoch-A-ftq76y0x/\" 0 0 0 0 0 0 0 10 0]\n0\n#FUNCTION ((DIAG-T DIAG-X) <PRINC .DIAG-T ,DIAG-CH> <PRINC \" \" ,DIAG-CH> <PRIN1 .DIAG-X ,DIAG-CH> <CRLF ,DIAG-CH> T)\n#SUBR *0000000000000000000125*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"RANDOM-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-RANDOM !.DIAG-A>> <DIAG \"RANDOM-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000245*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <DIAG \"GETTIMEDATE-ARGS\" <LIST !.DIAG-A>> <SET DIAG-R <APPLY ,DIAG-ORIG-GETTIMEDATE !.DIAG-A>> <DIAG \"GETTIMEDATE-RESULT\" .DIAG-R> .DIAG-R)\n#SUBR *0000000000000000000201*\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-READSTRING !.DIAG-A>> <DIAG \"READSTRING-COUNT\" .DIAG-R> <DIAG \"READSTRING-TEXT\" <SUBSTRUC <1 .DIAG-A> 0 .DIAG-R>> .DIAG-R)\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#FUNCTION ((\"AUX\" (DVEC <GETTIMEDATE>) (W #WORD *0000000000000000000000*) TM) <SET W <PUTBITS .W <BITS 18 0> <+ </ <7 .DVEC> 500000> <* <1 .DVEC> 2> <* <2 .DVEC> 120> <* <3 .DVEC> 7200>>>> <SET W <PUTBITS .W <BITS 7 27> <MOD <6 .DVEC> 100>>> <SET W <PUTBITS .W <BITS 4 23> <5 .DVEC>>> <SET W <PUTBITS .W <BITS 5 18> <4 .DVEC>>>)\n#FUNCTION ((\"TUPLE\" DIAG-A \"AUX\" DIAG-R) <SET DIAG-R <APPLY ,DIAG-ORIG-DSKDATE !.DIAG-A>> <DIAG \"DSKDATE-RESULT-FIX\" <CHTYPE .DIAG-R FIX>> .DIAG-R)\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.2,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 878336,
+            "sha256": "697e1f021c71b9a9e870aed9081d0b8d26e9ba1dbeb2f773d61ec0897fcbadf8",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {},
+      "diag_log": "GETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nGETTIMEDATE-ARGS ()\nGETTIMEDATE-RESULT ![0 0 12 12 12 1977 0!]\nDSKDATE-RESULT-FIX 10438660480\nRANDOM-ARGS (10438660480)\nRANDOM-RESULT 16566282405\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -21802663835\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nRANDOM-ARGS ()\nRANDOM-RESULT 12914488375\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -6577089531\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nRANDOM-ARGS ()\nRANDOM-RESULT 34210328094\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT 3437552668\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nRANDOM-ARGS ()\nRANDOM-RESULT 13814526739\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT -20114144995\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nRANDOM-ARGS ()\nRANDOM-RESULT 11990399124\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT 31711279130\nREADSTRING-COUNT 5\nREADSTRING-TEXT \"north\"\nRANDOM-ARGS ()\nRANDOM-RESULT 25894896720\nREADSTRING-COUNT 4\nREADSTRING-TEXT \"west\"\nRANDOM-ARGS ()\nRANDOM-RESULT 24534915165\nREADSTRING-COUNT 0\nREADSTRING-TEXT \"\"\n"
+    },
+    {
+      "name": "E4b-walk-transcript-epoch-A",
+      "kind": "transcript",
+      "note": "transcript of E4 without wrappers",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E4b-walk-transcript-epoch-A-zs_f43mt/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nnorth\nwest\nnorth\nwest\nnorth\nwest\nnorth\nwest\nnorth\nwest\n",
+      "input_sha256": "adbdb6d34a19f573b8c74eed005a138c38a10513c210fca0509197efd7e227b9",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stdout_sha256": "359dce66130529e70833c58b7e9dae8acea8e725459bf1c74a793908ae0ef5b8",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>North of House\n>West of House\nThere is a small mailbox here.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.18,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "397b191b8c55511bd34777c772884ad9abd72ac01e502dafee28aad6a77acadd",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "E5-plain-sequence-epoch-A",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC: after FLOAD only (no SAVE-IT): GETTIMEDATE, DSKDATE, <RANDOM seed> and 12 further <RANDOM> at LISTEN",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E5-plain-sequence-epoch-A-mu6_blcg/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<GETTIMEDATE>\n<CHTYPE <DSKDATE> FIX>\n<SET S <CHTYPE <DSKDATE> FIX>>\n<RANDOM .S>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<QUIT>\n",
+      "input_sha256": "aed7eb0d7a7934ff1d855dca60f9d429cf7755d5f89a479d9a1edb22d4c36951",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n![0 0 12 12 12 1977 0!]\n10438660480\n10438660480\n16566282405\n-21802663835\n12914488375\n-6577089531\n34210328094\n3437552668\n13814526739\n-20114144995\n11990399124\n31711279130\n25894896720\n24534915165\n-5538612619\n",
+      "stdout_sha256": "17df572fc55260aa537769cec8b218cb2952c88cdb1dd4d6bc337078ee278433",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n![0 0 12 12 12 1977 0!]\n10438660480\n10438660480\n16566282405\n-21802663835\n12914488375\n-6577089531\n34210328094\n3437552668\n13814526739\n-20114144995\n11990399124\n31711279130\n25894896720\n24534915165\n-5538612619\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.13,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {},
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "E5b-plain-sequence-epoch-B",
+      "kind": "diagnostic",
+      "note": "as E5 at epoch B",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 251036100,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E5b-plain-sequence-epoch-B-mggnlvrl/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<GETTIMEDATE>\n<CHTYPE <DSKDATE> FIX>\n<SET S <CHTYPE <DSKDATE> FIX>>\n<RANDOM .S>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<RANDOM>\n<QUIT>\n",
+      "input_sha256": "aed7eb0d7a7934ff1d855dca60f9d429cf7755d5f89a479d9a1edb22d4c36951",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n![0 15 12 15 12 1977 0!]\n10439448712\n10439448712\n16565494189\n-21802005015\n12915277119\n-6577677365\n34210260308\n3438241969\n-20545471973\n14245121603\n-5190372530\n-2648140689\n125308360\n33125320703\n-1244643045\n",
+      "stdout_sha256": "88225ce9312c4f8e7fa39296295e4a0d0be4b2f10e15cf34fd9151b5bf59509c",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n![0 15 12 15 12 1977 0!]\n10439448712\n10439448712\n16565494189\n-21802005015\n12915277119\n-6577677365\n34210260308\n3438241969\n-20545471973\n14245121603\n-5190372530\n-2648140689\n125308360\n33125320703\n-1244643045\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.13,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {},
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "E6-real-clock-gettimedate",
+      "kind": "diagnostic",
+      "note": "no shim: element 7 (microseconds) is live on the real clock",
+      "mode": "pipe",
+      "clock": "real host clock (no shim)",
+      "cwd": "$TMPDIR/session-probes/E6-real-clock-gettimedate-fdamy_ji/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<GETTIMEDATE>\n<GETTIMEDATE>\n<QUIT>\n",
+      "input_sha256": "f3c170bb9c578d14cafa9d557d15655821c784c8ff3ee4c7db550881e5b05b62",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![35 48 10 23 11 2026 400418!]\n![35 48 10 23 11 2026 400477!]\n",
+      "stdout_sha256": "44e772b380992a2d00d755b625abd4a0f3ff724854e9d51f67a5e38a3e6bbf17",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![35 48 10 23 11 2026 400418!]\n![35 48 10 23 11 2026 400477!]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_before": {},
+      "files_changed": {},
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "E8-subsecond-term",
+      "kind": "diagnostic",
+      "note": "DIAGNOSTIC: GETTIMEDATE element 7 (microseconds) forced to 0, 499999, 500000, 999999 under the fixed clock; shows the half-second term of DSKDATE",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E8-subsecond-term-5jqgomk8/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SETG GTD-ORIG ,GETTIMEDATE>\n<SETG USEC 0>\n<SETG GETTIMEDATE <FUNCTION (\"TUPLE\" A) <PUT <APPLY ,GTD-ORIG !.A> 7 ,USEC>>>\n<CHTYPE <DSKDATE> FIX>\n<SETG USEC 499999>\n<CHTYPE <DSKDATE> FIX>\n<SETG USEC 500000>\n<CHTYPE <DSKDATE> FIX>\n<SETG USEC 999999>\n<CHTYPE <DSKDATE> FIX>\n<QUIT>\n",
+      "input_sha256": "76f7422ae4ba55627a05fa9c0fd7246af79e5378dde0a8e88948a9dc1465e973",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#SUBR *0000000000000000000245*\n0\n#FUNCTION ((\"TUPLE\" A) <PUT <APPLY ,GTD-ORIG !.A> 7 ,USEC>)\n10438660480\n499999\n10438660480\n500000\n10438660481\n999999\n10438660481\n",
+      "stdout_sha256": "fb7f5f51c0d56f462d5c74bbb29c7ccc3bb44c4ca07fda5d5152a00e36316f00",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\n#SUBR *0000000000000000000245*\n0\n#FUNCTION ((\"TUPLE\" A) <PUT <APPLY ,GTD-ORIG !.A> 7 ,USEC>)\n10438660480\n499999\n10438660480\n500000\n10438660481\n999999\n10438660481\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.12,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {},
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "E7-west-transcript-epoch-A",
+      "kind": "transcript",
+      "note": "plain transcript of the six commands under the fixed clock",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E7-west-transcript-epoch-A-2cjohtep/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\n",
+      "input_sha256": "5c954db35e57386b853c13381629af8380971e3451342aca81e7fb971865ee0d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stdout_sha256": "12a4447371ee00e6fa66ebab891445f4893c44acba56c8bd6aea625f840988e3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "4b352df2f8d4e4b2a7055dbddbdbcfee0dd52806f67440be6e06d5510ef7897d",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    },
+    {
+      "name": "E7b-west-transcript-epoch-A-repeat",
+      "kind": "transcript",
+      "note": "repeat",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/E7b-west-transcript-epoch-A-repeat-6h2v3qbd/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\n",
+      "input_sha256": "5c954db35e57386b853c13381629af8380971e3451342aca81e7fb971865ee0d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\r\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stdout_sha256": "12a4447371ee00e6fa66ebab891445f4893c44acba56c8bd6aea625f840988e3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n>West of House\nThere is a small mailbox here.\n>Opening the mailbox reveals a leaflet.\n>Taken.\n>You are carrying:\nA leaflet\n>\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n>Beg pardon?\n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.17,
+      "files_before": {
+        "77act1.mud": {
+          "size": 87922,
+          "sha256": "fd1bde71f7d356ccd28c3fd73236e1d0ec2cb6a001d4be816a3d2011aecd0ee8",
+          "mode": "0o644"
+        },
+        "77act2.mud": {
+          "size": 35504,
+          "sha256": "b1efdaa199be939d5bae046776563bb6b5ef8ca054c17f4ff0d75a74e35693bb",
+          "mode": "0o644"
+        },
+        "77act3.mud": {
+          "size": 15647,
+          "sha256": "de4f6f15163ea99157ad0027cd815385e6f17d6d516384052ebe4cc35b133164",
+          "mode": "0o644"
+        },
+        "77defs.mud": {
+          "size": 18233,
+          "sha256": "566ebcc32be9b9226dd7cefd77a517583eebab80a03f452df39e13b85eed734e",
+          "mode": "0o644"
+        },
+        "77dung.mud": {
+          "size": 97961,
+          "sha256": "c103d4acfacf72deedc5f31cbd5bb165d8e5ec6536dfbf2bf6845d0933c5b01d",
+          "mode": "0o644"
+        },
+        "77loadall.mud": {
+          "size": 361,
+          "sha256": "389da842abe67e75523afb8e1ff1350f26375f5470b7dab167805f4a611e08aa",
+          "mode": "0o644"
+        },
+        "77makstr.mud": {
+          "size": 9462,
+          "sha256": "49ef04ce6c4c22c33c8e98b4ac5803f5ea5efb09d8a42050fb735d4722c004b5",
+          "mode": "0o644"
+        },
+        "77np.mud": {
+          "size": 19446,
+          "sha256": "ac9ffe1b8c2418e6a1d03d64a812bfca73e856632493c6346b4ed633adcb2605",
+          "mode": "0o644"
+        },
+        "77patch.mud": {
+          "size": 874,
+          "sha256": "c13c86c87d59f6e18adb21ced26580ea6520a3af8f7121cd2ad703fb1879a924",
+          "mode": "0o644"
+        },
+        "77rooms.mud": {
+          "size": 73232,
+          "sha256": "e89337af98565292f84cfb10e9239924e99918325c9e1ac39b6bce692f5aff94",
+          "mode": "0o644"
+        },
+        "78melee.mud": {
+          "size": 26434,
+          "sha256": "6b5fe49bdaceeb1e623d229f230bbae5e6f560b8298e3837d2deff9af29fb705",
+          "mode": "0o644"
+        },
+        "81prim.mud": {
+          "size": 4589,
+          "sha256": "8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571",
+          "mode": "0o644"
+        },
+        "81tell-repl.mud": {
+          "size": 4947,
+          "sha256": "ea57d8d4bb468f799a4c0b7194fc45e8d59606468d61f52fbb46defc8f377e4b",
+          "mode": "0o644"
+        },
+        "MDL/": {
+          "mode": "0o755"
+        },
+        "MDL/MADADV.HELP": {
+          "size": 4274,
+          "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.INFO": {
+          "size": 1527,
+          "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2",
+          "mode": "0o644"
+        },
+        "MDL/MADADV.SAVE": {
+          "size": 879667,
+          "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+          "mode": "0o644"
+        },
+        "SAVEFILE/": {
+          "mode": "0o755"
+        },
+        "run.mud": {
+          "size": 36,
+          "sha256": "a47675522f42f7a2fc930b05f77ce3efb92de6a750a73e6f9f7b291a7123093b",
+          "mode": "0o644"
+        }
+      },
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "c78e167bb020c201b5d95de36fee24d89944f219015328e4f9e5578ed4df0e70",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "changed_file_text": {}
+    }
+  ]
+}

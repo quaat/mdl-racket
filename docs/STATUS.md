@@ -1,17 +1,173 @@
-# Status — 2026-11-22 (M2 mainline PASS; M3 source execution partial)
+# Status — 2026-11-23 (`main` = `2a86d5d`: M3 SMOKE_PARITY (scoped) and local session smoke PASS on mainline; PLAYABLE NOT RUN)
 
-## Current state (2026-11-22)
+## Current state (2026-11-23)
 
-| M3 stage | Current evidence |
-|---|---|
-| PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
-| LOADED | FAIL: loader exit 1 after 433 original forms, zero skipped |
-| INITIALIZED | NOT RUN: source chain has not completed |
-| INTERACTIVE | NOT RUN: original startup/game loop unavailable |
-| SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
-| PLAYABLE | NOT RUN: original game has not booted in Racket |
+States used below: **PASS (mainline)** = verified on `main`; **PASS (branch
+evidence)** = verified on an unmerged branch only; **FAIL**; **BLOCKED**;
+**NOT RUN**. A branch PASS is not a mainline result.
 
-- **Issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
+### Mainline: `main` = `2a86d5d` (M3 mainline acceptance, 2026-11-23)
+
+M0, M1 and M2 gates: **PASS (mainline)**. The M3 stack (#107 → … → #150,
+#146, #142; #151) was integrated with the maintainer's approval and the full
+gate rerun on `main` with `M3_NATIVE=require`
+([acceptance record](evidence/M3/M3-MAINLINE-ACCEPTANCE.md)). Local runs:
+Racket v7.9 BC; CI: racket:8.10-bc (runs 45176163020, 45176121779).
+
+| M3 stage | State | Evidence |
+|---|---|---|
+| PARSED | PASS (mainline) | 36 historical text files parsed; 4 non-text files identified |
+| LOADED | PASS (mainline) | loader exit 0 after 1,229 original forms, zero skipped (`make m3-source-progress`) |
+| INITIALIZED | PASS (mainline, scoped) | faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>` (`make test-m3-saveit`) |
+| INTERACTIVE | PASS (mainline, scoped) | six house-boot commands through the host loop (`make test-m3-interactive`) |
+| SMOKE_PARITY | **PASS (mainline, scoped)** | house-boot at the session clock 250776000/UTC; one strict comparator, D1/D2 only (ADR-0053); promoted schema-3 reference `house-boot-reference.json`; `M3_NATIVE=require make m3-check` 7/7 incl. native fresh capture |
+| Local session smoke | **PASS (mainline)** | quit/n, inventory, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written (`make test-m3-session`, `make test-m3-launcher`) |
+| PLAYABLE | NOT RUN | M4 ([backlog](evidence/M4/SCENARIO-BACKLOG.md)) |
+
+The sections below describe the branch stack as it was integrated; they are
+kept as the integration history.
+
+### Integration history: umbrella #107 and the stack (now on `main`)
+
+Runtime stack (merge order): #107 (umbrella `feat/m3-logical-gc`) → #109 →
+#111 → #125 → #128 → #130 → #136 → #137 → #138 → #141 (S7 host loop + review
+F1/F2) → #144 (S8 session clock) → #145 (S9 MEMBER) → #147 (S11 QUIT/OPEN) →
+#148 (S12 launcher) and #150 (S13 READSTRING `!` and explicit output ports;
+both on #147). Side branches on that stack: #146 (S10 strict
+SMOKE_PARITY gate, on #144), #142 (docs reconciliation, on #141), #143
+(native reference probe evidence, on #141). The integration branch
+`integration/m3-acceptance` merges all of them; #131's capture tooling is
+merged into #146. All of it is on `main` since 2026-11-23 (#151 / `2a86d5d`).
+
+| M3 stage | State | Evidence |
+|---|---|---|
+| PARSED | PASS (branch evidence) | as on `main` |
+| LOADED | PASS (branch evidence) | loader exit 0 after 1,229 original forms, zero skipped (`make m3-source-progress`) |
+| INITIALIZED | PASS (branch evidence, scoped) | faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>`; SAVE is an in-session record (ADR-0048); host loop per ADR-0050; `make test-m3-saveit`, `make test-m3-interactive` |
+| INTERACTIVE | PASS (branch evidence, scoped) | the six house-boot commands read by the original RDCOM and answered exactly (`make test-m3-interactive`) |
+| SMOKE_PARITY | **PASS (branch evidence, scoped)** — #146 | fresh-boot house-boot scenario at the session clock fixed to epoch 250776000, UTC (ADR-0052). One strict comparator (ADR-0053): only D1 (LISTEN banner, `"DONE"`) and D2 (`canonical_text(ONLCR(raw))`) differ; date line, `west` (PROB 80 draw 65), every response, score line and move count exact; the candidate ends by D3 input exhaustion. Fresh native Confusion capture == committed candidate record == this runtime (`make m3-check` 7/7; CI run 45155753586 incl. native comparison). Clock→seed chain: DSKDATE = START seed 10438660480 and the RANDOM sequence equal native ([CLOCK-SEED-REFERENCE](evidence/M3/CLOCK-SEED-REFERENCE.md), `make test-m3-clock-seed`). Gameplay approval of the candidate reused; no new golden content |
+| Local session smoke | **PASS (branch evidence)** — #147/#148 | boot, six commands, `quit`/`n`, `inventory`, `quit`/`y` through the game's own FINISH → RECORD → QUIT; transcript byte-identical to native (D1 only); outcome `'quit`; extra input unread; no file written (OPEN denied per ADR-0055; Confusion writes `MDL/ZORK.LOG` — documented deviation, no visible difference). `make test-m3-session`, `make test-m3-launcher` (CI run 45158909816) |
+| PLAYABLE | NOT RUN | M4 scope ([backlog](evidence/M4/SCENARIO-BACKLOG.md)); known strict gaps below |
+
+Known strict gaps on the branch (each fails with an error, never stubbed):
+`put X in …` (unsupported TOP at `77np.mud:126` / CHTYPE conversion);
+`info`/`help` (OPEN "READ"); `script` reports it cannot open the channel; an
+in-game MDL ERROR stops at unsupported PRINT in HANDLE (`77rooms.mud:251`)
+before reaching QUIT; RESTORE unsupported. Local runs used Racket v7.9 BC;
+CI uses the pinned racket:8.10-bc container.
+
+### Fixed by the integration (now on `main`)
+
+These fixes reached `main` with the umbrella #107 (2026-11-23); their issues
+can now be closed against `main`.
+
+| Item | Fix | Record |
+|---|---|---|
+| #119 backslash-escaped atom names | PR #132 | [I119](evidence/M3/I119-ESCAPED-TRAILER.md) |
+| #124 leading-dot FLOAT | PR #133 | [I124](evidence/M3/I124-LEADING-DOT.md) |
+| #139 UNWIND cleanups masking raised errors | PR #140, ADR-0051 | [I139](evidence/M3/I139-UNWIND.md) |
+| #113 R1 session-owned CHANNEL ports | PR #117 | [R1](evidence/M3/review/R1.md) |
+| #113 R2/R10 GC growth, robust GC tests | PR #123 | [R2](evidence/M3/review/R2.md) |
+| #113 R3/R4 OBLIST authority, ROOT identity | PR #118 | [R3R4](evidence/M3/review/R3R4.md) |
+| #113 R5/R7 constructor evaluation, STRING views | PR #114 | [R5R7](evidence/M3/review/R5R7.md) |
+| #113 R6 MIN as an ordinary PDP-10 FLOAT | PR #115 | [R6](evidence/M3/review/R6.md) |
+| #113 R8 ERROR delivery, ERRET level | PR #116 | [R8](evidence/M3/review/R8.md) |
+| #113 R9 reference probe evidence | unknown: the branch `evidence/m3-107-reference-probes` named in #113 is not on `origin`; per-finding probes are in each R record | — |
+
+The issue #113 body still lists R2-R4 as "review running" and R6/R8 nits
+as open; the merges above supersede that table. The contracts are
+consolidated into [SEMANTICS](SEMANTICS.md).
+
+### Next
+
+Active iteration (PLAN "Active iteration (2026-11-23)"): WP1 stack
+readiness done on branch (F1 CI coverage, F2 flush, F3 docs, #55); WP2
+SMOKE_PARITY PASS on branch; WP3 MEMBER, QUIT, OPEN, READSTRING `!` and
+explicit output ports done on branch (#145, #147, #150); WP4 local session smoke and launcher PASS
+on branch; WP5 [M4 backlog](evidence/M4/SCENARIO-BACKLOG.md) drafted.
+
+M3 is accepted on `main` (scoped as above). Issues #119, #124, #135 (part 1)
+and #139 are fixed on `main`. Next: M4, first scenario "enter the house and
+open the cellar"; a manual DrRacket run (quit and Stop) would close the
+remaining GUI verification gap.
+
+## Slice history (newest first; each entry as recorded at the time)
+
+- **S7 interactive terminal I/O on `feat/m3-interactive-io` (WIP, ADR-0050):**
+  RESET (terminal CHANNEL; clears the host end-of-input flag), PRINC (STRING,
+  CHARACTER, FIX), PRIN1 (FIX, trailer-free ATOM incl. `,NULL`), READSTRING
+  (RDCOM/YES-NO form; stop consumed; overflow kept; no echo; flush first) and
+  the local host loop `mdl-session-run-interactive` (explicit ports; entry value
+  printed per D1; GVAL REP re-read each pass). End of input follows D3
+  "Mirror, then strict". The faithful path plays the six approved commands:
+  `make test-m3-interactive` exit 0 (30 checks); 10 raw runs are byte-identical
+  to Confusion's pipe output after removing `"DONE"` and the date. The `west`
+  response is RNG-dependent (`<PROB 80>`, 77rooms.mud:523) until #135. Strict
+  and unsupported: QUIT, OPEN/CLOSE, MEMBER, PRINC line breaking, `!` in input,
+  READSTRING default channel/FIX stop/EOF routine. See
+  [S7 evidence](evidence/M3/S7-INTERACTIVE.md).
+
+- **S6 inert REP on `feat/m3-startup-rep` (WIP, ADR-0049):** The GVAL of
+  ROOT REP is a predefined SUBR in every session (TYPE SUBR, GASSIGNED,
+  APPLICABLE; `<SETG SAVEREP ,REP>` keeps the same object), matching pinned
+  Confusion (`evidence/M3/S6-rep-reference.json`). Applying the default REP
+  by any path is a strict error naming ADR-0049; no raw MDL REPL exists. The
+  host top-level loop that applies the current GVAL of REP is specified in
+  SEMANTICS but not implemented. The faithful path now passes
+  77rooms.mud:301-302 and fails at `<RESET ,INCHAN>` (303):
+  `mdl-eval: unassigned or non-applicable MDL operator RESET`. Next
+  blockers: RESET, then the host loop, PRINC, READSTRING. Sandboxed checks
+  only so far; no INITIALIZED, interactive or parity result is claimed.
+  See [S6 evidence](evidence/M3/S6-REP.md).
+
+- **S5 SAVE session record on `feat/m3-startup-save-record` (WIP, ADR-0048):**
+  SAVE returns a fresh `"SAVED"`, writes no file, performs no GC or
+  interrupt side effect, and records (sequence, file-spec, INT-LEVEL) for
+  host inspection; RESTORE stays refused; `"BLOCKED"` registers but never
+  fires. Earlier, S4 (ADR-0047, issue #112) added ON with IPC registration
+  and stopped at the strict SAVE refusal at 77rooms.mud:26. The faithful
+  `<FLOAD "77loadall.mud">` + `<SAVE-IT>` path now records one SAVE of
+  `"<MDL>MADADV.SAVE"` at INT-LEVEL 100000, executes `<INT-LEVEL 0>`
+  (77rooms.mud:26; no GC/DIVERT-AGC occurrence was pending), STARTER,
+  GETSYS, `ON "BLOCKED"` and START (welcome text, INT-LEVEL 0 at 292),
+  and fails in CONTIN at 77rooms.mud:301 `<SETG SAVEREP ,REP>`:
+  `mdl-gval: unassigned MDL global REP`. Next blockers per the reference
+  trace: GVAL REP plus a LISTEN loop that applies it, RESET, PRINC,
+  READSTRING. No INITIALIZED, interactive or parity result is claimed.
+  See [S5 evidence](evidence/M3/S5-SAVE-RECORD.md) and the
+  [reference frontier](evidence/M3/S5-SAVE-FRONTIER.md).
+
+- **Issue #110 BACK follow-up on `feat/m3-back-continuation` (WIP):**
+  Manual and pinned Confusion probes establish BACK view behavior and the
+  terminal CHANNEL predecessor slot. The unchanged original START now
+  passes RANDOM and BACK, then fails at unassigned `TENEX?` in
+  `77rooms.mud:298`. Original source wrappers set this platform global
+  through GETSYS before START; direct START bypasses that setup. The
+  next slice must probe the source's startup prelude and report its next
+  real failure. No interactive or smoke-parity result is claimed. See
+  [BACK evidence](evidence/M3/BACK-CONTIN.md).
+
+- **Issue #108 RNG follow-up on `feat/m3-session-random` (WIP):** A
+  session-owned two-word 36-bit generator passes deterministic reference
+  cases, seed-order checks, strict errors, range checks and independent
+  session tests. The unchanged START now passes RANDOM and fails at
+  unassigned `BACK` in `77rooms.mud:297` after welcome output. The source
+  load remains 1,229 forms, zero skips. This is a new executable frontier,
+  not an INITIALIZED or M3 pass. See [RANDOM evidence](evidence/M3/RANDOM-START.md).
+
+- **Current WIP `feat/m3-logical-gc` (reviewed checkpoint `c5a6027`):** The complete unchanged
+  source chain loads: 1,229 forms, zero skips, loader exit 0. This is a
+  scoped LOADED gate result, not M3 acceptance. A direct original `START`
+  call fails at unassigned `RANDOM` after CRLF; terminal input, the game loop, approved
+  house smoke parity, and state comparisons remain unverified. After CI fixture
+  repair and GC/UVECTOR regressions, `make test` passes 1,471 Racket and 23
+  Python tests; `make m2-check` exits 0 on the repaired head. The
+  logical GC ledger covers LIST, VECTOR and UVECTOR backing allocations,
+  with the limits in [WIP evidence](evidence/M3/WIP-SOURCE-LOAD.md). The
+  next executable action is a reference-validated session RNG and then
+  the original terminal I/O path. M3 status: **FAIL / incomplete**.
+
+- **Previous issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
   scoped Gate A PASS after independent review; Gate B BLOCKED and M3
   incomplete.** Session-owned
   priority dispatch, pending occurrences, `INT-LEVEL`, `ENABLE`, and
@@ -591,10 +747,11 @@ function frames. `GO` follows the MDL manual chapter 10: top-level atoms in
 PROG/REPEAT bodies are labels skipped in normal flow, and GO resumes at the
 following expression in the nearest owned frame; the pinned Confusion has no
 GO or TAG, a recorded reference deviation, and TAG values remain
-unsupported. `UNWIND` runs its cleanup when a nonlocal transfer or an error
-crosses below it and returns the guarded expression's value otherwise;
-Confusion skips the cleanup on errors, a deviation the Racket runtime does
-not copy (manual chapter 16). `make test` passes 465 Racket checks and 13
+unsupported. `UNWIND` runs its cleanup when a nonlocal transfer crosses
+below it and returns the guarded expression's value otherwise. (This slice
+originally also ran it on errors; issue #139 / ADR-0051 corrected that: a
+raised error runs no cleanup, matching the manual and Confusion; see
+[I139 evidence](evidence/M3/I139-UNWIND.md).) `make test` passes 465 Racket checks and 13
 Python tests under the documented sandbox environment after both Codex
 review fixes (PUTREST TUPLE rejection in PR #32 and octal-token label
 exclusion here); the 36/36 reader

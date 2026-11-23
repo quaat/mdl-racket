@@ -1,0 +1,26 @@
+{
+  "name": "save-frontier-primitives",
+  "cases": [
+    {"name": "muddle-value", "input": "<PRIN1 ,MUDDLE>\n<QUIT>\n"},
+    {"name": "intlevel-default", "input": "<INT-LEVEL>\n<QUIT>\n"},
+    {"name": "save-return-and-intlevel", "note": "SAVE inside a function: value returned, INT-LEVEL preserved across SAVE",
+     "input": "<INT-LEVEL 100000>\n<DEFINE F (\"AUX\" R) <SET R <SAVE \"P1.SAVE\">> <PRINC \"[after-save:\"> <PRIN1 .R> <PRINC \" il=\"> <PRIN1 <INT-LEVEL>> <PRINC \"]\"> .R>\n<F>\n<QUIT>\n"},
+    {"name": "save-mdl-dir", "note": "FN default for MUDDLE>=100 is <MDL>MADADV.SAVE; MDL dir absent in empty cwd",
+     "input": "<SAVE \"<MDL>MADADV.SAVE\">\n<QUIT>\n"},
+    {"name": "save-mdl-dir-present", "cwd": "game", "note": "same FN in game-dir copy (MDL/ exists)",
+     "input": "<SAVE \"<MDL>MADADV.SAVE\">\n<QUIT>\n"},
+    {"name": "save-midprogram-make", "note": "image saved mid-PROG with a custom REP and INT-LEVEL 100000",
+     "input": "<SETG MARK 1>\n<INT-LEVEL 100000>\n<PROG () <PRINC \"[A]\"> <PRINC <SAVE \"MID.SAVE\">> <PRINC \"[B]\"> <SETG MARK 2>>\n<PRIN1 ,MARK>\n<QUIT>\n"},
+    {"name": "save-midprogram-restore-r", "reuse": "save-midprogram-make", "argv": ["-r", "MID.SAVE"],
+     "note": "restore via -r: does the SAVE call return again (prints RESTORED and [B])?",
+     "input": "<PRIN1 ,MARK>\n<PRIN1 <INT-LEVEL>>\n<QUIT>\n"},
+    {"name": "restore-subr-same-process", "note": "RESTORE in-process: does the continuation of RESTORE or of SAVE run?",
+     "input": "<SETG MARK 1>\n<PROG () <PRINC \"[A]\"> <PRINC <SAVE \"M2.SAVE\">> <PRINC \"[B]\">>\n<SETG MARK 3>\n<PROG () <PRINC \"[C]\"> <PRINC <RESTORE \"M2.SAVE\">> <PRINC \"[D]\">>\n<PRINC \"[E]\">\n<PRIN1 ,MARK>\n<QUIT>\n"},
+    {"name": "restore-applies-rep", "note": "after restore, LISTEN applies GVAL REP",
+     "input": "<DEFINE MYREP () <PRINC \"[MYREP called]\"> <QUIT>>\n<PROG () <SAVE \"R.SAVE\"> <SETG REP ,MYREP>>\n<PRINC \"[unreachable?]\">\n<QUIT>\n"},
+    {"name": "restore-applies-rep-r", "reuse": "restore-applies-rep", "argv": ["-r", "R.SAVE"],
+     "note": "image saved BEFORE SETG REP: restored REP is the default", "input": "<PRINC \"[default REP read this]\">\n<QUIT>\n"},
+    {"name": "save-eval-make", "input": "<SAVE-EVAL '<PROG () <PRINC \"[save-eval form ran]\"> <PRIN1 <INT-LEVEL>>> \"SE.SAVE\">\n<QUIT>\n"},
+    {"name": "save-eval-restore", "reuse": "save-eval-make", "argv": ["-r", "SE.SAVE"], "input": "<QUIT>\n"}
+  ]
+}

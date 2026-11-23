@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "m3-I119-I124-combined",
+  "description": "Probe cases for escaped leading-dot tokens after reconciling #119 (backslash escapes) with #124 (leading-dot FLOAT)",
+  "cases": [
+    {"name": "set-esc5-lval", "expression": "<SET \\5 3>\n.\\5"},
+    {"name": "set-esc-dot5-lval", "expression": "<SET \\.5 7>\n.\\.5"},
+    {"name": "esc-dot5-spname", "expression": "<SPNAME \\.5>"},
+    {"name": "esc-dot5-type", "expression": "<TYPE \\.5>"},
+    {"name": "dot5-float", "expression": ".5"},
+    {"name": "dot5-type", "expression": "<TYPE .5>"},
+    {"name": "dotdot5", "expression": "..5"},
+    {"name": "dotdotA-atom", "expression": "<SET B 4>\n<SET A B>\n..A"}
+  ]
+}

@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status: M0, M1 and M2 gates PASS; M3 source loading remains incomplete. NOT a playable game.** This repository is a starting
+> **Status (2026-11-23): `main` (`2a86d5d`) — M0, M1, M2 PASS; M3 accepted on mainline: the original 1977 game loads, initializes, matches native Confusion exactly on the fixed-clock fresh-boot house smoke (SMOKE_PARITY PASS, scoped) and completes a local session that quits through its own code (local session smoke PASS). PLAYABLE NOT RUN. NOT a complete playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -9,7 +9,163 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 interrupt foundation checkpoint (2026-11-22, issue #104):**
+## Verified status (2026-11-23)
+
+**Mainline (`main` = `2a86d5d`, M3 acceptance 2026-11-23).** M0, M1, M2:
+**PASS (mainline)**. M3, gate rerun on `main` with `M3_NATIVE=require` (local
+Racket v7.9 BC; CI racket:8.10-bc runs 45176163020 and 45176121779;
+[acceptance record](docs/evidence/M3/M3-MAINLINE-ACCEPTANCE.md)):
+
+| M3 stage | State on `main` |
+|---|---|
+| PARSED | PASS (mainline) |
+| LOADED | PASS (mainline): 1,229 forms, zero skipped |
+| INITIALIZED | PASS (mainline, scoped): faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>`; SAVE is an in-session record (ADR-0048) |
+| INTERACTIVE | PASS (mainline, scoped): the six house-boot commands through the host loop |
+| SMOKE_PARITY | **PASS (mainline, scoped)**: house-boot at the fixed session clock 250776000/UTC; one strict comparator, only D1/D2 differ (ADR-0053); committed schema-3 reference == fresh native capture == this runtime |
+| Local session smoke | **PASS (mainline)**: quit/n, a further command, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written |
+| PLAYABLE | NOT RUN (M4) |
+
+The fixes for #119, #124, #139, the #113 review findings R1-R8/R10, the
+host-loop flush masking (F2) and the session clock (#135 part 1) are on
+`main`. See [STATUS](docs/STATUS.md).
+
+**Supported on `main`:** the S7 terminal subset (RESET, PRINC, PRIN1,
+READSTRING as RDCOM/YES-NO use it) and the local host loop
+`mdl-session-run-interactive` (explicit ports; no MDL evaluator; never a
+network service); a session-owned clock (`#:clock`, `#:time-zone`,
+ADR-0052); MEMBER (structural search, STRING substring); QUIT as a session
+outcome (`'quit` / `'quit-after-mdl-error`, ADR-0054); OPEN under a virtual
+no-file policy (RECORD's form only, ADR-0055); SAVE as an in-session record.
+
+**Unsupported (strict errors):** RESTORE, CLOSE and other file I/O (`info`,
+`help`), TOP (`put X in …`), PRINT (the game's ERROR handler path), non-ASCII
+terminal input, a session without an explicit output port (S13, ADR-0050),
+and every MDL construct not listed in [SEMANTICS](docs/SEMANTICS.md). Typed
+`!` follows pinned Confusion (S13: `nor!th` reads as `north`).
+
+**Play locally (preview):** see the section below; `make play` or
+`racket zork/cli.rkt`.
+
+**Reproduce** (after `make sources`; local runs used Racket v7.9 BC, CI the
+racket:8.10-bc container; in the sandbox `export PLTCOLLECTS=":$PWD"`):
+`make test`, `make test-historical`, `make test-m2-g3`,
+`make m3-source-progress`, `make test-m3-historical-gc`,
+`make test-m3-start-back`, `make test-m3-saveit`, `make test-m3-interactive`,
+`make test-m3-clock-seed`, `make test-m3-session`, `make test-m3-launcher`,
+`make test-m3-bang`,
+`make m3-check` (aggregate M3 SMOKE_PARITY check; native stage NOT RUN
+without `mdli`), `make m3-native-parity` (after `make reference-build`).
+The reference CI workflow runs all of these.
+
+**Evidence:** [S10 SMOKE_PARITY](docs/evidence/M3/S10-SMOKE-PARITY.md),
+[S11 QUIT/OPEN](docs/evidence/M3/S11-QUIT-OPEN.md),
+[S12 launcher](docs/evidence/M3/S12-LAUNCHER.md),
+[S8 clock](docs/evidence/M3/S8-SESSION-CLOCK.md),
+[S9 MEMBER](docs/evidence/M3/S9-MEMBER.md),
+[F1/F2](docs/evidence/M3/F1-F2-STACK-FIXES.md),
+[native reference probes](docs/evidence/M3/), [S7](docs/evidence/M3/S7-INTERACTIVE.md),
+[compatibility inventory](docs/evidence/M3/COMPATIBILITY-INVENTORY.md).
+
+**Next milestone step:** M4, starting with the scenario "enter the house
+and open the cellar" ([backlog](docs/evidence/M4/SCENARIO-BACKLOG.md)). A
+manual DrRacket run (quit and Stop) would close the remaining GUI
+verification gap.
+
+**Previous M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
+summarised above; details in [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).
+That record listed UNWIND under host errors (#139) as missing; it has since
+been fixed on the branch (ADR-0051).
+
+**Previous M3 S6 inert REP (2026-11-23, `feat/m3-startup-rep`, ADR-0049):**
+By maintainer decision ("Inert REP + host loop") every session's GVAL of
+REP is a predefined SUBR (`<TYPE ,REP>` is SUBR, `<SETG SAVEREP ,REP>` then
+`<==? ,REP ,SAVEREP>` is T, as in pinned Confusion), but applying the default
+REP by any path is a strict error: the runtime never provides a raw MDL
+read-eval-print loop. The host top-level loop that will apply the current
+GVAL of REP (by then the game's RDCOM) is specified in `docs/SEMANTICS.md`
+but **not implemented**. The faithful `<SAVE-IT>` path now passes
+77rooms.mud:301-302 (SAVEREP holds the REP SUBR, REP is RDCOM) and stops at
+`<RESET ,INCHAN>` (77rooms.mud:303) with `mdl-eval: unassigned or
+non-applicable MDL operator RESET` (known XFAIL, `make test-m3-saveit`).
+Gate result for this slice: full gate PASS outside the sandbox (`make test`,
+`test-historical`, `m3-source-progress`, `test-m3-historical-gc`,
+`test-m3-start-back`, `test-m3-saveit`, `test-m3-andq`: all exit 0; see
+`docs/evidence/M3/S6-REP.md`). RESET, the host loop, PRINC,
+READSTRING, interactive input and smoke parity are unsupported.
+**INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have not passed; M3 is
+incomplete.** Next: RESET of INCHAN. See
+[S6 evidence](docs/evidence/M3/S6-REP.md).
+
+**Previous M3 S5 SAVE session record (2026-11-23, `feat/m3-startup-save-record`, ADR-0048):**
+By maintainer decision `<SAVE file-spec>` returns a fresh `"SAVED"`, writes
+no file, performs no GC and no interrupt side effect, and appends a
+host-visible session record (sequence, file-spec, INT-LEVEL); RESTORE stays
+refused. `"BLOCKED"` registers like IPC but can never fire. The faithful
+path (`<FLOAD "77loadall.mud">` then `<SAVE-IT>`) now records SAVE of
+`"<MDL>MADADV.SAVE"` at INT-LEVEL 100000, runs `<INT-LEVEL 0>`
+(77rooms.mud:26), GETSYS, `ON "BLOCKED"` and START (welcome text), then
+stops in CONTIN at `77rooms.mud:301` with `mdl-gval: unassigned MDL global
+REP` (known XFAIL, `make test-m3-saveit`, 27 assertions). Gate result for
+this slice: full gate PASS outside the sandbox at `fe495b1` (`make test`,
+`test-historical`, `m3-source-progress`, `test-m3-historical-gc`,
+`test-m3-start-back`, `test-m3-saveit`, `test-m3-andq`: all exit 0; see
+`docs/evidence/M3/S5-SAVE-RECORD.md`). RESET, the
+LISTEN/REP loop, PRINC, READSTRING, interactive input and smoke parity are
+unsupported. **INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have not
+passed; M3 is incomplete.** Next: a maintainer decision and slice for the
+GVAL of REP and the LISTEN loop that applies it. See
+[S5 evidence](docs/evidence/M3/S5-SAVE-RECORD.md).
+
+**Previous M3 BACK follow-up (2026-11-22, `feat/m3-back-continuation`):**
+The unchanged source chain still loads 1,229 forms with zero skips.
+Manual and pinned Confusion cases support BACK on shared array views and
+the terminal CHANNEL predecessor slot. Direct original START now passes
+RANDOM and BACK, then stops at unassigned `TENEX?` in
+`77rooms.mud:298`. The source's startup wrappers set that platform global
+through GETSYS before START; the next slice must probe their execution.
+`TMPDIR=/tmp make test` exits 0 with 2,009 Racket checks and 23 Python
+tests; `TMPDIR=/tmp make m2-check` exits 0.
+`TMPDIR=/tmp make test-m3-start-back` exits 0 with six source-backed
+assertions for this known XFAIL. See [BACK evidence](docs/evidence/M3/BACK-CONTIN.md).
+GETSYS, the full startup prelude, RESET, READSTRING, interactive input and
+house smoke parity remain unsupported or unverified. **INITIALIZED,
+INTERACTIVE, SMOKE_PARITY and PLAYABLE have not passed; M3 is incomplete.**
+Next: execute the original startup prelude through its next real failure.
+
+**Previous M3 RNG follow-up (2026-11-22, `feat/m3-session-random`):**
+The unchanged source chain still loads all 1,229 forms with zero skips.
+Session-owned 36-bit RANDOM advances original START through its one-seed
+call; it now stops at unassigned `BACK` in `77rooms.mud:297`, after the
+welcome output. `TMPDIR=/tmp make test` passes 1,996 Racket checks and 23
+Python tests; `TMPDIR=/tmp make test-m3-start-random` passes six assertions
+while recording BACK as the known XFAIL frontier. The pinned Confusion
+negative-seed range deviation is recorded in
+[RANDOM evidence](docs/evidence/M3/RANDOM-START.md). BACK, RESET,
+READSTRING, interactive input, and house smoke parity remain unsupported
+or unverified. **INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have
+not passed; M3 is incomplete.** Next: probe and implement the original
+CONTIN path's BACK operation, then continue toward terminal input.
+
+**Previous M3 source-load checkpoint (2026-11-22, `feat/m3-logical-gc`):**
+`TMPDIR=/tmp make m3-source-progress` verifies all 1,229 forms in the unchanged
+`77loadall.mud` chain, zero skipped, loader exit 0, and the approved source
+hashes. `TMPDIR=/tmp make test` passes 1,471 Racket checks and 23 Python
+tests; `TMPDIR=/tmp make m2-check` exits 0. Logical GC accounting, the
+original GC handler lifecycle, additional language primitives, and default
+terminal CHANNEL metadata enabled this load. Explicit GC is bounded to
+tracked LIST, VECTOR and UVECTOR backing storage; historical automatic
+collection timing and other allocations remain unmodeled. A direct call to
+the original `START` emits the welcome line and newline, then stops at
+unassigned `RANDOM`. **INITIALIZED, INTERACTIVE,
+SMOKE_PARITY, and PLAYABLE remain NOT RUN or FAIL; M3 is not accepted.**
+Reproduce with `TMPDIR=/tmp make test`, `TMPDIR=/tmp make m2-check`, and
+`TMPDIR=/tmp make m3-source-progress`. See the
+[WIP evidence](docs/evidence/M3/WIP-SOURCE-LOAD.md). Next: implement a
+reference-validated session RNG, then terminal input and a strict `m3-check` with
+the approved house smoke transcript.
+
+**Previous M3 interrupt foundation checkpoint (2026-11-22, issue #104):**
 The reviewed branch `feat/m3-interrupt-dispatcher` adds session-owned interrupt
 dispatch, priority and pending-event scheduling, `INT-LEVEL`, `ENABLE`,
 and `DISABLE`. Focused deterministic callbacks are verified (scoped Gate A
@@ -352,8 +508,60 @@ python scripts/compare_transcripts.py \
   artifacts/reference/house.json artifacts/candidate/house.json
 ```
 
-**No candidate Zork runtime exists yet.** Differential testing is a planned
-acceptance gate, not a capability claimed for M0.
+**No candidate transcript in this interchange format is produced yet.** On
+`main` the original game runs in Racket for the six-command
+house-boot scenario; the strict differential SMOKE_PARITY gate uses its own
+record format and comparator (`scripts/smoke_parity.py`, `make m3-check`,
+ADR-0053) and PASSES on `main` (see [STATUS](docs/STATUS.md)).
+
+## Play locally (preview)
+
+A thin local launcher runs the unchanged December 1977 source on this runtime
+through the faithful `run.mud` path (`<FLOAD "77loadall.mud">`, then SAVE-IT
+through the host loop). It is a **preview, not a PLAYABLE claim**: the
+PLAYABLE and SMOKE_PARITY gates have not passed.
+
+Setup: Racket (CI uses 8.10 BC; the launcher tests were run locally on 7.9 BC)
+with the repository as a collection root (`raco pkg install --auto --link`, or
+`export PLTCOLLECTS=":$PWD"`), then `make sources` to fetch the pinned game
+directory `.cache/upstream/mdlzork/mdlzork_771212/patched_confusion/`.
+
+```bash
+make play                                   # or: racket zork/cli.rkt
+racket zork/cli.rkt --fixed-clock 250776000 # fixed session clock (UTC), reproducible
+racket zork/cli.rkt --no-notice             # omit the launcher notice
+```
+
+From DrRacket, open `zork/main.rkt` and click Run (it only defines the
+library; nothing starts), or evaluate `(require zork)`; then call `(run-zork)`
+in the interactions window and type commands into its input box. `run-zork`
+creates a fresh session each call and **returns** a `zork-result` (`'quit`,
+`'quit-after-mdl-error` or `'input-exhausted`); it never exits Racket. Stop
+(a break) ends the game with `exn:break` and leaves DrRacket running. Strict
+failures are raised, not swallowed. Options: `#:input`, `#:output`,
+`#:source-root`, `#:clock`, `#:time-zone`, `#:notice? #f`.
+
+| Exit code (`zork/cli.rkt`) | Meaning |
+| --- | --- |
+| 0 | the game quit normally (`'quit`) |
+| 3 | the game quit after an MDL error (`'quit-after-mdl-error`) |
+| 4 | input ended (EOF) before the game quit (`'input-exhausted`) |
+| 1 | strict failure (unsupported construct, load not PASS); message on stderr |
+| 2 | usage error, or the pinned game sources are missing (`make sources`) |
+| 130 | interrupted (Ctrl-C) |
+
+Disclosed limitations: SAVE makes an in-session record only and RESTORE is
+unsupported (ADR-0048); the game never writes files (OPEN is denied,
+ADR-0055; the launcher also refuses file writes and network use under a
+security guard); unsupported constructs stop the game strictly with an error
+instead of being approximated. Known gaps include `put X in` (stops with a
+strict failure in the parser path: unsupported TOP per the S11 record, or an
+unsupported built-in CHTYPE conversion from the opening room) and file I/O
+commands such as `info`/`help` (strict OPEN `"READ"` failure) and `script`
+(prints `I can't open the script channel.`).
+There is no MDL REPL, evaluator, web server or persistence. Tests:
+`make test-m3-launcher`; evidence:
+[S12 launcher record](docs/evidence/M3/S12-LAUNCHER.md).
 
 ## Current implementation and milestone evidence
 
@@ -452,29 +660,36 @@ See the [M0 report](docs/evidence/M0/REPORT.md),
   without re-binding.
 - `GO` to top-level labels in the current function's PROG/REPEAT bodies,
   with labels skipped in normal flow, and `UNWIND` cleanup expressions that
-  run when a nonlocal transfer or error crosses below them.
+  run when an MDL nonlocal transfer (RETURN, AGAIN, GO, MAPLEAVE/MAPRET/MAPSTOP)
+  crosses below them. A raised error never runs them and propagates
+  unchanged ([ADR-0051](docs/DECISIONS.md), [evidence](docs/evidence/M3/I139-UNWIND.md)).
 - `DEFMAC` calls with runtime expansion, FORM values and `EXPAND`, quoted
   formals, and caller-frame evaluation of plain and TUPLE arguments.
 - An intentionally incomplete compatibility runtime.
 - Parser smoke tests, compile tests, native Confusion reference scripts,
   transcript comparison, and offline Python harness tests.
 
-**Not supported yet:** complete original MDL syntax, compile-time macro
-expansion, dynamic `.OBLIST`,
-SPECIAL/UNSPECIAL declaration wrappers, `[OPT ...]` and NTH
-repetitions, actor/room types, GROW/BACK/TOP and STRING/BYTES views,
-explicit environments, the `"BIND"`/`"CALL"` activation formals, TAG values,
-and `GO` across function boundaries, general nonlocal
-control flow beyond the supported RETURN/AGAIN/GO/UNWIND subset, source
-loading, general APPLY/DISPATCH, ROT,
-PDP-10 FLOAT bit layout, event scheduling,
-original parser, gameplay, and client-side web execution.
+The list above is the M0-M2 baseline. Later M3 slices (NTH repetition,
+declarations, events, interrupts and more on `main`; full source loading,
+SPECIAL/UNSPECIAL wrappers, BLOCK/`.OBLIST`, BACK, STRING views, RANDOM,
+PDP-10 FLOAT word images, startup and terminal I/O; on `main` since the M3 acceptance) are
+specified in [SEMANTICS](docs/SEMANTICS.md) and tracked in
+[STATUS](docs/STATUS.md).
+
+**Not supported yet (2026-11-23, `main`):** complete original MDL
+syntax, compile-time macro expansion, `[OPT ...]` declarations, GROW/TOP and
+BYTES views, explicit environments, the `"BIND"`/`"CALL"` activation
+formals, TAG values and `GO` across function boundaries, ILIST, MAX, TOP,
+PRINT, CLOSE and file OPEN modes other than RECORD's denied form, RESTORE, FLOAT printing and FIX→FLOAT CHTYPE, automatic
+event sources other than the logical GC model, an interactive error level,
+gameplay beyond the six-command scenario, and client-side web execution. On
+`main` additionally everything from `77rooms.mud:101` onward is missing.
 Unsupported compile constructs fail with errors; the reader's acceptance of a
 construct does not imply implemented semantics.
 
-The current milestone is [M2 execution semantics and MDL compilation](docs/PLAN.md).
-Its gate requires executing initial
-original source definitions; it does not assume a new game engine.
+The current milestone is [M3: the actual 1977 game boots in Racket](docs/PLAN.md).
+Its gate requires the approved house-smoke transcript; it does not assume a
+new game engine.
 
 ## Working with Codex
 

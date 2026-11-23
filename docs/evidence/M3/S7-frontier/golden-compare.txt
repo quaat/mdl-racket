@@ -1,0 +1,10 @@
+plain canonical (\r\n->\n) : boot_output equal = False ; commands equal = [False, True, True, True, True, True]
+--- golden
++++ pipe
+@@ -16 +15,0 @@
+-
+@@ -20 +18,0 @@
+-
+ cmd north pipe= 'You are facing the north side of a white house.  There is no door here,\nand all the windows are barred.\n' golden= 'You are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n'
+ONLCR emulation then canonical : boot_output equal = True ; commands equal = [True, True, True, True, True, True]
+trailing after score (pipe, ONLCR): ['Beg pardon?\n', ''] stderr: 'Error: Unexpected EOF\n' exit 0

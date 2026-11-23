@@ -1,0 +1,10 @@
+{
+ "schema_version": 1,
+ "name": "m3-review-r5-iuvector-uniform-type-failure",
+ "cases": [
+  {"name": "mismatch-at-element-2", "expression": "<SETG A 0> <IUVECTOR 4 '<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 2> \"X\") (T 1)>>> ,A"},
+  {"name": "mismatch-at-element-3", "expression": "<SETG A 0> <IUVECTOR 5 '<PROG () <SETG A <+ ,A 1>> <COND (<==? ,A 3> FOO) (T 1)>>> ,A"},
+  {"name": "string-first-element", "expression": "<SETG A 0> <IUVECTOR 3 '<PROG () <SETG A <+ ,A 1>> \"X\">> ,A"},
+  {"name": "success-count", "expression": "<SETG A 0> <IUVECTOR 4 '<SETG A <+ ,A 1>>> ,A"}
+ ]
+}

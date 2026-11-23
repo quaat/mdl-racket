@@ -1,0 +1,21 @@
+{
+  "name": "interactive-extra",
+  "cases": [
+    {
+      "name": "boot-null-marker",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "SETG NULL to a visible atom before SAVE-IT: shows that the blank line before the first room description is the default REP printing SAVE-IT's value (,NULL) plus TERPRI",
+      "input": "<FLOAD \"77loadall.mud\">\n<SETG NULL NULLMARK>\n<SAVE-IT>\nlook\n"
+    },
+    {
+      "name": "boot-rdcom-type",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "TYPE of RDCOM and of REP after CONTIN in Confusion (FUNCTION expected), observed through a PRINC-free path: the value is printed by REP before RDCOM runs? no: REP is applied next; so inspect before SAVE-IT",
+      "input": "<FLOAD \"77loadall.mud\">\n<TYPE ,RDCOM>\n<TYPE ,ROOM-INFO>\n<TYPE ,LEX>\n<TYPE ,EPARSE>\n<TYPE ,TELL>\n,INBUF\n<LENGTH ,INBUF>\n,READER-STRING\n<GASSIGNED? ERRH>\n<TYPE ,ERRH>\n<QUIT>\n"
+    }
+  ]
+}

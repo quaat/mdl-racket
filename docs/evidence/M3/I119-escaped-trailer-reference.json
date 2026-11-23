@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "name": "m3-I119-escaped-trailer",
+  "recorded_manually": true,
+  "interpreter_sha256_prefix": "6df359f6",
+  "interpreter_full_sha256": "b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda83b177",
+  "recorded_at": "2026-11-22",
+  "protocol": "manual stdin probe: each expression piped to mdli, <QUIT> appended; cwd=game dir",
+  "cases": [
+    {
+      "name": "setup-words",
+      "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<SPNAME DEAD\\!!-WORDS>",
+      "result_output": "\"DEAD!\"\n",
+      "ok": true
+    },
+    {
+      "name": "in-words",
+      "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<SPNAME IN\\!!-WORDS>",
+      "result_output": "\"IN!\"\n",
+      "ok": true
+    },
+    {
+      "name": "out-words",
+      "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<SPNAME OUT\\!!-WORDS>",
+      "result_output": "\"OUT!\"\n",
+      "ok": true
+    },
+    {
+      "name": "a-bang-b",
+      "expression": "<SPNAME A\\!B>",
+      "result_output": "\"A!B\"\n",
+      "ok": true
+    },
+    {
+      "name": "a-dash-b",
+      "expression": "<SPNAME A\\-B>",
+      "result_output": "\"A-B\"\n",
+      "ok": true
+    },
+    {
+      "name": "a-dbl-backslash-b",
+      "expression": "<SPNAME A\\\\B>",
+      "result_output": "\"A\\\\B\"\n",
+      "ok": true,
+      "note": "MDL string literal with single backslash; printed with escape"
+    },
+    {
+      "name": "bang-a",
+      "expression": "<SPNAME \\!A>",
+      "result_output": "\"!A\"\n",
+      "ok": true
+    },
+    {
+      "name": "identity",
+      "expression": "<SETG WORDS <MOBLIST WORDS 23>>\n<==? DEAD\\!!-WORDS DEAD\\!!-WORDS>",
+      "result_output": "T\n",
+      "ok": true
+    },
+    {
+      "name": "a-esc-trailer-b",
+      "expression": "<SETG B <MOBLIST B>>\n<SPNAME A\\!-B>",
+      "result_output": "\"A\"\n",
+      "ok": true,
+      "note": "SPLIT: escaped ! followed by - still triggers !- trailer split. PNAME=A, oblist=B"
+    },
+    {
+      "name": "a-esc-dbl-trailer-b",
+      "expression": "<SETG B <MOBLIST B>>\n<SPNAME A\\!!-B>",
+      "result_output": "\"A!\"\n",
+      "ok": true,
+      "note": "escaped ! in PNAME, then unescaped !- trailer. PNAME=A!, oblist=B"
+    }
+  ]
+}

@@ -50,10 +50,12 @@
     (hash 'status "PASS" 'completed_expressions (length nodes))))
 
 (define (execute-audit filename nodes)
-  (parameterize ([current-namespace test-namespace]
-                 [current-mdl-globals (make-hasheq)]
-                 [current-mdl-locals (list (make-hasheq))]
-                 [current-mdl-atom-space (make-mdl-atom-space)])
+  ;; A fresh context from the shared constructor, so the file runs with the
+  ;; interpreter's initial INCHAN/OUTCHAN bindings (review R1). S13 part B
+  ;; (ADR-0050): its terminal output goes to this script's stdout, passed
+  ;; explicitly.
+  (parameterize ([current-namespace test-namespace])
+   (call-with-mdl-context (make-mdl-context #:output-port (current-output-port)) (lambda ()
     (let/ec stop
       (for ([node (in-list nodes)] [index (in-naturals 1)])
         (with-handlers ([exn:fail?
@@ -61,7 +63,7 @@
                            (stop (failure "compile-or-execute" filename index
                                           node exn (sub1 index))))])
           (eval (compile-expression node))))
-      (hash 'status "PASS" 'completed_expressions (length nodes)))))
+      (hash 'status "PASS" 'completed_expressions (length nodes)))))))
 
 (define (audit-file filename)
   (define path (build-path source-root filename))

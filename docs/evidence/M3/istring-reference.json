@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "istring-rest",
+  "recorded_at": "2026-11-22T11:42:50.734055+00:00",
+  "interpreter_sha256": "b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda83b177",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "empty-fill",
+      "expression": "<ISTRING 3>\n<LENGTH <ISTRING 3>>",
+      "input": "<ISTRING 3>\n<LENGTH <ISTRING 3>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^@^@^@\"\n3\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"^@^@^@\"\n3\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "char-fill",
+      "expression": "<ISTRING 3 !\\X>",
+      "input": "<ISTRING 3 !\\X>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"XXX\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"XXX\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "rest-full",
+      "expression": "<TYPE <REST <ISTRING 3> 3>>\n<LENGTH <REST <ISTRING 3> 3>>",
+      "input": "<TYPE <REST <ISTRING 3> 3>>\n<LENGTH <REST <ISTRING 3> 3>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSTRING\n0\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "STRING\n0\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "rest-alias",
+      "expression": "<SETG M3-STR <ISTRING 3 !\\X>>\n<SETG M3-TAIL <REST ,M3-STR 1>>\n<PUT ,M3-TAIL 1 !\\Y>\n,M3-STR",
+      "input": "<SETG M3-STR <ISTRING 3 !\\X>>\n<SETG M3-TAIL <REST ,M3-STR 1>>\n<PUT ,M3-TAIL 1 !\\Y>\n,M3-STR\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"XXX\"\n\"XX\"\n\"YX\"\n\"XYX\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"XXX\"\n\"XX\"\n\"YX\"\n\"XYX\"\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

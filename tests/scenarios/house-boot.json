@@ -1,0 +1,13 @@
+{
+  "name": "house-boot",
+  "description": "Fresh-boot SMOKE_PARITY scenario (run.mud entry): north from west-of-house, then the five house commands. fixed_epoch=250776000 = 1977-12-12 12:00:00 UTC, chosen as a historically plausible date one day before the mdlzork_771212 game snapshot (bdcd4a67). That epoch makes DSKDATE's day=12, month=12 (local), year=1977 — matching the archive date. It also seeds RANDOM deterministically. The approved house.json (ZORK.SAVE restore) must stay unchanged.",
+  "fixed_epoch": 250776000,
+  "commands": [
+    "north",
+    "west",
+    "open mailbox",
+    "take leaflet",
+    "inventory",
+    "score"
+  ]
+}

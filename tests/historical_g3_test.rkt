@@ -88,17 +88,12 @@
    ;; Install the original VFLOAD first, then all of 81prim and the first
    ;; fourteen 77defs forms. The explicit prefix ends before world creation;
    ;; its result cannot change when M3 advances the complete loader.
-   (define session (make-mdl-session root))
+   ;; S13 part B (ADR-0050): the session writes only to its explicit port.
    (define out (open-output-string))
-   (define entry-report
-     (parameterize ([current-output-port out])
-       (mdl-session-load! session "77loadall.mud" #:max-expressions 1)))
-   (define prim-report
-     (parameterize ([current-output-port out])
-       (mdl-session-load! session "81prim.mud")))
-   (define defs-report
-     (parameterize ([current-output-port out])
-       (mdl-session-load! session "77defs.mud" #:max-expressions 14)))
+   (define session (make-mdl-session root #:output-port out))
+   (define entry-report (mdl-session-load! session "77loadall.mud" #:max-expressions 1))
+   (define prim-report (mdl-session-load! session "81prim.mud"))
+   (define defs-report (mdl-session-load! session "77defs.mud" #:max-expressions 14))
    (check (hash-ref entry-report 'status) "PARTIAL")
    (check (hash-ref entry-report 'completed_expressions) 1)
    (check (hash-ref prim-report 'status) "PASS")
@@ -125,12 +120,10 @@
    (call-with-output-file (build-path root "g3-controlled.mud")
      #:exists 'truncate/replace
      (lambda (port) (display "<SETG G3-VF 17>\n" port)))
-   (define vf-out (open-output-string))
-   (define vf-result
-     (parameterize ([current-output-port vf-out])
-       (mdl-session-call session "VFLOAD" "g3-controlled.mud")))
+   (define vf-start (string-length (get-output-string out)))
+   (define vf-result (mdl-session-call session "VFLOAD" "g3-controlled.mud"))
    (check (mdl-false? vf-result) #t)
-   (check (get-output-string vf-out) "g3-controlled.mud loaded\n")
+   (check (substring (get-output-string out) vf-start) "g3-controlled.mud loaded\n")
    (check (mdl-session-global session "G3-VF") 17)
 
    ;; --- Original MSETG (81prim.mud expression 2) --------------------------
