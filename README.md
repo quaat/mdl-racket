@@ -29,8 +29,11 @@ byte-identical to Confusion's pipe transcript under the same normalisation.
 clock (issue #135), so the `west` response (`<PROB 80>`) varies and is accepted
 in its two source-defined forms. **PLAYABLE has not passed**: QUIT, OPEN/CLOSE
 (RECORD), MEMBER (the game's ERROR handler) and UNWIND under host errors (#139)
-are unsupported; PRINC line breaking, `!` in terminal input and READSTRING's
-default channel/FIX stop/EOF routine are strict errors. Reproduce:
+are unsupported; PRINC line breaking and READSTRING's default channel/FIX
+stop/EOF routine are strict errors. (S13, `feat/m3-bang-output`: a typed `!`
+now follows pinned Confusion, `nor!th` reads as `north`, and a session without
+an explicit output port refuses all terminal output; see
+[S13 evidence](docs/evidence/M3/S13-BANG-OUTPUT.md).) Reproduce:
 `export PLTCOLLECTS=":$PWD"; make test-m3-interactive` (needs `make sources`).
 Next: a fixed clock (#135), then a strict SMOKE_PARITY comparison. See
 [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).
@@ -468,6 +471,55 @@ python scripts/compare_transcripts.py \
 
 **No candidate Zork runtime exists yet.** Differential testing is a planned
 acceptance gate, not a capability claimed for M0.
+
+## Play locally (preview)
+
+A thin local launcher runs the unchanged December 1977 source on this runtime
+through the faithful `run.mud` path (`<FLOAD "77loadall.mud">`, then SAVE-IT
+through the host loop). It is a **preview, not a PLAYABLE claim**: the
+PLAYABLE and SMOKE_PARITY gates have not passed.
+
+Setup: Racket (CI uses 8.10 BC; the launcher tests were run locally on 7.9 BC)
+with the repository as a collection root (`raco pkg install --auto --link`, or
+`export PLTCOLLECTS=":$PWD"`), then `make sources` to fetch the pinned game
+directory `.cache/upstream/mdlzork/mdlzork_771212/patched_confusion/`.
+
+```bash
+make play                                   # or: racket zork/cli.rkt
+racket zork/cli.rkt --fixed-clock 250776000 # fixed session clock (UTC), reproducible
+racket zork/cli.rkt --no-notice             # omit the launcher notice
+```
+
+From DrRacket, open `zork/main.rkt` and click Run (it only defines the
+library; nothing starts), or evaluate `(require zork)`; then call `(run-zork)`
+in the interactions window and type commands into its input box. `run-zork`
+creates a fresh session each call and **returns** a `zork-result` (`'quit`,
+`'quit-after-mdl-error` or `'input-exhausted`); it never exits Racket. Stop
+(a break) ends the game with `exn:break` and leaves DrRacket running. Strict
+failures are raised, not swallowed. Options: `#:input`, `#:output`,
+`#:source-root`, `#:clock`, `#:time-zone`, `#:notice? #f`.
+
+| Exit code (`zork/cli.rkt`) | Meaning |
+| --- | --- |
+| 0 | the game quit normally (`'quit`) |
+| 3 | the game quit after an MDL error (`'quit-after-mdl-error`) |
+| 4 | input ended (EOF) before the game quit (`'input-exhausted`) |
+| 1 | strict failure (unsupported construct, load not PASS); message on stderr |
+| 2 | usage error, or the pinned game sources are missing (`make sources`) |
+| 130 | interrupted (Ctrl-C) |
+
+Disclosed limitations: SAVE makes an in-session record only and RESTORE is
+unsupported (ADR-0048); the game never writes files (OPEN is denied,
+ADR-0055; the launcher also refuses file writes and network use under a
+security guard); unsupported constructs stop the game strictly with an error
+instead of being approximated. Known gaps include `put X in` (stops with a
+strict failure in the parser path: unsupported TOP per the S11 record, or an
+unsupported built-in CHTYPE conversion from the opening room) and file I/O
+commands such as `info`/`help` (strict OPEN `"READ"` failure) and `script`
+(prints `I can't open the script channel.`).
+There is no MDL REPL, evaluator, web server or persistence. Tests:
+`make test-m3-launcher`; evidence:
+[S12 launcher record](docs/evidence/M3/S12-LAUNCHER.md).
 
 ## Current implementation and milestone evidence
 

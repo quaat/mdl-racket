@@ -11,6 +11,16 @@
 | SMOKE_PARITY | NOT CLAIMED: the clock dependency is resolved on S8 branch `feat/m3-session-clock` (DSKDATE, START seed 10438660480 and 12 RANDOM values agree with native Confusion Probe E; `make test-m3-clock-seed`), but the golden is still a candidate and no strict SMOKE_PARITY comparison has been run |
 | PLAYABLE | NOT RUN: QUIT, OPEN/CLOSE (RECORD), MEMBER (HANDLE) and UNWIND under host errors (#139) are missing |
 
+- **S13 on `feat/m3-bang-output` (WIP; ADR-0050 amended 2026-11-23):**
+  (A) typed `!` in READSTRING follows pinned Confusion by maintainer decision
+  (`!c` stores `c` in one slot; escaped stop characters still stop; `!` before
+  EOF is stored; non-ASCII after `!` stays strict); the game's RDCOM reads
+  `nor!th` exactly like `north` (`make test-m3-bang`, 9 reference game cases,
+  exit 0). (B) sessions and contexts have no implicit terminal output: without
+  `#:output-port` every write and flush is a strict ADR-0050 error; only the
+  process-wide default context and `#lang mdl` modules opt in to the host's
+  `current-output-port`. See [S13 evidence](evidence/M3/S13-BANG-OUTPUT.md).
+
 - **S8 session clock on `feat/m3-session-clock` (WIP, issue #135 part 1,
   ADR-0052):** `make-mdl-session #:clock #:time-zone` (default real clock,
   host zone); `make-fixed-mdl-clock` is a constant instant. Only GETTIMEDATE's
@@ -29,7 +39,8 @@
   `make test-m3-interactive` exit 0 (30 checks); 10 raw runs are byte-identical
   to Confusion's pipe output after removing `"DONE"` and the date. The `west`
   response is RNG-dependent (`<PROB 80>`, 77rooms.mud:523) until #135. Strict
-  and unsupported: QUIT, OPEN/CLOSE, MEMBER, PRINC line breaking, `!` in input,
+  and unsupported: QUIT, OPEN/CLOSE, MEMBER, PRINC line breaking, `!` in input
+  (superseded by S13: `!` now follows Confusion),
   READSTRING default channel/FIX stop/EOF routine. See
   [S7 evidence](evidence/M3/S7-INTERACTIVE.md).
 

@@ -61,6 +61,27 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m3-interactive 2>&1 | tee artifacts/ci-logs/test-m3-interactive.log
+      - name: Complete local quit session through the game's own FINISH/RECORD/QUIT
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-session 2>&1 | tee artifacts/ci-logs/test-m3-session.log
+      - name: Local launcher (run-zork, CLI exit codes, break)
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-launcher 2>&1 | tee artifacts/ci-logs/test-m3-launcher.log
+      - name: Typed ! escape read by the game's own RDCOM
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-bang 2>&1 | tee artifacts/ci-logs/test-m3-bang.log
       # S10 (ADR-0053): the M3 SMOKE_PARITY technical check. Runs its own
       # stages in order (sources, test-m3-saveit, test-m3-clock-seed,
       # test-m3-interactive, comparator unit tests, this runtime's run vs the

@@ -1257,9 +1257,17 @@ loop").
    use it: count returned, stop character consumed and not stored, full
    buffer leaves the rest of the line unread, no echo, output flushed first.
    The manual's default channel, a FIX stop and the EOF-routine argument are
-   strict errors. A `!` or a non-ASCII character in the input is a strict
-   error (open question: Confusion drops `!` as a reader escape; the manual
-   is silent).
+   strict errors. A non-ASCII character in the input is a strict error.
+   ~~A `!` in the input is a strict error (open question: Confusion drops
+   `!` as a reader escape; the manual is silent).~~ **Amended 2026-11-23
+   (S13 part A, maintainer decision "follow pinned Confusion"):** `!c` is an
+   escape pair that stores `c` in one slot; the `!` is never stored or
+   counted; an escaped stop character still stops the read and is consumed;
+   `!` immediately before end of input is stored literally and sets the
+   end-of-input flag; escape pairing resumes on the next READSTRING after a
+   full buffer; the character after `!` must still be ASCII. Evidence:
+   `evidence/M3/READSTRING-BANG-REFERENCE.md`; contract: SEMANTICS
+   READSTRING; record: `evidence/M3/S13-BANG-OUTPUT.md`.
 4. **End of input, maintainer decision D3 "Mirror, then strict".** A read
    that meets end of input returns the characters read so far (often 0) and
    sets the channel's end-of-input flag, as Confusion does, so the game
@@ -1292,13 +1300,33 @@ by D1: the loop prints the entry value once.
 **Host input port only (independent review follow-up).** Terminal input
 uses only a host-supplied port. READSTRING on a session input CHANNEL with no
 port is a strict error (`... has no host-supplied port ...`); the runtime
-never reads the process's own stdin. Output keeps its pre-S7 behaviour: with
-no session port, OUTCHAN writes to the host's `current-output-port`
+never reads the process's own stdin. ~~Output keeps its pre-S7 behaviour:
+with no session port, OUTCHAN writes to the host's `current-output-port`
 parameter. That parameter is host-controlled and existing tests capture
 output through it. Making output strict as well would change a
 runtime-wide contract that predates S7 (PRINTSTRING, CRLF, VFLOAD tests),
-so it is left for a separate decision. `mdl-session-run-interactive`
-requires both ports to be explicit.
+so it is left for a separate decision.~~ (Superseded below.)
+`mdl-session-run-interactive` requires both ports to be explicit.
+
+**Explicit output port (amended 2026-11-23, S13 part B, maintainer
+decision "explicit output for game sessions").** Terminal output now uses
+only a host-supplied port as well. A PRINT CHANNEL made by `make-mdl-session`
+or `make-mdl-context` without `#:output-port` has no port, and every
+operation that resolves it is a strict error naming ADR-0050 (`... PRINT
+CHANNEL has no host-supplied output port; the runtime never falls back to the
+host's current-output-port (ADR-0050)`): PRINC, PRIN1, PRINTSTRING, TERPRI,
+CRLF, READSTRING's pre-read flush, the host loop's entry-value print and its
+final flush. Nothing is written to a parameterized host port. The only
+exception is an explicit opt-in that `make-mdl-session` and `make-mdl-context`
+do not accept: `mdl-ensure-terminal-channels! #:follow-current-output-port?
+#t`, used by exactly two non-session callers, the process-wide default
+context (end of `core.rkt`, used by core unit tests and host code that never
+creates a context) and `#lang mdl` modules (`mdl/lang/reader.rkt`), which run
+in that ambient context. Their PRINT CHANNEL follows the host's
+`current-output-port` at each operation, as before. F2 is unchanged: a
+strict error from the final flush is a secondary failure when a primary is
+leaving the loop, and is raised only when nothing else was. Record:
+`evidence/M3/S13-BANG-OUTPUT.md`.
 
 **Out of scope (decisions pending):** QUIT, OPEN/CLOSE (D5), UNWIND under
 host errors (issue #139), MEMBER, a fixed clock (#135). No GPLv3
@@ -1492,3 +1520,108 @@ commands, fixed clock 250776000, UTC. It does not cover play under the real
 wall clock, other inputs, save/restore, QUIT or death paths. The gate state
 stays the maintainer's decision in `STATUS.md`. No runtime file, game
 source, upstream provenance, license or GPLv3 code changed.
+## ADR-0054: QUIT is a session-termination signal; the host loop returns a session outcome
+
+**Status:** Proposed (S11). Implements the "ends when the applied code QUITs"
+clause of ADR-0049 part 3 and the QUIT rule anticipated by ADR-0051.
+Contract: SEMANTICS "M3 session end: `QUIT` and the host-loop outcome".
+Evidence: `evidence/M3/SESSION-QUIT-REFERENCE.md` (pinned Confusion
+`6df359f6…`, upstream `bdcd4a67`), implementation record
+`evidence/M3/S11-QUIT-OPEN.md`.
+
+**Decision:**
+1. `<QUIT>` takes exactly zero arguments (every game call site, including
+   FINISH 77rooms.mud:711-712). One argument is a strict unsupported error,
+   two or more `TOO-MANY-ARGUMENTS-SUPPLIED`. It never calls Racket `exit`.
+   It raises `mdl-quit-signal`, a dedicated host struct that is neither an
+   `exn:fail` nor an `exn:break`, so no `exn:fail?` handler of the runtime or
+   loader intercepts it.
+2. QUIT is not an MDL ERROR: no ERROR interrupt is signalled and no MDL ERROR
+   handler (the game's HANDLE) runs. It is a raise, not an MDL transfer, so
+   per ADR-0051 every UNWIND it crosses skips its cleanup (FINISH's cleanup
+   `<QUIT>` and any FLUSH-ME/JIGS-UP cleanup never run, RECORD never runs
+   twice). Host bookkeeping restored by `dynamic-wind`/`parameterize` is
+   still restored.
+3. `mdl-run-host-loop` / `mdl-session-run-interactive` catch exactly that
+   signal at the session boundary and **return** an `mdl-session-outcome`
+   (`kind`, `mdl-errors`). Kind is `'quit`, or `'quit-after-mdl-error` when
+   any MDL ERROR was signalled while the loop ran (resolved by a handler or
+   not); `mdl-errors` lists their messages oldest first. The runtime records
+   each application of the ERROR SUBR in the session for this purpose. An
+   acceptance run must require `'quit`.
+4. Every other ending still raises, unchanged: input exhaustion
+   (`exn:fail:mdl-input-exhausted`, D3), strict host/runtime failures and
+   unresolved MDL ERRORs (their `exn:fail`), the pass bound, host
+   cancellation (`exn:break`).
+5. F2 final flush: after a QUIT there is no primary failure, so a failed final
+   flush is raised (first failure; the rest are its secondaries) and the quit
+   outcome is dropped. A quit whose transcript may be incomplete is never
+   reported as success.
+6. QUIT outside the host loop: during `mdl-session-load!` the loader records
+   a `"QUIT"` event (file, expression, line, column, construct, load chain)
+   and the load report's status is `"QUIT"` (never `"PASS"`; the
+   `scripts/mdl_load.rkt` driver exits 3); during `mdl-session-call` the
+   signal propagates to the host caller unchanged. (Amended after the S11
+   independent review, 2026-11-23.)
+7. An MDL ERROR's outcome record is the message formatted at signal time;
+   the message of an unresolved ERROR's host failure is formatted after
+   handler delivery, as before S11, so a handler that mutates an argument
+   is reflected in it (S11 review).
+
+**Why:** The manual (§23.3) makes QUIT end MDL; Confusion's QUIT is `exit(0)`
+and runs no cleanup (C1, D11). A host process must not exit from inside a
+library call, and a game session needs a structured result that cannot be
+confused with failure. HANDLE (77rooms.mud:213-252) turns an MDL ERROR into
+`FINISH #FALSE (". Error.")` → RECORD → QUIT, an exit status 0 in Confusion;
+the outcome kind makes that path visible instead of letting it look like a
+clean user quit.
+
+**Consequences:** In this runtime HANDLE's ERROR path currently stops before
+FINISH: it applies `PRINT` (77rooms.mud:251), which is unsupported, so that
+path is a strict failure today; the outcome kind covers it once PRINT exists.
+No game source, upstream provenance, license or GPLv3 code changed.
+
+## ADR-0055: OPEN under a virtual no-file policy
+
+**Status:** Proposed (S11). Implements the maintainer-approved policy "OPEN
+returns FALSE, no file" (ADR-0050 D5). Contract: SEMANTICS "M3 file system:
+`OPEN` denial". Evidence: `evidence/M3/OPEN-FAILURE-REFERENCE.md`
+(`open-failure-probe.json`).
+
+**Decision:**
+1. Only RECORD's form is supported: `<OPEN mode name1 name2 device
+   directory>`, five STRING arguments, mode `"READB"`, `"PRINT"` or
+   `"PRINTO"` (77rooms.mud:731, 736, 748). Every other arity (the
+   one-file-spec forms at 316, 392, 412), every other mode (`"READ"` at 350,
+   352, 381, 384, 961; `"PRINTB"` at 392) and every non-STRING argument is a
+   strict error.
+2. OPEN never touches the host file system. It returns the three-element
+   FALSE `#FALSE (reason file-spec status)` with fresh STRINGs and a FIX
+   status, following manual §11.2.1 and Confusion's shape. The file spec is
+   built as Confusion builds it: `directory "/" name1 "." name2`.
+3. **Virtual-file-system policy, not OS equivalence:** the session's virtual
+   directory is empty and read-only. READB → `"No such file or directory"`,
+   2; PRINT and PRINTO → `"Permission denied"`, 13 (the values pinned
+   Confusion returns for an absent log in a read-only directory, D2/D7). The
+   status is never `*600130*` (196696), the only value that sends RECORD
+   (MUDDLE 101) into its SLEEP/AGAIN busy loop. The PRINTO value is fixed by
+   this policy; it is unreachable, because PRINTO follows only a successful
+   READB (Confusion D2 reports ENOENT for PRINTO on an absent file).
+4. Each denied call is recorded host-side (`mdl-session-open-records`); no MDL
+   primitive exposes it.
+5. CLOSE, FILE-LENGTH, ACCESS, SLEEP and file READSTRING stay unsupported.
+   Under the policy RECORD returns T through `<RETURN T .RECORD>` and its
+   UNWIND cleanup stops at the FALSE `.CH`, so CLOSE is never reached. No
+   success-shaped CLOSE exists.
+
+**Deviations recorded:** Confusion creates or appends to `MDL/ZORK.LOG` when
+the game QUITs; this runtime writes nothing. The log is not console output,
+so the C1 transcript is byte-identical. DO-SCRIPT's PRINT
+(77rooms.mud:354) is the same form and would be denied, so `script` would
+print `I can't open the script channel.` where Confusion creates
+`ZORK.SCRIPT` (not exercised). HELP/INFO (FILE-TO-TTY) fail strictly.
+
+**Security:** no file is opened, created, truncated or deleted by any OPEN
+call; the S11 tests run under a security guard that records every write or
+delete attempt and assert there are none. No server or web client can reach
+OPEN or the host loop.
