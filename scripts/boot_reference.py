@@ -18,21 +18,34 @@ GETTIMEDATE's localtime_r is a deterministic function of the frozen epoch.
 The shim is compiled per capture into the capture's temp dir and is never
 committed as a binary.
 
-Record layout (schema_version 2):
-  * STRICT_FIELDS — the gameplay view compared for parity (see gameplay_view):
+Record layout (schema_version 3; S10, ADR-0053):
+  * STRICT_FIELDS — the gameplay view compared for parity:
     scenario, fixed_epoch, tz, entry, boot_output, commands, complete.
     boot_output starts at "LISTENING-AT-LEVEL"; the Confusion banner (which
     contains the binary's compile timestamp) is moved to
-    informational.interpreter_banner and never compared.
+    informational.interpreter_banner and never compared. Comparison goes
+    through the single comparator scripts/smoke_parity.py (ADR-0053).
   * provenance.upstream_source — pinned mdlzork commit from sources.lock.json
     plus the commit actually checked out, and the game dir RELATIVE to the
     upstream checkout root.
-  * provenance.boot_input_state — per-file SHA-256 manifest (relative paths)
-    of the game directory AFTER the stale save image is removed, i.e. the
-    effective boot inputs, plus its aggregate hash.
-  * provenance.engine_sha256 — build-specific (Confusion embeds __DATE__);
-    informational, not part of gameplay parity.
+  * provenance.immutable_inputs — everything fixed BEFORE the boot and never
+    written by it: per-file SHA-256 manifest of the game directory copy after
+    removing STALE_BOOT_FILES and excluding SAVE_ARTIFACTS, its aggregate
+    hash, the interpreter binary hash (build-specific: Confusion embeds
+    __DATE__), the clock shim source hash, the scenario file hash and its
+    commands, and the entry forms. The capture fails if any of these game
+    files changes, or any other file appears or disappears, during the run.
+  * provenance.save_artifacts — files the run itself creates or overwrites
+    (SAVE-IT writes "<MDL>MADADV.SAVE", 77rooms.mud:8-9), each with its hash
+    before and after the run. They are outputs, never inputs. The after-hash
+    differs between identical captures (Confusion's saved heap image), so it
+    is recorded, never compared.
   * informational — captured_at, interpreter_banner, process exit status.
+
+Schema 2 (the committed, maintainer-approved candidate) recorded one
+provenance.boot_input_state manifest that wrongly included MDL/MADADV.SAVE as
+if it were a boot input; its gameplay fields are unaffected and stay
+comparable (same STRICT_FIELDS layout).
 
 Usage (see also Makefile reference-capture-boot / test-boot-reference):
     python3 scripts/boot_reference.py capture \\
@@ -66,11 +79,16 @@ UPSTREAM_GAME = UPSTREAM_ROOT / "mdlzork_771212/patched_confusion"
 SHIM_SRC = ROOT / "scripts/reference/fixed_time.c"
 LOCK_FILE = ROOT / "sources.lock.json"
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
+# Schema versions whose STRICT_FIELDS layout the comparator accepts.
+COMPARABLE_SCHEMA_VERSIONS = (2, 3)
 CHILD_TZ = "UTC"
 ENTRY = ('<FLOAD "77loadall.mud">', "<SAVE-IT>")
 # Files removed from the per-capture game copy before boot (relative paths).
 STALE_BOOT_FILES = ("SAVEFILE/ZORK.SAVE",)
+# Files the boot itself creates or overwrites (relative paths). SAVE-IT
+# (77rooms.mud:8-9) saves to "<MDL>MADADV.SAVE" when MUDDLE > 100.
+SAVE_ARTIFACTS = ("MDL/MADADV.SAVE",)
 # Fields that make up the gameplay view used for strict parity.
 STRICT_FIELDS = ("scenario", "fixed_epoch", "tz", "entry", "boot_output",
                  "commands", "complete")
@@ -163,14 +181,46 @@ def split_banner(text: str) -> tuple[str, str]:
 
 
 def gameplay_view(record: dict[str, Any]) -> dict[str, Any]:
-    """Return only the fields that participate in strict gameplay parity."""
+    """Return only the fields that participate in strict gameplay parity.
+
+    This is a projection, not a comparator: every parity comparison goes
+    through scripts/smoke_parity.compare_records (ADR-0053).
+    """
     return {key: record.get(key) for key in STRICT_FIELDS}
 
 
-def compare_gameplay(a: dict[str, Any], b: dict[str, Any]) -> list[str]:
-    """Return the STRICT_FIELDS whose values differ between two records."""
-    va, vb = gameplay_view(a), gameplay_view(b)
-    return [key for key in STRICT_FIELDS if va[key] != vb[key]]
+def repo_relative(path: Path) -> str:
+    """Repository-relative POSIX path when possible, else the bare file name.
+
+    Lexical (no resolve), so a symlinked .cache still yields '.cache/...'.
+    Never returns an absolute path.
+    """
+    try:
+        return Path(os.path.abspath(path)).relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.name
+
+
+def split_boot_files(manifest: dict[str, str]) -> tuple[dict[str, str], dict[str, str | None]]:
+    """Split a game-dir manifest into immutable inputs and SAVE artifacts."""
+    immutable = {rel: sha for rel, sha in manifest.items() if rel not in SAVE_ARTIFACTS}
+    save_before = {rel: manifest.get(rel) for rel in SAVE_ARTIFACTS}
+    return immutable, save_before
+
+
+def run_write_violations(immutable: dict[str, str], after: dict[str, str]) -> list[str]:
+    """Describe every change of the game dir during the run that is not a
+    declared SAVE artifact: a changed or removed immutable input, or a new
+    file. An empty list means the run wrote only SAVE_ARTIFACTS."""
+    problems = []
+    for rel, sha in immutable.items():
+        if rel not in after:
+            problems.append(f"immutable input removed during run: {rel}")
+        elif after[rel] != sha:
+            problems.append(f"immutable input changed during run: {rel}")
+    for rel in sorted(set(after) - set(immutable) - set(SAVE_ARTIFACTS)):
+        problems.append(f"undeclared file written during run: {rel}")
+    return problems
 
 
 def build_shim(output_dir: Path) -> Path:
@@ -194,7 +244,8 @@ def build_shim(output_dir: Path) -> Path:
 # ---------------------------------------------------------------------------
 
 def capture_boot(scenario: dict[str, Any], epoch: int, timeout: float,
-                 shim_so: Path | None = None) -> dict[str, Any]:
+                 shim_so: Path | None = None,
+                 scenario_path: Path | None = None) -> dict[str, Any]:
     """
     Run a fresh-boot reference capture.
 
@@ -215,6 +266,9 @@ def capture_boot(scenario: dict[str, Any], epoch: int, timeout: float,
     shim_so:
         Path to the compiled fixed_time.so. If None, the shim is compiled into
         the capture's temp dir (nothing is written under .cache/build).
+    scenario_path:
+        The scenario file, recorded (relative path and SHA-256) among the
+        immutable inputs when given.
     """
     if not EXE.is_file():
         raise RuntimeError(
@@ -256,6 +310,7 @@ def capture_boot(scenario: dict[str, Any], epoch: int, timeout: float,
                 stale.unlink()
                 removed.append(rel)
         boot_files = file_manifest(game_dir)
+        immutable_files, save_before = split_boot_files(boot_files)
 
         env = dict(os.environ)
         env["MDL_FIXED_EPOCH"] = str(epoch)
@@ -278,16 +333,45 @@ def capture_boot(scenario: dict[str, Any], epoch: int, timeout: float,
                     "checkout_root": f".cache/upstream/{UPSTREAM_NAME}",
                     "game_dir": game_rel,
                 },
-                "boot_input_state": {
+                "immutable_inputs": {
                     "description": (
-                        "game_dir copy after removing removed_before_boot; "
-                        "sha256 = sha256_manifest(files)"
+                        "fixed before the boot and never written by it: "
+                        "game_files = game_dir copy after removing "
+                        "removed_before_boot, excluding save_artifacts; "
+                        "game_files_sha256 = sha256_manifest(game_files)"
                     ),
                     "removed_before_boot": removed,
-                    "sha256": sha256_manifest(boot_files),
-                    "files": boot_files,
+                    "game_files": immutable_files,
+                    "game_files_sha256": sha256_manifest(immutable_files),
+                    "interpreter": {
+                        "path": repo_relative(EXE),
+                        "sha256": sha256_file(EXE),
+                        "note": "build-specific (Confusion embeds __DATE__)",
+                    },
+                    "clock_shim": {
+                        "path": repo_relative(SHIM_SRC),
+                        "sha256": sha256_file(SHIM_SRC),
+                    },
+                    "scenario": {
+                        "path": (repo_relative(scenario_path)
+                                 if scenario_path is not None else None),
+                        "sha256": (sha256_file(scenario_path)
+                                   if scenario_path is not None else None),
+                        "commands": list(commands),
+                    },
+                    "entry": list(ENTRY),
                 },
-                "engine_sha256": sha256_file(EXE),
+                "save_artifacts": {
+                    "description": (
+                        "files the run creates or overwrites (SAVE-IT, "
+                        "77rooms.mud:8-9); outputs, never inputs; SHA-256 "
+                        "before and after the run (null = absent). The "
+                        "after-hash of Confusion's heap image differs between "
+                        "identical runs and is never compared"
+                    ),
+                    "files": {rel: {"before": sha, "after": None}
+                              for rel, sha in save_before.items()},
+                },
             },
             "strict_fields": list(STRICT_FIELDS),
             "boot_output": "",
@@ -364,6 +448,18 @@ def capture_boot(scenario: dict[str, Any], epoch: int, timeout: float,
             record["informational"]["process_exitstatus"] = child.exitstatus
             record["informational"]["process_signalstatus"] = child.signalstatus
 
+        # Post-run provenance: SAVE artifacts' after-hashes, and strict
+        # proof that nothing else in the game copy was written.
+        after_files = file_manifest(game_dir)
+        for rel, entry in record["provenance"]["save_artifacts"]["files"].items():
+            entry["after"] = after_files.get(rel)
+        violations = run_write_violations(immutable_files, after_files)
+        if violations:
+            record["complete"] = False
+            message = "; ".join(violations)
+            record["error"] = (f"{record['error']}; {message}"
+                               if record["error"] else message)
+
     finally:
         shutil.rmtree(str(tmpdir), ignore_errors=True)
 
@@ -396,7 +492,8 @@ def main() -> int:
 
     cmp_ = sub.add_parser(
         "compare",
-        help="Compare the gameplay view (STRICT_FIELDS) of two boot captures.",
+        help=("Compare two records through the single ADR-0053 comparator "
+              "(scripts/smoke_parity.py)."),
     )
     cmp_.add_argument("expected", type=Path)
     cmp_.add_argument("actual", type=Path)
@@ -404,16 +501,9 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.action == "compare":
-        expected = json.loads(args.expected.read_text(encoding="utf-8"))
-        actual = json.loads(args.actual.read_text(encoding="utf-8"))
-        diffs = compare_gameplay(expected, actual)
-        if diffs:
-            print(f"BOOT GAMEPLAY MISMATCH in fields: {', '.join(diffs)}",
-                  file=sys.stderr)
-            return 1
-        print(f"Boot gameplay identical ({', '.join(STRICT_FIELDS)}): "
-              f"{args.expected} == {args.actual}")
-        return 0
+        sys.path.insert(0, str(ROOT))
+        from scripts import smoke_parity  # single comparator (ADR-0053)
+        return smoke_parity.compare_files(args.expected, args.actual)
 
     if not args.scenario.is_file():
         print(f"boot_reference: scenario not found: {args.scenario}", file=sys.stderr)
@@ -436,7 +526,8 @@ def main() -> int:
         return 1
 
     try:
-        record = capture_boot(scenario, epoch, args.timeout)
+        record = capture_boot(scenario, epoch, args.timeout,
+                              scenario_path=args.scenario)
         record["candidate"] = True
         record["candidate_note"] = CANDIDATE_NOTE
     except (RuntimeError, ValueError, OSError) as exc:

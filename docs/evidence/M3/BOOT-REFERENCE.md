@@ -10,6 +10,30 @@ NOT a strict golden fixture. Only the gameplay view (`STRICT_FIELDS`) is compare
 
 ---
 
+## S10 corrections (2026-11-23; see [S10-SMOKE-PARITY.md](S10-SMOKE-PARITY.md), ADR-0053)
+
+1. **RNG-visible output (risk 4 below was wrong).** The scenario *does* show RNG-dependent
+   text. `west` re-enters West of House, and ROOM-INFO (`77rooms.mud:521-525`) prints the brief
+   text only if `<OR ,BRIEF!-FLAG <PROB 80>>` holds; `PROB` draws `RANDOM`, which `START` seeds
+   from `<DSKDATE>` (the clock). Without a fixed clock the response alternates between the brief
+   text and the full West of House description (S7: 15 brief / 6 full in 21 unfixed-clock runs).
+   Under the fixed clock (250776000, UTC) the reference and this runtime both print the brief
+   text; the draw is proven in `historical_clock_seed_test.rkt` and
+   [CLOCK-SEED-REFERENCE.md](CLOCK-SEED-REFERENCE.md).
+2. **Provenance split (schema 3).** `MDL/MADADV.SAVE` is not a boot input: `SAVE-IT`
+   (`77rooms.mud:8-9`, `MUDDLE` > 100) writes `<MDL>MADADV.SAVE`. Schema 3 records it under
+   `provenance.save_artifacts` with before/after hashes and keeps it out of
+   `provenance.immutable_inputs` (game files, interpreter, clock shim, scenario, entry). The
+   approved schema-2 capture `house-boot-candidate.json` is kept unchanged (sha256 `eb194115…`);
+   its `boot_input_state` still lists `MDL/MADADV.SAVE`, a known schema-2 flaw. The schema-3
+   fresh capture is [S10-house-boot-reference.json](S10-house-boot-reference.json).
+3. **Comparison.** `boot_reference.py compare` now delegates to the single comparator
+   `scripts/smoke_parity.py` (ADR-0053); `compare_gameplay` was removed.
+4. **Risk 1 below is obsolete:** the Racket runtime runs this boot since S7/S8
+   (`make test-m3-interactive`, `make m3-check`).
+
+---
+
 ## Maintainer decision (2026-11-22)
 
 SMOKE_PARITY uses a fresh-boot scenario. The entry is `<FLOAD "77loadall.mud">` then
@@ -120,6 +144,7 @@ score        -> Your score would be 0 [total of 500 points], in 6 moves. /
 2. `make test` exit status in this session is environment-blocked (see step 7).
 3. Fresh boot starts at MOVES=0 (6 moves); the restore scenario `house.json` starts at
    MOVES=2. Expected.
-4. The scenario shows no RNG-visible text; epoch control of RANDOM is not yet exercised by
-   a gameplay assertion.
+4. ~~The scenario shows no RNG-visible text; epoch control of RANDOM is not yet exercised by
+   a gameplay assertion.~~ **Wrong** (S10 correction 1): `west` depends on `<PROB 80>`; the
+   fixed clock makes it deterministic and the comparator checks it exactly.
 5. Promotion of the full JSON to a strict golden fixture still needs maintainer approval.

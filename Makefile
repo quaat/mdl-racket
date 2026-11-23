@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -21,7 +21,7 @@ test-racket:
 	@bash scripts/test_racket.sh
 
 test-python:
-	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py tests/test_boot_reference.py
+	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py tests/test_boot_reference.py tests/test_smoke_parity.py
 
 test-historical: sources
 	@racket tests/historical_vfload_test.rkt
@@ -58,6 +58,23 @@ test-m3-interactive: sources
 # RANDOM seed -> RANDOM state, observed host-only.
 test-m3-clock-seed: sources
 	@raco test tests/historical_clock_seed_test.rkt
+
+# M3 SMOKE_PARITY technical check (S10, ADR-0053). Stages, in order, each with
+# PASS/FAIL/NOT RUN: sources, test-m3-saveit, test-m3-clock-seed,
+# test-m3-interactive, comparator unit tests, this runtime's run vs the
+# committed Confusion record through the single strict comparator (no native
+# binary needed), and the optional fresh native capture (NOT RUN without
+# mdli/gcc; M3_NATIVE=require makes that a failure). Nonzero exit on any FAIL;
+# report in artifacts/m3/m3-check.json, logs in artifacts/m3/logs/.
+m3-check:
+	@$(PYTHON) scripts/m3_check.py
+
+# Native part only (after `make reference-build`): our candidate run plus a
+# fresh capture of pinned Confusion in a disposable copy, both compared strictly.
+m3-native-parity:
+	@$(PYTHON) scripts/m3_check.py --native require \
+		--stages candidate-vs-committed-reference,native-fresh-capture-parity \
+		--report artifacts/m3/m3-native-parity.json
 
 # Complete local M2 technical check. Build the native reference once with
 # `make reference-build` before using this target. Milestone acceptance also
