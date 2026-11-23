@@ -1257,9 +1257,17 @@ loop").
    use it: count returned, stop character consumed and not stored, full
    buffer leaves the rest of the line unread, no echo, output flushed first.
    The manual's default channel, a FIX stop and the EOF-routine argument are
-   strict errors. A `!` or a non-ASCII character in the input is a strict
-   error (open question: Confusion drops `!` as a reader escape; the manual
-   is silent).
+   strict errors. A non-ASCII character in the input is a strict error.
+   ~~A `!` in the input is a strict error (open question: Confusion drops
+   `!` as a reader escape; the manual is silent).~~ **Amended 2026-11-23
+   (S13 part A, maintainer decision "follow pinned Confusion"):** `!c` is an
+   escape pair that stores `c` in one slot; the `!` is never stored or
+   counted; an escaped stop character still stops the read and is consumed;
+   `!` immediately before end of input is stored literally and sets the
+   end-of-input flag; escape pairing resumes on the next READSTRING after a
+   full buffer; the character after `!` must still be ASCII. Evidence:
+   `evidence/M3/READSTRING-BANG-REFERENCE.md`; contract: SEMANTICS
+   READSTRING; record: `evidence/M3/S13-BANG-OUTPUT.md`.
 4. **End of input, maintainer decision D3 "Mirror, then strict".** A read
    that meets end of input returns the characters read so far (often 0) and
    sets the channel's end-of-input flag, as Confusion does, so the game
@@ -1292,13 +1300,33 @@ by D1: the loop prints the entry value once.
 **Host input port only (independent review follow-up).** Terminal input
 uses only a host-supplied port. READSTRING on a session input CHANNEL with no
 port is a strict error (`... has no host-supplied port ...`); the runtime
-never reads the process's own stdin. Output keeps its pre-S7 behaviour: with
-no session port, OUTCHAN writes to the host's `current-output-port`
+never reads the process's own stdin. ~~Output keeps its pre-S7 behaviour:
+with no session port, OUTCHAN writes to the host's `current-output-port`
 parameter. That parameter is host-controlled and existing tests capture
 output through it. Making output strict as well would change a
 runtime-wide contract that predates S7 (PRINTSTRING, CRLF, VFLOAD tests),
-so it is left for a separate decision. `mdl-session-run-interactive`
-requires both ports to be explicit.
+so it is left for a separate decision.~~ (Superseded below.)
+`mdl-session-run-interactive` requires both ports to be explicit.
+
+**Explicit output port (amended 2026-11-23, S13 part B, maintainer
+decision "explicit output for game sessions").** Terminal output now uses
+only a host-supplied port as well. A PRINT CHANNEL made by `make-mdl-session`
+or `make-mdl-context` without `#:output-port` has no port, and every
+operation that resolves it is a strict error naming ADR-0050 (`... PRINT
+CHANNEL has no host-supplied output port; the runtime never falls back to the
+host's current-output-port (ADR-0050)`): PRINC, PRIN1, PRINTSTRING, TERPRI,
+CRLF, READSTRING's pre-read flush, the host loop's entry-value print and its
+final flush. Nothing is written to a parameterized host port. The only
+exception is an explicit opt-in that `make-mdl-session` and `make-mdl-context`
+do not accept: `mdl-ensure-terminal-channels! #:follow-current-output-port?
+#t`, used by exactly two non-session callers, the process-wide default
+context (end of `core.rkt`, used by core unit tests and host code that never
+creates a context) and `#lang mdl` modules (`mdl/lang/reader.rkt`), which run
+in that ambient context. Their PRINT CHANNEL follows the host's
+`current-output-port` at each operation, as before. F2 is unchanged: a
+strict error from the final flush is a secondary failure when a primary is
+leaving the loop, and is raised only when nothing else was. Record:
+`evidence/M3/S13-BANG-OUTPUT.md`.
 
 **Out of scope (decisions pending):** QUIT, OPEN/CLOSE (D5), UNWIND under
 host errors (issue #139), MEMBER, a fixed clock (#135). No GPLv3

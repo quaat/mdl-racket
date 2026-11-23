@@ -2116,9 +2116,10 @@ section and in "M3 interactive terminal I/O and the host top-level loop".
 
 Manual chapter 11 allows `PRINTSTRING string [channel [count]]`. It writes
 at most `count` visible characters, or the entire STRING when omitted.
-The CHANNEL must be an output CHANNEL; output goes to that CHANNEL's
-session-owned port (R1 section below; with no injected port, the host's
-`current-output-port` at each operation). The runtime retains the manual's
+The CHANNEL must be an output CHANNEL. This local runner maps its terminal
+channel to the session's host-supplied output port (S13 part B: a session
+without one refuses PRINTSTRING; only the ambient opt-in context follows the
+current Racket output port; see "Host ports" below). The runtime retains the manual's
 character-count return value; pinned Confusion returns the source STRING,
 a recorded deviation already present for one-argument PRINTSTRING. Invalid
 CHANNEL, count, or arity fails. Typed STRING values are accepted after
@@ -2128,10 +2129,10 @@ CHTYPE to STRING, as used by the original TELL definition.
 
 Manual chapter 11 defines CRLF as emitting a terminal newline and returning
 T. It accepts an optional output CHANNEL, like TERPRI, which instead returns
-empty FALSE. The runtime writes a line feed to the CHANNEL's port (R1
-section below) and requires a PRINT-mode CHANNEL. This follows the existing
-documented Unix terminal normalization; an actual carriage-return byte is not
-emitted.
+empty FALSE. The local runner writes a line feed to the CHANNEL's host output
+port (S13 part B: strict error when the session has none) and requires a
+PRINT-mode CHANNEL. This follows the existing documented
+Unix terminal normalization; an actual carriage-return byte is not emitted.
 
 ## M3 execution contexts and session-owned CHANNEL ports (review R1)
 
@@ -2164,8 +2165,11 @@ without the constructor has no INCHAN/OUTCHAN (no hidden fallback).
 owning atom space with a host record: direction, an optional Racket port and,
 for READ channels, the end-of-input flag (ADR-0050).
 `make-mdl-session`/`make-mdl-context` accept `#:output-port`/`#:input-port`.
-Output with no injected port goes to the host's `current-output-port` at
-each operation. Input never falls back: READSTRING on a READ channel without
+Output never falls back either (S13 part B): a session or context made
+without `#:output-port` refuses every terminal write and flush with a strict
+ADR-0050 error; only the process default context and `#lang mdl` modules
+opt in to following `current-output-port` (see "Host ports"). Input never
+falls back: READSTRING on a READ channel without
 a host-supplied port is a strict error, so the runtime never reads the
 process's own stdin (ADR-0050 "Host input port only"). CHTYPE may retype a
 VECTOR as CHANNEL, as in Confusion, but only storage registered in the
@@ -2435,6 +2439,22 @@ RDCOM `<PRINC ">">` and `<READSTRING .INBUF ,INCHAN .STR>` with READER-STRING
 = ESC CR LF (77rooms.mud:598-616), PRINC `!\.` (77rooms.mud:1398), PRINC of a
 FIX (78melee.mud:524), SCORE's PRIN1 of FIX (77rooms.mud:675-680).
 
+**Host ports (ADR-0050 "Host input port only" and, from 2026-11-23, S13 part
+B "Explicit output port").** A terminal CHANNEL reads or writes only the
+Racket port its host supplied. A session or context made without
+`#:input-port` refuses READSTRING; one made without `#:output-port` refuses
+every operation that resolves its PRINT CHANNEL: PRINC, PRIN1, PRINTSTRING,
+TERPRI, CRLF, the pre-read flush of READSTRING, and the host loop's entry
+print and final flush. The message is `<who>: this session's PRINT CHANNEL
+has no host-supplied output port; the runtime never falls back to the host's
+current-output-port (ADR-0050)`, and nothing reaches a parameterized
+`current-output-port`. Explicit opt-in, never a default:
+`mdl-ensure-terminal-channels! #:follow-current-output-port? #t` creates a
+PRINT CHANNEL that writes to the host's `current-output-port` at each
+operation. It is used only by the process-wide default context and by
+`#lang mdl` modules (which run in it); `make-mdl-session` and
+`make-mdl-context` do not accept it. Tests: `tests/session_output_port_test.rkt`.
+
 **Terminal CHANNEL host state.** Each terminal CHANNEL's host record (keyed
 by its backing storage, ADR-0046/#117) gains one mutable end-of-input flag,
 initially clear. It is host state only: no CHANNEL slot shows it (deviation:
@@ -2505,10 +2525,37 @@ forged, foreign or shifted (BACK/REST) view is refused.
   the FIX count stored. Case is preserved, nothing is echoed or written.
 - Overflow: when the buffer fills, the rest of the line stays unread and the
   next READSTRING continues from it (Confusion `readstring-overflow`).
-- A `!` or a character with code above 127 in the input is a strict error.
-  Confusion reads `!x` as `x` (its reader escape, `readstring-bang-and-case`);
-  the manual does not say what READSTRING does with `!`. Recorded as an open
-  question rather than guessed.
+- A character with code above 127 in the input is a strict error.
+- *(Superseded 2026-11-23, S13 part A: this bullet said "a `!` in the input
+  is a strict error".)* **`!` escape (maintainer decision 2026-11-23: follow
+  pinned Confusion; evidence `evidence/M3/READSTRING-BANG-REFERENCE.md`,
+  `readstring-bang-probe.json`).** The manual is silent on `!` in terminal
+  input; this is Confusion's stdio behaviour, adopted by decision, not a
+  manual-backed fact. Reading proceeds one *unit* at a time while the
+  buffer view has room:
+  1. A unit is one character `c`, or `!` followed by one character `c` (the
+     escape pair). Every character can be escaped, including `!` itself,
+     control characters and `\` (`\` is never an escape).
+  2. An escape pair yields `c`: the `!` is never stored or counted, and the
+     pair uses one buffer slot (`Ab!cD` → 4 `"AbcD"`; `!!` → 1 `"!"`;
+     `a!!b` → 3 `"a!b"`; `!a!b!c` → 3 `"abc"`; `a!<TAB>b` stores TAB).
+  3. The stop test uses `c` whether or not it was escaped: an escaped CR, LF
+     or ESC still ends the read, is consumed and is not stored (`ab!<LF>XY<LF>`
+     → 2 `"ab"`, then 2 `"XY"`; `ab!<CR><LF>cd<LF>` → 2, 0, 2).
+  4. `!` immediately followed by end of input is stored as a literal `!` and
+     counted; the read returns there and sets the end-of-input flag, so the
+     next READSTRING raises the D3 exhausted error (`ab!` → 3 `"ab!"`).
+  5. A unit begins only when the buffer has room; when the buffer is full the
+     rest stays unread, and escape pairing resumes on the next READSTRING
+     (3 slots, `ab!cd<LF>` → 3 `"abc"`, then 1 `"d"`; 2 slots → `"ab"`, then
+     `"cd"`). Because a pair always fits in the one slot that is left, a `!`
+     is never the last character read before the buffer fills.
+  6. The count is the number of characters stored.
+  The character after `!` passes the same check as any other input: code
+  above 127 is a strict error (`a!é` is refused). Known deviation, unchanged:
+  Confusion stores bytes above 127 raw (`ASCII` gives negative codes) with or
+  without a `!`. Not modelled: a FIX stop (strict here, so `bang-fix-stop`
+  cannot be exercised).
 - CR is a stop character in READER-STRING, so CRLF input yields an extra empty
   read (Confusion `boot-six-crlf`); the host therefore feeds LF-terminated
   lines.

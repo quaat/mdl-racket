@@ -210,7 +210,7 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
   READSTRING `!` escape per pinned Confusion; an explicit output port for
   game sessions. Each needs a SEMANTICS entry and reference probes first.
   **Status:** MEMBER (#145), QUIT and OPEN (#147) done on branch;
-  READSTRING `!` and explicit output in progress (S13).
+  READSTRING `!` and explicit output ports done (#150).
 - **WP4 — local session smoke and launcher.** A scenario covering
   `quit` answered n, continue, then `quit` answered y, with no file writes;
   a thin CLI/DrRacket launcher over `make-mdl-session` and

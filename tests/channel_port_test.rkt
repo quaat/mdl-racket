@@ -21,19 +21,34 @@
   (namespace-attach-module test-namespace core-module ns)
   ns)
 
-;; Fresh non-loader context from the shared context constructor.
+;; Fresh non-loader context from the shared context constructor. S13 part B
+;; (ADR-0050): a context writes only to an explicit host port, so each fresh
+;; context gets its own string port, read back by capture.
+(define current-context-out (make-parameter #f))
 (define (in-fresh-context thunk)
-  (parameterize ([current-namespace test-namespace])
-    (call-with-mdl-context (make-mdl-context) thunk)))
+  (define out (open-output-string))
+  (parameterize ([current-namespace test-namespace]
+                 [current-context-out out])
+    (call-with-mdl-context (make-mdl-context #:output-port out) thunk)))
 
 (define (run source)
   (for/fold ([result #f]) ([expr (in-list (compile-program (parse-mdl source)))])
     (eval expr)))
 
+;; Output written by THUNK. Inside in-fresh-context: what reached the
+;; context's own port, and nothing may reach the (parameterized) host
+;; current-output-port. Elsewhere (the process-wide default context and
+;; #lang mdl modules, the explicit follow-current-output-port opt-in): what
+;; reached current-output-port.
 (define (capture thunk)
   (define port (open-output-string))
+  (define context-out (current-context-out))
+  (define before (and context-out (string-length (get-output-string context-out))))
   (define result (parameterize ([current-output-port port]) (thunk)))
-  (values result (get-output-string port)))
+  (cond [context-out
+         (check-equal? (get-output-string port) "" "a context never writes to current-output-port")
+         (values result (substring (get-output-string context-out) before))]
+        [else (values result (get-output-string port))]))
 
 ;; 0. The default context is initialized by the runtime itself (end of
 ;;    core.rkt), before any #lang mdl module runs: nothing above has
@@ -119,14 +134,22 @@
                   (run "<PROG ((OUTCHAN ,OUTCHAN)) <PRINTSTRING \"pg\">>"))))
      (check-equal? output "pg"))))
 
-;; 7. Default terminal channels follow the current Racket port per call.
-(test-case "Default terminal channels follow the current Racket port per call."
+;; 7. S13 part B: only the process-wide default context (the explicit
+;;    follow-current-output-port opt-in) follows the current Racket port per
+;;    call; a fresh context writes every call to its own port.
+(test-case "Only the default context follows the current Racket port per call."
+  (parameterize ([current-namespace test-namespace])
+    (define-values (_a first) (capture (lambda () (run "<PRINTSTRING \"one\">"))))
+    (define-values (_b second) (capture (lambda () (run "<PRINTSTRING \"two\">"))))
+    (check-equal? first "one")
+    (check-equal? second "two"))
   (in-fresh-context
    (lambda ()
      (define-values (_a first) (capture (lambda () (run "<PRINTSTRING \"one\">"))))
      (define-values (_b second) (capture (lambda () (run "<PRINTSTRING \"two\">"))))
      (check-equal? first "one")
-     (check-equal? second "two"))))
+     (check-equal? second "two")
+     (check-equal? (get-output-string (current-context-out)) "onetwo"))))
 
 ;; 8. Counts and invalid arguments.
 (test-case "Counts and invalid arguments."
@@ -238,21 +261,26 @@
 ;;     contexts get different CHANNEL objects; modules run in the SAME context
 ;;     share its channels exactly as they share every other global.
 (test-case "Each context owns its channels; one context is shared by its modules."
-  (define ctx-a (make-mdl-context))
-  (define ctx-b (make-mdl-context))
+  ;; S13 part B: each context has its own explicit output port.
+  (define out-a (open-output-string))
+  (define out-b (open-output-string))
+  (define ctx-a (make-mdl-context #:output-port out-a))
+  (define ctx-b (make-mdl-context #:output-port out-b))
   (capture (lambda ()
              (call-with-mdl-context ctx-a
                (lambda () (dynamic-require mutate-fixture #f)))))
-  (define-values (_ output)
+  (define-values (_ stray)
     (capture (lambda ()
                (call-with-mdl-context ctx-b
                  (lambda () (dynamic-require print-fixture #f))))))
-  (check-regexp-match #rx"^from-b" output)
+  (check-regexp-match #rx"^from-b" (get-output-string out-b))
+  (check-false (regexp-match? #rx"from-b" (get-output-string out-a)))
+  (check-false (regexp-match? #rx"from-b" stray))
   (check-equal? (call-with-mdl-context ctx-b (lambda () (mdl-gval "R1-B-RESULT"))) 6)
   (check-false (eq? (call-with-mdl-context ctx-a (lambda () (mdl-gval "OUTCHAN")))
                     (call-with-mdl-context ctx-b (lambda () (mdl-gval "OUTCHAN")))))
   ;; Shared-context boundary, in a fresh namespace so both modules instantiate.
-  (define ctx-shared (make-mdl-context))
+  (define ctx-shared (make-mdl-context #:output-port (open-output-string)))
   (parameterize ([current-namespace (fresh-mdl-namespace)])
     (call-with-mdl-context ctx-shared
       (lambda ()

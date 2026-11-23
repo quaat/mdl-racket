@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -71,6 +71,12 @@ test-m3-launcher: sources
 # zone). Exit codes are documented in zork/cli.rkt and README "Play locally".
 play: sources
 	@$(RACKET) zork/cli.rkt
+
+# S13 part A (ADR-0050 §3 amended): the `!` escape in terminal input read by
+# the game's own RDCOM (`nor!th` behaves like `north`), compared with the
+# pinned Confusion game cases in docs/evidence/M3/readstring-bang-probe.json.
+test-m3-bang: sources
+	@raco test tests/historical_bang_input_test.rkt
 
 # Issue #135 part 1 (ADR-0052): fixed session clock -> DSKDATE -> START's
 # RANDOM seed -> RANDOM state, observed host-only.

@@ -25,7 +25,8 @@ M0, M1 and M2 gates: **PASS (mainline)**. M3 on `main`:
 Runtime stack (merge order): #107 (umbrella `feat/m3-logical-gc`) → #109 →
 #111 → #125 → #128 → #130 → #136 → #137 → #138 → #141 (S7 host loop + review
 F1/F2) → #144 (S8 session clock) → #145 (S9 MEMBER) → #147 (S11 QUIT/OPEN) →
-#148 (S12 launcher). Side branches on that stack: #146 (S10 strict
+#148 (S12 launcher) and #150 (S13 READSTRING `!` and explicit output ports;
+both on #147). Side branches on that stack: #146 (S10 strict
 SMOKE_PARITY gate, on #144), #142 (docs reconciliation, on #141), #143
 (native reference probe evidence, on #141). The integration branch
 `integration/m3-acceptance` merges all of them; #131's capture tooling is
@@ -75,8 +76,8 @@ consolidated into [SEMANTICS](SEMANTICS.md).
 
 Active iteration (PLAN "Active iteration (2026-11-23)"): WP1 stack
 readiness done on branch (F1 CI coverage, F2 flush, F3 docs, #55); WP2
-SMOKE_PARITY PASS on branch; WP3 MEMBER, QUIT, OPEN done, READSTRING `!` and
-explicit output in progress (S13); WP4 local session smoke and launcher PASS
+SMOKE_PARITY PASS on branch; WP3 MEMBER, QUIT, OPEN, READSTRING `!` and
+explicit output ports done on branch (#145, #147, #150); WP4 local session smoke and launcher PASS
 on branch; WP5 [M4 backlog](evidence/M4/SCENARIO-BACKLOG.md) drafted.
 
 Integration into `main` requires the maintainer's explicit approval (merge

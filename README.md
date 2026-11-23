@@ -17,7 +17,7 @@ PARSED PASS (mainline); LOADED **FAIL** (loader exit 1 after 433 forms at
 local session smoke and PLAYABLE **NOT RUN**.
 
 **Branch (umbrella PR #107 → #109 → #111 → #125 → #128 → #130 → #136 →
-#137 → #138 → #141 → #144 → #145 → #147 → #148; #146 strict parity gate and
+#137 → #138 → #141 → #144 → #145 → #147 → #148 / #150; #146 strict parity gate and
 #142 docs alongside; all combined on `integration/m3-acceptance`).** These
 are **branch evidence**, not mainline results:
 
@@ -45,9 +45,10 @@ outcome (`'quit` / `'quit-after-mdl-error`, ADR-0054); OPEN under a virtual
 no-file policy (RECORD's form only, ADR-0055); SAVE as an in-session record.
 
 **Unsupported (strict errors):** RESTORE, CLOSE and other file I/O (`info`,
-`help`), TOP (`put X in …`), PRINT (the game's ERROR handler path), `!` in
-terminal input and implicit output ports (both in progress, S13), and every
-MDL construct not listed in [SEMANTICS](docs/SEMANTICS.md).
+`help`), TOP (`put X in …`), PRINT (the game's ERROR handler path), non-ASCII
+terminal input, a session without an explicit output port (S13, ADR-0050),
+and every MDL construct not listed in [SEMANTICS](docs/SEMANTICS.md). Typed
+`!` follows pinned Confusion (S13: `nor!th` reads as `north`).
 
 **Play locally (preview):** see the section below; `make play` or
 `racket zork/cli.rkt`.
@@ -58,6 +59,7 @@ racket:8.10-bc container; in the sandbox `export PLTCOLLECTS=":$PWD"`):
 `make m3-source-progress`, `make test-m3-historical-gc`,
 `make test-m3-start-back`, `make test-m3-saveit`, `make test-m3-interactive`,
 `make test-m3-clock-seed`, `make test-m3-session`, `make test-m3-launcher`,
+`make test-m3-bang`,
 `make m3-check` (aggregate M3 SMOKE_PARITY check; native stage NOT RUN
 without `mdli`), `make m3-native-parity` (after `make reference-build`).
 The reference CI workflow runs all of these.
