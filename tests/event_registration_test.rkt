@@ -34,5 +34,5 @@
 (check-exn #rx"priority|FIX" (lambda () (run "<EVENT \"M3-USER\" \"BAD\">")))
 (check-exn #rx"IHEADER" (lambda () (run "<HANDLER 1 2>")))
 (check-exn #rx"unsupported HANDLER action" (lambda () (run "<HANDLER <EVENT \"M3-USER\" 7> \"BAD\">")))
-(check-exn #rx"external|unsupported" (lambda () (run "<EVENT \"GC\" 11>")))
+(check-equal? (type-name (run "<EVENT \"GC\" 11>")) "IHEADER")
 (check-exn #rx"unassigned|unsupported" (lambda () (run "<INTERRUPT \"M3-USER\">")))

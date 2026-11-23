@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "name": "M3 CHUTYPE shared UVECTOR header",
+  "recorded_at": "2026-11-22T17:17:15.966520+00:00",
+  "interpreter_sha256": "b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda83b177",
+  "source_commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "rest-chutype-updates-base-utype",
+      "expression": "<SETG U <IUVECTOR 2 1>> <SETG V <REST ,U 1>> <CHUTYPE ,V WORD> <UTYPE ,U>",
+      "input": "<SETG U <IUVECTOR 2 1>> <SETG V <REST ,U 1>> <CHUTYPE ,V WORD> <UTYPE ,U>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![1 1!]\n![1!]\n![#WORD *0000000000000000000001*!]\nWORD\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "![1 1!]\n![1!]\n![#WORD *0000000000000000000001*!]\nWORD\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "rest-chutype-updates-view-utype",
+      "expression": "<SETG U <IUVECTOR 2 1>> <SETG V <REST ,U 1>> <CHUTYPE ,V WORD> <UTYPE ,V>",
+      "input": "<SETG U <IUVECTOR 2 1>> <SETG V <REST ,U 1>> <CHUTYPE ,V WORD> <UTYPE ,V>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![1 1!]\n![1!]\n![#WORD *0000000000000000000001*!]\nWORD\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "![1 1!]\n![1!]\n![#WORD *0000000000000000000001*!]\nWORD\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "rest-chutype-retypes-base-elements",
+      "expression": "<SETG U <IUVECTOR 2 1>> <SETG V <REST ,U 1>> <CHUTYPE ,V WORD> <TYPE <1 ,U>>",
+      "input": "<SETG U <IUVECTOR 2 1>> <SETG V <REST ,U 1>> <CHUTYPE ,V WORD> <TYPE <1 ,U>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![1 1!]\n![1!]\n![#WORD *0000000000000000000001*!]\nWORD\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "![1 1!]\n![1!]\n![#WORD *0000000000000000000001*!]\nWORD\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

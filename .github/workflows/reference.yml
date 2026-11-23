@@ -25,13 +25,15 @@ jobs:
           make sources
           make check-source
       - name: Install Racket runtime test libraries
-        run: raco pkg install --auto --no-docs compatibility-lib rackunit-lib
+        run: raco pkg install --auto --no-docs compiler-lib compatibility-lib rackunit-lib
       - name: Execute pinned historical VFLOAD definition slice
         run: make test-historical
       - name: Execute M2 G3 original-definition gate
         run: make test-m2-g3
       - name: Validate M3 original-source progress
         run: make m3-source-progress
+      - name: Test historical GC handlers against pinned source
+        run: make test-m3-historical-gc
       - name: Build and capture native reference
         run: |
           make reference-build

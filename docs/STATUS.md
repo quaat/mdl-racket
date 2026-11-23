@@ -1,17 +1,29 @@
-# Status — 2026-11-22 (M2 mainline PASS; M3 source execution partial)
+# Status — 2026-11-22 (M2 mainline PASS; M3 source load WIP PASS)
 
 ## Current state (2026-11-22)
 
 | M3 stage | Current evidence |
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
-| LOADED | FAIL: loader exit 1 after 433 original forms, zero skipped |
-| INITIALIZED | NOT RUN: source chain has not completed |
+| LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
+| INITIALIZED | FAIL: original START reaches unassigned RANDOM after welcome output |
 | INTERACTIVE | NOT RUN: original startup/game loop unavailable |
 | SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
 | PLAYABLE | NOT RUN: original game has not booted in Racket |
 
-- **Issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
+- **Current WIP `feat/m3-logical-gc` (reviewed checkpoint `c5a6027`):** The complete unchanged
+  source chain loads: 1,229 forms, zero skips, loader exit 0. This is a
+  scoped LOADED gate result, not M3 acceptance. A direct original `START`
+  call fails at unassigned `RANDOM` after CRLF; terminal input, the game loop, approved
+  house smoke parity, and state comparisons remain unverified. After CI fixture
+  repair and GC/UVECTOR regressions, `make test` passes 1,471 Racket and 23
+  Python tests; `make m2-check` exits 0 on the repaired head. The
+  logical GC ledger covers LIST, VECTOR and UVECTOR backing allocations,
+  with the limits in [WIP evidence](evidence/M3/WIP-SOURCE-LOAD.md). The
+  next executable action is a reference-validated session RNG and then
+  the original terminal I/O path. M3 status: **FAIL / incomplete**.
+
+- **Previous issue #104 interrupt foundation on `feat/m3-interrupt-dispatcher`:
   scoped Gate A PASS after independent review; Gate B BLOCKED and M3
   incomplete.** Session-owned
   priority dispatch, pending occurrences, `INT-LEVEL`, `ENABLE`, and
@@ -591,10 +603,11 @@ function frames. `GO` follows the MDL manual chapter 10: top-level atoms in
 PROG/REPEAT bodies are labels skipped in normal flow, and GO resumes at the
 following expression in the nearest owned frame; the pinned Confusion has no
 GO or TAG, a recorded reference deviation, and TAG values remain
-unsupported. `UNWIND` runs its cleanup when a nonlocal transfer or an error
-crosses below it and returns the guarded expression's value otherwise;
-Confusion skips the cleanup on errors, a deviation the Racket runtime does
-not copy (manual chapter 16). `make test` passes 465 Racket checks and 13
+unsupported. `UNWIND` runs its cleanup when a nonlocal transfer crosses
+below it and returns the guarded expression's value otherwise. (This slice
+originally also ran it on errors; issue #139 / ADR-0051 corrected that: a
+raised error runs no cleanup, matching the manual and Confusion; see
+[I139 evidence](evidence/M3/I139-UNWIND.md).) `make test` passes 465 Racket checks and 13
 Python tests under the documented sandbox environment after both Codex
 review fixes (PUTREST TUPLE rejection in PR #32 and octal-token label
 exclusion here); the 36/36 reader

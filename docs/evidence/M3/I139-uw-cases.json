@@ -1,0 +1,130 @@
+{
+  "name": "unwind-frontier",
+  "cases": [
+    {
+      "name": "quit-in-body",
+      "input": "<UNWIND <QUIT> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n",
+      "note": "QUIT inside the guarded expression: does cleanup run before exit?"
+    },
+    {
+      "name": "quit-in-body-nested",
+      "input": "<PROG () <UNWIND <UNWIND <QUIT> <PRINC \"INNER\">> <PRINC \"OUTER\">>>\n",
+      "note": "QUIT under two UNWINDs"
+    },
+    {
+      "name": "error-stay-at-level2",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<PRINC \"AT-LEVEL-2\">\n<QUIT>\n",
+      "note": "ERROR inside UNWIND: is cleanup run when the error level is entered? QUIT from level 2."
+    },
+    {
+      "name": "error-erret-value",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<ERRET 5>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "ERRET 5 returns from the ERROR frame (above UNWIND): cleanup expected NOT to run, UNWIND returns 5"
+    },
+    {
+      "name": "error-erret-noargs",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<ERRET>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "ERRET with no args strips the whole stack (crosses UNWIND): manual implies cleanup"
+    },
+    {
+      "name": "error-return-activation",
+      "input": "<PROG P () <UNWIND <ERROR FOO> <PRINC \"CLEANUP\">> 99>\n<RETURN 7 .P>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "At level 2, RETURN to an activation below the UNWIND (non-local return crossing it)"
+    },
+    {
+      "name": "error-retry",
+      "input": "<SETG N 0>\n<UNWIND <PROG () <SETG N <+ ,N 1>> <COND (<1? ,N> <ERROR FOO>)> ,N> <PRINC \"CLEANUP\">>\n<RETRY>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "RETRY the ERROR frame (above UNWIND)"
+    },
+    {
+      "name": "error-frames",
+      "input": "<DEFINE F () <UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>>\n<F>\n<FUNCT <FRAME>>\n<FUNCT <FRAME <FRAME>>>\n<FUNCT <FRAME <FRAME <FRAME>>>>\n<FUNCT <FRAME <FRAME <FRAME <FRAME>>>>>\n<QUIT>\n",
+      "note": "Exploratory: FRAME chain at the error level"
+    },
+    {
+      "name": "error-erret-frame-below",
+      "input": "<DEFINE F () <UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>>\n<PROG () <F>>\n<ERRET 42 <FRAME <FRAME <FRAME>>>>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "ERRET to a frame below the UNWIND (third frame), if the chain matches error-frames"
+    },
+    {
+      "name": "error-eof-at-level2",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n",
+      "note": "stdin ends while sitting at the error level inside an UNWIND"
+    },
+    {
+      "name": "unbound-fn-cleanup-quits",
+      "input": "<UNWIND <PROG () <OPEN-NOT-DEFINED \"X\"> <PRINC \"BODY-DONE\"> <QUIT>> <PROG () <PRINC \"CLEANUP\"> <QUIT>>>\n<PRINC \"AT-LEVEL-2\">\n",
+      "note": "FINISH-shaped: unbound function error in body, cleanup QUITs; then EOF at level 2"
+    },
+    {
+      "name": "unbound-fn-cleanup-quits-erret",
+      "input": "<UNWIND <PROG () <OPEN-NOT-DEFINED \"X\"> <PRINC \"BODY-DONE\"> <QUIT>> <PROG () <PRINC \"CLEANUP\"> <QUIT>>>\n<ERRET>\n<PRINC \"AFTER\">\n",
+      "note": "Same, then ERRET with no args"
+    },
+    {
+      "name": "return-crosses",
+      "input": "<PROG () <UNWIND <RETURN 1> <PRINC \"C\">>>\n<QUIT>\n",
+      "note": "RETURN crossing UNWIND"
+    },
+    {
+      "name": "again-crosses",
+      "input": "<SETG N 0>\n<PROG () <SETG N <+ ,N 1>> <COND (<G? ,N 2> <RETURN ,N>)> <UNWIND <AGAIN> <PRINC \"C\">>>\n<QUIT>\n",
+      "note": "AGAIN crossing UNWIND twice"
+    },
+    {
+      "name": "nested-return-order",
+      "input": "<PROG () <UNWIND <UNWIND <RETURN 1> <PRINC \"INNER\">> <PRINC \"OUTER\">>>\n<QUIT>\n",
+      "note": "Order of nested cleanups"
+    },
+    {
+      "name": "return-cleanup-quits",
+      "input": "<PROG () <UNWIND <RETURN 1> <PROG () <PRINC \"C\"> <QUIT>>>>\n<PRINC \"AFTER\">\n",
+      "note": "RETURN crosses UNWIND whose cleanup QUITs"
+    },
+    {
+      "name": "error-inside-cleanup",
+      "input": "<PROG () <UNWIND <RETURN 1> <ERROR BAR>>>\n<PRINC \"AT-LEVEL-2\">\n<QUIT>\n",
+      "note": "ERROR inside cleanup during a RETURN"
+    },
+    {
+      "name": "error-inside-cleanup-erret-value",
+      "input": "<PROG () <UNWIND <RETURN 1> <ERROR BAR>>>\n<ERRET 3>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "ERROR inside cleanup, then ERRET value: does the original RETURN complete?"
+    },
+    {
+      "name": "error-inside-cleanup-of-error",
+      "input": "<UNWIND <ERROR FOO> <ERROR BAR>>\n<ERRET>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "Error in body, ERRET (cleanup runs?) and cleanup errors too"
+    },
+    {
+      "name": "handler-quits",
+      "input": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" T) <PRINC \"HANDLER\"> <QUIT>>>\n<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "Game-shaped: ERROR handler QUITs (like HANDLE -> FINISH -> QUIT)"
+    },
+    {
+      "name": "handler-erret",
+      "input": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" T) <PRINC \"HANDLER\"> <ERRET T .FR>>>\n<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "note": "Game-shaped: ERROR handler ERRETs T to its frame (like HANDLE CONTROL-G path)"
+    },
+    {
+      "name": "handler-in-unwind-finish",
+      "input": "<DEFINE FIN () <UNWIND <PROG () <PRINC \"FIN-BODY\"> <QUIT>> <QUIT>>>\n<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" T) <PRINC \"HANDLER\"> <FIN>>>\n<UNWIND <PROG () <OPEN-NOT-DEFINED \"X\"> 1> <PRINC \"CLEANUP\">>\n",
+      "note": "Handler calls a FINISH-shaped function while an outer UNWIND is pending"
+    },
+    {
+      "name": "eof-inside-unwind-read",
+      "input": "<UNWIND <PROG () <READ>> <PRINC \"CLEANUP\">>\n",
+      "note": "stdin EOF while a READ inside an UNWIND waits"
+    },
+    {
+      "name": "eof-inside-unwind-readstring",
+      "input": "<UNWIND <PROG () <READSTRING <ISTRING 5> ,INCHAN 5>> <PRINC \"CLEANUP\">>\n",
+      "note": "stdin EOF while READSTRING inside an UNWIND waits"
+    },
+    {
+      "name": "normal-no-cleanup",
+      "input": "<UNWIND 5 <PRINC \"CLEANUP\">>\n<QUIT>\n",
+      "note": "Baseline: normal completion"
+    }
+  ]
+}

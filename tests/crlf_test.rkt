@@ -1,0 +1,13 @@
+#lang racket/base
+(require rackunit racket/file "../mdl/loader.rkt" "../mdl/runtime/core.rkt")
+(define root (make-temporary-file "mdl-crlf~a" 'directory))
+(define s (make-mdl-session root))
+(define out (mdl-session-global s "OUTCHAN"))
+(define port (open-output-string))
+(define result (parameterize ([current-output-port port])
+                 (mdl-session-call s "CRLF" out)))
+(check-equal? (get-output-string port) "\n")
+(check-equal? (mdl-atom-pname result) "T")
+(check-exn #rx"output channel" (lambda ()
+  (mdl-session-call s "CRLF" (mdl-session-global s "INCHAN"))))
+(delete-directory/files root)

@@ -60,8 +60,13 @@
 (define (is-kind? n kind)
   (and (mdl-node? n) (eq? (source-node-kind n) kind)))
 
+;; True for both ordinary and escaped-atom nodes: an escaped atom has the
+;; same PNAME semantics as a plain atom but must bypass numeric/# classification.
+(define (is-atom-node? n)
+  (or (is-kind? n 'atom) (is-kind? n 'escaped-atom)))
+
 (define (atom-name n)
-  (unless (is-kind? n 'atom) (unsupported n "expected an MDL atom"))
+  (unless (is-atom-node? n) (unsupported n "expected an MDL atom"))
   (when (and (read-substitution? n)
              (not (eq? (substitution-value n)
                        (mdl-atom (mdl-atom-pname (substitution-value n))))))
@@ -84,23 +89,33 @@
             (unsupported n "FLOAT literal overflow"))
           float)
         number))
-  (cond
-    [(string=? upper "#FALSE") (unsupported n "#FALSE requires a LIST payload")]
-    [(string=? upper "#WORD") (unsupported n "#WORD requires a numeric payload")]
-    [(member upper '("T" "ELSE" "NIL")) `(mdl-atom ,upper)]
-    [(regexp-match? #px"^[+-]?[0-9]+$" val)
-     (fix-or-float (string->number val))]
-    [(regexp-match? #px"^[+-]?[0-9]+\\.$" val)
-     (fix-or-float (string->number (substring val 0 (sub1 (string-length val)))))]
-    [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
-    [(regexp-match? #px"^\\*[0-7]+\\*$" val)
-     (fix-or-float (string->number (substring val 1 (sub1 (string-length val))) 8))]
-    [(regexp-match? #px"^\\*[0-9]+\\*$" val)
-     (unsupported n "invalid octal FIX token")]
-    [(regexp-match? #px"^[+-]?[0-9]+(\\.[0-9]*)?[Ee][+-]?[0-9]+$" val)
-     (unsupported n "unsupported numeric token")]
-    [(string-prefix? val "#") (unsupported n "unsupported # reader token")]
-    [else `(mdl-atom ,val)]))
+  ;; An escaped atom (produced by a `\`-prefixed PNAME in source) is always
+  ;; an ATOM regardless of its PNAME.  `\5` has PNAME "5" but is ATOM, not
+  ;; FIX; `\#FOO` has PNAME "#FOO" but is ATOM, not an unsupported # token.
+  ;; See MDL chapter 15 and issue I119.
+  (if (is-kind? n 'escaped-atom)
+      (atom-ref val)
+      (cond
+        [(string=? upper "#FALSE") (unsupported n "#FALSE requires a LIST payload")]
+        [(string=? upper "#WORD") (unsupported n "#WORD requires a numeric payload")]
+        [(member upper '("T" "ELSE" "NIL")) (atom-ref upper)]
+        [(regexp-match? #px"^[+-]?[0-9]+$" val)
+         (fix-or-float (string->number val))]
+        [(regexp-match? #px"^[+-]?[0-9]+\\.$" val)
+         (fix-or-float (string->number (substring val 0 (sub1 (string-length val)))))]
+        [(regexp-match? #px"^[+-]?[0-9]+\\.[0-9]+$" val) (string->number val)]
+        ;; Leading-dot FLOATs: `.5` → 0.5, `.05` → 0.05 (MDL ch.7; Confusion I124)
+        [(regexp-match? #px"^\\.[0-9]+$" val) (string->number val)]
+        [(regexp-match? #px"^\\.[0-9]+[Ee][+-]?[0-9]+$" val)
+         (unsupported n "unsupported numeric token")]
+        [(regexp-match? #px"^\\*[0-7]+\\*$" val)
+         (fix-or-float (string->number (substring val 1 (sub1 (string-length val))) 8))]
+        [(regexp-match? #px"^\\*[0-9]+\\*$" val)
+         (unsupported n "invalid octal FIX token")]
+        [(regexp-match? #px"^[+-]?[0-9]+(\\.[0-9]*)?[Ee][+-]?[0-9]+$" val)
+         (unsupported n "unsupported numeric token")]
+        [(string-prefix? val "#") (unsupported n "unsupported # reader token")]
+        [else (atom-ref val)])))
 
 (define (compile-typed n)
   (define tagged (source-node-value n))
@@ -108,7 +123,14 @@
   (define value (cdr tagged))
   (unless (regexp-match? #px"^#[A-Z]" name)
     (unsupported n (format "unsupported typed literal ~a" name)))
-  (unless (is-kind? value 'atom)
+  (when (and (is-kind? value 'string) (string=? name "#WORD"))
+    (unsupported n "#WORD requires a numeric literal"))
+  (if (is-kind? value 'string)
+      `(mdl-chtype ,(source-node-value value) ,(atom-ref (substring name 1)))
+      (compile-typed-word n name value)))
+
+(define (compile-typed-word n name value)
+  (unless (is-atom-node? value)
     (unsupported n "#WORD requires a numeric literal"))
   (define raw (source-node-value value))
   (define bits
@@ -120,7 +142,7 @@
   (define word-expression `(mdl-word ,bits))
   (if (string=? name "#WORD")
       word-expression
-      `(mdl-chtype ,word-expression (mdl-atom ,(substring name 1)))))
+      `(mdl-chtype ,word-expression ,(atom-ref (substring name 1)))))
 
 ;; A splice node compiles to a runtime SEGMENT object in data positions
 ;; (quoted structures, interpreted bodies, raw call arguments) and to a
@@ -156,7 +178,7 @@
     [(decl) `(mdl-make-declaration
               (mdl-list ,@(map compile-data (source-node-value n)))
               ,(mdl-node-line n) ,(mdl-node-column n))]
-    [(atom) (mdl-constant n)]
+    [(atom escaped-atom) (mdl-constant n)]
     [(string) (source-node-value n)]
     [(splice) (compile-splice-data n)]
     [(list) `(mdl-list ,@(map compile-data (source-node-value n)))]
@@ -172,21 +194,40 @@
     [(form) `(mdl-make-form
               (mdl-list ,@(map compile-data (source-node-value n))))]
     [(local) `(mdl-make-form
-               (mdl-list (mdl-atom "LVAL")
-                         (mdl-atom ,(string-upcase (source-node-value n)))))]
+               (mdl-list (mdl-root-atom "LVAL")
+                         ,(atom-ref (string-upcase (source-node-value n)))))]
     [(global)
      `(mdl-make-form
-       (mdl-list (mdl-atom "GVAL")
+       (mdl-list (mdl-root-atom "GVAL")
                  ,(if (string? (source-node-value n))
-                      `(mdl-atom ,(string-upcase (source-node-value n)))
+                      (atom-ref (string-upcase (source-node-value n)))
                       (compile-data (source-node-value n)))))]
     [(quote) `(mdl-make-form
-               (mdl-list (mdl-atom "QUOTE")
+               (mdl-list (mdl-root-atom "QUOTE")
                          ,(compile-data (source-node-value n))))]
     [(typed) (compile-typed n)]
     [else (unsupported n "this MDL data construct is not implemented")]))
 
 (define current-mdl-literals (make-parameter #f))
+
+;; Atom identity is fixed when a top-level expression is read (manual 15.3:
+;; READ looks each PNAME up in .OBLIST), not each time compiled code runs.
+;; Every user-text ATOM reference in one top-level expression is therefore
+;; resolved once, in first-occurrence order, through the runtime's single
+;; search path before the expression body runs; function bodies close over
+;; those atoms. Binding OBLIST at run time affects only later reads.
+(define current-mdl-atom-refs (make-parameter #f))
+
+(define (atom-ref name)
+  (define refs (current-mdl-atom-refs))
+  (unless refs
+    (error 'mdl-compiler "ATOM reference outside a top-level expression: ~a" name))
+  (define table (car refs))
+  (or (hash-ref table name #f)
+      (let ([id (gensym 'mdl-atom)])
+        (hash-set! table name id)
+        (set-box! (cdr refs) (cons (list id `(mdl-atom ,name)) (unbox (cdr refs))))
+        id)))
 
 (define (retain-literal n [compiled #f])
   (define id (gensym 'mdl-literal))
@@ -196,7 +237,7 @@
   id)
 
 (define (compile-quote n)
-  (if (is-kind? n 'atom)
+  (if (is-atom-node? n)
       (mdl-constant n)
       (retain-literal n)))
 
@@ -220,7 +261,7 @@
   ;; the formal list bind the same activation.
   (define-values (leading-act args-node body-xs)
     (cond [(and (>= (length xs) 4)
-                (is-kind? (second xs) 'atom)
+                (is-atom-node? (second xs))
                 (is-kind? (third xs) 'list))
            (values (atom-name (second xs)) (third xs) (cdddr xs))]
           [(and (>= (length xs) 3) (is-kind? (second xs) 'list))
@@ -243,25 +284,25 @@
             (for/list ([spec (in-list specs)]) (second spec))))
   (if (ormap (lambda (spec) (memq (first spec) '(quoted quoted-optional))) specs)
       `(mdl-define-interpreted!
-        (mdl-atom ,fn-name)
+        ,(atom-ref fn-name)
         ,(compile-data args-node)
         (list ,@(map compile-data body))
-        ,(if leading-act `(mdl-atom ,leading-act) #f)
+        ,(if leading-act (atom-ref leading-act) #f)
         ,decl-expr)
       `(let ([definition-decl ,decl-expr])
-         (mdl-define! (mdl-atom ,fn-name)
+         (mdl-define! ,(atom-ref fn-name)
      (lambda mdl-given-args
        (mdl-with-function-scope
         (lambda ()
          ,(if has-activation?
               `(mdl-call-with-activation
-                (mdl-atom ,fn-name)
+                ,(atom-ref fn-name)
                 (list ,@(map (lambda (spec) (spec-expression spec names)) all-specs))
                 mdl-given-args
                 (lambda () ,(compile-sequence body names))
                 definition-decl)
               `(mdl-bind-function-formals
-                (mdl-atom ,fn-name)
+                ,(atom-ref fn-name)
                 (list ,@(map (lambda (spec) (spec-expression spec names)) all-specs))
                 mdl-given-args
                 #f
@@ -326,13 +367,13 @@
            [(memq next '(optional aux name)) (loop (cdr items) next)]
            [else ; one ARGS or TUPLE rest binding
             (when (or (null? (cdr items))
-                      (not (is-kind? (cadr items) 'atom)))
+                      (not (is-atom-node? (cadr items))))
               (unsupported item "ARGS or TUPLE requires an ATOM formal"))
             (define target (cadr items))
             (add-spec! item 'rest (atom-name target)
                        (if (string=? marker "TUPLE") 'tuple 'args))
             (loop (cddr items) 'after-rest)])]
-        [(is-kind? item 'atom)
+        [(is-atom-node? item)
          (define name (atom-name item))
          (define next-section
            (case section
@@ -343,7 +384,7 @@
              [else (unsupported item "ATOM formal not allowed in this section")]))
          (loop (cdr items) next-section)]
         [(is-kind? item 'quote)
-         (unless (is-kind? (source-node-value item) 'atom)
+         (unless (is-atom-node? (source-node-value item))
            (unsupported item "quoted formal must name an ATOM"))
          (define kind
            (case section
@@ -361,7 +402,7 @@
          (when (and quoted? (not (eq? section 'optional)))
            (unsupported item "quoted formal not allowed in this section"))
          (define name-node (if quoted? (source-node-value (first pair)) (first pair)))
-         (unless (is-kind? name-node 'atom)
+         (unless (is-atom-node? name-node)
            (unsupported item (if quoted? "quoted formal must name an ATOM"
                                  "formal name must be an ATOM")))
          (add-spec! item (if quoted? 'quoted-optional section)
@@ -381,11 +422,11 @@
     (define init (third spec))
     (if init `(lambda () ,(compile-expression init names)) #f))
   (case kind
-    [(required) `(list 'required (mdl-atom ,name))]
-    [(optional) `(list 'optional (mdl-atom ,name) ,(default-thunk))]
-    [(rest) `(list 'rest ',(third spec) (mdl-atom ,name))]
-    [(aux) `(list 'aux (mdl-atom ,name) ,(default-thunk))]
-    [(name) `(list 'name (mdl-atom ,name))]
+    [(required) `(list 'required ,(atom-ref name))]
+    [(optional) `(list 'optional ,(atom-ref name) ,(default-thunk))]
+    [(rest) `(list 'rest ',(third spec) ,(atom-ref name))]
+    [(aux) `(list 'aux ,(atom-ref name) ,(default-thunk))]
+    [(name) `(list 'name ,(atom-ref name))]
     [else (error 'mdl-compiler "unknown formal specification ~a" spec)]))
 
 ;; Atom-shaped reader tokens that constant compilation never treats as
@@ -394,10 +435,15 @@
 ;; explicit invalid-octal error), and # reader tokens. Everything else is
 ;; an atom name. PROG/REPEAT label detection shares this classification
 ;; with constant compilation.
-(define (atom-node-constant-token? val)
-  (or (regexp-match? #px"^[+-]?[0-9]" val)
-      (regexp-match? #px"^\\*[0-9]+\\*$" val)
-      (string-prefix? val "#")))
+;; An escaped-atom node (produced by a \-prefixed PNAME) is NEVER a constant
+;; token regardless of PNAME text: `\5` is an ATOM named "5", not FIX 5.
+(define (atom-node-constant-token? n)
+  (and (not (is-kind? n 'escaped-atom))
+       (let ([val (source-node-value n)])
+         (or (regexp-match? #px"^[+-]?[0-9]" val)
+             (regexp-match? #px"^\\.[0-9]" val)       ; leading-dot FLOAT: `.5`, `.5E1`
+             (regexp-match? #px"^\\*[0-9]+\\*$" val)
+             (string-prefix? val "#")))))
 
 ;; PROG and REPEAT bodies run as ordered items: top-level ATOMs are labels
 ;; skipped in normal flow and addressed by GO; other expressions compile to
@@ -405,16 +451,15 @@
 ;; which constant compilation rejects or turns into FIX/FLOAT/WORD values;
 ;; only true atom names can be labels.
 (define (prog-label-name n)
-  (and (is-kind? n 'atom)
-       (let ([val (source-node-value n)])
-         (and (not (atom-node-constant-token? val))
-              (atom-name n)))))
+  (and (is-atom-node? n)
+       (not (atom-node-constant-token? n))
+       (atom-name n)))
 
 (define (compile-prog-items body locals)
   (for/list ([n (in-list body)])
     (define label (prog-label-name n))
     (if label
-        `(cons 'label (mdl-atom ,label))
+        `(cons 'label ,(atom-ref label))
         `(cons 'expr (lambda () ,(compile-expression n locals))))))
 
 (define (compile-prog n args locals [repeat? #f])
@@ -423,7 +468,7 @@
     (unsupported n (format "~a requires an auxiliary LIST and body" name)))
   (define named?
     (and (>= (length args) 2)
-         (is-kind? (car args) 'atom)
+         (is-atom-node? (car args))
          (is-kind? (second args) 'list)))
   (define activation-name (and named? (atom-name (car args))))
   (define operands (if named? (cdr args) args))
@@ -437,7 +482,7 @@
   (define specs
     (for/list ([item (in-list (source-node-value aux))])
       (define-values (name initializer)
-        (cond [(is-kind? item 'atom) (values (atom-name item) #f)]
+        (cond [(is-atom-node? item) (values (atom-name item) #f)]
               [(and (is-kind? item 'list)
                     (= (length (source-node-value item)) 2))
                (define pair (source-node-value item))
@@ -446,7 +491,7 @@
       (when (member name names)
         (unsupported item "duplicate PROG auxiliary binding"))
       (set! names (cons name names))
-      `(cons (mdl-atom ,name)
+      `(cons ,(atom-ref name)
              ,(if initializer
                   `(lambda () ,(compile-expression initializer locals))
                   #f))))
@@ -456,7 +501,7 @@
     (vector ,@(compile-prog-items body locals))
     (list ,@specs)
     ,repeat?
-    ,(if activation-name `(mdl-atom ,activation-name) #f)
+    ,(if activation-name (atom-ref activation-name) #f)
     ,(if decl (compile-data decl) #f)))
 
 (define (compile-cond n clauses locals)
@@ -478,7 +523,7 @@
 
 (define (compile-and args locals)
   (if (null? args)
-      '(mdl-atom "T")
+      '(mdl-root-atom "T")
       (let loop ([remaining args])
         (if (null? (cdr remaining))
             (compile-expression (car remaining) locals)
@@ -511,7 +556,7 @@
   (if (null? xs)
       '(mdl-false '())
       (let* ([op-node (car xs)]
-             [op (and (is-kind? op-node 'atom) (atom-name op-node))]
+             [op (and (is-atom-node? op-node) (atom-name op-node))]
              [args (cdr xs)])
         (if (and op (not (number? (mdl-constant op-node))))
         (case (string->symbol op)
@@ -519,7 +564,7 @@
           [(FUNCTION)
            (define-values (leading-act formals-node body-xs)
              (cond [(and (>= (length args) 3)
-                         (is-kind? (first args) 'atom)
+                         (is-atom-node? (first args))
                          (is-kind? (second args) 'list))
                     (values (atom-name (first args)) (second args) (cddr args))]
                    [(and (>= (length args) 2) (is-kind? (first args) 'list))
@@ -529,14 +574,14 @@
            (define-values (decl body) (split-declaration n body-xs))
            `(mdl-function-literal ,(compile-data formals-node)
                                   (list ,@(map compile-data body))
-                                  ,(if leading-act `(mdl-atom ,leading-act) #f)
+                                  ,(if leading-act (atom-ref leading-act) #f)
                                   ,(if decl (compile-data decl) #f))]
           [(DEFMAC)
-           (unless (and (pair? args) (is-kind? (first args) 'atom))
+           (unless (and (pair? args) (is-atom-node? (first args)))
              (unsupported n "First argument of DEFMAC must be an atom"))
            (define-values (leading-act formals-node body-xs)
              (cond [(and (>= (length args) 4)
-                         (is-kind? (second args) 'atom)
+                         (is-atom-node? (second args))
                          (is-kind? (third args) 'list))
                     (values (atom-name (second args)) (third args) (cdddr args))]
                    [(and (>= (length args) 3) (is-kind? (second args) 'list))
@@ -544,10 +589,10 @@
                    [else (unsupported n "DEFMAC expects an ATOM name, formal list, and body")]))
            (parse-formal-list formals-node)
            (define-values (decl body) (split-declaration n body-xs))
-           `(mdl-defmac! (mdl-atom ,(atom-name (first args)))
+           `(mdl-defmac! ,(atom-ref (atom-name (first args)))
                          ,(compile-data formals-node)
                          (list ,@(map compile-data body))
-                         ,(if leading-act `(mdl-atom ,leading-act) #f)
+                         ,(if leading-act (atom-ref leading-act) #f)
                          ,(if decl (compile-data decl) #f))]
           [(PROG) (compile-prog n args locals)]
           [(REPEAT) (compile-prog n args locals #t)]
@@ -555,7 +600,7 @@
            (when (> (length args) 2)
              (unsupported n "RETURN accepts at most a value and activation"))
            `(mdl-return ,(if (null? args)
-                             '(mdl-atom "T")
+                             '(mdl-root-atom "T")
                              (compile-expression (car args) locals))
                         ,@(if (= (length args) 2)
                               (list (compile-expression (second args) locals))
@@ -597,12 +642,12 @@
            (unless (= (length args) 1) (unsupported n "NOT expects one argument"))
            `(if (mdl-truthy? ,(compile-expression (first args) locals))
                 (mdl-false '())
-                (mdl-atom "T"))]
+                (mdl-root-atom "T"))]
           [(QUOTE)
            (unless (= (length args) 1) (unsupported n "QUOTE expects one argument"))
            (compile-quote (first args))]
           [else
-           `(mdl-apply-form ,op
+           `(mdl-apply-form ,(atom-ref op)
                             (lambda () (list ,@(map compile-data args)))
                             ,(compile-call-thunks args locals))])
         `(mdl-apply-computed ,(compile-expression op-node locals)
@@ -612,14 +657,21 @@
 (define (compile-expression n [locals '()])
   ;; Retain each source literal once per compiled top-level expression.
   ;; A DEFINE then closes over the literal, retaining its identity on calls.
+  ;; Atoms are bound outside literals, which may refer to them.
   (if (current-mdl-literals)
       (compile-expression/body n locals)
-      (let ([literals (box '())])
-        (parameterize ([current-mdl-literals literals])
+      (let ([literals (box '())]
+            [atoms (cons (make-hash) (box '()))])
+        (parameterize ([current-mdl-literals literals]
+                       [current-mdl-atom-refs atoms])
           (define body (compile-expression/body n locals))
-          (if (null? (unbox literals))
-              body
-              `(let ,(reverse (unbox literals)) ,body))))))
+          (define with-literals
+            (if (null? (unbox literals))
+                body
+                `(let ,(reverse (unbox literals)) ,body)))
+          (if (null? (unbox (cdr atoms)))
+              with-literals
+              `(let ,(reverse (unbox (cdr atoms))) ,with-literals))))))
 
 ;; Structures whose elements include a SEGMENT compile every element to a
 ;; thunk handled by the runtime splice constructors: elements evaluate in
@@ -647,7 +699,7 @@
              `(mdl-eval (mdl-read-value ,(raw-node-value n))))
          `(mdl-eval (mdl-read-value ,(raw-node-value n))))]
     [(percent) (compile-data n)]
-    [(atom) (mdl-constant n)]
+    [(atom escaped-atom) (mdl-constant n)]
     [(false) (retain-literal n)]
     [(string) (source-node-value n)]
     [(splice)
@@ -658,10 +710,10 @@
      `(mdl-splice-result ,(compile-expression (source-node-value n) locals)
                          ,(mdl-node-line n) ,(mdl-node-column n))]
     [(local)
-     `(mdl-lval (mdl-atom ,(string-upcase (source-node-value n))))]
+     `(mdl-lval ,(atom-ref (string-upcase (source-node-value n))))]
     [(global)
      `(mdl-gval ,(if (string? (source-node-value n))
-                     `(mdl-atom ,(string-upcase (source-node-value n)))
+                     (atom-ref (string-upcase (source-node-value n)))
                      (compile-expression (source-node-value n) locals)))]
     [(quote) (compile-quote (source-node-value n))]
     [(list) (compile-spliced-structure n 'mdl-splice-list 'mdl-list locals)]

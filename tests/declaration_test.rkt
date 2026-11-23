@@ -52,7 +52,7 @@
               '(1))
 (check-exn #rx"unknown declaration type UNKNOWN-TYPE"
            (lambda () (run "<DEFINE F (X) #DECL ((X) UNKNOWN-TYPE) .X> <F 1>")))
-(check-exn #rx"DECL" (lambda () (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X>")))
+(check-equal? (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X> <F 2>") 2)
 
 ;; #DECL is a DECL-typed value in any expression position, like the
 ;; reference's <TYPE #DECL ((X) FIX)> probe returning DECL.

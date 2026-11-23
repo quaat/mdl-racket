@@ -1,5 +1,17 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 source-load review checkpoint (2026-11-22)
+
+`TMPDIR=/tmp make test` is source independent: terminal CHANNEL tests create
+temporary source roots and the historical GC handler test is excluded. The
+required Native Confusion reference workflow runs `make sources`, then
+`make m3-source-progress` and `make test-m3-historical-gc`; the latter also
+depends on `sources` locally and fails if any pinned file is missing. It
+asserts the complete 1,229-form load, zero skips, and all 13 files in order.
+Use `TMPDIR=/tmp make m2-check` for the existing M2 and native reference
+regression. The scope and current START failure are recorded in
+[WIP-SOURCE-LOAD.md](evidence/M3/WIP-SOURCE-LOAD.md).
+
 ## M3 interrupt foundation checkpoint (2026-11-22)
 
 Issue #104 adds `tests/interrupt_dispatch_test.rkt` to the Racket suite.
@@ -405,11 +417,14 @@ validation deviation.
 The control slice adds `tests/control_test.rkt` for activation formals
 (leading ATOM and `"NAME"`/`"ACT"`), explicit RETURN/AGAIN to a function's
 own activation, bare transfers skipping function frames, GO labels and
-transfers, and UNWIND cleanup on transfers and errors; frame, GO, and UNWIND
+transfers, and UNWIND cleanup on transfers; frame, GO, and UNWIND
 invariants are in `mdl/runtime/core.rkt`'s test submodule. Sixteen
 successful Confusion observations and seven error observations are under
-`docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO and
-UNWIND-on-error reference deviations.
+`docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO reference
+deviation. Issue #139 adds `tests/unwind_raise_test.rkt`: raised errors
+(MDL ERROR, host strict errors, non-`exn` raises) propagate unchanged and
+run no UNWIND cleanup, while every MDL transfer runs it exactly once
+(ADR-0051, `docs/evidence/M3/I139-UNWIND.md`).
 The macro slice adds `tests/macro_test.rkt` to `make test-racket` for DEFMAC,
 FORM, EXPAND, quoted formals, caller-frame argument evaluation, ARGS/TUPLE,
 and an expansion that defines a function. Twenty-five successful Confusion

@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "name": "unwind-frontier",
+  "recorded_at": "2026-11-23T06:35:51.700454+00:00",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "protocol": "uw_probe.py; one mdli process per case; stdin pipe; cwd fresh empty $TMPDIR/uw-work dir",
+  "cases": [
+    {
+      "name": "quit-in-body",
+      "note": "QUIT inside the guarded expression: does cleanup run before exit?",
+      "input": "<UNWIND <QUIT> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "",
+      "files_left": []
+    },
+    {
+      "name": "quit-in-body-nested",
+      "note": "QUIT under two UNWINDs",
+      "input": "<PROG () <UNWIND <UNWIND <QUIT> <PRINC \"INNER\">> <PRINC \"OUTER\">>>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "",
+      "files_left": []
+    },
+    {
+      "name": "error-stay-at-level2",
+      "note": "ERROR inside UNWIND: is cleanup run when the error level is entered? QUIT from level 2.",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<PRINC \"AT-LEVEL-2\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nAT-LEVEL-2\"AT-LEVEL-2\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nAT-LEVEL-2\"AT-LEVEL-2\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-erret-value",
+      "note": "ERRET 5 returns from the ERROR frame (above UNWIND): cleanup expected NOT to run, UNWIND returns 5",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<ERRET 5>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n5\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n5\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-erret-noargs",
+      "note": "ERRET with no args strips the whole stack (crosses UNWIND): manual implies cleanup",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<ERRET>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP\nLISTENING-AT-LEVEL 1 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-return-activation",
+      "note": "At level 2, RETURN to an activation below the UNWIND (non-local return crossing it)",
+      "input": "<PROG P () <UNWIND <ERROR FOO> <PRINC \"CLEANUP\">> 99>\n<RETURN 7 .P>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP7\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP7\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-retry",
+      "note": "RETRY the ERROR frame (above UNWIND)",
+      "input": "<SETG N 0>\n<UNWIND <PROG () <SETG N <+ ,N 1>> <COND (<1? ,N> <ERROR FOO>)> ,N> <PRINC \"CLEANUP\">>\n<RETRY>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n0\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nBad longjmp to LISTEN frame1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nBad longjmp to LISTEN frame1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-frames",
+      "note": "Exploratory: FRAME chain at the error level",
+      "input": "<DEFINE F () <UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>>\n<F>\n<FUNCT <FRAME>>\n<FUNCT <FRAME <FRAME>>>\n<FUNCT <FRAME <FRAME <FRAME>>>>\n<FUNCT <FRAME <FRAME <FRAME <FRAME>>>>>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nF\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nUNWIND\nREP\nLISTEN\nTOPLEVEL\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nF\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nUNWIND\nREP\nLISTEN\nTOPLEVEL\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-erret-frame-below",
+      "note": "ERRET to a frame below the UNWIND (third frame), if the chain matches error-frames",
+      "input": "<DEFINE F () <UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>>\n<PROG () <F>>\n<ERRET 42 <FRAME <FRAME <FRAME>>>>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nF\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUPAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nF\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUPAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-eof-at-level2",
+      "note": "stdin ends while sitting at the error level inside an UNWIND",
+      "input": "<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nError: Unexpected EOF\n",
+      "files_left": []
+    },
+    {
+      "name": "unbound-fn-cleanup-quits",
+      "note": "FINISH-shaped: unbound function error in body, cleanup QUITs; then EOF at level 2",
+      "input": "<UNWIND <PROG () <OPEN-NOT-DEFINED \"X\"> <PRINC \"BODY-DONE\"> <QUIT>> <PROG () <PRINC \"CLEANUP\"> <QUIT>>>\n<PRINC \"AT-LEVEL-2\">\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n OPEN-NOT-DEFINED \nLISTENING-AT-LEVEL 2 PROCESS 1\nAT-LEVEL-2\"AT-LEVEL-2\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n OPEN-NOT-DEFINED \nLISTENING-AT-LEVEL 2 PROCESS 1\nAT-LEVEL-2\"AT-LEVEL-2\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\nError: Unexpected EOF\n",
+      "files_left": []
+    },
+    {
+      "name": "unbound-fn-cleanup-quits-erret",
+      "note": "Same, then ERRET with no args",
+      "input": "<UNWIND <PROG () <OPEN-NOT-DEFINED \"X\"> <PRINC \"BODY-DONE\"> <QUIT>> <PROG () <PRINC \"CLEANUP\"> <QUIT>>>\n<ERRET>\n<PRINC \"AFTER\">\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n OPEN-NOT-DEFINED \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n OPEN-NOT-DEFINED \nLISTENING-AT-LEVEL 2 PROCESS 1\nCLEANUP",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "return-crosses",
+      "note": "RETURN crossing UNWIND",
+      "input": "<PROG () <UNWIND <RETURN 1> <PRINC \"C\">>>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nC1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nC1\n",
+      "stderr_raw": "",
+      "files_left": []
+    },
+    {
+      "name": "again-crosses",
+      "note": "AGAIN crossing UNWIND twice",
+      "input": "<SETG N 0>\n<PROG () <SETG N <+ ,N 1>> <COND (<G? ,N 2> <RETURN ,N>)> <UNWIND <AGAIN> <PRINC \"C\">>>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n0\nCC3\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\nCC3\n",
+      "stderr_raw": "",
+      "files_left": []
+    },
+    {
+      "name": "nested-return-order",
+      "note": "Order of nested cleanups",
+      "input": "<PROG () <UNWIND <UNWIND <RETURN 1> <PRINC \"INNER\">> <PRINC \"OUTER\">>>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nINNEROUTER1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nINNEROUTER1\n",
+      "stderr_raw": "",
+      "files_left": []
+    },
+    {
+      "name": "return-cleanup-quits",
+      "note": "RETURN crosses UNWIND whose cleanup QUITs",
+      "input": "<PROG () <UNWIND <RETURN 1> <PROG () <PRINC \"C\"> <QUIT>>>>\n<PRINC \"AFTER\">\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nC",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nC",
+      "stderr_raw": "",
+      "files_left": []
+    },
+    {
+      "name": "error-inside-cleanup",
+      "note": "ERROR inside cleanup during a RETURN",
+      "input": "<PROG () <UNWIND <RETURN 1> <ERROR BAR>>>\n<PRINC \"AT-LEVEL-2\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\nAT-LEVEL-2\"AT-LEVEL-2\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\nAT-LEVEL-2\"AT-LEVEL-2\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-inside-cleanup-erret-value",
+      "note": "ERROR inside cleanup, then ERRET value: does the original RETURN complete?",
+      "input": "<PROG () <UNWIND <RETURN 1> <ERROR BAR>>>\n<ERRET 3>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\n1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\n1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "error-inside-cleanup-of-error",
+      "note": "Error in body, ERRET (cleanup runs?) and cleanup errors too",
+      "input": "<UNWIND <ERROR FOO> <ERROR BAR>>\n<ERRET>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\n\n *ERROR* \n BAR \nLISTENING-AT-LEVEL 2 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "handler-quits",
+      "note": "Game-shaped: ERROR handler QUITs (like HANDLE -> FINISH -> QUIT)",
+      "input": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" T) <PRINC \"HANDLER\"> <QUIT>>>\n<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nT\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "handler-erret",
+      "note": "Game-shaped: ERROR handler ERRETs T to its frame (like HANDLE CONTROL-G path)",
+      "input": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" T) <PRINC \"HANDLER\"> <ERRET T .FR>>>\n<UNWIND <ERROR FOO> <PRINC \"CLEANUP\">>\n<PRINC \"AFTER\">\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nT\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n\n *ERROR* \n FOO \nLISTENING-AT-LEVEL 2 PROCESS 1\nAFTER\"AFTER\"\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "files_left": []
+    },
+    {
+      "name": "handler-in-unwind-finish",
+      "note": "Handler calls a FINISH-shaped function while an outer UNWIND is pending",
+      "input": "<DEFINE FIN () <UNWIND <PROG () <PRINC \"FIN-BODY\"> <QUIT>> <QUIT>>>\n<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" T) <PRINC \"HANDLER\"> <FIN>>>\n<UNWIND <PROG () <OPEN-NOT-DEFINED \"X\"> 1> <PRINC \"CLEANUP\">>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\nFIN\nT\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n OPEN-NOT-DEFINED \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFIN\nT\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n OPEN-NOT-DEFINED \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nError: Unexpected EOF\n",
+      "files_left": []
+    },
+    {
+      "name": "eof-inside-unwind-read",
+      "note": "stdin EOF while a READ inside an UNWIND waits",
+      "input": "<UNWIND <PROG () <READ>> <PRINC \"CLEANUP\">>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_left": []
+    },
+    {
+      "name": "eof-inside-unwind-readstring",
+      "note": "stdin EOF while READSTRING inside an UNWIND waits",
+      "input": "<UNWIND <PROG () <READSTRING <ISTRING 5> ,INCHAN 5>> <PRINC \"CLEANUP\">>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n1\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_left": []
+    },
+    {
+      "name": "normal-no-cleanup",
+      "note": "Baseline: normal completion",
+      "input": "<UNWIND 5 <PRINC \"CLEANUP\">>\n<QUIT>\n",
+      "exit_status": 0,
+      "stdout_after_banner": "LISTENING-AT-LEVEL 1 PROCESS 1\n5\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n5\n",
+      "stderr_raw": "",
+      "files_left": []
+    }
+  ]
+}

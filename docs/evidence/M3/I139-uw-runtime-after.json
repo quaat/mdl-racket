@@ -1,0 +1,145 @@
+{
+  "worktree": "this repository (see git HEAD)",
+  "name": "unwind-frontier-runtime-after",
+  "quit_models": [
+    {
+      "name": "quit-as-raise-non-exn",
+      "outcome": "caught mdl-quit",
+      "cleanups_ran": []
+    },
+    {
+      "name": "quit-as-escape-continuation",
+      "outcome": "quit-escaped",
+      "cleanups_ran": [
+        "cleanup"
+      ]
+    },
+    {
+      "name": "strict-error-cleanup-raises",
+      "outcome": "caught strict: OPEN unsupported",
+      "cleanups_ran": []
+    },
+    {
+      "note": "with an exit-handler that escapes, posts run; the DEFAULT exit-handler terminates the process immediately and runs no dynamic-wind posts (verified with a standalone (exit 3) probe during the investigation)",
+      "name": "quit-as-exit-via-escaping-exit-handler",
+      "outcome": "exit 0",
+      "cleanups_ran": [
+        "cleanup"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "detail": "5",
+      "cl_order_after": "0 0",
+      "name": "normal-no-cleanup",
+      "source": "<UNWIND 5 <SETG CL 1>>",
+      "outcome": "value"
+    },
+    {
+      "detail": "1",
+      "cl_order_after": "1 0",
+      "name": "return-crosses",
+      "source": "<PROG () <UNWIND <RETURN 1> <SETG CL 1>>>",
+      "outcome": "value"
+    },
+    {
+      "detail": "3",
+      "cl_order_after": "2 0",
+      "name": "again-crosses",
+      "source": "<SETG N 0> <PROG () <SETG N <+ ,N 1>> <COND (<G? ,N 2> <RETURN ,N>)> <UNWIND <AGAIN> <SETG CL <+ ,CL 1>>>>",
+      "outcome": "value"
+    },
+    {
+      "detail": "1",
+      "cl_order_after": "0 12",
+      "name": "nested-return-order",
+      "source": "<PROG () <UNWIND <UNWIND <RETURN 1> <SETG ORDER <+ <* ,ORDER 10> 1>>> <SETG ORDER <+ <* ,ORDER 10> 2>>>>",
+      "outcome": "value"
+    },
+    {
+      "detail": "mdl-error: FOO",
+      "cl_order_after": "0 0",
+      "name": "mdl-error-in-body",
+      "source": "<UNWIND <ERROR FOO> <SETG CL 1>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-eval: unassigned or non-applicable MDL operator OPEN-NOT-DEFINED",
+      "cl_order_after": "0 0",
+      "name": "unbound-fn-in-body",
+      "source": "<UNWIND <OPEN-NOT-DEFINED \"X\"> <SETG CL 1>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-eval: unassigned or non-applicable MDL operator OPEN",
+      "cl_order_after": "0 0",
+      "name": "open-in-body",
+      "source": "<UNWIND <OPEN \"READ\" \"ZORK\" \"LOG\"> <SETG CL 1>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-eval: unassigned or non-applicable MDL operator QUIT",
+      "cl_order_after": "0 0",
+      "name": "quit-in-body",
+      "source": "<UNWIND <QUIT> <SETG CL 1>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-eval: unassigned or non-applicable MDL operator UNPARSE",
+      "cl_order_after": "0 0",
+      "name": "strict-unsupported-in-body",
+      "source": "<UNWIND <UNPARSE 1.5> <SETG CL 1>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-eval: unassigned or non-applicable MDL operator OPEN-NOT-DEFINED",
+      "cl_order_after": "0 0",
+      "name": "finish-shaped-cleanup-errors",
+      "source": "<UNWIND <PROG () <OPEN-NOT-DEFINED \"X\"> 1> <PROG () <SETG CL 1> <QUIT>>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-error: BAR",
+      "cl_order_after": "1 0",
+      "name": "error-inside-cleanup-of-return",
+      "source": "<PROG () <UNWIND <RETURN 1> <PROG () <SETG CL 1> <ERROR BAR>>>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-error: FOO",
+      "cl_order_after": "0 0",
+      "name": "error-inside-cleanup-of-error",
+      "source": "<UNWIND <ERROR FOO> <PROG () <SETG CL 1> <ERROR BAR>>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-eval: unassigned or non-applicable MDL operator OPEN-NOT-DEFINED",
+      "cl_order_after": "0 0",
+      "name": "cleanup-returns-past-strict-error",
+      "source": "<PROG P () <UNWIND <OPEN-NOT-DEFINED \"X\"> <PROG () <SETG CL 1> <RETURN 7 .P>>>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "mdl-error: FOO",
+      "cl_order_after": "0 0",
+      "name": "cleanup-returns-past-mdl-error",
+      "source": "<PROG P () <UNWIND <ERROR FOO> <PROG () <SETG CL 1> <RETURN 7 .P>>>>",
+      "outcome": "exception"
+    },
+    {
+      "detail": "42",
+      "cl_order_after": "0 0",
+      "name": "handler-erret-above-unwind",
+      "source": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" TT) <ERRET 42 .FR>>> <UNWIND <ERROR FOO> <SETG CL 1>>",
+      "outcome": "value"
+    },
+    {
+      "detail": "mdl-error: FOO",
+      "cl_order_after": "0 9",
+      "name": "handler-falls-through",
+      "source": "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" TT) <SETG ORDER 9>>> <UNWIND <ERROR FOO> <SETG CL 1>>",
+      "outcome": "exception"
+    }
+  ]
+}

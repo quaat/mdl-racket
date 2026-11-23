@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "name": "special-declaration",
+  "recorded_at": "2026-11-22T10:38:12.269498+00:00",
+  "interpreter_sha256": "b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda83b177",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "special-fix",
+      "expression": "<DEFINE M3-SPECIAL (X) #DECL ((X) <SPECIAL FIX>) .X>\n<M3-SPECIAL 7>",
+      "input": "<DEFINE M3-SPECIAL (X) #DECL ((X) <SPECIAL FIX>) .X>\n<M3-SPECIAL 7>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3-SPECIAL\n7\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3-SPECIAL\n7\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "unspecial-string",
+      "expression": "<DEFINE M3-UNSPECIAL (X) #DECL ((X) <UNSPECIAL STRING>) .X>\n<M3-UNSPECIAL \"ok\">",
+      "input": "<DEFINE M3-UNSPECIAL (X) #DECL ((X) <UNSPECIAL STRING>) .X>\n<M3-UNSPECIAL \"ok\">\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3-UNSPECIAL\n\"ok\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3-UNSPECIAL\n\"ok\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "special-bad-type",
+      "expression": "<DEFINE M3-SPECIAL (X) #DECL ((X) <SPECIAL FIX>) .X>\n<M3-SPECIAL \"bad\">",
+      "input": "<DEFINE M3-SPECIAL (X) #DECL ((X) <SPECIAL FIX>) .X>\n<M3-SPECIAL \"bad\">\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nM3-SPECIAL\n\"bad\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "M3-SPECIAL\n\"bad\"\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

@@ -24,7 +24,11 @@
     (mdl-session-load! (make-mdl-session source-root) entry)))
 (make-directory* (or (path-only report-path) (current-directory)))
 (call-with-output-file report-path #:exists 'truncate/replace
-  (lambda (out) (write-json result out) (newline out)))
+  (lambda (out)
+    (write-json (if (hash-ref result 'failure #f)
+                    result
+                    (hash-set result 'failure 'null)) out)
+    (newline out)))
 (printf "MDL source load ~a: ~a completed expressions; report: ~a\n"
         (hash-ref result 'status) (hash-ref result 'completed_expressions)
         report-path)
