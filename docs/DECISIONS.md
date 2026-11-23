@@ -1753,3 +1753,46 @@ CHANNEL; the manual's general PRIMTYPE remark is not what Confusion does);
 adding the reference's first CHANNEL slot now (it is the echo/script LIST,
 whose effect this runtime does not implement, so a PUT there would be a
 silent no-op; revisit when scripting is supported).
+
+## ADR-0060: TYPE of compiled DEFINEs and host built-ins by representation registry
+
+Status: accepted (M4 S5b, frontier F4, 2026-11-23). (ADR-0059 is reserved by
+the separate MAX branch.)
+
+Context: SWORD (`77act1.mud:1903`) evaluates `<TYPE? ,SWORD-GLOW NOFFSET>` on
+every `take sword`. The GVAL of a DEFINE without quoted formals is a Racket
+closure made by the compiler, and `mdl-type-name` had no TYPE for it, so the
+game stopped with `mdl-type: unsupported MDL type #<procedure>`. The pinned
+reference (`docs/evidence/M4/FUNCTION-TYPE-REFERENCE.md`) gives FUNCTION for
+every DEFINE shape and SUBR for every built-in this runtime binds (and FLOAD).
+ADR-0049 established `mdl-subr`, a struct with `prop:procedure`, for REP.
+
+Decision: the TYPE of a host applicable is decided by membership in a
+runtime-owned `eq?` registry, never by a PNAME or GVAL name:
+
+- `mdl-define!` (only the compiler's DEFINE path calls it) already records
+  every compiled DEFINE closure in the weak `compiled-function-formals`
+  table; membership in that table now means TYPE FUNCTION. The closure
+  itself is unchanged, so application, GVAL/SETG identity and `==?` and the
+  call fast path are untouched (no wrapper, no extra indirection);
+- the values of `builtin-table` form a fixed `eq?` set whose TYPE is SUBR;
+- the loader's FLOAD, the only other caller of `mdl-define!`, becomes an
+  `mdl-subr` (TYPE SUBR, as REP; reference `<TYPE ,FLOAD>` = SUBR) through a
+  new `mdl-define-subr!`, so it no longer counts as a FUNCTION.
+
+Every other host procedure keeps the strict unsupported-type error. Values
+that need the MDL body LIST (CHTYPE to LIST, LENGTH/NTH/REST, printing) stay
+strict errors because a compiled closure has no such LIST.
+
+Consequences: `take sword`, `take all` and the sword demon run as in the
+reference; ROBBER, FUNCTION-PRINT and CEVENT's NOFFSET tests become
+reachable with the reference answer. TYPE of RDCOM (REP after CONTIN) is
+FUNCTION, so BLO's `<TYPE? ,REP SUBR FSUBR>` is FALSE as in the reference.
+Alternatives rejected: wrapping compiled closures in a struct like
+`mdl-subr` (changes the representation every call site sees, adds an
+application indirection, changes Racket object names in diagnostics);
+deciding by the DEFINE's name or by `object-name` (PNAME dispatch,
+ADR-0056); giving SUBR a PRIMTYPE (would open CHTYPE of a SUBR to WORD
+conversions that the runtime cannot honour); keeping the MDL body LIST of
+every compiled DEFINE to support CHTYPE/LENGTH/printing (a larger change
+not needed by the game; recorded as a deviation).

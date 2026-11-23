@@ -121,7 +121,8 @@
       ;; identity than later GVAL lookups.
       (hash-set! (current-mdl-globals)
                  (mdl-root-atom "MUDDLE") mdl-interpreter-version)
-      (mdl-define! (mdl-root-atom "FLOAD")
+      ;; FLOAD is a SUBR (pinned Confusion <TYPE ,FLOAD> = SUBR; ADR-0060).
+      (mdl-define-subr! (mdl-root-atom "FLOAD")
                    (lambda (name)
                      (load-internal!
                       session

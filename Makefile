@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -87,6 +87,14 @@ test-m4-orphan-prompt: sources
 # game's TOP operands after FLOAD.
 test-m4-top-parser: sources
 	@racket tests/historical_top_parser_test.rkt
+
+# M4 S5b (TYPE of applicable values; frontier F4, SWORD 77act1.mud:1903
+# <TYPE? ,SWORD-GLOW NOFFSET>): take the sword and carry it to the troll room;
+# every command prefix compared with the pinned Confusion captures (D1 only)
+# plus read-only state checkpoints (sword glow level, SWORD-DEMON HACTION),
+# and the game's applicables typed after FLOAD.
+test-m4-sword-glow: sources
+	@racket tests/historical_sword_glow_test.rkt
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,

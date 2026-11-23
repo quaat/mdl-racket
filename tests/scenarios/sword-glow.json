@@ -1,0 +1,26 @@
+{
+  "name": "sword-glow",
+  "description": "M4 S5b scenario, take the elvish sword (frontier F4, docs/evidence/M4/S1-HOUSE-CELLAR-FRONTIER.md and S5B-FUNCTION-TYPE.md). Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, microseconds 0, as house-boot). The S1 path into the living room, then `take sword` (TAKE 77rooms.mud:1098 -> APPLY-OBJECT 77rooms.mud:1129 -> SWORD 77act1.mud:1899-1906, whose `<TYPE? ,SWORD-GLOW NOFFSET>` at :1903 sees the DEFINEd FUNCTION SWORD-GLOW, TYPE FUNCTION, so SWORD-DEMON's HACTION becomes the ATOM SWORD-GLOW), `inventory`, then the cellar path of S1 (`take lamp`, `move rug`, `open trap door`, `turn on lamp`, `down`), where the sword demon SWORD-GLOW (77act1.mud:1877-1897) prints `Your sword is glowing with a faint blue glow.` (the troll is in the adjacent room), and `east` into the troll room, where it prints `Your sword has begun to glow very brightly.`. Each command was confirmed by the pinned native reference; see docs/evidence/M4/SWORD-GLOW-REFERENCE.md. Input ends after `east` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": ["<FLOAD \"77loadall.mud\">", "<SAVE-IT>"],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take sword",
+    "inventory",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "east"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/sword-glow-reference.json",
+    "case": "T1-sword-glow-pipe"
+  }
+}

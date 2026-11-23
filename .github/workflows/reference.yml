@@ -126,6 +126,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m4-top-parser 2>&1 | tee artifacts/ci-logs/test-m4-top-parser.log
+      - name: M4 S5b scenario (take the sword; TYPE of a FUNCTION)
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-sword-glow 2>&1 | tee artifacts/ci-logs/test-m4-sword-glow.log
       - name: Build and capture native reference
         run: |
           make reference-build
