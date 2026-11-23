@@ -189,3 +189,34 @@
 ;; Arguments are validated before the end-of-input check.
 (refused #rx"^READSTRING: buffer must be a mutable STRING"
          (string-append rd " <READSTRING 1 ,INCHAN ,RS>") #:input "")
+
+;; --- review follow-ups: host-port isolation and cross-session CHANNELs ------
+;; A context without a host input port never reads the process's own stdin:
+;; READSTRING is a strict error and the (parameterized) stdin stays unread.
+(let ([fake-stdin (open-input-string "SECRET\n")])
+  (check-exn #rx"^READSTRING: this session's READ CHANNEL has no host-supplied port"
+             (lambda ()
+               (parameterize ([current-input-port fake-stdin]
+                              [current-namespace ns])
+                 (call-with-mdl-context
+                  (make-mdl-context #:output-port (open-output-string))
+                  (lambda ()
+                    (for ([expr (in-list (compile-program
+                                          (parse-mdl (string-append prelude "<READSTRING ,B ,INCHAN ,RS>"))))])
+                      (eval expr)))))))
+  (check-equal? (port->string fake-stdin) "SECRET\n"))
+;; A CHANNEL from another session is refused by READSTRING (not only RESET).
+(let ()
+  (define foreign-inchan
+    (let-values ([(v _o _i) (run* ",INCHAN")]) v))
+  (check-exn #rx"^READSTRING: CHANNEL is not open in this MDL session"
+             (lambda ()
+               (parameterize ([current-namespace ns])
+                 (call-with-mdl-context
+                  (make-mdl-context #:input-port (open-input-string "abc\n")
+                                    #:output-port (open-output-string))
+                  (lambda ()
+                    (define buffer
+                      (for/fold ([r #f]) ([expr (in-list (compile-program (parse-mdl (string-append prelude ",B"))))])
+                        (eval expr)))
+                    (mdl-apply "READSTRING" buffer foreign-inchan)))))))

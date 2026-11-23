@@ -2780,6 +2780,17 @@
 ;; shows it (Confusion keeps it in STATUS, slot 11).
 (struct host-channel (direction port [at-eof? #:mutable]))
 
+;; ADR-0050 (review follow-up): terminal INPUT uses only a host-supplied
+;; port. A session input channel without one is a strict error; READSTRING
+;; never falls back to the process's own stdin. (Output keeps the pre-S7
+;; behaviour: with no session port it writes to the host's current-output-port
+;; parameter.)
+(define (host-channel-port/strict who host)
+  (or (host-channel-port host)
+      (error who
+             "this session's ~a CHANNEL has no host-supplied port; the runtime never falls back to the process's standard input (ADR-0050)"
+             (host-channel-direction host))))
+
 (define (mdl-make-terminal-channel mode [port #f])
   (unless (member mode '("READ" "PRINT"))
     (error 'mdl-make-terminal-channel "expected READ or PRINT mode"))
@@ -3710,7 +3721,7 @@
   (when (host-channel-at-eof? host)
     (raise (exn:fail:mdl-input-exhausted input-exhausted-message
                                          (current-continuation-marks))))
-  (define port (or (host-channel-port host) (current-input-port)))
+  (define port (host-channel-port/strict 'READSTRING host))
   (define size (mdl-string-length buffer))
   (let loop ([count 0])
     (if (>= count size)

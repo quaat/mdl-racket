@@ -13,10 +13,12 @@
 (unless (directory-exists? source-root)
   (error 'historical-saveit "pinned source missing: ~a" source-root))
 
-(define session (make-mdl-session source-root))
-(define load-report
-  (parameterize ([current-output-port (open-output-string)])
-    (mdl-session-load! session "77loadall.mud")))
+;; Terminal output goes only to this explicit session port (ADR-0050: the
+;; runtime never writes to the process's own stdout).
+(define terminal-out (open-output-string))
+(define session (make-mdl-session source-root #:output-port terminal-out))
+(define load-report (mdl-session-load! session "77loadall.mud"))
+(define load-output-length (string-length (get-output-string terminal-out)))
 (check-equal? (hash-ref load-report 'status) "PASS")
 (check-equal? (hash-ref load-report 'completed_expressions) 1229)
 (check-equal? (hash-ref load-report 'skipped_expressions) 0)
@@ -39,10 +41,9 @@
 (define source-before (listing source-root))
 (check-equal? (mdl-session-global session "ALT-FLAG") (mdl-session-atom session "T"))
 (check-equal? (mdl-session-save-records session) '())
-(define output (open-output-string))
-(define returned
-  (parameterize ([current-output-port output])
-    (mdl-session-call session "SAVE-IT")))
+(define returned (mdl-session-call session "SAVE-IT"))
+;; Only the text SAVE-IT wrote after the load.
+(define saveit-output (substring (get-output-string terminal-out) load-output-length))
 ;; SAVE-IT returns CONTIN's ,NULL: the ATOM with an empty PNAME that
 ;; 81tell-repl.mud inserts on ROOT.
 (check-eq? returned (mdl-session-global session "NULL"))
@@ -65,8 +66,8 @@
 ;; START ran through TELL (289-290) and its INT-LEVEL 0 (292).
 (check-true
  (regexp-match? #rx"^Welcome to Dungeon\\.\r?\nThis version created [A-Z][a-z]+ [0-9]+\\.\n$"
-                (get-output-string output))
- (get-output-string output))
+                saveit-output)
+ saveit-output)
 (check-equal? (mdl-session-global session "DEATHS") 0)
 (check-equal? (mdl-session-global session "MOVES") 0)
 ;; XUNAME/GET-NAME as in the Confusion trace (S5-SAVE-FRONTIER.md Q3 step 6).

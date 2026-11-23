@@ -1284,6 +1284,17 @@ ERROR; ours is a host-level strict error. PRINC/PRIN1 do not break lines.
 The ADR-0049 sentence "the loop itself reads and prints nothing" is amended
 by D1: the loop prints the entry value once.
 
+**Host input port only (independent review follow-up).** Terminal input
+uses only a host-supplied port. READSTRING on a session input CHANNEL with no
+port is a strict error (`... has no host-supplied port ...`); the runtime
+never reads the process's own stdin. Output keeps its pre-S7 behaviour: with
+no session port, OUTCHAN writes to the host's `current-output-port`
+parameter. That parameter is host-controlled and existing tests capture
+output through it. Making output strict as well would change a
+runtime-wide contract that predates S7 (PRINTSTRING, CRLF, VFLOAD tests),
+so it is left for a separate decision. `mdl-session-run-interactive`
+requires both ports to be explicit.
+
 **Out of scope (decisions pending):** QUIT, OPEN/CLOSE (D5), UNWIND under
 host errors (issue #139), MEMBER, a fixed clock (#135). No GPLv3
 implementation was copied.

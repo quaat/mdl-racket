@@ -47,11 +47,23 @@
 (check-equal? (hash-ref load-report 'skipped_expressions) 0)
 
 (define events '())
+;; Hang guard (review follow-up): RDCOM never returns, so a runtime bug that
+;; stops consuming input would loop forever. The run gets a wall-clock limit
+;; and a timeout is reported as a failure, not a hang.
+(define run-limit-seconds 300)
 (define failure
-  (with-handlers ([exn:fail? values])
-    (mdl-session-run-interactive session "SAVE-IT"
-                                 #:on-event (lambda (e) (set! events (cons e events))))
-    'returned))
+  (let* ([result (make-channel)]
+         [worker (thread
+                  (lambda ()
+                    (channel-put
+                     result
+                     (with-handlers ([exn:fail? values])
+                       (mdl-session-run-interactive
+                        session "SAVE-IT"
+                        #:on-event (lambda (e) (set! events (cons e events))))
+                       'returned))))])
+    (or (sync/timeout run-limit-seconds result)
+        (begin (kill-thread worker) 'timed-out))))
 (set! events (reverse events))
 (define raw (get-output-string output))
 

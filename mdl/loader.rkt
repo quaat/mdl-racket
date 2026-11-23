@@ -78,6 +78,8 @@
     (raise-argument-error 'make-mdl-session "(or/c #f input-port?)" input-port))
   ;; The shared context constructor binds INCHAN/OUTCHAN (LVAL and GVAL)
   ;; to this session's terminal CHANNELs before any source runs.
+  ;; ADR-0050: there is no input default; READSTRING on a session made
+  ;; without #:input-port is a strict error (never the process's stdin).
   (define context (make-mdl-context #:output-port output-port
                                     #:input-port input-port))
   (define session

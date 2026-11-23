@@ -176,6 +176,41 @@ as behaviour references only. No file is written next to the game source (assert
 - `scripts/m3_source_progress.py` still hard-codes INITIALIZED/INTERACTIVE false: it only
   loads the source and does not run SAVE-IT; this slice's gate evidence is the historical test.
 
+## Independent review (APPROVE WITH NITS) and follow-ups
+
+The scoped INITIALIZED and INTERACTIVE claims held up under review:
+- **Real path:** the full faithful path runs with the six house-boot commands.
+- **Gates asserted, not inferred:** the entry-returned and pass-1 events,
+  the golden boot text, MOVES=6, and the input fully consumed.
+- **"west" exception:** limited to `<OR ,BRIEF!-FLAG <PROB 80>>`
+  (77rooms.mud:523) and to that one response.
+- **Golden fixture:** a faithful extract of the approved candidate
+  (sha256 eb194115…).
+
+Follow-ups:
+
+1. **Medium (fixed for input):** READSTRING fell back to the process's
+   stdin when the session had no host input port. It now raises a strict
+   error (ADR-0050 "Host input port only").
+   - A new `readstring_test` check: a parameterized stdin holding `SECRET`
+     is left unread. Restoring the fallback fails 2/55.
+   - Making output strict as well was tried and reverted. It broke
+     pre-existing tests (PRINTSTRING, CRLF, VFLOAD, G3, start-back) that
+     capture output through the host's `current-output-port` parameter.
+     That is a runtime-wide contract older than S7, and the leak finding
+     was about input, so output strictness is left for a separate decision.
+   - `historical_saveit_test` now passes an explicit output port anyway.
+2. **Low (fixed):** `historical_interactive_test` runs the game loop in a
+   thread with a 300 s limit, and a timeout is a failure (`timed-out`).
+   Checked by setting the limit to 1 ms. Before this, a mutant that stopped
+   consuming input hung the test.
+3. **Low (recorded):** a PRINC mutant that drops CR passes the historical
+   test, because the six commands send no CR through PRINC. `princ_test`
+   catches it (1 failure). It joins the two mutants above that only unit
+   tests catch.
+4. **Nit (fixed):** READSTRING now has its own test refusing a CHANNEL from
+   another session. Before, only RESET's shared check was tested.
+
 ## Next action
 
 Fixed clock (#135) so `west` and the date line are deterministic, then a strict SMOKE_PARITY
