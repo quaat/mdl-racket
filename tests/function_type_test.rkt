@@ -166,6 +166,16 @@
   (check-exn exn:fail? (lambda () (raise-if-exn (run "<DEFINE F (X) <+ .X 1>>" who))) who))
 (check-exn #rx"unsupported primitive storage conversion"
            (lambda () (raise-if-exn (run "<DEFINE F (X) <+ .X 1>>" "<CHTYPE ,F LIST>"))))
+;; PUT/GET with a FIX indicator reach the element store of a PRIMTYPE LIST
+;; item (reference: <GET ,F 1> is the formals LIST). A compiled FUNCTION has no
+;; such LIST, so these are strict errors, never a FIX-keyed association.
+(for ([form '("<GET ,F 1>" "<PUT ,F 1 FOO>")])
+  (check-exn #rx"unsupported structured value"
+             (lambda () (raise-if-exn (run "<DEFINE F (X) <+ .X 1>>" form))) form))
+(check-exn #rx"TOO-FEW-ARGUMENTS-SUPPLIED"
+           (lambda () (raise-if-exn (run "<DEFINE F (X) <+ .X 1>>" "<PUT ,F 1>"))))
+;; A SUBR is unstructured (PRIMTYPE WORD): a FIX indicator is an association.
+(check-equal? (run "<PUT ,+ 1 FOO>" "<GET ,+ 1>") "FOO")
 (check-exn #rx"unsupported built-in TYPE conversion"
            (lambda () (raise-if-exn (run "<CHTYPE '((Y) <* .Y 2>) FUNCTION>"))))
 ;; Printing a FUNCTION or a SUBR stays strict (reference: #FUNCTION ((X) ...),
@@ -182,6 +192,13 @@
        [ref (ref-lines "builtin-subr-types")])
   (check-equal? (length names) (length ref))
   (check-true (andmap (lambda (l) (equal? l "SUBR")) ref))
+  ;; The probed names are exactly this runtime's built-ins (plus the loader's
+  ;; FLOAD): a built-in added later must get reference evidence too.
+  (define table-names
+    (parameterize ([current-namespace ns])
+      (eval '(hash-keys builtin-table) (module->namespace 'mdl/runtime/core))))
+  (check-equal? (sort (remove "FLOAD" names) string<?) (sort table-names string<?)
+                "probe builtin_names vs builtin-table keys")
   (for ([n names] [line ref] #:unless (equal? n "FLOAD"))
     (define v (run (format "<TYPE ,~a>" n)))
     (check-equal? v line n)))

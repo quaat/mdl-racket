@@ -1783,6 +1783,9 @@
   (hash-set! (current-mdl-globals) atom unassigned)
   atom)
 
+;; Compiler-only: the expansion of a compiled DEFINE calls this. Registering
+;; fn makes it TYPE FUNCTION (ADR-0060); a host-provided SUBR must use
+;; mdl-define-subr! instead.
 (define (mdl-define! name fn [formal-kinds '()])
   (when (procedure? fn)
     (hash-set! compiled-function-formals fn formal-kinds))
@@ -3365,9 +3368,11 @@
 ;; (mdl_primtype_structured(arg->pt) && FIX/OFFSET indicator); OFFSET
 ;; indicators are out of this slice's scope and stay on the association path.
 (define (mdl-structured-primtype? value)
-  (and ;; Native SUBRs are represented as host procedures; they are
-       ;; unstructured MDL items and may carry FIX-keyed associations.
-       (not (procedure? value))
+  (and ;; Host procedures other than compiled DEFINEs are SUBRs (PRIMTYPE
+       ;; WORD): unstructured, so they may carry FIX-keyed associations. A
+       ;; compiled DEFINE is a FUNCTION, PRIMTYPE LIST (ADR-0060): it takes the
+       ;; element path, which fails strictly because it has no body LIST.
+       (not (and (procedure? value) (not (compiled-function? value))))
        (member (mdl-atom-pname (mdl-primtype value))
                '("LIST" "VECTOR" "UVECTOR" "TUPLE" "STRING"))
        #t))
@@ -4755,7 +4760,7 @@
 (define builtin-subr-values
   (for/hasheq ([value (in-hash-values builtin-table)]) (values value #t)))
 (define (builtin-subr? value)
-  (hash-ref builtin-subr-values value #f))
+  (and (procedure? value) (hash-ref builtin-subr-values value #f)))
 
 ;; The default session is created after builtin-table exists, because a
 ;; session's ROOT is seeded with every builtin SUBR name. Definitions

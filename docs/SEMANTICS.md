@@ -3216,6 +3216,13 @@ a compiled FUNCTION (and, as before, for an interpreted one):
   conversion`;
 - structure access through PRIMTYPE LIST — LENGTH, NTH (`<1 ,F>`), REST,
   EMPTY?, MAPF over f, PUTREST — raises a strict error (never an empty LIST);
+- PUT and GET with a FIX indicator (reference: the formals LIST for
+  `<GET ,F 1>`) take the PRIMTYPE LIST element path and raise `mdl-length:
+  unsupported structured value`; `<PUT f 1>` is TOO-FEW-ARGUMENTS-SUPPLIED as
+  for any structured item. They never store a FIX-keyed association, which
+  stays the behaviour of SUBRs (PRIMTYPE WORD, unstructured). Review
+  amendment: before this, `mdl-structured-primtype?` skipped every host
+  procedure, so `<PUT ,F 1 FOO>` silently made an association;
 - PRIN1, PRINC and UNPARSE raise their existing `unsupported TYPE FUNCTION`
   errors (reference: `#FUNCTION ((X) ...)`); SUBRs likewise (`#SUBR *…*`).
 - `<PRIMTYPE ,+>` and `<TYPEPRIM SUBR>` stay strict (`unknown MDL TYPE

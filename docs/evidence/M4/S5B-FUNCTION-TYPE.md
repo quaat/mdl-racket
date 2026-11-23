@@ -147,3 +147,31 @@ reference runs in disposable `$TMPDIR` copies; Confusion (GPLv3) used only
 as a reference binary, no source copied. README/STATUS not updated
 (orchestrator). The change touches TYPE dispatch used by DECL matching and
 UVECTOR uniformity; an independent review is recommended (AGENTS.md).
+
+## Independent review (2026-11-23) and follow-up
+
+An independent read-only review of 1fe488f (merged with main as 058f4ae)
+found no blocking defects. It confirmed: only the compiler's DEFINE path
+registers closures; SETG shares the object; FUNCTION literals and
+interpreted DEFINEs are `mdl-function` records; MAPF/MAPR helpers are SUBRs;
+the weak table cannot drop a reachable closure; FUNCTION and SUBR never
+overlap; FSUBRs have no GVAL. Findings and dispositions:
+
+1. Medium (pre-existing, now contradicting SEMANTICS): `<PUT ,F 1 FOO>` /
+   `<GET ,F 1>` on a compiled FUNCTION made a silent FIX-keyed association,
+   because `mdl-structured-primtype?` skipped every host procedure. **Fixed**:
+   only non-FUNCTION host procedures (SUBRs) are skipped, so a compiled
+   FUNCTION takes the PRIMTYPE LIST element path and fails strictly
+   (`mdl-length: unsupported structured value`), as an interpreted FUNCTION
+   already did. Tests fail before the fix and pass after; a SUBR keeps the
+   FIX-keyed association.
+2. Low: `=?` of equal separate functions and the value of DEFINE remain
+   recorded deviations (pinned in tests). No change.
+3. Low: `mdl-define!` is exported (needed by the compiled expansion).
+   **Documented** as compiler-only; host SUBRs use `mdl-define-subr!`.
+4. Low: the builtin list was not checked against `builtin-table`. **Fixed**:
+   the test asserts the probed names equal the table keys (plus FLOAD).
+5. Low: `builtin-subr?` did a hash lookup for every value. **Fixed**: it is
+   guarded by `procedure?`.
+6. Low: `docs/evidence/M3/S6-REP.md` still described the TYPE limits.
+   **Fixed** with a forward note to ADR-0060.
