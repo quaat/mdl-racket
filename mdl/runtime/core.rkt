@@ -1,7 +1,7 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list racket/string racket/date racket/runtime-path
-         "memory.rkt" "random36.rkt")
+         "memory.rkt" "random36.rkt" "clock.rkt")
 (provide current-mdl-globals current-mdl-locals
          current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
@@ -26,6 +26,7 @@
          mdl-run-host-loop
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
+         mdl-random-state-snapshot
          atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
@@ -1769,13 +1770,21 @@
                             random-state internal lookup [lookup-stack #:mutable]
                             inchan outchan channels
                             ;; ADR-0048: SAVE session records, newest first.
-                            [save-records #:mutable]))
+                            [save-records #:mutable]
+                            ;; ADR-0052: session-owned host clock and zone
+                            ;; for GETTIMEDATE's "now" and local decomposition.
+                            clock time-zone))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
 (define mdl-oblist? oblist-value?)
 
-(define (make-mdl-atom-space)
+(define (make-mdl-atom-space #:clock [clock real-mdl-clock]
+                             #:time-zone [time-zone 'local])
+  (unless (mdl-clock? clock)
+    (raise-argument-error 'make-mdl-atom-space "mdl-clock?" clock))
+  (unless (mdl-time-zone? time-zone)
+    (raise-argument-error 'make-mdl-atom-space "(or/c 'local 'utc)" time-zone))
   (define named (make-hasheq))
   (define types (make-hasheq))
   (define builtins (make-hasheq))
@@ -1847,7 +1856,7 @@
               ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
               ;; (seed-root! fails if either is missing from the inventory).
               (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)
-              '()))
+              '() clock time-zone))
 
 ;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
 ;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
@@ -2626,6 +2635,12 @@
       (error 'mdl-random "RANDOM seeds must be signed 36-bit FIX values")))
   (apply random36-next! (atom-space-random-state (current-mdl-atom-space)) seeds))
 
+;; ADR-0052: host-only observation of the current session's RANDOM state. A
+;; detached copy; advancing it never consumes the session's sequence. No MDL
+;; primitive exposes it.
+(define (mdl-random-state-snapshot)
+  (random36-state-copy (atom-space-random-state (current-mdl-atom-space))))
+
 (define (mdl-gettimedate . args)
   (unless (<= (length args) 2)
     (error 'mdl-gettimedate "too many arguments to GETTIMEDATE"))
@@ -2633,11 +2648,9 @@
   (define utc? (and (= (length args) 2) (mdl-truthy? (cadr args))))
   (define-values (seconds micros)
     (cond
+      ;; ADR-0052: only this "now" read uses the session clock, once.
       [(mdl-false? requested)
-       (define now (/ (current-inexact-milliseconds) 1000.0))
-       (define whole (inexact->exact (floor now)))
-       (values whole (min 999999 (max 0
-                         (inexact->exact (round (* 1000000 (- now whole)))))))]
+       (mdl-clock-now (atom-space-clock (current-mdl-atom-space)))]
       [(and (exact-integer? requested) (<= fix-min requested fix-max))
        (values requested 0)]
       [(and (mdl-array? requested)
@@ -2651,7 +2664,10 @@
          (error 'mdl-gettimedate "invalid time UVECTOR"))
        (values sec usec)]
       [else (error 'mdl-gettimedate "wrong type of time to GETTIMEDATE")]))
-  (define date (seconds->date seconds (not utc?)))
+  ;; ADR-0052: the session zone stands in for the host local zone.
+  (define local? (and (not utc?)
+                      (eq? (atom-space-time-zone (current-mdl-atom-space)) 'local)))
+  (define date (seconds->date seconds local?))
   (mdl-uvector (date-second date) (date-minute date) (date-hour date)
                (date-day date) (date-month date) (date-year date) micros))
 
@@ -2840,9 +2856,12 @@
 (struct mdl-context (globals locals atom-space))
 
 (define (make-mdl-context #:output-port [output-port #f]
-                          #:input-port [input-port #f])
+                          #:input-port [input-port #f]
+                          #:clock [clock real-mdl-clock]
+                          #:time-zone [time-zone 'local])
   (define context (mdl-context (make-hasheq) (list (make-hasheq))
-                               (make-mdl-atom-space)))
+                               (make-mdl-atom-space #:clock clock
+                                                    #:time-zone time-zone)))
   (call-with-mdl-context
    context
    (lambda ()

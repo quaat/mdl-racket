@@ -6,10 +6,18 @@
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
 | LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | PASS (scoped) on S7 branch `feat/m3-interactive-io`: faithful `<FLOAD "77loadall.mud">` + SAVE-IT returns `,NULL` through CONTIN's RESET (ADR-0050); the host loop prints it (D1) and RDCOM reaches its first READSTRING; boot text equals the approved golden after D1/D2 normalisation and date-line normalisation (`make test-m3-interactive`) |
-| INTERACTIVE | PASS (scoped) on S7 branch: all six house-boot commands are read by the original RDCOM and answered as in the approved golden (`west` accepted in its two `<PROB 80>` forms, unfixed clock); end of input gives `Beg pardon?`/`>` then the strict host error `exn:fail:mdl-input-exhausted` (D3) |
-| SMOKE_PARITY | NOT CLAIMED: date line and RANDOM depend on the unfixed host clock (issue #135); the golden is still a candidate |
+| INITIALIZED | PASS (scoped) on S7 branch `feat/m3-interactive-io`: faithful `<FLOAD "77loadall.mud">` + SAVE-IT returns `,NULL` through CONTIN's RESET (ADR-0050); the host loop prints it (D1) and RDCOM reaches its first READSTRING; boot text equals the approved golden after D1/D2 normalisation; since S8 (issue #135 part 1, ADR-0052) the run uses the golden's fixed session clock (250776000, UTC) and the date line is compared exactly, without normalisation (`make test-m3-interactive`) |
+| INTERACTIVE | PASS (scoped) on S7 branch: all six house-boot commands are read by the original RDCOM and answered exactly as in the approved golden (S8: fixed session clock; `west` is compared exactly, its `<PROB 80>` draw is 65); end of input gives `Beg pardon?`/`>` then the strict host error `exn:fail:mdl-input-exhausted` (D3) |
+| SMOKE_PARITY | NOT CLAIMED: the clock dependency is resolved on S8 branch `feat/m3-session-clock` (DSKDATE, START seed 10438660480 and 12 RANDOM values agree with native Confusion Probe E; `make test-m3-clock-seed`), but the golden is still a candidate and no strict SMOKE_PARITY comparison has been run |
 | PLAYABLE | NOT RUN: QUIT, OPEN/CLOSE (RECORD), MEMBER (HANDLE) and UNWIND under host errors (#139) are missing |
+
+- **S8 session clock on `feat/m3-session-clock` (WIP, issue #135 part 1,
+  ADR-0052):** `make-mdl-session #:clock #:time-zone` (default real clock,
+  host zone); `make-fixed-mdl-clock` is a constant instant. Only GETTIMEDATE's
+  "now" reads it. With the golden's clock, DSKDATE = START's RANDOM seed =
+  10438660480 and the following RANDOM values match native Confusion. The
+  house-boot run now matches the golden exactly with no date normalisation.
+  See [S8 evidence](evidence/M3/S8-SESSION-CLOCK.md).
 
 - **S7 interactive terminal I/O on `feat/m3-interactive-io` (WIP, ADR-0050):**
   RESET (terminal CHANNEL; clears the host end-of-input flag), PRINC (STRING,

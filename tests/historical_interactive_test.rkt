@@ -10,11 +10,12 @@
 ;; host-level input-exhausted error (D3). The game text is compared with the
 ;; approved CANDIDATE golden (tests/fixtures/house-boot-golden.json) as
 ;; canonical_text(ONLCR(raw)) (D2), after removing the golden's LISTEN banner
-;; and "DONE" lines (D1) and normalising the "This version created" date line
-;; in both texts: DSKDATE reads the host clock until issue #135 provides a
-;; fixed clock. RANDOM is seeded from that clock too, so the "west" response
-;; (ROOM-INFO's <PROB 80>) is accepted in either of its two source-defined
-;; forms. This is NOT a SMOKE_PARITY claim.
+;; and "DONE" lines (D1). Issue #135 part 1 (ADR-0052): the session runs on
+;; the golden's own clock, a fixed session clock at fixed_epoch 250776000 with
+;; zone UTC, so the "This version created" line and START's RANDOM seed are
+;; deterministic and every segment, including "west", is compared exactly
+;; (no date normalisation, no alternative outputs). This is NOT a
+;; SMOKE_PARITY claim.
 ;;
 ;; Requires the pinned upstream source: .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/
 ;; Run with: make test-m3-interactive   (or: raco test tests/historical_interactive_test.rkt)
@@ -37,7 +38,12 @@
 ;; The host feeds LF-terminated lines and never echoes (D7).
 (define input (open-input-string (string-append (string-join commands "\n") "\n")))
 (define output (open-output-string))
-(define session (make-mdl-session source-root #:input-port input #:output-port output))
+;; The golden's clock (fixed_epoch, tz) as a session clock (ADR-0052).
+(check-equal? (hash-ref golden 'fixed_epoch) 250776000)
+(check-equal? (hash-ref golden 'tz) "UTC")
+(define session (make-mdl-session source-root #:input-port input #:output-port output
+                                  #:clock (make-fixed-mdl-clock (hash-ref golden 'fixed_epoch))
+                                  #:time-zone 'utc))
 (define (listing dir) (sort (map path->string (directory-list dir)) string<?))
 (define source-before (listing source-root))
 
@@ -90,50 +96,35 @@
 (define (onlcr text) (string-replace text "\n" "\r\n"))
 (define (canonical-text text)        ; scripts/boot_reference.py canonical_text
   (string-replace (string-replace text "\r\n" "\n") "\r" "\n"))
-(define (normalise-date text)
-  (regexp-replace* #rx"This version created [A-Z][a-z]+ [0-9]+\\." text
-                   "This version created [DATE]."))
 (define (remove-line-once text line)
   (define n (length (regexp-match* (regexp-quote line) text)))
   (unless (= n 1) (error 'remove-line-once "expected one ~s, found ~a" line n))
   (string-replace text line "" #:all? #f))
-(define ours (normalise-date (canonical-text (onlcr raw))))
+(define ours (canonical-text (onlcr raw)))
 (define golden-boot
-  (normalise-date
-   (remove-line-once (remove-line-once (hash-ref golden 'boot_output)
-                                       "LISTENING-AT-LEVEL 1 PROCESS 1\n")
-                     "\"DONE\"\n")))
+  (remove-line-once (remove-line-once (hash-ref golden 'boot_output)
+                                      "LISTENING-AT-LEVEL 1 PROCESS 1\n")
+                    "\"DONE\"\n"))
 ;; Prompts are bare ">" with no newline; no game text in this scenario has ">".
 (define segments (string-split ours ">" #:trim? #f))
 (check-equal? (length segments) 9 ours)   ; boot, 6 commands, Beg pardon?, ""
 
-;; Our raw date line really differs only by the clock (documented limit).
-(check-regexp-match #rx"This version created [A-Z][a-z]+ [0-9]+\\.\n" raw)
+;; The raw date line is the golden's, from the fixed session clock.
+(check-true (string-contains? raw "This version created December 12.\n") raw)
 
 ;; (a) boot text up to the first prompt equals the approved golden, including
 ;; the blank line from the D1 print of ,NULL.
 (check-equal? (first segments) golden-boot)
-(check-true (string-contains? (first segments) "This version created [DATE].\n\nYou are in an open field"))
+(check-true (string-contains? (first segments) "This version created December 12.\n\nYou are in an open field"))
 
 ;; --- (b) INTERACTIVE: all six commands read, dispatched, answered as golden ---
-;; "west" re-enters West of House. ROOM-INFO (77rooms.mud:521-525) prints the
-;; brief RDESC2 for a seen room only if <PROB 80> holds, so with RANDOM seeded
-;; from the unfixed host clock this output is RNG-dependent: about one run in
-;; five prints the full description instead (observed locally; see
-;; S7-INTERACTIVE.md). Until issue #135 fixes the clock, "west" must equal
-;; either the golden's brief text or the full West of House description, taken
-;; from the golden boot text (the same ROOM-INFO output). Every other command
-;; is compared exactly.
-(define full-west-of-house
-  (cadr (regexp-match #rx"This version created \\[DATE\\]\\.\n\n(.*)$" golden-boot)))
-(check-equal? full-west-of-house
-              "You are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n")
+;; "west" re-enters West of House: ROOM-INFO (77rooms.mud:521-525) prints the
+;; brief RDESC2 only if <PROB 80> holds. RANDOM is now seeded by START from
+;; the fixed session clock's DSKDATE (tests/historical_clock_seed_test.rkt),
+;; so every command, "west" included, is compared exactly.
 (for ([command (in-list (hash-ref golden 'commands))]
       [segment (in-list (take (rest segments) 6))])
-  (if (equal? (hash-ref command 'input) "west")
-      (check-not-false (member segment (list (hash-ref command 'output) full-west-of-house))
-                       segment)
-      (check-equal? segment (hash-ref command 'output) (hash-ref command 'input))))
+  (check-equal? segment (hash-ref command 'output) (hash-ref command 'input)))
 (check-equal? (list-ref segments 7) "Beg pardon?\n")
 (check-equal? (list-ref segments 8) "")
 ;; MOVES counts the six non-empty reads; the empty EOF read is not counted.

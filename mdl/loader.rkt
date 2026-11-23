@@ -1,13 +1,15 @@
 #lang racket/base
 ;; Local, root-restricted MDL source execution. No network entry point.
 (require racket/file racket/list racket/path racket/string
-         "parser.rkt" "compiler.rkt" "runtime/core.rkt")
+         "parser.rkt" "compiler.rkt" "runtime/core.rkt" "runtime/clock.rkt")
 (provide make-mdl-session mdl-session? mdl-session-load!
          mdl-session-atom mdl-session-global mdl-session-call
          mdl-session-save-records exn:fail:mdl-load?
          exn:fail:mdl-load-diagnostic
          mdl-session-run-interactive
-         exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?)
+         exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
+         mdl-session-random-snapshot
+         mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock)
 
 ;; input-port/output-port: the explicit host ports given to make-mdl-session
 ;; (#f when omitted); the host top-level loop requires both (ADR-0050).
@@ -67,8 +69,14 @@
 ;; output-port / input-port: host ports owned by this session's terminal
 ;; CHANNELs. #f (default) follows the current Racket port at each operation.
 ;; READSTRING reads input-port (ADR-0050).
+;; clock / time-zone (ADR-0052): the session's own host clock for
+;; GETTIMEDATE's "now" (default: the real wall clock) and its local zone
+;; ('local, the host zone, by default; or 'utc). Stored in the session's atom
+;; space; never process-global.
 (define (make-mdl-session source-root #:output-port [output-port #f]
-                          #:input-port [input-port #f])
+                          #:input-port [input-port #f]
+                          #:clock [clock real-mdl-clock]
+                          #:time-zone [time-zone 'local])
   (define root (canonical-path (path->complete-path source-root)))
   (unless (directory-exists? root)
     (raise-argument-error 'make-mdl-session "existing source-root directory" source-root))
@@ -76,12 +84,17 @@
     (raise-argument-error 'make-mdl-session "(or/c #f output-port?)" output-port))
   (when (and input-port (not (input-port? input-port)))
     (raise-argument-error 'make-mdl-session "(or/c #f input-port?)" input-port))
+  (unless (mdl-clock? clock)
+    (raise-argument-error 'make-mdl-session "mdl-clock?" clock))
+  (unless (mdl-time-zone? time-zone)
+    (raise-argument-error 'make-mdl-session "(or/c 'local 'utc)" time-zone))
   ;; The shared context constructor binds INCHAN/OUTCHAN (LVAL and GVAL)
   ;; to this session's terminal CHANNELs before any source runs.
   ;; ADR-0050: there is no input default; READSTRING on a session made
   ;; without #:input-port is a strict error (never the process's stdin).
   (define context (make-mdl-context #:output-port output-port
-                                    #:input-port input-port))
+                                    #:input-port input-port
+                                    #:clock clock #:time-zone time-zone))
   (define session
     (mdl-session root (mdl-context-globals context) (mdl-context-locals context)
                  (mdl-context-atom-space context) loader-namespace (box '())
@@ -286,6 +299,11 @@
 ;; source reader without exposing arbitrary evaluation.
 (define (mdl-session-atom session name)
   (call-in-session session (lambda () (mdl-atom name))))
+
+;; Test/introspection boundary (ADR-0052): a detached copy of the session's
+;; RANDOM state. Host-only; observing it never consumes the game's sequence.
+(define (mdl-session-random-snapshot session)
+  (call-in-session session mdl-random-state-snapshot))
 
 ;; Test/introspection boundary (ADR-0048): the session's SAVE records,
 ;; oldest first. Host-only; no MDL primitive exposes them.

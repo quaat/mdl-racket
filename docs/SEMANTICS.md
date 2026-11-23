@@ -1884,6 +1884,51 @@ UTC; otherwise host local time is used. Each call captures one timestamp
 before decomposing it. Invalid types and arity fail. This is an explicit
 host compatibility bridge; deterministic cross-engine RNG parity still
 requires a seed strategy and is not implied by matching this API shape.
+Since issue #135 the "now" read and the local-time zone come from the
+session (next section).
+
+## M3 session-owned host clock and time zone (issue #135; ADR-0052)
+
+The original game reads the clock only through GETTIMEDATE: DSKDATE
+(`81tell-repl.mud:57`) packs its result, SAVE-IT builds the "This version
+created" line from it (`77rooms.mud:158`), and START seeds RANDOM with
+`<CHTYPE <DSKDATE> FIX>` (`77rooms.mud:291`). The wall clock is therefore a
+host dependency, owned by each session like its RANDOM state.
+
+- `make-mdl-session` takes `#:clock` (default `real-mdl-clock`, the host wall
+  clock, as before) and `#:time-zone` (`'local`, the default, or `'utc`).
+  Both are stored in the session's atom space; no process-global parameter
+  is involved, so two sessions in one process never share a clock or zone.
+  Any other `#:clock` value (a number, a bare procedure) or zone symbol is
+  rejected at construction.
+- A clock is an `mdl-clock` value wrapping a host thunk that returns
+  `(values epoch-seconds microseconds)`. `make-mdl-clock` wraps a thunk;
+  `make-fixed-mdl-clock seconds #:micros m` (default 0) returns a constant
+  instant: every read yields the same values and it never advances. This
+  matches the reference capture shim (`scripts/reference/fixed_time.c`,
+  PR #131), whose `gettimeofday` returns `MDL_FIXED_EPOCH` with
+  `tv_usec = 0` on every call. Each read is validated: seconds an exact
+  integer in the signed 36-bit FIX range, microseconds 0..999999; anything
+  else is a strict error, never a fallback to real time.
+- Only GETTIMEDATE with no time argument (or a FALSE first argument) reads
+  the session clock, once per call. Explicit FIX or two-FIX UVECTOR
+  timestamps keep their values exactly. Racket monotonic time, timeouts,
+  thread scheduling and CPU time are untouched.
+- Decomposition: a truthy second argument selects UTC, as before. Otherwise
+  the session zone replaces "host local time" for both "now" and explicit
+  timestamps, as `localtime_r` does under the reference process's `TZ`.
+  With the default `'local` zone every result is identical to the previous
+  behaviour. The process `TZ` is never changed. The supported zones are
+  exactly `'local` and `'utc`; named or offset zones are not supported.
+- The zone is independent of the clock: a fixed clock does not imply UTC.
+  The reference golden (`fixed_epoch` 250776000, `tz` UTC) is reproduced
+  with `#:clock (make-fixed-mdl-clock 250776000) #:time-zone 'utc`.
+- Host-only observation: `mdl-session-random-snapshot` returns a detached
+  copy of the session's RANDOM state, so a test can compute later outputs
+  without consuming the game's sequence. No MDL primitive exposes it.
+
+Tests: `tests/session_clock_test.rkt` (no upstream source) and
+`tests/historical_clock_seed_test.rkt` (DSKDATE → START seed → RANDOM state).
 
 ## M3 default terminal CHANNEL bindings (startup)
 
