@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-bang m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-bang m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare test-m3-launcher play
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -66,6 +66,17 @@ test-m3-session: sources
 # pinned Confusion game cases in docs/evidence/M3/readstring-bang-probe.json.
 test-m3-bang: sources
 	@raco test tests/historical_bang_input_test.rkt
+
+# S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
+# zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,
+# fresh state per run, missing sources, CLI exit codes, break propagation.
+test-m3-launcher: sources
+	@raco test tests/launcher_test.rkt
+
+# Play the unchanged 1977 Zork locally on this terminal (real clock, local
+# zone). Exit codes are documented in zork/cli.rkt and README "Play locally".
+play: sources
+	@$(RACKET) zork/cli.rkt
 
 # Issue #135 part 1 (ADR-0052): fixed session clock -> DSKDATE -> START's
 # RANDOM seed -> RANDOM state, observed host-only.
