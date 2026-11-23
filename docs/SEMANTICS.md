@@ -2459,7 +2459,9 @@ Supported subset:
   finds its position (same result as MEMQ); FIX, ATOM, LIST, etc. miss.
 - **Cycles.** Comparison inherits the `=?` cycle boundary: identical cyclic
   objects match, distinct equal-content cycles raise the explicit
-  unsupported-cyclic-equality error. A LIST haystack is walked pair by pair;
+  unsupported-cyclic-equality error. That error ends the whole search, even
+  if a later element is `==?` to the needle (e.g. `<MEMBER .A (.B .A)>` with
+  `.A` and `.B` distinct one-element cycles): strict, never a silent miss. A LIST haystack is walked pair by pair;
   a hit before the cycle closes is returned, and revisiting a pair raises an
   explicit "cyclic LIST" error instead of looping (deviation: unprobed; the
   reference would not terminate on a miss).
