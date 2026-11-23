@@ -178,6 +178,10 @@
   (check-equal? (run "<UNWIND <ERROR FOO> <SETG CL 1>>") 42)
   (check-equal? (g "CL") 0))
 
+;; The next two scenarios pin per-UNWIND-call independence of the raise
+;; mark: a raise handled inside (or before) one UNWIND must not leave a mark
+;; that makes a later transfer skip its cleanup. A mutant sharing one mark
+;; across all UNWIND calls is caught only here (review, 2026-11-23).
 (scenario "a handler-resolved ERROR does not disable a later transfer's cleanup"
   (run "<HANDLER <EVENT \"ERROR\" 8> <FUNCTION (FR \"TUPLE\" TT) <ERRET 1 .FR>>>")
   (check-equal?

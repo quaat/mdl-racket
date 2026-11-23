@@ -1076,6 +1076,9 @@ post skips the cleanup when the mark is set. Host bookkeeping (activation
 liveness, bindings, OBLIST path and interrupt level) is still restored on
 a raise. An error inside a cleanup during a transfer propagates unchanged.
 It abandons the pending transfer and any outer cleanups on that path.
+"Unchanged" refers to UNWIND: it neither catches nor rewraps the raise. A
+raise out of a nested FLOAD still reaches its caller as the loader's
+`exn:fail:mdl-load` wrapper, which is a loader behaviour, not UNWIND's.
 
 **Why:** The MDL manual §16.2 makes ERROR a nested LISTEN on the intact
 stack. In §16.4/§16.5 only ERRET and RETRY strip the stack. The §16.6

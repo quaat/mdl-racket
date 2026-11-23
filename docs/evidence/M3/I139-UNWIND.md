@@ -164,7 +164,7 @@ Runtime probe after the fix: `PLTCOLLECTS=":$PWD" racket docs/evidence/M3/I139-u
 
 ## Risks
 
-- **Continuable raises.** A `raise-continuable` inside an UNWIND body would get the raised value back from this handler. The same applies to a resumed `exn:break` continuation, which would also leave the mark set. No runtime code uses either: `grep raise-continuable|exn:break mdl/ scripts/` finds nothing.
+- **Resumed breaks.** If a handler outside the UNWIND resumed a break, so that control re-entered the body through a resumed `exn:break` continuation, the raise mark would stay set and a later transfer would skip its cleanup. That is the only real hole. No runtime code resumes breaks: `grep raise-continuable|exn:break mdl/ scripts/` finds nothing. Continuable raises cannot happen here: `raise-continuable` is unbound in the Racket 7.9 BC used by this project (independent review, 2026-11-23).
 - **Older M2 records.** `REQUIREMENTS-AUDIT.md`, `MAINLINE-GATE.md` and `BRANCH-ACCEPTANCE.md` in `docs/evidence/M2/` still describe the old deviation. They are historical gate records. `docs/evidence/M2/CONTROL.md` carries a supersession note.
 
 ## Security and licensing
@@ -176,3 +176,31 @@ Runtime probe after the fix: `PLTCOLLECTS=":$PWD" racket docs/evidence/M3/I139-u
 ## Next action
 
 Implement QUIT as a raised non-`exn:fail` session signal caught by the host loop, which skips cleanups per ADR-0051. Track it with the RNG and terminal I/O work on the M3 INITIALIZED frontier.
+
+## Orchestrator gate and independent review (2026-11-23)
+
+Unsandboxed full gate at `644465f`, run as the normal user with
+`PLTCOLLECTS=":$PWD" TMPDIR=/tmp PYTHON=/usr/bin/python3 PYTHONPATH=$PWD/.sandbox-pydeps/lib`:
+
+| command | exit |
+|---|---|
+| `make test` | 0 |
+| `make test-historical` | 0 (placement matches pinned Confusion, 2350 entries) |
+| `make m3-source-progress` | 0 |
+| `make test-m3-historical-gc` | 0 |
+| `git diff --check` | 0 |
+
+No log contained `test failures`, `FAILURE` or `raised an exception`.
+
+Independent review verdict: **APPROVE WITH NITS**. It found no case where an error is swallowed or a transfer skips its cleanup.
+- **Transfers:** every MDL transfer is an escape continuation, never an exception: `let/ec` for PROG/REPEAT and activations, MAPLEAVE/MAPRET/MAPSTOP, and `call/ec` for ERRET.
+- **Raise mark:** it is local to each UNWIND call.
+- **Bookkeeping:** host state is restored after a raise.
+- **Reviewer's own mutations, all caught:**
+  - handler no longer sets the mark: 11/26;
+  - cleanup ignores the mark: 11/26;
+  - one mark shared by all UNWINDs: 13/26.
+- **Nits fixed after the gate (docs and a test comment only, no code change):**
+  - ADR-0051 notes the loader's `exn:fail:mdl-load` wrapper for nested FLOAD;
+  - the risk note names resumed breaks as the only real hole;
+  - `unwind_raise_test` documents which scenarios pin per-call mark independence.
