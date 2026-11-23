@@ -1,0 +1,22 @@
+{
+  "name": "orphan-prompt",
+  "description": "M4 S3 scenario, the parser's orphan prompts (frontier F2/F2b, docs/evidence/M4/S1-HOUSE-CELLAR-FRONTIER.md and S2-CHTYPE-SEGMENT.md). Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, microseconds 0, as house-boot). At West of House: open the mailbox, take the leaflet, `throw leaflet` (THROW's syntax wants an indirect object after AT: SYN-MATCH -> ORPHAN -> ORTELL 77np.mud:226 -> PRSTR -> FOOSTR 77np.mud:241, <CHTYPE <+ 32 <ASCII ...>> CHARACTER>, prints `at what?`), answer `mailbox` (the orphan continuation: SPARSE's ORFL branch 77np.mud:113-122 rebuilds the sentence, the leaflet is thrown and lands in the room), look, take the leaflet again, `kill mailbox` (KILL wants WITH: the same ORTELL/PRSTR/FOOSTR path prints `with what?`; the start-area stand-in for `kill troll`, which needs the troll room), answer `leaflet` (continuation: `Trying to kill a mailbox with a leaflet is suicidal.`), inventory. Each command was confirmed by the pinned native reference; see docs/evidence/M4/ORPHAN-PROMPT-REFERENCE.md. Input ends after inventory (D3 end-of-input applies). Not used: answering `with leaflet` (a prepositional answer) after `kill mailbox`, which raises ARGUMENT-OUT-OF-RANGE in the native reference (recorded there, ad hoc).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": ["<FLOAD \"77loadall.mud\">", "<SAVE-IT>"],
+  "commands": [
+    "open mailbox",
+    "take leaflet",
+    "throw leaflet",
+    "mailbox",
+    "look",
+    "take leaflet",
+    "kill mailbox",
+    "leaflet",
+    "inventory"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/orphan-prompt-reference.json",
+    "case": "T1-orphan-prompt-pipe"
+  }
+}

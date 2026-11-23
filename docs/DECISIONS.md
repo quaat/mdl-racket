@@ -1673,3 +1673,34 @@ a user TYPE atom merely named SEGMENT (or LIST/FALSE) never takes a built-in
 CHTYPE branch — CHTYPE dispatches on the target being a ROOT built-in TYPE,
 not on its PNAME. Hosts that inspect session values check TYPE inside the
 session (e.g. `mdl-session-call session "TYPE" v`).
+
+## ADR-0057: CHTYPE to CHARACTER keeps the 0–127 CHARACTER range
+
+Status: accepted (M4 S3, 2026-11-23).
+
+Context: frontier F2/F2b (every `<prep> what?` orphan prompt and every
+PRSTR use) needs `<CHTYPE fix CHARACTER>` (FOOSTR, `77np.mud:241`). The
+pinned reference treats CHARACTER as a raw retag of a 36-bit WORD: any
+value is accepted and comes back unchanged through ASCII, and out-of-range
+CHARACTERs print implementation bytes
+(`docs/evidence/M4/CHARACTER-CHTYPE-REFERENCE.md`). This runtime's
+documented CHARACTER contract is ASCII 0–127: `ASCII` FIX → CHARACTER is
+0–127 (the reference agrees there), READSTRING refuses input codes above
+127, and UNPARSE/PRINC are specified only for that range.
+
+Decision: CHTYPE to the ROOT CHARACTER TYPE accepts a WORD-primtype value
+(FIX, WORD, CHARACTER, NEWTYPE of WORD; not FLOAT) whose signed value is
+0–127 and returns the runtime's one CHARACTER representation (the typed
+WORD value made by `mdl-character`), so `==?`, STRING PUT and MEMQ treat it
+exactly like `!\c`. Other codes are a strict error. CHARACTER → FIX/WORD
+was already supported and is unchanged.
+
+Consequences: the game-reachable values (at most 122: PNAME characters ≤ 90
+plus 32, recorded by the reference probe `game-word-pname-range`) behave as
+in the reference; out-of-range CHTYPEs, which the reference accepts, fail
+loudly instead of producing an unprintable value. Following the reference
+would have required widening CHARACTER to a 36-bit code everywhere (STRING
+storage, printing, input) — a larger change with no game use. Alternatives
+rejected: accept any code (conflicts with the ASCII and input contract and
+the host string representation); refuse WORD/NEWTYPE sources (the reference
+accepts them and they cost nothing).

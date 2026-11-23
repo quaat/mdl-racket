@@ -2993,3 +2993,59 @@ whatever produced it:
   in both (the existing M2 D2 deviation, now also for runtime SEGMENTs).
 * Reader SEGMENTs no longer carry a source line/column (never shown in any
   message).
+
+## M4 S3: CHTYPE between FIX (WORD) and CHARACTER (frontier F2/F2b; ADR-0057)
+
+Specification written before implementation. Authority: MDL manual chapter
+6 (TYPE/PRIMTYPE/CHTYPE: CHTYPE changes only the TYPE of an object whose
+PRIMTYPE equals the target's) and chapter 7 (CHARACTER is PRIMTYPE WORD);
+pinned Confusion observations in
+`docs/evidence/M4/CHARACTER-CHTYPE-REFERENCE.md`
+(`character-chtype-probe.json`, script
+`scripts/probe_character_chtype_reference.py`). Game use: FOOSTR
+(`77np.mud:241`) lower-cases a word for PRSTR with
+`<PUT .Y 1 <CHTYPE <+ 32 <ASCII <1 .X>>> CHARACTER>>`; PRSTR is called by
+ORTELL (the `<prep> what?` orphan prompts, `77np.mud:226`), by SPARSE's
+`Which <noun>?` (`77np.mud:88`) and `I can't see a <adj> <noun> here.`
+(`77np.mud:79-80`).
+
+**Conversion.** `<CHTYPE x CHARACTER>` accepts any x of PRIMTYPE WORD whose
+value is a FIX code (FIX, WORD, CHARACTER, a NEWTYPE of WORD) and returns
+the CHARACTER with that code, the same runtime value that `ASCII`, a STRING
+element and the reader's `!\c` produce. Equality is by code: the result is
+`==?` and `=?` to `!\c` and to `<ASCII code>`; it is never `==?` or `=?` to
+the FIX (reference `character-identity`). It can be stored in a STRING by
+PUT, concatenated by STRING, found by MEMQ in a STRING, and PRINC writes it
+as the bare character. `<CHTYPE char FIX>` returns the code (`<CHTYPE !\A
+FIX>` is 65, equal to `<ASCII !\A>`); `<CHTYPE char WORD>` returns the WORD
+with that code and `<CHTYPE word CHARACTER>` returns the CHARACTER again;
+a NEWTYPE of WORD round-trips the same way. `<CHTYPE char CHARACTER>`
+returns the character unchanged.
+
+**Range (deviation, ADR-0057).** The reference does not range-check: any
+36-bit value becomes a CHARACTER and comes back unchanged through ASCII or
+CHTYPE to FIX (128, 255, 256, -1, 2^35-1, -2^35 all observed), and such
+CHARACTERs print implementation bytes. This runtime keeps its documented
+CHARACTER range: `<CHTYPE x CHARACTER>` is supported for codes **0–127**
+only, the range of `ASCII` FIX → CHARACTER (whose 128 and -1 the reference
+itself refuses with `Value for ASCII out of range`) and of terminal input
+(a code above 127 in READSTRING input is a strict error). Any other code is
+a strict error `mdl-chtype: CHARACTER code out of supported range 0..127`.
+Game reach is inside the range: PRSTR only receives ATOMs found by LOOKUP
+in the WORDS, OBJECTS, ACTIONS and DIRECTIONS oblists, whose PNAME
+characters are at most 90 (`Z`) in the reference (`game-word-pname-range`),
+so FOOSTR's argument is at most 122; the scenario log shows 97, 116, 119,
+105, 116, 104 (`at`, `with`).
+
+**Strict refusals.** CHTYPE to CHARACTER from a non-WORD PRIMTYPE (STRING,
+LIST, ATOM, VECTOR) and from CHARACTER to ATOM, LIST or STRING:
+`primitive type mismatch` (reference `PRIMTYPES do not match in CHTYPE`).
+FLOAT to CHARACTER and CHARACTER to FLOAT stay unsupported (the reference
+reinterprets the float bits; not on the game path). Wrong argument counts
+stay host arity errors (reference `TOO-MANY-/TOO-FEW-ARGUMENTS-SUPPLIED`).
+Printing a CHARACTER outside 32–126 through UNPARSE/PRIN1 is unchanged
+(control characters strict; PRIN1 of CHARACTER strict, M3 S7).
+
+**Dispatch.** As ADR-0056: the CHARACTER branch is taken only when the
+target is the session's ROOT built-in TYPE atom CHARACTER; a user TYPE atom
+merely named CHARACTER is an ordinary NEWTYPE.

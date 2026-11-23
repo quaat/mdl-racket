@@ -112,6 +112,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m4-mailbox-drop 2>&1 | tee artifacts/ci-logs/test-m4-mailbox-drop.log
+      - name: M4 S3 scenario (orphan prompts; CHTYPE to CHARACTER)
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-orphan-prompt 2>&1 | tee artifacts/ci-logs/test-m4-orphan-prompt.log
       - name: Build and capture native reference
         run: |
           make reference-build

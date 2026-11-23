@@ -3674,7 +3674,7 @@
         (when (and builtin?
                    (not (member target '("ATOM" "LIST" "FALSE" "VECTOR" "UVECTOR" "STRING"
                                          "FIX" "WORD" "LOSE" "CHANNEL"
-                                         "SEGMENT"))))
+                                         "SEGMENT" "CHARACTER"))))
           (error 'mdl-chtype "unsupported built-in TYPE conversion"))
         (when (and (not (or (null? base) (mpair? base) (mdl-atom? base)
                             (mdl-string? base)
@@ -3690,6 +3690,17 @@
                       (word-signed bits)]
                      [(equal? target "WORD")
                       (mdl-word bits)]
+                     ;; The one CHARACTER representation (`mdl-character`),
+                     ;; within the documented 0..127 range (ADR-0057; the
+                     ;; reference accepts any WORD value). FLOAT bits are
+                     ;; not reinterpreted as a CHARACTER.
+                     [(equal? target "CHARACTER")
+                      (when (flonum? base)
+                        (error 'mdl-chtype "unsupported FLOAT to CHARACTER conversion"))
+                      (define code (word-signed bits))
+                      (unless (<= 0 code 127)
+                        (error 'mdl-chtype "CHARACTER code out of supported range 0..127: ~a" code))
+                      (mdl-character (integer->char code))]
                      [(or (exact-integer? base) (mdl-word? base) (flonum? base))
                       (mdl-typed-value type (mdl-word bits))]
                      [else (error 'mdl-chtype "unsupported WORD reinterpretation")])]
