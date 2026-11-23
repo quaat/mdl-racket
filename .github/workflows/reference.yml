@@ -105,6 +105,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m4-house-cellar 2>&1 | tee artifacts/ci-logs/test-m4-house-cellar.log
+      - name: M4 S2 scenario (drop the leaflet; CHTYPE to SEGMENT)
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-mailbox-drop 2>&1 | tee artifacts/ci-logs/test-m4-mailbox-drop.log
       - name: Build and capture native reference
         run: |
           make reference-build

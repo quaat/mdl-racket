@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -67,6 +67,12 @@ test-m3-session: sources
 test-m4-house-cellar: sources
 	@racket tests/historical_house_cellar_test.rkt
 	@racket tests/historical_m4_frontier_test.rkt
+
+# M4 S2 (drop the leaflet; frontier F1, CHTYPE to SEGMENT): every command
+# prefix compared with the pinned Confusion captures (D1 only) plus read-only
+# state checkpoints, and the game's INSERT-OBJECT/TAKE-OBJECT tail sharing.
+test-m4-mailbox-drop: sources
+	@racket tests/historical_mailbox_drop_test.rkt
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,

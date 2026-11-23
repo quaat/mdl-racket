@@ -34,8 +34,7 @@
          atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
-         mdl-segment mdl-segment? mdl-segment-payload mdl-segment-line
-         mdl-segment-column mdl-make-segment mdl-splice-result
+         mdl-segment? mdl-segment-payload mdl-make-segment mdl-splice-result
          mdl-splice-result-value mdl-splice-list mdl-splice-vector
          mdl-splice-uvector
          mdl-word mdl-word? mdl-word-bits mdl-chtype mdl-character
@@ -924,11 +923,33 @@
 ;; a compiled splice evaluates to a splice marker carrying its already
 ;; evaluated payload value. Segment objects that are merely the VALUE of a
 ;; plain element are stored, not re-spliced.
-(struct mdl-segment (payload line column) #:transparent)
+;;
+;; SEGMENT is one built-in TYPE with PRIMTYPE LIST (ADR-0056; SEMANTICS
+;; "M4 S2"): the reader's `!<...>`/`!.X`/`!,X` and `<CHTYPE x SEGMENT>` are
+;; the same object, a TYPE tag over the LIST cells of its elements, exactly
+;; like a FORM. Its payload is a FORM view over the same cells.
 (struct mdl-splice-result (value line column) #:transparent)
 
+;; The ROOT SEGMENT atom of every atom space (registered by
+;; make-mdl-atom-space; weak, so a finished session's space can be
+;; collected). The test is by atom identity, never by PNAME, and does not
+;; depend on which space is current, so a host inspecting a session's values
+;; from outside it sees the same answer as the session itself.
+(define segment-type-atoms (make-weak-hasheq))
+
+(define (mdl-segment? value)
+  (and (mdl-typed-value? value)
+       (hash-ref segment-type-atoms (mdl-typed-value-type value) #f)))
+
+(define (mdl-segment-payload segment)
+  (mdl-make-form (mdl-typed-value-value segment)))
+
+;; The reader's constructor: PAYLOAD is the FORM read after `!`; the source
+;; position is not kept (it is never shown in a message).
 (define (mdl-make-segment payload line column)
-  (mdl-segment payload line column))
+  (unless (mdl-form? payload)
+    (error 'mdl-make-segment "SEGMENT payload must be a FORM"))
+  (mdl-typed-value (mdl-root-atom "SEGMENT") (mdl-typed-value-value payload)))
 
 (define (mdl-segment-standalone-error)
   (error 'mdl-segment
@@ -1830,6 +1851,7 @@
                name)))
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
+                          ("SEGMENT" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
                           ("VECTOR" . "VECTOR")
                           ("CHANNEL" . "VECTOR")
@@ -1848,6 +1870,7 @@
     (define type-atom (seed-root! (car entry)))
     (hash-set! types type-atom (cdr entry))
     (hash-set! builtins type-atom #t))
+  (hash-set! segment-type-atoms (seed-root! "SEGMENT") #t)
   (for ([name (in-hash-keys builtin-table)]) (seed-root! name))
   (for-each seed-root! root-internal-names)
   (atom-space initial root named types builtins (make-hasheq)
@@ -3649,7 +3672,8 @@
       (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
         (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
                    (not (member target '("ATOM" "LIST" "FALSE" "VECTOR" "UVECTOR" "STRING"
-                                         "FIX" "WORD" "LOSE" "CHANNEL"))))
+                                         "FIX" "WORD" "LOSE" "CHANNEL"
+                                         "SEGMENT"))))
           (error 'mdl-chtype "unsupported built-in TYPE conversion"))
         (when (and (not (or (null? base) (mpair? base) (mdl-atom? base)
                             (mdl-string? base)
@@ -3672,6 +3696,9 @@
                (mdl-list-head base 'mdl-chtype)]
               [(string=? target "FALSE")
                (mdl-false (mdl-list-head base 'mdl-chtype))]
+              ;; A SEGMENT tags the same LIST cells, like a FORM (ADR-0056).
+              [(string=? target "SEGMENT")
+               (mdl-typed-value type (mdl-list-head base 'mdl-chtype))]
               [(string=? target "ATOM") base]
               [(string=? target "STRING") base]
               [(or (string=? target "VECTOR") (string=? target "UVECTOR"))

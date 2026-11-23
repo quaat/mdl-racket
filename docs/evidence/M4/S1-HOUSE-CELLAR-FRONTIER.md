@@ -79,6 +79,9 @@ the frontier moves. It is not a parity test.
 
 ### F1 (rank 1): `<CHTYPE <FORM ...> SEGMENT>`, TYPE SEGMENT unknown
 
+**Resolved by M4 S2** ([S2-CHTYPE-SEGMENT.md](S2-CHTYPE-SEGMENT.md)); the
+text below is the original S1 record.
+
 * Reproduction: `open mailbox`, `take leaflet`, `drop leaflet`. Native
   prints `Dropped.`. We print `>Taken.\n>` and then raise
   `mdl-typeprim: unknown MDL TYPE SEGMENT`.

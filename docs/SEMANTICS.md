@@ -2923,3 +2923,73 @@ console transcript, so no visible output differs.
 
 **CLOSE** and the rest of the file API (FILE-LENGTH, ACCESS, READSTRING from a
 file, SLEEP) stay unsupported (strict). No success-shaped CLOSE exists.
+
+## M4 S2: CHTYPE to SEGMENT and runtime-built SEGMENTs (frontier F1; ADR-0056)
+
+Specification written before implementation. Authority: MDL manual chapter
+7 (segments) and chapter 6 (TYPE/PRIMTYPE/CHTYPE); pinned Confusion
+observations in `docs/evidence/M4/SEGMENT-CHTYPE-REFERENCE.md`
+(`segment-chtype-probe.json`, script `scripts/probe_segment_chtype_reference.py`).
+Game use: the DEFMACs INSERT-OBJECT and TAKE-OBJECT (`77defs.mud:332-342`)
+build `(<FORM PUT …> <CHTYPE <FORM ROBJS .ROOM> SEGMENT>)`; their expansion
+is `<PUT .R 7 (<PUT .O 19 .R> !<ROBJS .R!>)>`, whose LIST, when evaluated,
+prepends the object and **shares** the old ROBJS chain as its tail.
+
+**One SEGMENT type.** SEGMENT is a built-in TYPE whose PRIMTYPE is LIST
+(`<TYPEPRIM SEGMENT>` is LIST). The reader's `!<...>`, `!.X`, `!,X` and a
+CHTYPE'd FORM are the same kind of object: in the reference `<TYPE '!.X>` is
+SEGMENT and `<1 '!.X>` is LVAL. A SEGMENT is therefore represented exactly
+like a FORM: a TYPE tag over the LIST cells of its elements. NTH, LENGTH,
+REST (which returns a LIST), PUT, `=?` and `==?` behave as for any
+LIST-primtype typed value.
+
+**CHTYPE.** `<CHTYPE x SEGMENT>` accepts any value of PRIMTYPE LIST (LIST,
+FORM, FALSE, SEGMENT, a NEWTYPE of LIST) and returns a SEGMENT over the
+**same cells** (no copy): PUT through the SEGMENT is visible in the FORM and
+vice versa. `<==? seg form>` and `<=? seg form>` are false (the TYPEs
+differ); `==?` between two CHTYPEs of the same cells to SEGMENT is true, and
+so is `==?` between their LIST views (`<CHTYPE seg LIST>`). CHTYPE of a
+SEGMENT back to LIST, FALSE or a LIST NEWTYPE likewise shares the cells.
+CHTYPE to SEGMENT from any other PRIMTYPE (VECTOR, UVECTOR, STRING,
+WORD/FIX, ATOM) is a strict error, and so is SEGMENT to VECTOR (reference:
+`PRIMTYPES do not match in CHTYPE`). The SEGMENT test is by identity with
+the ROOT atom SEGMENT of a session's atom space, never by PNAME.
+
+**Evaluation.** Unchanged M2 D2 rules, now applied to every SEGMENT object,
+whatever produced it:
+
+* a SEGMENT that is a *raw element* of a LIST, VECTOR or UVECTOR being
+  evaluated (for example by EVAL of a runtime-built LIST, or by evaluating a
+  macro expansion) evaluates its elements as a FORM and splices the value's
+  elements; a final LIST-valued segment of a LIST construction shares the
+  payload's cells (reference: `<==? <REST <EVAL <LIST 0 .S>>> .L>` is T,
+  `<==? <EVAL <LIST .S>> .L>` is T, and a later PUT on `.L` is visible);
+  non-final segments copy (`<EVAL <LIST .S 9>>` does not share);
+* in a FORM's argument list it splices into the call's arguments; the LIST
+  SUBR copies (`<==? <EVAL <FORM LIST .S>> .L>` is false);
+* a SEGMENT that is the *value* of an evaluated element is stored as is
+  (`<LIST 1 .S>` → a LIST whose second element has TYPE SEGMENT); EVAL of
+  that LIST then splices it;
+* EVAL of a SEGMENT outside a structure is `ILLEGAL-SEGMENT: Attempt to
+  evaluate segment outside structured type`; a payload that evaluates to a
+  non-structured value is `ILLEGAL-SEGMENT: Segment evaluated to
+  nonstructured type`.
+
+**Not supported / deviations (recorded).**
+
+* CHTYPE to FORM stays an unsupported built-in conversion (existing strict
+  refusal, `tests/type_test.rkt`; not on the game path). The reference
+  accepts it and shares the cells (`<==? <CHTYPE seg FORM> form>` is T,
+  `<CHTYPE <CHTYPE (A B) SEGMENT> FORM>` is `<A B>`).
+* Printing a SEGMENT (PRIN1, UNPARSE, the REPL print) stays a strict error.
+  The reference prints `!<A B!>`, `!.X`, `!,X`, `!<!>`; this runtime does not
+  print FORMs or LISTs either.
+* The CHTYPE mismatch text stays the runtime's `primitive type mismatch`.
+  The reference writes `PRIMTYPES do not match in CHTYPE` to stderr and
+  returns to LISTEN without an ERROR frame.
+* Interpreted FUNCTION application: the reference binds a required formal
+  from a raw SEGMENT argument by evaluating it standalone
+  (`ILLEGAL-SEGMENT`), while a `"TUPLE"` formal splices; this runtime splices
+  in both (the existing M2 D2 deviation, now also for runtime SEGMENTs).
+* Reader SEGMENTs no longer carry a source line/column (never shown in any
+  message).
