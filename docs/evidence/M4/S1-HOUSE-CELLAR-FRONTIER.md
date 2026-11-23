@@ -147,7 +147,7 @@ below were superseded by the slice's own probe file
    `tests/scenarios/top-parser.json`) in the frontier test; full parity with
    checkpoints, including EVERYTHING's `<TOP ,OBJ-UV>` (`put/take/drop all`),
    in `tests/historical_top_parser_test.rkt`. Next strict failure on the TOP
-   path: F4 below.
+   path: F4 below (resolved by M4 S5b).
 4. MAX (#122) at `78melee.mud:447-448`, reached by actual troll combat with
    a weapon (backlog scenario 4). `kill troll with lamp` currently matches
    native (`Trying to kill a troll with a lamp is suicidal.`).
@@ -212,6 +212,17 @@ READSTRING-from-file / CLOSE; or extending the denial so the game prints its
 own "File not found."). Asserted in `tests/historical_m4_frontier_test.rkt`.
 
 ## F4 — `take all` / `take sword` in the living room (recorded 2026-11-23, M4 S4)
+
+**Resolved by M4 S5b** ([S5B-FUNCTION-TYPE.md](S5B-FUNCTION-TYPE.md),
+ADR-0060): the TYPE of a compiled DEFINE is FUNCTION, of a host built-in
+SUBR. Positive native regressions: `take all` in the living room equals the
+reference case `F4-living-room-take-all-pipe` (D1 only) in
+`tests/historical_m4_frontier_test.rkt`; `take sword` and the sword demon up
+to the troll room match the new reference scenario `sword-glow` with
+checkpoints (`tests/historical_sword_glow_test.rkt`). Next strict failure on
+the sword path: `kill troll with sword` in the troll room stops at MAX
+(`78melee.mud:447`), see S5B-FUNCTION-TYPE.md. The text below is the
+original S4 record.
 
 The next strict failure reached on a TOP path (not stubbed). Reproduction:
 `north`, `east`, `open window`, `west`, `west`, `take all`. Native prints

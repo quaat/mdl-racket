@@ -113,6 +113,12 @@ CONTIN runs after 302, so the first failure is 77rooms.mud:303.
 applying it raises the ADR-0049 error, that REP `==` RDCOM, and that RESET is
 still unassigned, together with all S5 assertions.
 
+> Later update (M4 S5b, ADR-0060): the TYPE limits recorded below are
+> resolved. A compiled DEFINE such as RDCOM is TYPE FUNCTION, and every
+> builtin-table SUBR (for example `<TYPE ,TYPE>`) is TYPE SUBR, so BLO's
+> `<TYPE? ,REP SUBR FSUBR>` is FALSE after CONTIN, as in the reference. See
+> `docs/evidence/M4/S5B-FUNCTION-TYPE.md`. The text below records the M3 state.
+
 Observed limit: RDCOM is a compiled DEFINE, which is a host procedure, and
 `<TYPE ,RDCOM>` (so `<TYPE ,REP>` after CONTIN) is still `mdl-type: unsupported
 MDL type #<procedure>`. This was already the case before this slice, and the

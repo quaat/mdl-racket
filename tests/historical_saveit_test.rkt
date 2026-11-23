@@ -83,10 +83,9 @@
            (lambda () (mdl-session-call session "APPLY" saverep)))
 ;; ... and 302 made REP the game's command reader RDCOM (a FUNCTION).
 (check-eq? (mdl-session-global session "REP") (mdl-session-global session "RDCOM"))
-;; (RDCOM is a compiled DEFINE, a host procedure: its TYPE is still an
-;; unsupported-type error, a pre-existing limit recorded in S6-REP.md.)
-(check-exn #rx"mdl-type: unsupported MDL type"
-           (lambda () (type-of (mdl-session-global session "REP"))))
+;; (RDCOM is a compiled DEFINE: since M4 S5b, ADR-0060, its TYPE is FUNCTION,
+;; as in the reference; before, it was an unsupported-type error.)
+(check-equal? (type-of (mdl-session-global session "REP")) "FUNCTION")
 ;; 303: RESET returned the same INCHAN; 304-305 completed.
 (check-eq? (mdl-session-global session "WINNER") (mdl-session-global session "PLAYER"))
 (check-true (mdl-false? (mdl-session-call session "NTH" (mdl-session-global session "PRSVEC") 2)))

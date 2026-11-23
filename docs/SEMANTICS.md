@@ -2399,7 +2399,8 @@ predefined SUBR value until the program SETGs or GUNASSIGNs REP:
 - Not supported (strict errors, unchanged): `<PRIMTYPE ,REP>`,
   `<TYPEPRIM SUBR>` (Confusion: WORD), CHTYPE of REP, DECL Patterns naming
   SUBR or FSUBR, UNPARSE/PRINT of REP. Other built-in SUBRs remain host
-  procedures whose TYPE is still an unsupported-type error.
+  procedures; since M4 S5b (ADR-0060) their TYPE is SUBR and the TYPE of a
+  compiled DEFINE (such as RDCOM) is FUNCTION.
 
 **Host top-level loop (specified in S6; implemented in S7, ADR-0050).** The loop
 replaces Confusion's LISTEN for a game session. Contract for the slice that
@@ -3145,3 +3146,99 @@ only in the script code after a successful OPEN "PRINT".
 
 **Not supported / recorded.** GROW is not a SUBR of the pinned reference
 (UNBOUND-VARIABLE) nor of this runtime, so TOP after GROW is not defined.
+
+## M4 S5b: TYPE of applicable values (frontier F4; ADR-0060)
+
+Specification written before implementation. Authority: MDL manual §9.1
+(FUNCTION is a TYPE of PRIMTYPE LIST whose elements are the formal LIST and
+the body), §9.3 (SUBR and FSUBR are the built-in applicables), §17.1 (MACRO),
+§6.4 (TYPE, TYPE?, PRIMTYPE); pinned Confusion observations in
+`docs/evidence/M4/FUNCTION-TYPE-REFERENCE.md` (`function-type-probe.json`,
+script `scripts/probe_function_type_reference.py`). Game uses: SWORD
+`77act1.mud:1903` `<COND (<TYPE? ,SWORD-GLOW NOFFSET> ,SWORD-GLOW)
+(SWORD-GLOW)>` (reached by every `take sword`, including `take all` in the
+living room), ROBBER `77act1.mud:1529, 1564` (the same shape), FUNCTION-PRINT
+`77defs.mud:503-513` and the CEVENT code `77rooms.mud:1642-1649` (TYPE? of an
+applicable against NOFFSET). NOFFSET is `<NEWTYPE NOFFSET WORD>`
+(`77defs.mud:4`), the compiled-code offset type of the PDP-10 original; in
+the interpreted 1977 source no value of TYPE NOFFSET is ever made, so every
+such test is FALSE and the game stores the ATOM instead (`(SWORD-GLOW)` is a
+COND clause whose value is the ATOM SWORD-GLOW).
+
+**Reference (pinned mdli 6df359f6).** `<DEFINE F (X) ...>` gives a value of
+TYPE FUNCTION, PRIMTYPE LIST, for every formal shape (no arguments, `#DECL`,
+OPTIONAL/AUX, TUPLE, a leading activation atom, "NAME", a quoted formal);
+`<TYPE? ,F FUNCTION>` → FUNCTION, `<TYPE? ,F SUBR FSUBR>` and `<TYPE? ,F
+NOFFSET>` → FALSE; `<==? ,F ,F>` and `<==? ,F ,F2>` after `<SETG F2 ,F>` → T;
+`<APPLICABLE? ,F>` → T. A `<FUNCTION ...>` literal is FUNCTION too. DEFMAC
+gives MACRO (PRIMTYPE LIST). Every built-in this runtime binds
+(`builtin-table` of `mdl/runtime/core.rkt`, and FLOAD) is a SUBR in the
+reference (PRIMTYPE WORD); COND, QUOTE, DEFINE, DEFMAC, FUNCTION, PROG, REPEAT,
+UNWIND, GDECL, AND, OR are FSUBRs, RETURN, AGAIN and NOT are SUBRs. In the
+loaded game `<TYPE ,SWORD-GLOW>`, `<TYPE ,SWORD>`, `<TYPE ,ROBBER>` and
+`<TYPE ,RDCOM>` are FUNCTION and `<TYPE? ,SWORD-GLOW NOFFSET>` is FALSE.
+Because FUNCTION is PRIMTYPE LIST, the reference also gives `<LENGTH ,F>` = 2,
+`<1 ,F>` = `(X)`, `<CHTYPE ,F LIST>` = `((X) <+ .X 1>)` (sharing its cells),
+`<CHTYPE list FUNCTION>` an applicable FUNCTION, and prints `#FUNCTION ((X)
+<+ .X 1>)`; a SUBR prints `#SUBR *…*`.
+
+**Result (implemented).** `TYPE` of an applicable value is the ROOT ATOM
+named below, selected by the value's representation, never by a PNAME or a
+GVAL name (ADR-0056):
+
+- a compiled DEFINE (the host procedure that `mdl-define!` stores for every
+  DEFINE without quoted formals; `mdl/compiler.rkt`): **FUNCTION**;
+- an interpreted DEFINE (quoted formals) and a `<FUNCTION ...>` literal (the
+  `mdl-function` record): **FUNCTION** (unchanged);
+- a DEFMAC (the `mdl-macro` record): **MACRO** (unchanged);
+- a host built-in bound to a ROOT name (every value of `builtin-table`), the
+  default REP (ADR-0049) and FLOAD: **SUBR**.
+
+`TYPE?` and DECL type patterns use the same TYPE, so `<TYPE? ,SWORD-GLOW
+NOFFSET>` is FALSE and SWORD stores the ATOM SWORD-GLOW, as in the reference.
+`<PRIMTYPE f>` of a FUNCTION is LIST (the existing TYPE table entry FUNCTION →
+LIST); of a MACRO LIST. The value stored by DEFINE is unchanged: GVAL, SETG,
+`==?` (the same object), application (FORM call, APPLY, MAPF, computed
+heads, HANDLER/interrupt actions, host `mdl-apply`) and the APPLICABLE DECL
+pattern behave exactly as before. A UVECTOR of FUNCTIONs has UTYPE FUNCTION
+(reference `function-uvector`).
+
+Any other host procedure (one the runtime never stores as an MDL value) has
+no TYPE: `mdl-type: unsupported MDL type …` stays a strict error.
+
+**Not representable here (strict errors, recorded deviations).** A compiled
+DEFINE is a Racket closure; it keeps no MDL formal/body LIST. Therefore, for
+a compiled FUNCTION (and, as before, for an interpreted one):
+
+- `<CHTYPE f LIST>` (reference: the formals+body LIST) raises
+  `mdl-chtype: unsupported primitive storage conversion`;
+- `<CHTYPE list FUNCTION>` raises `mdl-chtype: unsupported built-in TYPE
+  conversion`;
+- structure access through PRIMTYPE LIST — LENGTH, NTH (`<1 ,F>`), REST,
+  EMPTY?, MAPF over f, PUTREST — raises a strict error (never an empty LIST);
+- PUT and GET with a FIX indicator (reference: the formals LIST for
+  `<GET ,F 1>`) take the PRIMTYPE LIST element path and raise `mdl-length:
+  unsupported structured value`; `<PUT f 1>` is TOO-FEW-ARGUMENTS-SUPPLIED as
+  for any structured item. They never store a FIX-keyed association, which
+  stays the behaviour of SUBRs (PRIMTYPE WORD, unstructured). Review
+  amendment: before this, `mdl-structured-primtype?` skipped every host
+  procedure, so `<PUT ,F 1 FOO>` silently made an association;
+- PRIN1, PRINC and UNPARSE raise their existing `unsupported TYPE FUNCTION`
+  errors (reference: `#FUNCTION ((X) ...)`); SUBRs likewise (`#SUBR *…*`).
+- `<PRIMTYPE ,+>` and `<TYPEPRIM SUBR>` stay strict (`unknown MDL TYPE
+  SUBR`; reference WORD), as recorded for REP in ADR-0049, so CHTYPE of a SUBR
+  is refused.
+
+**Known deviations, unchanged by this slice.** The FSUBRs and SUBRs that the
+compiler handles by name (COND, QUOTE, DEFINE, AND, OR, NOT, RETURN, …) have
+no GVAL here (`,COND` is `mdl-gval: unassigned MDL global COND`;
+`<GASSIGNED? COND>` is FALSE, reference T). `APPLICABLE?` is not a SUBR of
+this runtime (strict unassigned-operator error; reference T for FUNCTION,
+SUBR, FSUBR, MACRO and FIX). `<=? f g>` of two separately defined functions
+with equal bodies is FALSE here (identity only; the reference compares the
+LISTs and gives T). A compiled `<DEFINE F ...>` form evaluates to the stored
+FUNCTION here; the reference returns the ATOM F (an interpreted DEFINE
+returns the ATOM here too; no game path checked so far uses the value). `<DECL? f
+APPLICABLE>` is T here, while the pinned
+reference has no ATOM APPLICABLE at startup and raises
+BAD-TYPE-SPECIFICATION1 (root inventory note above).
