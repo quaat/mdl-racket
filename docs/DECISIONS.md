@@ -1055,6 +1055,22 @@ REPL or evaluator service was added. The scope can be widened only with
 separate word-accounting evidence and tests. The source LOADED gate passes;
 M3 initialization and gameplay remain incomplete.
 
+## ADR-0045: Model RANDOM as session-owned 36-bit state
+
+**Decision (2026-11-22, issue #108):** Keep two 36-bit words in each MDL
+session's atom space. Implement the bit recurrence independently with Racket
+integer operations, using the historical manual's signed FIX contract and
+pinned Confusion output fixtures as behavioral checks. No process-global
+Racket PRNG or bounded integer random API participates. A one-seed call
+replaces the first word; a two-seed call replaces both before one advance.
+
+**Reference limit:** Pinned Confusion emits a value outside the signed
+36-bit range for negative seeds. Normalize state at every step and report
+that difference rather than treating an out-of-range host value as MDL FIX.
+The separate GPLv3 source remains a local reference dependency; no source
+code is copied into the MIT-0 runtime. A reviewer should inspect this
+independent recurrence and the fixture provenance before integration.
+
 ## ADR-0051: UNWIND cleanups run only for MDL transfers, never for raised errors
 
 **Status:** Accepted (maintainer decision 2026-11-23, issue #139, option a).

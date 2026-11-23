@@ -1,7 +1,7 @@
 #lang racket/base
 ;; Bootstrap MDL runtime: intentionally incomplete and NOT a gameplay engine.
 (require racket/mpair racket/list racket/string racket/date racket/runtime-path
-         "memory.rkt")
+         "memory.rkt" "random36.rkt")
 (provide current-mdl-globals current-mdl-locals
          current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
@@ -1762,7 +1762,7 @@
 ;; "Session-owned channels").
 (struct atom-space (initial root named types builtins manifests associations
                             global-declarations events interrupt-state memory
-                            internal lookup [lookup-stack #:mutable]
+                            random-state internal lookup [lookup-stack #:mutable]
                             inchan outchan channels))
 
 (define mdl-atom? atom-value?)
@@ -1835,7 +1835,7 @@
                          (list initial oblist-name initial-name)
                          (list root oblist-name root-name)))
               (make-hasheq) (make-hash) (mdl-interrupt-state 0 '())
-              (make-mdl-memory) internal
+              (make-mdl-memory) (make-random36-state) internal
               ;; Top-level default LVAL of ROOT OBLIST; see current-lookup-path.
               (mcons initial (mcons root '())) '()
               ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
@@ -2507,6 +2507,14 @@
         (if (or (inexact? smallest) (inexact? value))
             (exact->inexact result)
             result))))
+
+(define (mdl-random . seeds)
+  (when (> (length seeds) 2)
+    (error 'mdl-random "RANDOM takes at most two FIX seeds"))
+  (for ([seed (in-list seeds)])
+    (unless (and (exact-integer? seed) (<= fix-min seed fix-max))
+      (error 'mdl-random "RANDOM seeds must be signed 36-bit FIX values")))
+  (apply random36-next! (atom-space-random-state (current-mdl-atom-space)) seeds))
 
 (define (mdl-gettimedate . args)
   (unless (<= (length args) 2)
@@ -3661,6 +3669,7 @@
         "*" mdl-mul
         "/" mdl-div
         "MIN" mdl-min
+        "RANDOM" mdl-random
         "GETTIMEDATE" mdl-gettimedate
         "MOD" mdl-mod
         "0?" (lambda (number) (mdl-boolean (= (check-number 'mdl-zero? number) 0)))

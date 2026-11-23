@@ -1914,6 +1914,33 @@ empty FALSE. The local runner writes a line feed to the current Racket output
 port and requires a PRINT-mode CHANNEL. This follows the existing documented
 Unix terminal normalization; an actual carriage-return byte is not emitted.
 
+## M3 session-owned 36-bit RANDOM (`77rooms.mud:291`; issue #108)
+
+[The MDL Programming Language, chapter 3.5](https://mdl-language.readthedocs.io/en/latest/03-built-in-functions/)
+defines RANDOM as returning a FIX over the machine's full signed FIX range.
+With no explicit seeds, each fresh interpreter follows the same sequence.
+Two FIX arguments initialize a new sequence. The original START passes one
+FIX derived from DSKDATE, so the pinned Confusion reference's one-seed
+behavior is also required for progression. The generator state consists of
+two 36-bit words per session; a one-seed call replaces only the first word,
+and a two-seed call replaces both before advancing. Each call returns the
+new first word interpreted as a signed 36-bit FIX. A 36-bit logical shift
+of the second word and rotation of the first word's low bit determine the
+next first word; the previous first word becomes the second. This recurrence
+is expressed independently in Racket and checked against observed native
+outputs, without copying GPLv3 Confusion source into the MIT-0 runtime.
+
+The pinned observations in `evidence/M3/random-reference.json` cover the
+default first three outputs, one/two-seed replay and order, zero seeds,
+boundary seeds, and error text. Confusion accepts no, one, or two arguments;
+wrong types and more than two arguments report errors. Its negative-seed
+case returns `-68719476736`, outside signed 36-bit FIX, because its native
+host arithmetic does not normalize that intermediate. The Racket runtime
+normalizes every state transition to 36 bits and therefore intentionally
+differs for that case. Tests require range safety, deterministic replay,
+separate session state, valid seeding, strict errors, and original START
+advancement to its next actual dependency.
+
 ## M3 reader: backslash escapes in atom names (issue #119)
 
 **Contract** (MDL manual chapter 15, confirmed by pinned Confusion binary

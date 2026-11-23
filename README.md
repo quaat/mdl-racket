@@ -9,7 +9,21 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 WIP checkpoint (2026-11-22, `feat/m3-logical-gc`):**
+**Current M3 RNG follow-up (2026-11-22, `feat/m3-session-random`):**
+The unchanged source chain still loads all 1,229 forms with zero skips.
+Session-owned 36-bit RANDOM advances original START through its one-seed
+call; it now stops at unassigned `BACK` in `77rooms.mud:297`, after the
+welcome output. `TMPDIR=/tmp make test` passes 1,996 Racket checks and 23
+Python tests; `TMPDIR=/tmp make test-m3-start-random` passes six assertions
+while recording BACK as the known XFAIL frontier. The pinned Confusion
+negative-seed range deviation is recorded in
+[RANDOM evidence](docs/evidence/M3/RANDOM-START.md). BACK, RESET,
+READSTRING, interactive input, and house smoke parity remain unsupported
+or unverified. **INITIALIZED, INTERACTIVE, SMOKE_PARITY and PLAYABLE have
+not passed; M3 is incomplete.** Next: probe and implement the original
+CONTIN path's BACK operation, then continue toward terminal input.
+
+**Previous M3 source-load checkpoint (2026-11-22, `feat/m3-logical-gc`):**
 `TMPDIR=/tmp make m3-source-progress` verifies all 1,229 forms in the unchanged
 `77loadall.mud` chain, zero skipped, loader exit 0, and the approved source
 hashes. `TMPDIR=/tmp make test` passes 1,471 Racket checks and 23 Python
