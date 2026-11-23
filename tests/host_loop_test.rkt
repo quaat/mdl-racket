@@ -162,7 +162,6 @@ MDL
                               #:output-port out))
   (check-equal? (hash-ref (mdl-session-load! s "prog.mud") 'status) "PASS")
   (values s out collected flushes))
-(define (events-of kind events) (filter (lambda (e) (eq? (car e) kind)) events))
 
 ;; The reproduced defect: the host side closes the output port and raises a
 ;; preconstructed exception; the final flush then fails. The caller must get
@@ -181,10 +180,12 @@ MDL
                       (raise original))))
       'returned))
   (check-eq? caught original)
-  (define flush-failures (events-of 'flush-failed (reverse events)))
+  ;; ON-EVENT is never called once the loop body has been left.
+  (check-equal? (map car (reverse events)) '(entry-returned))
+  (define flush-failures (mdl-host-loop-secondary-failures original))
   (check-equal? (length flush-failures) 1)
   (for ([f (in-list flush-failures)])
-    (check-regexp-match #rx"output port is closed" (exn-message (cadr f)))))
+    (check-regexp-match #rx"output port is closed" (exn-message f))))
 ;; A raised non-exception value is preserved too.
 (let-values ([(s in out) (session-with "")])
   (define caught
@@ -209,10 +210,10 @@ MDL
   (check-pred exn:fail:mdl-input-exhausted? caught)
   (check-equal? (unbox flushes) 4)
   (check-equal? (get-output-string collected) "\n>Beg pardon?\n>")
-  (define flush-failures (events-of 'flush-failed (reverse events)))
+  (define flush-failures (mdl-host-loop-secondary-failures caught))
   (check-equal? (length flush-failures) 1)
   (for ([f (in-list flush-failures)])
-    (check-regexp-match #rx"simulated flush failure" (exn-message (cadr f)))))
+    (check-regexp-match #rx"simulated flush failure" (exn-message f))))
 ;; A strict runtime error inside a pass keeps its message too (request 1 is
 ;; the empty PRIN1, request 2 the loop's final flush).
 (let-values ([(s out collected flushes) (session-with-flaky-flush "<+ 1 2>\n" 2)])
@@ -224,7 +225,56 @@ MDL
       'returned))
   (check-regexp-match #rx"REP: the default REP SUBR is inert" (exn-message caught))
   (check-equal? (unbox flushes) 2)
-  (check-equal? (length (events-of 'flush-failed (reverse events))) 1))
+  (check-equal? (length (mdl-host-loop-secondary-failures caught)) 1))
+;; Independent review of F2: a flush that raises a non-exception value (or a
+;; non-exn:fail exn) is still only a secondary failure.
+(define (session-with-raising-flush input raised)
+  (define out
+    (make-output-port
+     'raising-flush always-evt
+     (lambda (bs start end non-block? breakable?)
+       (if (= start end) (raise raised) (- end start)))
+     void))
+  (define s (make-mdl-session root #:input-port (open-input-string input)
+                              #:output-port out))
+  (check-equal? (hash-ref (mdl-session-load! s "prog.mud") 'status) "PASS")
+  s)
+(let ([s (session-with-raising-flush "" 'port-raised-non-exn)])
+  ;; KEEPREP: no READSTRING flush; PRIN1's empty write is the first request,
+  ;; which raises inside the loop and is itself the primary failure.
+  (define caught (with-handlers ([(lambda (e) #t) values])
+                   (mdl-session-run-interactive s "KEEPREP") 'returned))
+  (check-eq? caught 'port-raised-non-exn)
+  ;; the loop's own flush raised the same value again: recorded, not raised
+  (check-equal? (mdl-host-loop-secondary-failures caught) '(port-raised-non-exn)))
+(let-values ([(s in out) (session-with "")])
+  ;; A primary failure from the host, then a final flush that raises a
+  ;; non-exception value: the primary still wins.
+  (define original (exn:fail "PRIMARY" (current-continuation-marks)))
+  (define flaky (session-with-raising-flush "" 'port-raised-non-exn))
+  (define caught
+    (with-handlers ([(lambda (e) #t) values])
+      (mdl-session-run-interactive
+       flaky "ENTRY"
+       #:on-event (lambda (e) (when (eq? (car e) 'entry-returned) (raise original))))
+      'returned))
+  (check-eq? caught original)
+  (check-equal? (mdl-host-loop-secondary-failures original) '(port-raised-non-exn)))
+;; A host that escapes on EVERY event still cannot turn a failure into a
+;; normal return: no event is delivered after the loop body is left.
+(let-values ([(s in out) (session-with "north\n")])
+  (define original (exn:fail "PRIMARY-2" (current-continuation-marks)))
+  (define caught
+    (with-handlers ([(lambda (e) #t) values])
+      (let/ec escape
+        (mdl-session-run-interactive
+         s "ENTRY"
+         #:on-event (lambda (e)
+                      (if (eq? (car e) 'entry-returned)
+                          (begin (close-output-port out) (raise original))
+                          (escape 'clean-return)))))))
+  (check-eq? caught original))
+
 ;; With no failure leaving the loop (a host escape out of ON-EVENT), a failed
 ;; final flush is itself the reported failure: never swallowed.
 (let-values ([(s in out) (session-with "")])

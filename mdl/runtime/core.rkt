@@ -23,7 +23,7 @@
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-make-terminal-channel mdl-substruc
          exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
-         mdl-run-host-loop
+         mdl-run-host-loop mdl-host-loop-secondary-failures
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          mdl-random-state-snapshot
@@ -3728,12 +3728,16 @@
 ;; re-reads the GVAL of ROOT REP and applies it with no arguments. It ends
 ;; only by an exception (input exhausted, a strict error, the pass bound);
 ;; QUIT is not modelled yet. Terminal output is flushed on every exit, and
-;; that final flush never replaces the outcome (review F2): when a raised
-;; value is leaving the loop it is re-raised unchanged (same object) and every
-;; flush failure is reported separately as a (flush-failed exn) event; when
-;; nothing was raised (a host escape out of ON-EVENT) a flush failure is
-;; itself raised. ON-EVENT receives host-only observations:
-;; (entry-returned value), (pass n), (flush-failed exn).
+;; that final flush never replaces the outcome and never runs host code
+;; (review F2 and its independent review): when a raised value is leaving
+;; the loop it is re-raised unchanged (same object), and every flush failure
+;; is recorded as a secondary failure of it, readable with
+;; mdl-host-loop-secondary-failures; when nothing was raised (a host escape
+;; out of ON-EVENT) the first flush failure is raised and the rest are its
+;; secondaries. ON-EVENT receives host-only observations:
+;; (entry-returned value), (pass n). It is never called after the loop body
+;; has been left, so a callback that escapes cannot turn a failure into a
+;; normal return.
 (define (mdl-run-host-loop entry-thunk #:max-passes [max-passes #f]
                            #:on-event [on-event void])
   (unless (or (not max-passes) (exact-positive-integer? max-passes))
@@ -3766,12 +3770,22 @@
    (lambda ()
      (define failures (flush-terminal-output/collect))
      (cond [leaving
-            ;; Report, then let the primary outcome continue unchanged. A
-            ;; failing ON-EVENT here must not mask it either.
-            (for ([failure (in-list failures)])
-              (with-handlers ([exn:fail? void])
-                (on-event (list 'flush-failed failure))))]
-           [(pair? failures) (raise (car failures))]))))
+            ;; The primary outcome continues unchanged after this thunk.
+            (record-secondary-failures! (unbox leaving) failures)]
+           [(pair? failures)
+            (record-secondary-failures! (car failures) (cdr failures))
+            (raise (car failures))]))))
+
+;; Secondary failures of a raised value that ended a host loop, keyed by the
+;; eq? identity of that value (weakly). Host-only diagnostics: a failed final
+;; flush is reported here instead of replacing the primary outcome.
+(define secondary-failures (make-weak-hasheq))
+(define (record-secondary-failures! primary failures)
+  (when (pair? failures)
+    (hash-set! secondary-failures primary
+               (append (hash-ref secondary-failures primary '()) failures))))
+(define (mdl-host-loop-secondary-failures primary)
+  (hash-ref secondary-failures primary '()))
 
 ;; ADR-0050 / maintainer decision D3 ("Mirror, then strict"): reading a
 ;; terminal CHANNEL whose input already ended. A host-level Racket exception,
@@ -3785,22 +3799,26 @@
 
 ;; Flush every terminal output port of this session, so a prompt written
 ;; with PRINC is visible before a blocking read (Confusion flushes stdout).
+;; Each distinct port once, even if several PRINT channels share it.
 (define (terminal-output-ports)
-  (for/list ([host (in-list (hash-values (atom-space-channels (current-mdl-atom-space))))]
-             #:when (eq? (host-channel-direction host) 'PRINT))
-    (or (host-channel-port host) (current-output-port))))
+  (remove-duplicates
+   (for/list ([host (in-list (hash-values (atom-space-channels (current-mdl-atom-space))))]
+              #:when (eq? (host-channel-direction host) 'PRINT))
+     (or (host-channel-port host) (current-output-port)))
+   eq?))
 (define (flush-terminal-output!)
   (for-each flush-output (terminal-output-ports)))
-;; The host loop's final flush: try every port, returning the exn:fail values
-;; raised (in order) instead of stopping at the first, so one failed port does
-;; not leave another unflushed. Breaks are not caught.
+;; The host loop's final flush: try every port, returning every value raised
+;; (in order) instead of stopping at the first, so one failed port does not
+;; leave another unflushed. Any raised value counts, not only exn:fail;
+;; breaks are not caught.
 (define (flush-terminal-output/collect)
   (for*/list ([port (in-list (terminal-output-ports))]
-              [failure (in-value (with-handlers ([exn:fail? values])
+              [failure (in-value (with-handlers ([(lambda (v) (not (exn:break? v))) box])
                                    (flush-output port)
                                    #f))]
               #:when failure)
-    failure))
+    (unbox failure)))
 
 ;; ADR-0050 READSTRING (manual 11.4.1.2): <READSTRING buffer channel [stop]>
 ;; exactly as RDCOM and YES/NO use it. Arguments are validated first; then
