@@ -1,5 +1,7 @@
 # M3 BACK follow-up: original CONTIN reaches TENEX?
 
+> **Reconciliation note (2026-11-23).** Superseded as the startup frontier: this record's TENEX? failure is for a direct `START` call that bypasses GETSYS. The faithful `run.mud` path (`<FLOAD "77loadall.mud">` + `<SAVE-IT>`) now completes startup and plays the six house-boot commands on the branch stack (S5-S7; [S7 evidence](S7-INTERACTIVE.md)). `make test-m3-start-back` still asserts this direct-START XFAIL.
+
 Date: 2026-11-22. Issue #110, branch `feat/m3-back-continuation`, stacked on
 draft RNG PR #109 (head `e3cc6dc0f29882ebcc7dd3490f528224124e3d39`).
 The formal M3 gate remains **FAIL / incomplete**.

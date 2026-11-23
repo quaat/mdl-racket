@@ -137,15 +137,25 @@ are ready to review.
 
 ## M3 — Actual 1977 game boots in Racket
 
-**Current source frontier (2026-11-22 WIP):** the unchanged `77loadall.mud`
-chain completes all 1,229 original forms with zero skips. The scoped LOADED
-gate passes on `feat/m3-logical-gc`. A direct call to the original START
-fails at unassigned TENEX? in CONTIN after the welcome output and CRLF on the
-BACK follow-up branch; source wrappers set this global before START. INITIALIZED,
-INTERACTIVE and SMOKE-PARITY remain incomplete. The progress report
-verifies PARSED and LOADED while recording the remaining stages false.
-M3 PASS requires the approved house smoke scenario, not just source-chain
-completion. See [WIP evidence](evidence/M3/WIP-SOURCE-LOAD.md).
+**Current frontier (2026-11-23; branch stack, not `main`):** the unchanged
+`77loadall.mud` chain completes all 1,229 original forms with zero skips
+(scoped LOADED PASS on the umbrella `feat/m3-logical-gc`, PR #107). On the
+stack head `feat/m3-interactive-io` (PR #141, `45c387f`) the faithful
+`run.mud` path, `<FLOAD "77loadall.mud">` then `<SAVE-IT>`, completes
+startup in-session (SAVE is an in-session record per ADR-0048; RESET,
+PRINC, PRIN1, READSTRING and the local host loop per ADR-0050), and the six
+house-boot commands play through the original RDCOM: scoped INITIALIZED
+and INTERACTIVE PASS (`make test-m3-interactive`; end of input terminates
+with the strict `exn:fail:mdl-input-exhausted`). SMOKE_PARITY is NOT RUN:
+the date line and the `west` text (`<PROB 80>`, 77rooms.mud:523) depend on
+the host clock until a session-owned fixed clock exists (#135). A direct
+call to START still stops at TENEX? because it bypasses GETSYS; that is a
+retained direct-START XFAIL, not the frontier. `main` (`fdf48e4`) is still
+at LOADED FAIL (433 forms). `scripts/m3_source_progress.py` does not run
+SAVE-IT and still reports INITIALIZED/INTERACTIVE false. M3 PASS requires
+the approved house smoke scenario, not just startup. See
+[S7 evidence](evidence/M3/S7-INTERACTIVE.md), [STATUS](STATUS.md) and the
+earlier [WIP evidence](evidence/M3/WIP-SOURCE-LOAD.md).
 
 The first source-progress gate is `make m3-source-progress`. It runs the
 unchanged `77loadall.mud` entry, accepts a new genuine source dependency
@@ -165,6 +175,41 @@ format differences). Save/restore and event seed handling are documented.
 
 **Tasks:** #17 world model, #18 command parser, #19 actions, #20 loop/IO,
 #21 initial differential test.
+
+### Active iteration (2026-11-23)
+
+Work packages for the current iteration. They do not change the milestone
+definitions or gates above. **M3 formal acceptance** = the deterministic,
+approved house smoke transcript (WP2) plus documented deviations. A local
+session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
+
+- **WP1 — stack readiness.**
+  - F1: CI runs `make test-m3-saveit` and `make test-m3-interactive` (the
+    reference workflow currently runs neither), and both workflows use the
+    shared `make test-python` list (the smoke workflow omits
+    `tests/test_m3_source_progress.py`).
+  - F2: the host loop's exit flush (`mdl-run-host-loop`, a `dynamic-wind`
+    post-thunk) must not replace the primary error if flushing itself fails.
+  - F3: documentation consolidation (this reconciliation: present-tense
+    SEMANTICS/STATUS/PLAN/README/inventory match the code).
+  - #55: agent-configuration revision.
+- **WP2 — deterministic fresh-boot SMOKE_PARITY (#131, #135).**
+  Host-injected, session-owned clock with epoch 250776000 (UTC); a proof
+  chain clock → DSKDATE → START seed → RNG; immutable boot inputs separated
+  from SAVE side effects; a strict comparator with negative checks; a
+  `make m3-check` aggregate target (does not exist yet).
+- **WP3 — session dependencies.** MEMBER, including STRING substring
+  search; QUIT per ADR-0051 as a raised non-`exn:fail` session signal; OPEN
+  denial that returns a FALSE with reason, file-spec and status chosen so
+  RECORD avoids its `*600130*` busy branch (CLOSE stays unsupported);
+  READSTRING `!` escape per pinned Confusion; an explicit output port for
+  game sessions. Each needs a SEMANTICS entry and reference probes first.
+- **WP4 — local session smoke and launcher.** A scenario covering
+  `quit` answered n, continue, then `quit` answered y, with no file writes;
+  a thin CLI/DrRacket launcher over `make-mdl-session` and
+  `mdl-session-run-interactive`. No raw REPL, no web service.
+- **WP5 — M4 scenario backlog.** Collect scenarios for the M4 corpus as a
+  backlog only; M4 gate work waits for M3 acceptance (AGENTS.md step 9).
 
 ## M4 — Comprehensive behavioral equivalence
 

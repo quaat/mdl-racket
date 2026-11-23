@@ -1,15 +1,80 @@
-# Status — 2026-11-23 (M2 mainline PASS; M3 source load WIP PASS; S7 INITIALIZED/INTERACTIVE scoped PASS)
+# Status — 2026-11-23 (`main`: M2 PASS, M3 LOADED FAIL; branch stack #141: M3 INITIALIZED/INTERACTIVE scoped PASS)
 
 ## Current state (2026-11-23)
 
-| M3 stage | Current evidence |
-|---|---|
-| PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
-| LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | PASS (scoped) on S7 branch `feat/m3-interactive-io`: faithful `<FLOAD "77loadall.mud">` + SAVE-IT returns `,NULL` through CONTIN's RESET (ADR-0050); the host loop prints it (D1) and RDCOM reaches its first READSTRING; boot text equals the approved golden after D1/D2 normalisation and date-line normalisation (`make test-m3-interactive`) |
-| INTERACTIVE | PASS (scoped) on S7 branch: all six house-boot commands are read by the original RDCOM and answered as in the approved golden (`west` accepted in its two `<PROB 80>` forms, unfixed clock); end of input gives `Beg pardon?`/`>` then the strict host error `exn:fail:mdl-input-exhausted` (D3) |
-| SMOKE_PARITY | NOT CLAIMED: date line and RANDOM depend on the unfixed host clock (issue #135); the golden is still a candidate |
-| PLAYABLE | NOT RUN: QUIT, OPEN/CLOSE (RECORD), MEMBER (HANDLE) and UNWIND under host errors (#139) are missing |
+States used below: **PASS (mainline)** = verified on `main`; **PASS (branch
+evidence)** = verified on an unmerged branch only; **FAIL**; **BLOCKED**;
+**NOT RUN**. A branch PASS is not a mainline result.
+
+### Mainline: `main` = `fdf48e4` (PR #106)
+
+M0, M1 and M2 gates: **PASS (mainline)**. M3 on `main`:
+
+| M3 stage | State | Evidence |
+|---|---|---|
+| PARSED | PASS (mainline) | 36 historical text files parsed; 4 non-text files identified |
+| LOADED | FAIL | loader exit 1 after 433 original forms, zero skipped, at `77rooms.mud` expression 16, line 101 (`EVENT "GC"`) |
+| INITIALIZED | NOT RUN | source chain does not complete on `main` |
+| INTERACTIVE | NOT RUN | |
+| SMOKE_PARITY | NOT RUN | |
+| Local session smoke | NOT RUN | |
+| PLAYABLE | NOT RUN | |
+
+### Branch: umbrella #107 and the stack #109 → #111 → #125 → #128 → #130 → #136 → #137 → #138 → #141
+
+The umbrella `feat/m3-logical-gc` (PR #107, `3b52abc`) is merged into every
+stack branch; the stack head is `feat/m3-interactive-io` (PR #141,
+`45c387f`). PR #131 (`feat/m3-boot-reference`, fresh-boot house reference
+capture, candidate for approval) is separate and targets the umbrella.
+
+| M3 stage | State | Evidence |
+|---|---|---|
+| PARSED | PASS (branch evidence) | as on `main` |
+| LOADED | PASS (branch evidence) | umbrella and every stack branch: loader exit 0 after 1,229 original forms, zero skipped (`make m3-source-progress`) |
+| INITIALIZED | PASS (branch evidence, scoped) | #141: the faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>` path completes startup in-session; SAVE is an in-session record (ADR-0048), RESET/PRINC/PRIN1/READSTRING and the host loop per ADR-0050. SAVE-IT returns `,NULL`, the host loop prints it (D1), RDCOM reaches its first READSTRING, and the boot text equals the candidate golden after D1/D2 and date-line normalisation (`make test-m3-interactive`) |
+| INTERACTIVE | PASS (branch evidence, scoped) | #141: the six house-boot commands (`north`, `west`, `open mailbox`, `take leaflet`, `inventory`, `score`) are read by the original RDCOM through the host loop and answered as in the candidate golden; `west` is accepted in its two `<PROB 80>` forms (unfixed clock). Input exhaustion terminates the run: `Beg pardon?`/`>` once, then the strict host error `exn:fail:mdl-input-exhausted` (D3) |
+| SMOKE_PARITY | NOT RUN (not claimed) | needs the session-owned fixed clock (#135); the date line and the `west` text depend on the host clock via DSKDATE → RANDOM → `<PROB 80>` (77rooms.mud:523). The golden is a maintainer-approved **candidate** (gameplay approved 2026-11-22), not yet a strict golden (#131) |
+| Local session smoke | NOT RUN | QUIT, OPEN and MEMBER are not implemented (PLAN WP3/WP4) |
+| PLAYABLE | NOT RUN | |
+
+`scripts/m3_source_progress.py` does not run SAVE-IT, so its report still
+records INITIALIZED/INTERACTIVE as false; the scoped gate evidence is
+`tests/historical_interactive_test.rkt`. CI (`.github/workflows/`) does not
+yet run `make test-m3-saveit` or `make test-m3-interactive` (PLAN WP1 F1);
+their results above come from local runs recorded in
+[S7 evidence](evidence/M3/S7-INTERACTIVE.md).
+
+### Fixed on branch; not integrated into `main`
+
+These fixes are merged into the umbrella `feat/m3-logical-gc` and present in
+every stack branch. Their issues stay open until the umbrella reaches
+`main`.
+
+| Item | Fix | Record |
+|---|---|---|
+| #119 backslash-escaped atom names | PR #132 | [I119](evidence/M3/I119-ESCAPED-TRAILER.md) |
+| #124 leading-dot FLOAT | PR #133 | [I124](evidence/M3/I124-LEADING-DOT.md) |
+| #139 UNWIND cleanups masking raised errors | PR #140, ADR-0051 | [I139](evidence/M3/I139-UNWIND.md) |
+| #113 R1 session-owned CHANNEL ports | PR #117 | [R1](evidence/M3/review/R1.md) |
+| #113 R2/R10 GC growth, robust GC tests | PR #123 | [R2](evidence/M3/review/R2.md) |
+| #113 R3/R4 OBLIST authority, ROOT identity | PR #118 | [R3R4](evidence/M3/review/R3R4.md) |
+| #113 R5/R7 constructor evaluation, STRING views | PR #114 | [R5R7](evidence/M3/review/R5R7.md) |
+| #113 R6 MIN as an ordinary PDP-10 FLOAT | PR #115 | [R6](evidence/M3/review/R6.md) |
+| #113 R8 ERROR delivery, ERRET level | PR #116 | [R8](evidence/M3/review/R8.md) |
+| #113 R9 reference probe evidence | unknown: the branch `evidence/m3-107-reference-probes` named in #113 is not on `origin`; per-finding probes are in each R record | — |
+
+The issue #113 body still lists R2-R4 as "review running" and R6/R8 nits
+as open; the merges above supersede that table. The contracts are
+consolidated into [SEMANTICS](SEMANTICS.md).
+
+### Next
+
+See [PLAN "Active iteration (2026-11-23)"](PLAN.md): WP1 stack readiness,
+WP2 deterministic SMOKE_PARITY (#131/#135), WP3 session dependencies
+(MEMBER, QUIT, OPEN denial, READSTRING `!`), WP4 local session smoke and
+launcher. M3 formal acceptance needs WP2.
+
+## Slice history (newest first; each entry as recorded at the time)
 
 - **S7 interactive terminal I/O on `feat/m3-interactive-io` (WIP, ADR-0050):**
   RESET (terminal CHANNEL; clears the host end-of-input flag), PRINC (STRING,

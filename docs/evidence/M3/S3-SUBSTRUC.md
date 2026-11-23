@@ -1,5 +1,7 @@
 # S3-SUBSTRUC — SUBSTRUC implementation
 
+> **Reconciliation note (2026-11-23).** Consolidated into [SEMANTICS §M3 startup: UNPARSE, MEMQ on STRING and SUBSTRUC](../../SEMANTICS.md). On the branch stack (PR #130 and later); not on `main`. The "Next frontier" below was superseded by S4-S7. The proposed section below is history.
+
 **RID**: S3-SUBSTRUC  
 **Branch**: feat/m3-startup-substruc  
 **Base commit**: 58db8036f85e273737d34c28b62ea2e247f0a69b (origin/feat/m3-startup-memq-string, PR #128)  

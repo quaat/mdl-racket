@@ -1,5 +1,7 @@
 # S1-MEMQ-STRING — MEMQ on STRING Haystacks
 
+> **Reconciliation note (2026-11-23).** Consolidated into [SEMANTICS §M3 startup: UNPARSE, MEMQ on STRING and SUBSTRUC](../../SEMANTICS.md). On the branch stack (PR #128 and later); not on `main`. The SUBSTRUC risk below was resolved by S3 (PR #130); MEMBER is still not implemented. The proposed section below is history.
+
 **Branch:** `feat/m3-startup-memq-string`
 **Base commit:** `c09bb02` (origin/feat/m3-startup-unparse, stacked on PR #125/#111)
 **RID:** S1-MEMQ-STRING

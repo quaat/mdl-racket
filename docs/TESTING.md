@@ -1,5 +1,18 @@
 # Test strategy, reference capture, and parity contract
 
+## M3 branch-stack targets (2026-11-23 reconciliation)
+
+On the stack head (PR #141) the M3 make targets are `m3-source-progress`,
+`test-m3-andq`, `test-m3-historical-gc`, `test-m3-start-back` (direct-START
+XFAIL at TENEX?), `test-m3-saveit` and `test-m3-interactive` (scoped
+INITIALIZED/INTERACTIVE evidence; see
+[S7](evidence/M3/S7-INTERACTIVE.md)). The `make test-m3-start-random` target
+named in the RANDOM checkpoint below was replaced by `test-m3-start-back`
+and no longer exists. The reference workflow does not yet run
+`test-m3-saveit` or `test-m3-interactive`, and the smoke workflow's pytest
+list omits `tests/test_m3_source_progress.py` that `make test-python` runs
+(PLAN WP1 F1). There is no `make m3-check` yet (PLAN WP2).
+
 ## M3 BACK follow-up checkpoint (2026-11-22)
 
 `tests/back_test.rkt` covers manual and pinned reference array BACK
