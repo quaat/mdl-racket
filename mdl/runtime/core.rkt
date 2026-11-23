@@ -2687,12 +2687,16 @@
       (error 'mdl-make-terminal-channel
              "~a CHANNEL requires a Racket ~a port" mode
              (if (equal? mode "PRINT") "output" "input"))))
-  (define storage (mdl-vector 0 mode "" "" "" "" "" "" "TTY" ""
+  ;; #111: the host CHANNEL has one predecessor slot before its 19 visible
+  ;; elements; original CONTIN uses BACK to reach it. #117 keys the host-port
+  ;; registry by the shared backing storage, so the REST/BACK/TOP views of
+  ;; this channel all resolve to the same port.
+  (define storage (mdl-vector 0 0 mode "" "" "" "" "" "" "TTY" ""
                               0 0 80 0 24 0 0 10 0))
   (hash-set! (atom-space-channels (current-mdl-atom-space))
              (mdl-array-storage storage)
              (host-channel (string->symbol mode) port))
-  (mdl-typed-value (mdl-root-atom "CHANNEL") storage))
+  (mdl-typed-value (mdl-root-atom "CHANNEL") (mdl-rest storage 1)))
 
 ;; Execution contexts. A context is one globals table, one local frame
 ;; stack (whose last frame holds top-level LVALs) and one atom space. Every
@@ -2898,6 +2902,32 @@
                                (- (mdl-array-length base) offset)
                                (mdl-array-type-cell base))))
          (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))]))
+
+(define (mdl-back value [offset 1])
+  (unless (and (exact-integer? offset) (positive? offset) (<= offset fix-max))
+    (error 'mdl-back "BACK requires a positive FIX offset"))
+  (define base (mdl-base value))
+  (cond
+    [(mdl-string? base)
+     (define start (if (mdl-string-view? base) (mdl-string-view-start base) 0))
+     (when (> offset start)
+       (error 'mdl-back "BACK offset exceeds removed prefix"))
+     (mdl-string-view (mdl-string-view-storage base)
+                      (- start offset)
+                      (+ (mdl-string-length base) offset))]
+    [(mdl-array? base)
+     (when (> offset (mdl-array-start base))
+       (error 'mdl-back "BACK offset exceeds removed prefix"))
+     (define result
+       (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                       (- (mdl-array-start base) offset)
+                       (+ (mdl-array-length base) offset)
+                       (mdl-array-type-cell base)))
+     (if (and (mdl-typed-value? value)
+              (eq? (mdl-typed-value-type value) (mdl-root-atom "CHANNEL")))
+         (mdl-typed-value (mdl-root-atom "CHANNEL") result)
+         result)]
+    [else (error 'mdl-back "BACK requires an array")]))
 
 (define (mdl-check-index who value index)
   (unless (and (exact-integer? index) (<= 1 index) (<= index (mdl-length value)))
@@ -3640,6 +3670,7 @@
         "APPLY" mdl-apply-subr
         "LENGTH" mdl-length
         "REST" mdl-rest
+        "BACK" mdl-back
         "NTH" mdl-nth
         "PUT" mdl-put!
         "GET" mdl-get

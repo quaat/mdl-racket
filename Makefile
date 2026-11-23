@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-random m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -41,8 +41,8 @@ test-m3-andq: sources
 test-m3-historical-gc: sources
 	@raco test tests/historical_gc_handler_test.rkt
 
-test-m3-start-random: sources
-	@raco test tests/historical_start_random_test.rkt
+test-m3-start-back: sources
+	@raco test tests/historical_start_back_test.rkt
 
 # Complete local M2 technical check. Build the native reference once with
 # `make reference-build` before using this target. Milestone acceptance also

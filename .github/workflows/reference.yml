@@ -34,8 +34,8 @@ jobs:
         run: make m3-source-progress
       - name: Test historical GC handlers against pinned source
         run: make test-m3-historical-gc
-      - name: Verify original START frontier after RANDOM
-        run: make test-m3-start-random
+      - name: Verify original START frontier after BACK
+        run: make test-m3-start-back
       - name: Build and capture native reference
         run: |
           make reference-build

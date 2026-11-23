@@ -6,10 +6,20 @@
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
 | LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | FAIL on RNG follow-up branch: original START reaches unassigned BACK in CONTIN |
+| INITIALIZED | FAIL on BACK follow-up branch: direct START reaches unassigned TENEX? in CONTIN |
 | INTERACTIVE | NOT RUN: original startup/game loop unavailable |
 | SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
 | PLAYABLE | NOT RUN: original game has not booted in Racket |
+
+- **Issue #110 BACK follow-up on `feat/m3-back-continuation` (WIP):**
+  Manual and pinned Confusion probes establish BACK view behavior and the
+  terminal CHANNEL predecessor slot. The unchanged original START now
+  passes RANDOM and BACK, then fails at unassigned `TENEX?` in
+  `77rooms.mud:298`. Original source wrappers set this platform global
+  through GETSYS before START; direct START bypasses that setup. The
+  next slice must probe the source's startup prelude and report its next
+  real failure. No interactive or smoke-parity result is claimed. See
+  [BACK evidence](evidence/M3/BACK-CONTIN.md).
 
 - **Issue #108 RNG follow-up on `feat/m3-session-random` (WIP):** A
   session-owned two-word 36-bit generator passes deterministic reference

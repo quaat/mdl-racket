@@ -1071,6 +1071,22 @@ The separate GPLv3 source remains a local reference dependency; no source
 code is copied into the MIT-0 runtime. A reviewer should inspect this
 independent recurrence and the fixture provenance before integration.
 
+## ADR-0046: Preserve the terminal CHANNEL predecessor for BACK
+
+**Decision (2026-11-22, issue #110):** Represent the default terminal
+CHANNEL as a view beginning after one host-managed element in its backing
+VECTOR. BACK can expose that predecessor without inventing a game object
+or changing source. Pinned Confusion reports a 20-element CHANNEL after
+BACK of the 19-element INCHAN, with FIX 0 at its first position. Generic
+VECTOR, UVECTOR and STRING BACK shares storage and enforces the manual's
+positive, in-range offset rule. The terminal CHANNEL retains its TYPE
+in the reference, so the runtime preserves it for that host value.
+
+**Boundary:** This does not define a full CHANNEL control block or RESET
+behavior. The original CONTIN then fails at TENEX?, a global initialized
+by source wrappers before START. Probe that prelude before adding host
+platform state. No GPLv3 implementation was copied.
+
 ## ADR-0051: UNWIND cleanups run only for MDL transfers, never for raised errors
 
 **Status:** Accepted (maintainer decision 2026-11-23, issue #139, option a).

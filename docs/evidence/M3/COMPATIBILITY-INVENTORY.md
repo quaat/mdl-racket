@@ -16,7 +16,8 @@ the authority for the next implementation dependency.
 | `81tell-repl.mud:57`, `77rooms.mud:286` | START path | GETTIMEDATE and PRINTSTRING with terminal CHANNEL | Implemented and tested for the source-reached subset; clock is host time |
 | `77rooms.mud:286` | START path | CRLF newline and T return | Implemented and focused test passing |
 | `77rooms.mud:291` | START path | 36-bit session-owned RANDOM with deterministic seeding | Implemented on issue #108 follow-up branch; native negative-seed range deviation documented |
-| `77rooms.mud:297` | CONTIN path | BACK on terminal CHANNEL's backing storage | First actual failure after RANDOM; source-backed semantics and reference probes required |
+| `77rooms.mud:297` | CONTIN path | BACK on terminal CHANNEL's backing storage | Implemented on issue #110 follow-up branch with manual and native probes |
+| `77rooms.mud:298`, `77patch.mud:38` | CONTIN and original startup prelude | TENEX? is set via GETSYS before START | Direct START now fails at unassigned TENEX?; probe source prelude before assigning platform state |
 | `81tell-repl.mud:46` | Interactive path | READSTRING plus original LEX/parser | Not implemented or verified; source definition loaded only |
 
 Locked source revision: mdlzork/Confusion

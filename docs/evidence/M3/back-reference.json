@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "name": "M3 BACK reference",
+  "source_commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "interpreter_sha256": "b5fcb91bbe9326c60a3fdb936eb089a5482ba15d2726f3dff212548cda83b177",
+  "protocol": "one isolated local process per case; input then <QUIT>; errors retained",
+  "cases": [
+    {
+      "name": "vector-back",
+      "expression": "<SETG B-V [1 2 3]>\n<BACK <REST ,B-V 2> 1>",
+      "input": "<SETG B-V [1 2 3]>\n<BACK <REST ,B-V 2> 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n[1 2 3]\n[2 3]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "[1 2 3]\n[2 3]\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "uvector-back",
+      "expression": "<SETG B-U ![1 2 3!]>\n<BACK <REST ,B-U 2> 1>",
+      "input": "<SETG B-U ![1 2 3!]>\n<BACK <REST ,B-U 2> 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![1 2 3!]\n![2 3!]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "![1 2 3!]\n![2 3!]\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "string-back",
+      "expression": "<SETG B-S \"ABCDE\">\n<BACK <REST ,B-S 4> 2>",
+      "input": "<SETG B-S \"ABCDE\">\n<BACK <REST ,B-S 4> 2>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"ABCDE\"\n\"CDE\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"ABCDE\"\n\"CDE\"\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "zero-offset",
+      "expression": "<SETG B-V [1 2 3]>\n<BACK <REST ,B-V 1> 0>",
+      "input": "<SETG B-V [1 2 3]>\n<BACK <REST ,B-V 1> 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n[1 2 3]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Must BACK at least 1 element\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "[1 2 3]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "terminal-hidden",
+      "expression": "<TYPE <BACK ,INCHAN>>\n<LENGTH <BACK ,INCHAN>>\n<1 <BACK ,INCHAN>>",
+      "input": "<TYPE <BACK ,INCHAN>>\n<LENGTH <BACK ,INCHAN>>\n<1 <BACK ,INCHAN>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nCHANNEL\n20\n0\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "CHANNEL\n20\n0\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "beyond-start",
+      "expression": "<BACK [1 2]>",
+      "input": "<BACK [1 2]>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Offset to BACK too large\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "bad-offset",
+      "expression": "<BACK <REST [1 2]> 2>",
+      "input": "<BACK <REST [1 2]> 2>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Offset to BACK too large\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    },
+    {
+      "name": "bad-type",
+      "expression": "<BACK 1>",
+      "input": "<BACK 1>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Bad type for BACK\n",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 11:34:34\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "ok": false,
+      "error": "nonzero exit, stderr, or missing LISTENING marker"
+    }
+  ]
+}

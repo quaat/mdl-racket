@@ -9,7 +9,23 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-**Current M3 RNG follow-up (2026-11-22, `feat/m3-session-random`):**
+**Current M3 BACK follow-up (2026-11-22, `feat/m3-back-continuation`):**
+The unchanged source chain still loads 1,229 forms with zero skips.
+Manual and pinned Confusion cases support BACK on shared array views and
+the terminal CHANNEL predecessor slot. Direct original START now passes
+RANDOM and BACK, then stops at unassigned `TENEX?` in
+`77rooms.mud:298`. The source's startup wrappers set that platform global
+through GETSYS before START; the next slice must probe their execution.
+`TMPDIR=/tmp make test` exits 0 with 2,009 Racket checks and 23 Python
+tests; `TMPDIR=/tmp make m2-check` exits 0.
+`TMPDIR=/tmp make test-m3-start-back` exits 0 with six source-backed
+assertions for this known XFAIL. See [BACK evidence](docs/evidence/M3/BACK-CONTIN.md).
+GETSYS, the full startup prelude, RESET, READSTRING, interactive input and
+house smoke parity remain unsupported or unverified. **INITIALIZED,
+INTERACTIVE, SMOKE_PARITY and PLAYABLE have not passed; M3 is incomplete.**
+Next: execute the original startup prelude through its next real failure.
+
+**Previous M3 RNG follow-up (2026-11-22, `feat/m3-session-random`):**
 The unchanged source chain still loads all 1,229 forms with zero skips.
 Session-owned 36-bit RANDOM advances original START through its one-seed
 call; it now stops at unassigned `BACK` in `77rooms.mud:297`, after the
