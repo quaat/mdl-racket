@@ -24,7 +24,7 @@ M0, M1 and M2 gates: **PASS (mainline)**. M3 on `main`:
 
 The umbrella `feat/m3-logical-gc` (PR #107, `3b52abc`) is merged into every
 stack branch; the stack head is `feat/m3-interactive-io` (PR #141,
-`45c387f`). PR #131 (`feat/m3-boot-reference`, fresh-boot house reference
+`0e9dafe`; review snapshot was `45c387f`). PR #131 (`feat/m3-boot-reference`, fresh-boot house reference
 capture, candidate for approval) is separate and targets the umbrella.
 
 | M3 stage | State | Evidence |
@@ -39,9 +39,10 @@ capture, candidate for approval) is separate and targets the umbrella.
 
 `scripts/m3_source_progress.py` does not run SAVE-IT, so its report still
 records INITIALIZED/INTERACTIVE as false; the scoped gate evidence is
-`tests/historical_interactive_test.rkt`. CI (`.github/workflows/`) does not
-yet run `make test-m3-saveit` or `make test-m3-interactive` (PLAN WP1 F1);
-their results above come from local runs recorded in
+`tests/historical_interactive_test.rkt`. Since 8e3d103 the reference CI
+workflow runs `make test-m3-saveit` and `make test-m3-interactive` (PLAN WP1
+F1, [F1/F2 record](evidence/M3/F1-F2-STACK-FIXES.md)); before that the
+results came from local runs recorded in
 [S7 evidence](evidence/M3/S7-INTERACTIVE.md).
 
 ### Fixed on branch; not integrated into `main`

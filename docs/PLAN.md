@@ -184,12 +184,15 @@ approved house smoke transcript (WP2) plus documented deviations. A local
 session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
 
 - **WP1 — stack readiness.**
-  - F1: CI runs `make test-m3-saveit` and `make test-m3-interactive` (the
-    reference workflow currently runs neither), and both workflows use the
-    shared `make test-python` list (the smoke workflow omits
-    `tests/test_m3_source_progress.py`).
-  - F2: the host loop's exit flush (`mdl-run-host-loop`, a `dynamic-wind`
-    post-thunk) must not replace the primary error if flushing itself fails.
+  - F1 (done on #141, 8e3d103/0e9dafe): the reference workflow runs
+    `make test-m3-saveit` and `make test-m3-interactive` with step time
+    limits and retained logs; the smoke workflow runs the shared
+    `make test-python`. A deliberate golden mismatch failed CI run
+    45150256893 at the six-command step.
+  - F2 (done on #141, 8e3d103): the host loop's final flush never replaces
+    the failure leaving the loop; flush failures are reported as
+    `(flush-failed exn)` events
+    ([F1/F2 record](evidence/M3/F1-F2-STACK-FIXES.md)).
   - F3: documentation consolidation (this reconciliation: present-tense
     SEMANTICS/STATUS/PLAN/README/inventory match the code).
   - #55: agent-configuration revision.

@@ -8,10 +8,9 @@ XFAIL at TENEX?), `test-m3-saveit` and `test-m3-interactive` (scoped
 INITIALIZED/INTERACTIVE evidence; see
 [S7](evidence/M3/S7-INTERACTIVE.md)). The `make test-m3-start-random` target
 named in the RANDOM checkpoint below was replaced by `test-m3-start-back`
-and no longer exists. The reference workflow does not yet run
-`test-m3-saveit` or `test-m3-interactive`, and the smoke workflow's pytest
-list omits `tests/test_m3_source_progress.py` that `make test-python` runs
-(PLAN WP1 F1). There is no `make m3-check` yet (PLAN WP2).
+and no longer exists. Since #141's review fixes (8e3d103) the reference
+workflow runs `test-m3-saveit` and `test-m3-interactive`, and the smoke
+workflow runs the shared `make test-python` (PLAN WP1 F1). There is no `make m3-check` yet (PLAN WP2).
 
 ## M3 BACK follow-up checkpoint (2026-11-22)
 
