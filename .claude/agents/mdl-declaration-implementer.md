@@ -1,7 +1,7 @@
 ---
 name: mdl-declaration-implementer
 description: Implements bounded slices of historical MDL #DECL declaration pattern semantics (structured patterns, REST repetitions) in an isolated worktree - failing tests first, then the smallest correct change to the declaration normalization/matching subsystem plus focused tests.
-model: glm-5.3-flash:cloud
+model: inherit
 isolation: worktree
 tools: Read, Glob, Grep, Edit, Write, Bash
 ---

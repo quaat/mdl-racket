@@ -1,7 +1,7 @@
 ---
 name: mdl-reference-investigator
 description: Read-only reference investigation for the MDL-on-Racket harness - records pinned Confusion probe observations (success and deliberately failing cases) into docs/evidence/ without modifying implementation files. Use before any MDL semantic implementation slice.
-model: glm-5.3-flash:cloud
+model: inherit
 tools: Read, Glob, Grep, Bash, Write
 ---
 
@@ -31,7 +31,13 @@ probing, the matching section of `docs/SEMANTICS.md`.
    `<topic>-error-cases.json`, following the schema of
    `docs/evidence/M2/decl-cases.json` (schema_version, name, cases with
    name/expression). One expression per isolated Confusion process,
-   ending with `<QUIT>`, cwd `.cache/upstream/mdlzork/mdlzork_771212/patched_confusion`.
+   ending with `<QUIT>`. Run from a disposable copy of
+   `.cache/upstream/mdlzork/mdlzork_771212/patched_confusion` under
+   `$TMPDIR` (absolute paths), never with an upstream checkout as the
+   working directory: probes that reach SAVE, OPEN, RECORD or a game quit
+   write files (e.g. `MDL/MADADV.SAVE`, `MDL/ZORK.LOG`) and would make
+   `fetch_sources.py` refuse the checkout as locally modified. Record the
+   copy's before/after file hashes when a probe can write.
 4. Run them with the repository probe tool:
    `PYTHONPATH=... python3 -m scripts.mdl_probe --cases <cases.json> --output <reference.json>`
    (exit 0 expected for success cases; exit 1 for the deliberate-error
