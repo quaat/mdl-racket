@@ -1637,3 +1637,39 @@ print `I can't open the script channel.` where Confusion creates
 call; the S11 tests run under a security guard that records every write or
 delete attempt and assert there are none. No server or web client can reach
 OPEN or the host loop.
+
+## ADR-0056: One SEGMENT representation, a LIST-primtype typed value
+
+Status: accepted (M4 S2, 2026-11-23).
+
+Context: frontier F1 (`drop`) needs `<CHTYPE <FORM ...> SEGMENT>`. The
+runtime's reader built SEGMENTs as a separate host struct with no MDL TYPE,
+so CHTYPE could not produce one and TYPE/NTH of a reader segment failed.
+The pinned reference shows a single TYPE SEGMENT, PRIMTYPE LIST, for reader
+and CHTYPE'd segments, with CHTYPE sharing the LIST cells
+(`docs/evidence/M4/SEGMENT-CHTYPE-REFERENCE.md`).
+
+Decision: SEGMENT is a built-in TYPE (PRIMTYPE LIST) represented like FORM:
+a TYPE tag over the element cells. The reader constructor
+(`mdl-make-segment`) and CHTYPE both produce it; `mdl-segment?` and
+`mdl-segment-payload` (a FORM view over the same cells) are the only
+accessors the evaluator uses, so the M2 D2 splice rules apply unchanged to
+every SEGMENT. `mdl-segment?` tests the type atom's identity against the
+ROOT SEGMENT atoms of all atom spaces (a weak registry filled by
+`make-mdl-atom-space`), so the answer does not depend on which space is
+current. CHTYPE gains SEGMENT as a LIST-primtype target that shares cells;
+CHTYPE to FORM stays unsupported (not needed by the game).
+
+Consequences: no game-specific path; source line/column of reader segments
+is dropped (unused). Printing SEGMENTs stays strict. Alternatives rejected:
+a second CHTYPE-only segment struct (two representations of one MDL TYPE,
+diverging TYPE/NTH/`==?` behaviour); copying the cells on CHTYPE (the
+reference shares, and INSERT-OBJECT relies on the shared tail).
+
+**Amendment (independent review, 2026-11-23):** SEGMENT identity is tested
+against the current atom space's ROOT SEGMENT atom, exactly as FORM is
+(`mdl-form?`): a SEGMENT value from another session is not spliced here, and
+a user TYPE atom merely named SEGMENT (or LIST/FALSE) never takes a built-in
+CHTYPE branch — CHTYPE dispatches on the target being a ROOT built-in TYPE,
+not on its PNAME. Hosts that inspect session values check TYPE inside the
+session (e.g. `mdl-session-call session "TYPE" v`).

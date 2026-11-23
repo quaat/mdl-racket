@@ -34,8 +34,7 @@
          atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
-         mdl-segment mdl-segment? mdl-segment-payload mdl-segment-line
-         mdl-segment-column mdl-make-segment mdl-splice-result
+         mdl-segment? mdl-segment-payload mdl-make-segment mdl-splice-result
          mdl-splice-result-value mdl-splice-list mdl-splice-vector
          mdl-splice-uvector
          mdl-word mdl-word? mdl-word-bits mdl-chtype mdl-character
@@ -924,11 +923,30 @@
 ;; a compiled splice evaluates to a splice marker carrying its already
 ;; evaluated payload value. Segment objects that are merely the VALUE of a
 ;; plain element are stored, not re-spliced.
-(struct mdl-segment (payload line column) #:transparent)
+;;
+;; SEGMENT is one built-in TYPE with PRIMTYPE LIST (ADR-0056; SEMANTICS
+;; "M4 S2"): the reader's `!<...>`/`!.X`/`!,X` and `<CHTYPE x SEGMENT>` are
+;; the same object, a TYPE tag over the LIST cells of its elements, exactly
+;; like a FORM. Its payload is a FORM view over the same cells.
 (struct mdl-splice-result (value line column) #:transparent)
 
+;; Identity test against the CURRENT atom space's ROOT SEGMENT, exactly as
+;; mdl-form? tests ROOT FORM (S2 independent review): a value from another
+;; session is never treated as a splice here, and a user TYPE atom that is
+;; merely named SEGMENT is never one.
+(define (mdl-segment? value)
+  (and (mdl-typed-value? value)
+       (eq? (mdl-typed-value-type value) (mdl-root-atom "SEGMENT"))))
+
+(define (mdl-segment-payload segment)
+  (mdl-make-form (mdl-typed-value-value segment)))
+
+;; The reader's constructor: PAYLOAD is the FORM read after `!`; the source
+;; position is not kept (it is never shown in a message).
 (define (mdl-make-segment payload line column)
-  (mdl-segment payload line column))
+  (unless (mdl-form? payload)
+    (error 'mdl-make-segment "SEGMENT payload must be a FORM"))
+  (mdl-typed-value (mdl-root-atom "SEGMENT") (mdl-typed-value-value payload)))
 
 (define (mdl-segment-standalone-error)
   (error 'mdl-segment
@@ -1830,6 +1848,7 @@
                name)))
   (for ([entry (in-list '(("ATOM" . "ATOM") ("OBLIST" . "UVECTOR")
                           ("LIST" . "LIST") ("FORM" . "LIST")
+                          ("SEGMENT" . "LIST")
                           ("FALSE" . "LIST") ("DECL" . "LIST")
                           ("VECTOR" . "VECTOR")
                           ("CHANNEL" . "VECTOR")
@@ -3646,10 +3665,16 @@
   (define converted
     (if (eq? (mdl-type value) type)
       value
-      (let ([base (mdl-base value)] [target (mdl-atom-pname type)])
-        (when (and (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)
+      ;; TARGET is the PNAME of a ROOT built-in TYPE, or #f for any other TYPE
+      ;; atom (S2 review: a user TYPE merely named SEGMENT/LIST/FALSE must not
+      ;; take a built-in conversion branch).
+      (let* ([base (mdl-base value)]
+             [builtin? (hash-has-key? (atom-space-builtins (current-mdl-atom-space)) type)]
+             [target (and builtin? (mdl-atom-pname type))])
+        (when (and builtin?
                    (not (member target '("ATOM" "LIST" "FALSE" "VECTOR" "UVECTOR" "STRING"
-                                         "FIX" "WORD" "LOSE" "CHANNEL"))))
+                                         "FIX" "WORD" "LOSE" "CHANNEL"
+                                         "SEGMENT"))))
           (error 'mdl-chtype "unsupported built-in TYPE conversion"))
         (when (and (not (or (null? base) (mpair? base) (mdl-atom? base)
                             (mdl-string? base)
@@ -3661,20 +3686,23 @@
                  (if (flonum? base)
                      (float-word-bits 'mdl-chtype base)
                      (word-bits-of base)))
-               (cond [(string=? target "FIX")
+               (cond [(equal? target "FIX")
                       (word-signed bits)]
-                     [(string=? target "WORD")
+                     [(equal? target "WORD")
                       (mdl-word bits)]
                      [(or (exact-integer? base) (mdl-word? base) (flonum? base))
                       (mdl-typed-value type (mdl-word bits))]
                      [else (error 'mdl-chtype "unsupported WORD reinterpretation")])]
-              [(string=? target "LIST")
+              [(equal? target "LIST")
                (mdl-list-head base 'mdl-chtype)]
-              [(string=? target "FALSE")
+              [(equal? target "FALSE")
                (mdl-false (mdl-list-head base 'mdl-chtype))]
-              [(string=? target "ATOM") base]
-              [(string=? target "STRING") base]
-              [(or (string=? target "VECTOR") (string=? target "UVECTOR"))
+              ;; A SEGMENT tags the same LIST cells, like a FORM (ADR-0056).
+              [(equal? target "SEGMENT")
+               (mdl-typed-value type (mdl-list-head base 'mdl-chtype))]
+              [(equal? target "ATOM") base]
+              [(equal? target "STRING") base]
+              [(or (equal? target "VECTOR") (equal? target "UVECTOR"))
                base]
               [(member (mdl-atom-pname desired-prim) '("ATOM" "LIST" "VECTOR" "UVECTOR" "STRING"))
                (mdl-typed-value type base)]

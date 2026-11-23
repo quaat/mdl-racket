@@ -5,20 +5,28 @@
 ;; printed before the failure and the exact error. When a slice implements the
 ;; construct, the case must be replaced by a reference-compared scenario.
 ;;
-;;   F1  drop leaflet -> DROPPER (77rooms.mud:1239) -> DEFMAC INSERT-OBJECT
-;;       (77defs.mud:332-336) expands <CHTYPE <FORM ROBJS .ROOM> SEGMENT>:
-;;       TYPE SEGMENT is unknown to the runtime. Native prints "Dropped.".
+;;   F1  RESOLVED by M4 S2 (docs/evidence/M4/S2-CHTYPE-SEGMENT.md): drop
+;;       leaflet -> DROPPER (77rooms.mud:1239) -> DEFMAC INSERT-OBJECT
+;;       (77defs.mud:332-336) -> <CHTYPE <FORM ROBJS .ROOM> SEGMENT>. The
+;;       case below is now a positive regression: the output equals the
+;;       pinned reference prefix P03 of tests/scenarios/mailbox-drop.json
+;;       (D1 only) and the run ends by input exhaustion. Full parity with
+;;       checkpoints is tests/historical_mailbox_drop_test.rkt.
 ;;   F2  kill troll (from the cellar) -> ORTELL (77np.mud:226) -> PRSTR ->
 ;;       FOOSTR (77np.mud:241) <CHTYPE <+ 32 <ASCII ...>> CHARACTER>:
 ;;       FIX -> CHARACTER is an unsupported built-in conversion. Native
 ;;       prints "with what?".
+;;   F2b the same construct is the next failure next to the drop path: throw
+;;       leaflet (DROPPER's sibling verb THROW, no indirect object) -> ORTELL
+;;       -> PRSTR -> FOOSTR. Native prints "at what?" (ad-hoc native run,
+;;       S2-CHTYPE-SEGMENT.md).
 ;;
 ;; (The game sources have CRLF line ends; a multi-line string literal keeps its
 ;; CR, exactly as Confusion prints it.)
 ;; Fixed session clock 250776000 / UTC; guarded like the S1 test (no writes);
 ;; watchdogged. Run with: racket tests/historical_m4_frontier_test.rkt
 (require rackunit racket/runtime-path racket/port racket/string racket/list
-         racket/file "../mdl/loader.rkt")
+         racket/file json "../mdl/loader.rkt")
 
 (current-check-handler (lambda (e) (raise e)))
 
@@ -73,13 +81,38 @@
   (check-equal? unread "" label)
   (printf "~a: strict failure as recorded: ~a\n" label expected-message))
 
-(check-frontier "F1 drop"
-                '("open mailbox" "take leaflet" "drop leaflet")
-                ">Opening the mailbox reveals a leaflet.\n>Taken.\n>"
-                "mdl-typeprim: unknown MDL TYPE SEGMENT")
+;; F1 (resolved): positive regression against the pinned reference prefix.
+(define-runtime-path drop-reference-file "../docs/evidence/M4/mailbox-drop-reference.json")
+(let* ([reference (call-with-input-file drop-reference-file read-json)]
+       [p03 (findf (lambda (c) (equal? (hash-ref c 'name) "P03-mailbox-drop-prefix"))
+                   (hash-ref reference 'cases))]
+       [lines '("open mailbox" "take leaflet" "drop leaflet")]
+       [ref-raw (hash-ref p03 'stdout_raw)]
+       [banner "LISTENING-AT-LEVEL 1 PROCESS 1\n"]
+       [expected (string-replace (cadr (regexp-match (regexp (string-append "^.*?" (regexp-quote banner)
+                                                                            "(.*)$"))
+                                                     ref-raw))
+                                 "\"DONE\"\n" "" #:all? #f)])
+  (check-equal? (hash-ref reference 'interpreter_sha256_before)
+                "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789")
+  (check-equal? (hash-ref p03 'input)
+                (string-append "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n"
+                               (apply string-append (map (lambda (l) (string-append l "\n")) lines))))
+  (define-values (result raw unread) (run-game lines))
+  (check-pred exn:fail:mdl-input-exhausted? result
+              (if (exn? result) (exn-message result) (format "~a" result)))
+  (check-true (string-contains? raw ">Dropped.\n>"))
+  (check-equal? raw expected)
+  (check-equal? unread "")
+  (printf "F1 drop: resolved; output equals reference P03 (D1 only)\n"))
 
 (check-frontier "F2 orphan prompt"
                 '("north" "east" "open window" "west" "west" "take lamp" "move rug"
                   "open trap door" "turn on lamp" "down" "east" "kill troll")
                 "A nasty-looking troll, brandishing a bloody axe, blocks all passages\r\nout of the room.\n>"
+                "mdl-chtype: unsupported built-in TYPE conversion")
+
+(check-frontier "F2b throw (next to the drop path)"
+                '("open mailbox" "take leaflet" "throw leaflet")
+                ">Opening the mailbox reveals a leaflet.\n>Taken.\n>"
                 "mdl-chtype: unsupported built-in TYPE conversion")

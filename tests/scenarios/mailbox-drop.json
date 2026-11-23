@@ -1,0 +1,21 @@
+{
+  "name": "mailbox-drop",
+  "description": "M4 S2 scenario, 'drop the leaflet' (frontier F1, docs/evidence/M4/S1-HOUSE-CELLAR-FRONTIER.md). Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, microseconds 0, as house-boot). At West of House: open the mailbox, take the leaflet (ADVER, out of the MAILB container), drop it (DROPPER 77rooms.mud:1239 -> INSERT-OBJECT macro 77defs.mud:332-336 -> <CHTYPE <FORM ROBJS .ROOM> SEGMENT> spliced as the final element of the expansion's LIST), inventory, look (the room list now begins with the dropped leaflet), take it again from the room (TAKE removes it from the ROBJS chain that INSERT-OBJECT built), drop it a second time (a second INSERT-OBJECT on that chain), look. Each command was confirmed accepted by the pinned native reference; see docs/evidence/M4/MAILBOX-DROP-REFERENCE.md. Input ends after the last look (D3 end-of-input applies). TAKE-OBJECT (77defs.mud:338-342) is not reachable from a short scenario (only the boat repair and CONS-OBJ use it); it is covered by the native probe case game-insert-take-object and tests/chtype_segment_test.rkt.",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": ["<FLOAD \"77loadall.mud\">", "<SAVE-IT>"],
+  "commands": [
+    "open mailbox",
+    "take leaflet",
+    "drop leaflet",
+    "inventory",
+    "look",
+    "take leaflet",
+    "drop leaflet",
+    "look"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/mailbox-drop-reference.json",
+    "case": "T1-mailbox-drop-pipe"
+  }
+}
