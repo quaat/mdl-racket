@@ -2266,6 +2266,9 @@ forged, foreign or shifted (BACK/REST) view is refused.
   4. `!` immediately followed by end of input is stored as a literal `!` and
      counted; the read returns there and sets the end-of-input flag, so the
      next READSTRING raises the D3 exhausted error (`ab!` → 3 `"ab!"`).
+     Unprobed (S13 review): whether that trailing `!` would instead stop the
+     read when the stop STRING itself contains `!`; the game's READER-STRING
+     (ESC CR LF) never does, so the runtime stores it as above.
   5. A unit begins only when the buffer has room; when the buffer is full the
      rest stays unread, and escape pairing resumes on the next READSTRING
      (3 slots, `ab!cd<LF>` → 3 `"abc"`, then 1 `"d"`; 2 slots → `"ab"`, then
