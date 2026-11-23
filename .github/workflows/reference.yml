@@ -47,6 +47,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m3-saveit 2>&1 | tee artifacts/ci-logs/test-m3-saveit.log
+      - name: Prove the fixed-clock DSKDATE seed and RANDOM chain
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-clock-seed 2>&1 | tee artifacts/ci-logs/test-m3-clock-seed.log
       - name: Execute the six house-boot commands through the host loop
         timeout-minutes: 8
         shell: bash
