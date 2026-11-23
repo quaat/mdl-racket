@@ -23,6 +23,7 @@
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-make-terminal-channel mdl-substruc
          exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
+         mdl-run-host-loop
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          atom-space-inchan atom-space-outchan
@@ -3620,6 +3621,41 @@
   (define port (print-arguments 'PRIN1 args))
   (write-string (prin1-text (car args)) port)
   (car args))
+
+;; ADR-0049 part 3 / ADR-0050 host top-level loop, in the current context.
+;; It replaces Confusion's LISTEN for a game session and is never an MDL
+;; evaluator: it applies ENTRY-THUNK (the caller's fixed entry FUNCTION),
+;; prints the value with PRIN1 and TERPRI to the LVAL of OUTCHAN (maintainer
+;; decision D1: the REP print of SAVE-IT's ,NULL), then on every pass
+;; re-reads the GVAL of ROOT REP and applies it with no arguments. It ends
+;; only by an exception (input exhausted, a strict error, the pass bound);
+;; QUIT is not modelled yet. Terminal output is flushed on every exit.
+;; ON-EVENT receives host-only observations: (entry-returned value), (pass n).
+(define (mdl-run-host-loop entry-thunk #:max-passes [max-passes #f]
+                           #:on-event [on-event void])
+  (unless (or (not max-passes) (exact-positive-integer? max-passes))
+    (raise-argument-error 'mdl-run-host-loop "(or/c #f exact-positive-integer?)" max-passes))
+  (dynamic-wind
+   void
+   (lambda ()
+     (define value (entry-thunk))
+     (on-event (list 'entry-returned value))
+     (define channel (default-output-channel 'host-loop))
+     (mdl-prin1 value channel)
+     (mdl-terpri channel)
+     (define rep-atom (mdl-root-atom "REP"))
+     (let loop ([pass 1])
+       (when (and max-passes (> pass max-passes))
+         (error 'host-loop "the host loop exceeded its bound of ~a passes (ADR-0049)" max-passes))
+       (define rep (global-option rep-atom))
+       (when (eq? rep unassigned)
+         (error 'host-loop "the GVAL of REP is unassigned (ADR-0049)"))
+       (unless (or (procedure? rep) (mdl-function? rep))
+         (error 'host-loop "the GVAL of REP is not an applicable FUNCTION or SUBR (ADR-0049)"))
+       (on-event (list 'pass pass))
+       (mdl-apply-evaluated rep '())
+       (loop (add1 pass))))
+   flush-terminal-output!))
 
 ;; ADR-0050 / maintainer decision D3 ("Mirror, then strict"): reading a
 ;; terminal CHANNEL whose input already ended. A host-level Racket exception,

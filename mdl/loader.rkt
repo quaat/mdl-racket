@@ -5,9 +5,14 @@
 (provide make-mdl-session mdl-session? mdl-session-load!
          mdl-session-atom mdl-session-global mdl-session-call
          mdl-session-save-records exn:fail:mdl-load?
-         exn:fail:mdl-load-diagnostic)
+         exn:fail:mdl-load-diagnostic
+         mdl-session-run-interactive
+         exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?)
 
-(struct mdl-session (root globals locals atoms namespace events read-values) #:transparent)
+;; input-port/output-port: the explicit host ports given to make-mdl-session
+;; (#f when omitted); the host top-level loop requires both (ADR-0050).
+(struct mdl-session (root globals locals atoms namespace events read-values
+                          input-port output-port) #:transparent)
 (struct exn:fail:mdl-load exn:fail (diagnostic) #:transparent)
 (define current-load-chain (make-parameter '())) ; canonical paths, entry first
 (define-namespace-anchor anchor)
@@ -61,7 +66,7 @@
 
 ;; output-port / input-port: host ports owned by this session's terminal
 ;; CHANNELs. #f (default) follows the current Racket port at each operation.
-;; input-port is stored for later READ-channel primitives; none read yet.
+;; READSTRING reads input-port (ADR-0050).
 (define (make-mdl-session source-root #:output-port [output-port #f]
                           #:input-port [input-port #f])
   (define root (canonical-path (path->complete-path source-root)))
@@ -78,7 +83,7 @@
   (define session
     (mdl-session root (mdl-context-globals context) (mdl-context-locals context)
                  (mdl-context-atom-space context) loader-namespace (box '())
-                 (make-hash)))
+                 (make-hash) input-port output-port))
   (call-in-session session
     (lambda ()
       ;; Interpreter-supplied globals (MUDDLE, issue #51) intern in THIS
@@ -285,12 +290,35 @@
 (define (mdl-session-save-records session)
   (call-in-session session mdl-save-records))
 
+(define (apply-global name args)
+  (define fn (mdl-gval name))
+  (cond
+    [(mdl-macro? fn) (mdl-eval (mdl-apply-interpreted fn args))]
+    [(mdl-function? fn) (mdl-apply-interpreted fn args #t)]
+    [else (apply mdl-apply name args)]))
+
 (define (mdl-session-call session name . args)
+  (call-in-session session (lambda () (apply-global name args))))
+
+;; ADR-0049 part 3 / ADR-0050: run a loaded game session interactively. Local
+;; host API only: no network or web entry point, and no MDL evaluator; input
+;; reaches MDL only through the program's own READSTRING. ENTRY names the
+;; GVAL applied with no arguments (for run.mud: "SAVE-IT", after the caller
+;; has loaded 77loadall.mud). The session must have been made with explicit
+;; #:input-port and #:output-port, so the loop never reads the process's own
+;; standard input. It ends only by an exception; exhausted input is
+;; exn:fail:mdl-input-exhausted, which a host reports as a failure.
+(define (mdl-session-run-interactive session entry #:max-passes [max-passes #f]
+                                     #:on-event [on-event void])
+  (unless (mdl-session? session)
+    (raise-argument-error 'mdl-session-run-interactive "mdl-session?" session))
+  (unless (string? entry)
+    (raise-argument-error 'mdl-session-run-interactive "string?" entry))
+  (unless (and (mdl-session-input-port session) (mdl-session-output-port session))
+    (error 'mdl-session-run-interactive
+           "requires a session made with explicit #:input-port and #:output-port (ADR-0050)"))
   (call-in-session
    session
    (lambda ()
-     (define fn (mdl-gval name))
-     (cond
-       [(mdl-macro? fn) (mdl-eval (mdl-apply-interpreted fn args))]
-       [(mdl-function? fn) (mdl-apply-interpreted fn args #t)]
-       [else (apply mdl-apply name args)]))))
+     (mdl-run-host-loop (lambda () (apply-global entry '()))
+                        #:max-passes max-passes #:on-event on-event))))

@@ -53,4 +53,5 @@ raco test mdl/runtime/core.rkt \
   tests/reset_test.rkt \
   tests/princ_test.rkt \
   tests/readstring_test.rkt \
-  tests/prin1_test.rkt
+  tests/prin1_test.rkt \
+  tests/host_loop_test.rkt
