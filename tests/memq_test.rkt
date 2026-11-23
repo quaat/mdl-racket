@@ -32,7 +32,9 @@
 (check-exn #rx"TOO-FEW-ARGUMENTS-SUPPLIED" (lambda () (run "<MEMQ 1>")))
 (check-exn #rx"TOO-MANY-ARGUMENTS-SUPPLIED" (lambda () (run "<MEMQ 1 '(1) 2>")))
 (check-exn #rx"structured" (lambda () (run "<MEMQ 1 2>")))
-(check-exn #rx"unsupported STRING MEMQ"
-           (lambda () (run "<MEMQ <NTH \"ABC\" 2> \"ABC\">")))
+;; STRING MEMQ: CHARACTER needle returns a STRING view sharing storage.
+;; NTH on a STRING returns a CHARACTER value.
+(check-equal? (mdl-atom-pname (run "<TYPE <MEMQ <NTH \"ABC\" 2> \"ABC\">>")) "STRING")
+(check-equal? (run "<LENGTH <MEMQ <NTH \"ABC\" 2> \"ABC\">>") 2)
 
 (displayln "MEMQ primitive tests passed")

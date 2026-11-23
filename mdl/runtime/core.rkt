@@ -3121,15 +3121,28 @@
 
 (define (mdl-memq item structure)
   (define base (mdl-base structure))
-  (when (mdl-string? base)
-    (error 'mdl-memq "unsupported STRING MEMQ"))
-  (unless (or (null? base) (mpair? base) (mdl-array? base)
-              (mdl-false? base) (mdl-tuple-value? base))
-    (error 'mdl-memq "Second arg to MEMQ must be structured"))
-  (or (for/or ([offset (in-range (mdl-length structure))])
-        (and (mdl-identical? item (mdl-nth structure (add1 offset)))
-             (mdl-rest structure offset)))
-      (mdl-false '())))
+  (cond
+    [(mdl-string? base)
+     ;; STRING MEMQ (MDL manual ch. 13): search each CHARACTER element for ==? identity.
+     ;; A non-CHARACTER needle can never ==? a CHARACTER element in a STRING, so it
+     ;; silently returns #FALSE () — Confusion confirms this for FIX and STRING needles.
+     ;; On hit, return the string REST'd to that position (a view sharing storage with
+     ;; the original — the view's start offset enables BACK to work correctly).
+     (let ([char-code (mdl-character-code item)])
+       (if (not char-code)
+           (mdl-false '())
+           (or (for/or ([i (in-range (mdl-string-length base))])
+                 (and (= (char->integer (mdl-string-ref base i)) char-code)
+                      (mdl-string-rest base i)))
+               (mdl-false '()))))]
+    [(or (null? base) (mpair? base) (mdl-array? base)
+         (mdl-false? base) (mdl-tuple-value? base))
+     (or (for/or ([offset (in-range (mdl-length structure))])
+           (and (mdl-identical? item (mdl-nth structure (add1 offset)))
+                (mdl-rest structure offset)))
+         (mdl-false '()))]
+    [else
+     (error 'mdl-memq "Second arg to MEMQ must be structured")]))
 
 (define (mdl-equal? left right)
   (define active (make-hasheq))

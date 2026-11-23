@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "name": "m3-memq-string-reference",
+  "cases": [
+    {"name": "hit-start", "expression": "<MEMQ !\\a \"abc\">"},
+    {"name": "hit-middle", "expression": "<MEMQ !\\b \"abc\">"},
+    {"name": "hit-end", "expression": "<MEMQ !\\c \"abc\">"},
+    {"name": "miss", "expression": "<MEMQ !\\z \"abc\">"},
+    {"name": "empty-string", "expression": "<MEMQ !\\a \"\">"},
+    {"name": "result-type", "expression": "<TYPE <MEMQ !\\b \"abc\">>"},
+    {"name": "result-length", "expression": "<LENGTH <MEMQ !\\b \"abc\">>"},
+    {"name": "result-1st", "expression": "<1 <MEMQ !\\b \"abc\">>"},
+    {"name": "alias-put", "expression": "<SET S <ISTRING 3 !\\a>> <PUT <MEMQ !\\a .S> 1 !\\z> .S"},
+    {"name": "rest-view-haystack", "expression": "<MEMQ !\\b <REST \"xbc\" 1>>"},
+    {"name": "fix-needle-error", "expression": "<MEMQ 97 \"abc\">"},
+    {"name": "string-needle-error", "expression": "<MEMQ \"a\" \"abc\">"}
+  ]
+}
