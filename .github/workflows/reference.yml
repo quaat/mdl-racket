@@ -36,6 +36,24 @@ jobs:
         run: make test-m3-historical-gc
       - name: Verify original START frontier after BACK
         run: make test-m3-start-back
+      # The faithful run.mud startup (FLOAD + SAVE-IT) and the six house-boot
+      # commands through the host loop (S7). The test itself bounds the game
+      # with a 300 s watchdog (a hang is a failure); the step limit is a
+      # second, coarser bound. Logs are kept as artifacts on failure.
+      - name: Execute faithful SAVE-IT startup
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-saveit 2>&1 | tee artifacts/ci-logs/test-m3-saveit.log
+      - name: Execute the six house-boot commands through the host loop
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m3-interactive 2>&1 | tee artifacts/ci-logs/test-m3-interactive.log
       - name: Build and capture native reference
         run: |
           make reference-build
@@ -50,3 +68,4 @@ jobs:
             artifacts/reference/house.json
             artifacts/reference/primitives.json
             docs/evidence/M0/reader-sweep.json
+            artifacts/ci-logs/

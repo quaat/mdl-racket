@@ -137,4 +137,115 @@ MDL
   (check-equal? (file->string path) "5\n12")   ; before close-output-port
   (close-output-port file-out))
 
+;; --- the final flush never masks the failure that ends the loop (review F2) ----
+;; A session whose output port's flush fails from the FAIL-FROM-th flush on
+;; (writes always succeed). Returns the session, the output collector and a
+;; box counting zero-length write requests: Racket sends a flush to a custom
+;; port as one, and so is an empty write (PRIN1 of ,NULL writes ""), so the
+;; counts below include the entry value's empty PRIN1.
+(define (session-with-flaky-flush input fail-from)
+  (define collected (open-output-string))
+  (define flushes (box 0))
+  (define out
+    (make-output-port
+     'flaky-flush always-evt
+     (lambda (bs start end non-block? breakable?)
+       (cond [(= start end)               ; a flush request
+              (set-box! flushes (add1 (unbox flushes)))
+              (when (>= (unbox flushes) fail-from)
+                (raise (exn:fail "flaky-flush: simulated flush failure"
+                                 (current-continuation-marks))))
+              0]
+             [else (write-bytes bs collected start end) (- end start)]))
+     void))
+  (define s (make-mdl-session root #:input-port (open-input-string input)
+                              #:output-port out))
+  (check-equal? (hash-ref (mdl-session-load! s "prog.mud") 'status) "PASS")
+  (values s out collected flushes))
+(define (events-of kind events) (filter (lambda (e) (eq? (car e) kind)) events))
+
+;; The reproduced defect: the host side closes the output port and raises a
+;; preconstructed exception; the final flush then fails. The caller must get
+;; the very same exception object, with the flush failure reported separately.
+(let-values ([(s in out) (session-with "north\n")])
+  (define original (exn:fail "ORIGINAL-STRICT-FAILURE" (current-continuation-marks)))
+  (define events '())
+  (define caught
+    (with-handlers ([(lambda (e) #t) values])
+      (mdl-session-run-interactive
+       s "ENTRY"
+       #:on-event (lambda (e)
+                    (set! events (cons e events))
+                    (when (eq? (car e) 'entry-returned)
+                      (close-output-port out)
+                      (raise original))))
+      'returned))
+  (check-eq? caught original)
+  (define flush-failures (events-of 'flush-failed (reverse events)))
+  (check-equal? (length flush-failures) 1)
+  (for ([f (in-list flush-failures)])
+    (check-regexp-match #rx"output port is closed" (exn-message (cadr f)))))
+;; A raised non-exception value is preserved too.
+(let-values ([(s in out) (session-with "")])
+  (define caught
+    (with-handlers ([(lambda (e) #t) values])
+      (mdl-session-run-interactive
+       s "ENTRY"
+       #:on-event (lambda (e) (when (eq? (car e) 'entry-returned)
+                                (close-output-port out)
+                                (raise 'host-signal))))
+      'returned))
+  (check-eq? caught 'host-signal))
+;; Input exhaustion (D3) stays the outcome when only the final flush fails:
+;; requests are the empty PRIN1, READSTRING's two flushes (prompt, then the
+;; prompt after "Beg pardon?"), then the loop's own fourth.
+(let-values ([(s out collected flushes) (session-with-flaky-flush "" 4)])
+  (define events '())
+  (define caught
+    (with-handlers ([(lambda (e) #t) values])
+      (mdl-session-run-interactive s "ENTRY"
+                                   #:on-event (lambda (e) (set! events (cons e events))))
+      'returned))
+  (check-pred exn:fail:mdl-input-exhausted? caught)
+  (check-equal? (unbox flushes) 4)
+  (check-equal? (get-output-string collected) "\n>Beg pardon?\n>")
+  (define flush-failures (events-of 'flush-failed (reverse events)))
+  (check-equal? (length flush-failures) 1)
+  (for ([f (in-list flush-failures)])
+    (check-regexp-match #rx"simulated flush failure" (exn-message (cadr f)))))
+;; A strict runtime error inside a pass keeps its message too (request 1 is
+;; the empty PRIN1, request 2 the loop's final flush).
+(let-values ([(s out collected flushes) (session-with-flaky-flush "<+ 1 2>\n" 2)])
+  (define events '())
+  (define caught
+    (with-handlers ([(lambda (e) #t) values])
+      (mdl-session-run-interactive s "KEEPREP"
+                                   #:on-event (lambda (e) (set! events (cons e events))))
+      'returned))
+  (check-regexp-match #rx"REP: the default REP SUBR is inert" (exn-message caught))
+  (check-equal? (unbox flushes) 2)
+  (check-equal? (length (events-of 'flush-failed (reverse events))) 1))
+;; With no failure leaving the loop (a host escape out of ON-EVENT), a failed
+;; final flush is itself the reported failure: never swallowed.
+(let-values ([(s in out) (session-with "")])
+  (define caught
+    (with-handlers ([(lambda (e) #t) values])
+      (let/ec escape
+        (mdl-session-run-interactive
+         s "ENTRY"
+         #:on-event (lambda (e) (when (eq? (car e) 'pass)
+                                  (close-output-port out)
+                                  (escape 'escaped)))))))
+  (check-pred exn:fail? caught)
+  (check-regexp-match #rx"output port is closed" (exn-message caught)))
+;; ... and a successful escape still flushes and returns normally.
+(let-values ([(s out collected flushes) (session-with-flaky-flush "" 1000)])
+  (check-equal?
+   (let/ec escape
+     (mdl-session-run-interactive
+      s "ENTRY" #:on-event (lambda (e) (when (eq? (car e) 'pass) (escape 'escaped)))))
+   'escaped)
+  (check-equal? (unbox flushes) 2)      ; the empty PRIN1, the final flush
+  (check-equal? (get-output-string collected) "\n"))
+
 (delete-directory/files root)

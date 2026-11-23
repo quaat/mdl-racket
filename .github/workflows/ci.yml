@@ -15,10 +15,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install Git for source-lock tests
+      - name: Install Git (source-lock tests) and make (shared test targets)
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends git
+          apt-get install -y --no-install-recommends git make
       - name: Install Racket test libraries
         run: raco pkg install --auto --no-docs compiler-lib rackunit-lib compatibility-lib
       - name: Python dependencies
@@ -28,4 +28,5 @@ jobs:
       - name: Racket smoke tests
         run: bash scripts/test_racket.sh
       - name: Python offline harness tests
-        run: python -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py
+        # The shared Makefile target, so the CI list cannot drift from `make test`.
+        run: make test-python PYTHON=python

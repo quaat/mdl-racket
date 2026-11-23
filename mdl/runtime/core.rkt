@@ -3653,15 +3653,25 @@
 ;; decision D1: the REP print of SAVE-IT's ,NULL), then on every pass
 ;; re-reads the GVAL of ROOT REP and applies it with no arguments. It ends
 ;; only by an exception (input exhausted, a strict error, the pass bound);
-;; QUIT is not modelled yet. Terminal output is flushed on every exit.
-;; ON-EVENT receives host-only observations: (entry-returned value), (pass n).
+;; QUIT is not modelled yet. Terminal output is flushed on every exit, and
+;; that final flush never replaces the outcome (review F2): when a raised
+;; value is leaving the loop it is re-raised unchanged (same object) and every
+;; flush failure is reported separately as a (flush-failed exn) event; when
+;; nothing was raised (a host escape out of ON-EVENT) a flush failure is
+;; itself raised. ON-EVENT receives host-only observations:
+;; (entry-returned value), (pass n), (flush-failed exn).
 (define (mdl-run-host-loop entry-thunk #:max-passes [max-passes #f]
                            #:on-event [on-event void])
   (unless (or (not max-passes) (exact-positive-integer? max-passes))
     (raise-argument-error 'mdl-run-host-loop "(or/c #f exact-positive-integer?)" max-passes))
+  ;; LEAVING: a box holding the raised value now leaving the loop, set only by
+  ;; the boundary handler, so a raise caught inside the loop never counts.
+  (define leaving #f)
   (dynamic-wind
    void
    (lambda ()
+    (with-handlers ([(lambda (raised) #t)
+                     (lambda (raised) (set! leaving (box raised)) (raise raised))])
      (define value (entry-thunk))
      (on-event (list 'entry-returned value))
      (define channel (default-output-channel 'host-loop))
@@ -3678,8 +3688,16 @@
          (error 'host-loop "the GVAL of REP is not an applicable FUNCTION or SUBR (ADR-0049)"))
        (on-event (list 'pass pass))
        (mdl-apply-evaluated rep '())
-       (loop (add1 pass))))
-   flush-terminal-output!))
+       (loop (add1 pass)))))
+   (lambda ()
+     (define failures (flush-terminal-output/collect))
+     (cond [leaving
+            ;; Report, then let the primary outcome continue unchanged. A
+            ;; failing ON-EVENT here must not mask it either.
+            (for ([failure (in-list failures)])
+              (with-handlers ([exn:fail? void])
+                (on-event (list 'flush-failed failure))))]
+           [(pair? failures) (raise (car failures))]))))
 
 ;; ADR-0050 / maintainer decision D3 ("Mirror, then strict"): reading a
 ;; terminal CHANNEL whose input already ended. A host-level Racket exception,
@@ -3693,10 +3711,22 @@
 
 ;; Flush every terminal output port of this session, so a prompt written
 ;; with PRINC is visible before a blocking read (Confusion flushes stdout).
+(define (terminal-output-ports)
+  (for/list ([host (in-list (hash-values (atom-space-channels (current-mdl-atom-space))))]
+             #:when (eq? (host-channel-direction host) 'PRINT))
+    (or (host-channel-port host) (current-output-port))))
 (define (flush-terminal-output!)
-  (for ([host (in-list (hash-values (atom-space-channels (current-mdl-atom-space))))])
-    (when (eq? (host-channel-direction host) 'PRINT)
-      (flush-output (or (host-channel-port host) (current-output-port))))))
+  (for-each flush-output (terminal-output-ports)))
+;; The host loop's final flush: try every port, returning the exn:fail values
+;; raised (in order) instead of stopping at the first, so one failed port does
+;; not leave another unflushed. Breaks are not caught.
+(define (flush-terminal-output/collect)
+  (for*/list ([port (in-list (terminal-output-ports))]
+              [failure (in-value (with-handlers ([exn:fail? values])
+                                   (flush-output port)
+                                   #f))]
+              #:when failure)
+    failure))
 
 ;; ADR-0050 READSTRING (manual 11.4.1.2): <READSTRING buffer channel [stop]>
 ;; exactly as RDCOM and YES/NO use it. Arguments are validated first; then
