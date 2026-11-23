@@ -178,8 +178,13 @@
                                     time-zone))]
     [else (hasheq 'source "none: START has not seeded RANDOM")]))
 
+;; The files <FLOAD "77loadall.mud"> reads, in load order (load report events).
+(define zork-game-files
+  '("77loadall.mud" "81prim.mud" "77defs.mud" "77makstr.mud" "81tell-repl.mud" "77act1.mud"
+    "77act2.mud" "77act3.mud" "77rooms.mud" "77patch.mud" "77np.mud" "78melee.mud" "77dung.mud"))
+
 (define zork-replay-profile
-  (replay-profile "zork-1977-run.mud/v1" "77loadall.mud" "SAVE-IT" zork-upstream
+  (replay-profile "zork-1977-run.mud/v1" "77loadall.mud" "SAVE-IT" zork-game-files zork-upstream
                   zork-prompt-refusal zork-replay-state zork-moves zork-seed))
 
 (define (with-default-root kws vals)

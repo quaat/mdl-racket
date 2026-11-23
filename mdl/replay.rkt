@@ -31,21 +31,27 @@
          (struct-out exn:fail:replay-save-refused)
          replay-record replay-restore replay-validate-checkpoint
          replay-prompt? replay-prompt-turn replay-prompt-session
-         replay-prompt-refusal replay-prompt-checkpoint
+         replay-prompt-refusal replay-prompt-checkpoint replay-prompt-try-checkpoint
          replay-checkpoint-format replay-rng-version replay-rng-algorithm
          replay-limits replay-sessions-created
          canonical-json-bytes canonical-json-parse checkpoint-reseal)
 
 ;; --- profile and results ---------------------------------------------------------
 ;; name: profile id stored in the checkpoint. entry-file / entry-function: the
-;; faithful boot. upstream: (-> hash symbol -> string) of upstream SHAs.
+;; faithful boot. files: the game files the boot loads, in load order (a
+;; checkpoint must list exactly these). upstream: (-> hash symbol -> string)
+;; of upstream SHAs.
 ;; prompt-refusal: (session enter-info -> (or/c #f string)), the game's save
 ;; boundary rule. state: (session -> hash symbol -> string), the selected game
 ;; state. moves: (session -> exact-integer). seed: (observations time-zone ->
 ;; hash symbol -> (or string integer)), the RNG seed provenance.
-(struct replay-profile (name entry-file entry-function upstream prompt-refusal state moves seed))
+(struct replay-profile (name entry-file entry-function files upstream prompt-refusal state moves
+                                 seed))
 ;; kind: 'quit, 'quit-after-mdl-error or 'input-exhausted (like zork-result).
-(struct replay-result (kind mdl-errors message session) #:transparent)
+;; host-errors: exn:fail values raised by the host's on-prompt/on-restored
+;; callbacks, oldest first. They are caught at the callback boundary so a
+;; failing host callback never unwinds the game (review L2).
+(struct replay-result (kind mdl-errors message session host-errors) #:transparent)
 ;; stage: 'format 'checksum 'schema 'profile 'provenance 'boot 'replay
 ;; 'verification.
 (struct exn:fail:replay-restore exn:fail (stage) #:transparent)
@@ -56,7 +62,7 @@
 (define replay-rng-algorithm "mdl-random36/v1")
 (define replay-limits
   (hasheq 'bytes (* 4 1024 1024) 'input-units 100000 'observations 400000
-          'string-chars 65536 'depth 8 'integer-digits 19 'state-entries 256))
+          'string-chars 65536 'depth 8 'integer-digits 19 'state-entries 256 'source-files 64))
 (define (limit k) (hash-ref replay-limits k))
 
 ;; Host-only test observation: how many replay sessions were created in this
@@ -225,6 +231,13 @@
   (and (hash? h) (for/and ([(k v) (in-hash h)]) (string? v))))
 
 (define (check-schema! doc)
+  ;; review M3: whatever the shape of a field, a violation is a schema
+  ;; rejection, never a contract error from an unchecked operation.
+  (with-handlers ([(lambda (e) (and (exn:fail? e) (not (exn:fail:replay-restore? e))))
+                   (lambda (e) (restore-fail 'schema "malformed field: ~a" (exn-message e)))])
+    (check-schema-fields! doc)))
+
+(define (check-schema-fields! doc)
   (schema-check! (keys=? doc '(checksum clock format input observations profile rng runtime
                                         source verification))
                  "unexpected top-level fields ~a" (and (hash? doc) (sort (hash-keys doc) symbol<?)))
@@ -234,17 +247,19 @@
                  "bad clock block")
   (define input (hash-ref doc 'input))
   (schema-check! (and (list? input) (<= (length input) (limit 'input-units))) "bad input log")
+  (define n-input (length input)) ; review M1: computed once
   (for ([u (in-list input)] [i (in-naturals)])
     (schema-check! (and (list? u) (= (length u) 2) (string? (car u))
                         (member (cadr u) '("stop" "full" "eof")))
                    "bad input unit ~a" i))
   (define obs (hash-ref doc 'observations))
   (schema-check! (and (list? obs) (<= (length obs) (limit 'observations))) "bad observation log")
+  (define n-obs (length obs))
   (for ([o (in-list obs)] [i (in-naturals)])
     (schema-check! (and (list? o) (= (length o) 3)
                         (exact-integer? (car o)) (<= (- (expt 2 35)) (car o) (sub1 (expt 2 35)))
                         (exact-integer? (cadr o)) (<= 0 (cadr o) 999999)
-                        (nat? (caddr o)) (<= (caddr o) (length input)))
+                        (nat? (caddr o)) (<= (caddr o) n-input))
                    "bad observation ~a" i))
   (schema-check! (string? (hash-ref doc 'profile)) "bad profile")
   (define rng (hash-ref doc 'rng))
@@ -263,15 +278,21 @@
                       (string? (hash-ref source 'entry_function))
                       (hex64? (hash-ref source 'manifest_sha256))
                       (string-map? (hash-ref source 'upstream))
-                      (list? (hash-ref source 'files)) (pair? (hash-ref source 'files))
-                      (for/and ([f (in-list (hash-ref source 'files))])
-                        (and (list? f) (= 2 (length f)) (string? (car f)) (hex64? (cadr f)))))
+                      (list? (hash-ref source 'files)) (pair? (hash-ref source 'files)))
                  "bad source block")
+  ;; review M2: bounded and duplicate-free before anything is hashed
+  (define files (hash-ref source 'files))
+  (schema-check! (<= (length files) (limit 'source-files))
+                 "~a source files listed (limit ~a)" (length files) (limit 'source-files))
+  (schema-check! (for/and ([f (in-list files)])
+                   (and (list? f) (= 2 (length f)) (string? (car f)) (hex64? (cadr f))))
+                 "bad source file entry")
+  (schema-check! (not (check-duplicates (map car files))) "duplicate source file entries")
   (define ver (hash-ref doc 'verification))
   (schema-check! (and (keys=? ver '(input_units moves observations state state_sha256
                                                 transcript_bytes transcript_sha256))
-                      (= (hash-ref ver 'input_units) (length input))
-                      (= (hash-ref ver 'observations) (length obs))
+                      (eqv? (hash-ref ver 'input_units) n-input)
+                      (eqv? (hash-ref ver 'observations) n-obs)
                       (exact-integer? (hash-ref ver 'moves))
                       (string-map? (hash-ref ver 'state))
                       (<= (hash-count (hash-ref ver 'state)) (limit 'state-entries))
@@ -291,6 +312,13 @@
 ;; encoding, format and RNG version, checksum, schema, profile, and source
 ;; provenance against the files under SOURCE-ROOT. Returns the parsed document.
 (define (replay-validate-checkpoint profile bs #:source-root root)
+  ;; review M3: every rejection is an exn:fail:replay-restore; an unexpected
+  ;; failure inside validation is reported as a format rejection.
+  (with-handlers ([(lambda (e) (and (exn:fail? e) (not (exn:fail:replay-restore? e))))
+                   (lambda (e) (restore-fail 'format "invalid checkpoint: ~a" (exn-message e)))])
+    (validate-checkpoint profile bs root)))
+
+(define (validate-checkpoint profile bs root)
   (unless (bytes? bs) (restore-fail 'format "a checkpoint must be a byte string"))
   (when (> (bytes-length bs) (limit 'bytes))
     (restore-fail 'format "oversized checkpoint: ~a bytes (limit ~a)" (bytes-length bs) (limit 'bytes)))
@@ -325,6 +353,10 @@
     (restore-fail 'provenance "upstream source SHAs ~s differ from this checkout's ~s"
                   (hash-ref source 'upstream) ((replay-profile-upstream profile))))
   (define files (hash-ref source 'files))
+  ;; review M2: exactly the profile's game files, settled before any read
+  (unless (equal? (map car files) (replay-profile-files profile))
+    (restore-fail 'provenance "the listed files ~s are not the profile's game files ~s"
+                  (map car files) (replay-profile-files profile)))
   (unless (equal? (manifest-hash files) (hash-ref source 'manifest_sha256))
     (restore-fail 'provenance "manifest hash does not match the listed files"))
   (define here
@@ -349,9 +381,18 @@
                      capture [live-output? #:mutable]
                      [files #:mutable] runtime-commit
                      [expected #:mutable]          ; restore: parsed checkpoint
-                     [on-prompt #:mutable]))
+                     [on-prompt #:mutable]
+                     [expected-input #:mutable]    ; restore: vector of logged units
+                     [host-errors #:mutable]))     ; newest first
 
 (struct replay-prompt (run turn info [valid? #:mutable]))
+
+;; Host callbacks run inside READSTRING (review L2). Their contract is not to
+;; raise; an exn:fail they raise anyway is recorded in the result's
+;; host-errors instead of unwinding the game's MDL frames. Breaks propagate.
+(define (call-host-callback r thunk)
+  (with-handlers ([exn:fail? (lambda (e) (set-run-host-errors! r (cons e (run-host-errors r))))])
+    (thunk)))
 (define (replay-prompt-session p) (run-session (replay-prompt-run p)))
 
 ;; The output port of a replay session: everything goes to the capture (for
@@ -400,12 +441,13 @@
           (define cb (run-on-prompt r))
           (when cb
             (define p (replay-prompt r (run-completed r) info #t))
-            (dynamic-wind void (lambda () (cb p)) (lambda () (set-replay-prompt-valid?! p #f))))])]
+            (dynamic-wind void (lambda () (call-host-callback r (lambda () (cb p))))
+                          (lambda () (set-replay-prompt-valid?! p #f))))])]
       [(complete)
        (define raw (hash-ref info 'raw))
        (define reason (hash-ref info 'reason))
        (when (eq? (run-phase r) 'replay)
-         (define expected (list-ref (hash-ref (run-expected r) 'input) (run-completed r)))
+         (define expected (vector-ref (run-expected-input r) (run-completed r)))
          (unless (and (equal? raw (car expected)) (equal? (symbol->string reason) (cadr expected)))
            (restore-fail 'replay "input unit ~a diverged: consumed ~s (~a), recorded ~s (~a)"
                          (run-completed r) raw reason (car expected) (cadr expected))))
@@ -456,6 +498,12 @@
 
 (define (obs->json o)
   (list (clock-observation-seconds o) (clock-observation-micros o) (clock-observation-turn o)))
+
+;; The non-raising form: the checkpoint bytes, or the refusal reason string.
+(define (replay-prompt-try-checkpoint p)
+  (with-handlers ([exn:fail:replay-save-refused?
+                   (lambda (e) (regexp-replace #rx"^replay checkpoint refused: " (exn-message e) ""))])
+    (replay-prompt-checkpoint p)))
 
 (define (replay-prompt-checkpoint p)
   (define refusal (replay-prompt-refusal p))
@@ -532,10 +580,11 @@
     (after-load files)
     (begin0
       (with-handlers ([exn:fail:mdl-input-exhausted?
-                       (lambda (e) (replay-result 'input-exhausted '() (exn-message e) s))])
+                       (lambda (e) (replay-result 'input-exhausted '() (exn-message e) s
+                                                  (reverse (run-host-errors r))))])
         (define outcome (mdl-session-run-interactive s (replay-profile-entry-function profile)))
         (replay-result (mdl-session-outcome-kind outcome) (mdl-session-outcome-mdl-errors outcome)
-                       #f s))
+                       #f s (reverse (run-host-errors r))))
       (set-run-phase! r 'ended))))
 
 ;; Overridden per restore (the replay-entry hook needs restore-only state).
@@ -555,7 +604,7 @@
   (check-ports 'replay-record in out)
   (unless (mdl-clock? source) (raise-argument-error 'replay-record "mdl-clock?" source))
   (define r (run profile #f #f tz boot-clock 'boot '() 0 #f #f (open-output-bytes) #t #f commit #f
-                 on-prompt))
+                 on-prompt #f '()))
   (set-run-clock! r (make-recording-mdl-clock source #:turn (lambda () (run-completed r))))
   (parameterize ([current-replay-entry (lambda (r info) (error 'replay "no replay in a recording run"))])
     (run-session! r #:root root #:input in #:output out
@@ -582,7 +631,8 @@
   (define-values (port remaining go-live!) (make-replay-input-port replay-bytes in))
   (define r (run profile #f #f (string->symbol (hash-ref (hash-ref doc 'clock) 'time_zone))
                  (hash-ref (hash-ref doc 'clock) 'boot_clock)
-                 'boot '() 0 #f #f (open-output-bytes) #f #f commit doc on-prompt))
+                 'boot '() 0 #f #f (open-output-bytes) #f #f commit doc on-prompt
+                 (list->vector input) '()))
   (set-run-clock! r (make-replaying-mdl-clock
                      (for/list ([o (in-list (hash-ref doc 'observations))]) (apply clock-observation o))
                      #:turn (lambda () (run-completed r))))
@@ -628,7 +678,7 @@
       (set-run-phase! r 'live)
       (set-run-live-output?! r #t)
       (go-live!)
-      (on-restored (run-session r))
+      (call-host-callback r (lambda () (on-restored (run-session r))))
       ;; This entry is now a live prompt (a restored game can be saved again).
       ((observer r void) 'enter info)))
   (parameterize ([current-replay-entry verify-and-resume!])

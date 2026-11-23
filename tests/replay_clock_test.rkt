@@ -122,6 +122,16 @@
   (check-exn exn:fail:contract? (lambda () (make-resumed-mdl-clock 100 2000000 backwards
                                                                     #:turn (lambda () 0)))))
 
+;; review L3: the resumed clock never goes backwards, even when the wall
+;; clock regresses after having advanced
+(let ()
+  (define wall-values '(100 105 103 90 104 110))
+  (define wall (make-mdl-clock (lambda () (begin0 (values (car wall-values) 0)
+                                                  (set! wall-values (cdr wall-values))))))
+  (define c (make-resumed-mdl-clock 1000 0 wall #:turn (lambda () 0)))
+  ;; anchor 100; then 105 -> +5, 103 -> +3 (held at +5), 90 (held), 104 (held), 110 -> +10
+  (check-equal? (for/list ([_ 5]) (read-now c)) '((1005 0) (1005 0) (1005 0) (1005 0) (1010 0))))
+
 ;; --- the real and fixed clocks are unchanged -----------------------------------
 (check-equal? (mdl-clock-mode (make-fixed-mdl-clock 5)) 'plain)
 (check-equal? (mdl-clock-mode real-mdl-clock) 'plain)

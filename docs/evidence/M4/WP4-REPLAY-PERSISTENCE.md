@@ -147,6 +147,27 @@ and the PoC fail (`modified first RNG word` → `accepted`); disabling the
 replaying clock's turn check makes `replay_clock_test` and the
 `moved to another turn` case fail. Both mutations reverted (no diff).
 
+After the independent review (finding L1) three more verifier mutants were
+checked against `tests/replay_checkpoint_test.rkt`, each reverted after:
+dropping the `state_sha256` comparison → the `state_sha256`-only tamper is
+`accepted` (test fails); dropping the `state` map comparison → the
+`state`-only tamper is `accepted` (fails); dropping the transcript digest
+comparison → the reordered-observation case is `accepted` (fails first; the
+explicit reseed at turn 3 equalises the RNG words, so only the transcript
+digest catches it), and the `transcript_sha256`-only tamper would fail too.
+
+## Review fixes (independent review of `26a88ed`)
+
+| Finding | Fix | Test (failing before, passing after) |
+|---|---|---|
+| M1 quadratic schema check, O(n²) replay lookup | input and observation counts computed once; replay compares units through a vector | validating a crafted 3.6 MB checkpoint (100 000 input units, 300 000 observations): timed out at 30 s before, 1.7 s after (whole fast suite 5 s) |
+| M2 unbounded, duplicated `source.files` | at most 64 entries, no duplicate paths (schema); the listed names must equal the profile's game files before any file is read (provenance) | duplicate entry and 40 000 copies: `accepted` before (40 000 copies hashed in 3.0 s), `schema` after (1.8 s, all parsing, nothing hashed); 65 entries → `schema`; an unexpected `missing.mud` → `provenance` "not the profile's game files", no file read |
+| M3 wrong-typed fields escaped as contract errors | the schema check and the whole validation convert any other failure into `exn:fail:replay-restore` | `input_units: "x"` raised `exn:fail:contract` (`=`) before; 20 wrong-typed fields → `schema` after, no session created |
+| L1 surviving verifier mutants | tamper tests for `transcript_sha256`, `state`, `state_sha256` alone | mutants above |
+| L2 host callback raising into the game | `on-prompt`/`on-restored` failures are caught at the callback boundary and returned as `replay-result-host-errors`; `replay-prompt-try-checkpoint` returns the refusal instead of raising | a refused `replay-prompt-checkpoint` in `on-prompt` no longer ends the game: it runs to its own QUIT with all 7 inputs read, one host error reported |
+| L3 resumed clock could go backwards | monotonic: never below the last value served | a wall clock 100→105→103→90→104→110 gives 1005, 1005, 1005, 1005, 1010 (failed before at 103) |
+| L3/L4/L5 wording | verification order (clock log last), integrity-only checksum, "selected verification state" in ADR-0061 and SEMANTICS | — |
+
 ## Security and licensing
 
 No MDL primitive, game source, game global or upstream file changed. No new
@@ -156,8 +177,21 @@ untrusted input: size-bounded before parsing, parsed by a strict canonical
 parser, schema-checked, checksummed, provenance-checked; listed game paths
 must stay inside the source root. No GPL code copied.
 
+## Trust model
+
+The checksum is integrity only, not authentication. A player can edit and
+reseal the input or clock log, including the clock observations that choose
+START's RANDOM seed (so a seed can be chosen). Verification guarantees only
+that the restored state is what the real game produces from the recorded
+inputs. The verification state is a selected state (34 fields); object
+positions beyond those fields, room flags and most globals are covered only
+by the transcript digest and by the reconstruction itself.
+
 ## Limitations
 
+- After a restore nothing is printed: the save point's `>` prompt belongs
+  to the replayed (discarded) transcript, so a player-facing host must show
+  its own notice or re-show the prompt (review L7).
 - Saves are taken synchronously in the host's prompt callback; an
   asynchronous "save now" request from another thread is not offered yet.
 - The transcript is kept in memory to digest it (linear in play length).
@@ -181,11 +215,15 @@ must stay inside the source root. No GPL code copied.
 3. This needs an accepted amendment of ADR-0055's no-file policy for the
    launcher only (MDL code keeps no file access), and the launcher notice
    must change accordingly.
-4. Acceptance scenarios: save/quit/load in a fresh process continuing a
+4. The checksum does not authenticate: a slot file can be edited and
+   resealed (inputs, clock observations and therefore the RANDOM seed
+   included). If save tampering matters, add host-side authentication
+   (for example an HMAC with a host-held key) as its own decision.
+5. Acceptance scenarios: save/quit/load in a fresh process continuing a
    native transcript (as here); corrupted, truncated, foreign-version and
    foreign-source slots rejected with a message and no state change; slot
    overwrite is atomic under a crash; saving at a refused prompt explains
    why; restore time measured for long games (if too slow: verified
    intermediate snapshots, ADR-0061 Option A).
-5. Native SAVE/RESTORE compatibility (DO-SAVE/DO-RESTORE, the 20-minute
+6. Native SAVE/RESTORE compatibility (DO-SAVE/DO-RESTORE, the 20-minute
    rule, continuation semantics) stays a separate decision.

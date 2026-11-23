@@ -3335,14 +3335,16 @@ three are added. Every mode returns validated `(seconds, micros)`.
   unread (missing read). A successful finish switches the same clock to the
   resumed mode.
 - Resumed mode (also `make-resumed-mdl-clock base-seconds base-micros wall
-  #:turn thunk`): `live = base + max(0, wall_now - wall_at_resume)`, where
+  #:turn thunk`): `live = max(last_live, base + max(0, wall_now -
+  wall_at_resume))`, where
   `base` is the last replayed observation and `wall` is an injected
   `mdl-clock` (the real clock in play; a deterministic clock in tests). It
   never reads the wall clock's absolute value into the game, so downtime
   between save and restore never reaches GET-TIME/PLAY-TIME; turn-based
   clock events (CLOCK-DEMON, `77rooms.mud:1630`) advance only per parsed
-  turn and are unaffected. A wall clock that goes backwards contributes no
-  elapsed time (clamped at zero). Recording, replaying and resumed clocks
+  turn and are unaffected. The resumed clock is monotonic (review L3): a
+  wall clock that goes backwards, even after advancing, holds the live time
+  at the last value served instead of taking it back. Recording, replaying and resumed clocks
   keep logging every observation they serve, so a restored session can be
   saved again (`mdl-clock-observations`).
 
@@ -3396,19 +3398,35 @@ parser of `mdl/replay.rkt` (no `read`, `eval`, `fasl` or
 `racket/serialize`), which also rejects any byte sequence that is not the
 canonical encoding of what it parsed (duplicate keys, reordering,
 whitespace, non-integers). Limits: 4 MiB, 100 000 input units, 400 000
-observations, 64 KiB per string, nesting depth 8. Fields: `format`,
+observations, 64 KiB per string, nesting depth 8, 64 source files;
+validation is linear in the document size (review M1). Fields: `format`,
 `profile`, `rng` (above), `source` (upstream SHAs from `sources.lock.json`,
 entry file and function, every loaded file with its SHA-256, and the
 manifest hash over that list), `runtime` (commit and Racket version:
 diagnostic only, never a reason to reject), `clock` (time zone, boot clock
 label), `observations`, `input`, `verification` (both RNG words, draws,
-MOVES, the selected game state and its SHA-256, the transcript length and
+MOVES, the selected verification state and its SHA-256, the transcript length and
 SHA-256, the input and observation counts) and `checksum` (SHA-256 of the
 canonical encoding of the document without `checksum`). Rejected before
 any session is created: oversize, non-canonical or malformed bytes, a
 checksum mismatch, a wrong `format`, RNG version or algorithm, a schema
-violation, a different profile, or a source-provenance mismatch (upstream
-SHAs or manifest hash computed from the files on disk).
+violation (any wrong-typed or missing field, duplicate or more than 64
+source files: always `exn:fail:replay-restore`, never a contract error), a
+different profile, or a source-provenance mismatch (a file list that is not
+exactly the profile's game files, checked before any file is read; upstream
+SHAs; or the manifest hash computed from the files on disk).
+
+The checksum is integrity only, not authentication: anyone can edit the
+input or clock log of a checkpoint and reseal it, including choosing the
+clock observations that seed RANDOM. Verification guarantees only that the
+restored state is what the real game produces from the recorded inputs.
+
+The verification state is a *selected* state: the Zork profile's 34 fields
+(the S6 troll checkpoint fields, clock events, lamp, deaths, INTIME,
+PLAYED-TIME, PARSE-WON, OFLAG, DIVERT counters, logical ledger). Object
+positions beyond those fields, room flags and most globals are covered only
+by the transcript digest and by the reconstruction itself: replay is the
+reconstruction; verification guards against a runtime that diverges.
 
 **Restore.** A fresh session from the unchanged sources, the replaying
 clock and an input port that serves exactly the logged characters (a read
@@ -3416,12 +3434,20 @@ past them is a strict replay error; the live input is never touched during
 replay); every completed READSTRING must equal its log entry. Output goes
 only to a capture whose digest is compared, so no replayed text is shown.
 At the READSTRING entry after the last logged unit the engine verifies, in
-order: the logged input is fully consumed; the save boundary holds; the
-clock log is fully consumed (missing read); RNG words; draw count; MOVES;
-the state digest (differing fields named); the transcript digest and length.
+order: the logged input is fully consumed; the save boundary holds; RNG
+words; draw count; MOVES; the selected state and its digest (differing
+fields named); the transcript length and digest; and last the clock log is
+fully consumed (a missing read; stage `replay`).
 Any failure raises `exn:fail:replay-restore` (with a stage: `format`,
 `checksum`, `schema`, `profile`, `provenance`, `boot`, `replay`,
 `verification`) and the fresh session is dropped; no existing session is
 touched and no state is overwritten. On success the clock switches to the
 resumed mode, output to the live port, input to the live port, and play
 continues in the same call.
+
+**Host callbacks.** `on-prompt` and `on-restored` run inside READSTRING, on
+the game's stack. Their contract is not to raise; an `exn:fail` they raise
+anyway is caught at the callback boundary and returned in the result's
+`host-errors`, so a refused save or a host bug never ends the live game
+(breaks still propagate). `replay-prompt-try-checkpoint` returns the
+checkpoint bytes or the refusal reason without raising.

@@ -125,6 +125,10 @@
   (check-equal? (parameterize ([current-security-guard original-guard]) (directory-list cwd)) '()
                 "the temporary cwd stayed empty")
   (delete-directory/files cwd)
+  (when (and (eq? (car outcome) 'ok) (replay-result? (cadr outcome)))
+    ;; a check failing inside a host callback is caught at the callback
+    ;; boundary (review L2): it must surface here
+    (check-equal? (replay-result-host-errors (cadr outcome)) '() "host callback errors"))
   (if (eq? (car outcome) 'ok) (cadr outcome) (raise (cadr outcome))))
 (define (stage-of thunk)
   (with-handlers ([exn:fail:replay-restore? (lambda (e) (list (exn:fail:replay-restore-stage e)

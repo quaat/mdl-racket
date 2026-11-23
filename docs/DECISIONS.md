@@ -2022,3 +2022,15 @@ Verified while implementing; the decisions above are unchanged.
 - Semantics, limits and error stages: SEMANTICS "M4 WP4: session clock
   modes and deterministic replay checkpoints". Evidence:
   `docs/evidence/M4/WP4-REPLAY-PERSISTENCE.md`.
+- Trust model (review L4): the checkpoint checksum is integrity only, not
+  authentication. A player can edit and reseal the input or clock log,
+  including the clock observations that choose START's RANDOM seed.
+  Verification guarantees only that the restored state is what the real
+  game produces from the recorded inputs; it does not prove the inputs were
+  played. A player-facing slice that needs tamper resistance must add
+  authentication (for example a host-held key) as a separate decision.
+- Selected verification state (review L5): the verification block holds a
+  selected state (34 fields in the Zork profile). Object positions beyond
+  those fields, room flags and most globals are covered only by the
+  transcript digest and by the reconstruction itself. Replay is the
+  reconstruction; verification guards against a runtime that diverges.

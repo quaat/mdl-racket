@@ -79,7 +79,9 @@
 ;; ('resumed); base-micros/wall-start-micros: the resumed clock's anchors.
 (struct log-state ([mode #:mutable] [log #:mutable] [pending #:mutable] [served #:mutable]
                    turn [source #:mutable] [base-micros #:mutable]
-                   [wall-start-micros #:mutable]))
+                   [wall-start-micros #:mutable]
+                   ;; resumed: the last instant served; never gone below
+                   [last-micros #:mutable]))
 (struct logging-clock mdl-clock (state))
 
 (define (check-turn-thunk who turn)
@@ -101,7 +103,10 @@
 
 (define (resumed-read st)
   (define elapsed (max 0 (- (read-micros (log-state-source st)) (log-state-wall-start-micros st))))
-  (define now (+ (log-state-base-micros st) elapsed))
+  ;; Monotonic (review L3): a wall clock that regresses after advancing
+  ;; holds the live time instead of taking it backwards.
+  (define now (max (log-state-last-micros st) (+ (log-state-base-micros st) elapsed)))
+  (set-log-state-last-micros! st now)
   (define seconds (floor (/ now 1000000)))
   (log! st seconds (- now (* seconds 1000000))))
 
@@ -132,7 +137,7 @@
   (unless (mdl-clock? source)
     (raise-argument-error 'make-recording-mdl-clock "mdl-clock?" source))
   (check-turn-thunk 'make-recording-mdl-clock turn)
-  (make-logging-clock (log-state 'recording '() '() 0 turn source #f #f)))
+  (make-logging-clock (log-state 'recording '() '() 0 turn source #f #f #f)))
 
 ;; Serves OBSERVATIONS in order; strict on extra reads and order divergence.
 (define (make-replaying-mdl-clock observations #:turn turn)
@@ -140,7 +145,7 @@
     (raise-argument-error 'make-replaying-mdl-clock "(listof valid clock-observation?)"
                           observations))
   (check-turn-thunk 'make-replaying-mdl-clock turn)
-  (make-logging-clock (log-state 'replaying '() observations 0 turn #f #f #f)))
+  (make-logging-clock (log-state 'replaying '() observations 0 turn #f #f #f #f)))
 
 ;; live = base + max(0, wall_now - wall_at_creation); logged like the others.
 (define (make-resumed-mdl-clock base-seconds base-micros wall #:turn turn)
@@ -151,13 +156,14 @@
   (unless (mdl-clock? wall)
     (raise-argument-error 'make-resumed-mdl-clock "mdl-clock?" wall))
   (check-turn-thunk 'make-resumed-mdl-clock turn)
-  (define st (log-state 'resumed '() '() 0 turn wall #f #f))
+  (define st (log-state 'resumed '() '() 0 turn wall #f #f #f))
   (resume! st (total-micros base-seconds base-micros) wall)
   (make-logging-clock st))
 
 (define (resume! st base wall)
   (set-log-state-source! st wall)
   (set-log-state-base-micros! st base)
+  (set-log-state-last-micros! st base)
   (set-log-state-wall-start-micros! st (read-micros wall))
   (set-log-state-mode! st 'resumed))
 

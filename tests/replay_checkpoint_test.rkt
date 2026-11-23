@@ -63,7 +63,7 @@ MDL
 (call-with-output-file (build-path root "prog.mud") (lambda (o) (void (write-string program o))))
 
 (define profile
-  (replay-profile "test-readstring/v1" "prog.mud" "BOOT" (lambda () (hasheq 'test "none"))
+  (replay-profile "test-readstring/v1" "prog.mud" "BOOT" '("prog.mud") (lambda () (hasheq 'test "none"))
                   (lambda (s info)
                     (and (not (eq? (hash-ref info 'buffer) (mdl-session-global s "BUF")))
                          "not the STEP reader"))
@@ -100,6 +100,7 @@ MDL
                                  (hash-set! checkpoints (replay-prompt-turn p)
                                             (replay-prompt-checkpoint p))))))
 (check-equal? (replay-result-kind full) 'quit)
+(check-equal? (replay-result-host-errors full) '())
 (check-equal? (sort (hash-keys checkpoints) <) (range 13)) ; turn 13 follows the consumed end of input
 (define full-text (get-output-string full-out))
 (check-equal? (length (regexp-match* #rx"> " full-text)) 14)
@@ -125,6 +126,7 @@ MDL
   (define out (open-output-string))
   (define result (replay-restore profile bs #:source-root root #:input (open-input-string (lines rest))
                                  #:output out #:wall-clock wall #:on-restored on-restored))
+  (check-equal? (replay-result-host-errors result) '())
   (values result (get-output-string out)))
 (define restored-rng #f)
 (define-values (r1 out1)
@@ -208,7 +210,9 @@ MDL
 
 ;; --- failures during replay or at verification ----------------------------------------
 (define obs (hash-ref doc 'observations))
-;; reordered observations at turn 0: the RNG seed differs -> verification
+;; reordered observations at turn 0: BOOT's seed differs, but the explicit
+;; reseed at turn 3 makes the RNG words equal again by the save point, so the
+;; transcript digest (the earlier RANDOM values) is what fails -> verification
 (check-equal? (reject (tamper (lambda (d) (hash-set d 'observations
                                                     (list* (cadr obs) (car obs) (cddr obs))))))
               'verification)
@@ -245,6 +249,41 @@ MDL
            (lambda () (replay-restore profile overrun #:source-root root #:input overrun-live
                                       #:output (open-output-string))))
 (check-equal? (read-line overrun-live) "live" "the live input was not touched by the failed replay")
+;; review L1: each verification field alone is checked
+(check-equal? (reject (tamper (lambda (d) (hset* d '(verification transcript_sha256) (make-string 64 #\0)))))
+              'verification)
+(check-equal? (reject (tamper (lambda (d) (hset* d '(verification state) (hasheq 'n "99")))))
+              'verification)
+(check-equal? (reject (tamper (lambda (d) (hset* d '(verification state_sha256) (make-string 64 #\0)))))
+              'verification)
+;; review M3: wrong-typed fields are schema rejections (never a contract error)
+(define sessions-before-m3 (replay-sessions-created))
+(for ([path+value (list (list '(verification input_units) "x") (list '(verification observations) "x")
+                        (list '(verification moves) "x") (list '(verification transcript_bytes) "x")
+                        (list '(verification state) "x") (list '(verification state_sha256) 5)
+                        (list '(verification) "x") (list '(rng draws) "x") (list '(rng state) '("a" 1))
+                        (list '(rng seed) "x") (list '(source files) "x") (list '(source files) '(("prog.mud")))
+                        (list '(source upstream) '()) (list '(input) "x") (list '(input) '(("r\n")))
+                        (list '(observations) "x") (list '(observations) '((1 2))) (list '(clock) "x")
+                        (list '(runtime) "x") (list '(profile) 7))])
+  (check-equal? (reject (tamper (lambda (d) (hset* d (car path+value) (cadr path+value))))) 'schema
+                (format "~s" path+value)))
+(check-equal? (replay-sessions-created) sessions-before-m3)
+;; review M2: source.files is bounded, duplicate-free and must be exactly the
+;; profile's game files; nothing is read from disk before that is settled
+(define (with-files files)
+  (tamper (lambda (d) (hset* (hset* d '(source files) files) '(source manifest_sha256)
+                             (sha256-hex (canonical-json-bytes files))))))
+(define prog-entry (car (hash-ref (hash-ref doc 'source) 'files)))
+(check-equal? (reject (with-files (list prog-entry prog-entry))) 'schema)
+(check-equal? (reject (with-files (make-list 40000 prog-entry))) 'schema)
+(check-equal? (reject (with-files (for/list ([i 65]) (list (format "f~a.mud" i) (cadr prog-entry))))) 'schema)
+(let ([e (with-handlers ([exn:fail:replay-restore? values])
+           (replay-validate-checkpoint profile (with-files (list (list "missing.mud" (cadr prog-entry))))
+                                       #:source-root root))])
+  (check-equal? (exn:fail:replay-restore-stage e) 'provenance)
+  (check-regexp-match #rx"not the profile's game files" (exn-message e)))
+(check-equal? (replay-sessions-created) sessions-before-m3)
 ;; the runtime block is diagnostic only
 (check-equal? (reject (tamper (lambda (d) (hset* d '(runtime commit) "0000000")))) 'accepted)
 (check-equal? (reject (tamper (lambda (d) (hset* d '(runtime racket) "Racket 99 (cs)")))) 'accepted)
@@ -253,7 +292,7 @@ MDL
 ;; a full buffer leaves pending input; after end of input was consumed (and
 ;; the channel RESET) there is no prompt to resume at
 (define refusals '())
-(void (replay-record profile #:source-root root
+(define refusals-run (replay-record profile #:source-root root
                      #:input (open-input-string (string-append "r\n" (make-string 45 #\x) "\nr\n"))
                      #:output (open-output-string) #:clock (make-fixed-mdl-clock 5) #:time-zone 'utc
                      #:on-prompt (lambda (p)
@@ -262,12 +301,48 @@ MDL
                                    (when (replay-prompt-refusal p)
                                      (check-exn exn:fail:replay-save-refused?
                                                 (lambda () (replay-prompt-checkpoint p)))))))
+(check-equal? (replay-result-host-errors refusals-run) '())
 (check-equal? (map car (reverse refusals)) '(0 1 2 3 4 5))
 (check-false (cadr (assv 1 refusals)))
 (check-regexp-match #rx"filled its buffer" (cadr (assv 2 refusals)))
 (check-false (cadr (assv 3 refusals)))
 (check-false (cadr (assv 4 refusals)))
 (check-regexp-match #rx"end of input" (cadr (assv 5 refusals)))
+;; review L2: a host callback that fails (here: a refused save) does not end
+;; the live game; the failure is reported in the result. A non-raising
+;; variant returns the refusal.
+(define tried '())
+(define survived
+  (replay-record profile #:source-root root
+                 #:input (open-input-string (string-append "r\n" (make-string 45 #\x) "\nr\nr\n"))
+                 #:output (open-output-string) #:clock (make-fixed-mdl-clock 5) #:time-zone 'utc
+                 #:on-prompt (lambda (p)
+                               (set! tried (cons (replay-prompt-try-checkpoint p) tried))
+                               (when (= (replay-prompt-turn p) 2) (replay-prompt-checkpoint p)))))
+(check-equal? (replay-result-kind survived) 'quit)
+(check-equal? (length (replay-result-host-errors survived)) 1)
+(check-true (exn:fail:replay-save-refused? (car (replay-result-host-errors survived))))
+(check-equal? (mdl-session-global (replay-result-session survived) "N") 7)
+(check-equal? (map (lambda (v) (if (bytes? v) 'checkpoint v)) (take (reverse tried) 4))
+              (list 'checkpoint 'checkpoint
+                    "the previous READSTRING filled its buffer; the rest of that line is pending input"
+                    'checkpoint))
+;; review M1: validating a crafted checkpoint near the size limit is linear
+;; (100 000 input units, 300 000 observations): well under the watchdog
+(define big
+  (tamper (lambda (d)
+            (define input (make-list 100000 '("" "stop")))
+            (define observations (make-list 300000 '(0 0 0)))
+            (hset* (hset* (hash-set (hash-set d 'input input) 'observations observations)
+                          '(verification input_units) 100000)
+                   '(verification observations) 300000))))
+(check-true (< (* 3/4 (hash-ref replay-limits 'bytes)) (bytes-length big) (hash-ref replay-limits 'bytes)))
+(define big-done (make-channel))
+(define big-thread (thread (lambda () (channel-put big-done
+                                                   (replay-validate-checkpoint profile big #:source-root root)))))
+(define big-doc (sync/timeout 30 big-done))
+(kill-thread big-thread)
+(check-true (hash? big-doc) "validating a 100k-unit/300k-observation checkpoint took over 30 s")
 ;; a prompt object is valid only during its callback
 (define kept #f)
 (void (replay-record profile #:source-root root #:input (open-input-string "r\n")
