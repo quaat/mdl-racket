@@ -6,10 +6,23 @@
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
 | LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | FAIL on S5 branch: faithful SAVE-IT passes SAVE (session record), ON "BLOCKED" and START, then stops in CONTIN at unassigned GVAL REP (77rooms.mud:301) |
+| INITIALIZED | FAIL on S6 branch: faithful SAVE-IT passes SAVE (session record), ON "BLOCKED", START and CONTIN 301-302 (inert REP SUBR, ADR-0049), then stops at `<RESET ,INCHAN>` (77rooms.mud:303) |
 | INTERACTIVE | NOT RUN: original startup/game loop unavailable |
 | SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
 | PLAYABLE | NOT RUN: original game has not booted in Racket |
+
+- **S6 inert REP on `feat/m3-startup-rep` (WIP, ADR-0049):** The GVAL of
+  ROOT REP is a predefined SUBR in every session (TYPE SUBR, GASSIGNED,
+  APPLICABLE; `<SETG SAVEREP ,REP>` keeps the same object), matching pinned
+  Confusion (`evidence/M3/S6-rep-reference.json`). Applying the default REP
+  by any path is a strict error naming ADR-0049; no raw MDL REPL exists. The
+  host top-level loop that applies the current GVAL of REP is specified in
+  SEMANTICS but not implemented. The faithful path now passes
+  77rooms.mud:301-302 and fails at `<RESET ,INCHAN>` (303):
+  `mdl-eval: unassigned or non-applicable MDL operator RESET`. Next
+  blockers: RESET, then the host loop, PRINC, READSTRING. Sandboxed checks
+  only so far; no INITIALIZED, interactive or parity result is claimed.
+  See [S6 evidence](evidence/M3/S6-REP.md).
 
 - **S5 SAVE session record on `feat/m3-startup-save-record` (WIP, ADR-0048):**
   SAVE returns a fresh `"SAVED"`, writes no file, performs no GC or

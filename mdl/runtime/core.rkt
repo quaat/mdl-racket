@@ -2252,6 +2252,28 @@
   (error 'RESTORE
          "restoring a saved image is not supported (maintainer decision 2026-11-23; ADR-0048)"))
 
+;; ADR-0049 (maintainer decision 2026-11-23, "Inert REP + host loop"): a
+;; predefined host value whose TYPE is SUBR (pinned Confusion: <TYPE ,REP> is
+;; SUBR). Only REP uses this representation; other built-ins stay plain host
+;; procedures. It is a Racket procedure, so every application path (FORM
+;; call, APPLY, MAPF, HANDLER delivery, host mdl-apply) reaches `proc` after
+;; ordinary SUBR argument evaluation, and APPLICABLE declarations match it.
+(struct mdl-subr (name proc)
+  #:property prop:procedure (struct-field-index proc)
+  ;; Racket diagnostics name the SUBR (e.g. #<procedure:REP>), not a source line.
+  #:property prop:object-name (struct-field-index name))
+
+;; The default GVAL of ROOT REP. CONTIN stores it (<SETG SAVEREP ,REP>,
+;; 77rooms.mud:301) and BLO tests its TYPE (77act1.mud:3), but applying it is
+;; a strict error: this runtime never provides a raw MDL read-eval-print
+;; loop. It reads no channel, evaluates nothing and prints nothing.
+(define mdl-default-rep
+  (mdl-subr
+   'REP
+   (lambda args
+     (error 'REP
+            "the default REP SUBR is inert; this runtime never provides a raw MDL read-eval-print loop (maintainer decision 2026-11-23; ADR-0049)"))))
+
 (define (require-oblist who value)
   (unless (mdl-oblist? value)
     (error who "expected an MDL OBLIST, got ~a" value)))
@@ -2725,6 +2747,7 @@
 
 (define (mdl-type-name value)
   (cond [(mdl-typed-value? value) (mdl-atom-pname (mdl-typed-value-type value))]
+        [(mdl-subr? value) "SUBR"]
         [(mdl-activation? value) "ACTIVATION"]
         [(mdl-error-frame? value) "FRAME"]
         [(mdl-word? value) "WORD"]
@@ -4047,6 +4070,7 @@
         "ON" mdl-on
         "SAVE" mdl-save
         "RESTORE" mdl-restore
+        "REP" mdl-default-rep
         "INT-LEVEL" mdl-int-level
         "ENABLE" mdl-enable
         "DISABLE" mdl-disable

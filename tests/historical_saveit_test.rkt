@@ -21,18 +21,20 @@
 (check-equal? (hash-ref load-report 'completed_expressions) 1229)
 (check-equal? (hash-ref load-report 'skipped_expressions) 0)
 
-;; Known XFAIL frontier (S5-SAVE-RECORD, ADR-0048). SAVE is a session
-;; record: <SAVE .FN> returns a fresh "SAVED", writes no file, and is recorded
-;; with INT-LEVEL 100000. The patched SAVE-IT has a single COND clause, so it
-;; continues in the same session: <INT-LEVEL 0> (77rooms.mud:26), STARTER,
-;; GETSYS (56), ON "BLOCKED" (59; registers, never fires), START (60).
-;; INITIALIZED remains FAIL: the run stops in CONTIN at the first reference
-;; to the GVAL of REP, the LISTEN loop's applicable (Confusion: a SUBR).
+;; Known XFAIL frontier (S6-REP, ADR-0049; SAVE per ADR-0048). SAVE is a
+;; session record: <SAVE .FN> returns a fresh "SAVED", writes no file, and is
+;; recorded with INT-LEVEL 100000. The patched SAVE-IT has a single COND
+;; clause, so it continues in the same session: <INT-LEVEL 0> (77rooms.mud:26),
+;; STARTER, GETSYS (56), ON "BLOCKED" (59; registers, never fires), START (60).
+;; ADR-0049: the GVAL of REP is the predefined, inert REP SUBR, so CONTIN's
+;; <SETG SAVEREP ,REP> (301) and <SETG REP ,RDCOM> (302) complete.
+;; INITIALIZED remains FAIL: the run stops at <RESET ,INCHAN> (303), the
+;; first reference to the still-unimplemented RESET SUBR.
 ;;
 ;; Call chain: SAVE-IT (77rooms.mud:60) -> START (77rooms.mud:293)
-;;   -> CONTIN (77rooms.mud:301) <SETG SAVEREP ,REP>  <- XFAIL here
+;;   -> CONTIN (77rooms.mud:303) <RESET ,INCHAN>  <- XFAIL here
 ;; This test asserts the XFAIL message so progress is tracked without claiming
-;; INITIALIZED.
+;; INITIALIZED. No host top-level loop is run (ADR-0049: specified only).
 (define (listing dir) (sort (map path->string (directory-list dir)) string<?))
 (define source-before (listing source-root))
 (check-equal? (mdl-session-global session "ALT-FLAG") (mdl-session-atom session "T"))
@@ -43,7 +45,8 @@
     (parameterize ([current-output-port output])
       (mdl-session-call session "SAVE-IT"))))
 (check-true (exn:fail? failure))
-(check-equal? (exn-message failure) "mdl-gval: unassigned MDL global REP")
+(check-equal? (exn-message failure)
+              "mdl-eval: unassigned or non-applicable MDL operator RESET")
 ;; SAVE (77rooms.mud:26) ran once, returned "SAVED" (the COND clause was
 ;; taken) and was recorded with the file-spec and INT-LEVEL 100000.
 (define records (mdl-session-save-records session))
@@ -69,10 +72,23 @@
 ;; XUNAME/GET-NAME as in the Confusion trace (S5-SAVE-FRONTIER.md Q3 step 6).
 (check-equal? (mdl-session-global session "XUNM") "MTRZORK")
 (check-equal? (mdl-session-global session "USER-NAME") "")
-;; CONTIN's first form (77rooms.mud:296) ran; 301 did not complete.
+;; CONTIN 77rooms.mud:296-302 ran; 303 did not complete.
 (check-true (mdl-false? (mdl-session-global session "ALT-FLAG")))
-(check-exn #rx"unassigned MDL global SAVEREP"
-           (lambda () (mdl-session-global session "SAVEREP")))
+(define (type-of value) (mdl-atom-pname (mdl-session-call session "TYPE" value)))
+;; 301: SAVEREP holds the predefined REP SUBR (ADR-0049) ...
+(define saverep (mdl-session-global session "SAVEREP"))
+(check-equal? (type-of saverep) "SUBR")
+(check-exn #rx"REP: the default REP SUBR is inert; .*ADR-0049"
+           (lambda () (mdl-session-call session "APPLY" saverep)))
+;; ... and 302 made REP the game's command reader RDCOM (a FUNCTION).
+(check-eq? (mdl-session-global session "REP") (mdl-session-global session "RDCOM"))
+;; (RDCOM is a compiled DEFINE, a host procedure: its TYPE is still an
+;; unsupported-type error, a pre-existing limit recorded in S6-REP.md.)
+(check-exn #rx"mdl-type: unsupported MDL type"
+           (lambda () (type-of (mdl-session-global session "REP"))))
+;; 303: RESET is still unassigned (not implemented in this slice).
+(check-exn #rx"unassigned MDL global RESET"
+           (lambda () (mdl-session-global session "RESET")))
 ;; State established by 77rooms.mud:13-21 before SAVE was reached.
 (check-equal? (mdl-session-global session "DEV") "DSK")
 (check-equal? (mdl-session-global session "SNM") "MDL")
