@@ -1,9 +1,12 @@
 #lang racket/base
 ;; Independent 36-bit two-word state transition for MDL RANDOM.
 (provide make-random36-state random36-next! random36-state?
-         random36-state-copy random36-state-words)
+         random36-state-copy random36-state-words random36-state-draws)
 
-(struct random36-state ([first #:mutable] [second #:mutable]))
+;; draws (ADR-0061): host-only count of steps taken (one per RANDOM call, an
+;; explicit reseed included). It never influences a result and no MDL
+;; primitive exposes it.
+(struct random36-state ([first #:mutable] [second #:mutable] [draws #:mutable]))
 
 (define modulus (arithmetic-shift 1 36))
 (define sign-bit (arithmetic-shift 1 35))
@@ -17,12 +20,13 @@
 
 (define (make-random36-state)
   ;; Fixed historical default state, checked by the pinned no-seed fixture.
-  (random36-state #o267762113337 #o155256071112))
+  (random36-state #o267762113337 #o155256071112 0))
 
 ;; Host-only observation (ADR-0052): a detached copy, so a caller can
 ;; compute later outputs without consuming the session's sequence.
 (define (random36-state-copy state)
-  (random36-state (random36-state-first state) (random36-state-second state)))
+  (random36-state (random36-state-first state) (random36-state-second state)
+                  (random36-state-draws state)))
 
 ;; The two unsigned 36-bit words, first then second.
 (define (random36-state-words state)
@@ -43,4 +47,5 @@
                          (arithmetic-shift (bitwise-and first 1) 35))))
   (set-random36-state-first! state next-first)
   (set-random36-state-second! state first)
+  (set-random36-state-draws! state (add1 (random36-state-draws state)))
   (signed36 next-first))

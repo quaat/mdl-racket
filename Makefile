@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -114,6 +114,15 @@ test-m4-troll-combat: sources
 # PARSE-WON, ORPHANS, trap door, MOVES).
 test-m4-parser-ambiguity: sources
 	@racket tests/historical_parser_ambiguity_test.rkt
+
+# M4 WP4 (ADR-0061): host persistence by deterministic replay. The troll-combat
+# scenario on a recording clock (fixed source 250776000 UTC): checkpoints at the
+# RDCOM prompt, restore in-process and in a fresh process, verification (both
+# RNG words, MOVES, state and transcript digests), continuation equal to the
+# native transcript, tampering, independence and replay cost. The checkpoint
+# format and clock modes also run in `make test` (replay_*_test.rkt).
+test-m4-replay-persistence: sources
+	@racket tests/persistence_replay_test.rkt
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,

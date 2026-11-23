@@ -30,7 +30,7 @@
          mdl-open-record-file-spec mdl-open-record-status
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
-         mdl-random-state-snapshot
+         mdl-random-state-snapshot mdl-error-messages
          mdl-max
          atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
@@ -1816,16 +1816,25 @@
                             [open-records #:mutable]
                             ;; ADR-0054: messages of every MDL ERROR signalled
                             ;; in this session, newest first (host-only).
-                            [mdl-errors #:mutable]))
+                            [mdl-errors #:mutable]
+                            ;; ADR-0061: host-only READSTRING observer, or #f.
+                            ;; Never reachable from MDL.
+                            input-observer))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
 (define mdl-oblist? oblist-value?)
 
 (define (make-mdl-atom-space #:clock [clock real-mdl-clock]
-                             #:time-zone [time-zone 'local])
+                             #:time-zone [time-zone 'local]
+                             #:input-observer [input-observer #f])
   (unless (mdl-clock? clock)
     (raise-argument-error 'make-mdl-atom-space "mdl-clock?" clock))
+  (unless (or (not input-observer)
+              (and (procedure? input-observer)
+                   (procedure-arity-includes? input-observer 2)))
+    (raise-argument-error 'make-mdl-atom-space "(or/c #f (procedure-arity-includes/c 2))"
+                          input-observer))
   (unless (mdl-time-zone? time-zone)
     (raise-argument-error 'make-mdl-atom-space "(or/c 'local 'utc)" time-zone))
   (define named (make-hasheq))
@@ -1900,7 +1909,7 @@
               ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
               ;; (seed-root! fails if either is missing from the inventory).
               (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)
-              '() clock time-zone '() '()))
+              '() clock time-zone '() '() input-observer))
 
 ;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
 ;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
@@ -2753,6 +2762,11 @@
 (define (mdl-random-state-snapshot)
   (random36-state-copy (atom-space-random-state (current-mdl-atom-space))))
 
+;; ADR-0054/ADR-0061: host-only copy of the messages of every MDL ERROR
+;; signalled in the current session, oldest first.
+(define (mdl-error-messages)
+  (reverse (atom-space-mdl-errors (current-mdl-atom-space))))
+
 (define (mdl-gettimedate . args)
   (unless (<= (length args) 2)
     (error 'mdl-gettimedate "too many arguments to GETTIMEDATE"))
@@ -3018,10 +3032,12 @@
 (define (make-mdl-context #:output-port [output-port #f]
                           #:input-port [input-port #f]
                           #:clock [clock real-mdl-clock]
-                          #:time-zone [time-zone 'local])
+                          #:time-zone [time-zone 'local]
+                          #:input-observer [input-observer #f])
   (define context (mdl-context (make-hasheq) (list (make-hasheq))
                                (make-mdl-atom-space #:clock clock
-                                                    #:time-zone time-zone)))
+                                                    #:time-zone time-zone
+                                                    #:input-observer input-observer)))
   (call-with-mdl-context
    context
    (lambda ()
@@ -4126,6 +4142,27 @@
                                          (current-continuation-marks))))
   (define port (host-channel-port/strict 'READSTRING host))
   (define size (mdl-string-length buffer))
+  ;; ADR-0061: the host-only observer sees this call's entry (before any
+  ;; character is read) and, when the call returns, every raw character it
+  ;; consumed (escape `!` included, stop character included) and why it
+  ;; ended. It observes; it never supplies input or changes the result.
+  (define observer (atom-space-input-observer (current-mdl-atom-space)))
+  (define consumed (and observer (open-output-string)))
+  (when observer
+    (observer 'enter
+              (hasheq 'buffer buffer 'channel channel 'stops stops
+                      'activation-kinds
+                      (map mdl-activation-kind (current-mdl-activations))
+                      'local-frames (current-mdl-locals))))
+  (define (next-char)
+    (define c (read-char port))
+    (when (and consumed (char? c)) (write-char c consumed))
+    c)
+  (define (finish count reason)
+    (when observer
+      (observer 'complete
+                (hasheq 'raw (get-output-string consumed) 'reason reason 'count count)))
+    count)
   ;; S13 part A (ADR-0050 §3 as amended 2026-11-23; maintainer decision:
   ;; follow pinned Confusion, evidence READSTRING-BANG-REFERENCE.md). One unit
   ;; is read per free slot: a character c, or the escape pair `!` c, which
@@ -4140,18 +4177,18 @@
     (add1 count))
   (let loop ([count 0])
     (if (>= count size)
-        count
-        (let* ([lead (read-char port)]
+        (finish count 'full)
+        (let* ([lead (next-char)]
                [escaped? (and (char? lead) (char=? lead #\!))]
-               [ch (if escaped? (read-char port) lead)])
+               [ch (if escaped? (next-char) lead)])
           (cond
             [(eof-object? ch)
              (set-host-channel-at-eof?! host #t)
-             (if escaped? (store-and-continue count #\!) count)]
+             (finish (if escaped? (store-and-continue count #\!) count) 'eof)]
             [(> (char->integer ch) 127)
              (error 'READSTRING "non-ASCII character (code ~a) in terminal input is not supported (ADR-0050)"
                     (char->integer ch))]
-            [(memv ch stops) count]
+            [(memv ch stops) (finish count 'stop)]
             [else (loop (store-and-continue count ch))])))))
 
 ;; SUBSTRUC (MDL manual ch. 7, section 7.1.7)
