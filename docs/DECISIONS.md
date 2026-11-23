@@ -1753,3 +1753,15 @@ CHANNEL; the manual's general PRIMTYPE remark is not what Confusion does);
 adding the reference's first CHANNEL slot now (it is the echo/script LIST,
 whose effect this runtime does not implement, so a PUT there would be a
 silent no-op; revisit when scripting is supported).
+
+**Amendment (maintainer decision, 2026-11-23): BACK keeps the TYPE too.**
+`mdl-back` preserves the argument's exact MDL TYPE — the TYPE atom itself,
+never its PNAME — for every array-backed value: the terminal CHANNEL (as
+before) and any NEWTYPE of VECTOR, UVECTOR or STRING. Shared storage, the
+UVECTOR UTYPE cell, mutation visibility and the bounds checks are unchanged.
+The resulting policy: REST drops a custom TYPE tag; BACK and TOP keep the
+argument's TYPE, matching pinned Confusion. This departs from the manual's
+general statement (§7.6.2) that BACK yields the array PRIMTYPE; the
+discrepancy is acknowledged and the reference is followed. It revises the M3
+BACK rule (CHANNEL-only), which was the source of the TOP/BACK `==?`
+inconsistency found in the S4 review.

@@ -191,13 +191,14 @@
 (check-equal? (run "<LENGTH <BACK ,INCHAN>>") "20")
 (check-equal? (run "<1 <BACK ,INCHAN>>") "0")
 
-;; Independent review (2026-11-23): recorded deviations, pinned so a change
-;; to either is noticed. (1) TOP keeps a NEWTYPE tag, this runtime's BACK does
-;; not (M3 BACK rule); native BACK keeps it (SEMANTICS M4 S4).
+;; (1) TOP and BACK both keep a NEWTYPE tag (maintainer decision 2026-11-23,
+;; ADR-0058 amendment), matching pinned Confusion; their results are ==?.
 (check-equal? (run "<NEWTYPE FOO VECTOR>" "<SET F <CHTYPE <REST [1 2 3] 2> FOO>>" "<TYPE <TOP .F>>")
               "FOO")
 (check-equal? (run "<NEWTYPE FOO VECTOR>" "<SET F <CHTYPE <REST [1 2 3] 2> FOO>>" "<TYPE <BACK .F 2>>")
-              "VECTOR")
+              "FOO")
+(check-equal? (run "<NEWTYPE FOO VECTOR>" "<SET F <CHTYPE <REST [1 2 3] 2> FOO>>" "<==? <TOP .F> <BACK .F 2>>")
+              "T")
 ;; (2) OBLIST is struct-backed here, so TOP of it is refused (strict).
 (refuses #rx"^mdl-top: Bad type for TOP" "<TOP <ROOT>>")
 

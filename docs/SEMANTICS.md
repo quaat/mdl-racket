@@ -2232,10 +2232,13 @@ storage and UVECTOR UTYPE header with the input view; mutation through
 either view remains visible to the other. The pinned native probes in
 `evidence/M3/back-reference.json` confirm vector, uvector and string
 content, zero-offset and beyond-start errors, and the host terminal
-CHANNEL's one preceding slot. Confusion retains CHANNEL TYPE on BACK of
-INCHAN, despite the manual's general statement that BACK changes to the
-array PRIMTYPE; preserve that observed host-channel behavior only for a
-CHANNEL value. Its preceding slot reads as FIX 0 in the pinned bare
+CHANNEL's one preceding slot. Confusion retains the argument's TYPE on BACK
+— CHANNEL for INCHAN, and any NEWTYPE of VECTOR, UVECTOR or STRING — despite
+the manual's general statement that BACK changes to the array PRIMTYPE.
+*Amended 2026-11-23 (maintainer decision; ADR-0058 amendment):* BACK keeps
+the argument's exact TYPE (by TYPE atom, never PNAME) for every array-backed
+value, as TOP does; REST drops it. Previously only CHANNEL was kept. The
+manual discrepancy is acknowledged and the reference is followed. Its preceding slot reads as FIX 0 in the pinned bare
 interpreter; the original source's PUT on that FIX uses the existing
 association dispatch. This host representation is not a puzzle-rule change.
 
@@ -3105,20 +3108,12 @@ a NEWTYPE-tagged original only if the TYPEs agree (`<==? <TOP <CHTYPE <REST
 separate array is `=?` but not `==?`. EVERYTHING's `<==? .SUV .TUV>` is T
 exactly when the BACK steps have reached the first slot.
 
-**Known deviation: BACK of a NEWTYPE'd array (independent review,
-2026-11-23).** TOP keeps the argument's TYPE, as pinned Confusion does.
-This runtime's BACK keeps only the CHANNEL TYPE (the M3 BACK decision above,
-following the manual's "BACK yields the array PRIMTYPE"), whereas native BACK
-keeps any TYPE: with `<NEWTYPE FOO VECTOR> <SET F <CHTYPE <REST [1 2 3] 2>
-FOO>>`, native gives `<TYPE <BACK .F 2>>` = FOO and `<==? <TOP .F> <BACK .F
-2>>` = T (also for a NEWTYPE of STRING; probe below), while this runtime gives
-VECTOR and FALSE. The TOP/BACK `==?` identity above therefore holds for
-untyped arrays (all game uses: SPARSE and EVERYTHING BACK plain VECTOR /
-UVECTOR views) but not for NEWTYPE'd arrays. Changing BACK needs a
-maintainer decision because it revises the recorded M3 BACK rule.
-Native check (mdli 6df359f6, bare interpreter): `<TYPE <BACK <CHTYPE <REST
-[1 2 3] 2> FOO> 2>>` → `FOO`; `<==? <TOP .F> <BACK .F 2>>` → `T`;
-`<TYPE <BACK <CHTYPE <REST "abc" 1> BS> 1>>` → `BS`.
+**BACK of a NEWTYPE'd array (resolved 2026-11-23).** The independent S4
+review found that BACK dropped a NEWTYPE tag while TOP kept it (native keeps
+it for both: `<TYPE <BACK .F 2>>` = FOO, `<==? <TOP .F> <BACK .F 2>>` = T,
+`BS` for a NEWTYPE of STRING; mdli 6df359f6). By maintainer decision BACK now
+keeps the argument's TYPE too, so TOP and BACK views of the same extent of a
+typed array are `==?` (tests/back_test.rkt, tests/top_test.rkt).
 
 **Refusals (strict errors).** Any other argument: LIST-primtype values
 (LIST, a REST of a LIST, FORM, FALSE, SEGMENT), TUPLEs (this runtime's TUPLE
