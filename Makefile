@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -46,6 +46,12 @@ test-m3-start-back: sources
 
 test-m3-saveit: sources
 	@raco test tests/historical_saveit_test.rkt
+
+# S7 (ADR-0050): faithful run.mud path played with the six house-boot
+# commands through the host top-level loop. INITIALIZED/INTERACTIVE evidence,
+# not SMOKE_PARITY (the date line needs the fixed clock of issue #135).
+test-m3-interactive: sources
+	@raco test tests/historical_interactive_test.rkt
 
 # Complete local M2 technical check. Build the native reference once with
 # `make reference-build` before using this target. Milestone acceptance also

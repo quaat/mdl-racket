@@ -1,0 +1,25 @@
+S7: raw Racket output vs pinned Confusion boot-six (pipe stdout_raw), byte comparison
+Confusion: S7-frontier/boot-reference.json case boot-six, fixed clock (MDL_FIXED_EPOCH=250776000, TZ=UTC);
+  stderr 'Error: Unexpected EOF\n', exit 0; text from '81prim.mud loaded' onward.
+Racket: 10 runs of the faithful path (mdl-session-load! 77loadall.mud, then
+  mdl-session-run-interactive "SAVE-IT"), LF-terminated input, UNFIXED host clock.
+Normalisation: remove the one '"DONE"\n' line (D1, not produced by the host) and the
+  date in 'This version created <Month> <day>.' in both texts (issue #135). No other change;
+  CR bytes are kept, so this is stricter than the D2 canonical comparison.
+RNG: ROOM-INFO's <PROB 80> (77rooms.mud:523) picks the brief or the full West of House
+  text for 'west'. Confusion's fixed-clock seed gives the brief text; the Racket seed
+  follows the wall clock. 'FULL-variant' compares against the Confusion text with that
+  one response replaced by the full description (the same ROOM-INFO text as at boot).
+
+run 1  west=BRIEF byte-identical to Confusion:                 True
+run 2  west=FULL  byte-identical to Confusion FULL-variant:    True
+run 3  west=FULL  byte-identical to Confusion FULL-variant:    True
+run 4  west=BRIEF byte-identical to Confusion:                 True
+run 5  west=BRIEF byte-identical to Confusion:                 True
+run 6  west=FULL  byte-identical to Confusion FULL-variant:    True
+run 7  west=FULL  byte-identical to Confusion FULL-variant:    True
+run 8  west=BRIEF byte-identical to Confusion:                 True
+run 9  west=BRIEF byte-identical to Confusion:                 True
+run 10 west=BRIEF byte-identical to Confusion:                 True
+
+Racket outcome (every run): exn:fail:mdl-input-exhausted: READSTRING: input exhausted: the session input ended and the mirrored end-of-input read was already returned (maintainer decision D3; ADR-0050)
