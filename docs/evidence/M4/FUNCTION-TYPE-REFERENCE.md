@@ -12,7 +12,7 @@ Command: `python3 -I scripts/probe_function_type_reference.py docs/evidence/M4/f
 → exit 0, 19 cases (one mdli process each, pipe mode; language cases in an
 empty `$TMPDIR` directory, the game case in a fresh copy of
 `patched_confusion`). Record: `function-type-probe.json` (sha256
-`398d250e…489a`), raw stdout/stderr per case (latin-1), the probed name lists
+`0dac64dc…861f`; re-recorded in M4 S5a to add MAX, earlier record `398d250e…489a`), raw stdout/stderr per case (latin-1), the probed name lists
 `builtin_names` and `special_names`.
 
 Manual: *The MDL Programming Language* §9.1 (a FUNCTION is a LIST-primtype
@@ -55,7 +55,7 @@ object: the formal LIST followed by the body), §9.3 (SUBR/FSUBR), §17.1
 | function-uvector | `<UVECTOR ,F ,G>` `![#FUNCTION ((X) .X) #FUNCTION ((X) .X)!]`, UTYPE FUNCTION |
 | macro | DEFMAC: TYPE MACRO, PRIMTYPE LIST, `<TYPE? ,M MACRO>` MACRO, `<TYPE? ,M FUNCTION>` FALSE, APPLICABLE? T, `<M>` 3 |
 | builtin-subr | `<TYPE ,+>` SUBR, PRIMTYPE WORD, `<TYPE? ,+ SUBR>` SUBR, `<TYPE? ,+ FUNCTION>` FALSE, APPLICABLE? T, `<DECL? ,+ SUBR>` T, `==?` T; `<SETG PLUS ,+>` prints `#SUBR *0000000000000000000117*`, `==?` T, TYPE SUBR, applies; `<TYPEPRIM SUBR>` WORD, `FSUBR` WORD, `FUNCTION` LIST, `MACRO` LIST |
-| builtin-subr-types | `<TYPE ,n>` is **SUBR** for every one of the 112 probed names: the 111 names this runtime binds to a host built-in (`builtin-table` of `mdl/runtime/core.rkt` at `adbe410`) and FLOAD |
+| builtin-subr-types | `<TYPE ,n>` is **SUBR** for every one of the 113 probed names: the 112 names this runtime binds to a host built-in (`builtin-table` of `mdl/runtime/core.rkt` at `adbe410`, plus MAX added by M4 S5a) and FLOAD |
 | special-form-types | QUOTE, DEFINE, DEFMAC, FUNCTION, PROG, REPEAT, UNWIND, GDECL, COND, AND, OR: **FSUBR**; RETURN, AGAIN, NOT: **SUBR** |
 | fsubr | `<TYPE ,COND>` FSUBR, PRIMTYPE WORD, `<TYPE? ,COND SUBR FSUBR>` FSUBR, APPLICABLE? T, `<GASSIGNED? COND>` T |
 | applicable-other | `<APPLICABLE? 3>` T; ATOM, LIST, FALSE: FALSE |
