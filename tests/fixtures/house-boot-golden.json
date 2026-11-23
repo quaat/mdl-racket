@@ -1,0 +1,42 @@
+{
+  "note": "Extract of the maintainer-approved CANDIDATE house-boot transcript (gameplay approved 2026-11-22; not yet a strict golden). Source: docs/evidence/M3/house-boot-candidate.json on branch BOOT-REF (PR #131) at commit e616ac0; sha256 of that file below. Only the strict text fields needed by tests/historical_interactive_test.rkt are copied, unchanged. PTY-rendered (see docs/evidence/M3/S7-frontier/golden-compare.txt).",
+  "source_file": "docs/evidence/M3/house-boot-candidate.json",
+  "source_commit": "e616ac0",
+  "source_sha256": "eb194115ce70a12d990dfe71a8a914e5b9739337fb209713b8573872f81a6eb5",
+  "scenario": "house-boot",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "candidate_note": "CANDIDATE: gameplay approved by maintainer 2026-11-22; NOT yet a strict golden fixture. Compare only STRICT_FIELDS (scripts/boot_reference.py compare).",
+  "boot_output": "LISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\n\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\n\nfront door.\nThere is a small mailbox here.\n",
+  "commands": [
+    {
+      "input": "north",
+      "output": "You are facing the north side of a white house.  There is no door here,\n\nand all the windows are barred.\n"
+    },
+    {
+      "input": "west",
+      "output": "West of House\nThere is a small mailbox here.\n"
+    },
+    {
+      "input": "open mailbox",
+      "output": "Opening the mailbox reveals a leaflet.\n"
+    },
+    {
+      "input": "take leaflet",
+      "output": "Taken.\n"
+    },
+    {
+      "input": "inventory",
+      "output": "You are carrying:\nA leaflet\n"
+    },
+    {
+      "input": "score",
+      "output": "\nYour score would be 0 [total of 500 points], in 6 moves.\nThis score gives you the rank of Beginner.\n"
+    }
+  ],
+  "complete": true
+}

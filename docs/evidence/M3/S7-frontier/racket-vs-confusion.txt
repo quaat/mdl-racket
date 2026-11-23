@@ -1,0 +1,11 @@
+racket raw contains CR: True
+confusion pipe (from 81prim line) == racket stub walk: False
+'--- confusion-pipe\n'
+'+++ racket-stub-walk\n'
+'@@ -12,6 +12,4 @@\n'
+' 77dung.mud loaded\n'
+'-"DONE"\n'
+' Welcome to Dungeon.\r\n'
+' This version created December 12.\n'
+'-\n'
+' You are in an open field west of a big white house, with a boarded\r\n'

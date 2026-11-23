@@ -1,0 +1,59 @@
+{
+  "name": "interactive-boot",
+  "cases": [
+    {
+      "name": "boot-six",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "approved house-boot scenario over a pipe; EOF after score",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest\nopen mailbox\ntake leaflet\ninventory\nscore\n"
+    },
+    {
+      "name": "boot-six-crlf",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "same, CRLF line endings (as run.mud bytes)",
+      "input": "<FLOAD \"77loadall.mud\">\r\n<SAVE-IT>\r\nnorth\r\nwest\r\nopen mailbox\r\ntake leaflet\r\ninventory\r\nscore\r\n"
+    },
+    {
+      "name": "boot-quit-yes",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "QUIT command, answer y: FINISH/SCORE/YES-NO/RECORD/QUIT",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nquit\ny\nlook\n"
+    },
+    {
+      "name": "boot-quit-no",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nquit\nn\nlook\n"
+    },
+    {
+      "name": "boot-edge-lines",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "empty line, upper case, 150-char line (INBUF is 100), ESC terminator",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n\nNORTH\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nwest\u001binventory\n"
+    },
+    {
+      "name": "boot-eof-midline",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nnorth\nwest"
+    },
+    {
+      "name": "boot-same-line",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "command on the same line as <SAVE-IT>",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>north\n"
+    }
+  ]
+}

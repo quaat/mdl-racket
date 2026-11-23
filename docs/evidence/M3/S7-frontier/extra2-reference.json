@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "name": "interactive-extra2",
+  "recorded_at": "2026-11-23T06:23:43.234869+00:00",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "protocol": "if_probe.py; one mdli process per case; stdin pipe; cwd fresh $TMPDIR/if-work dir; never .cache/upstream",
+  "cases": [
+    {
+      "name": "eof-sequence-then-reset",
+      "note": "form, then a single LF, then EOF. LISTEN leaves LF as lookahead. Calls: 1 reads lookahead LF ->0; 2 hits EOF ->0 and sets AT_EOF; RESET clears status; 3 getc at EOF -> 0 again (no error); 4 -> error",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <RESET ,INCHAN>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINC \"after\">>\n",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"^@^@^@^@^@^@^@^@^@^@\"\n\n0 \n0 \n#CHANNEL [1 \"READ\" \"\" \"\" \"\" \"\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 10 0 0 0 10 0] \n0 ",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"^@^@^@^@^@^@^@^@^@^@\"\n\n0 \n0 \n#CHANNEL [1 \"READ\" \"\" \"\" \"\" \"\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 10 0 0 0 10 0] \n0 ",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {},
+      "workdir": "$TMPDIR/if-work/eof-sequence-then-reset-2zx4qa52"
+    },
+    {
+      "name": "eof-routine-proper",
+      "note": "third call has an EOF routine argument (4th arg)",
+      "cwd_kind": "empty",
+      "fixed_clock": false,
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS '<PROG () <PRINC \"eof-routine-ran\"> 99>>> <PRINC \"after\">>\n",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\r\n\"\n\"^@^@^@^@^@^@^@^@^@^@\"\n\n0 \n0 eof-routine-ran\n99 after\"after\"\n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^[\n\"\n\"^@^@^@^@^@^@^@^@^@^@\"\n\n0 \n0 eof-routine-ran\n99 after\"after\"\n",
+      "stderr_raw": "Attempt to read from closed channel\n",
+      "files_created_or_changed": {},
+      "workdir": "$TMPDIR/if-work/eof-routine-proper-x5lk8ag4"
+    },
+    {
+      "name": "boot-quit-then-eof",
+      "note": "quit then EOF: YES/NO RESETs (clearing EOF), READSTRING returns 0, INBUF still holds 'quit'",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nquit\n",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>\nYour score would be 0 [total of 500 points], in 1 move.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>\nYour score would be 0 [total of 500 points], in 1 move.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n>",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "57c8dce02c71c0227cb2e2996d26126fa52382785150b83e47c03f6605627342"
+          ]
+        }
+      },
+      "workdir": "$TMPDIR/if-work/boot-quit-then-eof-r13rqzxt"
+    },
+    {
+      "name": "boot-quit-y-no-mdl-dir",
+      "note": "quit/y with MDL/ directory removed is not possible here (SAVE would fail); instead check exit and log only",
+      "cwd_kind": "game",
+      "fixed_clock": true,
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nquit\nyes\n",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>\nYour score would be 0 [total of 500 points], in 1 move.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>\nYour score would be 0 [total of 500 points], in 1 move.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "files_created_or_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": [
+            879667,
+            "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4"
+          ],
+          "after": [
+            874632,
+            "8e8aaad0011b40cc95f04417e47ff88ff7bd9be3a6ba4be73df7055b2cf33c1f"
+          ]
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": [
+            130,
+            "0decb2738fefceb520ef67a5a9cc4948bccbf4cee289d75f190355f692dac3ba"
+          ]
+        }
+      },
+      "workdir": "$TMPDIR/if-work/boot-quit-y-no-mdl-dir-tvk_rp75"
+    }
+  ]
+}

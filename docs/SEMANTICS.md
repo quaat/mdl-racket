@@ -2063,7 +2063,7 @@ predefined SUBR value until the program SETGs or GUNASSIGNs REP:
   SUBR or FSUBR, UNPARSE/PRINT of REP. Other built-in SUBRs remain host
   procedures whose TYPE is still an unsupported-type error.
 
-**Host top-level loop (specified, not implemented in S6).** The loop
+**Host top-level loop (specified in S6; implemented in S7, ADR-0050).** The loop
 replaces Confusion's LISTEN for a game session. Contract for the slice that
 implements it (after RESET, PRINC and READSTRING exist):
 
@@ -2076,7 +2076,9 @@ implements it (after RESET, PRINC and READSTRING exist):
    `<APPLY ,REP>`. An unassigned or non-applicable GVAL is a strict error. The
    default REP SUBR is never applied by the loop: meeting it is the ADR-0049
    strict error. The pass's value is discarded; the loop itself reads and
-   prints nothing.
+   prints nothing. (Amended by ADR-0050, maintainer decision D1: before the
+   first pass the loop prints the entry form's value once with PRIN1 and
+   TERPRI; see "M3 interactive terminal I/O and the host top-level loop".)
 3. *End.* The loop ends normally only when the applied code QUITs (the game's
    QUIT/FINISH path). Exhausted terminal input (for example READSTRING at EOF,
    which Confusion reports as `Unexpected EOF`) is a strict error, never a
@@ -2094,6 +2096,144 @@ XUNM is unassigned or in WINNERS and `<PC>` (T) holds. On that path the next
 loop pass meets the default REP and fails loudly (ADR-0049), where Confusion
 drops into its REPL. BLO (77act1.mud:3) acts only while REP is a SUBR or FSUBR;
 after CONTIN REP is RDCOM (a FUNCTION), and BLOCKED never fires (ADR-0048).
+
+## M3 interactive terminal I/O and the host top-level loop (ADR-0050)
+
+Specification written before implementation. References: manual chapter 11
+(§11.1.2.3 PRINC/PRIN1, §11.2.8 channel slots, §11.3 end of file, §11.4.1.2
+READSTRING, §11.7.7 RESET, §11.8 terminals) and 16.1 (LISTEN); pinned
+Confusion `6df359f6…` probes in `evidence/M3/S7-frontier/`
+(`primitives-reference.json`, `extra2-reference.json`, `boot-reference.json`).
+Game uses: CONTIN `<RESET ,INCHAN>` (77rooms.mud:303), YES/NO (77defs.mud:433),
+RDCOM `<PRINC ">">` and `<READSTRING .INBUF ,INCHAN .STR>` with READER-STRING
+= ESC CR LF (77rooms.mud:598-616), PRINC `!\.` (77rooms.mud:1398), PRINC of a
+FIX (78melee.mud:524), SCORE's PRIN1 of FIX (77rooms.mud:675-680).
+
+**Terminal CHANNEL host state.** Each terminal CHANNEL's host record (keyed
+by its backing storage, ADR-0046/#117) gains one mutable end-of-input flag,
+initially clear. It is host state only: no CHANNEL slot shows it (deviation:
+Confusion keeps it in STATUS, slot 11). "Open CHANNEL" below means: TYPE
+CHANNEL (the ROOT atom), registered in the current session, and the view's
+mode slot (element 2) equal to the host direction (`"READ"`/`"PRINT"`), so a
+forged, foreign or shifted (BACK/REST) view is refused.
+
+**RESET** `<RESET channel>`.
+- Exactly one argument; zero or more than one is a strict error
+  (Confusion: `Not enough args to RESET` / `Too many args to RESET`).
+- A non-CHANNEL is a strict error (Confusion: `Argument to RESET must be of
+  type CHANNEL`); a CHANNEL that is not open in this session is refused.
+- READ terminal channel: clears the end-of-input flag. Unread input queued on
+  the port is **not** discarded (Confusion keeps its stdio buffer too). There
+  is no lookahead to drop: READSTRING never peeks (Confusion drops one
+  lookahead character, which only LISTEN's reader sets).
+- PRINT terminal channel: no host state to reset.
+- Returns the same object (`==?` the argument). No slot changes, the BACK
+  predecessor slot and its associations (CONTIN's `<PUT <1 <BACK ,INCHAN>> 6
+  …>`) are untouched. Deviation: Confusion sets STATUS to 0 and rewrites
+  DEVN; the manual's "like OPENing afresh" re-acquisition is not modelled.
+
+**PRINC** `<PRINC object [channel]>` and **PRIN1** `<PRIN1 object [channel]>`.
+- One or two arguments, otherwise a strict error. The channel defaults to
+  the LVAL of OUTCHAN (as PRINTSTRING); it must be an open PRINT CHANNEL
+  (Confusion: `Channel for PRINC must be output channel`, `Attempt to write
+  to non-channel`).
+- Both return the object itself.
+- PRINC writes: a STRING (native or REST view) as its characters, without
+  quotes; a CHARACTER as the bare character; a FIX in decimal (Confusion
+  `<PRINC 42>` → `42`). CR (13) and LF (10) are written raw. Any other
+  control character (0-31, 127) is a strict error (Confusion prints `^X`
+  notation, e.g. ESC as `^[`; not modelled).
+- PRIN1 writes: a FIX in decimal; an ATOM whose PNAME is empty and which is
+  found by its PNAME on the current OBLIST path prints nothing (Confusion
+  `rep-value-printing-null-atom`: the game's `,NULL`); any other ATOM follows
+  the existing UNPARSE ATOM rules (safe PNAME characters, reachable, no
+  trailer), else a strict error.
+- Every other TYPE (ATOM for PRINC, STRING/CHARACTER/LIST/FALSE for PRIN1,
+  typed values, …) is a strict error.
+- **No line breaking.** The manual and Confusion insert a newline when the
+  column is positive and column + length exceeds the CHANNEL line width
+  (slot 13, 0 = unlimited). This runtime ignores slot 13 and inserts
+  nothing; RDCOM sets the width to 1000 (`<PUT .OUTCHAN 13 1000>`), which
+  makes breaking unreachable on the tested path. Tests assert the absence.
+  HANDLE sets width 80; that path is out of scope.
+
+**READSTRING** `<READSTRING buffer channel [stop]>`.
+- Exactly two or three arguments. Fewer is a strict error (the manual's
+  default `.INCHAN` channel is not modelled); a fourth argument (EOF routine)
+  is a strict unsupported error; more is a strict error.
+- buffer: a mutable STRING or REST view of one; anything else (including an
+  immutable literal or a CHTYPE'd STRING) is a strict error (Confusion:
+  `UVECTOR for readstring must be of type STRING`).
+- channel: an open READ CHANNEL (Confusion: `Channel for READSTRING must be
+  input channel`).
+- stop: a STRING (native or view) of stop characters. A FIX stop (count
+  limit) is a strict unsupported error; any other TYPE is a strict error.
+- Arguments are validated first. Then every open terminal output port of the
+  session is flushed (the prompt is visible before a blocking read). Then, if
+  the channel's end-of-input flag is set, `exn:fail:mdl-input-exhausted` is
+  raised (see below). Otherwise characters are read one at a time from the
+  channel's port until (a) the buffer view is full, (b) a stop character is
+  read (consumed, not stored), or (c) end of input, which sets the flag.
+  Characters are stored from position 1 of the given view; the rest of the
+  buffer is unchanged (stale characters stay, as YES/NO relies on). Returns
+  the FIX count stored. Case is preserved, nothing is echoed or written.
+- Overflow: when the buffer fills, the rest of the line stays unread and the
+  next READSTRING continues from it (Confusion `readstring-overflow`).
+- A `!` or a character with code above 127 in the input is a strict error.
+  Confusion reads `!x` as `x` (its reader escape, `readstring-bang-and-case`);
+  the manual does not say what READSTRING does with `!`. Recorded as an open
+  question rather than guessed.
+- CR is a stop character in READER-STRING, so CRLF input yields an extra empty
+  read (Confusion `boot-six-crlf`); the host therefore feeds LF-terminated
+  lines.
+
+**End of input (maintainer decision D3, "Mirror, then strict").** The first
+read that meets end of input behaves as Confusion's: it returns the count
+read so far (0 for an empty read, so RDCOM prints `Beg pardon?` and a new
+`>`) and sets the flag. A READSTRING entered with the flag set raises
+`exn:fail:mdl-input-exhausted` with the message `READSTRING: input exhausted:
+the session input ended and the mirrored end-of-input read was already
+returned (maintainer decision D3; ADR-0050)`. This is a host-level Racket
+exception, **not** an MDL ERROR: no MDL ERROR handler runs (the game's HANDLE
+would otherwise run FINISH/RECORD/QUIT, which Confusion never shows), and the
+host loop reports it as a failure. RESET clears the flag (Confusion: after
+RESET one more 0-count read, then the error). Deviation: Confusion raises
+`Error: Unexpected EOF` and closes the channel; the manual calls ERROR.
+
+**Host top-level loop** (`mdl-session-run-interactive session entry
+#:max-passes #:on-event`, `mdl/loader.rkt`). Implements ADR-0049 part 3 with
+the maintainer's D1 amendment.
+1. The session must have been made with explicit `#:input-port` and
+   `#:output-port`; otherwise the call fails before running anything (the
+   loop never reads the process's own standard input by accident).
+2. *Entry.* Apply the GVAL named `entry` (for `run.mud`: `SAVE-IT`, after
+   the caller's `mdl-session-load!` of `77loadall.mud`) with no arguments.
+   If it raises, the failure propagates and the loop never starts.
+3. *Entry value print (D1).* PRIN1 the entry value to the LVAL of OUTCHAN,
+   then TERPRI. For SAVE-IT this is `,NULL` (empty PNAME), i.e. one empty
+   line, as LISTEN's REP prints it in Confusion. The banner
+   `LISTENING-AT-LEVEL 1 PROCESS 1` and the `"DONE"` line (REP printing
+   FLOAD's value) are never printed; the comparator strips them from the
+   Confusion golden.
+4. *Each pass.* Re-read the session's GVAL of ROOT REP (never cached);
+   unassigned or non-applicable is a strict error; the default REP is the
+   ADR-0049 strict error. Apply it with no arguments; discard the value.
+   RDCOM never returns on the tested path, so the loop makes one pass.
+   `#:max-passes` bounds the passes (exceeding it is a strict error).
+5. *End.* Only by an exception in this slice: input exhausted, a strict
+   error, or any other failure. QUIT is not implemented (out of scope). The
+   output port is flushed on every exit.
+6. *Isolation.* Local host API only; no network or web entry point; input
+   reaches MDL only through the program's own READSTRING.
+
+**Transcript comparison (D2).** The approved golden is PTY-rendered. A
+Racket transcript is compared as `canonical_text(ONLCR(raw))`: every LF in
+the raw output becomes CR LF (termios ONLCR), then CR LF → LF and CR → LF
+(`scripts/boot_reference.py` `canonical_text`). The golden's
+`LISTENING-AT-LEVEL 1 PROCESS 1` and `"DONE"` lines are removed (D1), and the
+`This version created <Month> <day>.` line is normalised in both texts,
+because DSKDATE reads the host clock until issue #135 fixes it. Full
+SMOKE_PARITY needs that fixed clock.
 
 ## M3 reader: backslash escapes in atom names (issue #119)
 

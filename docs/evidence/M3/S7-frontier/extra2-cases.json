@@ -1,0 +1,31 @@
+{
+  "name": "interactive-extra2",
+  "cases": [
+    {
+      "name": "eof-sequence-then-reset",
+      "note": "form, then a single LF, then EOF. LISTEN leaves LF as lookahead. Calls: 1 reads lookahead LF ->0; 2 hits EOF ->0 and sets AT_EOF; RESET clears status; 3 getc at EOF -> 0 again (no error); 4 -> error",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <RESET ,INCHAN>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINC \"after\">>\n"
+    },
+    {
+      "name": "eof-routine-proper",
+      "note": "third call has an EOF routine argument (4th arg)",
+      "input": "<SETG RS <STRING <ASCII 27> <ASCII 13> <ASCII 10>>>\n<SET B <ISTRING 10>>\n<PROG () <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS>> <PRINT <READSTRING .B ,INCHAN ,RS '<PROG () <PRINC \"eof-routine-ran\"> 99>>> <PRINC \"after\">>\n"
+    },
+    {
+      "name": "boot-quit-then-eof",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "quit then EOF: YES/NO RESETs (clearing EOF), READSTRING returns 0, INBUF still holds 'quit'",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nquit\n"
+    },
+    {
+      "name": "boot-quit-y-no-mdl-dir",
+      "cwd": "game",
+      "fixed_clock": true,
+      "timeout": 120,
+      "note": "quit/y with MDL/ directory removed is not possible here (SAVE would fail); instead check exit and log only",
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nquit\nyes\n"
+    }
+  ]
+}
