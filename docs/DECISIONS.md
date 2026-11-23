@@ -1426,6 +1426,100 @@ the handler is turned `OFF` at load (`77rooms.mud:104`). A determinism
 claim for another program that reads that argument must not rely on this
 ADR.
 
+## ADR-0053: One strict SMOKE_PARITY comparator; D1 and D2 are the only allowed differences
+
+**Status:** Proposed (S10, issues #131/#135). Builds on ADR-0050 (D1, D2,
+D3) and ADR-0052 (fixed session clock). Evidence:
+`evidence/M3/S10-SMOKE-PARITY.md`.
+
+**Decision:**
+
+1. **One comparator.** Every fresh-boot SMOKE_PARITY comparison goes through
+   `compare_records` in `scripts/smoke_parity.py`: this runtime's candidate
+   against a Confusion reference record, and a fresh Confusion capture
+   against the committed one. `boot_reference.py compare` delegates to it.
+   There is no second comparator.
+2. **Records.** A reference record is a Confusion PTY capture from
+   `scripts/boot_reference.py` (schema 2 or 3; same strict-field layout). A
+   candidate record is built by `candidate_record` from the raw facts of
+   `scripts/m3_house_boot_run.rkt`. That script runs the faithful `run.mud`
+   path through `mdl-session-run-interactive` on the scenario's fixed clock
+   (`fixed_epoch`, zone UTC) and keeps the raw output verbatim. The
+   comparator re-derives every compared candidate field from that raw output,
+   so an edited record fails.
+3. **Allowed presentation differences, and nothing else:**
+   - **D1** (ADR-0050 part 5): the reference `boot_output` must contain
+     `LISTENING-AT-LEVEL 1 PROCESS 1` as its first line and FLOAD's
+     `"DONE"` line exactly once each. Those two lines are removed exactly once,
+     from the reference only. The host's REP print of `,NULL` (the blank line
+     after the date line) is compared, not removed.
+   - **D2** (ADR-0050; `evidence/M3/S7-frontier/golden-compare.txt`): the
+     reference text is `canonical_text` of PTY output, whose line discipline
+     applies ONLCR. The candidate's raw output becomes
+     `canonical_text(ONLCR(raw))`, then splits at RDCOM prompts with the
+     reference's own rule (`^>`). After D2, no CR or ESC may remain in any
+     compared text.
+4. **Exact checks.** These must be equal: scenario name, `fixed_epoch`,
+   `tz`, the entry forms, and the command inputs (order, missing and extra
+   commands). These must be byte-identical after D1/D2: the boot text and
+   every response. Named checks repeat these for the date line (exactly one,
+   identical) and the score line (points, total, moves). The final move count
+   must equal the number of commands. The candidate's `MOVES` global must
+   equal the move count on its score line. There is no date substitution,
+   no alternative `west` text and no whitespace folding.
+5. **Termination (D3).** The candidate run must end by input exhaustion:
+   - exactly one mirrored empty read after the last command (output
+     `Beg pardon?` then `>`);
+   - then `exn:fail:mdl-input-exhausted` with the exact D3 message;
+   - all input consumed, load PASS (1229/0), host-loop events
+     `entry-returned`, `pass`, and the game directory unchanged.
+
+   This is reported as input exhaustion, never as a user QUIT or as success
+   on its own. A run that stops early, times out, errors or returns is a
+   FAIL. The reference PTY capture stops at the last prompt, so the D3 tail
+   is checked against its exact expectation, not against the reference.
+6. **Provenance (reference schema 3).** `provenance.immutable_inputs` holds
+   what is fixed before the boot:
+   - the game files, minus the removed stale `SAVEFILE/ZORK.SAVE` and minus
+     SAVE artifacts;
+   - the hashes of mdli, `fixed_time.c` and the scenario file;
+   - the commands and the entry forms.
+
+   `provenance.save_artifacts` lists the files the run writes
+   (`MDL/MADADV.SAVE`, `77rooms.mud:8-9`) with before and after hashes. The
+   after hash changes between identical Confusion runs, so it is never
+   compared. A capture fails if the run writes any other file. The
+   approved schema-2 record stays unchanged. Its `boot_input_state` still
+   lists `MDL/MADADV.SAVE`, a documented flaw. Its gameplay fields remain
+   comparable.
+7. **`make m3-check`** runs these stages in order, each PASS, FAIL or NOT
+   RUN:
+   - `sources`;
+   - `test-m3-saveit`;
+   - `test-m3-clock-seed`;
+   - `test-m3-interactive`;
+   - the comparator unit tests;
+   - the binary-free strict comparison of this runtime against the
+     committed reference;
+   - optionally, a fresh native capture compared with both. Without mdli or
+     gcc this stage is NOT RUN, never PASS; `M3_NATIVE=require` makes that a
+     FAIL.
+
+   The target exits nonzero on any FAIL and writes
+   `artifacts/m3/m3-check.json`.
+
+**Why:** S7 compared with date normalisation and allowed two `west` texts,
+because the clock was not fixed. ADR-0052 made the clock a session
+dependency, so every tolerance except the two approved presentation
+differences can now go. One comparator keeps the contract in one place.
+Each kind of drift (date, RNG branch, text, command list, score/moves,
+early stop) fails a named negative test.
+
+**Consequence:** A PASS is technical evidence for one scenario: six
+commands, fixed clock 250776000, UTC. It does not cover play under the real
+wall clock, other inputs, save/restore, QUIT or death paths. The gate state
+stays the maintainer's decision in `STATUS.md`. No runtime file, game
+source, upstream provenance, license or GPLv3 code changed.
 ## ADR-0054: QUIT is a session-termination signal; the host loop returns a session outcome
 
 **Status:** Proposed (S11). Implements the "ends when the applied code QUITs"
