@@ -39,3 +39,7 @@
            (hash-ref failure 'stage) (hash-ref failure 'expression_index)
            (hash-ref failure 'exception))
   (exit 1))
+;; ADR-0054 item 6: the loaded program QUIT; not a PASS and not a load failure.
+(when (equal? (hash-ref result 'status) "QUIT")
+  (eprintf "the program QUIT during the load (last event in the report)\n")
+  (exit 3))

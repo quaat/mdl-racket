@@ -1435,8 +1435,16 @@ Evidence: `evidence/M3/SESSION-QUIT-REFERENCE.md` (pinned Confusion
    flush is raised (first failure; the rest are its secondaries) and the quit
    outcome is dropped. A quit whose transcript may be incomplete is never
    reported as success.
-6. QUIT outside the host loop (during a load or `mdl-session-call`) propagates
-   the signal to the host caller unchanged.
+6. QUIT outside the host loop: during `mdl-session-load!` the loader records
+   a `"QUIT"` event (file, expression, line, column, construct, load chain)
+   and the load report's status is `"QUIT"` (never `"PASS"`; the
+   `scripts/mdl_load.rkt` driver exits 3); during `mdl-session-call` the
+   signal propagates to the host caller unchanged. (Amended after the S11
+   independent review, 2026-11-23.)
+7. An MDL ERROR's outcome record is the message formatted at signal time;
+   the message of an unresolved ERROR's host failure is formatted after
+   handler delivery, as before S11, so a handler that mutates an argument
+   is reflected in it (S11 review).
 
 **Why:** The manual (§23.3) makes QUIT end MDL; Confusion's QUIT is `exit(0)`
 and runs no cleanup (C1, D11). A host process must not exit from inside a
