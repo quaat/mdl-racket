@@ -1,4 +1,4 @@
-# Status — 2026-11-23 (`main`: M2 PASS, M3 LOADED FAIL; branch stack: M3 SMOKE_PARITY and local session smoke PASS (branch evidence, scoped))
+# Status — 2026-11-23 (`main` = `2a86d5d`: M3 SMOKE_PARITY (scoped) and local session smoke PASS on mainline; PLAYABLE NOT RUN)
 
 ## Current state (2026-11-23)
 
@@ -6,21 +6,28 @@ States used below: **PASS (mainline)** = verified on `main`; **PASS (branch
 evidence)** = verified on an unmerged branch only; **FAIL**; **BLOCKED**;
 **NOT RUN**. A branch PASS is not a mainline result.
 
-### Mainline: `main` = `fdf48e4` (PR #106)
+### Mainline: `main` = `2a86d5d` (M3 mainline acceptance, 2026-11-23)
 
-M0, M1 and M2 gates: **PASS (mainline)**. M3 on `main`:
+M0, M1 and M2 gates: **PASS (mainline)**. The M3 stack (#107 → … → #150,
+#146, #142; #151) was integrated with the maintainer's approval and the full
+gate rerun on `main` with `M3_NATIVE=require`
+([acceptance record](evidence/M3/M3-MAINLINE-ACCEPTANCE.md)). Local runs:
+Racket v7.9 BC; CI: racket:8.10-bc (runs 45176163020, 45176121779).
 
 | M3 stage | State | Evidence |
 |---|---|---|
 | PARSED | PASS (mainline) | 36 historical text files parsed; 4 non-text files identified |
-| LOADED | FAIL | loader exit 1 after 433 original forms, zero skipped, at `77rooms.mud` expression 16, line 101 (`EVENT "GC"`) |
-| INITIALIZED | NOT RUN | source chain does not complete on `main` |
-| INTERACTIVE | NOT RUN | |
-| SMOKE_PARITY | NOT RUN | |
-| Local session smoke | NOT RUN | |
-| PLAYABLE | NOT RUN | |
+| LOADED | PASS (mainline) | loader exit 0 after 1,229 original forms, zero skipped (`make m3-source-progress`) |
+| INITIALIZED | PASS (mainline, scoped) | faithful `<FLOAD "77loadall.mud">` + `<SAVE-IT>` (`make test-m3-saveit`) |
+| INTERACTIVE | PASS (mainline, scoped) | six house-boot commands through the host loop (`make test-m3-interactive`) |
+| SMOKE_PARITY | **PASS (mainline, scoped)** | house-boot at the session clock 250776000/UTC; one strict comparator, D1/D2 only (ADR-0053); promoted schema-3 reference `house-boot-reference.json`; `M3_NATIVE=require make m3-check` 7/7 incl. native fresh capture |
+| Local session smoke | **PASS (mainline)** | quit/n, inventory, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written (`make test-m3-session`, `make test-m3-launcher`) |
+| PLAYABLE | NOT RUN | M4 ([backlog](evidence/M4/SCENARIO-BACKLOG.md)) |
 
-### Branch: umbrella #107 and the stack
+The sections below describe the branch stack as it was integrated; they are
+kept as the integration history.
+
+### Integration history: umbrella #107 and the stack (now on `main`)
 
 Runtime stack (merge order): #107 (umbrella `feat/m3-logical-gc`) → #109 →
 #111 → #125 → #128 → #130 → #136 → #137 → #138 → #141 (S7 host loop + review
@@ -30,7 +37,7 @@ both on #147). Side branches on that stack: #146 (S10 strict
 SMOKE_PARITY gate, on #144), #142 (docs reconciliation, on #141), #143
 (native reference probe evidence, on #141). The integration branch
 `integration/m3-acceptance` merges all of them; #131's capture tooling is
-merged into #146. Nothing below is on `main`.
+merged into #146. All of it is on `main` since 2026-11-23 (#151 / `2a86d5d`).
 
 | M3 stage | State | Evidence |
 |---|---|---|
@@ -49,11 +56,10 @@ in-game MDL ERROR stops at unsupported PRINT in HANDLE (`77rooms.mud:251`)
 before reaching QUIT; RESTORE unsupported. Local runs used Racket v7.9 BC;
 CI uses the pinned racket:8.10-bc container.
 
-### Fixed on branch; not integrated into `main`
+### Fixed by the integration (now on `main`)
 
-These fixes are merged into the umbrella `feat/m3-logical-gc` and present in
-every stack branch. Their issues stay open until the umbrella reaches
-`main`.
+These fixes reached `main` with the umbrella #107 (2026-11-23); their issues
+can now be closed against `main`.
 
 | Item | Fix | Record |
 |---|---|---|
@@ -80,11 +86,10 @@ SMOKE_PARITY PASS on branch; WP3 MEMBER, QUIT, OPEN, READSTRING `!` and
 explicit output ports done on branch (#145, #147, #150); WP4 local session smoke and launcher PASS
 on branch; WP5 [M4 backlog](evidence/M4/SCENARIO-BACKLOG.md) drafted.
 
-Integration into `main` requires the maintainer's explicit approval (merge
-in stack order, then rerun the full gate on `main`). Pending maintainer
-decision: promote the schema-3 reference capture (MADADV.SAVE moved to SAVE
-artifacts) over the committed schema-2 candidate record. Next single M4
-scenario: enter the house and open the cellar.
+M3 is accepted on `main` (scoped as above). Issues #119, #124, #135 (part 1)
+and #139 are fixed on `main`. Next: M4, first scenario "enter the house and
+open the cellar"; a manual DrRacket run (quit and Stop) would close the
+remaining GUI verification gap.
 
 ## Slice history (newest first; each entry as recorded at the time)
 
