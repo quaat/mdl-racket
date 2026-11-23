@@ -52,7 +52,7 @@ a minimal Confusion probe (source + output), and a Racket regression test.
 | `NEWTYPE` / `CHTYPE` / `NEWSTRUC` | NEWTYPE and structured CHTYPE subset; NEWSTRUC unsupported | declarations, print/eval hooks, NEWSTRUC | M1 issue #6 |
 | `PROG` / `REPEAT` / `RETURN` / `AGAIN` | named and unnamed frames; bare and explicit transfers to PROG/REPEAT | GO/TAG cross-function transfer is partial | M2 issues #20, #26, #28 |
 | `DEFINE` formals | required, OPTIONAL/AUX/TUPLE/ARGS sections with in-frame defaults; leading activation ATOM and `"NAME"`/`"ACT"` markers | `"BIND"`/`"CALL"` markers, quoted formals | M2 formals and control slices |
-| `GO` / `UNWIND` | GO to labels in the current function's PROG/REPEAT; UNWIND cleanup on transfers and errors | TAG values, GO across function boundaries | M2 control slice |
+| `GO` / `UNWIND` | GO to labels in the current function's PROG/REPEAT; UNWIND cleanup on MDL transfers only, never on raised errors (ADR-0051) | TAG values, GO across function boundaries | M2 control slice |
 | MDL octal `*777*` | FIX input with 36-bit boundary conversion | full reader radix controls | M1 issue #8 |
 | `#ROOM {...}` / typed macros | AST recognition only | macro expansion with original semantics | **NOT IMPLEMENTED** |
 | `READSTRING` / `LEX` / `EPARSE` | not supported | original parser and terminal semantics | **NOT IMPLEMENTED** |
@@ -489,9 +489,12 @@ defines `<UNWIND stdexpr errexpr>`: evaluate stdexpr and return its value;
 if a nonlocal return crosses below the UNWIND frame, evaluate errexpr in the
 UNWIND's environment, ignore its value, and complete the transfer. Normal
 completion never runs the cleanup. Pinned Confusion probes are in
-`docs/evidence/M2/control-*` (16 successful and 7 error observations),
-including the reference skipping UNWIND cleanup on errors while the Racket
-runtime follows the manual. Tests are in `tests/control_test.rkt` plus
+`docs/evidence/M2/control-*` (16 successful and 7 error observations).
+This slice originally also ran the cleanup on errors and called
+Confusion's behaviour a deviation. Issue #139 (ADR-0051) found that the
+probe was read at error level 2, where the manual runs no cleanup either.
+Raised errors now skip the cleanup; see "M3 UNWIND cleanup only on MDL
+transfers" below. Tests are in `tests/control_test.rkt` plus
 runtime invariants in `mdl/runtime/core.rkt`; commands, hashes, and
 deviations are in `docs/evidence/M2/CONTROL.md`.
 
@@ -1977,3 +1980,77 @@ as LVAL of the FIX 5 (a type mismatch when evaluated).  This reader raises
 "empty local reference", a strict reader error.  Not present in the game source.
 
 Evidence: `docs/evidence/M3/I124-LEADING-DOT.md`, Confusion probe I124.
+
+## M3 UNWIND cleanup only on MDL transfers (issue #139; ADR-0051, supersedes ADR-0018's error rule)
+
+`<UNWIND stdexpr errexpr>` evaluates stdexpr and returns its value. The
+cleanup errexpr runs, in the UNWIND's environment and with its value
+ignored, **only** when an MDL transfer of control leaves stdexpr through
+the UNWIND frame. The transfer then completes. In this runtime the MDL
+transfers are the escape continuations:
+
+- `RETURN` and `AGAIN`, bare or to an explicit PROG/REPEAT/function
+  ACTIVATION below the UNWIND;
+- `GO` to a label of a PROG/REPEAT below the UNWIND;
+- `MAPLEAVE`, `MAPRET` and `MAPSTOP` from a MAPF/MAPR loop function whose
+  body contains the UNWIND;
+- the same transfers performed by an ERROR or other interrupt handler.
+  `<ERRET value frame>` returns to the ERROR frame, which is above every
+  UNWIND that was active when ERROR was called, so it crosses none.
+
+A raised error never runs the cleanup. This covers an MDL `ERROR` that no
+handler resolves (it reaches the host as a Racket exception), host strict
+errors for unsupported constructs and unassigned operators, nested-load
+failures, and any other Racket `raise`, including a non-`exn` value.
+The original exception propagates unchanged. A cleanup therefore cannot
+mask the error or turn it into a normal value by escaping, for example
+`<PROG P () <UNWIND <OPEN-NOT-DEFINED "X"> <RETURN 7 .P>>>` raises the
+unassigned-operator error and never returns 7. A future `QUIT` must be
+implemented as a raised signal that is not an `exn:fail`, so it skips
+cleanups by the same rule. Host bookkeeping still unwinds on a raise:
+activation liveness, local bindings, OBLIST paths and the interrupt level
+are restored by Racket `dynamic-wind`/`parameterize`. Only the MDL
+errexpr is skipped.
+
+Manual basis
+([chapter 16](https://mdl-language.readthedocs.io/en/latest/16-errors-frames-etc/),
+[chapter 23](https://mdl-language.readthedocs.io/en/latest/23-mdl-as-a-system-process/)):
+
+- §16.2: ERROR is a call that behaves like LISTEN on top of the intact
+  stack. Entering the error level unwinds nothing.
+- §16.4/§16.5: only ERRET and RETRY strip the control stack.
+- §16.6: the cleanup runs when a non-local return crosses the UNWIND,
+  for example the FLOAD channel close "if the user attempts to ERRET".
+- §23.3: QUIT stops MDL. Nothing is unwound.
+
+Pinned Confusion agrees (`docs/evidence/M3/I139-UNWIND.md`): entering an
+error level, stdin EOF at the error level, QUIT and C-level internal errors
+run no cleanup. ERRET with no arguments, ERRET to a frame below, and a
+RETURN typed at the error level to an activation below all run it.
+
+A runtime-level error that is not resolved is terminal: this runtime has no
+interactive error level. That matches the outcome of a Confusion error
+level that is never left by ERRET or RETRY. The error-level transfers that
+need an operator at a REPL cannot be modelled. These are ERRET with no
+arguments, ERRET to a frame below the UNWIND, RETRY, and a RETURN typed
+at level 2. They are documented deviations, never guessed.
+
+An error raised inside a cleanup while an MDL transfer is in progress
+propagates unchanged and is terminal. The pending transfer is abandoned,
+and no outer UNWIND cleanup on the abandoned path runs. Confusion instead
+suspends the transfer at a new error level and completes it after an ERRET
+from that level. When an ERROR handler resolves the cleanup's ERROR with
+`<ERRET value frame>`, the cleanup continues and the original transfer
+completes, as in Confusion's `error-inside-cleanup-erret-value` probe.
+
+Tests (`tests/unwind_raise_test.rkt`, `tests/control_test.rkt`,
+`tests/mapf_test.rkt`, core invariants in `mdl/runtime/core.rkt`) must
+show the following. Strict and MDL errors inside the body, including the
+FINISH-shaped case whose cleanup would call an unassigned QUIT, surface
+the body's original error with the cleanup counter at 0. A cleanup that
+would RETURN past the error never swallows it. RETURN, AGAIN, GO,
+MAPLEAVE, MAPRET and MAPSTOP run the cleanup exactly once. Nested UNWINDs
+run inner then outer on a transfer and neither on a raise. An error in a
+cleanup during a transfer surfaces unchanged and skips outer cleanups. A
+handler-resolved error inside the body does not disable a later
+transfer's cleanup. A raised non-`exn` value skips cleanups.

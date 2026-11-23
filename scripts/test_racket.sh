@@ -43,4 +43,5 @@ raco test mdl/runtime/core.rkt \
   tests/channel_port_test.rkt tests/channel_root_identity_test.rkt \
   tests/constructor_eval_policy_test.rkt tests/string_view_consumers_test.rkt \
   tests/oblist_identity_test.rkt \
-  tests/escaped_atom_test.rkt
+  tests/escaped_atom_test.rkt \
+  tests/unwind_raise_test.rkt

@@ -417,11 +417,14 @@ validation deviation.
 The control slice adds `tests/control_test.rkt` for activation formals
 (leading ATOM and `"NAME"`/`"ACT"`), explicit RETURN/AGAIN to a function's
 own activation, bare transfers skipping function frames, GO labels and
-transfers, and UNWIND cleanup on transfers and errors; frame, GO, and UNWIND
+transfers, and UNWIND cleanup on transfers; frame, GO, and UNWIND
 invariants are in `mdl/runtime/core.rkt`'s test submodule. Sixteen
 successful Confusion observations and seven error observations are under
-`docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO and
-UNWIND-on-error reference deviations.
+`docs/evidence/M2/control-*`; see `CONTROL.md` there for the GO reference
+deviation. Issue #139 adds `tests/unwind_raise_test.rkt`: raised errors
+(MDL ERROR, host strict errors, non-`exn` raises) propagate unchanged and
+run no UNWIND cleanup, while every MDL transfer runs it exactly once
+(ADR-0051, `docs/evidence/M3/I139-UNWIND.md`).
 The macro slice adds `tests/macro_test.rkt` to `make test-racket` for DEFMAC,
 FORM, EXPAND, quoted formals, caller-frame argument evaluation, ARGS/TUPLE,
 and an expansion that defines a function. Twenty-five successful Confusion
