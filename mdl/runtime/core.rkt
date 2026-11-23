@@ -3327,6 +3327,61 @@
     [else
      (error 'mdl-memq "Second arg to MEMQ must be structured")]))
 
+;; MEMBER (manual §8.2.2; SEMANTICS "M3 primitive: MEMBER"; reference
+;; docs/evidence/M3/MEMBER-REFERENCE.md). Structural =? search returning the
+;; shared REST view, plus substring search when both arguments are PRIMTYPE
+;; STRING. Not MEMQ: the comparison is mdl-equal?, never identity.
+(define (mdl-member item structure)
+  (define base (mdl-base structure))
+  (cond
+    [(mdl-string? base)
+     (define needle (mdl-base item))
+     (cond
+       [(mdl-string? needle)
+        (define n (mdl-string-content needle))
+        (define h (mdl-string-content base))
+        (define nlen (string-length n))
+        (when (zero? nlen)
+          (error 'mdl-member
+                 "MEMBER: empty STRING needle in a STRING haystack is unsupported (the reference reads out of bounds; docs/evidence/M3/MEMBER-REFERENCE.md)"))
+        (or (for/or ([i (in-range (add1 (- (string-length h) nlen)))])
+              (and (for/and ([k (in-range nlen)])
+                     (char=? (string-ref h (+ i k)) (string-ref n k)))
+                   (mdl-rest structure i)))
+            (mdl-false '()))]
+       [else
+        ;; Element search: =? against each CHARACTER element.
+        (or (for/or ([i (in-range (mdl-string-length base))])
+              (and (mdl-equal? item (mdl-character (mdl-string-ref base i)))
+                   (mdl-rest structure i)))
+            (mdl-false '()))])]
+    [(mdl-array? base)
+     (unless (memq (mdl-array-kind base) '(VECTOR UVECTOR))
+       (error 'mdl-member "MEMBER: unsupported structured kind ~a"
+              (mdl-array-kind base)))
+     (or (for/or ([i (in-range (mdl-array-length base))])
+           (and (mdl-equal? item (mdl-nth base (add1 i)))
+                (mdl-rest structure i)))
+         (mdl-false '()))]
+    [(mdl-tuple-value? base)
+     (error 'mdl-member
+            "MEMBER: TUPLE haystack is unsupported (not probed against the reference)")]
+    [(or (null? base) (mpair? base) (mdl-false? base))
+     (define seen (make-hasheq))
+     (let loop ([tail (mdl-list-head structure 'mdl-member)])
+       (cond
+         [(null? tail) (mdl-false '())]
+         [(not (mpair? tail)) (error 'mdl-member "MEMBER: improper LIST")]
+         [(hash-ref seen tail #f)
+          (error 'mdl-member "MEMBER: cyclic LIST haystack without a match")]
+         [else
+          (hash-set! seen tail #t)
+          (if (mdl-equal? item (mcar tail))
+              tail
+              (loop (mcdr tail)))]))]
+    [else
+     (error 'mdl-member "Second arg to MEMBER must be structured")]))
+
 (define (mdl-equal? left right)
   (define active (make-hasheq))
   (define (compare-structured a b thunk)
@@ -4364,6 +4419,11 @@
                    [(2) (mdl-memq (car args) (cadr args))]
                    [(0 1) (error 'mdl-memq "TOO-FEW-ARGUMENTS-SUPPLIED")]
                    [else (error 'mdl-memq "TOO-MANY-ARGUMENTS-SUPPLIED")]))
+        "MEMBER" (lambda args
+                   (case (length args)
+                     [(2) (mdl-member (car args) (cadr args))]
+                     [(0 1) (error 'mdl-member "TOO-FEW-ARGUMENTS-SUPPLIED")]
+                     [else (error 'mdl-member "TOO-MANY-ARGUMENTS-SUPPLIED")]))
         "PUTREST" mdl-putrest!
         "FORM" (lambda elems (mdl-make-form (apply mdl-list elems)))
         "EXPAND" mdl-expand

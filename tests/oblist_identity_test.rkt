@@ -295,8 +295,10 @@
    ;; an unimplemented ROOT SUBR.)
    (check-exn #rx"unassigned or non-applicable MDL operator PRINT"
               (lambda () (run "<PRINT \"FOO\">")))
-   (check-exn #rx"unassigned MDL global MEMBER"
-              (lambda () (run ",MEMBER")))))
+   ;; (MEMBER was the example here until S9 implemented it; STRCOMP is
+   ;; still an unimplemented ROOT SUBR.)
+   (check-exn #rx"unassigned MDL global STRCOMP"
+              (lambda () (run ",STRCOMP")))))
 
 (test-case "user INSERT, REMOVE and BLOCK cannot change mdl-root-atom"
   (in-fresh-session

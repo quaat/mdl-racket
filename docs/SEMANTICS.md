@@ -2423,3 +2423,63 @@ run inner then outer on a transfer and neither on a raise. An error in a
 cleanup during a transfer surfaces unchanged and skips outer cleanups. A
 handler-resolved error inside the body does not disable a later
 transfer's cleanup. A raised non-`exn` value skips cleanups.
+
+## M3 primitive: `MEMBER` (S9; issue #139 frontier, HANDLE)
+
+Authority: [MDL manual §8.2.2](https://mdl-language.readthedocs.io/en/latest/08-truth/)
+and the pinned Confusion observations in `docs/evidence/M3/MEMBER-REFERENCE.md`
+(`member-probe.json`, 58 cases). Implementation record:
+`docs/evidence/M3/S9-MEMBER.md`.
+
+`<MEMBER object structured>` takes exactly two arguments. It is not an alias
+of `MEMQ`: the comparison is structural `=?` (the runtime's `mdl-equal?`,
+including its cycle boundary from issue #23), never `==?`, and the result is
+never a host Boolean.
+
+Supported subset:
+
+- **Element search.** The haystack is PRIMTYPE LIST (LIST, FORM, any other
+  LIST-primtype TYPE, and a FALSE's payload), VECTOR or UVECTOR, native or a
+  REST view, CHTYPE'd/NEWTYPE'd included. Elements are scanned first to last
+  and compared with `=?`; the first hit wins. The result is the shared
+  `<REST structured i>` view (`mdl-rest`): a PUT through it is visible in the
+  haystack, it is `==?` to `<REST s i>`, and at offset 0 it is `==?` to the
+  haystack itself. Its TYPE is the haystack's PRIMTYPE type (FORM gives LIST,
+  a NEWTYPE of VECTOR gives VECTOR, `#FALSE (1 2)` gives LIST). A miss
+  returns `#FALSE ()`. A STRING needle against a LIST or VECTOR is an element
+  search (`<MEMBER "a" ["abc"]>` misses); `<MEMBER "" ,LEXV>` (77rooms.mud
+  COMMAND) finds the first empty STRING view.
+- **Substring search.** When both arguments are PRIMTYPE STRING (native
+  STRING, REST view, typed STRING), MEMBER returns the shared STRING tail view
+  at the first case-sensitive occurrence of the needle's characters, offset
+  relative to the (possibly REST'd) haystack, TYPE STRING. A needle longer than
+  the haystack, or an empty haystack, returns `#FALSE ()`.
+- **Element search in a STRING.** Any other needle against a STRING haystack
+  is an element search with `=?` against each CHARACTER element: a CHARACTER
+  finds its position (same result as MEMQ); FIX, ATOM, LIST, etc. miss.
+- **Cycles.** Comparison inherits the `=?` cycle boundary: identical cyclic
+  objects match, distinct equal-content cycles raise the explicit
+  unsupported-cyclic-equality error. A LIST haystack is walked pair by pair;
+  a hit before the cycle closes is returned, and revisiting a pair raises an
+  explicit "cyclic LIST" error instead of looping (deviation: unprobed; the
+  reference would not terminate on a miss).
+
+Strict refusals (never a silent FALSE):
+
+- Arity other than two: `TOO-FEW-ARGUMENTS-SUPPLIED` /
+  `TOO-MANY-ARGUMENTS-SUPPLIED` (Confusion raises these MDL ERRORs).
+- A non-structured second argument (FIX, ATOM, CHARACTER, ...): error
+  `Second arg to MEMBER must be structured`, the same host-error style as
+  MEMQ. Confusion prints this text as an internal error without an ERROR frame.
+- An **empty STRING needle with a STRING haystack**. Confusion's result is an
+  out-of-bounds read (it matches at the first NUL in or after the haystack),
+  which differs from the manual's substring definition and is not MDL
+  semantics. The runtime raises a deliberate unsupported error and returns
+  neither the haystack nor `""`. The game never does this.
+- TUPLE haystacks (modelled by the runtime, but MEMBER on them was not probed)
+  and structured kinds the runtime does not model (BYTES, TEMPLATE, ...).
+  These raise an explicit unsupported error until a reference probe exists.
+
+Tests: `tests/member_test.rkt` (smoke suite), one assertion per supported
+reference case plus aliasing, first-match, REST'd offsets, typed values,
+cycles and every refusal.
