@@ -22,6 +22,7 @@
          mdl-make-declaration mdl-gdecl
          mdl-vector mdl-uvector mdl-data-uvector mdl-rest mdl-nth mdl-put! mdl-get mdl-putrest!
          mdl-make-terminal-channel mdl-substruc
+         exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          atom-space-inchan atom-space-outchan
@@ -3602,6 +3603,76 @@
   (write-string (princ-text (car args)) port)
   (car args))
 
+;; ADR-0050 / maintainer decision D3 ("Mirror, then strict"): reading a
+;; terminal CHANNEL whose input already ended. A host-level Racket exception,
+;; never an MDL ERROR, so no MDL ERROR handler (the game's HANDLE) runs; a host
+;; must report it as a failure.
+(struct exn:fail:mdl-input-exhausted exn:fail ())
+(define input-exhausted-message
+  (string-append "READSTRING: input exhausted: the session input ended and the "
+                 "mirrored end-of-input read was already returned "
+                 "(maintainer decision D3; ADR-0050)"))
+
+;; Flush every terminal output port of this session, so a prompt written
+;; with PRINC is visible before a blocking read (Confusion flushes stdout).
+(define (flush-terminal-output!)
+  (for ([host (in-list (hash-values (atom-space-channels (current-mdl-atom-space))))])
+    (when (eq? (host-channel-direction host) 'PRINT)
+      (flush-output (or (host-channel-port host) (current-output-port))))))
+
+;; ADR-0050 READSTRING (manual 11.4.1.2): <READSTRING buffer channel [stop]>
+;; exactly as RDCOM and YES/NO use it. Arguments are validated first; then
+;; output is flushed; then a channel whose end-of-input flag is set raises
+;; exn:fail:mdl-input-exhausted. Otherwise characters are read until the
+;; buffer view is full, a stop character is read (consumed, not stored) or
+;; input ends (flag set, partial count returned). Characters are stored from
+;; the view's position 1; the rest of the buffer is unchanged. No echo.
+(define (mdl-readstring . args)
+  (define n (length args))
+  (unless (<= 2 n 4)
+    (error 'READSTRING
+           "READSTRING takes a buffer, a CHANNEL and an optional stop STRING (ADR-0050)"))
+  (when (= n 4)
+    (error 'READSTRING "an EOF routine argument is not supported (ADR-0050)"))
+  (define buffer (car args))
+  (define channel (cadr args))
+  (define host (registered-channel-host 'READSTRING channel
+                                        "argument must be of type CHANNEL"))
+  (unless (and (eq? (host-channel-direction host) 'READ)
+               (channel-mode-intact? channel host))
+    (error 'READSTRING "READSTRING requires an input channel"))
+  (unless (and (mdl-string? buffer)
+               (not (immutable? (if (mdl-string-view? buffer)
+                                    (mdl-string-view-storage buffer)
+                                    buffer))))
+    (error 'READSTRING "buffer must be a mutable STRING (ADR-0050)"))
+  (define stops
+    (cond [(= n 2) '()]
+          [(mdl-string? (caddr args)) (string->list (mdl-string-content (caddr args)))]
+          [(exact-integer? (caddr args))
+           (error 'READSTRING "a FIX stop is not supported (ADR-0050)")]
+          [else (error 'READSTRING "stop must be a STRING (ADR-0050)")]))
+  (flush-terminal-output!)
+  (when (host-channel-at-eof? host)
+    (raise (exn:fail:mdl-input-exhausted input-exhausted-message
+                                         (current-continuation-marks))))
+  (define port (or (host-channel-port host) (current-input-port)))
+  (define size (mdl-string-length buffer))
+  (let loop ([count 0])
+    (if (>= count size)
+        count
+        (let ([ch (read-char port)])
+          (cond
+            [(eof-object? ch) (set-host-channel-at-eof?! host #t) count]
+            [(char=? ch #\!)
+             (error 'READSTRING
+                    "'!' in terminal input is not supported: pinned Confusion reads \"!x\" as x and the manual is silent (open question; ADR-0050)")]
+            [(> (char->integer ch) 127)
+             (error 'READSTRING "non-ASCII character (code ~a) in terminal input is not supported (ADR-0050)"
+                    (char->integer ch))]
+            [(memv ch stops) count]
+            [else (mdl-string-set! buffer count ch) (loop (add1 count))])))))
+
 ;; SUBSTRUC (MDL manual ch. 7, section 7.1.7)
 ;;
 ;; Contract: `<SUBSTRUC from rest amount to>` copies `amount` elements of
@@ -4131,6 +4202,7 @@
         "CRLF" mdl-crlf
         "RESET" mdl-reset
         "PRINC" mdl-princ
+        "READSTRING" mdl-readstring
         "ERROR" mdl-error
         "ERRET" mdl-erret
         "EVENT" mdl-event

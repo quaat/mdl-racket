@@ -51,4 +51,5 @@ raco test mdl/runtime/core.rkt \
   tests/escaped_atom_test.rkt \
   tests/rep_test.rkt \
   tests/reset_test.rkt \
-  tests/princ_test.rkt
+  tests/princ_test.rkt \
+  tests/readstring_test.rkt
