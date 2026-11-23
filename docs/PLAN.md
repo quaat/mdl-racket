@@ -213,6 +213,8 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
   `mdl-session-run-interactive`. No raw REPL, no web service.
 - **WP5 — M4 scenario backlog.** Collect scenarios for the M4 corpus as a
   backlog only; M4 gate work waits for M3 acceptance (AGENTS.md step 9).
+  Draft: [M4 scenario backlog](evidence/M4/SCENARIO-BACKLOG.md) (first
+  scenario: enter the house and open the cellar).
 
 ## M4 — Comprehensive behavioral equivalence
 
