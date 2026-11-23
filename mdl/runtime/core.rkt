@@ -876,22 +876,35 @@
     (error 'mdl-go "GO target position is not active"))
   ((mdl-activation-goto target) (cons goto-token index)))
 
-;; UNWIND evaluates its first expression and returns its value. If a
-;; nonlocal transfer or an error crosses below this point, the cleanup
-;; expression runs first in the environment of the UNWIND call, its value
-;; is ignored, and the transfer completes. Normal completion never runs the
-;; cleanup. The dynamic-wind post runs for escape-continuation jumps and
-;; exceptions alike.
+;; UNWIND evaluates its first expression and returns its value. If an MDL
+;; transfer of control (RETURN, AGAIN, GO, MAPLEAVE/MAPRET/MAPSTOP, also
+;; from a handler) leaves the first expression through this point, the
+;; cleanup expression runs first in the environment of the UNWIND call, its
+;; value is ignored, and the transfer completes. Normal completion never
+;; runs the cleanup. A raised error (an unresolved MDL ERROR, a host strict
+;; error, or any other Racket raise, including a future QUIT signal) is not
+;; an MDL transfer: MDL enters an error level on the intact stack and only
+;; ERRET/RETRY strip it (manual 16.2, 16.4, 16.6; QUIT 23.3). This runtime
+;; has no error level, so the raise propagates unchanged and the cleanup
+;; does not run (ADR-0051, issue #139). The exception handler only marks the
+;; raise and returns, so the next enclosing handler receives the original
+;; value. A raise caught inside the body never reaches this handler.
 (define (mdl-unwind std-thunk erre-thunk)
   (define completed-normally? #f)
+  (define raised-through? #f)
   (dynamic-wind
     void
     (lambda ()
-      (define value (std-thunk))
+      (define value
+        (call-with-exception-handler
+         (lambda (raised) (set! raised-through? #t) raised)
+         std-thunk))
       (set! completed-normally? #t)
       value)
     (lambda ()
-      (unless completed-normally? (erre-thunk) (void)))))
+      (unless (or completed-normally? raised-through?)
+        (erre-thunk)
+        (void)))))
 
 ;; ---------------------------------------------------------------------------
 ;; SEGMENT values (MDL chapter 7, `!` splice notation).
@@ -4211,7 +4224,8 @@
              (lambda ()
                (mdl-with-prog-activation
                 (vector (body-item (lambda () (mdl-go (mdl-atom "M2-NONE"))))))))
-  ;; UNWIND: cleanup only when a transfer or error crosses below it.
+  ;; UNWIND: cleanup only when an MDL transfer crosses below it; a raised
+  ;; error propagates unchanged without the cleanup (ADR-0051).
   (check-equal? (mdl-unwind (lambda () 5) (lambda () (set! go-log 'cleaned)))
                 5)
   (check-equal? go-log '(b a))
@@ -4230,7 +4244,7 @@
              (lambda ()
                (mdl-unwind (lambda () (error 'test "boom"))
                            (lambda () (set! error-cleaned? #t)))))
-  (check-true error-cleaned?)
+  (check-false error-cleaned?)
   ;; Function activation formals: explicit targets work; bare transfers
   ;; skip function frames.
   (check-equal?
