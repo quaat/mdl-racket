@@ -114,9 +114,11 @@
    (define predicted (for/list ([_ (in-range 6)]) (random36-next! snap)))
    (define actual (for/list ([_ (in-range 6)]) (mdl-session-call g "RANDOM")))
    (check-equal? actual predicted)
-   ;; A second snapshot is detached from the first and from the session.
+   ;; A second snapshot is detached from the session: advancing it leaves the
+   ;; session's state words exactly as recorded before.
+   (define words-before (random36-state-words (mdl-session-random-snapshot g)))
    (define snap2 (mdl-session-random-snapshot g))
    (random36-next! snap2)
-   (check-equal? (random36-state-words (mdl-session-random-snapshot g))
-                 (random36-state-words (mdl-session-random-snapshot g))))
+   (check-not-equal? (random36-state-words snap2) words-before)
+   (check-equal? (random36-state-words (mdl-session-random-snapshot g)) words-before))
  (lambda () (delete-directory/files root)))
