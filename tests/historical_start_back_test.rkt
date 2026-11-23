@@ -5,21 +5,21 @@
   "../.cache/upstream/mdlzork/mdlzork_771212/patched_confusion")
 (unless (directory-exists? source-root)
   (error 'historical-start-back "pinned source missing: ~a" source-root))
-(define session (make-mdl-session source-root))
-(define load-report
-  (parameterize ([current-output-port (open-output-string)])
-    (mdl-session-load! session "77loadall.mud")))
+;; S13 part B (ADR-0050): the session writes only to its explicit port.
+(define session-out (open-output-string))
+(define session (make-mdl-session source-root #:output-port session-out))
+(define load-report (mdl-session-load! session "77loadall.mud"))
 (check-equal? (hash-ref load-report 'status) "PASS")
 (check-equal? (hash-ref load-report 'completed_expressions) 1229)
 (check-equal? (hash-ref load-report 'skipped_expressions) 0)
 
 ;; Known XFAIL frontier: the unchanged START now passes RANDOM and BACK,
 ;; then needs the platform TENEX? global in original CONTIN at 77rooms.mud:298.
-(define output (open-output-string))
+(define start-offset (string-length (get-output-string session-out)))
 (define failure
   (with-handlers ([exn:fail? values])
-    (parameterize ([current-output-port output])
-      (mdl-session-call session "START" "WHOUS" ""))))
+    (mdl-session-call session "START" "WHOUS" "")))
+(define output (substring (get-output-string session-out) start-offset))
 (check-true (exn:fail? failure))
 (check-true (regexp-match? #rx"unassigned MDL global TENEX\\?" (exn-message failure)))
-(check-true (regexp-match? #rx"^Welcome to Dungeon" (get-output-string output)))
+(check-true (regexp-match? #rx"^Welcome to Dungeon" output))

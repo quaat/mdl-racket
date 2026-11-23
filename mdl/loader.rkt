@@ -73,8 +73,13 @@
   (raise (exn:fail:mdl-load message (current-continuation-marks) info)))
 
 ;; output-port / input-port: host ports owned by this session's terminal
-;; CHANNELs. #f (default) follows the current Racket port at each operation.
-;; READSTRING reads input-port (ADR-0050).
+;; CHANNELs. READSTRING reads input-port (ADR-0050). Neither has a fallback:
+;; a session made without #:input-port refuses READSTRING, and one made
+;; without #:output-port refuses every terminal write and flush (PRINC, PRIN1,
+;; PRINTSTRING, TERPRI, CRLF, READSTRING's pre-read flush, the host loop's
+;; prints and final flush) with a strict ADR-0050 error; it never writes to
+;; the host's current-output-port (S13 part B). A host that wants the
+;; process's stdout passes (current-output-port) explicitly.
 ;; clock / time-zone (ADR-0052): the session's own host clock for
 ;; GETTIMEDATE's "now" (default: the real wall clock) and its local zone
 ;; ('local, the host zone, by default; or 'utc). Stored in the session's atom
@@ -96,8 +101,11 @@
     (raise-argument-error 'make-mdl-session "(or/c 'local 'utc)" time-zone))
   ;; The shared context constructor binds INCHAN/OUTCHAN (LVAL and GVAL)
   ;; to this session's terminal CHANNELs before any source runs.
-  ;; ADR-0050: there is no input default; READSTRING on a session made
-  ;; without #:input-port is a strict error (never the process's stdin).
+  ;; ADR-0050: there is no input or output default; READSTRING on a session
+  ;; made without #:input-port is a strict error (never the process's stdin),
+  ;; and so is any terminal output without #:output-port (S13 part B; never
+  ;; the host's current-output-port). The follow-current-output-port opt-in
+  ;; of mdl-ensure-terminal-channels! is deliberately not offered here.
   (define context (make-mdl-context #:output-port output-port
                                     #:input-port input-port
                                     #:clock clock #:time-zone time-zone))
