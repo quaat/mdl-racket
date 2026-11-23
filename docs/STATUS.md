@@ -1,4 +1,4 @@
-# Status — 2026-11-23 (M2 mainline PASS; M3 source load WIP PASS)
+# Status — 2026-11-23 (M2 mainline PASS; M3 source load WIP PASS; S7 INITIALIZED/INTERACTIVE scoped PASS)
 
 ## Current state (2026-11-23)
 
@@ -6,10 +6,24 @@
 |---|---|
 | PARSED | PASS: 36 historical text files parsed; 4 non-text files identified |
 | LOADED | PASS on WIP branch: loader exit 0 after 1,229 original forms, zero skipped |
-| INITIALIZED | FAIL on S6 branch: faithful SAVE-IT passes SAVE (session record), ON "BLOCKED", START and CONTIN 301-302 (inert REP SUBR, ADR-0049), then stops at `<RESET ,INCHAN>` (77rooms.mud:303) |
-| INTERACTIVE | NOT RUN: original startup/game loop unavailable |
-| SMOKE_PARITY | NOT RUN: no Racket candidate transcript |
-| PLAYABLE | NOT RUN: original game has not booted in Racket |
+| INITIALIZED | PASS (scoped) on S7 branch `feat/m3-interactive-io`: faithful `<FLOAD "77loadall.mud">` + SAVE-IT returns `,NULL` through CONTIN's RESET (ADR-0050); the host loop prints it (D1) and RDCOM reaches its first READSTRING; boot text equals the approved golden after D1/D2 normalisation and date-line normalisation (`make test-m3-interactive`) |
+| INTERACTIVE | PASS (scoped) on S7 branch: all six house-boot commands are read by the original RDCOM and answered as in the approved golden (`west` accepted in its two `<PROB 80>` forms, unfixed clock); end of input gives `Beg pardon?`/`>` then the strict host error `exn:fail:mdl-input-exhausted` (D3) |
+| SMOKE_PARITY | NOT CLAIMED: date line and RANDOM depend on the unfixed host clock (issue #135); the golden is still a candidate |
+| PLAYABLE | NOT RUN: QUIT, OPEN/CLOSE (RECORD), MEMBER (HANDLE) and UNWIND under host errors (#139) are missing |
+
+- **S7 interactive terminal I/O on `feat/m3-interactive-io` (WIP, ADR-0050):**
+  RESET (terminal CHANNEL; clears the host end-of-input flag), PRINC (STRING,
+  CHARACTER, FIX), PRIN1 (FIX, trailer-free ATOM incl. `,NULL`), READSTRING
+  (RDCOM/YES-NO form; stop consumed; overflow kept; no echo; flush first) and
+  the local host loop `mdl-session-run-interactive` (explicit ports; entry value
+  printed per D1; GVAL REP re-read each pass). End of input follows D3
+  "Mirror, then strict". The faithful path plays the six approved commands:
+  `make test-m3-interactive` exit 0 (30 checks); 10 raw runs are byte-identical
+  to Confusion's pipe output after removing `"DONE"` and the date. The `west`
+  response is RNG-dependent (`<PROB 80>`, 77rooms.mud:523) until #135. Strict
+  and unsupported: QUIT, OPEN/CLOSE, MEMBER, PRINC line breaking, `!` in input,
+  READSTRING default channel/FIX stop/EOF routine. See
+  [S7 evidence](evidence/M3/S7-INTERACTIVE.md).
 
 - **S6 inert REP on `feat/m3-startup-rep` (WIP, ADR-0049):** The GVAL of
   ROOT REP is a predefined SUBR in every session (TYPE SUBR, GASSIGNED,
