@@ -5,7 +5,7 @@
 (provide current-mdl-globals current-mdl-locals
          current-mdl-read-values mdl-register-read-value! mdl-read-value
          mdl-interpreter-version
-         mdl-setg! mdl-gval mdl-define!
+         mdl-setg! mdl-gval mdl-define! mdl-define-subr!
          mdl-set! mdl-lval mdl-with-bindings mdl-with-aux-bindings mdl-type
          mdl-bind-function-formals mdl-call-with-activation
          mdl-with-function-scope mdl-with-prog-activation
@@ -96,7 +96,13 @@
 (struct mdl-interrupt-state ([level #:mutable] [pending #:mutable]))
 (struct mdl-interrupt-occurrence (header arguments))
 (struct mdl-error-frame (owner resume [live? #:mutable]))
+;; Every host procedure stored by a compiled DEFINE (mdl-define!, called only
+;; by the compiler's DEFINE path), mapped to its formal kinds. Membership is
+;; also what makes such a procedure an MDL FUNCTION (ADR-0060): see
+;; compiled-function? and mdl-type-name.
 (define compiled-function-formals (make-weak-hasheq))
+(define (compiled-function? value)
+  (and (procedure? value) (hash-has-key? compiled-function-formals value)))
 (struct mdl-decl-value (bindings result line column positionals) #:transparent)
 (define local-declarations (make-weak-hasheq))
 (define current-mdl-function-owner (make-parameter (gensym 'mdl-top-level)))
@@ -1778,10 +1784,19 @@
   (hash-set! (current-mdl-globals) atom unassigned)
   atom)
 
+;; Compiler-only: the expansion of a compiled DEFINE calls this. Registering
+;; fn makes it TYPE FUNCTION (ADR-0060); a host-provided SUBR must use
+;; mdl-define-subr! instead.
 (define (mdl-define! name fn [formal-kinds '()])
   (when (procedure? fn)
     (hash-set! compiled-function-formals fn formal-kinds))
   (mdl-setg! name fn))
+
+;; A host-provided SUBR bound by a host (the loader's FLOAD): TYPE SUBR, like
+;; REP (ADR-0049, ADR-0060), never registered as a compiled FUNCTION.
+(define (mdl-define-subr! name proc)
+  (require-atom 'mdl-define-subr! name)
+  (mdl-setg! name (mdl-subr (string->symbol (mdl-atom-pname name)) proc)))
 
 (struct atom-value (pname [oblist #:mutable]))
 (struct oblist-value (name entries size))
@@ -2871,6 +2886,11 @@
         [(mdl-tuple-value? value) "TUPLE"]
         [(mdl-macro? value) "MACRO"]
         [(mdl-function? value) "FUNCTION"]
+        ;; ADR-0060: TYPE by representation (registry membership), never by a
+        ;; name. A compiled DEFINE is a FUNCTION; a host built-in bound to a
+        ;; ROOT name is a SUBR. Any other host procedure has no TYPE.
+        [(compiled-function? value) "FUNCTION"]
+        [(builtin-subr? value) "SUBR"]
         [(mdl-iheader? value) "IHEADER"]
         [(mdl-handler? value) "HANDLER"]
         [(mdl-decl-value? value) "DECL"]
@@ -3238,30 +3258,35 @@
                                (mdl-array-type-cell base))))
          (mdl-list-tail (mdl-list-head value 'mdl-rest) offset 'mdl-rest)))]))
 
+;; BACK (manual 7.6.2): the inverse of REST over the same storage. It keeps
+;; the argument's exact TYPE (the TYPE atom itself, never its PNAME), as TOP
+;; does and as pinned Confusion does; REST drops it (maintainer decision
+;; 2026-11-23, ADR-0058 amendment; SEMANTICS "M3 BACK"). This covers the
+;; terminal CHANNEL (previously the only TYPE kept) and every NEWTYPE of
+;; VECTOR, UVECTOR or STRING.
 (define (mdl-back value [offset 1])
   (unless (and (exact-integer? offset) (positive? offset) (<= offset fix-max))
     (error 'mdl-back "BACK requires a positive FIX offset"))
   (define base (mdl-base value))
+  (define (retag result)
+    (if (mdl-typed-value? value)
+        (mdl-typed-value (mdl-typed-value-type value) result)
+        result))
   (cond
     [(mdl-string? base)
      (define start (if (mdl-string-view? base) (mdl-string-view-start base) 0))
      (when (> offset start)
        (error 'mdl-back "BACK offset exceeds removed prefix"))
-     (mdl-string-view (mdl-string-view-storage base)
-                      (- start offset)
-                      (+ (mdl-string-length base) offset))]
+     (retag (mdl-string-view (mdl-string-view-storage base)
+                             (- start offset)
+                             (+ (mdl-string-length base) offset)))]
     [(mdl-array? base)
      (when (> offset (mdl-array-start base))
        (error 'mdl-back "BACK offset exceeds removed prefix"))
-     (define result
-       (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
-                       (- (mdl-array-start base) offset)
-                       (+ (mdl-array-length base) offset)
-                       (mdl-array-type-cell base)))
-     (if (and (mdl-typed-value? value)
-              (eq? (mdl-typed-value-type value) (mdl-root-atom "CHANNEL")))
-         (mdl-typed-value (mdl-root-atom "CHANNEL") result)
-         result)]
+     (retag (make-mdl-array (mdl-array-kind base) (mdl-array-storage base)
+                            (- (mdl-array-start base) offset)
+                            (+ (mdl-array-length base) offset)
+                            (mdl-array-type-cell base)))]
     [else (error 'mdl-back "BACK requires an array")]))
 
 ;; TOP (manual 7.6.2.2; SEMANTICS "M4 S4", ADR-0058): the inverse of every
@@ -3361,9 +3386,11 @@
 ;; (mdl_primtype_structured(arg->pt) && FIX/OFFSET indicator); OFFSET
 ;; indicators are out of this slice's scope and stay on the association path.
 (define (mdl-structured-primtype? value)
-  (and ;; Native SUBRs are represented as host procedures; they are
-       ;; unstructured MDL items and may carry FIX-keyed associations.
-       (not (procedure? value))
+  (and ;; Host procedures other than compiled DEFINEs are SUBRs (PRIMTYPE
+       ;; WORD): unstructured, so they may carry FIX-keyed associations. A
+       ;; compiled DEFINE is a FUNCTION, PRIMTYPE LIST (ADR-0060): it takes the
+       ;; element path, which fails strictly because it has no body LIST.
+       (not (and (procedure? value) (not (compiled-function? value))))
        (member (mdl-atom-pname (mdl-primtype value))
                '("LIST" "VECTOR" "UVECTOR" "TUPLE" "STRING"))
        #t))
@@ -4745,6 +4772,14 @@
                    [else (error 'mdl-neq "TOO-MANY-ARGUMENTS-SUPPLIED")]))
         "==?" (lambda (a b) (mdl-boolean (mdl-identical? a b)))
         "N==?" (lambda (a b) (mdl-boolean (not (mdl-identical? a b))))))
+
+;; ADR-0060: the host built-ins bound to ROOT names are SUBRs (pinned
+;; Confusion: every builtin-table name is a SUBR). The set is fixed at module
+;; load and compared by eq?; REP is an mdl-subr and is typed before this.
+(define builtin-subr-values
+  (for/hasheq ([value (in-hash-values builtin-table)]) (values value #t)))
+(define (builtin-subr? value)
+  (and (procedure? value) (hash-ref builtin-subr-values value #f)))
 
 ;; The default session is created after builtin-table exists, because a
 ;; session's ROOT is seeded with every builtin SUBR name. Definitions

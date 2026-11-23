@@ -44,6 +44,7 @@ raco test mdl/runtime/core.rkt \
   tests/gettimedate_test.rkt tests/terminal_channel_test.rkt \
   tests/printstring_channel_test.rkt tests/crlf_test.rkt \
   tests/random36_test.rkt tests/back_test.rkt tests/top_test.rkt \
+  tests/function_type_test.rkt \
   tests/unparse_test.rkt \
   tests/memq_string_test.rkt \
   tests/channel_port_test.rkt tests/channel_root_identity_test.rkt \
