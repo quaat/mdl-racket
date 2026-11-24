@@ -123,8 +123,8 @@ byte before the first difference.
 | F3 save | 1 | "Saving." Writes `SAVEFILE/ZORK.SAVE`. | "Saving." Identical text. In-session SAVE record, no file (ADR-0048). | all | parity of text; documented deviation |
 | F4 restore, no image | 1 | "Restored." then the prompt; play goes on | "Restored." then strict `RESTORE: restoring a saved image is not supported (… ADR-0048)` | 0 (text matches up to the failure) | **INV-06** |
 | F5 save, restore, look | 3 | Restores the saved state and prints the room | Strict failure at RESTORE. `look` unread. | 1 | **INV-06** |
-| F6 help | 1 | Prints `MDL/MADADV.HELP` | Strict `OPEN: mode "READ" is not supported; only READB, PRINT and PRINTO are (ADR-0055)` | 0 | **INV-05** |
-| F7 info | 1 | Prints `MDL/MADADV.INFO` | Same strict OPEN error | 0 | **INV-05** |
+| F6 help | 1 | Prints `MDL/MADADV.HELP` | Strict `OPEN: mode "READ" is not supported; only READB, PRINT and PRINTO are (ADR-0055)` (at capture; **fixed by M4 S10**, #171: prints the file as natively) | 0 (now all) | **INV-05** (fixed) |
+| F7 info | 1 | Prints `MDL/MADADV.INFO` | Same strict OPEN error (at capture; **fixed by M4 S10**) | 0 (now all) | **INV-05** (fixed) |
 | F8 odysseus → Strange Passage | 28 | The cyclops flees. `north` enters BLROO. `look`, `east` to the living room. | Stops at ABS on entering the Cyclops Room (INV-01). TIME not reached yet. | 23 | INV-01 masks **INV-04** |
 | F9 `c-int` | 2 | "Nothing happens." | Strict `mdl-gval: unassigned MDL global TIME` | 0 | **INV-04** |
 | F10 Bat Room | 37 | Three BEL bytes (`<IMAGE 7>`), three `<SLEEP 1>` (run took 3.25 s), "A deranged giant vampire bat … lifts you away…." | Strict `mdl-eval: unassigned or non-applicable MDL operator IMAGE` after the Bat Room description | 36: the troll fight, the round room's RANDOM landings and the mirror all match | **INV-02 / INV-03** |
@@ -166,10 +166,10 @@ result, and the fix and regression test.
 | **INV-02** IMAGE | F10: troll16, then `north` `east`, round-room detours `se` `south` `se` `east` `se` `south` `se` `south` `look` `se` (lands in the Grail Room under this clock), then `east` `sw` `rub mirror` `west` `west` `north` `nw` `west` | (a) | missing primitive | **P0** | confirmed in both engines; **fixed** by M4 S9 (#168): the mirror-bat scenario (F10) matches native at all 38 prefixes, BEL bytes included | #168 |
 | **INV-03** SLEEP | F10 (same command) | (a) | missing primitive; host-time decision | **P0** | native confirmed; **fixed** by M4 S9 (#169): waits only on a live clock; mirror-bat matches with no wait under the fixed clock | #169 |
 | **INV-04** TIME | F9: `c-int` (confirmed). F8: troll16, the maze route, `odysseus` `north` (native only) | (a) | missing primitive applied by name; value is non-deterministic natively | **P0** via BLROO (P2 for `c-int` alone) | F9 confirmed in both; **fixed** by M4 S9 (#170): session-derived FLOAT (documented deviation); the strange-passage scenario (F8 route + `c-int`) matches native at all 32 prefixes | #170 |
-| **INV-05** help / info | F6 `help`, F7 `info` (also `?`, which LEX maps to HELP) | (a) | decided-strict (ADR-0055) | **P1**: the session ends on a command the game's own help text advertises | confirmed in both engines | to create |
+| **INV-05** help / info | F6 `help`, F7 `info` (also `?`, which LEX maps to HELP) | (a) | decided-strict (ADR-0055) until the maintainer decision of 2026-11-24 ("Read-only allowlist") | **P1**: the session ended on a command the game's own help text advertises | confirmed in both engines; **fixed** by M4 S10 (#171, ADR-0055 amendment): the help-info scenario (`help`, `info`, `?`) matches native at all 9 turns and prefixes | #171 |
 | **INV-06** restore | F4 `restore`; F5 `save` `restore` `look` | (a) | decided-strict (ADR-0048) | **P1** (save/load mechanic) | confirmed in both engines | to create |
 | **INV-07** PRINT in HANDLE | No player command known: needs an MDL ERROR during play | (b) | missing primitive on the game's error path | **P2** | source + S11 evidence | to create |
-| INV-08 CLOSE / FILE-LENGTH / ACCESS / file READSTRING | Behind INV-05, and behind a successful OPEN in RECORD and DO-UNSCRIPT | (b) | decided-strict (ADR-0055) | P3 now; part of the INV-05 fix | source | to create (or fold into INV-05) |
+| INV-08 CLOSE / FILE-LENGTH / ACCESS / file READSTRING | Behind INV-05, and behind a successful OPEN in RECORD and DO-UNSCRIPT | (b) | decided-strict (ADR-0055) | P3 | **partly fixed** by M4 S10 (#171): FILE-LENGTH, file READSTRING and CLOSE on the allowlisted read-only CHANNELs only; ACCESS, and CLOSE of any other CHANNEL, stay strict (unreachable: RECORD's and DO-SCRIPT's OPENs are still denied) | #171 |
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
 
@@ -205,7 +205,7 @@ result, and the fix and regression test.
 - *Proposed fix:* implement the ROOT SUBR TIME. The game only tests whether its value is true, but native TIME reads CPU time, so it is not deterministic. Maintainer decision: derive a deterministic FLOAT from the session (for example, seconds since the session clock started, or a constant positive FLOAT), or record TIME as a clock observation under ADR-0061.
 - *Regression test:* the F9 scenario; F8 once INV-01 is fixed; a unit test that TIME has type FLOAT and is true.
 
-**INV-05: help / info.**
+**INV-05: help / info.** *Status: fixed by M4 S10 (#171; maintainer decision 2026-11-24 "Read-only allowlist", option (1)). OPEN "READ" opens exactly MDL/MADADV.HELP and MDL/MADADV.INFO, hash-checked and read-only; FILE-LENGTH, file READSTRING and CLOSE serve them; every other OPEN "READ" stays strict. See [S10 record](S10-HELP-INFO.md).*
 
 - *First failing location and call path:* 77rooms.mud:961 `<OPEN "READ" .FILE1 .FILE2 .DEV .SNM>` in FILE-TO-TTY (:960), called by HELP (:956) and INFO (:954). Behind it are FILE-LENGTH (:970), READSTRING from a file channel (:978, :979) and CLOSE (:983, :984).
 - *Native:* Prints the shipped files `MDL/MADADV.HELP` (4274 bytes) and `MDL/MADADV.INFO` (1527 bytes).
@@ -229,7 +229,7 @@ result, and the fix and regression test.
 - *Proposed fix:* implement PRINT (CRLF, PRIN1, space; follow the manual, probe Confusion). The maintainer decides whether runtime-detected strict failures should stay host failures (current, strict policy) or be signalled to the game's ERROR handler. Recommendation: keep them strict.
 - *Regression test:* a synthetic `<ERROR …>` during play through the real HANDLE, comparing transcript and `quit-after-mdl-error` with native.
 
-**INV-08: CLOSE / FILE-LENGTH / ACCESS / file READSTRING.**
+**INV-08: CLOSE / FILE-LENGTH / ACCESS / file READSTRING.** *Status: partly fixed by M4 S10 (#171) together with INV-05: FILE-LENGTH, file READSTRING and CLOSE for the allowlisted CHANNELs only. ACCESS and CLOSE of other CHANNELs stay strict and unreachable.*
 
 - *Location and call path:* CLOSE at 77rooms.mud:370 (DO-UNSCRIPT, only when SCRIPT-CHANNEL is set) and at :735, :794, :795 (RECORD, only after a successful OPEN); FILE-LENGTH at :732 and :970; ACCESS at :733 and :741. Under the policy, OPEN always fails, so none of these is reached except behind FILE-TO-TTY (INV-05).
 - *Native and ours:* Not observable. F2 and F13 match.
@@ -318,7 +318,7 @@ during the load, which completes.
 
 | Path | Decision | Gameplay effect (evidence) |
 |---|---|---|
-| `help`, `info`, `?` → OPEN "READ" | ADR-0055: only five-STRING READB, PRINT and PRINTO; every other mode is strict | Session ends (F6, F7). INV-05 |
+| `help`, `info`, `?` → OPEN "READ" | ADR-0055 amendment (M4 S10, #171): READ only for the two allowlisted, hash-checked files; every other READ and mode stays strict | **No longer strict**: prints the files as natively (scenario help-info). INV-05 fixed |
 | `restore` → RESTORE | ADR-0048: RESTORE is strict | Session ends after "Restored." (F4, F5). INV-06 |
 | `save` → SAVE | ADR-0048: in-session record, returns "SAVED" | Text parity (F3). No image, no RESTORE. |
 | `script` → OPEN "PRINT" denied | ADR-0055 | Text parity in the reference copy (F2). SCRIPT-CHANNEL is never set, so CLOSE in unscript is unreachable. |
@@ -353,7 +353,8 @@ during the load, which completes.
    non-deterministic; the game only tests truthiness. Options are a
    deterministic session-derived FLOAT or a clock observation under
    ADR-0061.
-5. **INV-05 help / info** (P1, (a), decided-strict). **Maintainer decision
+5. **INV-05 help / info** — *fixed by M4 S10 (#171), option (1) decided
+   2026-11-24.* (P1, (a), decided-strict). **Maintainer decision
    on the file I/O policy**: a read-only allowlist of the two shipped files
    (faithful, brings INV-08 in), or a FALSE denial that prints "File not
    found." (stopgap, deviation).
