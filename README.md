@@ -67,22 +67,51 @@ The reference CI workflow runs all of these.
 [native reference probes](docs/evidence/M3/), [S7](docs/evidence/M3/S7-INTERACTIVE.md),
 [compatibility inventory](docs/evidence/M3/COMPATIBILITY-INVENTORY.md).
 
-**M4 (in progress; M4 gate NOT YET PASSED, PLAYABLE NOT RUN):** native
-scenarios compared prefix by prefix with pinned Confusion plus state
-checkpoints, each PASS (scenario-scoped): enter the house and open the cellar
-(`make test-m4-house-cellar`), drop (`test-m4-mailbox-drop`, SEGMENT),
-orphan prompts (`test-m4-orphan-prompt`, CHARACTER), TOP and the parser
-(`test-m4-top-parser`), take the sword (`test-m4-sword-glow`, FUNCTION/SUBR
-TYPEs) and troll combat with the sword (`test-m4-troll-combat`, one combat
-branch); on its branch, parser rejection and ambiguity
-(`test-m4-parser-ambiguity`: unknown words, truncation, empty and blank
-lines, `Which door?`; no runtime change). Also on `main`: MAX (ADR-0059), BACK/TOP keep the TYPE (ADR-0058).
-The manual DrRacket checks (quit, Stop) passed. Evidence:
-[docs/evidence/M4](docs/evidence/M4/), [STATUS](docs/STATUS.md).
+**M4 is in progress.** Its acceptance terms are tracked separately in
+[STATUS](docs/STATUS.md) and epic
+[#163](https://github.com/quaat/mdl-racket/issues/163):
 
-**Next milestone step:** more M4 scenarios from the
-[backlog](docs/evidence/M4/SCENARIO-BACKLOG.md): death and recovery,
-scoring, lamp countdown and clock events.
+| Term | State |
+|---|---|
+| SCENARIO_PARITY | PASS for S1–S7 |
+| GAMEPLAY_RELIABILITY | NOT RUN |
+| PLAYABLE | NOT RUN |
+| FULL_COMPLETION | NOT RUN |
+| M4_ACCEPTED | NOT YET |
+
+**Native scenarios (mainline).** Each is compared with pinned Confusion
+prefix by prefix, with state checkpoints, and each PASS is
+scenario-scoped:
+
+| Scenario | Target | Notes |
+|---|---|---|
+| Enter the house and open the cellar | `make test-m4-house-cellar` | |
+| Drop | `test-m4-mailbox-drop` | SEGMENT |
+| Orphan prompts | `test-m4-orphan-prompt` | CHARACTER |
+| TOP and the parser | `test-m4-top-parser` | |
+| Take the sword | `test-m4-sword-glow` | FUNCTION/SUBR TYPEs |
+| Troll combat with the sword | `test-m4-troll-combat` | one combat branch |
+| Parser rejection and ambiguity | `test-m4-parser-ambiguity` | `Which door?` |
+
+Also on `main`:
+- MAX (ADR-0059);
+- BACK and TOP keep the TYPE (ADR-0058);
+- the manual DrRacket checks (quit, Stop) passed.
+
+**Persistence (proof of concept, `make test-m4-replay-persistence`;
+ADR-0061, #165).** A game saved at the command prompt is restored by
+deterministic replay in a fresh process. Its output and state are verified
+against the native troll-combat run. Limits:
+- It is not yet a player-facing save. `run-zork` writes no files.
+- The game's own SAVE and RESTORE commands stay unsupported.
+
+Evidence: [docs/evidence/M4](docs/evidence/M4/).
+
+**Next steps** (epic #163):
+1. A gameplay failure inventory and a single-run checkpoint runner.
+2. Combat, death and recovery branches.
+3. Lamp and clock events, objects, scoring.
+4. Player-facing saves, after an ADR-0055 amendment.
 
 **Previous M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
 summarised above; details in [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).
