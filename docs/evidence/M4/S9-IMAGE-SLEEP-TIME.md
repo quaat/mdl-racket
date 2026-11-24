@@ -33,8 +33,9 @@ PLAYABLE claim and not the M4 gate.
 * `<SLEEP seconds [unhang]>`: non-negative FIX (FLOAT refused, as the reference;
   the manual allows it); returns T always; waits through the host-only
   `current-mdl-sleeper` (default Racket `sleep`, breakable) only when
-  `mdl-clock-live?` of the session clock is true; a live wait first flushes the
-  terminal output ports. UNHANG accepted (no MDL interrupt can arrive during the
+  `mdl-clock-live?` of the session clock is true; any SLEEP of more than 0
+  seconds first flushes the terminal output ports, in every mode (so its errors
+  are mode-independent). UNHANG accepted (no MDL interrupt can arrive during the
   wait). No clock read or observation.
 * `<TIME arg ...>`: arguments evaluated and ignored; returns the FLOAT n.0 for
   the n-th TIME call of the session (counter in the atom space). Chosen because
@@ -172,3 +173,30 @@ game; deviation by decision), a live-clock game run that actually waits (unit
 tests cover the live path with a fake sleeper and one real 1 s wait), IMAGE
 codes ≥ 128 (strict here). Next: the remaining inventory items (INV-05
 help/info, INV-06 restore) per the maintainer's ordering.
+
+## Independent review (2026-11-24)
+
+A read-only independent review of `origin/main...HEAD` found no defects.
+Verdict: approve with nits. Changes made in response:
+
+* **SLEEP errors depended on the clock mode.** The flush ran only before a
+  live wait, so a port-less PRINT channel failed `<SLEEP 1>` on a live clock
+  but returned T on a fixed one. SLEEP now flushes for every `seconds` > 0 in
+  every mode. New test: a port-less context fails identically under the fixed
+  and real clocks and never waits. It failed before the fix (1/83) and passes
+  after.
+* **The break test was timing-dependent.** It now breaks only after the real
+  sleeper has signalled that the wait began, so it cannot pass by breaking
+  context setup.
+* **The flush test could not detect a missing flush.** It used an unbuffered
+  bytes port. It now uses a port that buffers until flushed. Mutation check:
+  replacing the flush with `(void)` gives 3/83 failures.
+
+Kept as decided:
+
+* A resumed clock is live whatever its wall source (maintainer decision
+  #169). In production the wall is the real clock.
+* `current-mdl-sleeper` stays a process-wide, host-only parameter. There is
+  no multi-session host.
+* Playing interactively with `zork/cli.rkt --fixed-clock` never pauses at the
+  bat, per decision #169.

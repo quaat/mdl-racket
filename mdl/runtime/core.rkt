@@ -2809,12 +2809,14 @@
     (error 'SLEEP "FIRST-ARG-WRONG-TYPE: expected a FIX number of seconds"))
   (when (negative? seconds)
     (error 'SLEEP "ARGUMENT-OUT-OF-RANGE: SLEEP time negative"))
-  (when (and (positive? seconds)
-             (mdl-clock-live? (atom-space-clock (current-mdl-atom-space))))
+  (when (positive? seconds)
     ;; As READSTRING before it blocks: output written so far is visible
-    ;; during the wait.
+    ;; during the wait. Flushed in every clock mode, so that SLEEP's value
+    ;; and errors (a port-less PRINT channel's strict S13 error) never
+    ;; depend on the mode; only the wait does.
     (flush-terminal-output! 'SLEEP)
-    ((current-mdl-sleeper) seconds))
+    (when (mdl-clock-live? (atom-space-clock (current-mdl-atom-space)))
+      ((current-mdl-sleeper) seconds)))
   (mdl-root-atom "T"))
 
 ;; M4 S9 (issue #170, decision: a session-derived value with no clock read):

@@ -3569,9 +3569,13 @@ live afterwards. SLEEP **never reads or advances the session clock**: it adds
 no clock observation in any mode, so recording, replaying and resumed
 observation logs, GETTIMEDATE results and DSKDATE are unchanged by SLEEP, and a
 checkpoint taken after a SLEEP replays without waiting (replaying clock). A
-live wait first flushes the session's terminal output ports (as READSTRING
-does before it blocks, so the bytes written before the SLEEP — the bat's BELs
-— are visible during the wait), then calls the host sleeper with `seconds`.
+SLEEP with `seconds` > 0 first flushes the session's terminal output ports in
+every clock mode (as READSTRING does before it blocks, so the bytes written
+before the SLEEP — the bat's BELs — are visible during a wait); a port-less
+PRINT channel therefore fails SLEEP strictly in every mode alike, so SLEEP's
+value and errors never depend on the mode, only whether it waits (independent
+review of S9). Then, only on a live clock, it calls the host sleeper with
+`seconds`.
 The sleeper is the host-only parameter `current-mdl-sleeper` (default: Racket
 `sleep`), never reachable from MDL; tests install a recording fake. The wait
 is interruptible by a Racket break (DrRacket Stop, Ctrl-C): `exn:break`

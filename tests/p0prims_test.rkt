@@ -152,20 +152,43 @@
                       [(v s) (sleep-under res "<SLEEP 1>")])
           (check-equal? s '(1)) (check-equal? (reads) r0)
           (check-equal? (mdl-clock-observations res) '())))
+;; A buffered output port: written bytes stay pending until a flush (Racket
+;; signals a flush as an empty write), then become visible. Returns the port
+;; and a thunk giving the visible bytes.
+(define (buffered-port)
+  (define pending (open-output-bytes))
+  (define visible (open-output-bytes))
+  (values (make-output-port
+           'buffered always-evt
+           (lambda (bs start end non-block? breakable?)
+             (if (= start end)
+                 (write-bytes (get-output-bytes pending #t) visible)
+                 (write-bytes bs pending start end))
+             (- end start))
+           void)
+          (lambda () (get-output-bytes visible))))
 ;; FWEEP 4 1 (FLY-ME): three BELs and three one-second SLEEPs; under a live
-;; clock the BELs are written before each wait.
+;; clock each BEL is flushed (visible, not merely buffered) before its wait.
 (check* (with-fake-sleeper
-         (define out (open-output-bytes))
+         (define-values (out visible) (buffered-port))
          (define seen '())
          (parameterize ([current-mdl-sleeper
-                         (lambda (s) (set! seen (cons (get-output-bytes out) seen))
+                         (lambda (s) (set! seen (cons (visible) seen))
                                  (fake-sleeper s))])
            (define ctx (fresh-context #:out out #:clock (make-mdl-clock (lambda () (values 0 0))
                                                                          #:live? #t)))
            (check-equal? (name (run-in ctx (string-append fweep " <FWEEP 4 1>"))) "T")
-           (check-equal? (get-output-bytes out) #"\a\a\a")
            (check-equal? (reverse sleeps) '(1 1 1))
            (check-equal? (reverse seen) (list #"\a" #"\a\a" #"\a\a\a")))))
+;; A port-less PRINT channel: <SLEEP 1> fails strictly (the flush cannot
+;; resolve a port) in every clock mode, and never waits; <SLEEP 0> flushes
+;; nothing and returns T.
+(for ([clock (list (make-fixed-mdl-clock 0) real-mdl-clock)])
+  (check* (with-fake-sleeper
+           (check-exn #rx"PRINT CHANNEL has no host-supplied output port"
+                      (lambda () (run-in (make-mdl-context #:clock clock) "<SLEEP 1>")))
+           (check-equal? sleeps '())
+           (check-equal? (name (run-in (make-mdl-context #:clock clock) "<SLEEP 0>")) "T"))))
 (check* (let-values ([(v s) (sleep-under (make-fixed-mdl-clock 0) (string-append fweep " <FWEEP 4 1>"))])
           (check-equal? (name v) "T") (check-equal? s '())))
 ;; UNHANG is accepted (never consulted: no interrupt can arrive during SLEEP).
@@ -196,15 +219,22 @@
           (check-true (< ms 5000) (format "waited ~a ms" ms))))
 ;; A break (DrRacket Stop, Ctrl-C) interrupts a live wait: exn:break leaves
 ;; SLEEP unchanged, long before the requested 60 seconds.
+;; The break is sent only once the real wait has begun (STARTED), so the
+;; test cannot pass by breaking context setup instead of the wait.
 (check* (let* ([result (box #f)]
+               [started (make-semaphore 0)]
                [t0 (current-inexact-milliseconds)]
                [worker (thread
                         (lambda ()
                           (set-box! result
                                     (with-handlers ([exn:break? (lambda (e) e)])
-                                      (run-in (fresh-context #:clock real-mdl-clock)
-                                              "<SLEEP 60>")))))])
-          (sleep 0.2)
+                                      (parameterize ([current-mdl-sleeper
+                                                      (lambda (s)
+                                                        (semaphore-post started)
+                                                        (sleep s))])
+                                        (run-in (fresh-context #:clock real-mdl-clock)
+                                                "<SLEEP 60>"))))))])
+          (check-not-false (sync/timeout 30 started) "the wait began")
           (break-thread worker)
           (check-not-false (sync/timeout 10 worker) "worker ended")
           (check-true (exn:break? (unbox result)))
