@@ -3683,7 +3683,7 @@ readable file at all.
    missing file (orchestrator decision (a): a broken install, never FALSE).
 4. The result is a fresh CHANNEL of 19 elements, as natively: `[n "READ"
    name1 name2 device directory name1 name2 device directory 0 0 #LOSE 0 0 0
-   0 0 10 0]` with fresh STRINGs. n is the lowest number ≥ 3 not used by
+   0 10 0]` with fresh STRINGs. n is the lowest number ≥ 3 not used by
    another open file CHANNEL of the session (natively the host descriptor: 3,
    then 4). **Deviation:** element 10 is the requested directory (`"MDL"`),
    never the absolute host directory Confusion puts there (decision (c); no
