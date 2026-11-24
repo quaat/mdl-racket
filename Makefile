@@ -21,7 +21,7 @@ test-racket:
 	@bash scripts/test_racket.sh
 
 test-python:
-	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py tests/test_boot_reference.py tests/test_smoke_parity.py
+	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py tests/test_boot_reference.py tests/test_smoke_parity.py tests/test_sweep_operator_heads.py
 
 test-historical: sources
 	@racket tests/historical_vfload_test.rkt
