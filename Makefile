@@ -134,6 +134,7 @@ test-m4-parser-ambiguity: sources
 test-m4-replay-persistence: sources
 	@racket tests/persistence_replay_test.rkt
 	@racket tests/replay_sleep_time_test.rkt
+	@racket tests/help_info_replay_test.rkt
 
 # M4 S8 (the cyclops and ABS, issue #167): lunch and water from the kitchen,
 # the troll-combat path, the maze into the Cyclops Room (FIGHTING's FIRST?
