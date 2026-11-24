@@ -31,7 +31,7 @@
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          mdl-random-state-snapshot mdl-error-messages
-         mdl-max mdl-abs
+         mdl-max mdl-abs mdl-image mdl-sleep mdl-time current-mdl-sleeper
          atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
@@ -1819,7 +1819,10 @@
                             [mdl-errors #:mutable]
                             ;; ADR-0061: host-only READSTRING observer, or #f.
                             ;; Never reachable from MDL.
-                            input-observer))
+                            input-observer
+                            ;; M4 S9 (#170): how many times TIME was called
+                            ;; in this session (host-only; TIME's value).
+                            [time-calls #:mutable]))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1909,7 +1912,7 @@
               ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
               ;; (seed-root! fails if either is missing from the inventory).
               (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)
-              '() clock time-zone '() '() input-observer))
+              '() clock time-zone '() '() input-observer 0))
 
 ;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
 ;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
@@ -2760,6 +2763,69 @@
          (if (exact-integer? value)
              (check-fix 'mdl-abs (abs value))
              (abs value))]))
+
+;; M4 S9 (issue #169): the host sleeper of a live SLEEP. Host-only (never
+;; reachable from MDL); tests install a recording fake. The default is
+;; Racket's sleep, which a break (DrRacket Stop, Ctrl-C) interrupts.
+(define current-mdl-sleeper
+  (make-parameter (lambda (seconds) (sleep seconds))
+                  (lambda (proc)
+                    (unless (and (procedure? proc) (procedure-arity-includes? proc 1))
+                      (raise-argument-error 'current-mdl-sleeper
+                                            "(procedure-arity-includes/c 1)" proc))
+                    proc)))
+
+;; M4 S9 (issue #168, decision: emit the exact byte): IMAGE writes the one
+;; byte CODE (0-127; control characters raw, never ^X) to a session PRINT
+;; CHANNEL (default the LVAL of OUTCHAN) and returns CODE. No flush. Codes
+;; outside 0-127 are strict (ADR-0050/0057; the reference writes CODE mod 256,
+;; recorded deviation, docs/SEMANTICS.md).
+(define (mdl-image . args)
+  (cond [(null? args) (error 'IMAGE "TOO-FEW-ARGUMENTS-SUPPLIED")]
+        [(> (length args) 2) (error 'IMAGE "TOO-MANY-ARGUMENTS-SUPPLIED")])
+  (define code (car args))
+  (unless (exact-integer? code)
+    (error 'IMAGE "FIRST-ARG-WRONG-TYPE: expected a FIX character code"))
+  (unless (<= 0 code 127)
+    (error 'IMAGE "character code ~a is outside 0-127 (ADR-0050, ADR-0057)" code))
+  (define host (channel-output-host 'IMAGE (if (null? (cdr args))
+                                               (default-output-channel 'IMAGE)
+                                               (cadr args))))
+  (write-byte code (host-channel-output-port/strict 'IMAGE host))
+  code)
+
+;; M4 S9 (issue #169, decision: wait for real only on live clocks): SLEEP
+;; validates a non-negative FIX (FLOAT refused, as the reference), then waits
+;; through current-mdl-sleeper only if the session clock is live
+;; (mdl-clock-live?: real, resumed, recording over a live source). It never
+;; reads or advances the clock, and returns T in every mode. UNHANG is
+;; accepted: no MDL interrupt can arrive during the wait in this runtime, so
+;; it is never consulted. A break propagates unchanged.
+(define (mdl-sleep . args)
+  (cond [(null? args) (error 'SLEEP "TOO-FEW-ARGUMENTS-SUPPLIED")]
+        [(> (length args) 2) (error 'SLEEP "TOO-MANY-ARGUMENTS-SUPPLIED")])
+  (define seconds (car args))
+  (unless (and (exact-integer? seconds) (<= fix-min seconds fix-max))
+    (error 'SLEEP "FIRST-ARG-WRONG-TYPE: expected a FIX number of seconds"))
+  (when (negative? seconds)
+    (error 'SLEEP "ARGUMENT-OUT-OF-RANGE: SLEEP time negative"))
+  (when (and (positive? seconds)
+             (mdl-clock-live? (atom-space-clock (current-mdl-atom-space))))
+    ;; As READSTRING before it blocks: output written so far is visible
+    ;; during the wait.
+    (flush-terminal-output! 'SLEEP)
+    ((current-mdl-sleeper) seconds))
+  (mdl-root-atom "T"))
+
+;; M4 S9 (issue #170, decision: a session-derived value with no clock read):
+;; TIME ignores its (already evaluated) arguments and returns the FLOAT n.0
+;; for the n-th TIME call of this session. Documented deviation from the
+;; reference's CPU seconds (docs/SEMANTICS.md).
+(define (mdl-time . _ignored)
+  (define space (current-mdl-atom-space))
+  (define n (add1 (atom-space-time-calls space)))
+  (set-atom-space-time-calls! space n)
+  (exact->inexact n))
 
 (define (mdl-random . seeds)
   (when (> (length seeds) 2)
@@ -4806,6 +4872,9 @@
         "MIN" mdl-min
         "MAX" mdl-max
         "ABS" mdl-abs
+        "IMAGE" mdl-image
+        "SLEEP" mdl-sleep
+        "TIME" mdl-time
         "RANDOM" mdl-random
         "GETTIMEDATE" mdl-gettimedate
         "MOD" mdl-mod

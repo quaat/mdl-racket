@@ -77,10 +77,14 @@ def test_committed_sweep_matches_fresh_run():
     live = {m["name"] for m in data["missing"] if m["class"] == "missing"}
     # The inventory's static candidates still unimplemented
     # (GAMEPLAY-FAILURE-INVENTORY.md); fixed ones move to builtins.
-    assert {"IMAGE", "SLEEP", "CLOSE", "FILE-LENGTH", "ACCESS", "PRINT",
-            "EVAL", "PARSE"} <= live
-    # INV-01 fixed by M4 S8 (#167): ABS is a runtime builtin now.
-    assert "ABS" not in live
-    assert "ABS" in data["runtime_name_sources"]["builtin_table"]
-    assert "ABS" in data["builtin_used"]
-    assert "TIME" in {r["name"] for r in data["root_name_data_refs"]}
+    assert {"CLOSE", "FILE-LENGTH", "ACCESS", "PRINT", "EVAL", "PARSE"} <= live
+    # INV-01 fixed by M4 S8 (#167); INV-02/03/04 fixed by M4 S9 (#168-#170):
+    # ABS, IMAGE, SLEEP and TIME are runtime builtins now.
+    for name in ("ABS", "IMAGE", "SLEEP", "TIME"):
+        assert name not in live, name
+        assert name in data["runtime_name_sources"]["builtin_table"], name
+    for name in ("ABS", "IMAGE", "SLEEP"):
+        assert name in data["builtin_used"], name
+    # TIME is applied by name only (a data ATOM, never a head); it is no
+    # longer a ROOT-SUBR data reference this runtime lacks.
+    assert "TIME" not in {r["name"] for r in data["root_name_data_refs"]}

@@ -1,0 +1,1342 @@
+{
+  "schema_version": 1,
+  "kind": "m4-p0prims-reference",
+  "engine": "confusion-patched-1977",
+  "recorded_at": "2026-11-24T06:24:39.429534+00:00",
+  "interpreter": ".cache/build/confusion_patched/mdli",
+  "interpreter_sha256_before": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "interpreter_sha256_after": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "upstream_mdlzork_checked_out": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "shim_src_sha256": "d1fa86520eab80891c95c9cbec8a35401fd1fe55c1d6fa6b18165a30736ab925",
+  "protocol": "scripts/probe_p0prims_reference.py (module docstring)",
+  "cases": [
+    {
+      "name": "baseline",
+      "kind": "transcript",
+      "note": "wall-time baseline for the SLEEP cases",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/baseline-5400ihod/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<+ 1 1>\n<QUIT>\n",
+      "input_sha256": "51500ce34f84d11fbf3aaee59da35b307b826ddaed963e2a021b6bbd6db5274f",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n2\n",
+      "stdout_sha256": "9f5ef43f640ec16ec3fc5e851cd0f3115019f6316ed20c62f31450993bb9632d",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n2\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<+ 1 1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "3b2074797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a320a"
+    },
+    {
+      "name": "image-65",
+      "kind": "transcript",
+      "note": "printable code: writes the character, returns the FIX",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-65-zrom700x/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 65>\n<TYPE <IMAGE 66>>\n<QUIT>\n",
+      "input_sha256": "13c1dcd08fb7f2fadf1b21e064788c09eee19c2d60e0105579d890f0d6721d35",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nA65\nBFIX\n",
+      "stdout_sha256": "88fffd4a89683a149ff516e356090cda8e873d2971bf0f4f4a731112ba7bb6da",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nA65\nBFIX\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 65>",
+        "<TYPE <IMAGE 66>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "3c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a4136350a424649580a"
+    },
+    {
+      "name": "image-7",
+      "kind": "transcript",
+      "note": "BEL (the game's code)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-7-06yt8_p_/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 7>\n<TYPE <IMAGE 7>>\n<QUIT>\n",
+      "input_sha256": "b3c4ade0a294c9d692e0629d88751bc60e6b8f252e28677933c0d02a23401848",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\u00077\n\u0007FIX\n",
+      "stdout_sha256": "8b3a5a41073e22cb301cb88060afad21676f57708b7832d16ab1237beca1d18e",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\u00077\n\u0007FIX\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 7>",
+        "<TYPE <IMAGE 7>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a07370a074649580a"
+    },
+    {
+      "name": "image-controls",
+      "kind": "transcript",
+      "note": "control codes and DEL: raw, never ^X notation",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-controls-0uoayz4y/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 0>\n<IMAGE 1>\n<IMAGE 10>\n<IMAGE 13>\n<IMAGE 27>\n<IMAGE 127>\n<QUIT>\n",
+      "input_sha256": "c952fdda0a87246ecba17d2d375b0fb6208cd4b69a9bf4bb30b518445d37d922",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\u00000\n\u00011\n\n10\n\r13\n\u001b27\n127\n",
+      "stdout_sha256": "93eae415034517efaeeefc8f75a5aaad704e2ae240a1fc181d11c83ffc50b923",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\u00000\n\u00011\n\n10\n\n13\n\u001b27\n127\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 0>",
+        "<IMAGE 1>",
+        "<IMAGE 10>",
+        "<IMAGE 13>",
+        "<IMAGE 27>",
+        "<IMAGE 127>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "64657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a00300a01310a0a31300a0d31330a1b32370a7f3132370a"
+    },
+    {
+      "name": "image-128",
+      "kind": "transcript",
+      "note": "first code above 7-bit ASCII",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-128-_6ajcwr6/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 128>\n<QUIT>\n",
+      "input_sha256": "b02d0912d1e0b14314ba8d23425b1978bd3288e0755f2cf27099a02226d8cd2a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n128\n",
+      "stdout_sha256": "23f0e04c179b7579a53c7962504a3b9c64cb179b13857c90b24eb6915e7ced1b",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n128\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 128>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a803132380a"
+    },
+    {
+      "name": "image-200",
+      "kind": "transcript",
+      "note": "8-bit code",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-200-daqoxh7r/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 200>\n<QUIT>\n",
+      "input_sha256": "4d59b917cb106e89ed767f6bf3121aefae79b4e345106add5dfc5e199aadb952",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nÈ200\n",
+      "stdout_sha256": "0b8dcc0669d877f14e788636b05c02231ffcc966dc6c9d9959bb8ded3cf208b9",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nÈ200\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 200>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310ac83230300a"
+    },
+    {
+      "name": "image-255",
+      "kind": "transcript",
+      "note": "8-bit code",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-255-7d6m89yp/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 255>\n<QUIT>\n",
+      "input_sha256": "dba2cd0aeb780f1abbd2004c9d7ca4f0c758b2d1b84f5d8e5d6fdbb7c7509ac4",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nÿ255\n",
+      "stdout_sha256": "a267653c123678740531c44654a1c6394afcce3d267d3f2f4b6411fbb755ab34",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nÿ255\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 255>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310aff3235350a"
+    },
+    {
+      "name": "image-256",
+      "kind": "transcript",
+      "note": "beyond a byte",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-256-z_v1tw3s/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 256>\n<QUIT>\n",
+      "input_sha256": "f305d102afa5a74eca835d910a0d12f08a12127796e421a910235eb0c984429b",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\u0000256\n",
+      "stdout_sha256": "024390be8ae1034d699849861fc89c899adf6aac10816a5f30478a3291bd6930",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\u0000256\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 256>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a003235360a"
+    },
+    {
+      "name": "image-321",
+      "kind": "transcript",
+      "note": "65 + 256",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-321-_txfmb_v/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 321>\n<QUIT>\n",
+      "input_sha256": "b3e5e574364db9054525106d12efb36aaf5cdb9bb97dce389ee01a4b6f4057a7",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nA321\n",
+      "stdout_sha256": "edf71c37cfc4c75f8bf613676189b7805755d632c638a1d987466d8d87cc0e88",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nA321\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.02,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 321>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a413332310a"
+    },
+    {
+      "name": "image-negative",
+      "kind": "transcript",
+      "note": "negative FIX",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-negative-0_pcnbhe/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE -1>\n<QUIT>\n",
+      "input_sha256": "4fc3e50a7a972fd41cb0545178a3bd42a71d3226c33ccef5ec061e1f4c09e81e",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nÿ-1\n",
+      "stdout_sha256": "807cba1edcc10efefa568fc644d4a9d77508a446aa8d19c2bd389da642b8065b",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nÿ-1\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE -1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "74797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310aff2d310a"
+    },
+    {
+      "name": "image-outchan-lval",
+      "kind": "transcript",
+      "note": "explicit channel, LVAL OUTCHAN",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-outchan-lval-is9ece1z/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 66 .OUTCHAN>\n<QUIT>\n",
+      "input_sha256": "d81c080157b9bbd73add6300f86f7f8be3a69abe2a4af4124e18caa71236b3e1",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nB66\n",
+      "stdout_sha256": "0c0016f6efb1ef8813d5c5d82eaacfcc09e7fa897f04b17075c00f06a9a68505",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nB66\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 66 .OUTCHAN>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "74797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a4236360a"
+    },
+    {
+      "name": "image-outchan-gval",
+      "kind": "transcript",
+      "note": "explicit channel, GVAL OUTCHAN",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-outchan-gval-c17x8o5_/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 67 ,OUTCHAN>\n<QUIT>\n",
+      "input_sha256": "5530ae791ea066abc750079840f71d9794ad007c343bb5f670bcfc6e777a3a12",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nC67\n",
+      "stdout_sha256": "6bb8db87b840e548c53df415bd4a72ea7959be1e9c9fd71100c45e5e32b5ceca",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nC67\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 67 ,OUTCHAN>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "74797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a4336370a"
+    },
+    {
+      "name": "err-image-inchan",
+      "kind": "transcript",
+      "note": "input channel",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-inchan-lxypb86b/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 65 .INCHAN>\n<QUIT>\n",
+      "input_sha256": "813ec1ddcfdfb8c0d5e1839668e828b6f65437f0562f4496a86a0ed7efca08f7",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n65\n",
+      "stdout_sha256": "b6162ca206e35449dc01a049b89189346213c48923fd92b7946d15740d2fdc6c",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n65\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 65 .INCHAN>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "2074797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a36350a"
+    },
+    {
+      "name": "err-image-chan-fix",
+      "kind": "transcript",
+      "note": "non-CHANNEL second argument",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-chan-fix-4qedd9mj/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 65 1>\n<QUIT>\n",
+      "input_sha256": "0cf2937f5ef337db4d06537caf7af9207a039cf80e28813bb8a08faf19484918",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_sha256": "995cd34fc86ffc0555ab911a93fd38cedb03aa1a58b6128b34d354d801923cbc",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Error: Attempt to write to non-channel\n",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 65 1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a"
+    },
+    {
+      "name": "err-image-no-args",
+      "kind": "transcript",
+      "note": "zero arguments",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-no-args-eamsolh_/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE>\n<QUIT>\n",
+      "input_sha256": "89eda6d56de7bf71abdf6800afcc597dede6aa8771ef19823a267529550e26b3",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "c80e2f42d788f1405de5e48e3f31c6238034aead3da2f29cbf1c01e45d9f16d7",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "200a2022544f4f2d4645572d415247554d454e54532d535550504c49454422200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-image-three-args",
+      "kind": "transcript",
+      "note": "three arguments",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-three-args-3lpio60o/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 65 .OUTCHAN 1>\n<QUIT>\n",
+      "input_sha256": "68515e697a7b2c7aea303f6c938c0e45a52c58ed875f0590e33ac449e17243d0",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "51a9a45b2666bb99fba580536ef4509e9dee5575ec744c10123003fba969a73d",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 65 .OUTCHAN 1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "0a2022544f4f2d4d414e592d415247554d454e54532d535550504c49454422200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-image-string",
+      "kind": "transcript",
+      "note": "STRING",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-string-tlzb7vgd/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE \"A\">\n<QUIT>\n",
+      "input_sha256": "ad3e6b6cdcc622e5b8b205859d2d75c20c44bce79247c8da1598c43a1f206d65",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE \"A\">"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-image-character",
+      "kind": "transcript",
+      "note": "CHARACTER",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-character-t1cc_at2/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE !\\A>\n<QUIT>\n",
+      "input_sha256": "9100b385d79c85d93f457f91ac55655ff13ce8bdcc2673b15c72725ad069f5e6",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE !\\A>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-image-float",
+      "kind": "transcript",
+      "note": "FLOAT",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-float-9nvmo2_a/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE 65.0>\n<QUIT>\n",
+      "input_sha256": "4a2c011a033a531b5996dce820f32a2c42a2217b5e9c51df8887fe143d4f1973",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE 65.0>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-image-false",
+      "kind": "transcript",
+      "note": "FALSE",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-false-ziyvjfgh/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE <>>\n<QUIT>\n",
+      "input_sha256": "dcbf94669dcb4e4a49cc4c95527357e4d07b5373df9fa93b24fd20265260cf22",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE <>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-image-atom",
+      "kind": "transcript",
+      "note": "ATOM",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-image-atom-11ttqikc/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<IMAGE A>\n<QUIT>\n",
+      "input_sha256": "6f942141912975197ffe76313cce44b8ad3a88a92f9c9886983660459dcba2a9",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<IMAGE A>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "image-applicable",
+      "kind": "transcript",
+      "note": "IMAGE as a SUBR value",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-applicable-5o4oe53d/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<TYPE ,IMAGE>\n<APPLY ,IMAGE 68>\n<QUIT>\n",
+      "input_sha256": "34931c49731e5be6e22aeea1fb2b6159ce10b492b12827cc1f5e1e2307f66426",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nD68\n",
+      "stdout_sha256": "e63cc2efdd801196323d5e54d9064144c7ea79447fa29b2f0b10771119d1e3b2",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nD68\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<TYPE ,IMAGE>",
+        "<APPLY ,IMAGE 68>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "3c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a535542520a4436380a"
+    },
+    {
+      "name": "image-fweep-no-sleep",
+      "kind": "transcript",
+      "note": "77act2.mud:53 FWEEP with SLP 0 (BOOM-ROOM's <FWEEP 7>): six BELs, no SLEEP",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/image-fweep-no-sleep-41pa0fux/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<DEFINE FWEEP (NUM \"OPTIONAL\" (SLP 0)) #DECL ((NUM SLP) FIX) <REPEAT ((N .NUM)) <AND <0? <SET N <- .N 1>>> <RETURN>> <IMAGE 7> <OR <0? .SLP> <SLEEP .SLP>>>>\n<FWEEP 7>\n<QUIT>\n",
+      "input_sha256": "433503f96bc6b298ec7e039f05c1ac251c99f95a793b9f9bc12369acc926df00",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFWEEP\n\u0007\u0007\u0007\u0007\u0007\u0007T\n",
+      "stdout_sha256": "31f19b27ee1216bafd716728a01e9e75b222850dd7ace885009fbf8cbbd0e8b9",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFWEEP\n\u0007\u0007\u0007\u0007\u0007\u0007T\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<DEFINE FWEEP (NUM \"OPTIONAL\" (SLP 0)) #DECL ((NUM SLP) FIX) <REPEAT ((N .NUM)) <AND <0? <SET N <- .N 1>>> <RETURN>> <IMAGE 7> <OR <0? .SLP> <SLEEP .SLP>>>>",
+        "<FWEEP 7>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a46574545500a070707070707540a"
+    },
+    {
+      "name": "sleep-0",
+      "kind": "transcript",
+      "note": "zero seconds",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-0-aavb3jhy/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 0>\n<TYPE <SLEEP 0>>\n<QUIT>\n",
+      "input_sha256": "0f421ad6f9efb2f72ae7542386477f9d247e82346b6238bea427e716054cb637",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\nATOM\n",
+      "stdout_sha256": "f88186f2aaf1d118e9903654c9131426cf31cbeee6b6cf9772c957cdb1f7671e",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\nATOM\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 0>",
+        "<TYPE <SLEEP 0>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "65203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a540a41544f4d0a"
+    },
+    {
+      "name": "sleep-1",
+      "kind": "transcript",
+      "note": "one second (compare elapsed with baseline)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-1-ygybe6mt/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 1>\n<QUIT>\n",
+      "input_sha256": "b5ec48d69fa5884754fa9f7e37035adca7fd717eb3cf839a5e9d32974b5e26d8",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stdout_sha256": "cb4b14d96f139eac456ce5f0f1e62ff5ae3a043cab22dc5f2992ec065f73c6c6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 1.01,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "3b2074797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a540a"
+    },
+    {
+      "name": "sleep-3x1",
+      "kind": "transcript",
+      "note": "three one-second sleeps",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-3x1-wi6sa4og/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 1>\n<SLEEP 1>\n<SLEEP 1>\n<QUIT>\n",
+      "input_sha256": "a98f6759d4c6c267f64017f2b924e0c0f696a4e6013d9e6c9d5386b80c474b3e",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\nT\nT\n",
+      "stdout_sha256": "5aae9502afaf6151b10c37cbb5fe2583716bb868af78ac671cd9d58ba8f44281",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\nT\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 3.01,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 1>",
+        "<SLEEP 1>",
+        "<SLEEP 1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "7065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a540a540a540a"
+    },
+    {
+      "name": "sleep-float",
+      "kind": "transcript",
+      "note": "FLOAT seconds",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-float-ad592hnl/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 0.5>\n<TYPE <SLEEP 0.5>>\n<QUIT>\n",
+      "input_sha256": "7adffd843bc551c5c236dc170db691d346c6adc66f1377c2a20ad4697f51b8ee",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 3 PROCESS 1\n",
+      "stdout_sha256": "184ac54eab9cdcdfdc2120de4374208f5f94acc0d31e36f472da8b9557222c13",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 3 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 0.5>",
+        "<TYPE <SLEEP 0.5>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20332050524f4345535320310a"
+    },
+    {
+      "name": "sleep-float-1.5",
+      "kind": "transcript",
+      "note": "FLOAT seconds",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-float-1.5-ywrk6l8s/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 1.5>\n<QUIT>\n",
+      "input_sha256": "e71ea5344fd01f563dde530c1b03473338db764a80c8edb56788b1eff2490939",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 1.5>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "sleep-negative",
+      "kind": "transcript",
+      "note": "negative FIX (manual: time is non-negative)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-negative-sxak8mm8/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP -1>\n<QUIT>\n",
+      "input_sha256": "50ca3b2a08b81d62a811594a215bef19b57c6ee438b573bf03f4d93ad0a63032",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"ARGUMENT-OUT-OF-RANGE\" \n \"SLEEP time negative\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "9ed3557aaf23d846260842c52ced956c88bde03c52f55480b28eb19ed749a515",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"ARGUMENT-OUT-OF-RANGE\" \n \"SLEEP time negative\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP -1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "2d52414e474522200a2022534c4545502074696d65206e6567617469766522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "sleep-negative-float",
+      "kind": "transcript",
+      "note": "negative FLOAT",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-negative-float-ulrvd1ce/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP -0.5>\n<QUIT>\n",
+      "input_sha256": "e501b4751b36297404071b9a470c85961e71fa9aa1e8df792a41d4ed32901298",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP -0.5>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "sleep-pred-true",
+      "kind": "transcript",
+      "note": "optional UNHANG argument, true",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-pred-true-ae_1sjmm/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 0 T>\n<QUIT>\n",
+      "input_sha256": "1b85d3f676e802a6e892a32e7652361b4d875ff8c34c9e49d8b88cb8e3a66f43",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stdout_sha256": "cb4b14d96f139eac456ce5f0f1e62ff5ae3a043cab22dc5f2992ec065f73c6c6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 0 T>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "3b2074797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a540a"
+    },
+    {
+      "name": "sleep-pred-false",
+      "kind": "transcript",
+      "note": "optional UNHANG argument, FALSE",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-pred-false-tc_3l7ex/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 1 <>>\n<QUIT>\n",
+      "input_sha256": "c6d38cde1c622e63e4ca1e193ef06e7f3d245a0802824399c75c91f69c009804",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stdout_sha256": "cb4b14d96f139eac456ce5f0f1e62ff5ae3a043cab22dc5f2992ec065f73c6c6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 1.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 1 <>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "3b2074797065203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a540a"
+    },
+    {
+      "name": "sleep-gettimedate",
+      "kind": "transcript",
+      "note": "under the fixed-clock shim the wall clock does not move across SLEEP",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-gettimedate-mhlagkms/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<GETTIMEDATE>\n<SLEEP 1>\n<GETTIMEDATE>\n<QUIT>\n",
+      "input_sha256": "e52e5de042deac1547bd1e9b0d754485f167720067efb33166325fb8a59e8615",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![0 0 12 12 12 1977 0!]\nT\n![0 0 12 12 12 1977 0!]\n",
+      "stdout_sha256": "e76a078c6a0b8a9fe78120dad55b29e8c879e776ecc5a87a4c98ee96ed8d14c4",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n![0 0 12 12 12 1977 0!]\nT\n![0 0 12 12 12 1977 0!]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 1.01,
+      "files_removed": [],
+      "forms": [
+        "<GETTIMEDATE>",
+        "<SLEEP 1>",
+        "<GETTIMEDATE>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4c20312050524f4345535320310a215b30203020313220313220313220313937372030215d0a540a215b30203020313220313220313220313937372030215d0a"
+    },
+    {
+      "name": "err-sleep-no-args",
+      "kind": "transcript",
+      "note": "zero arguments",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-sleep-no-args-c0242zgc/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP>\n<QUIT>\n",
+      "input_sha256": "32c9fd66a48f37bb1aa6c47cf2a6498fe3912160f4cc2e2ef5df1c318a36ee56",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "c80e2f42d788f1405de5e48e3f31c6238034aead3da2f29cbf1c01e45d9f16d7",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "200a2022544f4f2d4645572d415247554d454e54532d535550504c49454422200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-sleep-three-args",
+      "kind": "transcript",
+      "note": "three arguments",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-sleep-three-args-ra5f1pr8/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP 0 T T>\n<QUIT>\n",
+      "input_sha256": "9ad5aeb9e56bde38bf4bcedf9f23778c7827bd01626360cea3e88711aee6dc23",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "51a9a45b2666bb99fba580536ef4509e9dee5575ec744c10123003fba969a73d",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP 0 T T>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "0a2022544f4f2d4d414e592d415247554d454e54532d535550504c49454422200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-sleep-string",
+      "kind": "transcript",
+      "note": "STRING",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-sleep-string-04kqlb10/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP \"1\">\n<QUIT>\n",
+      "input_sha256": "bf830112bb401012fd7d55ef48d5f935c16fbd5c09945721c7b5c56396ed161b",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP \"1\">"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-sleep-atom",
+      "kind": "transcript",
+      "note": "ATOM",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-sleep-atom-01kktagf/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP A>\n<QUIT>\n",
+      "input_sha256": "1b56d3b9d9d68934b89308960cde395cf67b3c7cc91ad4894b03016e12cfc34b",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP A>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-sleep-false",
+      "kind": "transcript",
+      "note": "FALSE",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-sleep-false-lsgi9lzu/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP <>>\n<QUIT>\n",
+      "input_sha256": "29052ff26ce0d5a1a36170cb6f1dd5000d9797781f97bca01233ceb1f29fb874",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP <>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-sleep-character",
+      "kind": "transcript",
+      "note": "CHARACTER",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-sleep-character-kzs239jz/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP !\\A>\n<QUIT>\n",
+      "input_sha256": "a9a99e797b8d8a076e3d145b676795a52b43097f4e576cc94f49517091043573",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP !\\A>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "err-sleep-list",
+      "kind": "transcript",
+      "note": "LIST",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-sleep-list-ipv8q7y5/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SLEEP '(1)>\n<QUIT>\n",
+      "input_sha256": "66909189bd8dfef50b9949e25c2d0620e29c833145f76dfb8770243b6d59cd27",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "81d38515cab63b6953200311802c0bc16b37ee1f78a79012b7e8966a20656dc3",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FIRST-ARG-WRONG-TYPE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SLEEP '(1)>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4552524f522a200a202246495253542d4152472d57524f4e472d5459504522200a4c495354454e494e472d41542d4c4556454c20322050524f4345535320310a"
+    },
+    {
+      "name": "sleep-applicable",
+      "kind": "transcript",
+      "note": "SLEEP as a SUBR value",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-applicable-aum_xk6b/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<TYPE ,SLEEP>\n<APPLY ,SLEEP 0>\n<QUIT>\n",
+      "input_sha256": "d59d8dfafc8463f4255aff1d4d0602251d3820f267ec1c3074b097e02d710130",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nT\n",
+      "stdout_sha256": "aa52e8aebea4728cb7591b203478c06d7eb2302c4f81889f16a23d13399d9812",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<TYPE ,SLEEP>",
+        "<APPLY ,SLEEP 0>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "65203c434f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a535542520a540a"
+    },
+    {
+      "name": "sleep-fweep",
+      "kind": "transcript",
+      "note": "77act2.mud:43 FLY-ME's <FWEEP 4 1>: three BELs and three one-second SLEEPs",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/sleep-fweep-3tecav39/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<DEFINE FWEEP (NUM \"OPTIONAL\" (SLP 0)) #DECL ((NUM SLP) FIX) <REPEAT ((N .NUM)) <AND <0? <SET N <- .N 1>>> <RETURN>> <IMAGE 7> <OR <0? .SLP> <SLEEP .SLP>>>>\n<FWEEP 4 1>\n<QUIT>\n",
+      "input_sha256": "6711f1e5425a44f37b57d0c3547aa383e7b33588532fec5b9cb7ef4d1b88aff5",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFWEEP\n\u0007\u0007\u0007T\n",
+      "stdout_sha256": "9e78a95f260db6138f216fbfaaaf62e708471adc38286cb589d3130397d9ad58",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFWEEP\n\u0007\u0007\u0007T\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 3.01,
+      "files_removed": [],
+      "forms": [
+        "<DEFINE FWEEP (NUM \"OPTIONAL\" (SLP 0)) #DECL ((NUM SLP) FIX) <REPEAT ((N .NUM)) <AND <0? <SET N <- .N 1>>> <RETURN>> <IMAGE 7> <OR <0? .SLP> <SLEEP .SLP>>>>",
+        "<FWEEP 4 1>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a46574545500a070707540a"
+    },
+    {
+      "name": "time-type",
+      "kind": "transcript",
+      "note": "TYPE and sign; the printed value is CPU time (not deterministic)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/time-type-93fu7zwn/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<TYPE <TIME>>\n<G? <TIME> 0.0>\n<TIME>\n<QUIT>\n",
+      "input_sha256": "8b40aded2d44aca9e157059a9162c22a0e42a2e5acc299e3d61f266021a1ded4",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFLOAT\nT\n0.0054770\n",
+      "stdout_sha256": "6fa0516157471fa3b11dd429b1bdaf65be958560c4a3c4b2c378ab3bb1010f92",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFLOAT\nT\n0.0054770\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_removed": [],
+      "forms": [
+        "<TYPE <TIME>>",
+        "<G? <TIME> 0.0>",
+        "<TIME>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a464c4f41540a540a302e303035343737300a"
+    },
+    {
+      "name": "time-args",
+      "kind": "transcript",
+      "note": "any number of arguments, evaluated and ignored",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/time-args-ym_9jlka/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<TYPE <TIME 1>>\n<TYPE <TIME 1 \"a\" FOO <>>>\n<TIME <SETG X 5>>\n,X\n<QUIT>\n",
+      "input_sha256": "336fe5507817db7f4e7999ab06ff77c6888957347431c7aafa1beb1c7c4098e6",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFLOAT\nFLOAT\n0.0035910\n5\n",
+      "stdout_sha256": "abed457d094dfdd4902e9a7383d6c6e73e8df4ba17a38e561d88aa5e5df19adf",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFLOAT\nFLOAT\n0.0035910\n5\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<TYPE <TIME 1>>",
+        "<TYPE <TIME 1 \"a\" FOO <>>>",
+        "<TIME <SETG X 5>>",
+        ",X"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a464c4f41540a464c4f41540a302e303033353931300a350a"
+    },
+    {
+      "name": "time-monotonic",
+      "kind": "transcript",
+      "note": "two successive calls",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/time-monotonic-jt_vwo4r/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SET A <TIME>>\n<SET B <TIME>>\n<G=? .B .A>\n<==? .A .B>\n<QUIT>\n",
+      "input_sha256": "98d8846da004cfce7f04c09a103e01a8ce662774b1331e5ba489b568ae81cb4b",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0.0038540\n0.0038730\nT\n#FALSE ()\n",
+      "stdout_sha256": "78e19f366d8d74e79d58438d247481a0dd768bf1c67240955225f69f5c8d5424",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0.0038540\n0.0038730\nT\n#FALSE ()\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<SET A <TIME>>",
+        "<SET B <TIME>>",
+        "<G=? .B .A>",
+        "<==? .A .B>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a302e303033383534300a302e303033383733300a540a2346414c53452028290a"
+    },
+    {
+      "name": "time-truthy",
+      "kind": "transcript",
+      "note": "the game's use: APPLY of the GVAL with no arguments, tested for truth",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/time-truthy-_3ws2c_d/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<COND (<TIME> \"true\") (T \"false\")>\n<COND (<APPLY <GVAL TIME>> \"true\") (T \"false\")>\n<QUIT>\n",
+      "input_sha256": "cada943a6f1d91e049c291064d4b194de4a4b6532d67cc818ad2b0773d6c150c",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"true\"\n\"true\"\n",
+      "stdout_sha256": "338cdb88cf79500f665a518786ffb95289af98c51c59fd94561f90ce1172129e",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"true\"\n\"true\"\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<COND (<TIME> \"true\") (T \"false\")>",
+        "<COND (<APPLY <GVAL TIME>> \"true\") (T \"false\")>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a2274727565220a2274727565220a"
+    },
+    {
+      "name": "time-applicable",
+      "kind": "transcript",
+      "note": "TIME as a SUBR value",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/time-applicable-dn2m0fjf/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<TYPE ,TIME>\n<TYPE <APPLY ,TIME>>\n<QUIT>\n",
+      "input_sha256": "e1d68253c359a76bac40fbaded9fabd98b53403862ae7f2832bd685273779716",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nFLOAT\n",
+      "stdout_sha256": "ab8ed1bf1373fff0f7b2f4d1ed70a9a48d593e0bd163bb22aa4e583aec6fa8d8",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nFLOAT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_removed": [],
+      "forms": [
+        "<TYPE ,TIME>",
+        "<TYPE <APPLY ,TIME>>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "4f5059494e473e20666f722064657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a535542520a464c4f41540a"
+    },
+    {
+      "name": "time-sleep",
+      "kind": "transcript",
+      "note": "SLEEP does not consume CPU time (manual 21.10.2)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/time-sleep-azqzt16f/game",
+      "removed_before_boot": [],
+      "setup": [],
+      "input": "<SET A <TIME>>\n<SLEEP 1>\n<SET B <TIME>>\n<L? <- .B .A> 0.5>\n<QUIT>\n",
+      "input_sha256": "df4413389703d1030ef4e0ba0d2bdfeab5f56ecfdc355e8567362d8c9fb5948d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0.0036260\nT\n0.0037720\nT\n",
+      "stdout_sha256": "5952f01de81e92261afd6fe90544daf36fa20ed0d0e47f23509e076dea97090d",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0.0036260\nT\n0.0037720\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 1.0,
+      "files_removed": [],
+      "forms": [
+        "<SET A <TIME>>",
+        "<SLEEP 1>",
+        "<SET B <TIME>>",
+        "<L? <- .B .A> 0.5>"
+      ],
+      "cwd_kind": "empty",
+      "stdout_hex_tail": "657461696c730a0a0a4c495354454e494e472d41542d4c4556454c20312050524f4345535320310a302e303033363236300a540a302e303033373732300a540a"
+    }
+  ]
+}

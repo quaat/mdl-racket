@@ -3498,3 +3498,134 @@ LISTENING-AT-LEVEL 2) is not modelled for these arguments.
 **Not supported / out of scope.** Negative zero (separate open issue, as for
 MIN/MAX: `<ABS -0.0>` is not distinguished); FLOAT printing. Code:
 `mdl/runtime/core.rkt` (`mdl-abs`); tests `tests/abs_test.rkt`.
+
+## M4: IMAGE, SLEEP, TIME (#168–#170)
+
+Specification written before implementation. Authority: MDL manual §11.4.2.3
+(IMAGE), §21.10.2 (SLEEP), §23.1 (TIME), Appendix 2 (`IMAGE (CODE "OPTIONAL"
+(CHANNEL .OUTCHAN))` "sends an image-mode character via an output CHANNEL";
+`SLEEP (<OR FIX FLOAT> "OPTIONAL" (UNHANG <>))` "does nothing, interruptibly,
+the given number of seconds"; `TIME ("TUPLE" IGNORED) #DECL ((VALUE) FLOAT)`
+"returns the elapsed execution time in seconds"); pinned Confusion
+observations in `docs/evidence/M4/P0PRIMS-REFERENCE.md` (`p0prims-probe.json`,
+script `scripts/probe_p0prims_reference.py`); maintainer decisions in the
+issue comments of #168, #169 and #170 (2026-11-24). Game uses: FWEEP
+(`77act2.mud:53-58`) `<IMAGE 7>` and `<OR <0? .SLP> <SLEEP .SLP>>`, reached
+from the Bat Room (BATS-ROOM → FLY-ME `<FWEEP 4 1>`: three BELs, three
+one-second SLEEPs) and BOOM-ROOM `<FWEEP 7>` (six BELs, no SLEEP); the ATOM
+TIME as the verb function of the internal verbs WALK-IN, C-INT, DEAD!, FIRST?,
+IN!, OUT!, HACK? and the TURN-TO syntax (`77dung.mud:2819, 2902-2916`) and
+as the Strange Passage's room action (`77dung.mud:1385`), applied with no
+arguments by APPLY-RANDOM and only tested for truth (RDCOM
+`77rooms.mud:631-634`, ROOM-INFO `:553-555`).
+
+**IMAGE** (decision #168: *emit the exact byte*). `<IMAGE code>` or
+`<IMAGE code channel>`; the default channel is the LVAL of OUTCHAN (as PRINC).
+`code` must be a FIX in 0–127; IMAGE writes exactly that one byte to the
+channel's host port — control characters (BEL 7, NUL 0, ESC 27, DEL 127, CR,
+LF) are written raw, never in ^X notation and never refused (unlike PRINC,
+ADR-0050) — and returns `code` (TYPE FIX). No flush, no line or column
+bookkeeping (manual: slots 14 and 16 are not updated; this runtime does not
+model them). Transcripts therefore contain the BEL bytes exactly as natively
+(`<IMAGE 7>` → byte 0x07). The channel must be a registered PRINT CHANNEL of
+the session (the PRINC/PRINTSTRING check `channel-output-host`); a port-less
+PRINT channel is the strict S13 error. Refusals (host strict failures, the
+reference's ERROR names in the message): zero arguments
+`TOO-FEW-ARGUMENTS-SUPPLIED`; three or more `TOO-MANY-ARGUMENTS-SUPPLIED`; a
+non-FIX code (STRING, CHARACTER, FLOAT, FALSE, ATOM, ...)
+`FIRST-ARG-WRONG-TYPE`. Recorded deviations (none on the game path; the game
+uses code 7 on the default channel only): (1) **codes outside 0–127** are a
+strict error here; the reference writes the code modulo 256 (`<IMAGE 200>`
+byte 0xC8, `<IMAGE 256>` byte 0x00, `<IMAGE 321>` `A`, `<IMAGE -1>` byte 0xFF).
+The manual says "ASCII 7-bit code", and ADR-0050/ADR-0057 keep terminal
+characters to 0–127 (a byte above 127 is not a 1977 terminal character, and
+a UTF-8 host text port would not carry it as one byte). (2) **An input
+channel** (`<IMAGE 65 .INCHAN>`) is a strict error here; the reference writes
+nothing and returns 65. (3) A non-CHANNEL second argument is a strict error
+here; the reference prints the host message `Error: Attempt to write to
+non-channel` on stderr and returns to LISTEN level 1.
+
+**SLEEP** (decision #169: *wait for real only on live clocks*). `<SLEEP
+seconds>` or `<SLEEP seconds unhang>`. `seconds` must be a non-negative FIX in
+the signed 36-bit range. The value is always the ATOM T, in every clock mode.
+The wait depends only on the session clock's liveness, `mdl-clock-live?`
+(`mdl/runtime/clock.rkt`):
+
+| Session clock | live? | SLEEP |
+|---|---|---|
+| real (`real-mdl-clock`) | yes | waits `seconds` |
+| resumed (after replay, ADR-0061) | yes | waits |
+| recording over a live source | yes | waits |
+| fixed (`make-fixed-mdl-clock`) | no | returns at once |
+| replaying | no | returns at once |
+| recording over a non-live source (fixed, as tests use) | no | returns at once |
+| custom `make-mdl-clock` | as declared by `#:live?` (default no) | waits only if declared live |
+
+A host-supplied custom clock is not known to follow real time (tests use
+advancing fake clocks), so it is non-live unless the host passes `#:live?
+#t`. Liveness is read at each SLEEP, so a replaying clock that finishes and
+resumes (ADR-0061 `mdl-clock-finish-replay!`) is non-live during replay and
+live afterwards. SLEEP **never reads or advances the session clock**: it adds
+no clock observation in any mode, so recording, replaying and resumed
+observation logs, GETTIMEDATE results and DSKDATE are unchanged by SLEEP, and a
+checkpoint taken after a SLEEP replays without waiting (replaying clock). A
+live wait first flushes the session's terminal output ports (as READSTRING
+does before it blocks, so the bytes written before the SLEEP — the bat's BELs
+— are visible during the wait), then calls the host sleeper with `seconds`.
+The sleeper is the host-only parameter `current-mdl-sleeper` (default: Racket
+`sleep`), never reachable from MDL; tests install a recording fake. The wait
+is interruptible by a Racket break (DrRacket Stop, Ctrl-C): `exn:break`
+propagates out of SLEEP unchanged, like any other host break (no MDL
+interrupt, no clock read). `seconds` 0 never waits. `unhang` (manual: the
+HANG predicate, evaluated when an interrupt is dismissed back into the wait)
+is accepted with any value and returned nowhere: no MDL interrupt can be
+delivered during a SLEEP in this runtime (interrupts are the logical GC
+interrupt, raised only by allocation, ADR-0047/0048), so the predicate is
+never consulted, exactly as in the reference pipe runs (`<SLEEP 0 T>` T,
+`<SLEEP 1 <>>` waited 1 s and returned T). Refusals: zero arguments
+`TOO-FEW-ARGUMENTS-SUPPLIED`; three or more `TOO-MANY-ARGUMENTS-SUPPLIED`;
+a negative FIX `ARGUMENT-OUT-OF-RANGE` ("SLEEP time negative", as the
+reference); any non-FIX, **FLOAT included**, `FIRST-ARG-WRONG-TYPE`.
+Manual vs reference: the manual and Appendix 2 allow a FLOAT time; the pinned
+reference refuses every FLOAT (`<SLEEP 0.5>`, `<SLEEP 1.5>`, `<SLEEP -0.5>`:
+FIRST-ARG-WRONG-TYPE, no wait). This runtime follows the reference (the
+stricter choice; the game passes FIX 1 only). Native timing: `<SLEEP 1>`
+1.01 s, three `<SLEEP 1>` 3.01 s, under the fixed-clock shim too (the shim
+fixes the wall clock, not sleeping; GETTIMEDATE is equal before and after).
+
+**TIME** (decision #170: *a session-derived value with no clock read*).
+`<TIME arg ...>` takes any number of arguments, evaluated (as for every
+SUBR) and ignored, and returns the FLOAT *n*.0 where *n* is the number of
+TIME calls made in this session so far, this one included: 1.0 for the first
+call, then 2.0, 3.0, ... The counter lives in the session's atom space
+(host-only; MDL cannot read or set it except by calling TIME); it starts at
+0 in every new session and is never reset. **Documented deviation**: natively
+TIME is the CPU time the process has used, in seconds (`<TIME>` 0.0054770 in
+a fresh probe), which differs between runs. Why this derivation: (a) it reads
+no clock, so it adds no ADR-0061 observation and needs no replay record; (b) it
+is a pure function of the session's own execution, so a replay of the same
+inputs from a fresh boot reproduces every TIME value exactly, and two runs of a
+test agree; (c) it keeps every property the reference shows and a program can
+rely on: TYPE FLOAT, positive (`<G? <TIME> 0.0>` T), true (the game's only
+use), non-decreasing, and two successive calls differ (`==?` FALSE natively
+as here). Rejected: a constant (successive calls would be `==?`, unlike the
+reference); seconds from the session clock (a clock observation per TIME call,
+reading the clock in a mode that may be live; and under the fixed clock it
+would be constant anyway); host CPU time (not deterministic). The magnitude is
+not CPU seconds: a program that measures elapsed CPU time with TIME sees call
+counts, not seconds. No game code does (it only tests truth).
+
+**ADR-0052 / ADR-0061 interaction.** None of the three reads the session
+clock; GETTIMEDATE's "now" stays the only clock reader. Observation logs and
+checkpoint formats are unchanged (no new checkpoint field: the TIME counter
+and the SLEEP waits are reproduced by replay itself). SLEEP's only clock
+dependency is the liveness query, which reads no time. See the ADR-0052 and
+ADR-0061 amendments in `docs/DECISIONS.md`.
+
+**Not supported / out of scope.** IMAGE codes above 127 and on non-PRINT
+channels (strict, above); SLEEP's FLOAT time (strict, as the reference);
+any upper bound on a live SLEEP (a live session waits the requested seconds,
+as natively; a server host bounds a session by other means). Code:
+`mdl/runtime/core.rkt` (`mdl-image`, `mdl-sleep`, `mdl-time`,
+`current-mdl-sleeper`), `mdl/runtime/clock.rkt` (`mdl-clock-live?`); tests
+`tests/p0prims_test.rkt`, `tests/replay_sleep_time_test.rkt`.

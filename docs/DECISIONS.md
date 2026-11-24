@@ -1428,6 +1428,19 @@ the handler is turned `OFF` at load (`77rooms.mud:104`). A determinism
 claim for another program that reads that argument must not rely on this
 ADR.
 
+**Amendment (M4 S9, maintainer decisions on #169/#170, 2026-11-24).** (1)
+SLEEP waits for real only when the session clock is *live*: the real clock,
+the resumed clock (ADR-0061), a recording clock over a live source, or a
+custom clock made with `make-mdl-clock thunk #:live? #t`. Fixed, replaying,
+recording-over-fixed and (by default) custom clocks are non-live and SLEEP
+returns at once. The new query `mdl-clock-live?` reads no time. (2) SLEEP and
+TIME never read the session clock: GETTIMEDATE's "now" stays its only
+reader. TIME returns a session-derived FLOAT (the count of TIME calls in the
+session), a documented deviation from Confusion's CPU time. (3) The live
+wait goes through the host-only parameter `current-mdl-sleeper` (default
+Racket `sleep`, interruptible by a break); tests replace it. Details:
+SEMANTICS "M4: IMAGE, SLEEP, TIME (#168–#170)".
+
 ## ADR-0053: One strict SMOKE_PARITY comparator; D1 and D2 are the only allowed differences
 
 **Status:** Proposed (S10, issues #131/#135). Builds on ADR-0050 (D1, D2,
@@ -2034,3 +2047,11 @@ Verified while implementing; the decisions above are unchanged.
   those fields, room flags and most globals are covered only by the
   transcript digest and by the reconstruction itself. Replay is the
   reconstruction; verification guards against a runtime that diverges.
+
+**Note (M4 S9, 2026-11-24).** SLEEP and TIME add no clock observation and no
+checkpoint field: SLEEP's wait depends only on the clock's liveness
+(non-live while replaying, live once the clock resumes), and the TIME
+counter is reproduced by replaying the same inputs from a fresh boot. A
+checkpoint taken after a SLEEP or TIME restores exactly and its replay never
+waits (`tests/replay_sleep_time_test.rkt`). The format `mdl-zork-replay/v1`
+is unchanged.

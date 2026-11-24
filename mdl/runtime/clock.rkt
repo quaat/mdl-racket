@@ -4,7 +4,7 @@
 ;; nothing here is process-global, and nothing here touches Racket monotonic
 ;; time, timeouts, scheduling or CPU time.
 (provide mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock
-         mdl-clock-now mdl-time-zone?
+         mdl-clock-now mdl-time-zone? mdl-clock-live?
          ;; ADR-0061 replay modes (host-only)
          make-recording-mdl-clock make-replaying-mdl-clock make-resumed-mdl-clock
          mdl-clock-mode mdl-clock-observations mdl-clock-finish-replay!
@@ -12,7 +12,10 @@
          (struct-out exn:fail:mdl-clock-replay))
 
 ;; read: host thunk returning (values epoch-seconds microseconds).
-(struct mdl-clock (read))
+;; declared-live?: whether a plain clock follows real time (M4 S9, issue #169): only a
+;; live clock makes SLEEP wait. Logging clocks decide by mode instead (see
+;; mdl-clock-live?), so their field is #f.
+(struct mdl-clock (read declared-live?))
 
 (define fix-min (- (expt 2 35)))
 (define fix-max (sub1 (expt 2 35)))
@@ -20,10 +23,14 @@
 (define (valid-seconds? v) (and (exact-integer? v) (<= fix-min v fix-max)))
 (define (valid-micros? v) (and (exact-integer? v) (<= 0 v 999999)))
 
-(define (make-mdl-clock thunk)
+;; A host-supplied clock is not known to follow real time (tests use
+;; advancing fake clocks), so it is non-live unless the host says #:live? #t.
+(define (make-mdl-clock thunk #:live? [live? #f])
   (unless (and (procedure? thunk) (procedure-arity-includes? thunk 0))
     (raise-argument-error 'make-mdl-clock "(-> (values exact-integer? exact-integer?))" thunk))
-  (mdl-clock thunk))
+  (unless (boolean? live?)
+    (raise-argument-error 'make-mdl-clock "boolean?" live?))
+  (mdl-clock thunk live?))
 
 ;; A constant instant. It never advances: every read returns the same
 ;; values, matching the reference capture shim (scripts/reference/fixed_time.c
@@ -34,7 +41,7 @@
     (raise-argument-error 'make-fixed-mdl-clock "signed 36-bit exact integer seconds" seconds))
   (unless (valid-micros? micros)
     (raise-argument-error 'make-fixed-mdl-clock "exact integer microseconds in 0..999999" micros))
-  (mdl-clock (lambda () (values seconds micros))))
+  (mdl-clock (lambda () (values seconds micros)) #f))
 
 ;; The host wall clock, read exactly as GETTIMEDATE did before issue #135.
 (define real-mdl-clock
@@ -42,7 +49,8 @@
    (lambda ()
      (define now (/ (current-inexact-milliseconds) 1000.0))
      (define whole (inexact->exact (floor now)))
-     (values whole (min 999999 (max 0 (inexact->exact (round (* 1000000 (- now whole))))))))))
+     (values whole (min 999999 (max 0 (inexact->exact (round (* 1000000 (- now whole))))))))
+   #t))
 
 ;; One validated read. An invalid read is a strict error, never a fallback.
 (define (mdl-clock-now clock)
@@ -130,7 +138,7 @@
      (log! st (clock-observation-seconds o) (clock-observation-micros o))]
     [(resumed) (resumed-read st)]))
 
-(define (make-logging-clock st) (logging-clock (lambda () (state-read st)) st))
+(define (make-logging-clock st) (logging-clock (lambda () (state-read st)) #f st))
 
 ;; Logs every read of SOURCE, in order, with the turn index.
 (define (make-recording-mdl-clock source #:turn turn)
@@ -195,3 +203,18 @@
 (define (mdl-clock-observations clock)
   (unless (mdl-clock? clock) (raise-argument-error 'mdl-clock-observations "mdl-clock?" clock))
   (and (logging-clock? clock) (reverse (log-state-log (logging-clock-state clock)))))
+
+;; M4 S9 (issue #169, maintainer decision 2026-11-24): does this clock follow
+;; real time, so that SLEEP waits for real? Reads no time and logs nothing.
+;; real: yes; fixed: no; custom: as declared (#:live?, default no);
+;; recording: as its source; replaying: no; resumed: yes. Decided at each
+;; call, so a replaying clock becomes live when replay finishes and resumes.
+(define (mdl-clock-live? clock)
+  (unless (mdl-clock? clock) (raise-argument-error 'mdl-clock-live? "mdl-clock?" clock))
+  (if (logging-clock? clock)
+      (let ([st (logging-clock-state clock)])
+        (case (log-state-mode st)
+          [(recording) (mdl-clock-live? (log-state-source st))]
+          [(replaying) #f]
+          [(resumed) #t]))
+      (mdl-clock-declared-live? clock)))
