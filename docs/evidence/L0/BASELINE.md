@@ -110,3 +110,9 @@ separately fetched under its existing provenance and license.
 audit in #178 and obtain review. The association removal discrepancy in
 [#179](https://github.com/quaat/mdl-racket/issues/179) is a separate
 maintainer decision before the L1 implementation.
+
+The reviewed example classifications require passing results on both Racket
+paths and native transcript agreement recorded in
+[native-agreement.json](native-agreement.json). The generator requires
+the reviewed input and output to match the retained capture. A capture
+that merely completed is insufficient evidence of agreement.

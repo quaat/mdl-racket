@@ -5781,6 +5781,7 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-reference.json",
@@ -5875,6 +5876,7 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M0/primitives.json",
@@ -6119,6 +6121,7 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-error-cases.json",
@@ -8503,6 +8506,7 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-reference.json",
@@ -9910,6 +9914,7 @@
         "tests/structured_type_head_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/atom-props-cases.json",
         "docs/evidence/M2/atom-props-reference.json",
@@ -10071,6 +10076,7 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/bindings-cases.json",
         "docs/evidence/M1/bindings-reference.json",
@@ -10221,6 +10227,7 @@
         "tests/segment_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/indirect-apply-error-cases.json",
         "docs/evidence/M2/indirect-apply-error-reference.json",
@@ -11545,6 +11552,7 @@
         "tests/min_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M3/review/r6-min-float-cases.json",
         "docs/evidence/M3/review/r6-min-float-reference.json"
@@ -11844,6 +11852,7 @@
         "tests/segment_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/macro-cases.json",
         "docs/evidence/M2/macro-error-cases.json",
@@ -12746,6 +12755,7 @@
         "tests/unparse_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M2/atom-props-cases.json",
@@ -12868,6 +12878,7 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-reference.json"
@@ -14950,6 +14961,7 @@
         "tests/top_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/sequences-cases.json",
         "docs/evidence/M1/sequences-reference.json",
@@ -16221,6 +16233,7 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/mapf-cases.json",
         "docs/evidence/M2/mapf-control-cases.json",
@@ -16567,6 +16580,7 @@
         "tests/member_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M3/member-probe.json"
       ],
@@ -18379,6 +18393,7 @@
         "tests/special_decl_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M0/primitives.json",
         "docs/evidence/M1/false-cases.json",
@@ -18829,6 +18844,7 @@
         "tests/type_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/types-cases.json",
         "docs/evidence/M1/types-reference.json",
@@ -19667,6 +19683,7 @@
         "tests/unparse_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M0/primitives.json",
@@ -20029,6 +20046,7 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M0/primitives.json",
@@ -21892,6 +21910,7 @@
         "tests/unparse_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M1/bindings-cases.json",
@@ -22109,6 +22128,7 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M0/primitives.json",
         "docs/evidence/M1/atoms-cases.json",
@@ -23972,6 +23992,7 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M0/primitives.json",
         "docs/evidence/M1/atoms-cases.json",
@@ -25248,6 +25269,7 @@
         "tests/nth_decl_test.rkt"
       ],
       "native_mentions": [
+        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/declaration-pattern-cases.json",
         "docs/evidence/M2/declaration-pattern-reference.json",

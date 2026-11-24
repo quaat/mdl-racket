@@ -54,10 +54,10 @@ def page_sections(path, lines):
 
 
 def normalized_form(source):
-    return " ".join(source.split())
+    return "\n".join(line.strip() for line in source.splitlines())
 
 
-def manual_pages(docs, fixtures, outcomes, native):
+def manual_pages(docs, fixtures, outcomes, agreements):
     pages = []
     for path in sorted(docs.glob("*.md")):
         content = path.read_bytes()
@@ -80,12 +80,16 @@ def manual_pages(docs, fixtures, outcomes, native):
                     continue
                 name = fixture["id"]
                 row["fixture"] = name
-                if fixture.get("manual_expected"):
-                    row["status"] = "ACCEPTED_DEVIATION"
-                elif all(value == "XFAIL" for value in outcomes.get(name, {}).values()) and name in outcomes:
+                result = outcomes.get(name, {})
+                if set(result) != {"loader", "lang"}:
+                    break
+                if set(result.values()) == {"XFAIL"}:
                     row["status"] = "UNSUPPORTED"
-                elif set(outcomes.get(name, {}).values()) == {"PASS"}:
-                    row["status"] = "VERIFIED" if native.get(name) else "PARTIAL"
+                elif set(result.values()) == {"PASS"}:
+                    if fixture.get("manual_expected"):
+                        row["status"] = "ACCEPTED_DEVIATION"
+                    else:
+                        row["status"] = "VERIFIED" if name in agreements else "PARTIAL"
                 break
             prompt_lines.append(row)
         pages.append({
@@ -188,8 +192,15 @@ def coverage(docs):
     native = lexical_evidence(sorted((ROOT / "docs/evidence").rglob("*.json")))
     semantics = json.loads((OUTPUT / "semantics.json").read_text(encoding="utf-8"))
     native_report = ROOT / "docs/evidence/L0/native-examples.json"
-    observations = {item["name"]: item["ok"] for item in
-                    json.loads(native_report.read_text())["observations"]}
+    records = json.loads(native_report.read_text())["observations"]
+    observations = {item["name"]: item["ok"] for item in records}
+    reviewed = json.loads(native_report.with_name("native-agreement.json").read_text())["agreements"]
+    agreements = {
+        row["name"] for row in records
+        if row["ok"] and reviewed.get(row["name"]) == {
+            "input": row["input"], "result_output": row["result_output"]
+        }
+    }
     manual_report = ROOT / "docs/evidence/L0/manual-summary.json"
     outcomes = defaultdict(dict)
     for row in json.loads(manual_report.read_text())["results"]:
@@ -231,7 +242,7 @@ def coverage(docs):
             "zork_reachability": "static operator mention" if name in reachable else None,
             **semantics.get(name, {}),
         })
-    pages = manual_pages(docs, fixtures, outcomes, observations)
+    pages = manual_pages(docs, fixtures, outcomes, agreements)
     return {"schema_version": 1, "manual_commit": MANUAL_COMMIT, "pages": pages,
             "entries": entries}
 

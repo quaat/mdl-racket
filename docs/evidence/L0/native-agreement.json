@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "agreements": {
+    "fix-literal": {
+      "input": "1\n<QUIT>\n",
+      "result_output": "1\n"
+    },
+    "float-literal": {
+      "input": "1.0\n<QUIT>\n",
+      "result_output": "1.0000000\n"
+    },
+    "atom-literal": {
+      "input": "GEORGE\n<QUIT>\n",
+      "result_output": "GEORGE\n"
+    },
+    "add": {
+      "input": "<+ 2 4 6>\n<QUIT>\n",
+      "result_output": "12\n"
+    },
+    "fix-cast": {
+      "input": "<FIX 1.0>\n<QUIT>\n",
+      "result_output": "1\n"
+    },
+    "mixed-division": {
+      "input": "</ 11 7 2.0>\n<QUIT>\n",
+      "result_output": "0.5000000\n"
+    },
+    "setg": {
+      "input": "<SETG FOO <SETG BAR 500>>\n,BAR\n<QUIT>\n",
+      "result_output": "500\n500\n"
+    },
+    "gval": {
+      "input": "<SETG FOO <SETG BAR 500>>\n<SETG BAR FOO>\n,,BAR\n<QUIT>\n",
+      "result_output": "500\nFOO\n500\n"
+    },
+    "builtin-type": {
+      "input": "<TYPE ,+>\n<QUIT>\n",
+      "result_output": "SUBR\n"
+    },
+    "float-primtype": {
+      "input": "<PRIMTYPE 1.0>\n<QUIT>\n",
+      "result_output": "WORD\n"
+    },
+    "evaluated-list": {
+      "input": "(1 2 <+ 3 4>)\n<QUIT>\n",
+      "result_output": "(1 2 7)\n"
+    },
+    "empty-form": {
+      "input": "<>\n<QUIT>\n",
+      "result_output": "#FALSE ()\n"
+    },
+    "member-string": {
+      "input": "<MEMBER \"PART\" \"SUM OF PARTS\">\n<QUIT>\n",
+      "result_output": "\"PARTS\"\n"
+    },
+    "sequential-aux": {
+      "input": "<DEFINE AUXEX (\"TUPLE\" T\n                 \"AUX\" (A <LENGTH .T>) (B <* 2 .A>))\n        ![.A .B]>\n<AUXEX 1 2 \"FOO\">\n<QUIT>\n",
+      "result_output": "AUXEX\n![3 6!]\n"
+    },
+    "mapf-string": {
+      "input": "<MAPF ,STRING 1 '[\"MODELING\" \"DEVELOPMENT\" \"LIBRARY\"]>\n<QUIT>\n",
+      "result_output": "\"MDL\"\n"
+    },
+    "association": {
+      "input": "<SET L '(1 2 3 4)>\n<PUT .L FOO \"L is a list.\">\n<GET .L FOO>\n<QUIT>\n",
+      "result_output": "(1 2 3 4)\n(1 2 3 4)\n\"L is a list.\"\n"
+    },
+    "numeric-get": {
+      "input": "<SET L '(1 2 3 4)>\n<GET .L 3>\n<QUIT>\n",
+      "result_output": "(1 2 3 4)\n3\n"
+    },
+    "declaration-match": {
+      "input": "<DECL? '[1 2 3] '<VECTOR [REST FIX]>>\n<QUIT>\n",
+      "result_output": "T\n"
+    },
+    "macro-increment": {
+      "input": "<DEFMAC INC (ATM \"OPTIONAL\" (N 1))\n        #DECL ((VALUE) FORM (ATM) ATOM (N) <OR FIX FLOAT>)\n        <FORM SET .ATM <FORM + <FORM LVAL .ATM> .N>>>\n<SET X 1>\n<INC X>\n.X\n<QUIT>\n",
+      "result_output": "INC\n1\n2\n2\n"
+    },
+    "getbits": {
+      "input": "<GETBITS #WORD *777777777777* <BITS 3>>\n<QUIT>\n",
+      "result_output": "#WORD *0000000000000000000007*\n"
+    }
+  }
+}
