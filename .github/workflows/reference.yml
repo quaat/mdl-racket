@@ -203,3 +203,4 @@ jobs:
             docs/evidence/M0/reader-sweep.json
             artifacts/ci-logs/
             artifacts/m3/
+            artifacts/scenario-divergence/

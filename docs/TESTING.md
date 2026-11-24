@@ -1,5 +1,125 @@
 # Test strategy, reference capture, and parity contract
 
+## M4 scenario runner (2026-11-24)
+
+The ten M4 native-parity scenarios (`make test-m4-house-cellar`,
+`-mailbox-drop`, `-orphan-prompt`, `-top-parser`, `-sword-glow`,
+`-troll-combat`, `-parser-ambiguity`, `-cyclops-room`, `-mirror-bat`,
+`-strange-passage`) run through one shared driver,
+`tests/m4_scenario_runner.rkt`. Each test file keeps only its command list,
+its scenario-specific reference assertions, its read-only checkpoint function
+and its post-FLOAD sections. Every comparison is byte-exact after ADR-0053
+D1 only (the Confusion/LISTEN banner and the `"DONE"` line); nothing else is
+normalised. Evidence: [SINGLE-RUN-RUNNER.md](evidence/M4/SINGLE-RUN-RUNNER.md).
+
+**Single-run mode (default).** One boot (`<FLOAD "77loadall.mud">`, then
+SAVE-IT through the host loop on the fixed clock 250776000/UTC) is fed all n
+commands. The host-only READSTRING observer (ADR-0061, `#:input-observer`;
+no runtime hook was added) snapshots, at the entry of READSTRING call k
+(k = 0..n, k commands consumed):
+
+- the output so far, which must equal the native prefix-k stdout up to and
+  including its (k+1)-th RDCOM prompt `>` (the reference probe's own
+  `prompt_head` split; the runner requires exactly k+2 prompts in that stdout
+  and n+2 in T1, so an ambiguous split is a strict error, never a guess);
+- the scenario's read-only checkpoint, which must equal the reference
+  diagnostic checkpoint k (run X1, taken at READSTRING entry k). Reading the
+  checkpoint must not change the RNG state or the storage ledger;
+- the characters READSTRING call k consumed: exactly command k+1 and its
+  newline (k < n), or end of input (k = n).
+
+At the end of the run (D3 input exhaustion) the whole output must equal the
+native T1 stdout, which includes T1's own end-of-input tail, and the final
+state must equal end checkpoint n.
+
+*End-of-input tails.* A native prefix-k run ends with input exhaustion: RDCOM
+reads an empty line, prints `Beg pardon?`, the demons run, a prompt follows,
+and the next READSTRING dies. From the reference alone the runner classifies
+each prefix k < n as *standard* when that tail is exactly `Beg pardon?\n>` and
+its end checkpoint equals its READSTRING-entry checkpoint (after the
+scenario's declared, reference-verified `#:eof-transform`: parser-ambiguity
+declares that the empty command empties LEXV and sets PARSE-WON false). Every
+non-standard prefix is re-run by the per-prefix protocol (a reboot): today
+sword-glow k = 0 and troll-combat k = 0 (the first empty turn disarms
+SWORD-DEMON) and mirror-bat k = 33 (the sword glows brighter on the empty
+turn).
+
+*Coverage lost by the single-run mode, stated exactly.* For each standard
+prefix k < n this runtime's own reply to an end-of-input empty command at the
+state of turn k is not executed. That turn is not just a reply: after
+`Beg pardon?` RDCOM runs the DEMONS loop (77rooms.mud:642-647), so SWORD-GLOW
+and ROBBER (whose `<PROB 30>` draws RANDOM) run there; FIGHTING and CLOCKER
+do not (PARSE-WON is false). What the reference evidences about the native
+turn differs by scenario. Where `end_checkpoints` were recorded (sword-glow,
+troll-combat, parser-ambiguity, cyclops-room, mirror-bat, strange-passage)
+it shows the reply is exactly `Beg pardon?\n>` and no compared field changed
+(or exactly the declared transform). For house-cellar, mailbox-drop,
+orphan-prompt and top-parser it shows only the reply text: their end
+checkpoint k falls back to the entry checkpoint, so the state half of the
+classification is vacuous there, and their native end-of-input state is
+evidenced only at k = n. No reference records the RANDOM draws of a
+prefix's end-of-input turn. The same RDCOM empty-input branch (`Beg
+pardon?`, 77rooms.mud:641) still runs in this runtime at k = n of every
+scenario, in every reboot, and mid-run for parser-ambiguity's empty (`""`)
+command; its blank command (`"   "`, INPLEN 3) takes the EPARSE branch
+instead (77rooms.mud:620, `Huh?`). Second, a checkpoint field whose read
+evaluates allocating game code is never read mid-run, because the logical
+storage ledger it charges is game-visible (DIVERT-AGC/GC timing, ADR-0044):
+the scenario declares it with `#:end-only-keys` and a `#:turn-checkpoint`
+without it, and it is compared only after end of input (single-run k = n,
+reboots, per-prefix). Today that is `lit` (the game's `LIT?` reaches LFCN,
+which evaluates a FUNCTION form) in house-cellar and parser-ambiguity. A read
+at a READSTRING entry that changes the RANDOM state, the storage ledger, the
+session output or the record of signalled MDL errors fails with kind
+`run-guard`; other mutation by a read (interning a new ATOM, game code that
+sets state) is not observed, so checkpoint functions must stay pure reads of
+existing names (as all ten do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
+exist). Coverage gained: the per-turn
+checkpoints at READSTRING entry (the newer per-prefix tests compared only
+end checkpoints) and the one-READSTRING-per-command check.
+
+**Per-prefix mode** (`M4_SCENARIO_MODE=per-prefix`; `make
+m4-scenarios-per-prefix` runs all ten; not on CI's default path). The
+pre-runner protocol through the same module: one boot per prefix k = 0..n
+with only k commands; the whole output equals the native prefix-k stdout and
+the state after end of input equals the reference end checkpoint k
+(`end_checkpoints` when recorded, otherwise diagnostic checkpoint k, as
+before).
+
+**Failures.** Both modes report the earliest failing k (single-run: the
+single run's earliest failing turn, then the reboots below it). Before the
+test fails (non-zero exit) the runner writes
+`artifacts/scenario-divergence/<scenario>-<mode>.json` (directory overridable
+with `M4_SCENARIO_DIVERGENCE_DIR`; uploaded by the reference workflow): mode,
+`earliest_failing_k`, `command_at_k` (the last command consumed), kind
+(`transcript`, `checkpoint`, `run-guard`, `timeout`, `scenario-check`),
+stage, message, `last_k_reached`, the offset of the first differing byte with
+200 bytes of expected and actual context, and the checkpoint field diffs. A
+passing run removes a stale report of the same scenario and mode.
+
+**Guards and watchdog.** Every game run (both modes, the reboots and the
+load-only sections) is guarded while the game thread runs; the checkpoint
+reads after a run and the load-only sections' later MDL calls run in the test
+thread, outside the guard, watchdog and fake sleeper, as before the runner: no file write or delete (attributed to the
+turn during which it happened), an empty temporary cwd, unchanged game
+directory hashes, no open RECORD channel, and SLEEP's recording host sleeper
+never called under the fixed clock. A whole-scenario wall-clock limit
+(`M4_SCENARIO_TIMEOUT`, default 900 s single-run, 3600 s per-prefix) and a
+no-progress limit between READSTRING entries (`M4_SCENARIO_TURN_TIMEOUT`,
+default 120 s, boot included) stop the game thread and fail with kind
+`timeout`, the earliest failing k (the turn being processed) and the last k
+reached.
+
+Reproduce:
+
+```sh
+export PLTCOLLECTS=":$PWD" TMPDIR=/tmp
+make test-m4-mirror-bat                          # single-run (default)
+M4_SCENARIO_MODE=per-prefix racket tests/historical_mirror_bat_test.rkt
+make m4-scenarios-per-prefix                     # all ten, per-prefix
+raco test tests/m4_scenario_runner.rkt           # runner unit tests (also in make test)
+```
+
 ## M3 SMOKE_PARITY check (S10, 2026-11-23)
 
 `make m3-check` (`scripts/m3_check.py`) runs, in order, `sources`,

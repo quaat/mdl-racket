@@ -2055,3 +2055,37 @@ counter is reproduced by replaying the same inputs from a fresh boot. A
 checkpoint taken after a SLEEP or TIME restores exactly and its replay never
 waits (`tests/replay_sleep_time_test.rkt`). The format `mdl-zork-replay/v1`
 is unchanged.
+
+## ADR-0062: M4 scenarios run once per scenario, checked at every READSTRING entry
+
+Status: proposed (2026-11-24, branch `feat/m4-single-run-runner`; Phase 1 of
+epic #163). Evidence: `docs/evidence/M4/SINGLE-RUN-RUNNER.md`.
+
+- The ten M4 native-parity scenario tests share one driver,
+  `tests/m4_scenario_runner.rkt`. Its default single-run mode boots once,
+  feeds all commands, and at each READSTRING entry k compares the output so
+  far with the native prefix-k stdout up to its prompt (the probe's
+  `prompt_head` split, strict on the prompt count) and the read-only
+  checkpoint with the reference diagnostic checkpoint k; at end of input it
+  compares the whole transcript with T1 and the end checkpoint n. The
+  per-prefix reboot protocol stays available (`M4_SCENARIO_MODE=per-prefix`,
+  `make m4-scenarios-per-prefix`) and is the only way native end-of-input
+  tails of every prefix are re-executed.
+- End-of-input tails: prefixes whose native tail is not exactly
+  `Beg pardon?\n>` or whose end checkpoint differs from the (declared,
+  reference-verified) transform of the entry checkpoint are re-run per
+  prefix automatically (the state half of this test is evidenced only for
+  scenarios with recorded `end_checkpoints`). After a single-run watchdog
+  stop no reboots run; the timeout is reported with the last k reached. The coverage the single-run mode does not keep is
+  stated in TESTING ("M4 scenario runner").
+- Snapshots are taken by the host-only READSTRING observer (ADR-0061); no
+  runtime hook was added. A snapshot must not change the RANDOM state, the
+  logical storage ledger (game-visible, ADR-0044), the session output or the
+  record of signalled MDL errors (checked); other mutation is not observed,
+  so checkpoint functions stay pure reads of existing names. A checkpoint field whose
+  read evaluates allocating game code (`LIT?` reaches LFCN, which evaluates a
+  FUNCTION form) is read only after end of input (`#:end-only-keys`), never
+  mid-run.
+- Comparison stays ADR-0053 D1 only, byte for byte. Failures write a
+  divergence report `artifacts/scenario-divergence/<scenario>-<mode>.json`
+  and still fail the test.

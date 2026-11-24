@@ -13,9 +13,9 @@
 ;;
 ;; Compared with the pinned Confusion pipe captures in
 ;; docs/evidence/M4/strange-passage-reference.json
-;; (STRANGE-PASSAGE-REFERENCE.md) by the shared driver
-;; tests/m4_p0prims_scenario.rkt: every prefix's transcript byte for byte (D1
-;; only) and its end checkpoint. TIME's value is not printed by the game (it is
+;; (STRANGE-PASSAGE-REFERENCE.md) through tests/m4_p0prims_scenario.rkt and the
+;; shared runner tests/m4_scenario_runner.rkt: every turn's transcript byte for
+;; byte (D1 only) and checkpoint, and the end-of-input tail. TIME's value is not printed by the game (it is
 ;; only tested for truth), so the deterministic TIME deviation (decision #170)
 ;; is invisible here, as natively. Scenario evidence for M4, not a PLAYABLE claim.
 ;;

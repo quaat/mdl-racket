@@ -80,8 +80,11 @@ The reference CI workflow runs all of these.
 | M4_ACCEPTED | NOT YET |
 
 **Native scenarios (mainline).** Each is compared with pinned Confusion
-prefix by prefix, with state checkpoints, and each PASS is
-scenario-scoped:
+turn by turn, with state checkpoints, and each PASS is
+scenario-scoped. The targets run each scenario in one boot and check every
+turn at its READSTRING prompt (`tests/m4_scenario_runner.rkt`,
+[record](docs/evidence/M4/SINGLE-RUN-RUNNER.md)); `make
+m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 
 | Scenario | Target | Notes |
 |---|---|---|
