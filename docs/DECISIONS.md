@@ -1862,3 +1862,175 @@ ADR-0056); giving SUBR a PRIMTYPE (would open CHTYPE of a SUBR to WORD
 conversions that the runtime cannot honour); keeping the MDL body LIST of
 every compiled DEFINE to support CHTYPE/LENGTH/printing (a larger change
 not needed by the game; recorded as a deviation).
+
+## ADR-0061: Game persistence by deterministic replay first (hybrid strategy)
+
+Status: accepted direction (maintainer, 2026-11-23): hybrid persistence, deterministic replay first. Decisions taken: the resumed clock, any runtime with the same game sources, saves at the command prompt only. The implementation is validated by the WP4.5 proof of concept. ADR-0048 and ADR-0055 stay in force; this ADR does not amend them. Epic #163, WP4.
+
+### Context
+
+Today SAVE is an in-session record (ADR-0048). OPEN is limited to RECORD's denied form (ADR-0055). RESTORE is a strict error, and `run-zork` never writes files. Players need saves that survive a process exit.
+
+The facts below come from the pinned 1977 source and the current runtime.
+
+**1. Host inputs to the game.** The game reads only two kinds of host input:
+
+- **The session clock.** GETTIMEDATE is the clock's only reader (`mdl/runtime/clock.rkt`, ADR-0052). The game calls it through DSKDATE (`81tell-repl.mud:57`), which packs the time of day in *half-seconds* and so uses the microsecond field. DSKDATE has these callers:
+  - START, for INTIME (`77rooms.mud:277`) and to seed RANDOM (`:291`);
+  - GET-TIME / PLAY-TIME (`:174`);
+  - the VERSION text (`:158`);
+  - DO-SAVE and DO-RESTORE (`:389`, `:414`).
+- **Terminal input.** READSTRING on INCHAN. (READCHR appears only inside comment strings of the patched source, `77rooms.mud:617-618`, `77act1.mud:1075-1076`, and is not implemented by this runtime.)
+
+The user name is the constant `"MTRZORK"` (GXUNAME, `81tell-repl.mud:93`). GETSYS runs only when MUDDLE > 100. RANDOM is the session-owned 36-bit two-word generator (`mdl/runtime/random36.rkt`). The GC interrupt source is the logical allocation ledger, not the host GC (#113 R2).
+
+**2. RNG state.** It is two unsigned 36-bit words. An explicit `<RANDOM s1 s2>` overwrites one or both words before stepping. `mdl-session-random-snapshot` (`mdl/loader.rkt`) returns a detached copy.
+
+**3. Native save semantics (for reference only).**
+- DO-SAVE banks PLAYED-TIME and stamps THEN.
+- DO-RESTORE resets INTIME to the restore time. It also refuses with "It's too soon." and then QUITs if fewer than 2400 half-seconds (20 minutes) have passed since the save, unless the player is in WINNERS (`77rooms.mud:404-436`).
+- The manual (§11.6) says RESTORE resumes execution at the earlier SAVE; it does not return to RESTORE's caller.
+
+None of this is in scope here.
+
+### Decision
+
+Host-managed persistence first uses **deterministic replay**.
+
+A checkpoint is a versioned record of:
+- the initial conditions;
+- every host input the session consumed, in order;
+- the verification state at the save point.
+
+Restore boots a fresh session from the unchanged sources and replays those inputs. It then **verifies** that the reconstructed state equals the recorded verification state. A mismatch is a restore failure, and nothing is overwritten.
+
+**Option A, direct snapshots** (serializing runtime state), stays open as a later optimisation. It must be validated against replay. It is not used first, because:
+- compiled closures, ports, continuations and shared or cyclic MDL structure cannot be serialized safely without custom, reviewed encoders;
+- replay reuses the exact code path that the native parity tests already certify.
+
+#### 1. RNG contract (`rng/v1`)
+
+The checkpoint records:
+- the algorithm id `mdl-random36/v1`;
+- the initial-seed provenance: the START DSKDATE word and the clock observation it came from;
+- both current state words, first then second, as unsigned 36-bit values.
+
+A draw count goes in **only if** it can be counted outside the generator without changing any MDL-visible result; otherwise it is left out.
+
+On restore, the RNG state comes from replay alone and is then compared with the recorded words. The state words are never written into a session. RANDOM is never reseeded from the wall clock. No second generator is introduced.
+
+#### 2. Clock modes
+
+Four `mdl-clock` constructors exist; ADR-0052's interface is unchanged.
+
+- **real** — existing.
+- **fixed** — existing.
+- **recording** — wraps a source clock. It appends each `(seconds, micros)` read, in order, to a session-owned observation log. The time zone and the epoch base are recorded once.
+- **replaying** — serves the logged observations in order. These are strict errors:
+  - a read after the log is exhausted (an extra read);
+  - observations left unread when replay ends (a missing read);
+  - a read whose call position does not match the log (an ordering divergence). Each observation carries its input-turn index, so the check is "observation *i* belongs to turn *t*".
+
+**Replay-to-live transition — decided: the resumed clock.** After replay, the session switches to a **resumed clock**:
+
+    live = last recorded observation + (wall time elapsed since the restore)
+
+The reasoning:
+- The original game excludes non-running time from "played time" (DO-SAVE banks PLAYED-TIME; DO-RESTORE resets INTIME).
+- The host must not change game globals to imitate that.
+- A clock that continues from the save keeps GET-TIME and PLAY-TIME continuous without touching game state.
+
+The cost is that DSKDATE's date and time of day no longer match the host's. Its only other visible use is the VERSION text.
+
+The rejected alternative is a raw wall clock after restore: GET-TIME would then count the downtime, which the original never does.
+
+Turn-based events (CLOCK-INT, `77rooms.mud:1657`) advance only per game turn. Downtime never advances them.
+
+#### 3. Input log and save boundary
+
+The checkpoint records every input unit the session consumed: the raw characters of each completed READSTRING call (escape `!` and stop character included) and why it ended (stop character, full buffer, end of input), observed host-side inside READSTRING. Interrupts are handled as follows:
+- interrupts the host delivers (the DrRacket break) are not replayable, and any session in which one was delivered cannot be saved;
+- the logical GC interrupts are internal and must reproduce on replay; the proof checks this.
+
+A save can be taken **only at the RDCOM command prompt**: the READSTRING in RDCOM, `77rooms.mud:616`, with no pending orphan question and no unread input. After the S7 parser evidence the rule is concrete (SEMANTICS "M4 WP4"): the READSTRING must be RDCOM's own (its frame shape, `IVEC` FALSE, INBUF/INCHAN/READER-STRING, `,REP` = `,RDCOM`), `<1 ,ORPHANS>` must be FALSE, and the previous READSTRING must have ended at its stop character. Saves are refused:
+- inside a parser follow-up (`Which door?`, an orphan prompt);
+- during YES-NO prompts;
+- after a strict runtime error;
+- after QUIT or FINISH.
+
+The startup SAVE-IT record (ADR-0048) is separate. It is never a player save, and a player save never replaces it.
+
+#### 4. Format and boundary
+
+A checkpoint is a bounded, versioned JSON document. It contains no closures, ports, continuations or executable data, and is read with a schema-checked parser only. Its fields:
+- `format` (`mdl-zork-replay/v1`);
+- `rng` (`rng/v1`);
+- source provenance: the upstream SHAs and a manifest hash of the game files. A mismatch is a hard reject;
+- runtime provenance: the runtime commit and the Racket version class. Recorded for diagnosis only; it does not by itself reject a checkpoint;
+- the time zone and the boot clock mode;
+- the observation log;
+- the input log;
+- the verification block: both RNG words, MOVES, a canonical digest of selected game state, and a transcript digest;
+- an integrity checksum over the canonical encoding.
+
+Limits: a maximum input and observation count and a maximum byte size. A checkpoint that fails any check is rejected with a specific error before any session is created:
+- wrong format or RNG version;
+- source provenance mismatch;
+- checksum mismatch;
+- oversized.
+
+In the proof of concept, the checkpoint is a detached value that tests write under `$TMPDIR`. `run-zork` and MDL code gain **no** file access. A later player-facing slice adds a host-only save directory (atomic writes, confined slot names, no player-controlled paths), and that needs its own accepted amendment of ADR-0055's no-file policy for the launcher.
+
+#### 5. Replay side effects
+
+Replay runs with:
+- output written to a capture port that is discarded after its digest is compared;
+- no file writes, given ADR-0055;
+- the replaying clock.
+
+Visible output is shown only after verification succeeds. A failed restore never touches an existing live session; it uses a fresh session that is then dropped.
+
+### Consequences
+
+- Restore cost grows linearly with the number of commands replayed. It must be measured; the proof reports seconds per 100 commands. Option A, or replay from intermediate verified snapshots, is the mitigation if it proves too slow.
+- Compatibility (decided): a checkpoint is accepted by **any runtime whose game-source manifest hash matches**. The runtime commit and Racket version are recorded for diagnosis only.
+  - Replay verification is the safety net: both RNG words, MOVES, the state digest and the transcript digest must match at the save point. If they don't, the restore fails with a "this runtime does not reproduce the saved game" error, and no session is created.
+  - A runtime change that alters game behaviour therefore surfaces as a verification failure, never as silently different state.
+- Native SAVE/RESTORE (DO-SAVE, DO-RESTORE, SAVE-GAME and RESTORE-GAME with OPEN "PRINTB"/"READB") stays unsupported and strict. It needs a separate decision, which must cover continuation semantics, the 20-minute rule, and file channels.
+
+### Decisions recorded (maintainer, 2026-11-23)
+
+1. Replay-to-live: the **resumed clock**.
+2. Compatibility: the **same game sources, any runtime**, with replay verification as the gate.
+3. Save boundary: the **command prompt only**.
+
+### Implementation (feat/m4-replay-persistence, WP4.1–WP4.5)
+
+Verified while implementing; the decisions above are unchanged.
+
+- Module placement: the generic replay machinery (canonical checkpoint
+  encoding and strict parser, recording and restoring runs, verification)
+  is `mdl/replay.rkt`, a host module beside `mdl/loader.rkt`; it is not an
+  MDL primitive and is not reachable from MDL. The Zork rules (the RDCOM
+  save boundary, the selected game state, the seed provenance) are the
+  profile in `zork/persistence.rkt`. Neither writes files; `run-zork` is
+  unchanged. Clock modes are in `mdl/runtime/clock.rkt`.
+- Input is observed inside READSTRING by a session-owned, host-only
+  observer (`make-mdl-session #:input-observer`), so the log is exactly
+  what MDL consumed. The draw count is counted in the generator state; it
+  never changes a RANDOM result and is not visible to MDL.
+- Semantics, limits and error stages: SEMANTICS "M4 WP4: session clock
+  modes and deterministic replay checkpoints". Evidence:
+  `docs/evidence/M4/WP4-REPLAY-PERSISTENCE.md`.
+- Trust model (review L4): the checkpoint checksum is integrity only, not
+  authentication. A player can edit and reseal the input or clock log,
+  including the clock observations that choose START's RANDOM seed.
+  Verification guarantees only that the restored state is what the real
+  game produces from the recorded inputs; it does not prove the inputs were
+  played. A player-facing slice that needs tamper resistance must add
+  authentication (for example a host-held key) as a separate decision.
+- Selected verification state (review L5): the verification block holds a
+  selected state (34 fields in the Zork profile). Object positions beyond
+  those fields, room flags and most globals are covered only by the
+  transcript digest and by the reconstruction itself. Replay is the
+  reconstruction; verification guards against a runtime that diverges.

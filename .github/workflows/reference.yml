@@ -147,6 +147,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m4-parser-ambiguity 2>&1 | tee artifacts/ci-logs/test-m4-parser-ambiguity.log
+      - name: M4 WP4 replay persistence (save, restore, verify)
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-replay-persistence 2>&1 | tee artifacts/ci-logs/test-m4-replay-persistence.log
       - name: Build and capture native reference
         run: |
           make reference-build

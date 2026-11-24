@@ -62,6 +62,7 @@ raco test mdl/runtime/core.rkt \
   tests/host_loop_test.rkt \
   tests/unwind_raise_test.rkt \
   tests/session_clock_test.rkt \
+  tests/replay_clock_test.rkt tests/replay_checkpoint_test.rkt \
   tests/member_test.rkt \
   tests/quit_open_test.rkt \
   tests/session_output_port_test.rkt

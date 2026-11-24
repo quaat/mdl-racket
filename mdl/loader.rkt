@@ -2,14 +2,15 @@
 ;; Local, root-restricted MDL source execution. No network entry point.
 (require racket/file racket/list racket/path racket/string
          "parser.rkt" "compiler.rkt" "runtime/core.rkt" "runtime/clock.rkt"
-         (only-in "runtime/random36.rkt" random36-state-words))
+         (only-in "runtime/random36.rkt" random36-state-words random36-state-draws))
 (provide make-mdl-session mdl-session? mdl-session-load!
          mdl-session-atom mdl-session-global mdl-session-call
          mdl-session-save-records exn:fail:mdl-load?
          exn:fail:mdl-load-diagnostic
          mdl-session-run-interactive
          exn:fail:mdl-input-exhausted exn:fail:mdl-input-exhausted?
-         mdl-session-random-snapshot random36-state-words
+         mdl-session-random-snapshot random36-state-words random36-state-draws
+         mdl-session-mdl-errors mdl-session-storage-stats
          mdl-clock? make-mdl-clock make-fixed-mdl-clock real-mdl-clock
          mdl-host-loop-secondary-failures
          mdl-quit-signal? mdl-session-outcome? mdl-session-outcome-kind
@@ -84,10 +85,15 @@
 ;; GETTIMEDATE's "now" (default: the real wall clock) and its local zone
 ;; ('local, the host zone, by default; or 'utc). Stored in the session's atom
 ;; space; never process-global.
+;; input-observer (ADR-0061): an optional host-only procedure called by
+;; READSTRING ('enter at each call's entry, 'complete with the raw characters
+;; the call consumed); the replay persistence host uses it. MDL code cannot
+;; reach it.
 (define (make-mdl-session source-root #:output-port [output-port #f]
                           #:input-port [input-port #f]
                           #:clock [clock real-mdl-clock]
-                          #:time-zone [time-zone 'local])
+                          #:time-zone [time-zone 'local]
+                          #:input-observer [input-observer #f])
   (define root (canonical-path (path->complete-path source-root)))
   (unless (directory-exists? root)
     (raise-argument-error 'make-mdl-session "existing source-root directory" source-root))
@@ -108,7 +114,8 @@
   ;; of mdl-ensure-terminal-channels! is deliberately not offered here.
   (define context (make-mdl-context #:output-port output-port
                                     #:input-port input-port
-                                    #:clock clock #:time-zone time-zone))
+                                    #:clock clock #:time-zone time-zone
+                                    #:input-observer input-observer))
   (define session
     (mdl-session root (mdl-context-globals context) (mdl-context-locals context)
                  (mdl-context-atom-space context) loader-namespace (box '())
@@ -338,6 +345,16 @@
 ;; RANDOM state. Host-only; observing it never consumes the game's sequence.
 (define (mdl-session-random-snapshot session)
   (call-in-session session mdl-random-state-snapshot))
+
+;; Host-only (ADR-0054, ADR-0061): the messages of every MDL ERROR signalled
+;; in the session so far, oldest first.
+(define (mdl-session-mdl-errors session)
+  (call-in-session session mdl-error-messages))
+
+;; Host-only (ADR-0044, ADR-0061): the session's logical storage ledger
+;; (capacity, used, free), read without collecting.
+(define (mdl-session-storage-stats session)
+  (call-in-session session mdl-logical-storage-stats))
 
 ;; Test/introspection boundary (ADR-0055): the session's denied OPEN calls
 ;; (mode, file spec, status), oldest first. Host-only; no MDL primitive
