@@ -10,10 +10,13 @@
 ;; the bat drops the player in a RANDOM mine room; `look`.
 ;;
 ;; Compared with the pinned Confusion pipe captures in
-;; docs/evidence/M4/mirror-bat-reference.json (MIRROR-BAT-REFERENCE.md) by the
-;; shared driver tests/m4_p0prims_scenario.rkt: every prefix's transcript byte
-;; for byte (D1 only; the three BEL bytes included), its end checkpoint, and
-;; that SLEEP never calls the host sleeper under the fixed (non-live) clock.
+;; docs/evidence/M4/mirror-bat-reference.json (MIRROR-BAT-REFERENCE.md) through
+;; tests/m4_p0prims_scenario.rkt and the shared runner
+;; tests/m4_scenario_runner.rkt: every turn's transcript byte for byte (D1
+;; only; the three BEL bytes included) and checkpoint, the end-of-input tail
+;; (prefix 33's sword glow on the empty command by a per-prefix re-run in the
+;; default single-run mode), and that SLEEP never calls the host sleeper under
+;; the fixed (non-live) clock.
 ;; Natively the full run takes about 3.25 s (three real one-second SLEEPs);
 ;; here it does not wait. Scenario evidence for M4, not a PLAYABLE claim.
 ;;
@@ -51,8 +54,10 @@
    (check-equal? (hash-ref (list-ref cps 35) 'here) "SQUEE!-ROOMS")
    (check-equal? (hash-ref (list-ref cps 36) 'here) "MINE2!-ROOMS")
    (check-equal? (length (hash-ref (hash-ref reference 'diagnostic) 'random_draws)) 28))
- #:check-prefix
- (lambda (k raw session)
-   (check-equal? (bel-count raw) (if (>= k bat-entry) 3 0) (format "BELs at prefix ~a" k))
+ ;; The transcript compared at turn k: the output at READSTRING entry k in the
+ ;; single run, the whole prefix-k output in a per-prefix run.
+ #:check-turn
+ (lambda (k raw)
+   (check-equal? (bel-count raw) (if (>= k bat-entry) 3 0) (format "BELs at turn ~a" k))
    (when (>= k bat-entry)
-     (check-true (string-contains? raw bat-text) (format "bat text at prefix ~a" k)))))
+     (check-true (string-contains? raw bat-text) (format "bat text at turn ~a" k)))))

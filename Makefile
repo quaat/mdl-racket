@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage m4-scenarios-per-prefix play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -61,28 +61,38 @@ test-m3-interactive: sources
 test-m3-session: sources
 	@raco test tests/historical_session_quit_test.rkt
 
-# M4 scenario 1 (enter the house and open the cellar): every command prefix
-# compared with the pinned Confusion captures (D1 only) plus read-only state
+# M4 native-parity scenarios (the ten test-m4-* targets below except
+# replay-persistence) run through the shared runner tests/m4_scenario_runner.rkt
+# (docs/TESTING.md, "M4 scenario runner"). Default single-run mode: one boot
+# fed all commands, every turn's output and read-only checkpoints compared at
+# READSTRING entry with the pinned Confusion captures (D1 only), the whole
+# transcript and end-of-input state compared exactly, and the prefixes whose
+# native end-of-input tail is not standard re-run per prefix. On failure a
+# report is written to artifacts/scenario-divergence/<name>-<mode>.json.
+# `make m4-scenarios-per-prefix` runs all ten in the per-prefix reboot mode.
+#
+# M4 scenario 1 (enter the house and open the cellar): every turn compared
+# with the pinned Confusion captures (D1 only) plus read-only state
 # checkpoints; then the known strict frontier next to it (not parity).
 test-m4-house-cellar: sources
 	@racket tests/historical_house_cellar_test.rkt
 	@racket tests/historical_m4_frontier_test.rkt
 
 # M4 S2 (drop the leaflet; frontier F1, CHTYPE to SEGMENT): every command
-# prefix compared with the pinned Confusion captures (D1 only) plus read-only
+# turn compared with the pinned Confusion captures (D1 only) plus read-only
 # state checkpoints, and the game's INSERT-OBJECT/TAKE-OBJECT tail sharing.
 test-m4-mailbox-drop: sources
 	@racket tests/historical_mailbox_drop_test.rkt
 
 # M4 S3 (orphan prompts; frontier F2/F2b, CHTYPE FIX -> CHARACTER in FOOSTR):
-# every command prefix compared with the pinned Confusion captures (D1 only)
+# every turn compared with the pinned Confusion captures (D1 only)
 # plus read-only state checkpoints (ORPHANS, SCRSTR), and the game's own
 # PRSTR/FOOSTR after FLOAD.
 test-m4-orphan-prompt: sources
 	@racket tests/historical_orphan_prompt_test.rkt
 
 # M4 S4 (the TOP SUBR; SPARSE 77np.mud:126 and EVERYTHING 77rooms.mud:1283):
-# every command prefix compared with the pinned Confusion captures (D1 only)
+# every turn compared with the pinned Confusion captures (D1 only)
 # plus read-only state checkpoints (PRSVEC, PREPVEC, OBJ-UV storage), and the
 # game's TOP operands after FLOAD.
 test-m4-top-parser: sources
@@ -90,7 +100,7 @@ test-m4-top-parser: sources
 
 # M4 S5b (TYPE of applicable values; frontier F4, SWORD 77act1.mud:1903
 # <TYPE? ,SWORD-GLOW NOFFSET>): take the sword and carry it to the troll room;
-# every command prefix compared with the pinned Confusion captures (D1 only)
+# every turn compared with the pinned Confusion captures (D1 only)
 # plus read-only state checkpoints (sword glow level, SWORD-DEMON HACTION),
 # and the game's applicables typed after FLOAD.
 test-m4-sword-glow: sources
@@ -99,7 +109,7 @@ test-m4-sword-glow: sources
 # M4 S6 (troll combat): the sword-glow path, then `kill troll with sword` until
 # the troll dies (KILLER 77act1.mud:1699, BLOW 78melee.mud:377, the FIGHTING
 # demon 78melee.mud:282, TROLL 77act1.mud:360), then diagnose/score/inventory/
-# look/take axe/east; every command prefix compared with the pinned Confusion
+# look/take axe/east; every turn compared with the pinned Confusion
 # captures (D1 only) plus read-only state checkpoints (troll strength and
 # flags, axe location, hero strength, cure clock, glow level).
 test-m4-troll-combat: sources
@@ -109,7 +119,7 @@ test-m4-troll-combat: sources
 # empty and blank lines, buzz words, orphan continuations, dangling adjective,
 # too many objects, double preposition, quoting, the 10-word LEXV, darkness,
 # and `Which door?` (GET-OBJECT 77np.mud:363 -> SPARSE 77np.mud:88) answered
-# by an adjective; every command prefix compared with the pinned Confusion
+# by an adjective; every turn compared with the pinned Confusion
 # captures (D1 only) plus read-only state checkpoints (LEXV, PRSVEC,
 # PARSE-WON, ORPHANS, trap door, MOVES).
 test-m4-parser-ambiguity: sources
@@ -128,7 +138,7 @@ test-m4-replay-persistence: sources
 # M4 S8 (the cyclops and ABS, issue #167): lunch and water from the kitchen,
 # the troll-combat path, the maze into the Cyclops Room (FIGHTING's FIRST?
 # call evaluates <ABS .COUNT>, 77act1.mud:951), then feed, water, wake
-# (<ABS <RVARS .RM>>, :949) and flee the cyclops; every command prefix
+# (<ABS <RVARS .RM>>, :949) and flee the cyclops; every turn
 # compared with the pinned Confusion captures (D1 only) plus read-only state
 # checkpoints (cyclops flags and RVARS, food/water, OPPV, scores, MOVES) and
 # the RANDOM draws.
@@ -137,8 +147,8 @@ test-m4-cyclops-room: sources
 
 # M4 S9 (IMAGE and SLEEP, issues #168/#169): the troll-combat path, the round
 # room, `rub mirror`, then the Bat Room: FWEEP's <IMAGE 7> and <SLEEP 1>
-# (77act2.mud:57-58) three times, then the bat's RANDOM drop; every command
-# prefix compared with the pinned Confusion captures (D1 only; the three BEL
+# (77act2.mud:57-58) three times, then the bat's RANDOM drop; every
+# turn compared with the pinned Confusion captures (D1 only; the three BEL
 # bytes included) plus read-only state checkpoints; the fixed (non-live) clock
 # must never call the host sleeper.
 test-m4-mirror-bat: sources
@@ -146,10 +156,25 @@ test-m4-mirror-bat: sources
 
 # M4 S9 (TIME, issue #170): the maze into the Cyclops Room, `odysseus`, `north`
 # into the Strange Passage (room action TIME), `c-int` (verb function TIME),
-# the living room; every command prefix compared with the pinned Confusion
+# the living room; every turn compared with the pinned Confusion
 # captures (D1 only) plus read-only state checkpoints.
 test-m4-strange-passage: sources
 	@racket tests/historical_strange_passage_test.rkt
+
+# The ten M4 native-parity scenarios in the per-prefix reboot mode (one boot
+# per command prefix; the pre-runner protocol, slower). Not on CI's default
+# path; the equivalence evidence is docs/evidence/M4/SINGLE-RUN-RUNNER.md.
+M4_SCENARIO_TESTS := tests/historical_house_cellar_test.rkt \
+	tests/historical_mailbox_drop_test.rkt tests/historical_orphan_prompt_test.rkt \
+	tests/historical_top_parser_test.rkt tests/historical_sword_glow_test.rkt \
+	tests/historical_troll_combat_test.rkt tests/historical_parser_ambiguity_test.rkt \
+	tests/historical_cyclops_room_test.rkt tests/historical_mirror_bat_test.rkt \
+	tests/historical_strange_passage_test.rkt
+m4-scenarios-per-prefix: sources
+	@for t in $(M4_SCENARIO_TESTS); do \
+	  echo "== M4_SCENARIO_MODE=per-prefix racket $$t"; \
+	  M4_SCENARIO_MODE=per-prefix racket $$t || exit 1; \
+	done
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,
