@@ -1,4 +1,4 @@
-# Status — 2026-11-24 (`main` = `b74588d`: M3 accepted; M4 S1–S6 PASS (mainline, scenario-scoped); S7 parser ambiguity merged (#164); WP4 replay persistence proof of concept PASS (branch `feat/m4-replay-persistence`); M4 gate NOT YET PASSED; PLAYABLE NOT RUN)
+# Status — 2026-11-24 (`main` = `065098d`: M3 accepted; M4 S1–S7 SCENARIO_PARITY (mainline, scenario-scoped); WP4 replay persistence proof of concept on mainline (#165); M4_ACCEPTED NOT YET; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN)
 
 ## Current state (2026-11-23)
 
@@ -40,11 +40,23 @@ checkpoints ([M4 baseline record](evidence/M4/M4-MAINLINE-BASELINE.md)):
 | S5a MAX | **PASS (mainline)** | #159 (#122 closed); ADR-0059 accepted (zero-argument `<MAX>` only); `tests/max_test.rkt` |
 | S5b TYPE of DEFINEd functions (FUNCTION) and built-ins (SUBR); take sword | **PASS (mainline, scenario-scoped)** | #161; `make test-m4-sword-glow` (14 prefixes); ADR-0060 |
 | S6 troll combat with the sword | **PASS (mainline, scenario-scoped)** | #162; `make test-m4-troll-combat` (23 prefixes + checkpoints; troll dies on the third blow); [S6 record](evidence/M4/S6-TROLL-COMBAT.md) |
-| S7 parser rejection and ambiguity (`Which door?`) | **PASS (branch evidence, scenario-scoped)** | `make test-m4-parser-ambiguity` (35 prefixes + checkpoints: LEXV, PRSVEC, PARSE-WON, ORPHANS, MOVES); no runtime change; [S7 record](evidence/M4/S7-PARSER-AMBIGUITY.md) |
+| S7 parser rejection and ambiguity (`Which door?`) | **PASS (mainline, scenario-scoped)** | #164; `make test-m4-parser-ambiguity` (35 prefixes + checkpoints: LEXV, PRSVEC, PARSE-WON, ORPHANS, MOVES); no runtime change; [S7 record](evidence/M4/S7-PARSER-AMBIGUITY.md) |
 | Manual DrRacket checks (quit, Stop) | **PASS** | [record](evidence/M4/DRRACKET-MANUAL-CHECK.md) |
-| WP4 host persistence by deterministic replay (ADR-0061; WP4.1–4.5 + WP4.6 regressions) | **PASS (branch evidence, proof of concept, scenario-scoped)** | `feat/m4-replay-persistence`; `make test-m4-replay-persistence` (troll combat saved at the RDCOM prompt before the first kill, restored in-process and in a fresh process: both RNG words, MOVES, 34-field state and transcript digests verified; pre-save + post-restore output = native T1; save after combat; pending lamp event; resumed clock; tampering; independence; 0.85 s replay per 100 commands + 6 s boot); `replay_clock_test`, `replay_checkpoint_test` in `make test`; player-facing SAVE/LOAD not implemented (needs an ADR-0055 amendment); [WP4 record](evidence/M4/WP4-REPLAY-PERSISTENCE.md) |
+| WP4 host persistence by deterministic replay (ADR-0061; WP4.1–4.5 + WP4.6 regressions) | **PASS (mainline, proof of concept, scenario-scoped)** | #165 (independent review: no blocking defects; findings fixed); `make test-m4-replay-persistence` (troll combat saved at the RDCOM prompt before the first kill, restored in-process and in a fresh process: both RNG words, MOVES, 34-field state and transcript digests verified; pre-save + post-restore output = native T1; save after combat; pending lamp event; resumed clock; tampering; independence; 0.85 s replay per 100 commands + 6 s boot); `replay_clock_test`, `replay_checkpoint_test` in `make test`; player-facing SAVE/LOAD not implemented (needs an ADR-0055 amendment); [WP4 record](evidence/M4/WP4-REPLAY-PERSISTENCE.md) |
 | M4 comprehensive-equivalence gate | NOT YET PASSED | scenario, state, save/restore and completion criteria not met |
 | PLAYABLE | NOT RUN | no playability gate executed |
+
+#### Acceptance terms (epic [#163](https://github.com/quaat/mdl-racket/issues/163))
+
+These are tracked separately and never collapsed into one PASS.
+
+| Term | Meaning | State on `main` = `065098d` |
+|---|---|---|
+| SCENARIO_PARITY | each specified scenario matches pinned Confusion in text and in state checkpoints | **PASS for S1–S7** (7 scenarios; per-scenario, each under one fixed clock and seed) |
+| GAMEPLAY_RELIABILITY | every declared required gameplay branch runs without an unexpected runtime failure | NOT RUN: the branch list (combat, death and recovery, timers, objects, scoring, save/load) and the failure inventory are still to be written (#163 Phase 1) |
+| PLAYABLE | a user can start, interact, progress, quit and resume through a verified session | NOT RUN: quit works (M3 session smoke); resume is a proof of concept only and not player-facing (WP4.7) |
+| FULL_COMPLETION | the game's real completion condition is reached and verified | NOT RUN (#163 Phase 6) |
+| M4_ACCEPTED | every M4 requirement in [PLAN](PLAN.md) is met (`make m4-check`, not yet written) | NOT YET |
 
 Gates: `c8964bf` (S1–S3) every target exit 0 locally (Racket v7.9 BC,
 `M3_NATIVE=require`) and in CI (racket:8.10-bc, runs 45230824479,
@@ -53,11 +65,16 @@ the M3 targets, run sequentially, exit 0) and CI green before merge. Strict by
 decision: `help`/`info` (OPEN "READ"), RESTORE, file operations. S6 covers one
 combat branch only (the troll dies; the hero is never hit): hero wounds,
 death (JIGS-UP), unconsciousness and staggering are not reached under this
-seed and timing. S7 (branch) covers the parser's rejection messages, the
-5-letter truncation, empty versus blank lines (only a non-empty line is a
-move) and one `Which door?` question answered by adjectives; it needed no
-runtime change. Next (Phase E): death and recovery, scoring and inventory,
-lamp countdown and clock events.
+seed and timing. S7 covers the parser's rejection messages, the 5-letter
+truncation, empty versus blank lines (only a non-empty line is a move) and
+one `Which door?` question answered by adjectives; it needed no runtime
+change. WP4 proves deterministic replay persistence. It is not a player-facing
+save yet, and native SAVE/RESTORE stays strict. Next, in the order of epic
+[#163](https://github.com/quaat/mdl-racket/issues/163):
+1. the gameplay failure inventory and a single-run checkpoint runner;
+2. combat branches found by searching clocks and seeds in the native game;
+3. lamp and clock events, objects, scoring;
+4. player-facing saves (WP4.7, after an ADR-0055 amendment).
 
 The sections below describe the branch stack as it was integrated; they are
 kept as the integration history.

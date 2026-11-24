@@ -230,13 +230,26 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
 
 ## M4 — Comprehensive behavioral equivalence
 
-> **Progress (2026-11-23, `main` = `c8964bf`):** scenarios S1 (house and
-> cellar), S2 (SEGMENT / drop) and S3 (CHARACTER / orphan prompts) PASS on
-> mainline, scenario-scoped ([baseline](evidence/M4/M4-MAINLINE-BASELINE.md)).
-> The M4 gate itself is NOT YET PASSED. Next slices, each separately
-> reviewable: S4 TOP and the parser path (`77np.mud:126`); S5 MAX (#122) and
-> weapon combat with the troll; then corpus expansion (parser ambiguity,
-> death/recovery, scoring/inventory, lamp countdown and clock events).
+> **Progress (2026-11-24, `main` = `065098d`).** On mainline, each
+> scenario-scoped:
+> - S1–S7 match native: house and cellar, SEGMENT, CHARACTER, TOP and the
+>   parser, take the sword, troll combat, parser ambiguity.
+> - WP4 replay persistence is proven (#165, ADR-0061).
+>
+> The M4 gate is NOT YET PASSED. The completion plan and its tracking are
+> epic [#163](https://github.com/quaat/mdl-racket/issues/163), phases 0–7:
+> - baseline;
+> - failure discovery and harness;
+> - combat, death and recovery;
+> - parser, objects, scoring and timers;
+> - persistence;
+> - known defects;
+> - the full playthrough;
+> - the gates.
+>
+> Acceptance terms are kept separate: SCENARIO_PARITY, GAMEPLAY_RELIABILITY,
+> PLAYABLE, FULL_COMPLETION and M4_ACCEPTED (definitions in
+> [STATUS](STATUS.md)).
 
 **Build:** scripted paths across map/puzzles; inventory, game death,
 NPCs, lamp/timers, parser edge cases, randomness, scoring, save/restore,
@@ -246,8 +259,16 @@ feasible; transcript alone is necessary but insufficient.
 **Gate:** reference scenarios and state snapshots have passing diff reports;
 accepted exceptions are source-justified; completing-game run verified.
 
-**Tasks:** #22 scenario corpus, #23 state schema, #24 deterministic RNG,
-#25 complete-game test, #26 save/restore parity, #27 security review.
+**Tasks:** tracked in epic [#163](https://github.com/quaat/mdl-racket/issues/163).
+Corrected 2026-11-24: this line used to list #22–#27, which are closed M2
+issues and PRs, not M4 tasks. The epic's items:
+- scenario corpus: Phases 2–3;
+- state schema: per-scenario checkpoints plus the Phase 1 runner;
+- deterministic RNG: done on mainline (#109, ADR-0061 `rng/v1`);
+- complete-game test: Phase 6;
+- save/restore: WP4 (host replay proven in #165; player-facing WP4.7; native
+  SAVE/RESTORE needs its own decision);
+- security review: Phase 5, with #120 blocking any exposed service.
 
 ## M5 — Browser application (server-backed first)
 
@@ -258,8 +279,10 @@ Forbid raw MDL evaluation exposed to browser clients.
 **Gate:** multiplayer isolation, input validation, save/restore, accessible
 keyboard UI, mobile layout, no regression against game oracle.
 
-**Tasks:** #28 session service, #29 terminal UI, #30 saves, #31 accessibility,
-#32 production limits.
+**Tasks:** session service, terminal UI, saves, accessibility, production
+limits. No issues have been created yet. This line used to cite #28–#32,
+which are closed M2 issues and PRs (corrected 2026-11-24). #120 must be fixed
+before any exposed service.
 
 ## M6 — Optional client-side/browser runtime
 
