@@ -163,9 +163,9 @@ result, and the fix and regression test.
 | ID | Reproduction | Class | Root cause | Sev. | Status | Issue / PR |
 |---|---|---|---|---|---|---|
 | **INV-01** ABS | F1: troll16, `south` `south` `east` `up` `sw` `east` `south` `ne` | (a) | missing primitive | **P0** | confirmed in both engines; **fixed** by M4 S8 (#167): the cyclops-room scenario matches native at all 41 prefixes | #167 |
-| **INV-02** IMAGE | F10: troll16, then `north` `east`, round-room detours `se` `south` `se` `east` `se` `south` `se` `south` `look` `se` (lands in the Grail Room under this clock), then `east` `sw` `rub mirror` `west` `west` `north` `nw` `west` | (a) | missing primitive | **P0** | confirmed in both engines | to create |
-| **INV-03** SLEEP | F10 (same command) | (a) | missing primitive; host-time decision | **P0** | native confirmed; masked by INV-02 in ours | to create |
-| **INV-04** TIME | F9: `c-int` (confirmed). F8: troll16, the maze route, `odysseus` `north` (native only) | (a) | missing primitive applied by name; value is non-deterministic natively | **P0** via BLROO (P2 for `c-int` alone) | F9 confirmed in both; F8 blocked by INV-01 in ours | to create |
+| **INV-02** IMAGE | F10: troll16, then `north` `east`, round-room detours `se` `south` `se` `east` `se` `south` `se` `south` `look` `se` (lands in the Grail Room under this clock), then `east` `sw` `rub mirror` `west` `west` `north` `nw` `west` | (a) | missing primitive | **P0** | confirmed in both engines; **fixed** by M4 S9 (#168): the mirror-bat scenario (F10) matches native at all 38 prefixes, BEL bytes included | #168 |
+| **INV-03** SLEEP | F10 (same command) | (a) | missing primitive; host-time decision | **P0** | native confirmed; **fixed** by M4 S9 (#169): waits only on a live clock; mirror-bat matches with no wait under the fixed clock | #169 |
+| **INV-04** TIME | F9: `c-int` (confirmed). F8: troll16, the maze route, `odysseus` `north` (native only) | (a) | missing primitive applied by name; value is non-deterministic natively | **P0** via BLROO (P2 for `c-int` alone) | F9 confirmed in both; **fixed** by M4 S9 (#170): session-derived FLOAT (documented deviation); the strange-passage scenario (F8 route + `c-int`) matches native at all 32 prefixes | #170 |
 | **INV-05** help / info | F6 `help`, F7 `info` (also `?`, which LEX maps to HELP) | (a) | decided-strict (ADR-0055) | **P1**: the session ends on a command the game's own help text advertises | confirmed in both engines | to create |
 | **INV-06** restore | F4 `restore`; F5 `save` `restore` `look` | (a) | decided-strict (ADR-0048) | **P1** (save/load mechanic) | confirmed in both engines | to create |
 | **INV-07** PRINT in HANDLE | No player command known: needs an MDL ERROR during play | (b) | missing primitive on the game's error path | **P2** | source + S11 evidence | to create |
@@ -181,7 +181,7 @@ result, and the fix and regression test.
 - *Proposed fix:* implement the ROOT SUBR ABS for FIX and FLOAT, strict on other types and arities. Document it in SEMANTICS and probe Confusion first.
 - *Regression test:* a unit test, plus a scenario test over F1's 26 commands compared with the committed native capture.
 
-**INV-02: IMAGE.**
+**INV-02: IMAGE.** *Status: fixed by M4 S9 (#168): IMAGE writes the exact byte (0–127); see [S9 record](S9-IMAGE-SLEEP-TIME.md).*
 
 - *First failing location and call path:* 77act2.mud:57 `<IMAGE 7>` in FWEEP (:53). The call path: ROOM-INFO applies the room action on WALK-IN (77rooms.mud:554–555) → BATS-ROOM (77act2.mud:26) → FLY-ME (:39, called at :30) → `<FWEEP 4 1>` (:43). It is also reached by BOOM-ROOM `<FWEEP 7>` (:22): a lit candle or torch in the gas room. That path was not run.
 - *Native:* Three `\x07` bytes, then the bat text and a random coal-mine room.
@@ -189,7 +189,7 @@ result, and the fix and regression test.
 - *Proposed fix:* implement IMAGE: write the character code raw to the output channel and return the FIX. The transcript must keep the BEL bytes. Decide whether a future web client renders or strips BEL.
 - *Regression test:* a unit test, plus a scenario test over F10 compared byte for byte with the native raw stdout.
 
-**INV-03: SLEEP.**
+**INV-03: SLEEP.** *Status: fixed by M4 S9 (#169): waits only when the session clock is live; never reads the clock.*
 
 - *First failing location and call path:* 77act2.mud:58 `<SLEEP .SLP>` in FWEEP, on the same call path as INV-02. SLEEP in RECORD (77rooms.mud:740, :746) is unreachable under ADR-0055: the status is never `*600130*`.
 - *Native:* `<SLEEP 1>` three times; the run takes 3.25 s against about 0.2 s for the other cases. No text.
@@ -197,7 +197,7 @@ result, and the fix and regression test.
 - *Proposed fix:* implement SLEEP after a maintainer decision. Either it waits for real time (bounded, real clock only) or it returns T without waiting under the fixed and replay clocks. The fixed-clock shim already freezes DSKDATE natively, so `time` output must not change. A server must never block a worker indefinitely.
 - *Regression test:* the F10 scenario must end in parity with no strict failure, plus a SLEEP unit test (return value, no clock change under the fixed clock).
 
-**INV-04: TIME.**
+**INV-04: TIME.** *Status: fixed by M4 S9 (#170): the session's TIME-call count as a FLOAT, no clock read (documented deviation from CPU time).*
 
 - *First failing location and call path:* RDCOM applies the verb function: `<APPLY-RANDOM <VFCN .CV>>` (77rooms.mud:631–632) → `<APPLY <GVAL TIME>>`. Internal verbs WALK-IN, C-INT, DEAD!, FIRST?, IN!, OUT! and HACK? (77dung.mud:2902–2916) and the TURN-TO syntax (:2819) are bound to `TIME`. Of these, only `C-INT` and the TURN-TO syntax can be typed; the others contain a break character or exceed five letters. The room BLROO, the Strange Passage, has the room action `TIME` (77dung.mud:1385). ROOM-INFO applies it on entry (77rooms.mud:555), and RDCOM after every successful command there (77rooms.mud:634).
 - *Native:* `c-int` → "Nothing happens." (TIME returns a positive FLOAT). BLROO: the room text, and play goes on.
