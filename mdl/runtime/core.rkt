@@ -31,7 +31,7 @@
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          mdl-random-state-snapshot mdl-error-messages
-         mdl-max
+         mdl-max mdl-abs
          atom-space-inchan atom-space-outchan
          mdl-array? mdl-array-kind mdl-array-length form-elements mdl-base
          mdl-length mdl-equal? mdl-identical?
@@ -2748,6 +2748,19 @@
             (exact->inexact result)
             result))))
 
+;; M4 S8 (issue #167): ABS of one checked FIX/FLOAT argument, keeping its
+;; TYPE. -2^35 has no 36-bit FIX counterpart: check-fix makes it a strict
+;; overflow (manual 3.5), never a wrap or a FLOAT (the pinned reference's
+;; 64-bit FIX returns 2^35; documented deviation, docs/SEMANTICS.md).
+(define (mdl-abs . args)
+  (cond [(null? args) (error 'mdl-abs "TOO-FEW-ARGUMENTS-SUPPLIED")]
+        [(pair? (cdr args)) (error 'mdl-abs "TOO-MANY-ARGUMENTS-SUPPLIED")]
+        [else
+         (define value (check-number 'mdl-abs (car args)))
+         (if (exact-integer? value)
+             (check-fix 'mdl-abs (abs value))
+             (abs value))]))
+
 (define (mdl-random . seeds)
   (when (> (length seeds) 2)
     (error 'mdl-random "RANDOM takes at most two FIX seeds"))
@@ -4792,6 +4805,7 @@
         "/" mdl-div
         "MIN" mdl-min
         "MAX" mdl-max
+        "ABS" mdl-abs
         "RANDOM" mdl-random
         "GETTIMEDATE" mdl-gettimedate
         "MOD" mdl-mod
