@@ -48,3 +48,9 @@ A follow-up after infrastructure integration will classify the outstanding
 manual examples and annotate verified semantics by coverage dimension.
 [#179](https://github.com/quaat/mdl-racket/issues/179) remains the first
 runtime slice, subject to L0 acceptance and the explicit removal policy.
+
+The first hosted conformance attempt at `ce88b643f5dcd8e9f7db2f6b3c21c61e0b7c6d7e`
+exited 2 during inventory validation. Git rejected the container-mounted
+workspace's ownership before any fixture ran. The workflow now registers
+the single GitHub workspace path in the job's Git configuration.
+[Initial CI log](https://github.com/quaat/mdl-racket/actions/runs/45372653150)
