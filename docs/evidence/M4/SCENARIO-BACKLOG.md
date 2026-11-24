@@ -4,9 +4,12 @@ Status (updated 2026-11-23): scenario 1 is **executed and PASS on `main`**
 (#153, `make test-m4-house-cellar`); two further scenarios grew out of its
 frontier and also PASS on `main`: **mailbox-drop** (S2, #154) and
 **orphan-prompt** (S3, #155) — see the [M4 baseline](M4-MAINLINE-BASELINE.md).
-Row 4 (troll combat, S6, #162) is on `main`; row 2 (parser rejection and
-ambiguity, S7) PASSes on its branch.
-Rows 3 and 5 remain planned (row 4 has further branches, see its row). Original status when drafted: plan only; no
+Row 4 (troll combat, S6, #162) and row 2 (parser rejection and ambiguity,
+S7, #164) are on `main`. Rows 3 and 5 remain planned, and row 4 has further
+branches (see its row). The plan going forward is epic
+[#163](https://github.com/quaat/mdl-racket/issues/163). Row 3's lamp countdown
+is checked across a replay restore (WP4, #165) but has no native scenario
+of its own yet. Original status when drafted: plan only; no
 scenario had been run in either engine. This orders the first M4
 slices after M3 acceptance (deterministic house smoke) and the local session
 smoke (PLAN WP4). It is not a PLAYABLE claim.
@@ -27,7 +30,7 @@ Source paths below are relative to
 | # | Scenario | Exercises | Source | Clock/RNG | Known unsupported risk |
 |---|---|---|---|---|---|
 | 1 | **Enter the house and open the cellar** (first scenario) | object transfer, containment, a puzzle transition, darkness | WINDOW-FUNCTION / OPEN-CLOSE `77act1.mud:39-60`, KITCHEN `:62`, LIVING-ROOM `:178`, RUG `:303`, TRAP-DOOR `:211`, CELLAR `:270`, TAKE `77rooms.mud:1098`, LIT? `77rooms.mud:1026` | fixed clock; ROOM-INFO `<PROB 80>` draws on each new room | first construct past the six-command path is unknown until probed; MEMBER (WP3) is on the parser path |
-| 2 | Parser rejection and ambiguity | unknown words, 5-letter truncation, "which X?", empty line | SPARSE `77np.mud:19`, EPARSE `77np.mud:347`, TAKE-IT-OR-LEAVE-IT `77np.mud:182` | none expected; one YUKS draw (`take` of the mailbox) and two in `down` from the dark attic | reference: unknown words count as moves, an empty line does not ([quit probe](../M3/SESSION-QUIT-REFERENCE.md)). **S7 PASS (branch evidence)**: 35 prefixes + checkpoints match native, no runtime change ([S7](S7-PARSER-AMBIGUITY.md)); `Which door?` in the living room answered by `trap` / `wooden`; not covered: a carried-vs-room ambiguity, a PHRASE orphan, the vehicle message |
+| 2 | Parser rejection and ambiguity | unknown words, 5-letter truncation, "which X?", empty line | SPARSE `77np.mud:19`, EPARSE `77np.mud:347`, TAKE-IT-OR-LEAVE-IT `77np.mud:182` | none expected; one YUKS draw (`take` of the mailbox) and two in `down` from the dark attic | reference: unknown words count as moves, an empty line does not ([quit probe](../M3/SESSION-QUIT-REFERENCE.md)). **S7 PASS (mainline, #164)**: 35 prefixes + checkpoints match native, no runtime change ([S7](S7-PARSER-AMBIGUITY.md)); `Which door?` in the living room answered by `trap` / `wooden`; not covered: a carried-vs-room ambiguity, a PHRASE orphan, the vehicle message |
 | 3 | Lamp and time events | LANTERN on/off, LIGHT-INT countdown, CLOCK-INT queue | LANTERN `77act1.mud:1859`, LIGHT-INT `77act1.mud:2006`, CLOCK-INT `77rooms.mud:1657` | needs many moves; RNG draws from room descriptions | interrupt/clock-event delivery path not yet exercised |
 | 4 | Troll combat and death | FIGHTING, BLOW, strength, JIGS-UP | TROLL `77act1.mud:360`, FIGHTING `78melee.mud:282`, BLOW `78melee.mud:377`, JIGS-UP `77rooms.mud:870` | RNG-heavy: every blow draws | MAX resolved (#159). **S6 PASS** for the branch where the troll dies on the third blow ([S6](S6-TROLL-COMBAT.md)); hero wounds, JIGS-UP, unconsciousness and staggering not yet reached (need another seed or timing); MIN at `77act1.mud:963` |
 | 5 | Scoring | SCORE-OBJ / SCORE-ROOM / SCORE-UPD | `77rooms.mud:654-668` | fixed | none known |
