@@ -69,7 +69,8 @@ MDL
                          "not the STEP reader"))
                   (lambda (s) (hasheq 'n (number->string (mdl-session-global s "N"))))
                   (lambda (s) (mdl-session-global s "N"))
-                  (lambda (obs tz) (hasheq 'source "BOOT <RANDOM> from two clock reads"))))
+                  (lambda (obs tz) (hasheq 'source "BOOT <RANDOM> from two clock reads"))
+                  '()))
 
 ;; A deterministic source advancing 0.37 s per read.
 (define (stepping-clock start step-micros)

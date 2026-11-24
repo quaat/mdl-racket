@@ -25,7 +25,7 @@
 ;; (pinned source missing, load not PASS), and exn:break (DrRacket's Stop or
 ;; Ctrl-C), so a break ends the game without ending the host process.
 (require racket/runtime-path racket/string
-         "../mdl/loader.rkt")
+         "../mdl/loader.rkt" "game-files.rkt")
 
 (provide run-zork
          (struct-out zork-result)
@@ -108,7 +108,10 @@
     ;; A fresh session per call: no state is shared between two runs.
     (define session
       (make-mdl-session root #:input-port in #:output-port out
-                        #:clock clock #:time-zone time-zone))
+                        #:clock clock #:time-zone time-zone
+                        ;; ADR-0055 amendment (#171): help/info read the two
+                        ;; pinned, hash-checked files; nothing else.
+                        #:read-only-files zork-read-only-files))
     (define report (mdl-session-load! session entry-file))
     (unless (equal? (hash-ref report 'status) "PASS")
       (define failure (hash-ref report 'failure #f))

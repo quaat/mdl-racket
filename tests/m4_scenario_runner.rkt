@@ -53,7 +53,7 @@
 ;; Comparisons are byte-exact after ADR-0053 D1 only; nothing is normalised.
 (require rackunit racket/runtime-path racket/port racket/string racket/list
          racket/file racket/path file/sha1 json
-         "../mdl/loader.rkt"
+         "../mdl/loader.rkt" "../zork/game-files.rkt"
          (only-in "../mdl/runtime/core.rkt" mdl-atom? mdl-atom-pname mdl-truthy?
                   current-mdl-sleeper))
 (provide run-m4-scenario m4-reference m4-run-load-only
@@ -174,7 +174,9 @@
   (set! session
         (make-mdl-session m4-source-root #:input-port input #:output-port output
                           #:clock (make-fixed-mdl-clock fixed-epoch) #:time-zone 'utc
-                          #:input-observer observer))
+                          #:input-observer observer
+                          ;; ADR-0055 amendment (#171): help/info's two files.
+                          #:read-only-files zork-read-only-files))
   (define start (current-inexact-milliseconds))
   (define done (make-channel))
   (define worker
@@ -277,6 +279,10 @@
     [(pair? (mdl-session-open-records (run-result-session r)))
      (mk-failure k-default "run-guard" stage
                  (format "open RECORD channels: ~s" (mdl-session-open-records (run-result-session r))))]
+    ;; M4 S10: every read-only file CHANNEL the game opened was CLOSEd.
+    [(assq 'open (map reverse (mdl-session-file-channels (run-result-session r))))
+     (mk-failure k-default "run-guard" stage
+                 (format "file CHANNELs left open: ~s" (mdl-session-file-channels (run-result-session r))))]
     [else #f]))
 (define (load-failure r k stage)
   (define report (run-result-load-report r))
@@ -348,8 +354,19 @@
 ;; RDCOM prompt `>`. Strict: the stdout of prefix k must hold exactly k+2
 ;; prompts (one per READSTRING entry, the end-of-input one included), or the
 ;; split is ambiguous and this scenario cannot use the single-run mode.
-(define (prompt-head text k label)
-  (define positions (for/list ([c (in-string text)] [i (in-naturals)] #:when (char=? c #\>)) i))
+;; SPLIT (ADR-0062 amendment, M4 S10): 'any counts every `>` (the default);
+;; 'line-initial counts only a `>` at the start of the text or after a LF, for
+;; a scenario whose game text itself holds `>` (help-info). The count check is
+;; the same in both.
+(define (prompt-head text k label [split 'any])
+  (define positions
+    (for/list ([c (in-string text)] [i (in-naturals)]
+               #:when (and (char=? c #\>)
+                           (case split
+                             [(any) #t]
+                             [(line-initial) (or (zero? i) (char=? (string-ref text (sub1 i)) #\newline))]
+                             [else (error 'm4-scenario "prompt split must be any or line-initial, not ~s" split)])))
+      i))
   (unless (= (length positions) (+ k 2))
     (error 'm4-scenario "~a: expected ~a prompts `>` in the reference stdout, found ~a; the prompt split is ambiguous (use M4_SCENARIO_MODE=per-prefix)"
            label (+ k 2) (length positions)))
@@ -362,7 +379,7 @@
 ;; a prefix of T1 is implied by the run itself (outputs only grow, and the
 ;; whole output must equal T1), so a reference inconsistency there surfaces as
 ;; a failing turn, never as a silent pass.
-(define (eof-split pk k label) (prompt-head pk k label))
+(define (eof-split pk k label [split 'any]) (prompt-head pk k label split))
 
 ;; The prefixes k < n whose native end-of-input tail is not standard: the tail
 ;; text is not exactly "Beg pardon?\n>", or the end checkpoint differs from the
@@ -408,15 +425,18 @@
                          #:end-only-keys [end-only-keys '()]
                          #:ignore-keys [ignore-keys '()]
                          #:eof-transform [eof-transform values]
-                         #:check-turn [check-turn void])
+                         #:check-turn [check-turn void]
+                         #:prompt-split [prompt-split 'any])
   (unless (eq? (null? end-only-keys) (eq? turn-checkpoint checkpoint))
     (error 'm4-scenario "#:end-only-keys and #:turn-checkpoint must be given together"))
+  (unless (memq prompt-split '(any line-initial))
+    (error 'm4-scenario "#:prompt-split must be 'any or 'line-initial, not ~s" prompt-split))
   (parameterize ([current-check-handler raise])
     (run-m4-scenario* name expected-commands checkpoint turn-checkpoint end-only-keys
-                      (cons 'n ignore-keys) eof-transform check-turn)))
+                      (cons 'n ignore-keys) eof-transform check-turn prompt-split)))
 
 (define (run-m4-scenario* name expected-commands checkpoint turn-checkpoint end-only-keys
-                          ignore-keys eof-transform check-turn)
+                          ignore-keys eof-transform check-turn prompt-split)
   (unless (directory-exists? m4-source-root)
     (error 'm4-scenario "pinned source missing: ~a" m4-source-root))
   (define mode (scenario-mode))
@@ -442,6 +462,9 @@
   (check-equal? (hash-ref reference 'interpreter_sha256_after) m4-pinned-mdli)
   (check-equal? (hash-ref reference 'upstream_mdlzork_checked_out) m4-pinned-upstream)
   (check-equal? (hash-ref reference 'commands) commands)
+  ;; The reference records the split its capture used (help-info); the
+  ;; scenario must declare the same one. A reference without it used 'any.
+  (check-equal? (hash-ref reference 'prompt_split "any") (symbol->string prompt-split))
   (define ref-checks (hash-ref reference 'checks))
   (check-true (hash-ref ref-checks 't1_equals_t1b_bytes))
   (check-true (hash-ref ref-checks 'diag_game_part_equals_t1_game_part_bytes))
@@ -527,7 +550,7 @@
     ;; Reference-side split and classification.
     (define t1 (vector-ref transcripts n))
     (define heads (for/vector ([k (in-range 0 (add1 n))])
-                    (eof-split (vector-ref transcripts k) k (prefix-case-name k))))
+                    (eof-split (vector-ref transcripts k) k (prefix-case-name k) prompt-split)))
     (define (tail k) (substring (vector-ref transcripts k) (string-length (vector-ref heads k))))
     (define reboots
       (non-standard-eof-tails n tail
@@ -740,6 +763,18 @@
   (check-exn #rx"expected 2 prompts" (lambda () (prompt-head "a > b\n>Beg pardon?\n>" 0 "P00")))
   (check-equal? (eof-split p0 0 "P00") "Welcome.\n>")
   (check-equal? (eof-split p1 1 "P01") "Welcome.\n>You are here.\n>")
+  ;; #:prompt-split 'line-initial (ADR-0062 amendment): a `>` inside a line
+  ;; (help-info's 'attack <villain> with <weapon>') is not a prompt; the count
+  ;; stays strict.
+  (define ph "Welcome.\n>\nkill <villain> with <weapon>\n>Beg pardon?\n>")
+  (check-exn #rx"expected 3 prompts" (lambda () (prompt-head ph 1 "P01")))
+  (check-equal? (prompt-head ph 1 "P01" 'line-initial) "Welcome.\n>\nkill <villain> with <weapon>\n>")
+  (check-equal? (eof-split ph 1 "P01" 'line-initial) "Welcome.\n>\nkill <villain> with <weapon>\n>")
+  (check-equal? (prompt-head ">x\n>" 0 "P00" 'line-initial) ">")
+  (check-exn #rx"expected 2 prompts" (lambda () (prompt-head ph 0 "P00" 'line-initial)))
+  (check-exn #rx"expected 3 prompts"
+             (lambda () (prompt-head "Welcome.\n>a >b\n>" 1 "P01" 'line-initial)))
+  (check-exn #rx"prompt split" (lambda () (prompt-head p0 0 "P00" 'mid-line)))
   ;; Classification: the tail text and the end checkpoint both decide.
   (define tails (vector "Beg pardon?\n>" "Beg pardon?\nYour sword glows.\n>" "Beg pardon?\n>"
                         "Beg pardon?\n>"))

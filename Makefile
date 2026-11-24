@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage m4-scenarios-per-prefix play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage test-m4-help-info m4-scenarios-per-prefix play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -61,7 +61,7 @@ test-m3-interactive: sources
 test-m3-session: sources
 	@raco test tests/historical_session_quit_test.rkt
 
-# M4 native-parity scenarios (the ten test-m4-* targets below except
+# M4 native-parity scenarios (the eleven test-m4-* targets below except
 # replay-persistence) run through the shared runner tests/m4_scenario_runner.rkt
 # (docs/TESTING.md, "M4 scenario runner"). Default single-run mode: one boot
 # fed all commands, every turn's output and read-only checkpoints compared at
@@ -161,7 +161,16 @@ test-m4-mirror-bat: sources
 test-m4-strange-passage: sources
 	@racket tests/historical_strange_passage_test.rkt
 
-# The ten M4 native-parity scenarios in the per-prefix reboot mode (one boot
+# M4 S10 (help and info, issue #171; ADR-0055 amendment "Read-only
+# allowlist"): `help`, `info` and `?` print MDL/MADADV.HELP / .INFO through
+# FILE-TO-TTY (OPEN "READ" of the two pinned, hash-checked files, FILE-LENGTH,
+# file READSTRING, CLOSE); every turn compared with the pinned Confusion
+# captures (D1 only; prompts split at line-initial `>`) plus read-only state
+# checkpoints including ,INBUF.
+test-m4-help-info: sources
+	@racket tests/historical_help_info_test.rkt
+
+# The eleven M4 native-parity scenarios in the per-prefix reboot mode (one boot
 # per command prefix; the pre-runner protocol, slower). Not on CI's default
 # path; the equivalence evidence is docs/evidence/M4/SINGLE-RUN-RUNNER.md.
 M4_SCENARIO_TESTS := tests/historical_house_cellar_test.rkt \
@@ -169,7 +178,7 @@ M4_SCENARIO_TESTS := tests/historical_house_cellar_test.rkt \
 	tests/historical_top_parser_test.rkt tests/historical_sword_glow_test.rkt \
 	tests/historical_troll_combat_test.rkt tests/historical_parser_ambiguity_test.rkt \
 	tests/historical_cyclops_room_test.rkt tests/historical_mirror_bat_test.rkt \
-	tests/historical_strange_passage_test.rkt
+	tests/historical_strange_passage_test.rkt tests/historical_help_info_test.rkt
 m4-scenarios-per-prefix: sources
 	@for t in $(M4_SCENARIO_TESTS); do \
 	  echo "== M4_SCENARIO_MODE=per-prefix racket $$t"; \

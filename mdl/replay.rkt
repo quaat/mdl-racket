@@ -45,8 +45,12 @@
 ;; boundary rule. state: (session -> hash symbol -> string), the selected game
 ;; state. moves: (session -> exact-integer). seed: (observations time-zone ->
 ;; hash symbol -> (or string integer)), the RNG seed provenance.
+;; read-only-files: the session's read-only allowlist (M4 S10, ADR-0055
+;; amendment; make-mdl-session #:read-only-files). File reads are not input:
+;; READSTRING from a file CHANNEL never reaches the observer, so they are
+;; neither logged nor replayed; replay re-reads the hash-checked files.
 (struct replay-profile (name entry-file entry-function files upstream prompt-refusal state moves
-                                 seed))
+                                 seed read-only-files))
 ;; kind: 'quit, 'quit-after-mdl-error or 'input-exhausted (like zork-result).
 ;; host-errors: exn:fail values raised by the host's on-prompt/on-restored
 ;; callbacks, oldest first. They are caught at the callback boundary so a
@@ -568,7 +572,8 @@
   (parameterize ([current-security-guard (no-write-guard (current-security-guard))])
     (define s (make-mdl-session root #:input-port in #:output-port (make-tee-port r out)
                                 #:clock (run-clock r) #:time-zone (run-time-zone r)
-                                #:input-observer (observer r (lambda (info) (replay-entry! r info)))))
+                                #:input-observer (observer r (lambda (info) (replay-entry! r info)))
+                                #:read-only-files (replay-profile-read-only-files profile)))
     (set! sessions-created (add1 sessions-created))
     (set-run-session! r s)
     (define report (mdl-session-load! s (replay-profile-entry-file profile)))
