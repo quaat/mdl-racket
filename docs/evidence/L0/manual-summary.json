@@ -1,6 +1,19 @@
 {
-  "schema_version": 1,
-  "toolchain": "Racket 8.10 BC",
+  "schema_version": 2,
+  "provenance": {
+    "manifest_version": 2,
+    "manifest_sha256": "180468097b091217d0eeafd7b666158721bf153ad860948b3221975376966040",
+    "manual_revision": "89707367b951ea79bedc71f51ab213886e0f62ce",
+    "runtime_revision": "65ec0f4069caa2c0e1590ca7c4d396f9c2209fb2",
+    "runtime_sha256": "a4fc43c6fdcd40c9937f585e4f815d3cd85dcf163305d97c27dae4ba51686440",
+    "runner_revision": "65ec0f4069caa2c0e1590ca7c4d396f9c2209fb2",
+    "runner_sha256": "7cd03e06accc9cfe91cd4f25215292f7807d2da23e2da88e110755f045bf62d9",
+    "toolchain": {
+      "racket": "Welcome to Racket v8.10 [bc].",
+      "python": "3.13.5"
+    },
+    "worker_version": 1
+  },
   "summary": {
     "PASS": 72,
     "XFAIL": 16
@@ -202,443 +215,3615 @@
   "results": [
     {
       "id": "fix-literal",
+      "fixture_sha256": "cda8a4865b93c0c5affccc8ed05834c23af078dd6ca526081300208a5398b350",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 1
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 1,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "fix-literal",
+      "fixture_sha256": "cda8a4865b93c0c5affccc8ed05834c23af078dd6ca526081300208a5398b350",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 1
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 1,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "float-literal",
+      "fixture_sha256": "d294ff5de7bd751621e3c510e995da5603c7139019851b02926b59672078ce86",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FLOAT",
+          "value": 1.0
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 1.0,
+            "type": "FLOAT",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "float-literal",
+      "fixture_sha256": "d294ff5de7bd751621e3c510e995da5603c7139019851b02926b59672078ce86",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FLOAT",
+          "value": 1.0
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 1.0,
+            "type": "FLOAT",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "atom-literal",
+      "fixture_sha256": "4ff595f0491f5c6782cb4c3d67366070df48a375179c120b30821d4fa165eb40",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "GEORGE"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "GEORGE",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "atom-literal",
+      "fixture_sha256": "4ff595f0491f5c6782cb4c3d67366070df48a375179c120b30821d4fa165eb40",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "GEORGE"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "GEORGE",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "add",
+      "fixture_sha256": "7e37bbe9e908fd80eaa0e35126af08ae8c0186dcfe3d2e0ba8abc72f04a98cc5",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 12
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 12,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "add",
+      "fixture_sha256": "7e37bbe9e908fd80eaa0e35126af08ae8c0186dcfe3d2e0ba8abc72f04a98cc5",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 12
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 12,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "fix-cast",
+      "fixture_sha256": "ec5fd8d83855d2fe36871648f6a95ab471efb233b2779278c69f21503793bf07",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 1
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 1,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "fix-cast",
+      "fixture_sha256": "ec5fd8d83855d2fe36871648f6a95ab471efb233b2779278c69f21503793bf07",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 1
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 1,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "mixed-division",
+      "fixture_sha256": "7c3f3a218535ce3b6d7c233a65d12321ea571844639e6d3932650005e7616f53",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FLOAT",
+          "value": 0.5
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 0.5,
+            "type": "FLOAT",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "mixed-division",
+      "fixture_sha256": "7c3f3a218535ce3b6d7c233a65d12321ea571844639e6d3932650005e7616f53",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FLOAT",
+          "value": 0.5
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 0.5,
+            "type": "FLOAT",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "sqrt",
+      "fixture_sha256": "a2daeaaabb66be7973d7d3d121796ef6ff30c011193a3aa5caf93d083e65e765",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "runtime",
+          "column": 1,
+          "construct": "SETG",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SQRT",
+          "expression_index": 1,
+          "file": "sqrt.mud",
+          "line": 1,
+          "load_chain": [
+            "sqrt.mud"
+          ],
+          "stage": "execute"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 5.0,
+            "type": "FLOAT",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#182",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SQRT",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "line": 1,
+          "column": 1,
+          "expression_index": 1
+        },
+        "error": null
+      }
     },
     {
       "id": "sqrt",
+      "fixture_sha256": "a2daeaaabb66be7973d7d3d121796ef6ff30c011193a3aa5caf93d083e65e765",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SQRT"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 5.0,
+            "type": "FLOAT",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#182",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SQRT",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "setg",
+      "fixture_sha256": "592060eeed0e1dea5c8bd951f60c6716a21d1770856207dcf15d5e5b2289f410",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 500
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 500
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 500,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 500,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "setg",
+      "fixture_sha256": "592060eeed0e1dea5c8bd951f60c6716a21d1770856207dcf15d5e5b2289f410",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 500
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 500
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 500,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 500,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "gval",
+      "fixture_sha256": "c2824375153a2ab0dea931dee7ad9a3b8f99778d5f441d38236dd15fc10788bf",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 500
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 500,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "gval",
+      "fixture_sha256": "c2824375153a2ab0dea931dee7ad9a3b8f99778d5f441d38236dd15fc10788bf",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 500
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 500,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "value",
+      "fixture_sha256": "30b685fdcaeb59f613e30c97e21fefd4f9c2d6153d0d73358e87761cc646055a",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 9
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 5
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 5,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 9,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "value",
+      "fixture_sha256": "30b685fdcaeb59f613e30c97e21fefd4f9c2d6153d0d73358e87761cc646055a",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 9
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 5
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 5,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 9,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "binding-restoration",
+      "fixture_sha256": "7b1d75e47ef5d1baa897e72a201691072dc31d1e317cb7d730a1fc517a2e7aab",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "compiler",
+          "column": 27,
+          "construct": "#FUNCTION",
+          "exception": "mdl-compiler: 2:27: unsupported # reader token",
+          "expression_index": 2,
+          "file": "binding-restoration.mud",
+          "line": 2,
+          "load_chain": [
+            "binding-restoration.mud"
+          ],
+          "stage": "compile"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 25,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#183",
+          "exception": "mdl-compiler: 2:27: unsupported # reader token",
+          "output": "",
+          "classification": "compiler",
+          "stage": "compile",
+          "construct": "#FUNCTION",
+          "line": 2,
+          "column": 27,
+          "expression_index": 2
+        },
+        "error": null
+      }
     },
     {
       "id": "binding-restoration",
+      "fixture_sha256": "7b1d75e47ef5d1baa897e72a201691072dc31d1e317cb7d730a1fc517a2e7aab",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-compiler: 3:27: unsupported # reader token"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 25,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#183",
+          "exception": "mdl-compiler: 3:27: unsupported # reader token",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "named-binding-restoration",
+      "fixture_sha256": "c8f44c4f5e980e4784a50371050b455278228ce890582a67db6bdd26a18a5c3b",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 25
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 25,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "named-binding-restoration",
+      "fixture_sha256": "c8f44c4f5e980e4784a50371050b455278228ce890582a67db6bdd26a18a5c3b",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 25
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 25,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "define",
+      "fixture_sha256": "202dedae6b41c9b9e5a5488080e2692fa6093523a5495b267a7dad6f67f3bd81",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 25
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 25,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "define",
+      "fixture_sha256": "202dedae6b41c9b9e5a5488080e2692fa6093523a5495b267a7dad6f67f3bd81",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 25
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 25,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "repeated-setg",
+      "fixture_sha256": "4343eb7b2cd8e8f1f6ae3ce8fc5fd6fc4744845650aa82d7ee4cc264e2df116d",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "repeated-setg",
+      "fixture_sha256": "4343eb7b2cd8e8f1f6ae3ce8fc5fd6fc4744845650aa82d7ee4cc264e2df116d",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "nested-lval",
+      "fixture_sha256": "5a6a6d5ce1b917b0c23febeaaeb54376c3904574c0ddbee4138f8d9d3f1c822e",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "reader",
+          "column": 50,
+          "construct": "file",
+          "exception": "mdl-reader: nested-lval.mud:1:50: ..name: LVAL argument must be an ATOM, not a compound form",
+          "expression_index": 1,
+          "file": "nested-lval.mud",
+          "line": 1,
+          "load_chain": [
+            "nested-lval.mud"
+          ],
+          "stage": "parse"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#134",
+          "exception": "mdl-reader: nested-lval.mud:1:50: ..name: LVAL argument must be an ATOM, not a compound form",
+          "output": "",
+          "classification": "reader",
+          "stage": "parse",
+          "construct": "file",
+          "line": 1,
+          "column": 50,
+          "expression_index": 1
+        },
+        "error": null
+      }
     },
     {
       "id": "nested-lval",
+      "fixture_sha256": "5a6a6d5ce1b917b0c23febeaaeb54376c3904574c0ddbee4138f8d9d3f1c822e",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-reader: nested-lval.mud:2:50: ..name: LVAL argument must be an ATOM, not a compound form"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#134",
+          "exception": "mdl-reader: nested-lval.mud:2:50: ..name: LVAL argument must be an ATOM, not a compound form",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "builtin-type",
+      "fixture_sha256": "7d36e54a0bf8cc5894cd1c6beb9e7da0039957dcd66827a324830b782ea5bee5",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "SUBR"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "SUBR",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "builtin-type",
+      "fixture_sha256": "7d36e54a0bf8cc5894cd1c6beb9e7da0039957dcd66827a324830b782ea5bee5",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "SUBR"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "SUBR",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "float-primtype",
+      "fixture_sha256": "ea66e7a9097d72a05b31de2e52b81ad0567204ae203db9fafafc4e921af7c562",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "WORD"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "WORD",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "float-primtype",
+      "fixture_sha256": "ea66e7a9097d72a05b31de2e52b81ad0567204ae203db9fafafc4e921af7c562",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "WORD"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "WORD",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "evaluated-list",
+      "fixture_sha256": "356d2c1e752cb893eadfccd4105e90d245a357ae52cb6c0cb52dea0dbbf47d22",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 1
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 2
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 7
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 2,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 7,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "evaluated-list",
+      "fixture_sha256": "356d2c1e752cb893eadfccd4105e90d245a357ae52cb6c0cb52dea0dbbf47d22",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 1
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 2
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 7
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 2,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 7,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "shared-rest",
+      "fixture_sha256": "afd524253a92255efb59ce169e7e2099ec19a55bd6e2f863fdaa1d9118b455c7",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 1
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 19
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 3
+            }
+          ]
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 19
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 19,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 19,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 3,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "shared-rest",
+      "fixture_sha256": "afd524253a92255efb59ce169e7e2099ec19a55bd6e2f863fdaa1d9118b455c7",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 1
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 19
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 3
+            }
+          ]
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 19
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 19,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 19,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 3,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "nth-past-end",
+      "fixture_sha256": "f4bce74a96ababcf3295bf4a55135c971afb6fb3b92c3e1074326b2f7cb1978e",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "failure": {
+          "classification": "runtime",
+          "column": 1,
+          "construct": "SETG",
+          "exception": "mdl-nth: index out of range",
+          "expression_index": 1,
+          "file": "nth-past-end.mud",
+          "line": 1,
+          "load_chain": [
+            "nth-past-end.mud"
+          ],
+          "stage": "execute"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": null,
+        "gap": null,
+        "error": {
+          "exception": "mdl-nth: index out of range",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "expression_index": 1,
+          "line": 1,
+          "column": 1
+        }
+      }
     },
     {
       "id": "nth-past-end",
+      "fixture_sha256": "f4bce74a96ababcf3295bf4a55135c971afb6fb3b92c3e1074326b2f7cb1978e",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "failure": {
+          "exception": "mdl-nth: index out of range"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": null,
+        "gap": null,
+        "error": {
+          "exception": "mdl-nth: index out of range",
+          "output": ""
+        }
+      }
     },
     {
       "id": "empty-form",
+      "fixture_sha256": "88b2a87b8a14d0ce8ce51675517bea6486eeefa1a762f75dddc5885d040378b7",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "FALSE",
+          "value": []
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [],
+            "type": "FALSE",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "empty-form",
+      "fixture_sha256": "88b2a87b8a14d0ce8ce51675517bea6486eeefa1a762f75dddc5885d040378b7",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "FALSE",
+          "value": []
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [],
+            "type": "FALSE",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "and-false-payload",
+      "fixture_sha256": "f4992053af82fb6370a99fe35559bda544b364ff1ca7f21537bb993817b37e77",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "FALSE",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 1
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "FALSE",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "and-false-payload",
+      "fixture_sha256": "f4992053af82fb6370a99fe35559bda544b364ff1ca7f21537bb993817b37e77",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "FALSE",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 1
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "FALSE",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "member-string",
+      "fixture_sha256": "b40c103d779d1efcff0a03f9694e78ad27ee3662c42f1d15a823f4a949e5b864",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "PARTS"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "PARTS",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "member-string",
+      "fixture_sha256": "b40c103d779d1efcff0a03f9694e78ad27ee3662c42f1d15a823f4a949e5b864",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "PARTS"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "PARTS",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "sequential-aux",
+      "fixture_sha256": "f048d9ac14038f32daa07b3fd0d1149444b90d29e4ace736bba5a0ebff9b145a",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "UVECTOR",
+          "type": "UVECTOR",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 3
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 6
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 3,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 6,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "UVECTOR",
+            "primtype": "UVECTOR"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "sequential-aux",
+      "fixture_sha256": "f048d9ac14038f32daa07b3fd0d1149444b90d29e4ace736bba5a0ebff9b145a",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "UVECTOR",
+          "type": "UVECTOR",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 3
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 6
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 3,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 6,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "UVECTOR",
+            "primtype": "UVECTOR"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "eval",
+      "fixture_sha256": "a6070af4adfd3080043581e69ee3d28120108adf6e61f45540308573667b49c2",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "runtime",
+          "column": 1,
+          "construct": "SETG",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator EVAL",
+          "expression_index": 2,
+          "file": "eval.mud",
+          "line": 2,
+          "load_chain": [
+            "eval.mud"
+          ],
+          "stage": "execute"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#184",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator EVAL",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "line": 2,
+          "column": 1,
+          "expression_index": 2
+        },
+        "error": null
+      }
     },
     {
       "id": "eval",
+      "fixture_sha256": "a6070af4adfd3080043581e69ee3d28120108adf6e61f45540308573667b49c2",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator EVAL"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#184",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator EVAL",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "mapf-string",
+      "fixture_sha256": "599c44b25ac6f981e5ad90efa82b15d3188614695c85c48332501e839911897d",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "MDL"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "MDL",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "mapf-string",
+      "fixture_sha256": "599c44b25ac6f981e5ad90efa82b15d3188614695c85c48332501e839911897d",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "MDL"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "MDL",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "princ",
+      "fixture_sha256": "9e23ec6f7bf2e105bb2a5d34ec576e12c7b93c95224ad646732a027514fd492a",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "MDL",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "MDL"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "MDL",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": "MDL"
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "princ",
+      "fixture_sha256": "9e23ec6f7bf2e105bb2a5d34ec576e12c7b93c95224ad646732a027514fd492a",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "MDL",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "MDL"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "MDL",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": "MDL"
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "print",
+      "fixture_sha256": "24675528d183c6bce2eb35ce0958cc388a4739cb1177d25e24240a0ab91138b2",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "runtime",
+          "column": 1,
+          "construct": "SETG",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PRINT",
+          "expression_index": 1,
+          "file": "print.mud",
+          "line": 1,
+          "load_chain": [
+            "print.mud"
+          ],
+          "stage": "execute"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 17,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": "\n17 "
+        },
+        "gap": {
+          "issue": "#173",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PRINT",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "line": 1,
+          "column": 1,
+          "expression_index": 1
+        },
+        "error": null
+      }
     },
     {
       "id": "print",
+      "fixture_sha256": "24675528d183c6bce2eb35ce0958cc388a4739cb1177d25e24240a0ab91138b2",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PRINT"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 17,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": "\n17 "
+        },
+        "gap": {
+          "issue": "#173",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PRINT",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "setloc",
+      "fixture_sha256": "ffb9f4f2f1946e9f032a2331143bd4b2802e04cd7acc73e6f99fd7b0ac3f3d5f",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "runtime",
+          "column": 1,
+          "construct": "SETLOC",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SETLOC",
+          "expression_index": 2,
+          "file": "setloc.mud",
+          "line": 2,
+          "load_chain": [
+            "setloc.mud"
+          ],
+          "stage": "execute"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "DOC-HI",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#185",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SETLOC",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETLOC",
+          "line": 2,
+          "column": 1,
+          "expression_index": 2
+        },
+        "error": null
+      }
     },
     {
       "id": "setloc",
+      "fixture_sha256": "ffb9f4f2f1946e9f032a2331143bd4b2802e04cd7acc73e6f99fd7b0ac3f3d5f",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SETLOC"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "DOC-HI",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#185",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SETLOC",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "association",
+      "fixture_sha256": "0bfa85a90ecbc445851c4cebd8b6ff7de63de9672512e378a86270eadc4df1cc",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "L is a list."
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "L is a list.",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "association",
+      "fixture_sha256": "0bfa85a90ecbc445851c4cebd8b6ff7de63de9672512e378a86270eadc4df1cc",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "L is a list."
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "L is a list.",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "numeric-get",
+      "fixture_sha256": "3d6ad8718ee877dff8290c1f5e847c526a0b0fdf2e6698dc979db908e315e6c0",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 3
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "numeric-get",
+      "fixture_sha256": "3d6ad8718ee877dff8290c1f5e847c526a0b0fdf2e6698dc979db908e315e6c0",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 3
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "explicit-properties",
+      "fixture_sha256": "8b74294b10eb652b2f9b4df472343f98652af55c48a7dd707fe5887048e98fb8",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "runtime",
+          "column": 1,
+          "construct": "PUTPROP",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PUTPROP",
+          "expression_index": 2,
+          "file": "explicit-properties.mud",
+          "line": 2,
+          "load_chain": [
+            "explicit-properties.mud"
+          ],
+          "stage": "execute"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 4,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "UVECTOR",
+            "primtype": "UVECTOR"
+          },
+          "effect": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#179",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PUTPROP",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "PUTPROP",
+          "line": 2,
+          "column": 1,
+          "expression_index": 2
+        },
+        "error": null
+      }
     },
     {
       "id": "explicit-properties",
+      "fixture_sha256": "8b74294b10eb652b2f9b4df472343f98652af55c48a7dd707fe5887048e98fb8",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PUTPROP"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 4,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "UVECTOR",
+            "primtype": "UVECTOR"
+          },
+          "effect": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#179",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PUTPROP",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "declaration-match",
+      "fixture_sha256": "33bd2f911022cceb55fba5eaa063b66e90b23b497001c546aaf682325f2caa4c",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "T"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "T",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "declaration-match",
+      "fixture_sha256": "33bd2f911022cceb55fba5eaa063b66e90b23b497001c546aaf682325f2caa4c",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "T"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "T",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "declaration-miss",
+      "fixture_sha256": "e4fed00b114aee4c4c60879b3fa2787c27d7f0c37b20099a5695a85c72cee22b",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "FALSE",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FLOAT",
+              "value": 2.0
+            },
+            {
+              "primtype": "ATOM",
+              "type": "ATOM",
+              "value": "FIX"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "type": "FALSE",
+            "primtype": "LIST",
+            "value": [
+              {
+                "type": "FLOAT",
+                "primtype": "WORD",
+                "value": 2.0
+              },
+              {
+                "type": "ATOM",
+                "primtype": "ATOM",
+                "value": "FIX"
+              }
+            ]
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "declaration-miss",
+      "fixture_sha256": "e4fed00b114aee4c4c60879b3fa2787c27d7f0c37b20099a5695a85c72cee22b",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "FALSE",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FLOAT",
+              "value": 2.0
+            },
+            {
+              "primtype": "ATOM",
+              "type": "ATOM",
+              "value": "FIX"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "type": "FALSE",
+            "primtype": "LIST",
+            "value": [
+              {
+                "type": "FLOAT",
+                "primtype": "WORD",
+                "value": 2.0
+              },
+              {
+                "type": "ATOM",
+                "primtype": "ATOM",
+                "value": "FIX"
+              }
+            ]
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "atom-pname",
+      "fixture_sha256": "e842ea74cb14fb338a8444602f2d503caf01da5b75f200337a8554125d7e4123",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "SAMPLE"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "SAMPLE",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "atom-pname",
+      "fixture_sha256": "e842ea74cb14fb338a8444602f2d503caf01da5b75f200337a8554125d7e4123",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "STRING",
+          "type": "STRING",
+          "value": "SAMPLE"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "SAMPLE",
+            "type": "STRING",
+            "primtype": "STRING"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "unwind-normal",
+      "fixture_sha256": "4b0e29c0a834a9b1a1fa17b637c1ab24302d49e1317e13f08fb605cf0d7d9dc1",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 1
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 3
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 1,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "unwind-normal",
+      "fixture_sha256": "4b0e29c0a834a9b1a1fa17b637c1ab24302d49e1317e13f08fb605cf0d7d9dc1",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 1
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 3
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 3,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 1,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "double-percent",
+      "fixture_sha256": "afb537ef44c7a2fde2d0503fdc8512afa2a292550f665cde266fead9bd84e75c",
       "mode": "loader",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "classification": "reader",
+          "column": 28,
+          "construct": "file",
+          "exception": "mdl-reader: double-percent.mud:3:28: unsupported %% reader macro",
+          "expression_index": 3,
+          "file": "double-percent.mud",
+          "line": 3,
+          "load_chain": [
+            "double-percent.mud"
+          ],
+          "stage": "parse"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 2,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": [],
+                "type": "LIST",
+                "primtype": "LIST"
+              },
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "VECTOR",
+            "primtype": "VECTOR"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#183",
+          "exception": "mdl-reader: double-percent.mud:3:28: unsupported %% reader macro",
+          "output": "",
+          "classification": "reader",
+          "stage": "parse",
+          "construct": "file",
+          "line": 3,
+          "column": 28,
+          "expression_index": 3
+        },
+        "error": null
+      }
     },
     {
       "id": "double-percent",
+      "fixture_sha256": "afb537ef44c7a2fde2d0503fdc8512afa2a292550f665cde266fead9bd84e75c",
       "mode": "lang",
-      "status": "XFAIL"
+      "status": "XFAIL",
+      "actual": {
+        "failure": {
+          "exception": "mdl-compiler: 4:27: unsupported percent reader macro"
+        },
+        "output": "",
+        "status": "FAIL"
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 2,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": [],
+                "type": "LIST",
+                "primtype": "LIST"
+              },
+              {
+                "value": 1,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "VECTOR",
+            "primtype": "VECTOR"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": {
+          "issue": "#183",
+          "exception": "mdl-compiler: 4:27: unsupported percent reader macro",
+          "output": ""
+        },
+        "error": null
+      }
     },
     {
       "id": "macro-increment",
+      "fixture_sha256": "649db83952f35ddd5de6f76d581a635d6ff89cebb1ff9265418bbaf81616e2b4",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "macro-increment",
+      "fixture_sha256": "649db83952f35ddd5de6f76d581a635d6ff89cebb1ff9265418bbaf81616e2b4",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "getbits",
+      "fixture_sha256": "045c25d0a4899c83c62be97e98929355891b8d36addfbb3d12857e6cf9ab14e0",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "WORD",
+          "value": 7
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 7,
+            "type": "WORD",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "getbits",
+      "fixture_sha256": "045c25d0a4899c83c62be97e98929355891b8d36addfbb3d12857e6cf9ab14e0",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "WORD",
+          "value": 7
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 7,
+            "type": "WORD",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "interrupt-level",
+      "fixture_sha256": "d1976210e7a249400b0cb0a48fd47631d533e60b2eaa77fec52ba4c1063cc45f",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "interrupt-level",
+      "fixture_sha256": "d1976210e7a249400b0cb0a48fd47631d533e60b2eaa77fec52ba4c1063cc45f",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 2
+        },
+        "output": "",
+        "result": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "effect": {
+            "value": 2,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "sleep-zero",
+      "fixture_sha256": "478534cbbc94ef647782833a4fe1537fdc3c535b43db52cb91d7b0b2a0710ebd",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "T"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "T",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "sleep-zero",
+      "fixture_sha256": "478534cbbc94ef647782833a4fe1537fdc3c535b43db52cb91d7b0b2a0710ebd",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "T"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "T",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "gc-result-type",
+      "fixture_sha256": "5b7b5764890e36d6c37500f5bbccff57cd81bde1ea24b7b0782f4c9c3d19e2fb",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "FIX"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "FIX",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "gc-result-type",
+      "fixture_sha256": "5b7b5764890e36d6c37500f5bbccff57cd81bde1ea24b7b0782f4c9c3d19e2fb",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 0
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "FIX"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "FIX",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 0,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "time-eager",
+      "fixture_sha256": "f9a834d25fc491f031c8aa0fb23678b8df32187d6323a73642738bfabca2116c",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 8
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "FLOAT"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "FLOAT",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 8,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "time-eager",
+      "fixture_sha256": "f9a834d25fc491f031c8aa0fb23678b8df32187d6323a73642738bfabca2116c",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "WORD",
+          "type": "FIX",
+          "value": 8
+        },
+        "output": "",
+        "result": {
+          "primtype": "ATOM",
+          "type": "ATOM",
+          "value": "FLOAT"
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": "FLOAT",
+            "type": "ATOM",
+            "primtype": "ATOM"
+          },
+          "effect": {
+            "value": 8,
+            "type": "FIX",
+            "primtype": "WORD"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "tail-construction",
+      "fixture_sha256": "7ecc65ad4d23264ad70b743580089fd81650bd597f1e4ed05b935345bd0c5ff2",
       "mode": "loader",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 4
+            }
+          ]
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 3
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 4
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 3,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 4,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": [
+              {
+                "value": 4,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     },
     {
       "id": "tail-construction",
+      "fixture_sha256": "7ecc65ad4d23264ad70b743580089fd81650bd597f1e4ed05b935345bd0c5ff2",
       "mode": "lang",
-      "status": "PASS"
+      "status": "PASS",
+      "actual": {
+        "effect": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 4
+            }
+          ]
+        },
+        "output": "",
+        "result": {
+          "primtype": "LIST",
+          "type": "LIST",
+          "value": [
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 3
+            },
+            {
+              "primtype": "WORD",
+              "type": "FIX",
+              "value": 4
+            }
+          ]
+        }
+      },
+      "expected": {
+        "value": {
+          "result": {
+            "value": [
+              {
+                "value": 3,
+                "type": "FIX",
+                "primtype": "WORD"
+              },
+              {
+                "value": 4,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "effect": {
+            "value": [
+              {
+                "value": 4,
+                "type": "FIX",
+                "primtype": "WORD"
+              }
+            ],
+            "type": "LIST",
+            "primtype": "LIST"
+          },
+          "output": ""
+        },
+        "gap": null,
+        "error": null
+      }
     }
   ]
 }

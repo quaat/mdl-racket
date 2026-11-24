@@ -1,6 +1,31 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "manual_commit": "89707367b951ea79bedc71f51ab213886e0f62ce",
+  "historical_runtime": {
+    "manifest_version": 2,
+    "manifest_sha256": "180468097b091217d0eeafd7b666158721bf153ad860948b3221975376966040",
+    "manual_revision": "89707367b951ea79bedc71f51ab213886e0f62ce",
+    "runtime_revision": "65ec0f4069caa2c0e1590ca7c4d396f9c2209fb2",
+    "runtime_sha256": "a4fc43c6fdcd40c9937f585e4f815d3cd85dcf163305d97c27dae4ba51686440",
+    "runner_revision": "65ec0f4069caa2c0e1590ca7c4d396f9c2209fb2",
+    "runner_sha256": "7cd03e06accc9cfe91cd4f25215292f7807d2da23e2da88e110755f045bf62d9",
+    "toolchain": {
+      "racket": "Welcome to Racket v8.10 [bc].",
+      "python": "3.13.5"
+    },
+    "worker_version": 1
+  },
+  "native_reference": {
+    "manifest_version": 2,
+    "manifest_sha256": "180468097b091217d0eeafd7b666158721bf153ad860948b3221975376966040",
+    "manual_revision": "89707367b951ea79bedc71f51ab213886e0f62ce",
+    "reference_revision": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+    "exe_sha256": "da8472a991a8f2fe109c117cfe00c6207edb5bb8d9033dfe36f1e2d478380f68",
+    "toolchain": {
+      "python": "3.13.5",
+      "machine": "x86_64"
+    }
+  },
   "pages": [
     {
       "page": "00-front-matter",
@@ -5643,7 +5668,9 @@
           }
         }
       ],
-      "issues": [],
+      "issues": [
+        183
+      ],
       "deviation": null,
       "missing_functionality": "operator or reader facility",
       "dependencies": [
@@ -5765,8 +5792,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4872,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4872
         }
       ],
       "test_mentions": [
@@ -5781,7 +5808,6 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-reference.json",
@@ -5833,8 +5859,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4870,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4870
         }
       ],
       "test_mentions": [
@@ -5876,7 +5902,6 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M0/primitives.json",
@@ -6026,8 +6051,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4871,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4871
         }
       ],
       "test_mentions": [
@@ -6111,8 +6136,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4873,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4873
         }
       ],
       "test_mentions": [
@@ -6121,7 +6146,6 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-error-cases.json",
@@ -6164,8 +6188,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4883,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4883
         }
       ],
       "test_mentions": [
@@ -6209,8 +6233,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4884,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4884
         }
       ],
       "test_mentions": [],
@@ -6326,8 +6350,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4895,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4895
         }
       ],
       "test_mentions": [
@@ -6475,8 +6499,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4889,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4889
         }
       ],
       "test_mentions": [
@@ -6585,8 +6609,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4876,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4876
         }
       ],
       "test_mentions": [
@@ -6721,8 +6745,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1892,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1892
         }
       ],
       "test_mentions": [],
@@ -6766,8 +6790,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 608,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 608
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1479
         }
       ],
       "test_mentions": [
@@ -6894,8 +6923,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 639,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 639
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1469
         }
       ],
       "test_mentions": [
@@ -6966,8 +7000,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4769,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4769
         }
       ],
       "test_mentions": [
@@ -7010,8 +7044,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4792,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4792
         }
       ],
       "test_mentions": [
@@ -7146,8 +7180,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4836,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4836
         }
       ],
       "test_mentions": [
@@ -7332,8 +7366,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4807,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4807
         }
       ],
       "test_mentions": [
@@ -7450,8 +7484,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4778,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4778
         }
       ],
       "test_mentions": [
@@ -7600,13 +7634,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1877,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4857
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4857,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1877
         }
       ],
       "test_mentions": [
@@ -7892,8 +7926,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4839,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4839
         }
       ],
       "test_mentions": [
@@ -8492,13 +8526,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1885,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4789
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4789,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1885
         }
       ],
       "test_mentions": [
@@ -8506,7 +8540,6 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-reference.json",
@@ -8544,8 +8577,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4806,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4806
         }
       ],
       "test_mentions": [],
@@ -8608,8 +8641,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4861,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4861
         }
       ],
       "test_mentions": [
@@ -9066,8 +9099,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1882,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1882
         }
       ],
       "test_mentions": [
@@ -9130,8 +9163,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1887,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1887
         }
       ],
       "test_mentions": [],
@@ -9167,8 +9200,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4785,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4785
         }
       ],
       "test_mentions": [
@@ -9303,8 +9336,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4786,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4786
         }
       ],
       "test_mentions": [
@@ -9463,8 +9496,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 638,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 638
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1468
         }
       ],
       "test_mentions": [
@@ -9651,8 +9689,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4812,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4812
         }
       ],
       "test_mentions": [
@@ -9799,8 +9837,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1880,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1880
         }
       ],
       "test_mentions": [],
@@ -9895,8 +9933,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4780,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4780
         }
       ],
       "test_mentions": [
@@ -9914,7 +9952,6 @@
         "tests/structured_type_head_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/atom-props-cases.json",
         "docs/evidence/M2/atom-props-reference.json",
@@ -10020,8 +10057,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 563,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 563
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1487
         }
       ],
       "test_mentions": [
@@ -10076,7 +10118,6 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/bindings-cases.json",
         "docs/evidence/M1/bindings-reference.json",
@@ -10212,8 +10253,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 579,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 579
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1488
         }
       ],
       "test_mentions": [
@@ -10227,7 +10273,6 @@
         "tests/segment_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/indirect-apply-error-cases.json",
         "docs/evidence/M2/indirect-apply-error-reference.json",
@@ -10355,8 +10400,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4830,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4830
         }
       ],
       "test_mentions": [],
@@ -10537,8 +10582,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4770,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4770
         }
       ],
       "test_mentions": [
@@ -10582,8 +10627,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4829,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4829
         }
       ],
       "test_mentions": [],
@@ -10637,8 +10682,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4862,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4862
         }
       ],
       "test_mentions": [
@@ -10745,8 +10790,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4795,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4795
         }
       ],
       "test_mentions": [
@@ -10795,8 +10840,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4818,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4818
         }
       ],
       "test_mentions": [
@@ -10874,8 +10919,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4817,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4817
         }
       ],
       "test_mentions": [
@@ -11024,7 +11069,9 @@
           }
         }
       ],
-      "issues": [],
+      "issues": [
+        184
+      ],
       "deviation": null,
       "missing_functionality": "operator or reader facility",
       "dependencies": [
@@ -11087,8 +11134,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4819,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4819
         }
       ],
       "test_mentions": [
@@ -11218,8 +11265,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4856,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4856
         }
       ],
       "test_mentions": [
@@ -11263,8 +11310,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1880,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1880
         }
       ],
       "test_mentions": [],
@@ -11539,20 +11586,19 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1884,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4787
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4787,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1884
         }
       ],
       "test_mentions": [
         "tests/min_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M3/review/r6-min-float-cases.json",
         "docs/evidence/M3/review/r6-min-float-reference.json"
@@ -11635,8 +11681,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/loader.rkt",
-          "line": 132,
-          "kind": "loader-only operator binding"
+          "kind": "loader-only operator binding",
+          "line": 132
         }
       ],
       "test_mentions": [
@@ -11770,13 +11816,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1884,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4788
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4788,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1884
         }
       ],
       "test_mentions": [
@@ -11832,13 +11878,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1878,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4855
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4855,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1878
         }
       ],
       "test_mentions": [
@@ -11852,7 +11898,6 @@
         "tests/segment_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/macro-cases.json",
         "docs/evidence/M2/macro-error-cases.json",
@@ -11915,8 +11960,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1888,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1888
         }
       ],
       "test_mentions": [],
@@ -12185,13 +12230,18 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1891,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1891
         },
         {
           "file": "mdl/compiler.rkt",
-          "line": 564,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 564
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1486
         }
       ],
       "test_mentions": [
@@ -12333,8 +12383,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4888,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4888
         }
       ],
       "test_mentions": [
@@ -12370,8 +12420,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4887,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4887
         }
       ],
       "test_mentions": [
@@ -12433,8 +12483,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4777,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4777
         }
       ],
       "test_mentions": [
@@ -12537,8 +12587,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4805,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4805
         }
       ],
       "test_mentions": [
@@ -12687,8 +12737,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 623,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 623
         }
       ],
       "test_mentions": [
@@ -12736,8 +12786,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4843,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4843
         }
       ],
       "test_mentions": [
@@ -12755,7 +12805,6 @@
         "tests/unparse_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M2/atom-props-cases.json",
@@ -12869,8 +12918,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4790,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4790
         }
       ],
       "test_mentions": [
@@ -12878,7 +12927,6 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/word-cases.json",
         "docs/evidence/M1/word-reference.json"
@@ -13072,8 +13120,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 614,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 614
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1480
         }
       ],
       "test_mentions": [
@@ -13147,8 +13200,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4781,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4781
         }
       ],
       "test_mentions": [
@@ -13216,13 +13269,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4773,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4773
         },
         {
           "file": "mdl/compiler.rkt",
-          "line": 631,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 631
         }
       ],
       "test_mentions": [
@@ -13307,13 +13360,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1894,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4820
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4820,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1894
         }
       ],
       "test_mentions": [
@@ -13491,8 +13544,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1893,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1893
         }
       ],
       "test_mentions": [],
@@ -13686,8 +13739,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4877,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4877
         }
       ],
       "test_mentions": [
@@ -13895,8 +13948,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4865,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4865
         }
       ],
       "test_mentions": [
@@ -13965,8 +14018,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4828,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4828
         }
       ],
       "test_mentions": [
@@ -14332,8 +14385,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4804,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4804
         }
       ],
       "test_mentions": [
@@ -14570,8 +14623,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4802,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4802
         }
       ],
       "test_mentions": [
@@ -14619,8 +14672,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4800,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4800
         }
       ],
       "test_mentions": [
@@ -14765,8 +14818,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4886,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4886
         }
       ],
       "test_mentions": [
@@ -14800,8 +14853,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4885,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4885
         }
       ],
       "test_mentions": [
@@ -14932,8 +14985,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4837,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4837
         }
       ],
       "test_mentions": [
@@ -14961,7 +15014,6 @@
         "tests/top_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/sequences-cases.json",
         "docs/evidence/M1/sequences-reference.json",
@@ -15024,8 +15076,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4771,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4771
         }
       ],
       "test_mentions": [
@@ -15168,13 +15220,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1878,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4798
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4798,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1878
         }
       ],
       "test_mentions": [
@@ -15805,8 +15857,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4864,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4864
         }
       ],
       "test_mentions": [
@@ -15867,8 +15919,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1886,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1886
         }
       ],
       "test_mentions": [],
@@ -15962,8 +16014,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4796,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4796
         }
       ],
       "test_mentions": [
@@ -16028,8 +16080,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4772,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4772
         }
       ],
       "test_mentions": [
@@ -16079,8 +16131,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1890,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1890
         }
       ],
       "test_mentions": [],
@@ -16147,8 +16199,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4779,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4779
         }
       ],
       "test_mentions": [
@@ -16217,8 +16269,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4831,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4831
         }
       ],
       "test_mentions": [
@@ -16233,7 +16285,6 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/mapf-cases.json",
         "docs/evidence/M2/mapf-control-cases.json",
@@ -16309,8 +16360,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4835,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4835
         }
       ],
       "test_mentions": [
@@ -16356,8 +16407,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4832,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4832
         }
       ],
       "test_mentions": [
@@ -16395,8 +16446,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4833,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4833
         }
       ],
       "test_mentions": [
@@ -16438,8 +16489,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4834,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4834
         }
       ],
       "test_mentions": [
@@ -16482,8 +16533,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4875,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4875
         }
       ],
       "test_mentions": [
@@ -16572,15 +16623,14 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4849,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4849
         }
       ],
       "test_mentions": [
         "tests/member_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M3/member-probe.json"
       ],
@@ -16623,8 +16673,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4844,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4844
         }
       ],
       "test_mentions": [
@@ -16698,8 +16748,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4874,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4874
         }
       ],
       "test_mentions": [
@@ -16745,8 +16795,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4860,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4860
         }
       ],
       "test_mentions": [
@@ -16798,8 +16848,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4882,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4882
         }
       ],
       "test_mentions": [
@@ -16918,8 +16968,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4896,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4896
         }
       ],
       "test_mentions": [
@@ -16966,8 +17016,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4890,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4890
         }
       ],
       "test_mentions": [
@@ -17149,8 +17199,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4784,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4784
         }
       ],
       "test_mentions": [
@@ -17686,8 +17736,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 641,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 641
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1471
         }
       ],
       "test_mentions": [
@@ -17832,8 +17887,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4841,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4841
         }
       ],
       "test_mentions": [
@@ -17996,8 +18051,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1877,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1877
         }
       ],
       "test_mentions": [],
@@ -18029,8 +18084,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4867,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4867
         }
       ],
       "test_mentions": [
@@ -18079,8 +18134,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4821,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4821
         }
       ],
       "test_mentions": [
@@ -18160,8 +18215,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4822,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4822
         }
       ],
       "test_mentions": [
@@ -18239,8 +18294,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4826,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4826
         }
       ],
       "test_mentions": [
@@ -18370,8 +18425,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 640,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 640
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1470
         }
       ],
       "test_mentions": [
@@ -18393,7 +18453,6 @@
         "tests/special_decl_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M0/primitives.json",
         "docs/evidence/M1/false-cases.json",
@@ -18484,8 +18543,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4793,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4793
         }
       ],
       "test_mentions": [
@@ -18763,8 +18822,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4868,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4868
         }
       ],
       "test_mentions": [
@@ -18816,8 +18875,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4782,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4782
         }
       ],
       "test_mentions": [
@@ -18844,7 +18903,6 @@
         "tests/type_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M1/types-cases.json",
         "docs/evidence/M1/types-reference.json",
@@ -18959,8 +19017,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4815,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4815
         }
       ],
       "test_mentions": [
@@ -19031,8 +19089,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4814,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4814
         }
       ],
       "test_mentions": [
@@ -19239,8 +19297,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4809,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4809
         }
       ],
       "test_mentions": [
@@ -19417,8 +19475,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 597,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 597
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1476
         }
       ],
       "test_mentions": [
@@ -19643,8 +19706,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4842,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4842
         }
       ],
       "test_mentions": [
@@ -19683,7 +19746,6 @@
         "tests/unparse_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M0/primitives.json",
@@ -19803,8 +19865,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4791,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4791
         }
       ],
       "test_mentions": [
@@ -19898,8 +19960,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4854,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4854
         }
       ],
       "test_mentions": [
@@ -20036,8 +20098,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4825,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4825
         }
       ],
       "test_mentions": [
@@ -20046,7 +20108,6 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M0/primitives.json",
@@ -20254,8 +20315,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 646,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 646
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1464
         }
       ],
       "test_mentions": [
@@ -20289,8 +20355,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4880,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4880
         }
       ],
       "test_mentions": [
@@ -20554,8 +20620,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4816,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4816
         }
       ],
       "test_mentions": [
@@ -20664,8 +20730,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4866,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4866
         }
       ],
       "test_mentions": [
@@ -20738,8 +20804,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4827,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4827
         }
       ],
       "test_mentions": [
@@ -20784,8 +20850,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 598,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 598
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1477
         }
       ],
       "test_mentions": [
@@ -20848,8 +20919,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4813,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4813
         }
       ],
       "test_mentions": [
@@ -20910,8 +20981,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4838,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4838
         }
       ],
       "test_mentions": [
@@ -21027,8 +21098,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4824,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4824
         }
       ],
       "test_mentions": [
@@ -21198,8 +21269,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 599,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 599
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1478
         }
       ],
       "test_mentions": [
@@ -21309,8 +21385,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4863,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4863
         }
       ],
       "test_mentions": [
@@ -21687,8 +21763,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4823,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4823
         }
       ],
       "test_mentions": [
@@ -21757,8 +21833,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1879,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1879
         }
       ],
       "test_mentions": [],
@@ -21860,13 +21936,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4775,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4775
         },
         {
           "file": "mdl/compiler.rkt",
-          "line": 634,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 634
         }
       ],
       "test_mentions": [
@@ -21910,7 +21986,6 @@
         "tests/unparse_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/L1-properties/native-preflight.json",
         "docs/evidence/M1/bindings-cases.json",
@@ -22050,13 +22125,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4776,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4776
         },
         {
           "file": "mdl/compiler.rkt",
-          "line": 627,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 627
         }
       ],
       "test_mentions": [
@@ -22128,7 +22203,6 @@
         "tests/unwind_raise_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M0/primitives.json",
         "docs/evidence/M1/atoms-cases.json",
@@ -22325,7 +22399,9 @@
           }
         }
       ],
-      "issues": [],
+      "issues": [
+        185
+      ],
       "deviation": null,
       "missing_functionality": "operator or reader facility",
       "dependencies": [
@@ -22381,8 +22457,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4878,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4878
         }
       ],
       "test_mentions": [
@@ -22681,8 +22757,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4869,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4869
         }
       ],
       "test_mentions": [
@@ -22748,7 +22824,9 @@
           }
         }
       ],
-      "issues": [],
+      "issues": [
+        182
+      ],
       "deviation": null,
       "missing_functionality": "operator or reader facility",
       "dependencies": null,
@@ -22960,13 +23038,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1883,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4803
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4803,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1883
         }
       ],
       "test_mentions": [
@@ -23202,8 +23280,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4810,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4810
         }
       ],
       "test_mentions": [
@@ -23458,8 +23536,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4811,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4811
         }
       ],
       "test_mentions": [
@@ -23552,8 +23630,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4879,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4879
         }
       ],
       "test_mentions": [
@@ -23701,8 +23779,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4840,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4840
         }
       ],
       "test_mentions": [
@@ -23838,8 +23916,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1889,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1889
         }
       ],
       "test_mentions": [
@@ -23936,8 +24014,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4767,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4767
         }
       ],
       "test_mentions": [
@@ -23992,7 +24070,6 @@
         "tests/word_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M0/primitives.json",
         "docs/evidence/M1/atoms-cases.json",
@@ -24257,8 +24334,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4768,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4768
         }
       ],
       "test_mentions": [
@@ -24317,8 +24394,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4783,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4783
         }
       ],
       "test_mentions": [
@@ -24793,8 +24870,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4808,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4808
         }
       ],
       "test_mentions": [
@@ -24881,8 +24958,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/compiler.rkt",
-          "line": 618,
-          "kind": "compiler special form"
+          "kind": "compiler special form",
+          "line": 618
+        },
+        {
+          "file": "mdl/runtime/core.rkt",
+          "kind": "interpreted evaluator special form",
+          "line": 1481
         }
       ],
       "test_mentions": [
@@ -24950,8 +25032,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4797,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4797
         }
       ],
       "test_mentions": [
@@ -25036,13 +25118,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1883,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4801
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4801,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1883
         }
       ],
       "test_mentions": [
@@ -25165,8 +25247,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4774,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4774
         }
       ],
       "test_mentions": [
@@ -25251,13 +25333,13 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1881,
-          "kind": "runtime type registration"
+          "kind": "runtime operator binding",
+          "line": 4799
         },
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4799,
-          "kind": "runtime operator binding"
+          "kind": "runtime type registration",
+          "line": 1881
         }
       ],
       "test_mentions": [
@@ -25269,7 +25351,6 @@
         "tests/nth_decl_test.rkt"
       ],
       "native_mentions": [
-        "docs/evidence/L0/native-agreement.json",
         "docs/evidence/L0/native-examples.json",
         "docs/evidence/M2/declaration-pattern-cases.json",
         "docs/evidence/M2/declaration-pattern-reference.json",
@@ -25321,8 +25402,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 1885,
-          "kind": "runtime type registration"
+          "kind": "runtime type registration",
+          "line": 1885
         }
       ],
       "test_mentions": [],
@@ -25417,8 +25498,8 @@
       "implementation_candidates": [
         {
           "file": "mdl/runtime/core.rkt",
-          "line": 4794,
-          "kind": "runtime operator binding"
+          "kind": "runtime operator binding",
+          "line": 4794
         }
       ],
       "test_mentions": [
