@@ -46,18 +46,35 @@ turn).
 
 *Coverage lost by the single-run mode, stated exactly.* For each standard
 prefix k < n this runtime's own reply to an end-of-input empty command at the
-state of turn k is not executed; the reference guarantees the native reply
-there is exactly `Beg pardon?\n>` with no compared field changed (or exactly
-the declared transform), and the runtime executes the same RDCOM empty-input
-path at k = n of every scenario, at every reboot, and mid-run for the empty
-and blank lines of parser-ambiguity. Second, a checkpoint field whose read
+state of turn k is not executed. That turn is not just a reply: after
+`Beg pardon?` RDCOM runs the DEMONS loop (77rooms.mud:642-647), so SWORD-GLOW
+and ROBBER (whose `<PROB 30>` draws RANDOM) run there; FIGHTING and CLOCKER
+do not (PARSE-WON is false). What the reference evidences about the native
+turn differs by scenario. Where `end_checkpoints` were recorded (sword-glow,
+troll-combat, parser-ambiguity, cyclops-room, mirror-bat, strange-passage)
+it shows the reply is exactly `Beg pardon?\n>` and no compared field changed
+(or exactly the declared transform). For house-cellar, mailbox-drop,
+orphan-prompt and top-parser it shows only the reply text: their end
+checkpoint k falls back to the entry checkpoint, so the state half of the
+classification is vacuous there, and their native end-of-input state is
+evidenced only at k = n. No reference records the RANDOM draws of a
+prefix's end-of-input turn. The same RDCOM empty-input branch (`Beg
+pardon?`, 77rooms.mud:641) still runs in this runtime at k = n of every
+scenario, in every reboot, and mid-run for parser-ambiguity's empty (`""`)
+command; its blank command (`"   "`, INPLEN 3) takes the EPARSE branch
+instead (77rooms.mud:620, `Huh?`). Second, a checkpoint field whose read
 evaluates allocating game code is never read mid-run, because the logical
 storage ledger it charges is game-visible (DIVERT-AGC/GC timing, ADR-0044):
 the scenario declares it with `#:end-only-keys` and a `#:turn-checkpoint`
 without it, and it is compared only after end of input (single-run k = n,
 reboots, per-prefix). Today that is `lit` (the game's `LIT?` reaches LFCN,
-which evaluates a FUNCTION form) in house-cellar and parser-ambiguity; any
-other perturbing read fails with kind `run-guard`. Coverage gained: the per-turn
+which evaluates a FUNCTION form) in house-cellar and parser-ambiguity. A read
+at a READSTRING entry that changes the RANDOM state, the storage ledger, the
+session output or the record of signalled MDL errors fails with kind
+`run-guard`; other mutation by a read (interning a new ATOM, game code that
+sets state) is not observed, so checkpoint functions must stay pure reads of
+existing names (as all ten do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
+exist). Coverage gained: the per-turn
 checkpoints at READSTRING entry (the newer per-prefix tests compared only
 end checkpoints) and the one-READSTRING-per-command check.
 
@@ -80,8 +97,10 @@ stage, message, `last_k_reached`, the offset of the first differing byte with
 200 bytes of expected and actual context, and the checkpoint field diffs. A
 passing run removes a stale report of the same scenario and mode.
 
-**Guards and watchdog.** Every run (both modes, the reboots and the
-load-only sections) is guarded: no file write or delete (attributed to the
+**Guards and watchdog.** Every game run (both modes, the reboots and the
+load-only sections) is guarded while the game thread runs; the checkpoint
+reads after a run and the load-only sections' later MDL calls run in the test
+thread, outside the guard, watchdog and fake sleeper, as before the runner: no file write or delete (attributed to the
 turn during which it happened), an empty temporary cwd, unchanged game
 directory hashes, no open RECORD channel, and SLEEP's recording host sleeper
 never called under the fixed clock. A whole-scenario wall-clock limit

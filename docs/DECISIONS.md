@@ -2074,11 +2074,15 @@ epic #163). Evidence: `docs/evidence/M4/SINGLE-RUN-RUNNER.md`.
 - End-of-input tails: prefixes whose native tail is not exactly
   `Beg pardon?\n>` or whose end checkpoint differs from the (declared,
   reference-verified) transform of the entry checkpoint are re-run per
-  prefix automatically. The coverage the single-run mode does not keep is
+  prefix automatically (the state half of this test is evidenced only for
+  scenarios with recorded `end_checkpoints`). After a single-run watchdog
+  stop no reboots run; the timeout is reported with the last k reached. The coverage the single-run mode does not keep is
   stated in TESTING ("M4 scenario runner").
 - Snapshots are taken by the host-only READSTRING observer (ADR-0061); no
-  runtime hook was added. A snapshot must not change the RANDOM state or the
-  logical storage ledger (game-visible, ADR-0044); a checkpoint field whose
+  runtime hook was added. A snapshot must not change the RANDOM state, the
+  logical storage ledger (game-visible, ADR-0044), the session output or the
+  record of signalled MDL errors (checked); other mutation is not observed,
+  so checkpoint functions stay pure reads of existing names. A checkpoint field whose
   read evaluates allocating game code (`LIT?` reaches LFCN, which evaluates a
   FUNCTION form) is read only after end of input (`#:end-only-keys`), never
   mid-run.

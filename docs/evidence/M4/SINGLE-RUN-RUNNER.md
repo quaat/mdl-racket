@@ -68,11 +68,19 @@ READSTRING entry). `end_checkpoints[k]` is the last checkpoint of Dkk, taken
 **Lost coverage (single-run mode only).** For each standard prefix k < n
 (11 + 8 + 9 + 10 + 12 + 21 + 34 + 40 + 36 + 31 = 212 prefixes) this
 runtime's own reply to the end-of-input empty command at the state of turn
-k is not executed. The reference guarantees the native reply there is
+k is not executed, and that turn runs the DEMONS loop after the reply
+(77rooms.mud:642-647: SWORD-GLOW, and ROBBER with a `<PROB 30>` RANDOM
+draw; not FIGHTING or CLOCKER, since PARSE-WON is false). For the six
+scenarios with `end_checkpoints` the reference shows the native reply is
 exactly `Beg pardon?\n>` with no compared field changed (or exactly the
-declared transform). The same RDCOM empty-input path still runs at k = n of
-every scenario, in every reboot, and mid-run for the empty (`""`) and blank
-(`"   "`) commands of parser-ambiguity. `make m4-scenarios-per-prefix` keeps
+declared transform). For house-cellar, mailbox-drop, orphan-prompt and
+top-parser it shows only the reply text (end checkpoint k falls back to the
+entry checkpoint, so the state check is vacuous; their native end-of-input
+state is evidenced only at k = n). No reference records the RANDOM draws of
+a prefix's end-of-input turn. The same `Beg pardon?` branch (77rooms.mud:641)
+still runs at k = n of every scenario, in every reboot, and mid-run for
+parser-ambiguity's empty (`""`) command; its blank command (`"   "`, INPLEN
+3) takes the EPARSE branch (77rooms.mud:620, `Huh?`), not this one. `make m4-scenarios-per-prefix` keeps
 the full per-prefix coverage.
 
 **Lost coverage: allocating reads.** `LIT?` (77rooms.mud:1026) reaches
@@ -227,3 +235,40 @@ Confusion code was copied.
   allocates or draws RANDOM is rejected by the perturbation guard and must be
   declared end-only.
 - CI timing on racket:8.10-bc is not measured here.
+
+## Independent review (2026-11-24)
+
+A read-only independent review of `origin/main...HEAD` independently
+recomputed the prompt counts and the tail classification from the ten
+references, and diffed every migrated test. It found no assertion dropped
+and no path where single-run passes while per-prefix fails, beyond the stated
+lost coverage. Verdict: approve with nits. Changes made in response:
+
+* **Defect: after a single-run watchdog stop, the earliest failing k was wrong.**
+  The reboots below the timed-out turn shared the scenario deadline, so each
+  timed out at once and the smallest was reported. The runner now skips
+  reboots after a single-run timeout and reports the timeout with the last k
+  reached. Checked on troll-combat, whose k = 0 reboot is non-standard:
+  with `M4_SCENARIO_TIMEOUT=5.5` and `5.55`, the fixed runner reports
+  "earliest failing k = 9" and "k = 11" (kind timeout, stage single-run).
+  With the skip disabled, both report "k = 0, stage reboot … after 0
+  READSTRING entries". A timeout after a single run that passed, while the
+  reboots are running, is still reported in the reboot that was running
+  (sword-glow with `M4_SCENARIO_TIMEOUT=5.7`: prefix 0), which is accurate.
+* **The snapshot guard is wider.** A read at a READSTRING entry must also
+  leave the session output and the record of signalled MDL errors unchanged.
+  TESTING.md now says which other mutation is not observed (interning a new
+  ATOM, game code that sets state), and that checkpoint functions must stay
+  pure reads.
+* **Docs corrected.**
+  * Only the six scenarios with `end_checkpoints` evidence the native
+    end-of-input state at k < n.
+  * The skipped end-of-input turn runs the DEMONS loop.
+  * Parser-ambiguity's blank command takes the EPARSE branch, not
+    `Beg pardon?`.
+  * Post-run checkpoint reads run outside the game-thread guard.
+* **A stale divergence report is removed when a scenario starts.** Before,
+  it was removed only when the scenario passed.
+
+Not changed: the boundary race between the worker's `channel-put` and the
+deadline, and `exn?` catching a break during `check-turn`. Both are harmless.

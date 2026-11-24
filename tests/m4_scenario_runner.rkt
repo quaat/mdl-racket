@@ -420,6 +420,10 @@
   (unless (directory-exists? m4-source-root)
     (error 'm4-scenario "pinned source missing: ~a" m4-source-root))
   (define mode (scenario-mode))
+  ;; A report left by an earlier local run never sits beside a new result,
+  ;; including a failure raised before any turn is compared.
+  (let ([stale (build-path (divergence-dir) (format "~a-~a.json" name mode))])
+    (when (file-exists? stale) (delete-file stale)))
   (define scenario-limit (env-seconds "M4_SCENARIO_TIMEOUT" (if (eq? mode 'per-prefix) 3600 900)))
   (define turn-limit (env-seconds "M4_SCENARIO_TURN_TIMEOUT" 120))
   (define started (current-inexact-milliseconds))
@@ -538,19 +542,29 @@
     (define extra-entries '())
     (define (snapshot session output)
       (define out (get-output-string output))
-      (define-values (rng0 ledger0)
-        (values (mdl-session-random-snapshot session) (mdl-session-storage-stats session)))
+      (define-values (rng0 ledger0 errors0)
+        (values (mdl-session-random-snapshot session) (mdl-session-storage-stats session)
+                (length (mdl-session-mdl-errors session))))
       (define cp (with-handlers ([exn:fail? values]) (turn-checkpoint session)))
       (define rng1 (mdl-session-random-snapshot session))
       (define ledger1 (mdl-session-storage-stats session))
-      ;; #f, or what the read changed: RANDOM's state or the logical storage
-      ;; ledger (game-visible through DIVERT-AGC and GC timing, ADR-0044).
+      (define errors1 (length (mdl-session-mdl-errors session)))
+      ;; #f, or what the read changed among what this guard observes: RANDOM's
+      ;; state, the logical storage ledger (game-visible through DIVERT-AGC and
+      ;; GC timing, ADR-0044), the session's output, or its record of signalled
+      ;; MDL errors. Other mutation (e.g. interning a new ATOM, or game code
+      ;; that sets state) is not observed here; checkpoint functions must stay
+      ;; to pure reads of existing names (docs/TESTING.md).
       (define perturbed
         (cond [(not (and (equal? (random36-state-words rng0) (random36-state-words rng1))
                          (= (random36-state-draws rng0) (random36-state-draws rng1))))
                "the RANDOM state"]
               [(not (equal? ledger0 ledger1))
                (format "the storage ledger (~s -> ~s)" ledger0 ledger1)]
+              [(not (= (string-length out) (string-length (get-output-string output))))
+               "the session output"]
+              [(not (= errors0 errors1))
+               (format "the MDL error record (~a -> ~a errors)" errors0 errors1)]
               [else #f]))
       (vector out cp perturbed))
     (define (observer kind k info session output)
@@ -636,8 +650,15 @@
     (printf "~a: single run of ~a commands, ~a READSTRING entries, ~a s\n"
             name n (run-result-entries r) (real->decimal-string (run-result-elapsed r) 1))
     ;; Reboots for the non-standard prefixes below the single run's failure.
+    ;; Not after a single-run watchdog stop: the reboots share the scenario's
+    ;; deadline, so each would time out at once and be misreported as an
+    ;; earlier failing k (independent review); the timeout is reported with
+    ;; the last k reached instead.
     (define limit-k (if single-failure (failure-k single-failure) (add1 n)))
-    (define reboot-ks (filter (lambda (k) (< k limit-k)) (map car reboots)))
+    (define reboot-ks
+      (if (and single-failure (equal? (failure-kind single-failure) "timeout"))
+          '()
+          (filter (lambda (k) (< k limit-k)) (map car reboots))))
     (define reboot-failure
       (for/or ([k (in-list reboot-ks)])
         (check-prefix-run k "reboot (non-standard end-of-input tail)")))
