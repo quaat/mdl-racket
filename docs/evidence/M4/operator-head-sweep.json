@@ -1,0 +1,4051 @@
+{
+ "schema_version": 1,
+ "kind": "m4-operator-head-sweep",
+ "generator": "scripts/sweep_operator_heads.py",
+ "game_dir": ".cache/upstream/mdlzork/mdlzork_771212/patched_confusion",
+ "files": [
+  "77loadall.mud",
+  "run.mud",
+  "81prim.mud",
+  "77defs.mud",
+  "77makstr.mud",
+  "81tell-repl.mud",
+  "77act1.mud",
+  "77act2.mud",
+  "77act3.mud",
+  "77rooms.mud",
+  "77patch.mud",
+  "77np.mud",
+  "78melee.mud",
+  "77dung.mud"
+ ],
+ "file_stats": {
+  "77loadall.mud": {
+   "top_level_objects": 13,
+   "comments": 0
+  },
+  "run.mud": {
+   "top_level_objects": 2,
+   "comments": 0
+  },
+  "81prim.mud": {
+   "top_level_objects": 8,
+   "comments": 0
+  },
+  "77defs.mud": {
+   "top_level_objects": 96,
+   "comments": 121
+  },
+  "77makstr.mud": {
+   "top_level_objects": 27,
+   "comments": 0
+  },
+  "81tell-repl.mud": {
+   "top_level_objects": 43,
+   "comments": 18
+  },
+  "77act1.mud": {
+   "top_level_objects": 145,
+   "comments": 17
+  },
+  "77act2.mud": {
+   "top_level_objects": 60,
+   "comments": 0
+  },
+  "77act3.mud": {
+   "top_level_objects": 31,
+   "comments": 0
+  },
+  "77rooms.mud": {
+   "top_level_objects": 146,
+   "comments": 17
+  },
+  "77patch.mud": {
+   "top_level_objects": 17,
+   "comments": 2
+  },
+  "77np.mud": {
+   "top_level_objects": 33,
+   "comments": 1
+  },
+  "78melee.mud": {
+   "top_level_objects": 37,
+   "comments": 0
+  },
+  "77dung.mud": {
+   "top_level_objects": 573,
+   "comments": 15
+  }
+ },
+ "runtime_name_sources": {
+  "builtin_table": [
+   "*",
+   "+",
+   "-",
+   "/",
+   "0?",
+   "1?",
+   "==?",
+   "=?",
+   "AND?",
+   "ANDB",
+   "APPLY",
+   "ASCII",
+   "ASSIGNED?",
+   "ATOM",
+   "BACK",
+   "BITS",
+   "BLOAT",
+   "BLOCK",
+   "CHTYPE",
+   "CHUTYPE",
+   "CRLF",
+   "DECL?",
+   "DISABLE",
+   "EMPTY?",
+   "ENABLE",
+   "ENDBLOCK",
+   "EQVB",
+   "ERRET",
+   "ERROR",
+   "EVENT",
+   "EXPAND",
+   "FIX",
+   "FLOAT",
+   "FORM",
+   "G=?",
+   "G?",
+   "GASSIGNED?",
+   "GC",
+   "GET",
+   "GETBITS",
+   "GETTIMEDATE",
+   "GUNASSIGN",
+   "GVAL",
+   "HANDLER",
+   "INSERT",
+   "INT-LEVEL",
+   "ISTRING",
+   "IUVECTOR",
+   "IVECTOR",
+   "L=?",
+   "L?",
+   "LENGTH",
+   "LENGTH?",
+   "LIST",
+   "LOOKUP",
+   "LSH",
+   "LVAL",
+   "MANIFEST",
+   "MAPF",
+   "MAPLEAVE",
+   "MAPR",
+   "MAPRET",
+   "MAPSTOP",
+   "MAX",
+   "MEMBER",
+   "MEMQ",
+   "MIN",
+   "MOBLIST",
+   "MOD",
+   "N==?",
+   "N=?",
+   "NEWTYPE",
+   "NTH",
+   "OBLIST?",
+   "OFF",
+   "ON",
+   "OPEN",
+   "ORB",
+   "PNAME",
+   "PRIMTYPE",
+   "PRIN1",
+   "PRINC",
+   "PRINTSTRING",
+   "PUT",
+   "PUTBITS",
+   "PUTREST",
+   "QUIT",
+   "RANDOM",
+   "READSTRING",
+   "REMOVE",
+   "REP",
+   "RESET",
+   "REST",
+   "RESTORE",
+   "ROOT",
+   "SAVE",
+   "SET",
+   "SETG",
+   "SPNAME",
+   "STRING",
+   "SUBSTRUC",
+   "TERPRI",
+   "TOP",
+   "TYPE",
+   "TYPE?",
+   "TYPEPRIM",
+   "UNPARSE",
+   "UTYPE",
+   "UVECTOR",
+   "VALUE",
+   "VECTOR",
+   "XORB"
+  ],
+  "root_internal": [
+   "AGAIN",
+   "AND",
+   "COND",
+   "DEFINE",
+   "DEFMAC",
+   "FLOAD",
+   "FUNCTION",
+   "GDECL",
+   "INCHAN",
+   "INTERRUPTS",
+   "MUDDLE",
+   "NOT",
+   "OR",
+   "OUTCHAN",
+   "PROG",
+   "QUOTE",
+   "REDEFINE",
+   "REPEAT",
+   "RETURN",
+   "T",
+   "UNWIND"
+  ],
+  "compiler_special": [
+   "AGAIN",
+   "AND",
+   "COND",
+   "DEFINE",
+   "DEFMAC",
+   "FUNCTION",
+   "GDECL",
+   "GO",
+   "GVAL",
+   "NOT",
+   "OR",
+   "PROG",
+   "QUOTE",
+   "REPEAT",
+   "RETURN",
+   "SET",
+   "SETG",
+   "UNWIND"
+  ],
+  "loader_subrs": [
+   "FLOAD"
+  ],
+  "confusion_root_count": 240
+ },
+ "summary": {
+  "distinct_operator_names": 380,
+  "by_class": {
+   "builtin": 117,
+   "game": 234,
+   "local": 0,
+   "missing": 24,
+   "missing-not-live": 5
+  },
+  "sites": 9183,
+  "game_defined_names": 708,
+  "computed_setg_sites": 22,
+  "computed_head_sites": 6
+ },
+ "missing": [
+  {
+   "name": "ABS",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 4,
+   "sites": [
+    {
+     "file": "77act1.mud",
+     "line": 949,
+     "col": 40,
+     "kind": "head",
+     "function": "CYCLOPS",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77act1.mud",
+     "line": 951,
+     "col": 21,
+     "kind": "head",
+     "function": "CYCLOPS",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77act1.mud",
+     "line": 1031,
+     "col": 60,
+     "kind": "head",
+     "function": "CYCLOPS-ROOM",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77act1.mud",
+     "line": 1050,
+     "col": 32,
+     "kind": "head",
+     "function": "AOS-SOS",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "ACCESS",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 733,
+     "col": 32,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 741,
+     "col": 25,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "ALLTYPES",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "77act1.mud",
+     "line": 8,
+     "col": 22,
+     "kind": "head",
+     "function": "BLO",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77act1.mud",
+     "line": 8,
+     "col": 38,
+     "kind": "head",
+     "function": "BLO",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "APPLICABLE?",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77defs.mud",
+     "line": 451,
+     "col": 13,
+     "kind": "head",
+     "function": "DA",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "APPLYTYPE",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77act1.mud",
+     "line": 7,
+     "col": 17,
+     "kind": "head",
+     "function": "BLO",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "ARGS",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "81tell-repl.mud",
+     "line": 114,
+     "col": 18,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "CHANNEL",
+   "class": "missing-not-live",
+   "in_confusion_root": true,
+   "live_site_count": 0,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 726,
+     "col": 26,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "CLOSE",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 8,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 351,
+     "col": 21,
+     "kind": "head",
+     "function": "DO-SCRIPT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 353,
+     "col": 21,
+     "kind": "head",
+     "function": "DO-SCRIPT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 370,
+     "col": 11,
+     "kind": "head",
+     "function": "DO-UNSCRIPT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 382,
+     "col": 20,
+     "kind": "head",
+     "function": "DO-SAVE",
+     "context": [
+      "superseded"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 385,
+     "col": 27,
+     "kind": "head",
+     "function": "DO-SAVE",
+     "context": [
+      "superseded"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 735,
+     "col": 25,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 794,
+     "col": 12,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 795,
+     "col": 39,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 983,
+     "col": 47,
+     "kind": "head",
+     "function": "FILE-TO-TTY",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 984,
+     "col": 18,
+     "kind": "head",
+     "function": "FILE-TO-TTY",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "DISMISS",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77act1.mud",
+     "line": 21,
+     "col": 10,
+     "kind": "head",
+     "function": "ILO",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "EVAL",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 3,
+   "sites": [
+    {
+     "file": "81prim.mud",
+     "line": 51,
+     "col": 32,
+     "kind": "head",
+     "function": "NEWSTRUC",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "81prim.mud",
+     "line": 88,
+     "col": 19,
+     "kind": "head",
+     "function": "MAKE-SLOT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77act1.mud",
+     "line": 20,
+     "col": 24,
+     "kind": "head",
+     "function": "ILO",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "EVALTYPE",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77act1.mud",
+     "line": 6,
+     "col": 17,
+     "kind": "head",
+     "function": "BLO",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "FFRAME",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "81tell-repl.mud",
+     "line": 110,
+     "col": 31,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "81tell-repl.mud",
+     "line": 117,
+     "col": 16,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "FIELD",
+   "class": "missing",
+   "in_confusion_root": false,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 119,
+     "col": 40,
+     "kind": "head",
+     "function": "ITS-GET-NAME",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "FILE-LENGTH",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 732,
+     "col": 45,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 970,
+     "col": 33,
+     "kind": "head",
+     "function": "FILE-TO-TTY",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "FUNCT",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 3,
+   "sites": [
+    {
+     "file": "81tell-repl.mud",
+     "line": 112,
+     "col": 26,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "81tell-repl.mud",
+     "line": 113,
+     "col": 18,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "81tell-repl.mud",
+     "line": 116,
+     "col": 17,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "IMAGE",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77act2.mud",
+     "line": 57,
+     "col": 10,
+     "kind": "head",
+     "function": "FWEEP",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "IPC-OFF",
+   "class": "missing",
+   "in_confusion_root": false,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 57,
+     "col": 31,
+     "kind": "applied-gval",
+     "function": "SAVE-IT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77patch.mud",
+     "line": 39,
+     "col": 19,
+     "kind": "applied-gval",
+     "function": "START-ZORK",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "IPC-ON",
+   "class": "missing",
+   "in_confusion_root": false,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 58,
+     "col": 31,
+     "kind": "applied-gval",
+     "function": "SAVE-IT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77patch.mud",
+     "line": 40,
+     "col": 19,
+     "kind": "applied-gval",
+     "function": "START-ZORK",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "PARSE",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "77act1.mud",
+     "line": 20,
+     "col": 30,
+     "kind": "head",
+     "function": "ILO",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77np.mud",
+     "line": 131,
+     "col": 19,
+     "kind": "head",
+     "function": "SP",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "PRINT",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 4,
+   "sites": [
+    {
+     "file": "81prim.mud",
+     "line": 54,
+     "col": 43,
+     "kind": "head",
+     "function": "NEWSTRUC",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "81tell-repl.mud",
+     "line": 113,
+     "col": 11,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "81tell-repl.mud",
+     "line": 114,
+     "col": 11,
+     "kind": "head",
+     "function": "STACKDUMP",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 251,
+     "col": 47,
+     "kind": "head",
+     "function": "HANDLE",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "RESTORE-GAME",
+   "class": "missing-not-live",
+   "in_confusion_root": false,
+   "live_site_count": 0,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 413,
+     "col": 25,
+     "kind": "head",
+     "function": "DO-RESTORE",
+     "context": [
+      "superseded"
+     ],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "SAVE-GAME",
+   "class": "missing-not-live",
+   "in_confusion_root": false,
+   "live_site_count": 0,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 397,
+     "col": 25,
+     "kind": "head",
+     "function": "DO-SAVE",
+     "context": [
+      "superseded"
+     ],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "SLEEP",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 3,
+   "sites": [
+    {
+     "file": "77act2.mud",
+     "line": 58,
+     "col": 24,
+     "kind": "head",
+     "function": "FWEEP",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 740,
+     "col": 34,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 746,
+     "col": 25,
+     "kind": "head",
+     "function": "RECORD",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "SNAME",
+   "class": "missing",
+   "in_confusion_root": true,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 22,
+     "col": 17,
+     "kind": "head",
+     "function": "SAVE-IT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 410,
+     "col": 25,
+     "kind": "head",
+     "function": "DO-RESTORE",
+     "context": [
+      "superseded"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 441,
+     "col": 35,
+     "kind": "head",
+     "function": "DO-RESTORE",
+     "context": [
+      "superseded"
+     ],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "SPECIAL",
+   "class": "missing-not-live",
+   "in_confusion_root": false,
+   "live_site_count": 0,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 189,
+     "col": 43,
+     "kind": "head",
+     "function": "PLAY-TIME",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77rooms.mud",
+     "line": 411,
+     "col": 46,
+     "kind": "head",
+     "function": "DO-RESTORE",
+     "context": [
+      "decl",
+      "superseded"
+     ],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "SUBSTITUTE",
+   "class": "missing",
+   "in_confusion_root": false,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77act1.mud",
+     "line": 9,
+     "col": 17,
+     "kind": "head",
+     "function": "BLO",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "TUPLE",
+   "class": "missing-not-live",
+   "in_confusion_root": true,
+   "live_site_count": 0,
+   "sites": [
+    {
+     "file": "81prim.mud",
+     "line": 22,
+     "col": 22,
+     "kind": "head",
+     "function": "FLAGWORD",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77defs.mud",
+     "line": 354,
+     "col": 18,
+     "kind": "head",
+     "function": "FLUSH-OBJ",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 11,
+     "col": 18,
+     "kind": "head",
+     "function": "CONS-OBJ",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 31,
+     "col": 25,
+     "kind": "head",
+     "function": "EXIT",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 135,
+     "col": 37,
+     "kind": "head",
+     "function": "ADD-ACTION",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 140,
+     "col": 19,
+     "kind": "head",
+     "function": "ADD-DIRECTIONS",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 146,
+     "col": 43,
+     "kind": "head",
+     "function": "DSYNONYM",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 154,
+     "col": 34,
+     "kind": "head",
+     "function": "VSYNONYM",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 172,
+     "col": 21,
+     "kind": "head",
+     "function": "ADD-BUZZ",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 180,
+     "col": 31,
+     "kind": "head",
+     "function": "ADD-ZORK",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    },
+    {
+     "file": "77makstr.mud",
+     "line": 201,
+     "col": 34,
+     "kind": "head",
+     "function": "SYNONYM",
+     "context": [
+      "decl"
+     ],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "UNAME",
+   "class": "missing",
+   "in_confusion_root": false,
+   "live_site_count": 2,
+   "sites": [
+    {
+     "file": "77rooms.mud",
+     "line": 58,
+     "col": 39,
+     "kind": "head",
+     "function": "SAVE-IT",
+     "context": [],
+     "local_formal": false
+    },
+    {
+     "file": "77patch.mud",
+     "line": 40,
+     "col": 27,
+     "kind": "head",
+     "function": "START-ZORK",
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  },
+  {
+   "name": "USE",
+   "class": "missing",
+   "in_confusion_root": false,
+   "live_site_count": 1,
+   "sites": [
+    {
+     "file": "77defs.mud",
+     "line": 1,
+     "col": 24,
+     "kind": "head",
+     "function": null,
+     "context": [],
+     "local_formal": false
+    }
+   ]
+  }
+ ],
+ "superseded_definitions": [
+  {
+   "name": "DO-RESTORE",
+   "file": "77rooms.mud",
+   "line": 404,
+   "superseded_by": "77patch.mud:13"
+  },
+  {
+   "name": "DO-SAVE",
+   "file": "77rooms.mud",
+   "line": 377,
+   "superseded_by": "77patch.mud:9"
+  }
+ ],
+ "computed_heads": [
+  {
+   "file": "77defs.mud",
+   "line": 68,
+   "head_kind": "form",
+   "function": null,
+   "context": [
+    "decl",
+    "quoted"
+   ]
+  },
+  {
+   "file": "77defs.mud",
+   "line": 97,
+   "head_kind": "form",
+   "function": null,
+   "context": [
+    "decl",
+    "quoted"
+   ]
+  },
+  {
+   "file": "77defs.mud",
+   "line": 302,
+   "head_kind": "form",
+   "function": "COND-OPEN",
+   "context": [
+    "decl"
+   ]
+  },
+  {
+   "file": "77defs.mud",
+   "line": 307,
+   "head_kind": "form",
+   "function": "COND-CLOSE",
+   "context": [
+    "decl"
+   ]
+  },
+  {
+   "file": "77act2.mud",
+   "line": 427,
+   "head_kind": "form",
+   "function": "BALLOON",
+   "context": [
+    "decl"
+   ]
+  },
+  {
+   "file": "77rooms.mud",
+   "line": 1061,
+   "head_kind": "form",
+   "function": "WALK",
+   "context": [
+    "decl"
+   ]
+  }
+ ],
+ "strings_as_code": [
+  {
+   "name": "EVAL",
+   "file": "81prim.mud",
+   "line": 51,
+   "function": "NEWSTRUC",
+   "argument": "form"
+  },
+  {
+   "name": "EVAL",
+   "file": "81prim.mud",
+   "line": 88,
+   "function": "MAKE-SLOT",
+   "argument": "form"
+  },
+  {
+   "name": "EVAL",
+   "file": "77act1.mud",
+   "line": 20,
+   "function": "ILO",
+   "argument": "form"
+  },
+  {
+   "name": "PARSE",
+   "file": "77act1.mud",
+   "line": 20,
+   "function": "ILO",
+   "argument": "lval"
+  },
+  {
+   "name": "PARSE",
+   "file": "77np.mud",
+   "line": 131,
+   "function": "SP",
+   "argument": "form"
+  }
+ ],
+ "game_defined_kinds": {
+  "1ADD-ACTION": [
+   "DEFINE"
+  ],
+  "AACTION": [
+   "NEWSTRUC-field"
+  ],
+  "AADD-ACTION": [
+   "DEFINE"
+  ],
+  "ACT-HACK": [
+   "DEFINE"
+  ],
+  "ACTIONS": [
+   "SETG"
+  ],
+  "ACTORBIT": [
+   "FLAGWORD-bit"
+  ],
+  "ACTORS": [
+   "SETG"
+  ],
+  "ADD-ABBREV": [
+   "DEFINE"
+  ],
+  "ADD-ACTION": [
+   "DEFINE"
+  ],
+  "ADD-ACTOR": [
+   "DEFINE"
+  ],
+  "ADD-BUZZ": [
+   "DEFINE"
+  ],
+  "ADD-DEMON": [
+   "DEFINE"
+  ],
+  "ADD-DESC": [
+   "DEFINE"
+  ],
+  "ADD-DIRECTIONS": [
+   "DEFINE"
+  ],
+  "ADD-MELEE": [
+   "DEFINE"
+  ],
+  "ADD-OBJECT": [
+   "DEFINE"
+  ],
+  "ADD-STAR": [
+   "DEFINE"
+  ],
+  "ADD-WORD": [
+   "DEFINE"
+  ],
+  "ADD-ZORK": [
+   "DEFINE"
+  ],
+  "AFLAGS": [
+   "NEWSTRUC-field"
+  ],
+  "ALARM": [
+   "DEFINE"
+  ],
+  "ALT-FLAG": [
+   "SETG"
+  ],
+  "ANYTHING": [
+   "DEFINE"
+  ],
+  "AOBJ": [
+   "NEWSTRUC-field"
+  ],
+  "AOBJECT": [
+   "DEFINE"
+  ],
+  "AOBJS": [
+   "NEWSTRUC-field"
+  ],
+  "AOS-SOS": [
+   "DEFINE"
+  ],
+  "APPLY-OBJECT": [
+   "DEFMAC"
+  ],
+  "APPLY-RANDOM": [
+   "DEFMAC"
+  ],
+  "ARAND": [
+   "NEWSTRUC-field"
+  ],
+  "ARMED?": [
+   "DEFINE"
+  ],
+  "AROOM": [
+   "NEWSTRUC-field"
+  ],
+  "ASCORE": [
+   "NEWSTRUC-field"
+  ],
+  "ASTAGGERED": [
+   "FLAGWORD-bit"
+  ],
+  "ASTRENGTH": [
+   "NEWSTRUC-field"
+  ],
+  "ATMFIX": [
+   "DEFINE"
+  ],
+  "ATMFIX1": [
+   "DEFINE"
+  ],
+  "ATTACKER": [
+   "DEFINE"
+  ],
+  "AVEHICLE": [
+   "NEWSTRUC-field"
+  ],
+  "BACKER": [
+   "DEFINE"
+  ],
+  "BALLOON": [
+   "DEFINE"
+  ],
+  "BAT-DROPS": [
+   "PSETG"
+  ],
+  "BATS-ROOM": [
+   "DEFINE"
+  ],
+  "BDIGS": [
+   "PSETG"
+  ],
+  "BEACH-ROOM": [
+   "DEFINE"
+  ],
+  "BIGFIX": [
+   "SETG"
+  ],
+  "BINF": [
+   "SETG"
+  ],
+  "BLAB": [
+   "SETG"
+  ],
+  "BLACK-BOOK": [
+   "DEFINE"
+  ],
+  "BLAST": [
+   "DEFINE"
+  ],
+  "BLO": [
+   "DEFINE"
+  ],
+  "BLOC": [
+   "SETG"
+  ],
+  "BLOW": [
+   "DEFINE"
+  ],
+  "BOARD": [
+   "DEFINE"
+  ],
+  "BODY-FUNCTION": [
+   "DEFINE"
+  ],
+  "BOLT-FUNCTION": [
+   "DEFINE"
+  ],
+  "BOOM-ROOM": [
+   "DEFINE"
+  ],
+  "BOTTLE-FUNCTION": [
+   "DEFINE"
+  ],
+  "BREAKS": [
+   "PSETG"
+  ],
+  "BRICK-BOOM": [
+   "PSETG"
+  ],
+  "BRICK-FUNCTION": [
+   "DEFINE"
+  ],
+  "BRIEF": [
+   "DEFINE",
+   "SETG"
+  ],
+  "BRKS": [
+   "PSETG"
+  ],
+  "BRUSH": [
+   "DEFINE"
+  ],
+  "BTIE": [
+   "SETG"
+  ],
+  "BUCKET": [
+   "DEFINE"
+  ],
+  "BUCKET-TOP": [
+   "SETG"
+  ],
+  "BUOY-FLAG": [
+   "SETG"
+  ],
+  "BURNABLE?": [
+   "DEFMAC"
+  ],
+  "BURNBIT": [
+   "FLAGWORD-bit"
+  ],
+  "BURNER": [
+   "DEFINE"
+  ],
+  "BURNUP": [
+   "DEFINE"
+  ],
+  "BURNUP-INT": [
+   "SETG"
+  ],
+  "BUTSTR": [
+   "PSETG"
+  ],
+  "BUTTONS": [
+   "DEFINE"
+  ],
+  "CACTION": [
+   "NEWSTRUC-field"
+  ],
+  "CAGE-SOLVE": [
+   "SETG"
+  ],
+  "CAGE-TOP": [
+   "SETG"
+  ],
+  "CAGED-ROOM": [
+   "DEFINE"
+  ],
+  "CAKE-FUNCTION": [
+   "DEFINE"
+  ],
+  "CAN-TAKE?": [
+   "DEFMAC"
+  ],
+  "CANDLE-TELLS": [
+   "PSETG"
+  ],
+  "CANDLE-TICKS": [
+   "PSETG"
+  ],
+  "CANDLES": [
+   "DEFINE"
+  ],
+  "CAROUSEL-EXIT": [
+   "DEFINE"
+  ],
+  "CAROUSEL-FLIP": [
+   "SETG"
+  ],
+  "CAROUSEL-OUT": [
+   "DEFINE"
+  ],
+  "CAROUSEL-ROOM": [
+   "DEFINE"
+  ],
+  "CAROUSEL-ZOOM": [
+   "SETG"
+  ],
+  "CAVE2-ROOM": [
+   "DEFINE"
+  ],
+  "CDIGS": [
+   "PSETG"
+  ],
+  "CDIMMER": [
+   "PSETG"
+  ],
+  "CELLAR": [
+   "DEFINE"
+  ],
+  "CEVENT": [
+   "DEFINE"
+  ],
+  "CEXIT": [
+   "DEFINE"
+  ],
+  "CFLAG": [
+   "NEWSTRUC-field"
+  ],
+  "CHALICE": [
+   "DEFINE"
+  ],
+  "CHIMNEY-FUNCTION": [
+   "DEFINE"
+  ],
+  "CHOMP": [
+   "DEFINE"
+  ],
+  "CID": [
+   "NEWSTRUC-field"
+  ],
+  "CLEARING": [
+   "DEFINE"
+  ],
+  "CLIFF-FUNCTION": [
+   "DEFINE"
+  ],
+  "CLIFFS": [
+   "PSETG"
+  ],
+  "CLOCK-DEMON": [
+   "DEFINE"
+  ],
+  "CLOCK-DISABLE": [
+   "DEFMAC"
+  ],
+  "CLOCK-ENABLE": [
+   "DEFMAC"
+  ],
+  "CLOCK-INT": [
+   "DEFINE"
+  ],
+  "CLOCKER": [
+   "SETG"
+  ],
+  "CLOSER": [
+   "DEFINE"
+  ],
+  "CMACH-ROOM": [
+   "DEFINE"
+  ],
+  "CNTPRS": [
+   "PSETG"
+  ],
+  "CNTUSE": [
+   "PSETG"
+  ],
+  "COFFIN-CURE": [
+   "DEFINE"
+  ],
+  "COKE-BOTTLES": [
+   "DEFINE"
+  ],
+  "COMMAND": [
+   "DEFINE"
+  ],
+  "COND-CLOSE": [
+   "DEFMAC"
+  ],
+  "COND-OPEN": [
+   "DEFMAC"
+  ],
+  "CONS-OBJ": [
+   "DEFINE"
+  ],
+  "CONTBIT": [
+   "FLAGWORD-bit"
+  ],
+  "CONTIN": [
+   "DEFINE"
+  ],
+  "CRAIN": [
+   "SETG"
+  ],
+  "CRUSHED": [
+   "PSETG"
+  ],
+  "CTICK": [
+   "NEWSTRUC-field"
+  ],
+  "CTRL-S": [
+   "DEFINE"
+  ],
+  "CURE-CLOCK": [
+   "DEFINE"
+  ],
+  "CURE-WAIT": [
+   "SETG"
+  ],
+  "CURRENT": [
+   "PSETG"
+  ],
+  "CURSES": [
+   "DEFINE"
+  ],
+  "CXACTION": [
+   "NEWSTRUC-field"
+  ],
+  "CXFLAG": [
+   "NEWSTRUC-field"
+  ],
+  "CXGNOME": [
+   "SETG"
+  ],
+  "CXROOM": [
+   "NEWSTRUC-field"
+  ],
+  "CXSTR": [
+   "NEWSTRUC-field"
+  ],
+  "CYCLOMAD": [
+   "PSETG"
+  ],
+  "CYCLOPS": [
+   "DEFINE"
+  ],
+  "CYCLOPS-FLAG": [
+   "SETG"
+  ],
+  "CYCLOPS-MELEE": [
+   "PSETG"
+  ],
+  "CYCLOPS-ROOM": [
+   "DEFINE"
+  ],
+  "DA": [
+   "DEFINE"
+  ],
+  "DAM-ROOM": [
+   "DEFINE"
+  ],
+  "DBG": [
+   "SETG"
+  ],
+  "DBOAT-FUNCTION": [
+   "DEFINE"
+  ],
+  "DDOOR-FUNCTION": [
+   "DEFINE"
+  ],
+  "DEADEND": [
+   "PSETG"
+  ],
+  "DEATHS": [
+   "SETG"
+  ],
+  "DECLINE-AND-FALL": [
+   "DEFINE"
+  ],
+  "DEF1": [
+   "PSETG"
+  ],
+  "DEF1-RES": [
+   "PSETG"
+  ],
+  "DEF2-RES": [
+   "PSETG"
+  ],
+  "DEF2A": [
+   "PSETG"
+  ],
+  "DEF2B": [
+   "PSETG"
+  ],
+  "DEF3-RES": [
+   "PSETG"
+  ],
+  "DEF3A": [
+   "PSETG"
+  ],
+  "DEF3B": [
+   "PSETG"
+  ],
+  "DEF3C": [
+   "PSETG"
+  ],
+  "DEFLATE": [
+   "SETG"
+  ],
+  "DEFLATER": [
+   "DEFINE"
+  ],
+  "DEMONS": [
+   "SETG"
+  ],
+  "DESCRIBABLE?": [
+   "DEFMAC"
+  ],
+  "DEV": [
+   "SETG"
+  ],
+  "DIAGNOSE": [
+   "DEFINE"
+  ],
+  "DIGGER": [
+   "DEFINE"
+  ],
+  "DIMMER": [
+   "PSETG"
+  ],
+  "DIRECTIONS": [
+   "SETG"
+  ],
+  "DISPATCH": [
+   "DEFINE"
+  ],
+  "DIVERT-AMT": [
+   "SETG"
+  ],
+  "DIVERT-CNT": [
+   "SETG"
+  ],
+  "DIVERT-FCN": [
+   "DEFINE"
+  ],
+  "DIVERT-HAND": [
+   "SETG"
+  ],
+  "DIVERT-INC": [
+   "SETG"
+  ],
+  "DIVERT-INT": [
+   "SETG"
+  ],
+  "DIVERT-LMT": [
+   "SETG"
+  ],
+  "DIVERT-MAX": [
+   "SETG"
+  ],
+  "DO-RESTORE": [
+   "DEFINE"
+  ],
+  "DO-SAVE": [
+   "DEFINE"
+  ],
+  "DO-SCRIPT": [
+   "DEFINE"
+  ],
+  "DO-UNSCRIPT": [
+   "DEFINE"
+  ],
+  "DOME-FLAG": [
+   "SETG"
+  ],
+  "DOME-ROOM": [
+   "DEFINE"
+  ],
+  "DOOR?": [
+   "DEFMAC"
+  ],
+  "DOORBIT": [
+   "FLAGWORD-bit"
+  ],
+  "DOORMUNGS": [
+   "PSETG"
+  ],
+  "DOORSTR": [
+   "PSETG"
+  ],
+  "DRINKABLE?": [
+   "DEFMAC"
+  ],
+  "DRINKBIT": [
+   "FLAGWORD-bit"
+  ],
+  "DROP-OBJECT": [
+   "DEFMAC"
+  ],
+  "DROPPER": [
+   "DEFINE"
+  ],
+  "DROWNINGS": [
+   "PSETG"
+  ],
+  "DSKDATE": [
+   "DEFINE"
+  ],
+  "DSYNONYM": [
+   "DEFINE"
+  ],
+  "DUMBWAITER": [
+   "DEFINE"
+  ],
+  "DUMMY": [
+   "PSETG"
+  ],
+  "DUNGEON": [
+   "DEFINE"
+  ],
+  "EAST-HOUSE": [
+   "DEFINE"
+  ],
+  "EAT": [
+   "DEFINE"
+  ],
+  "EATME-FUNCTION": [
+   "DEFINE"
+  ],
+  "ECHO-FLAG": [
+   "SETG"
+  ],
+  "ECHO-ROOM": [
+   "DEFINE"
+  ],
+  "ECHO-ROOM-BIT": [
+   "FLAGWORD-bit"
+  ],
+  "EDIBLE?": [
+   "DEFMAC"
+  ],
+  "EGYPT-FLAG": [
+   "SETG"
+  ],
+  "EMPTY-HANDED": [
+   "SETG"
+  ],
+  "EPARSE": [
+   "DEFINE"
+  ],
+  "ERRH": [
+   "SETG"
+  ],
+  "EVARG": [
+   "SETG"
+  ],
+  "EVERYTHING": [
+   "DEFINE"
+  ],
+  "EWALLS": [
+   "PSETG"
+  ],
+  "EXCRUCIATINGLY-UNTASTEFUL-CODE": [
+   "DEFINE"
+  ],
+  "EXIT": [
+   "DEFINE"
+  ],
+  "EXORCISE": [
+   "DEFINE"
+  ],
+  "FALLS-ROOM": [
+   "DEFINE"
+  ],
+  "FIGHT-DEMON": [
+   "SETG"
+  ],
+  "FIGHT-STRENGTH": [
+   "DEFINE"
+  ],
+  "FIGHTBIT": [
+   "FLAGWORD-bit"
+  ],
+  "FIGHTING": [
+   "DEFINE"
+  ],
+  "FIGHTING?": [
+   "DEFMAC"
+  ],
+  "FILE-TO-TTY": [
+   "DEFINE"
+  ],
+  "FILL": [
+   "DEFINE"
+  ],
+  "FIND": [
+   "DEFINE"
+  ],
+  "FIND-FROB": [
+   "DEFINE"
+  ],
+  "FIND-OBJ": [
+   "DEFINE"
+  ],
+  "FIND-PREP": [
+   "DEFINE"
+  ],
+  "FIND-ROOM": [
+   "DEFINE"
+  ],
+  "FINDMEBIT": [
+   "FLAGWORD-bit"
+  ],
+  "FINISH": [
+   "DEFINE"
+  ],
+  "FIXSTR": [
+   "DEFINE"
+  ],
+  "FLAG-NAMES": [
+   "PSETG"
+  ],
+  "FLAGWORD": [
+   "DEFINE"
+  ],
+  "FLAMEBIT": [
+   "FLAGWORD-bit"
+  ],
+  "FLAMING?": [
+   "DEFMAC"
+  ],
+  "FLASK-FUNCTION": [
+   "DEFINE"
+  ],
+  "FLUSH-ME": [
+   "DEFINE"
+  ],
+  "FLUSH-OBJ": [
+   "DEFINE"
+  ],
+  "FLY-ME": [
+   "DEFINE"
+  ],
+  "FOODBIT": [
+   "FLAGWORD-bit"
+  ],
+  "FOOSTR": [
+   "DEFINE"
+  ],
+  "FORDES": [
+   "PSETG"
+  ],
+  "FOREST": [
+   "PSETG"
+  ],
+  "FROB-LOTS": [
+   "DEFINE"
+  ],
+  "FROBOZZ": [
+   "DEFINE"
+  ],
+  "FUNCTION-PRINT": [
+   "DEFINE"
+  ],
+  "FUSE-FUNCTION": [
+   "DEFINE"
+  ],
+  "FWEEP": [
+   "DEFINE"
+  ],
+  "FWIM": [
+   "DEFINE"
+  ],
+  "GATE-FLAG": [
+   "SETG"
+  ],
+  "GC-FCN": [
+   "DEFINE"
+  ],
+  "GC-HAND": [
+   "SETG"
+  ],
+  "GC-INT": [
+   "SETG"
+  ],
+  "GERONIMO": [
+   "DEFINE"
+  ],
+  "GET-ATOM": [
+   "DEFINE"
+  ],
+  "GET-DEMON": [
+   "DEFINE"
+  ],
+  "GET-NAME": [
+   "DEFINE"
+  ],
+  "GET-OBJECT": [
+   "DEFINE"
+  ],
+  "GET-TIME": [
+   "DEFINE"
+  ],
+  "GETSYS": [
+   "DEFINE"
+  ],
+  "GHOST-FUNCTION": [
+   "DEFINE"
+  ],
+  "GLACIER": [
+   "DEFINE"
+  ],
+  "GLACIER-FLAG": [
+   "SETG"
+  ],
+  "GLACIER-ROOM": [
+   "DEFINE"
+  ],
+  "GLADESC": [
+   "PSETG"
+  ],
+  "GNOME-DOOR": [
+   "SETG"
+  ],
+  "GNOME-FLAG": [
+   "SETG"
+  ],
+  "GNOME-FUNCTION": [
+   "DEFINE"
+  ],
+  "GOTO": [
+   "DEFINE"
+  ],
+  "GRANITE": [
+   "DEFINE"
+  ],
+  "GRAT1-FUNCTION": [
+   "DEFINE"
+  ],
+  "GRAT2-FUNCTION": [
+   "DEFINE"
+  ],
+  "GREEK-TO-ME": [
+   "PSETG"
+  ],
+  "GRUE-FUNCTION": [
+   "DEFINE"
+  ],
+  "GRUNLOCK": [
+   "SETG"
+  ],
+  "GUNK-FUNCTION": [
+   "DEFINE"
+  ],
+  "GWIM": [
+   "DEFINE"
+  ],
+  "GWIM-SLOT": [
+   "DEFINE"
+  ],
+  "GXUNAME": [
+   "DEFINE"
+  ],
+  "HACK-HACK": [
+   "DEFINE"
+  ],
+  "HACKABLE?": [
+   "DEFINE"
+  ],
+  "HACTION": [
+   "NEWSTRUC-field"
+  ],
+  "HANDLE": [
+   "DEFINE"
+  ],
+  "HEAD-FUNCTION": [
+   "DEFINE"
+  ],
+  "HELLO": [
+   "DEFINE"
+  ],
+  "HELLOS": [
+   "PSETG"
+  ],
+  "HELP": [
+   "DEFINE"
+  ],
+  "HERE": [
+   "SETG"
+  ],
+  "HESITATE": [
+   "MSETG"
+  ],
+  "HFLAG": [
+   "NEWSTRUC-field"
+  ],
+  "HO-HUM": [
+   "PSETG"
+  ],
+  "HOBJ": [
+   "NEWSTRUC-field"
+  ],
+  "HOBJS": [
+   "NEWSTRUC-field"
+  ],
+  "HROOM": [
+   "NEWSTRUC-field"
+  ],
+  "HROOMS": [
+   "NEWSTRUC-field"
+  ],
+  "HS": [
+   "SETG"
+  ],
+  "IBOAT-FUNCTION": [
+   "DEFINE"
+  ],
+  "ICEBLAST": [
+   "PSETG"
+  ],
+  "ICEBOOM": [
+   "DEFINE"
+  ],
+  "ILO": [
+   "DEFINE"
+  ],
+  "INBUF": [
+   "SETG"
+  ],
+  "INDENTSTR": [
+   "PSETG"
+  ],
+  "INFESTED?": [
+   "DEFINE"
+  ],
+  "INFLATER": [
+   "DEFINE"
+  ],
+  "INFO": [
+   "DEFINE"
+  ],
+  "INSERT-OBJECT": [
+   "DEFMAC"
+  ],
+  "INTIME": [
+   "SETG"
+  ],
+  "INVENT": [
+   "DEFINE"
+  ],
+  "ITS-GET-NAME": [
+   "DEFINE"
+  ],
+  "JARGON": [
+   "DEFINE"
+  ],
+  "JIGS-UP": [
+   "DEFINE"
+  ],
+  "JUMPLOSS": [
+   "PSETG"
+  ],
+  "KICKER": [
+   "DEFINE"
+  ],
+  "KILL-OBJ": [
+   "DEFINE"
+  ],
+  "KILLED": [
+   "MSETG"
+  ],
+  "KILLER": [
+   "DEFINE"
+  ],
+  "KITCHEN": [
+   "DEFINE"
+  ],
+  "KNIFE-MELEE": [
+   "PSETG"
+  ],
+  "KNOCK": [
+   "DEFINE"
+  ],
+  "LAMP-OFF": [
+   "DEFINE"
+  ],
+  "LAMP-ON": [
+   "DEFINE"
+  ],
+  "LAMP-TELLS": [
+   "PSETG"
+  ],
+  "LAMP-TICKS": [
+   "PSETG"
+  ],
+  "LANTERN": [
+   "DEFINE"
+  ],
+  "LEAF-PILE": [
+   "DEFINE"
+  ],
+  "LEAK-FUNCTION": [
+   "DEFINE"
+  ],
+  "LEAPER": [
+   "DEFINE"
+  ],
+  "LEDGE-FUNCTION": [
+   "DEFINE"
+  ],
+  "LEDGE-MUNG": [
+   "DEFINE"
+  ],
+  "LEX": [
+   "DEFINE"
+  ],
+  "LEXV": [
+   "SETG"
+  ],
+  "LFCN": [
+   "DEFINE"
+  ],
+  "LIGHT-INT": [
+   "DEFINE"
+  ],
+  "LIGHT-LOAD": [
+   "SETG"
+  ],
+  "LIGHT-SHAFT": [
+   "SETG"
+  ],
+  "LIGHT-SOURCE": [
+   "DEFINE"
+  ],
+  "LIGHT-WOUND": [
+   "MSETG"
+  ],
+  "LIGHTBIT": [
+   "FLAGWORD-bit"
+  ],
+  "LIT?": [
+   "DEFINE"
+  ],
+  "LIVING-ROOM": [
+   "DEFINE"
+  ],
+  "LLD-FLAG": [
+   "SETG"
+  ],
+  "LLD-ROOM": [
+   "DEFINE"
+  ],
+  "LLD2-ROOM": [
+   "DEFINE"
+  ],
+  "LOAD-MAX": [
+   "SETG"
+  ],
+  "LOCKER": [
+   "DEFINE"
+  ],
+  "LONG-DESC-OBJ": [
+   "DEFINE"
+  ],
+  "LONG-TELL": [
+   "MSETG"
+  ],
+  "LONG-TELL1": [
+   "MSETG"
+  ],
+  "LOOK-UNDER": [
+   "DEFINE"
+  ],
+  "LOSE-WEAPON": [
+   "MSETG"
+  ],
+  "LOSSTR": [
+   "PSETG"
+  ],
+  "LOW-TIDE": [
+   "SETG"
+  ],
+  "MACHINE-FUNCTION": [
+   "DEFINE"
+  ],
+  "MACHINE-ROOM": [
+   "DEFINE"
+  ],
+  "MAGALICE": [
+   "SETG"
+  ],
+  "MAGCMACH": [
+   "SETG"
+  ],
+  "MAGIC-FLAG": [
+   "SETG"
+  ],
+  "MAGNET-ROOM": [
+   "DEFINE"
+  ],
+  "MAINT-ROOM": [
+   "DEFINE"
+  ],
+  "MAKE-ACTION": [
+   "DEFINE"
+  ],
+  "MAKE-SCRIPT": [
+   "DEFINE"
+  ],
+  "MAKE-SLOT": [
+   "DEFINE"
+  ],
+  "MATCH-FUNCTION": [
+   "DEFINE"
+  ],
+  "MAZE-11": [
+   "DEFINE"
+  ],
+  "MAZEDESC": [
+   "PSETG"
+  ],
+  "MELTER": [
+   "DEFINE"
+  ],
+  "MGVALS": [
+   "PSETG"
+  ],
+  "MINDESC": [
+   "PSETG"
+  ],
+  "MIRROR-MIRROR": [
+   "DEFINE"
+  ],
+  "MIRROR-MUNG": [
+   "SETG"
+  ],
+  "MIRROR-ROOM": [
+   "DEFINE"
+  ],
+  "MISSED": [
+   "MSETG"
+  ],
+  "MONTHS": [
+   "PSETG"
+  ],
+  "MOVE": [
+   "DEFINE"
+  ],
+  "MOVES": [
+   "SETG"
+  ],
+  "MSETG": [
+   "DEFINE"
+  ],
+  "MSWITCH-FUNCTION": [
+   "DEFINE"
+  ],
+  "MUMBLER": [
+   "DEFINE"
+  ],
+  "MUNG-ROOM": [
+   "DEFINE"
+  ],
+  "MUNGED-ROOM": [
+   "SETG"
+  ],
+  "MUNGER": [
+   "DEFINE"
+  ],
+  "MY-SCRIPT": [
+   "SETG"
+  ],
+  "NARROW": [
+   "PSETG"
+  ],
+  "NDESCBIT": [
+   "FLAGWORD-bit"
+  ],
+  "NEFALS": [
+   "SETG"
+  ],
+  "NEFALS2": [
+   "SETG"
+  ],
+  "NEWSTRUC": [
+   "DEFINE"
+  ],
+  "NO-CHECK-BIT": [
+   "FLAGWORD-bit"
+  ],
+  "NO-CRLF": [
+   "MSETG"
+  ],
+  "NO-OBJS": [
+   "DEFINE"
+  ],
+  "NOFIT": [
+   "PSETG"
+  ],
+  "NULEXIT": [
+   "SETG"
+  ],
+  "NULL": [
+   "SETG"
+  ],
+  "NULL-DESC": [
+   "PSETG"
+  ],
+  "NULL-EXIT": [
+   "PSETG"
+  ],
+  "NULL-SYN": [
+   "PSETG"
+  ],
+  "OACTION": [
+   "NEWSTRUC-field"
+  ],
+  "OADJS": [
+   "NEWSTRUC-field"
+  ],
+  "OBJ-HERE?": [
+   "DEFINE"
+  ],
+  "OBJ-UV": [
+   "SETG"
+  ],
+  "OBJECT": [
+   "DEFINE"
+  ],
+  "OBJECT-ACTION": [
+   "DEFINE"
+  ],
+  "OBJECT-OBL": [
+   "SETG"
+  ],
+  "OBJECTS": [
+   "SETG"
+  ],
+  "OBJGVALS": [
+   "PSETG"
+  ],
+  "OCAN": [
+   "NEWSTRUC-field"
+  ],
+  "OCAPAC": [
+   "NEWSTRUC-field"
+  ],
+  "OCONTENTS": [
+   "NEWSTRUC-field"
+  ],
+  "ODESC1": [
+   "NEWSTRUC-field"
+  ],
+  "ODESC2": [
+   "NEWSTRUC-field"
+  ],
+  "ODESCO": [
+   "NEWSTRUC-field"
+  ],
+  "OFFENDED": [
+   "PSETG"
+  ],
+  "OFLAG": [
+   "MSETG"
+  ],
+  "OFLAGS": [
+   "NEWSTRUC-field"
+  ],
+  "OFVAL": [
+   "NEWSTRUC-field"
+  ],
+  "OID": [
+   "NEWSTRUC-field"
+  ],
+  "OLIGHT?": [
+   "NEWSTRUC-field"
+  ],
+  "ON-POLE": [
+   "SETG"
+  ],
+  "ONAME": [
+   "MSETG"
+  ],
+  "ONAMES": [
+   "NEWSTRUC-field"
+  ],
+  "OOPEN?": [
+   "NEWSTRUC-field"
+  ],
+  "OPEN-CLOSE": [
+   "DEFINE"
+  ],
+  "OPENABLE?": [
+   "DEFMAC"
+  ],
+  "OPENER": [
+   "DEFINE"
+  ],
+  "OPPV": [
+   "SETG"
+  ],
+  "OPREP": [
+   "MSETG"
+  ],
+  "ORAND": [
+   "NEWSTRUC-field"
+  ],
+  "OREAD": [
+   "NEWSTRUC-field"
+  ],
+  "ORFEO": [
+   "DEFINE"
+  ],
+  "OROOM": [
+   "NEWSTRUC-field"
+  ],
+  "ORPHAN": [
+   "DEFINE"
+  ],
+  "ORPHANS": [
+   "SETG"
+  ],
+  "ORTELL": [
+   "DEFINE"
+  ],
+  "OSIZE": [
+   "NEWSTRUC-field"
+  ],
+  "OSLOT1": [
+   "MSETG"
+  ],
+  "OTOUCH?": [
+   "NEWSTRUC-field"
+  ],
+  "OTVAL": [
+   "NEWSTRUC-field"
+  ],
+  "OVER-FALLS": [
+   "DEFINE"
+  ],
+  "OVERB": [
+   "MSETG"
+  ],
+  "OVIS?": [
+   "DEFMAC"
+  ],
+  "OVISOFF": [
+   "MSETG"
+  ],
+  "OVISON": [
+   "FLAGWORD-bit"
+  ],
+  "PAINTING": [
+   "DEFINE"
+  ],
+  "PARSE-WON": [
+   "SETG"
+  ],
+  "PASS-THE-BUCKET": [
+   "DEFINE"
+  ],
+  "PC": [
+   "DEFINE"
+  ],
+  "PDSKDATE": [
+   "DEFINE"
+  ],
+  "PICK-ONE": [
+   "DEFMAC"
+  ],
+  "PLAY-TIME": [
+   "DEFINE"
+  ],
+  "PLAYED-TIME": [
+   "SETG"
+  ],
+  "PLAYER": [
+   "SETG"
+  ],
+  "PLUGGER": [
+   "DEFINE"
+  ],
+  "POBJ": [
+   "NEWSTRUC-field"
+  ],
+  "POISON": [
+   "PSETG"
+  ],
+  "POST-CRLF": [
+   "MSETG"
+  ],
+  "POUR": [
+   "DEFINE"
+  ],
+  "PPREP": [
+   "NEWSTRUC-field"
+  ],
+  "PRAYER": [
+   "DEFINE"
+  ],
+  "PRE-CRLF": [
+   "MSETG"
+  ],
+  "PREP2VEC": [
+   "SETG"
+  ],
+  "PREPVEC": [
+   "SETG"
+  ],
+  "PRES": [
+   "DEFINE"
+  ],
+  "PRINT-CONT": [
+   "DEFINE"
+  ],
+  "PRINT-CONTENTS": [
+   "DEFINE"
+  ],
+  "PROB": [
+   "DEFINE"
+  ],
+  "PRSTR": [
+   "DEFINE"
+  ],
+  "PRSVEC": [
+   "SETG"
+  ],
+  "PSETG": [
+   "DEFINE"
+  ],
+  "PSTRING": [
+   "DEFINE"
+  ],
+  "PTEMP": [
+   "SETG"
+  ],
+  "PURE-LIST": [
+   "SETG"
+  ],
+  "PUSHER": [
+   "DEFINE"
+  ],
+  "PUT-BALLOON": [
+   "DEFINE"
+  ],
+  "PUTTER": [
+   "DEFINE"
+  ],
+  "R/L": [
+   "DEFINE"
+  ],
+  "RACTION": [
+   "NEWSTRUC-field"
+  ],
+  "RAINBOW": [
+   "SETG"
+  ],
+  "RAIRBIT": [
+   "FLAGWORD-bit"
+  ],
+  "RANDOM-LIST": [
+   "SETG"
+  ],
+  "RAW-SCORE": [
+   "SETG"
+  ],
+  "RBITS": [
+   "NEWSTRUC-field"
+  ],
+  "RBOAT-FUNCTION": [
+   "DEFINE"
+  ],
+  "RBUCKBIT": [
+   "FLAGWORD-bit"
+  ],
+  "RDCOM": [
+   "DEFINE"
+  ],
+  "RDESC1": [
+   "NEWSTRUC-field"
+  ],
+  "RDESC2": [
+   "NEWSTRUC-field"
+  ],
+  "READABLE?": [
+   "DEFMAC"
+  ],
+  "READBIT": [
+   "FLAGWORD-bit"
+  ],
+  "READER": [
+   "DEFINE"
+  ],
+  "READER-STRING": [
+   "PSETG"
+  ],
+  "READST": [
+   "DEFINE"
+  ],
+  "RECORD": [
+   "DEFINE"
+  ],
+  "RECORD-STRING": [
+   "SETG"
+  ],
+  "RECORDER-STRING": [
+   "PSETG"
+  ],
+  "REMARKABLY-DISGUSTING-CODE": [
+   "DEFINE"
+  ],
+  "REMOVE-OBJECT": [
+   "DEFINE"
+  ],
+  "REP": [
+   "SETG"
+  ],
+  "REPENT": [
+   "DEFINE"
+  ],
+  "RESDESC": [
+   "PSETG"
+  ],
+  "RESERVOIR-NORTH": [
+   "DEFINE"
+  ],
+  "RESERVOIR-SOUTH": [
+   "DEFINE"
+  ],
+  "REXITS": [
+   "NEWSTRUC-field"
+  ],
+  "RFILLBIT": [
+   "FLAGWORD-bit"
+  ],
+  "RHOUSEBIT": [
+   "FLAGWORD-bit"
+  ],
+  "RID": [
+   "NEWSTRUC-field"
+  ],
+  "RIDDLE-FLAG": [
+   "SETG"
+  ],
+  "RING": [
+   "DEFINE"
+  ],
+  "RISE-AND-SHINE": [
+   "DEFINE"
+  ],
+  "RIVERDESC": [
+   "PSETG"
+  ],
+  "RIVR4-ROOM": [
+   "DEFINE"
+  ],
+  "RLANDBIT": [
+   "FLAGWORD-bit"
+  ],
+  "RLIGHT?": [
+   "NEWSTRUC-field"
+  ],
+  "RMGVALS": [
+   "PSETG"
+  ],
+  "RMUNGBIT": [
+   "FLAGWORD-bit"
+  ],
+  "ROB-ADV": [
+   "DEFINE"
+  ],
+  "ROB-ROOM": [
+   "DEFINE"
+  ],
+  "ROBBER": [
+   "DEFINE"
+  ],
+  "ROBBER-C-DESC": [
+   "PSETG"
+  ],
+  "ROBBER-DEMON": [
+   "SETG"
+  ],
+  "ROBBER-FUNCTION": [
+   "DEFINE"
+  ],
+  "ROBBER-U-DESC": [
+   "PSETG"
+  ],
+  "ROBJS": [
+   "NEWSTRUC-field"
+  ],
+  "ROBOT-ACTIONS": [
+   "SETG"
+  ],
+  "ROBOT-ACTOR": [
+   "DEFINE"
+  ],
+  "ROBOT-FUNCTION": [
+   "DEFINE"
+  ],
+  "ROOM": [
+   "DEFINE"
+  ],
+  "ROOM-DESC": [
+   "DEFINE"
+  ],
+  "ROOM-INFO": [
+   "DEFINE"
+  ],
+  "ROOM-OBL": [
+   "SETG"
+  ],
+  "ROOMS": [
+   "SETG"
+  ],
+  "ROPE-FUNCTION": [
+   "DEFINE"
+  ],
+  "RRAND": [
+   "NEWSTRUC-field"
+  ],
+  "RSACREDBIT": [
+   "FLAGWORD-bit"
+  ],
+  "RSEEN?": [
+   "NEWSTRUC-field"
+  ],
+  "RTRNN": [
+   "DEFMAC"
+  ],
+  "RTRO": [
+   "DEFMAC"
+  ],
+  "RTRZ": [
+   "DEFMAC"
+  ],
+  "RUBBER": [
+   "DEFINE"
+  ],
+  "RUG": [
+   "DEFINE"
+  ],
+  "RUSTY-KNIFE": [
+   "DEFINE"
+  ],
+  "RVAL": [
+   "NEWSTRUC-field"
+  ],
+  "RVARS": [
+   "NEWSTRUC-field"
+  ],
+  "RWATERBIT": [
+   "FLAGWORD-bit"
+  ],
+  "SACREDBIT": [
+   "FLAGWORD-bit"
+  ],
+  "SADD-ACTION": [
+   "DEFINE"
+  ],
+  "SAFE-FLAG": [
+   "SETG"
+  ],
+  "SAFE-FUNCTION": [
+   "DEFINE"
+  ],
+  "SAFE-MUNG": [
+   "DEFINE"
+  ],
+  "SAFE-ROOM": [
+   "DEFINE"
+  ],
+  "SAVE-IT": [
+   "DEFINE"
+  ],
+  "SAVEREP": [
+   "SETG"
+  ],
+  "SCORE": [
+   "DEFINE"
+  ],
+  "SCORE-MAX": [
+   "SETG"
+  ],
+  "SCORE-OBJ": [
+   "DEFINE"
+  ],
+  "SCORE-ROOM": [
+   "DEFINE"
+  ],
+  "SCORE-UPD": [
+   "DEFINE"
+  ],
+  "SCRATCH-STR": [
+   "SETG"
+  ],
+  "SCRIPT-CHANNEL": [
+   "SETG"
+  ],
+  "SCRSTR": [
+   "SETG"
+  ],
+  "SDRIVER": [
+   "NEWSTRUC-field"
+  ],
+  "SEARCH-LIST": [
+   "DEFINE"
+  ],
+  "SEARCHBIT": [
+   "FLAGWORD-bit"
+  ],
+  "SEE-INSIDE?": [
+   "DEFMAC"
+  ],
+  "SERIOUS-WOUND": [
+   "MSETG"
+  ],
+  "SFCN": [
+   "NEWSTRUC-field"
+  ],
+  "SFLIP": [
+   "NEWSTRUC-field"
+  ],
+  "SHAKE": [
+   "DEFINE"
+  ],
+  "SHORT-NAMES": [
+   "PSETG"
+  ],
+  "SHORT-VAL-NAMES": [
+   "PSETG"
+  ],
+  "SINBAD": [
+   "DEFINE"
+  ],
+  "SITTING-DUCK": [
+   "MSETG"
+  ],
+  "SKELETON": [
+   "DEFINE"
+  ],
+  "SKIPPER": [
+   "DEFINE"
+  ],
+  "SLEEPBIT": [
+   "FLAGWORD-bit"
+  ],
+  "SLOTS": [
+   "SETG"
+  ],
+  "SMDROP": [
+   "PSETG"
+  ],
+  "SNARF-OBJECT": [
+   "DEFINE"
+  ],
+  "SNM": [
+   "SETG"
+  ],
+  "SOBJECT": [
+   "DEFINE"
+  ],
+  "SP": [
+   "DEFINE"
+  ],
+  "SPARSE": [
+   "DEFINE"
+  ],
+  "SPHERE-CLOCK": [
+   "SETG"
+  ],
+  "SPHERE-FUNCTION": [
+   "DEFINE"
+  ],
+  "SPINDIZZY": [
+   "PSETG"
+  ],
+  "SPLICE-OUT": [
+   "DEFINE"
+  ],
+  "SSV": [
+   "SETG"
+  ],
+  "STACKDUMP": [
+   "DEFINE"
+  ],
+  "STACKDUMP-ATOMS-TO-SKIP": [
+   "SETG"
+  ],
+  "STAGGER": [
+   "MSETG"
+  ],
+  "STAGGERED": [
+   "FLAGWORD-bit"
+  ],
+  "STAGGERED?": [
+   "DEFMAC"
+  ],
+  "STARS": [
+   "SETG"
+  ],
+  "START": [
+   "DEFINE"
+  ],
+  "START-ZORK": [
+   "DEFINE"
+  ],
+  "STARTER": [
+   "DEFINE"
+  ],
+  "STFORE": [
+   "PSETG"
+  ],
+  "STICK-FUNCTION": [
+   "DEFINE"
+  ],
+  "STRENGTH-MAX": [
+   "SETG"
+  ],
+  "STRENGTH-MIN": [
+   "SETG"
+  ],
+  "STRINGP": [
+   "DEFINE"
+  ],
+  "SUPER-BRIEF": [
+   "DEFINE",
+   "SETG"
+  ],
+  "SWIMMER": [
+   "DEFINE"
+  ],
+  "SWIMYUKS": [
+   "PSETG"
+  ],
+  "SWINGER": [
+   "DEFINE"
+  ],
+  "SWORD": [
+   "DEFINE"
+  ],
+  "SWORD-DEMON": [
+   "SETG"
+  ],
+  "SWORD-GLOW": [
+   "DEFINE"
+  ],
+  "SWORD-MELEE": [
+   "PSETG"
+  ],
+  "SYN-EQUAL": [
+   "DEFINE"
+  ],
+  "SYN-MATCH": [
+   "DEFINE"
+  ],
+  "SYN1": [
+   "NEWSTRUC-field"
+  ],
+  "SYN2": [
+   "NEWSTRUC-field"
+  ],
+  "SYNONYM": [
+   "DEFINE"
+  ],
+  "TAKE": [
+   "DEFINE"
+  ],
+  "TAKE-IT": [
+   "DEFINE"
+  ],
+  "TAKE-IT-OR-LEAVE-IT": [
+   "DEFINE"
+  ],
+  "TAKE-OBJECT": [
+   "DEFMAC"
+  ],
+  "TAKEBIT": [
+   "FLAGWORD-bit"
+  ],
+  "TCAVE-ROOM": [
+   "DEFINE"
+  ],
+  "TCHOMP": [
+   "PSETG"
+  ],
+  "TELL": [
+   "DEFINE"
+  ],
+  "TELL-FLAG": [
+   "SETG"
+  ],
+  "TENEX?": [
+   "SETG"
+  ],
+  "THEN": [
+   "SETG"
+  ],
+  "THIEF-MELEE": [
+   "PSETG"
+  ],
+  "THIS-IT?": [
+   "DEFINE"
+  ],
+  "TIE": [
+   "DEFINE"
+  ],
+  "TIEBIT": [
+   "FLAGWORD-bit"
+  ],
+  "TOOLBIT": [
+   "FLAGWORD-bit"
+  ],
+  "TORCH-ROOM": [
+   "DEFINE"
+  ],
+  "TRANSBIT": [
+   "FLAGWORD-bit"
+  ],
+  "TRANSPARENT?": [
+   "DEFMAC"
+  ],
+  "TRAP-DOOR": [
+   "DEFINE",
+   "SETG"
+  ],
+  "TRC": [
+   "DEFMAC"
+  ],
+  "TREAS": [
+   "DEFINE"
+  ],
+  "TREASURE-ROOM": [
+   "DEFINE"
+  ],
+  "TRNN": [
+   "DEFMAC"
+  ],
+  "TRO": [
+   "DEFMAC"
+  ],
+  "TROLL": [
+   "DEFINE"
+  ],
+  "TROLL-FLAG": [
+   "SETG"
+  ],
+  "TROLL-MELEE": [
+   "PSETG"
+  ],
+  "TROLLDESC": [
+   "PSETG"
+  ],
+  "TROLLOUT": [
+   "PSETG"
+  ],
+  "TROPHY-CASE": [
+   "DEFINE"
+  ],
+  "TRYTAKEBIT": [
+   "FLAGWORD-bit"
+  ],
+  "TRZ": [
+   "DEFMAC"
+  ],
+  "TTY-INIT": [
+   "DEFINE"
+  ],
+  "TTY-UNINIT": [
+   "DEFINE"
+  ],
+  "TUBE-FUNCTION": [
+   "DEFINE"
+  ],
+  "TURNBIT": [
+   "FLAGWORD-bit"
+  ],
+  "TURNER": [
+   "DEFINE"
+  ],
+  "UN-BRIEF": [
+   "DEFINE"
+  ],
+  "UN-SUPER-BRIEF": [
+   "DEFINE"
+  ],
+  "UNBOARD": [
+   "DEFINE"
+  ],
+  "UNCONSCIOUS": [
+   "MSETG"
+  ],
+  "UNLOCKER": [
+   "DEFINE"
+  ],
+  "UNSPEAKABLE-CODE": [
+   "DEFINE"
+  ],
+  "UNTIE": [
+   "DEFINE"
+  ],
+  "UPPERCASE": [
+   "DEFINE"
+  ],
+  "USER-NAME": [
+   "SETG"
+  ],
+  "VABIT": [
+   "FLAGWORD-bit"
+  ],
+  "VAL-NAMES": [
+   "PSETG"
+  ],
+  "VALUABLES": [
+   "DEFINE"
+  ],
+  "VALUABLES?": [
+   "DEFINE"
+  ],
+  "VAPORS": [
+   "PSETG"
+  ],
+  "VBIT": [
+   "NEWSTRUC-field"
+  ],
+  "VDECL": [
+   "NEWSTRUC-field"
+  ],
+  "VEHBIT": [
+   "FLAGWORD-bit"
+  ],
+  "VERS": [
+   "SETG"
+  ],
+  "VERSION": [
+   "DEFINE"
+  ],
+  "VFCN": [
+   "NEWSTRUC-field"
+  ],
+  "VFLOAD": [
+   "DEFINE"
+  ],
+  "VICBIT": [
+   "FLAGWORD-bit"
+  ],
+  "VICTIMS?": [
+   "DEFINE"
+  ],
+  "VILLAIN": [
+   "FLAGWORD-bit"
+  ],
+  "VILLAIN-PROBS": [
+   "SETG"
+  ],
+  "VILLAINS": [
+   "SETG"
+  ],
+  "VNAME": [
+   "NEWSTRUC-field"
+  ],
+  "VOLCORE": [
+   "PSETG"
+  ],
+  "VOLGNOME": [
+   "DEFINE"
+  ],
+  "VPREP": [
+   "NEWSTRUC-field"
+  ],
+  "VRBIT": [
+   "FLAGWORD-bit"
+  ],
+  "VSTR": [
+   "NEWSTRUC-field"
+  ],
+  "VSYNONYM": [
+   "DEFINE"
+  ],
+  "VTBIT": [
+   "FLAGWORD-bit"
+  ],
+  "VTRNN": [
+   "DEFMAC"
+  ],
+  "VWORD": [
+   "NEWSTRUC-field"
+  ],
+  "VXBIT": [
+   "FLAGWORD-bit"
+  ],
+  "WAIT": [
+   "DEFINE"
+  ],
+  "WALK": [
+   "DEFINE"
+  ],
+  "WATER-FUNCTION": [
+   "DEFINE"
+  ],
+  "WAVER": [
+   "DEFINE"
+  ],
+  "WEAPONBIT": [
+   "FLAGWORD-bit"
+  ],
+  "WEAPONS": [
+   "SETG"
+  ],
+  "WEIGHT": [
+   "DEFINE"
+  ],
+  "WELL": [
+   "DEFINE"
+  ],
+  "WHEEEEE": [
+   "PSETG"
+  ],
+  "WIN": [
+   "DEFINE"
+  ],
+  "WINDOW-FUNCTION": [
+   "DEFINE"
+  ],
+  "WINDOW-YEAR": [
+   "DEFINE"
+  ],
+  "WINNER": [
+   "SETG"
+  ],
+  "WINNERS": [
+   "PSETG"
+  ],
+  "WINNING?": [
+   "DEFINE"
+  ],
+  "WIRE-FUNCTION": [
+   "DEFINE"
+  ],
+  "WITH-TELL": [
+   "DEFINE"
+  ],
+  "WORD?": [
+   "DEFINE"
+  ],
+  "WORDS": [
+   "SETG"
+  ],
+  "XUNAME": [
+   "DEFINE"
+  ],
+  "XUNM": [
+   "SETG"
+  ],
+  "YELL": [
+   "DEFINE"
+  ],
+  "YES/NO": [
+   "DEFINE"
+  ],
+  "YUKS": [
+   "PSETG"
+  ],
+  "ZORK": [
+   "DEFINE"
+  ]
+ },
+ "root_name_data_refs": [
+  {
+   "name": "BIND",
+   "count": 1,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "81tell-repl.mud",
+     "line": 109,
+     "function": null,
+     "context": [
+      "quoted"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "CHARACTER",
+   "count": 3,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77act2.mud",
+     "line": 526,
+     "function": "RISE-AND-SHINE",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77act2.mud",
+     "line": 578,
+     "function": "DECLINE-AND-FALL",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77np.mud",
+     "line": 241,
+     "function": "FOOSTR",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "DECL",
+   "count": 3,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "81prim.mud",
+     "line": 97,
+     "function": "MAKE-SLOT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77defs.mud",
+     "line": 5,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 132,
+     "function": "ADD-ACTION",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "FALSE",
+   "count": 4,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77defs.mud",
+     "line": 5,
+     "function": null,
+     "context": [
+      "quoted"
+     ]
+    },
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 61,
+     "function": "ROOM",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 122,
+     "function": "OBJECT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 398,
+     "function": "DO-SAVE",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "FSUBR",
+   "count": 1,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77act1.mud",
+     "line": 4,
+     "function": "BLO",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "FUNCT",
+   "count": 1,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 19,
+     "function": "CEXIT",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "INITIAL",
+   "count": 7,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "81prim.mud",
+     "line": 27,
+     "function": "FLAGWORD",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "81prim.mud",
+     "line": 67,
+     "function": "NEWSTRUC",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 1,
+     "function": "CEVENT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 259,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 266,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 451,
+     "function": "GET-ATOM",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 804,
+     "function": null,
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "OBLIST",
+   "count": 19,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "81prim.mud",
+     "line": 27,
+     "function": "FLAGWORD",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "81prim.mud",
+     "line": 67,
+     "function": "NEWSTRUC",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 1,
+     "function": "CEVENT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 24,
+     "function": "CEXIT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77makstr.mud",
+     "line": 25,
+     "function": "CEXIT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 259,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 259,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 259,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 265,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 265,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 266,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 451,
+     "function": "GET-ATOM",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 804,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 804,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77np.mud",
+     "line": 2,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77np.mud",
+     "line": 4,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 59,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 61,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 63,
+     "function": null,
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "RSUBR",
+   "count": 1,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77defs.mud",
+     "line": 506,
+     "function": "FUNCTION-PRINT",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "RSUBR-ENTRY",
+   "count": 1,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77defs.mud",
+     "line": 506,
+     "function": "FUNCTION-PRINT",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "SEGMENT",
+   "count": 3,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77defs.mud",
+     "line": 336,
+     "function": "INSERT-OBJECT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77defs.mud",
+     "line": 342,
+     "function": "TAKE-OBJECT",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77act1.mud",
+     "line": 6,
+     "function": "BLO",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "SUBR",
+   "count": 3,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "81tell-repl.mud",
+     "line": 129,
+     "function": "DISPATCH",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77act1.mud",
+     "line": 4,
+     "function": "BLO",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77act1.mud",
+     "line": 7,
+     "function": "BLO",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "TIME",
+   "count": 11,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 188,
+     "function": "PLAY-TIME",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77rooms.mud",
+     "line": 190,
+     "function": "PLAY-TIME",
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 1385,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2819,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2902,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2904,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2906,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2908,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2910,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2912,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "77dung.mud",
+     "line": 2916,
+     "function": null,
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "TOPLEVEL",
+   "count": 1,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "81tell-repl.mud",
+     "line": 116,
+     "function": "STACKDUMP",
+     "context": []
+    }
+   ]
+  },
+  {
+   "name": "WORD",
+   "count": 2,
+   "sites": [
+    {
+     "kind": "atom",
+     "file": "77defs.mud",
+     "line": 4,
+     "function": null,
+     "context": []
+    },
+    {
+     "kind": "atom",
+     "file": "81tell-repl.mud",
+     "line": 1,
+     "function": null,
+     "context": []
+    }
+   ]
+  }
+ ],
+ "builtin_used": [
+  "*",
+  "+",
+  "-",
+  "/",
+  "0?",
+  "1?",
+  "==?",
+  "=?",
+  "AGAIN",
+  "AND",
+  "AND?",
+  "ANDB",
+  "APPLY",
+  "ASCII",
+  "ASSIGNED?",
+  "ATOM",
+  "BACK",
+  "BITS",
+  "BLOAT",
+  "BLOCK",
+  "CHTYPE",
+  "CHUTYPE",
+  "COND",
+  "CRLF",
+  "DEFINE",
+  "DEFMAC",
+  "EMPTY?",
+  "ENDBLOCK",
+  "EQVB",
+  "ERRET",
+  "ERROR",
+  "EVENT",
+  "FIX",
+  "FLOAD",
+  "FLOAT",
+  "FORM",
+  "FUNCTION",
+  "G=?",
+  "G?",
+  "GASSIGNED?",
+  "GC",
+  "GDECL",
+  "GET",
+  "GETBITS",
+  "GETTIMEDATE",
+  "GVAL",
+  "HANDLER",
+  "INSERT",
+  "INT-LEVEL",
+  "ISTRING",
+  "IUVECTOR",
+  "IVECTOR",
+  "L=?",
+  "L?",
+  "LENGTH",
+  "LENGTH?",
+  "LIST",
+  "LOOKUP",
+  "LSH",
+  "LVAL",
+  "MANIFEST",
+  "MAPF",
+  "MAPLEAVE",
+  "MAPR",
+  "MAPRET",
+  "MAPSTOP",
+  "MAX",
+  "MEMBER",
+  "MEMQ",
+  "MIN",
+  "MOBLIST",
+  "MOD",
+  "N==?",
+  "N=?",
+  "NEWTYPE",
+  "NOT",
+  "NTH",
+  "OFF",
+  "ON",
+  "OPEN",
+  "OR",
+  "ORB",
+  "PNAME",
+  "PRIMTYPE",
+  "PRIN1",
+  "PRINC",
+  "PRINTSTRING",
+  "PROG",
+  "PUT",
+  "PUTBITS",
+  "PUTREST",
+  "QUIT",
+  "QUOTE",
+  "RANDOM",
+  "READSTRING",
+  "REPEAT",
+  "RESET",
+  "REST",
+  "RESTORE",
+  "RETURN",
+  "ROOT",
+  "SAVE",
+  "SET",
+  "SETG",
+  "SPNAME",
+  "STRING",
+  "SUBSTRUC",
+  "TERPRI",
+  "TOP",
+  "TYPE",
+  "TYPE?",
+  "UNPARSE",
+  "UNWIND",
+  "UVECTOR",
+  "VALUE",
+  "VECTOR",
+  "XORB"
+ ]
+}
