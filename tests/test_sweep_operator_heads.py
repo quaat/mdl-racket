@@ -75,7 +75,12 @@ def test_committed_sweep_matches_fresh_run():
     assert COMMITTED.read_text(encoding="utf-8") == fresh
     data = json.loads(fresh)
     live = {m["name"] for m in data["missing"] if m["class"] == "missing"}
-    # The inventory's static candidates (GAMEPLAY-FAILURE-INVENTORY.md).
-    assert {"ABS", "IMAGE", "SLEEP", "CLOSE", "FILE-LENGTH", "ACCESS", "PRINT",
+    # The inventory's static candidates still unimplemented
+    # (GAMEPLAY-FAILURE-INVENTORY.md); fixed ones move to builtins.
+    assert {"IMAGE", "SLEEP", "CLOSE", "FILE-LENGTH", "ACCESS", "PRINT",
             "EVAL", "PARSE"} <= live
+    # INV-01 fixed by M4 S8 (#167): ABS is a runtime builtin now.
+    assert "ABS" not in live
+    assert "ABS" in data["runtime_name_sources"]["builtin_table"]
+    assert "ABS" in data["builtin_used"]
     assert "TIME" in {r["name"] for r in data["root_name_data_refs"]}

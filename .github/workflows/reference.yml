@@ -154,6 +154,13 @@ jobs:
           mkdir -p artifacts/ci-logs
           set -o pipefail
           make test-m4-replay-persistence 2>&1 | tee artifacts/ci-logs/test-m4-replay-persistence.log
+      - name: M4 S8 scenario (the cyclops and ABS)
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          mkdir -p artifacts/ci-logs
+          set -o pipefail
+          make test-m4-cyclops-room 2>&1 | tee artifacts/ci-logs/test-m4-cyclops-room.log
       - name: Build and capture native reference
         run: |
           make reference-build

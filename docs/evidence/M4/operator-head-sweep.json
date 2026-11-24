@@ -87,6 +87,7 @@
    "1?",
    "==?",
    "=?",
+   "ABS",
    "AND?",
    "ANDB",
    "APPLY",
@@ -243,10 +244,10 @@
  "summary": {
   "distinct_operator_names": 380,
   "by_class": {
-   "builtin": 117,
+   "builtin": 118,
    "game": 234,
    "local": 0,
-   "missing": 24,
+   "missing": 23,
    "missing-not-live": 5
   },
   "sites": 9183,
@@ -255,50 +256,6 @@
   "computed_head_sites": 6
  },
  "missing": [
-  {
-   "name": "ABS",
-   "class": "missing",
-   "in_confusion_root": true,
-   "live_site_count": 4,
-   "sites": [
-    {
-     "file": "77act1.mud",
-     "line": 949,
-     "col": 40,
-     "kind": "head",
-     "function": "CYCLOPS",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "77act1.mud",
-     "line": 951,
-     "col": 21,
-     "kind": "head",
-     "function": "CYCLOPS",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "77act1.mud",
-     "line": 1031,
-     "col": 60,
-     "kind": "head",
-     "function": "CYCLOPS-ROOM",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "77act1.mud",
-     "line": 1050,
-     "col": 32,
-     "kind": "head",
-     "function": "AOS-SOS",
-     "context": [],
-     "local_formal": false
-    }
-   ]
-  },
   {
    "name": "ACCESS",
    "class": "missing",
@@ -3938,6 +3895,7 @@
   "1?",
   "==?",
   "=?",
+  "ABS",
   "AGAIN",
   "AND",
   "AND?",

@@ -3451,3 +3451,50 @@ anyway is caught at the callback boundary and returned in the result's
 `host-errors`, so a refused save or a host bug never ends the live game
 (breaks still propagate). `replay-prompt-try-checkpoint` returns the
 checkpoint bytes or the refusal reason without raising.
+
+## M4: ABS (#167)
+
+Specification written before implementation. Authority: MDL manual §3.4
+(ABS is listed with `+ - * / MIN MAX MOD` among the arithmetic SUBRs; "All
+except MOD, which wants FIXes, are indifferent as to whether their arguments
+are FLOAT or FIX"), §3.5 ("They all will cause an overflow or underflow
+error if any result, intermediate or final, is too large or too small"),
+Appendix 2 (`ABS (NUMBER) #DECL ((VALUE) <OR FIX FLOAT> (NUMBER) <OR FIX
+FLOAT>)`, "returns absolute value of a number"), and pinned Confusion
+observations in `docs/evidence/M4/ABS-REFERENCE.md` (`abs-probe.json`, script
+`scripts/probe_abs_reference.py`). Game uses, all on FIX (the cyclops
+counter RVARS, DECLed FIX): CYCLOPS `77act1.mud:949`
+`<PUT .RM ,RVARS <ABS <RVARS .RM>>>` and `:951` `<G? <ABS .COUNT> 5>`;
+CYCLOPS-ROOM `:1031` and AOS-SOS `:1050` `<NTH ,CYCLOMAD <ABS .VARS>>`. The
+fighting demon reaches `:951` on entering the Cyclops Room (it calls the
+cyclops action with the FIRST? verb, `78melee.mud:308-309`).
+
+**Result.** `<ABS x>` takes exactly one argument, a FIX in the signed 36-bit
+range or a FLOAT (the shared `check-number`, as for MIN/MAX and `+`). The
+result has the argument's TYPE: a FIX gives the FIX |x| (`<ABS -5>` FIX 5,
+`<ABS 0>` FIX 0), a FLOAT gives the FLOAT |x| (`<ABS -2.5>` FLOAT 2.5,
+`<ABS 0.0>` FLOAT 0.0); there is no conversion between FIX and FLOAT. FLOAT
+magnitude is exact (only the sign changes), so `<==? <ABS <- <MIN>>> <MIN>>`
+is T and no new PDP-10 rounding arises.
+
+**36-bit edge.** The most negative FIX −2^35 (`-34359738368`, readable as a
+FIX literal) has no positive 36-bit counterpart. Following manual §3.5
+(overflow is an error) and the runtime's FIX model (`check-fix`, as `<- 0
+-34359738368>` already fails), `<ABS -34359738368>` is the strict error
+`mdl-abs: FIX overflow`; it is never wrapped back to −2^35 or turned into a
+FLOAT. Recorded reference deviation: Confusion FIX is a 64-bit host integer
+and returns FIX 34359738368 (also for `<ABS <- 0 34359738368>>`), and
+`<ABS -34359738369>` is FIX 34359738369 there, while this runtime's reader
+makes `-34359738369` a FLOAT (M1 issue #8), so the result is FLOAT
+34359738369.0 here. No game expression comes near the edge (|RVARS| ≤ 6).
+
+**Refusals.** Zero arguments: `mdl-abs: TOO-FEW-ARGUMENTS-SUPPLIED`; two or
+more: `mdl-abs: TOO-MANY-ARGUMENTS-SUPPLIED` (the reference's ERROR atoms).
+A non-number (STRING, ATOM, LIST, FALSE, CHARACTER, VECTOR, ...):
+`mdl-abs: expected MDL FIX or FLOAT` (reference `FIRST-ARG-WRONG-TYPE`).
+These are host strict failures, as for MAX; the reference's MDL ERROR (and
+LISTENING-AT-LEVEL 2) is not modelled for these arguments.
+
+**Not supported / out of scope.** Negative zero (separate open issue, as for
+MIN/MAX: `<ABS -0.0>` is not distinguished); FLOAT printing. Code:
+`mdl/runtime/core.rkt` (`mdl-abs`); tests `tests/abs_test.rkt`.

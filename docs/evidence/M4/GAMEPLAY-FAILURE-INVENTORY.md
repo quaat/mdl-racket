@@ -162,7 +162,7 @@ result, and the fix and regression test.
 
 | ID | Reproduction | Class | Root cause | Sev. | Status | Issue / PR |
 |---|---|---|---|---|---|---|
-| **INV-01** ABS | F1: troll16, `south` `south` `east` `up` `sw` `east` `south` `ne` | (a) | missing primitive | **P0** | confirmed in both engines | to create |
+| **INV-01** ABS | F1: troll16, `south` `south` `east` `up` `sw` `east` `south` `ne` | (a) | missing primitive | **P0** | confirmed in both engines; **fixed** by M4 S8 (#167): the cyclops-room scenario matches native at all 41 prefixes | #167 |
 | **INV-02** IMAGE | F10: troll16, then `north` `east`, round-room detours `se` `south` `se` `east` `se` `south` `se` `south` `look` `se` (lands in the Grail Room under this clock), then `east` `sw` `rub mirror` `west` `west` `north` `nw` `west` | (a) | missing primitive | **P0** | confirmed in both engines | to create |
 | **INV-03** SLEEP | F10 (same command) | (a) | missing primitive; host-time decision | **P0** | native confirmed; masked by INV-02 in ours | to create |
 | **INV-04** TIME | F9: `c-int` (confirmed). F8: troll16, the maze route, `odysseus` `north` (native only) | (a) | missing primitive applied by name; value is non-deterministic natively | **P0** via BLROO (P2 for `c-int` alone) | F9 confirmed in both; F8 blocked by INV-01 in ours | to create |
@@ -173,7 +173,7 @@ result, and the fix and regression test.
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
 
-**INV-01: ABS.**
+**INV-01: ABS.** *Status: fixed by M4 S8 (#167). ABS is a builtin, and the operator sweep JSON was regenerated, so ABS is now class `builtin`.*
 
 - *First failing location and call path:* 77act1.mud:951 `<G? <ABS .COUNT> 5>` in CYCLOPS (77act1.mud:934). The call path: RDCOM's demon loop (77rooms.mud:643–647) → FIGHTING (78melee.mud:282), which sets PRSVEC 1 to FIRST?!-WORDS (:308) and calls `<APPLY-RANDOM CYCLOPS>` (:309). ABS also appears at :949 (wake), :1031 (CYCLOPS-ROOM LOOK) and :1050 (AOS-SOS); natively all are reached in F1.
 - *Native:* The room text, then "Your sword has begun to glow very brightly." Play goes on.

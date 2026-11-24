@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -123,6 +123,16 @@ test-m4-parser-ambiguity: sources
 # format and clock modes also run in `make test` (replay_*_test.rkt).
 test-m4-replay-persistence: sources
 	@racket tests/persistence_replay_test.rkt
+
+# M4 S8 (the cyclops and ABS, issue #167): lunch and water from the kitchen,
+# the troll-combat path, the maze into the Cyclops Room (FIGHTING's FIRST?
+# call evaluates <ABS .COUNT>, 77act1.mud:951), then feed, water, wake
+# (<ABS <RVARS .RM>>, :949) and flee the cyclops; every command prefix
+# compared with the pinned Confusion captures (D1 only) plus read-only state
+# checkpoints (cyclops flags and RVARS, food/water, OPPV, scores, MOVES) and
+# the RANDOM draws.
+test-m4-cyclops-room: sources
+	@racket tests/historical_cyclops_room_test.rkt
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,
