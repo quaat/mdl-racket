@@ -177,13 +177,15 @@
 (check-equal? cli-eof-status 4 cli-eof-err)
 (check-equal? cli-eof-out c2-reference)
 (check-regexp-match #rx"input ended \\(EOF\\)" cli-eof-err)
-;; A strict failure (S11's unsupported "info" -> OPEN "READ") exits 1 with the
-;; error on stderr; it is not reported as a quit.
+;; A strict failure exits 1 with the error on stderr; it is not reported as a
+;; quit. Since M4 S10 (#171) "info" prints MDL/MADADV.INFO (ADR-0055
+;; amendment), so the strict example is now "restore" (DO-RESTORE -> RESTORE,
+;; unsupported by ADR-0048; inventory INV-06).
 (define-values (cli-strict-status cli-strict-out cli-strict-err)
-  (apply values (run-cli (lines->string '("north" "info" "quit" "y"))
+  (apply values (run-cli (lines->string '("north" "restore" "quit" "y"))
                          "--fixed-clock" (number->string epoch) "--no-notice")))
 (check-equal? cli-strict-status 1)
-(check-regexp-match #rx"strict failure: OPEN: mode \"READ\" is not supported" cli-strict-err)
+(check-regexp-match #rx"strict failure: RESTORE: restoring a saved image is not supported" cli-strict-err)
 (check-false (regexp-match? #rx"Do you wish to leave" cli-strict-out))
 ;; A usage error exits 2 before the game starts.
 (define-values (cli-usage-status cli-usage-out cli-usage-err)
