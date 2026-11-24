@@ -755,3 +755,14 @@ the evidence, and update this README when the gate result changes.
 This repository is an independent development scaffold. Local Racket and
 Confusion checks, remote CI, and golden review completed on 2026-11-17.
 See [`docs/STATUS.md`](docs/STATUS.md) for explicit M0 evidence and M1 limits.
+
+## MDL language conformance
+
+L0 is in progress. Run `make install` and `make test-manual` for an
+isolated corpus of MDL manual examples. On Racket 8.10 BC the current
+corpus records 60 passing loader/frontend checks and 16 tracked gaps.
+The existing Zork gates remain separate. Explicit associations
+(`PUTPROP`, `GETPROP`) and general `EVAL` remain pending.
+See the [coverage matrix](docs/conformance/MDL-COVERAGE.md),
+[verification evidence](docs/evidence/L0/BASELINE.md) and
+[L1 backlog](docs/conformance/PLAN.md).

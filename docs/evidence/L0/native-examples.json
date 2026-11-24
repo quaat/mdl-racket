@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "source_commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "exe_sha256": "da8472a991a8f2fe109c117cfe00c6207edb5bb8d9033dfe36f1e2d478380f68",
+  "protocol": "Bare Confusion, empty working directory per case, TZ=UTC, default RNG, final QUIT",
+  "observations": [
+    {
+      "name": "fix-literal",
+      "input": "1\n<QUIT>\n",
+      "result_output": "1\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "float-literal",
+      "input": "1.0\n<QUIT>\n",
+      "result_output": "1.0000000\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "atom-literal",
+      "input": "GEORGE\n<QUIT>\n",
+      "result_output": "GEORGE\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "add",
+      "input": "<+ 2 4 6>\n<QUIT>\n",
+      "result_output": "12\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "fix-cast",
+      "input": "<FIX 1.0>\n<QUIT>\n",
+      "result_output": "1\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "mixed-division",
+      "input": "</ 11 7 2.0>\n<QUIT>\n",
+      "result_output": "0.5000000\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "sqrt",
+      "input": "<SQRT <+ <* 3 3> <* 4 4>>>\n<QUIT>\n",
+      "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n SQRT \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "exit_code": 0,
+      "ok": false
+    },
+    {
+      "name": "setg",
+      "input": "<SETG FOO <SETG BAR 500>>\n,BAR\n<QUIT>\n",
+      "result_output": "500\n500\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "gval",
+      "input": "<SETG FOO <SETG BAR 500>>\n<SETG BAR FOO>\n,,BAR\n<QUIT>\n",
+      "result_output": "500\nFOO\n500\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "value",
+      "input": "<SET DOC-X 5>\n<SETG DOC-X 9>\n<VALUE DOC-X>\n<GVAL DOC-X>\n<QUIT>\n",
+      "result_output": "5\n9\n5\n9\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "binding-restoration",
+      "input": "<SET X 0>\n<#FUNCTION ((X) <SET X <* .X .X>>) 5>\n.X\n<QUIT>\n",
+      "result_output": "0\n25\n0\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "named-binding-restoration",
+      "input": "<SET X 0>\n<DEFINE DOC-SQUARE-SET (X) <SET X <* .X .X>>>\n<DOC-SQUARE-SET 5>\n.X\n<QUIT>\n",
+      "result_output": "0\nDOC-SQUARE-SET\n25\n0\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "define",
+      "input": "<DEFINE DOC-SQUARE (X) <* .X .X>>\n<DOC-SQUARE 5>\n<QUIT>\n",
+      "result_output": "DOC-SQUARE\n25\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "repeated-setg",
+      "input": "<DEFINE DOC-RESET () <SETG DOC-COUNT 0>>\n<DEFINE DOC-STEP () <SETG DOC-COUNT <+ ,DOC-COUNT 1>>>\n<DOC-RESET>\n<DOC-STEP>\n<DOC-STEP>\n<QUIT>\n",
+      "result_output": "DOC-RESET\nDOC-STEP\n0\n1\n2\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "nested-lval",
+      "input": "<DEFINE DOC-INC (TARGET) <SET .TARGET <+ ..TARGET 1>>>\n<SET DOC-A 0>\n<DOC-INC DOC-A>\n<DOC-INC DOC-A>\n.DOC-A\n<QUIT>\n",
+      "result_output": "DOC-INC\n0\n1\n2\n2\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "builtin-type",
+      "input": "<TYPE ,+>\n<QUIT>\n",
+      "result_output": "SUBR\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "float-primtype",
+      "input": "<PRIMTYPE 1.0>\n<QUIT>\n",
+      "result_output": "WORD\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "evaluated-list",
+      "input": "(1 2 <+ 3 4>)\n<QUIT>\n",
+      "result_output": "(1 2 7)\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "shared-rest",
+      "input": "<SET DOC-L (1 2 3)>\n<PUT <REST .DOC-L> 1 19>\n<NTH .DOC-L 2>\n.DOC-L\n<QUIT>\n",
+      "result_output": "(1 2 3)\n(19 3)\n19\n(1 19 3)\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "empty-form",
+      "input": "<>\n<QUIT>\n",
+      "result_output": "#FALSE ()\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "and-false-payload",
+      "input": "<AND 3 #FALSE (1) 7>\n<QUIT>\n",
+      "result_output": "#FALSE (1)\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "member-string",
+      "input": "<MEMBER \"PART\" \"SUM OF PARTS\">\n<QUIT>\n",
+      "result_output": "\"PARTS\"\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "sequential-aux",
+      "input": "<DEFINE AUXEX (\"TUPLE\" T\n                 \"AUX\" (A <LENGTH .T>) (B <* 2 .A>))\n        ![.A .B]>\n<AUXEX 1 2 \"FOO\">\n<QUIT>\n",
+      "result_output": "AUXEX\n![3 6!]\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "eval",
+      "input": "<SET F '<+ 1 2>>\n<EVAL .F>\n<QUIT>\n",
+      "result_output": "<+ 1 2>\n3\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "mapf-string",
+      "input": "<MAPF ,STRING 1 '[\"MODELING\" \"DEVELOPMENT\" \"LIBRARY\"]>\n<QUIT>\n",
+      "result_output": "\"MDL\"\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "princ",
+      "input": "<PRINC \"MDL\">\n<QUIT>\n",
+      "result_output": "MDL\"MDL\"\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "print",
+      "input": "<PRINT 17>\n<QUIT>\n",
+      "result_output": "\n17 17\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "setloc",
+      "input": "<SET DOC-L (1 2 3)>\n<SETLOC <AT .DOC-L 2> DOC-HI>\n<NTH .DOC-L 2>\n<QUIT>\n",
+      "result_output": "(1 2 3)\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n SETLOC \nLISTENING-AT-LEVEL 2 PROCESS 1\n2\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
+      "exit_code": 0,
+      "ok": false
+    },
+    {
+      "name": "association",
+      "input": "<SET L '(1 2 3 4)>\n<PUT .L FOO \"L is a list.\">\n<GET .L FOO>\n<QUIT>\n",
+      "result_output": "(1 2 3 4)\n(1 2 3 4)\n\"L is a list.\"\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "numeric-get",
+      "input": "<SET L '(1 2 3 4)>\n<GET .L 3>\n<QUIT>\n",
+      "result_output": "(1 2 3 4)\n3\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "explicit-properties",
+      "input": "<SET L '(1 2 3 4)>\n<PUTPROP .L 3 '![4]>\n<GETPROP .L 3>\n<GET .L 3>\n<QUIT>\n",
+      "result_output": "(1 2 3 4)\n(1 2 3 4)\n![4!]\n3\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "declaration-match",
+      "input": "<DECL? '[1 2 3] '<VECTOR [REST FIX]>>\n<QUIT>\n",
+      "result_output": "T\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "declaration-miss",
+      "input": "<DECL? '[1 2.0 3.0] '<VECTOR [REST FIX]>>\n<QUIT>\n",
+      "result_output": "#FALSE (2.0000000 FIX)\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "atom-pname",
+      "input": "<PNAME SAMPLE>\n<QUIT>\n",
+      "result_output": "\"SAMPLE\"\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "unwind-normal",
+      "input": "<SET OBSERVED 1>\n<UNWIND <+ .OBSERVED 2> <SET OBSERVED 9>>\n.OBSERVED\n<QUIT>\n",
+      "result_output": "1\n3\n1\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "double-percent",
+      "input": "<DEFINE SETUP () <SET A 0>>\n<DEFINE NXT () <SET A <+ .A 1>>>\n[%%<SETUP> %<NXT> %<NXT> (%%<SETUP>) %<NXT>]\n<QUIT>\n",
+      "result_output": "SETUP\nNXT\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n1\n2\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr": "Read %% macros not supported\nRead %% macros not supported\nUnexpected ) in input\nUnexpected ] in input\n",
+      "exit_code": 0,
+      "ok": false
+    },
+    {
+      "name": "macro-increment",
+      "input": "<DEFMAC INC (ATM \"OPTIONAL\" (N 1))\n        #DECL ((VALUE) FORM (ATM) ATOM (N) <OR FIX FLOAT>)\n        <FORM SET .ATM <FORM + <FORM LVAL .ATM> .N>>>\n<SET X 1>\n<INC X>\n.X\n<QUIT>\n",
+      "result_output": "INC\n1\n2\n2\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "getbits",
+      "input": "<GETBITS #WORD *777777777777* <BITS 3>>\n<QUIT>\n",
+      "result_output": "#WORD *0000000000000000000007*\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    }
+  ]
+}

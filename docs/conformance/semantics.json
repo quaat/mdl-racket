@@ -1,0 +1,88 @@
+{
+  "+": {
+    "required_evaluation_semantics": "Evaluate operands left to right and add them. An empty argument list yields FIX zero. A FLOAT operand promotes the arithmetic per the manual's numeric rules.",
+    "identity_and_mutation": "Returns a numeric value with no operand mutation.",
+    "error_behavior": "Arguments must be numbers. Historical overflow behavior warrants separate tests.",
+    "dependencies": ["FIX", "FLOAT"]
+  },
+  "/": {
+    "required_evaluation_semantics": "Divide the first operand by successive divisors. A FIX/FIX intermediate truncates before a later FLOAT operand promotes it.",
+    "identity_and_mutation": "No mutation of the operands.",
+    "error_behavior": "Non-numeric operands and zero divisors fail.",
+    "dependencies": ["FIX", "FLOAT"]
+  },
+  "LVAL": {
+    "required_evaluation_semantics": "Return an ATOM's local value in the selected or running environment. A leading dot abbreviates an application of LVAL.",
+    "identity_and_mutation": "Return the bound object itself without changing the binding.",
+    "error_behavior": "Unassigned local value is an error. The manual requires an ATOM; the current implementation has #121.",
+    "dependencies": ["ATOM", "ENVIRONMENT"]
+  },
+  "UNASSIGN": {
+    "status": "UNSUPPORTED",
+    "required_evaluation_semantics": "Remove the assigned local value of an ATOM, including if already unassigned.",
+    "identity_and_mutation": "Affects the selected ATOM binding rather than the object previously bound.",
+    "dependencies": ["ATOM", "ENVIRONMENT"]
+  },
+  "GETPROP": {
+    "required_evaluation_semantics": "Evaluate the call arguments normally. On a miss, evaluate the supplied fallback again or return MDL FALSE when absent.",
+    "identity_and_mutation": "Both selectors must match by ==?. A FIX indicator always looks in association space. A hit returns the stored object.",
+    "error_behavior": "A numeric indicator does not cause an index-range error. A missing property is an ordinary result.",
+    "dependencies": ["==?", "EVAL", "PUTPROP"]
+  },
+  "PUTPROP": {
+    "required_evaluation_semantics": "Associate a value and return the item. With no value argument, remove an association and return the old value or MDL FALSE, per the manual.",
+    "identity_and_mutation": "Both selectors match by ==?. Numeric indicators do not write structure elements. Associations may disappear when keys become unreachable and no locative retains them.",
+    "error_behavior": "The item, indicator and value may be any MDL objects. An out-of-range FIX remains a valid association indicator.",
+    "dependencies": ["==?", "GC"]
+  },
+  "GET": {
+    "required_evaluation_semantics": "Use element access for a structured item and FIX or OFFSET selector, otherwise use association lookup.",
+    "identity_and_mutation": "The retrieval returns the selected object. Association keys match by ==?.",
+    "error_behavior": "An invalid element index fails. An association miss uses the supplied fallback or MDL FALSE.",
+    "dependencies": ["NTH", "GETPROP", "OFFSET"]
+  },
+  "PUT": {
+    "required_evaluation_semantics": "Use element mutation for a structured item and FIX or OFFSET selector, otherwise use association storage and removal.",
+    "identity_and_mutation": "Element writes preserve sharing with other views. Association keys match by ==?.",
+    "error_behavior": "Structure index errors still apply to the indexed branch.",
+    "deviation": "ADR-0023: two-argument association removal returns the item per pinned Confusion, whereas the manual specifies the removed value.",
+    "dependencies": ["PUTPROP", "AT", "SETLOC"]
+  },
+  "DECL?": {
+    "status": "ACCEPTED_DEVIATION",
+    "required_evaluation_semantics": "Test whether an object matches a declaration Pattern.",
+    "deviation": "ADR-0023 and M2 D3 preserve Confusion's diagnostic FALSE payload for element/pattern mismatches.",
+    "dependencies": ["DECL", "FALSE"]
+  },
+  "UNWIND": {
+    "required_evaluation_semantics": "Evaluate the primary expression. When an MDL in-flight transfer crosses the frame, evaluate cleanup in the original environment, ignore its result and continue the transfer.",
+    "identity_and_mutation": "Normal return leaves cleanup unevaluated. An actual cleanup may mutate objects.",
+    "dependencies": ["ENVIRONMENT", "FRAME", "RETURN"]
+  },
+  "PRINT": {
+    "required_evaluation_semantics": "Emit a newline, the read representation of the evaluated value and a following space. Return the evaluated value.",
+    "identity_and_mutation": "Returns the argument object and writes to the selected output CHANNEL.",
+    "dependencies": ["PRIN1", "OUTCHAN", "CHANNEL"]
+  },
+  "%": {
+    "required_evaluation_semantics": "During READ, evaluate the next object immediately and insert the resulting object in the read structure.",
+    "identity_and_mutation": "The evaluated result keeps its identity and side effects happen in source order.",
+    "dependencies": ["READ", "EVAL"]
+  },
+  "%%": {
+    "status": "UNSUPPORTED",
+    "required_evaluation_semantics": "During READ, evaluate the next object immediately, retain side effects and discard its value.",
+    "dependencies": ["READ", "EVAL", "%"]
+  },
+  "EVAL": {
+    "status": "UNSUPPORTED",
+    "required_evaluation_semantics": "Evaluate an MDL object in the supplied environment or the current one, using its evaluation type.",
+    "dependencies": ["ENVIRONMENT", "EVALTYPE"]
+  },
+  "SETLOC": {
+    "status": "UNSUPPORTED",
+    "required_evaluation_semantics": "Write an evaluated value to the storage location designated by a locative.",
+    "identity_and_mutation": "A change is visible to users of the corresponding location, including aliased views.",
+    "dependencies": ["AT", "IN", "LEGAL?"]
+  }
+}

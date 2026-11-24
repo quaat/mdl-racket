@@ -245,3 +245,7 @@ compare:
 
 reference-probe:
 	@$(PYTHON) -m scripts.mdl_probe --cases tests/scenarios/primitives.json --output artifacts/reference/primitives.json
+
+.PHONY: test-manual
+test-manual:
+	@$(PYTHON) scripts/test_manual.py --racket "$(RACKET)"

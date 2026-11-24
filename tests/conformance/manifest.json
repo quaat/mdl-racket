@@ -1,0 +1,1220 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "fix-literal",
+      "chapter": 2,
+      "section": "2.3",
+      "feature": "FIX literal",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/02-read-evaluate-print/#23-example-type-fix-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "1",
+      "expected": {
+        "result": {
+          "value": 1,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/02-read-evaluate-print.md#L64"
+    },
+    {
+      "id": "float-literal",
+      "chapter": 2,
+      "section": "2.4",
+      "feature": "FLOAT literal",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/02-read-evaluate-print/#24-example-type-float-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "1.0",
+      "expected": {
+        "result": {
+          "value": 1.0,
+          "type": "FLOAT",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/02-read-evaluate-print.md#L86"
+    },
+    {
+      "id": "atom-literal",
+      "chapter": 2,
+      "section": "2.5",
+      "feature": "ATOM literal",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/02-read-evaluate-print/#25-example-type-atom-pname-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "GEORGE",
+      "expected": {
+        "result": {
+          "value": "GEORGE",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/02-read-evaluate-print.md#L97"
+    },
+    {
+      "id": "add",
+      "chapter": 3,
+      "section": "3.4",
+      "feature": "+",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/03-built-in-functions/#34-examples--and-fix-arithmetic-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<+ 2 4 6>",
+      "expected": {
+        "result": {
+          "value": 12,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/03-built-in-functions.md#L70"
+    },
+    {
+      "id": "fix-cast",
+      "chapter": 3,
+      "section": "3.4",
+      "feature": "FIX",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/03-built-in-functions/#34-examples--and-fix-arithmetic-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<FIX 1.0>",
+      "expected": {
+        "result": {
+          "value": 1,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/03-built-in-functions.md#L70"
+    },
+    {
+      "id": "mixed-division",
+      "chapter": 3,
+      "section": "3.4",
+      "feature": "/",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/03-built-in-functions/#34-examples--and-fix-arithmetic-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "</ 11 7 2.0>",
+      "expected": {
+        "result": {
+          "value": 0.5,
+          "type": "FLOAT",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/03-built-in-functions.md#L70"
+    },
+    {
+      "id": "sqrt",
+      "chapter": 3,
+      "section": "3.4",
+      "feature": "SQRT",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/03-built-in-functions/#34-examples--and-fix-arithmetic-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<SQRT <+ <* 3 3> <* 4 4>>>",
+      "expected": {
+        "result": {
+          "value": 5.0,
+          "type": "FLOAT",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "gaps": {
+        "loader": {
+          "issue": "#177",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SQRT",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "line": 1,
+          "column": 1,
+          "expression_index": 1
+        },
+        "lang": {
+          "issue": "#177",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SQRT",
+          "output": ""
+        }
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/03-built-in-functions.md#L70"
+    },
+    {
+      "id": "setg",
+      "chapter": 4,
+      "section": "4.2.1",
+      "feature": "SETG",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/#421-setg-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<SETG FOO <SETG BAR 500>>",
+      "expected": {
+        "result": {
+          "value": 500,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 500,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": ",BAR",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/04-values-of-atoms.md#L16"
+    },
+    {
+      "id": "gval",
+      "chapter": 4,
+      "section": "4.2.2",
+      "feature": "GVAL",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/#422-gval-1",
+      "origin": "manual",
+      "setup": [
+        "<SETG FOO <SETG BAR 500>>",
+        "<SETG BAR FOO>"
+      ],
+      "expression": ",,BAR",
+      "expected": {
+        "result": {
+          "value": 500,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/04-values-of-atoms.md#L42"
+    },
+    {
+      "id": "value",
+      "chapter": 4,
+      "section": "4.4",
+      "feature": "VALUE",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/#44-value",
+      "origin": "adapted",
+      "setup": [
+        "<SET DOC-X 5>",
+        "<SETG DOC-X 9>"
+      ],
+      "expression": "<VALUE DOC-X>",
+      "expected": {
+        "result": {
+          "value": 5,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 9,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": "<GVAL DOC-X>",
+      "note": "Supplied candidate, using the precedence rule and isolated setup.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/04-values-of-atoms.md#L154"
+    },
+    {
+      "id": "binding-restoration",
+      "chapter": 5,
+      "section": "5.3",
+      "feature": "dynamic binding",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/05-simple-functions/#53-application-of-functions-binding-1",
+      "origin": "manual",
+      "setup": [
+        "<SET X 0>"
+      ],
+      "expression": "<#FUNCTION ((X) <SET X <* .X .X>>) 5>",
+      "expected": {
+        "result": {
+          "value": 25,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": ".X",
+      "gaps": {
+        "loader": {
+          "issue": "#178",
+          "exception": "mdl-compiler: 2:27: unsupported # reader token",
+          "output": "",
+          "classification": "compiler",
+          "stage": "compile",
+          "construct": "#FUNCTION",
+          "line": 2,
+          "column": 27,
+          "expression_index": 2
+        },
+        "lang": {
+          "issue": "#178",
+          "exception": "mdl-compiler: 3:27: unsupported # reader token",
+          "output": ""
+        }
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/05-simple-functions.md#L85"
+    },
+    {
+      "id": "named-binding-restoration",
+      "chapter": 5,
+      "section": "5.3",
+      "feature": "dynamic binding",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/05-simple-functions/#53-application-of-functions-binding-1",
+      "origin": "adapted",
+      "setup": [
+        "<SET X 0>",
+        "<DEFINE DOC-SQUARE-SET (X) <SET X <* .X .X>>>"
+      ],
+      "expression": "<DOC-SQUARE-SET 5>",
+      "expected": {
+        "result": {
+          "value": 25,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": ".X",
+      "note": "Uses DEFINE in place of the historical #FUNCTION reader literal.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/05-simple-functions.md#L85"
+    },
+    {
+      "id": "define",
+      "chapter": 5,
+      "section": "5.4",
+      "feature": "DEFINE",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/05-simple-functions/#54-defining-functions-function-and-define-1",
+      "origin": "adapted",
+      "setup": [
+        "<DEFINE DOC-SQUARE (X) <* .X .X>>"
+      ],
+      "expression": "<DOC-SQUARE 5>",
+      "expected": {
+        "result": {
+          "value": 25,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "note": "Supplied candidate, using a fresh name.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/05-simple-functions.md#L176"
+    },
+    {
+      "id": "repeated-setg",
+      "chapter": 5,
+      "section": "5.5",
+      "feature": "SETG",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/05-simple-functions/#55-examples-comments-1",
+      "origin": "authored",
+      "setup": [
+        "<DEFINE DOC-RESET () <SETG DOC-COUNT 0>>",
+        "<DEFINE DOC-STEP () <SETG DOC-COUNT <+ ,DOC-COUNT 1>>>",
+        "<DOC-RESET>",
+        "<DOC-STEP>"
+      ],
+      "expression": "<DOC-STEP>",
+      "expected": {
+        "result": {
+          "value": 2,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "note": "Supplied candidate, isolates persistence across function calls.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/05-simple-functions.md#L234"
+    },
+    {
+      "id": "nested-lval",
+      "chapter": 5,
+      "section": "5.5",
+      "feature": "nested LVAL",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/05-simple-functions/#55-examples-comments-1",
+      "origin": "adapted",
+      "setup": [
+        "<DEFINE DOC-INC (TARGET) <SET .TARGET <+ ..TARGET 1>>>",
+        "<SET DOC-A 0>",
+        "<DOC-INC DOC-A>",
+        "<DOC-INC DOC-A>"
+      ],
+      "expression": ".DOC-A",
+      "expected": {
+        "result": {
+          "value": 2,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "gaps": {
+        "loader": {
+          "issue": "#134",
+          "exception": "mdl-reader: .*nested-lval\\.mud:1:\\d+: \\.\\.name: LVAL argument must be an ATOM, not a compound form",
+          "output": "",
+          "classification": "reader",
+          "stage": "parse",
+          "construct": "file",
+          "line": 1,
+          "column": 50,
+          "expression_index": 1
+        },
+        "lang": {
+          "issue": "#134",
+          "exception": "mdl-reader: .*nested-lval\\.mud:2:\\d+: \\.\\.name: LVAL argument must be an ATOM, not a compound form",
+          "output": ""
+        }
+      },
+      "note": "Supplied candidate, with renamed bindings.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/05-simple-functions.md#L234"
+    },
+    {
+      "id": "builtin-type",
+      "chapter": 6,
+      "section": "6.3.1",
+      "feature": "TYPE",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/06-data-types/#631-type-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<TYPE ,+>",
+      "expected": {
+        "result": {
+          "value": "SUBR",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/06-data-types.md#L45"
+    },
+    {
+      "id": "float-primtype",
+      "chapter": 6,
+      "section": "6.3.2",
+      "feature": "PRIMTYPE",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/06-data-types/#632-primtype-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<PRIMTYPE 1.0>",
+      "expected": {
+        "result": {
+          "value": "WORD",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/06-data-types.md#L70"
+    },
+    {
+      "id": "evaluated-list",
+      "chapter": 7,
+      "section": "7.4",
+      "feature": "LIST evaluation",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/07-structured-objects/#74-examples-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "(1 2 <+ 3 4>)",
+      "expected": {
+        "result": {
+          "value": [
+            {
+              "value": 1,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": 2,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": 7,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "LIST",
+          "primtype": "LIST"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/07-structured-objects.md#L165"
+    },
+    {
+      "id": "shared-rest",
+      "chapter": 7,
+      "section": "7.4",
+      "feature": "REST",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/07-structured-objects/#74-examples-1",
+      "origin": "authored",
+      "setup": [
+        "<SET DOC-L (1 2 3)>",
+        "<PUT <REST .DOC-L> 1 19>"
+      ],
+      "expression": "<NTH .DOC-L 2>",
+      "expected": {
+        "result": {
+          "value": 19,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": [
+            {
+              "value": 1,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": 19,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": 3,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "LIST",
+          "primtype": "LIST"
+        },
+        "output": ""
+      },
+      "effect_expression": ".DOC-L",
+      "note": "Supplied candidate isolates a shared tail mutation.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/07-structured-objects.md#L165"
+    },
+    {
+      "id": "empty-form",
+      "chapter": 8,
+      "section": "8.1",
+      "feature": "FALSE",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/08-truth/#81-truth-values-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<>",
+      "expected": {
+        "result": {
+          "value": [],
+          "type": "FALSE",
+          "primtype": "LIST"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/08-truth.md#L3"
+    },
+    {
+      "id": "and-false-payload",
+      "chapter": 8,
+      "section": "8.4.1",
+      "feature": "AND",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/08-truth/#841-and-and-or-as-short-conds",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<AND 3 #FALSE (1) 7>",
+      "expected": {
+        "result": {
+          "value": [
+            {
+              "value": 1,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "FALSE",
+          "primtype": "LIST"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "note": "Supplied candidate checks that AND returns the original FALSE payload.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/08-truth.md#L267"
+    },
+    {
+      "id": "member-string",
+      "chapter": 8,
+      "section": "8.2.2",
+      "feature": "MEMBER",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/08-truth/#822-equality-and-membership-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<MEMBER \"PART\" \"SUM OF PARTS\">",
+      "expected": {
+        "result": {
+          "value": "PARTS",
+          "type": "STRING",
+          "primtype": "STRING"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/08-truth.md#L56"
+    },
+    {
+      "id": "sequential-aux",
+      "chapter": 9,
+      "section": "9.3",
+      "feature": "AUX",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/09-functions/#93-aux-1",
+      "origin": "manual",
+      "setup": [
+        "<DEFINE AUXEX (\"TUPLE\" T\n                 \"AUX\" (A <LENGTH .T>) (B <* 2 .A>))\n        ![.A .B]>"
+      ],
+      "expression": "<AUXEX 1 2 \"FOO\">",
+      "expected": {
+        "result": {
+          "value": [
+            {
+              "value": 3,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": 6,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "UVECTOR",
+          "primtype": "UVECTOR"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/09-functions.md#L164"
+    },
+    {
+      "id": "eval",
+      "chapter": 9,
+      "section": "9.7",
+      "feature": "EVAL",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/09-functions/#97-eval-and-bind",
+      "origin": "manual",
+      "setup": [
+        "<SET F '<+ 1 2>>"
+      ],
+      "expression": "<EVAL .F>",
+      "expected": {
+        "result": {
+          "value": 3,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "gaps": {
+        "loader": {
+          "issue": "#177",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator EVAL",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "line": 2,
+          "column": 1,
+          "expression_index": 2
+        },
+        "lang": {
+          "issue": "#177",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator EVAL",
+          "output": ""
+        }
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/09-functions.md#L254"
+    },
+    {
+      "id": "mapf-string",
+      "chapter": 10,
+      "section": "10.2.3",
+      "feature": "MAPF",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/10-looping/#1023-examples-1",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<MAPF ,STRING 1 '[\"MODELING\" \"DEVELOPMENT\" \"LIBRARY\"]>",
+      "expected": {
+        "result": {
+          "value": "MDL",
+          "type": "STRING",
+          "primtype": "STRING"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/10-looping.md#L186"
+    },
+    {
+      "id": "princ",
+      "chapter": 11,
+      "section": "11.1.2.3",
+      "feature": "PRINC",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/11-input-output/#11123-princ",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<PRINC \"MDL\">",
+      "expected": {
+        "result": {
+          "value": "MDL",
+          "type": "STRING",
+          "primtype": "STRING"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": "MDL"
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/11-input-output.md#L92"
+    },
+    {
+      "id": "print",
+      "chapter": 11,
+      "section": "11.1.2.1",
+      "feature": "PRINT",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/11-input-output/#11121-print",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<PRINT 17>",
+      "expected": {
+        "result": {
+          "value": 17,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": "\n17 "
+      },
+      "gaps": {
+        "loader": {
+          "issue": "#173",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PRINT",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "line": 1,
+          "column": 1,
+          "expression_index": 1
+        },
+        "lang": {
+          "issue": "#173",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PRINT",
+          "output": ""
+        }
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/11-input-output.md#L72"
+    },
+    {
+      "id": "setloc",
+      "chapter": 12,
+      "section": "12.3.2",
+      "feature": "SETLOC",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/12-locatives/#1232-setloc",
+      "origin": "authored",
+      "setup": [
+        "<SET DOC-L (1 2 3)>",
+        "<SETLOC <AT .DOC-L 2> DOC-HI>"
+      ],
+      "expression": "<NTH .DOC-L 2>",
+      "expected": {
+        "result": {
+          "value": "DOC-HI",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "gaps": {
+        "loader": {
+          "issue": "#177",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SETLOC",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETLOC",
+          "line": 2,
+          "column": 1,
+          "expression_index": 2
+        },
+        "lang": {
+          "issue": "#177",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator SETLOC",
+          "output": ""
+        }
+      },
+      "note": "Supplied candidate. The missing outer operator stops evaluation before AT.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/12-locatives.md#L111"
+    },
+    {
+      "id": "association",
+      "chapter": 13,
+      "section": "13.3",
+      "feature": "GET",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/13-association-properties/#133-examples-of-association",
+      "origin": "manual",
+      "setup": [
+        "<SET L '(1 2 3 4)>",
+        "<PUT .L FOO \"L is a list.\">"
+      ],
+      "expression": "<GET .L FOO>",
+      "expected": {
+        "result": {
+          "value": "L is a list.",
+          "type": "STRING",
+          "primtype": "STRING"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/13-association-properties.md#L70"
+    },
+    {
+      "id": "numeric-get",
+      "chapter": 13,
+      "section": "13.3",
+      "feature": "GET",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/13-association-properties/#133-examples-of-association",
+      "origin": "manual",
+      "setup": [
+        "<SET L '(1 2 3 4)>"
+      ],
+      "expression": "<GET .L 3>",
+      "expected": {
+        "result": {
+          "value": 3,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/13-association-properties.md#L70"
+    },
+    {
+      "id": "explicit-properties",
+      "chapter": 13,
+      "section": "13.3",
+      "feature": "PUTPROP/GETPROP",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/13-association-properties/#133-examples-of-association",
+      "origin": "manual",
+      "setup": [
+        "<SET L '(1 2 3 4)>",
+        "<PUTPROP .L 3 '![4]>"
+      ],
+      "expression": "<GETPROP .L 3>",
+      "expected": {
+        "result": {
+          "value": [
+            {
+              "value": 4,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "UVECTOR",
+          "primtype": "UVECTOR"
+        },
+        "effect": {
+          "value": 3,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": "<GET .L 3>",
+      "gaps": {
+        "loader": {
+          "issue": "#179",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PUTPROP",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "PUTPROP",
+          "line": 2,
+          "column": 1,
+          "expression_index": 2
+        },
+        "lang": {
+          "issue": "#179",
+          "exception": "mdl-eval: unassigned or non-applicable MDL operator PUTPROP",
+          "output": ""
+        }
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/13-association-properties.md#L70"
+    },
+    {
+      "id": "declaration-match",
+      "chapter": 14,
+      "section": "14.7.4",
+      "feature": "DECL?",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/#1474-decl",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<DECL? '[1 2 3] '<VECTOR [REST FIX]>>",
+      "expected": {
+        "result": {
+          "value": "T",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/14-data-type-declarations.md#L573"
+    },
+    {
+      "id": "declaration-miss",
+      "chapter": 14,
+      "section": "14.7.4",
+      "feature": "DECL?",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/14-data-type-declarations/#1474-decl",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<DECL? '[1 2.0 3.0] '<VECTOR [REST FIX]>>",
+      "expected": {
+        "result": {
+          "type": "FALSE",
+          "primtype": "LIST",
+          "value": [
+            {
+              "type": "FLOAT",
+              "primtype": "WORD",
+              "value": 2.0
+            },
+            {
+              "type": "ATOM",
+              "primtype": "ATOM",
+              "value": "FIX"
+            }
+          ]
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "manual_expected": {
+        "value": [],
+        "type": "FALSE",
+        "primtype": "LIST"
+      },
+      "note": "ADR-0023 and the M2 D3 ledger preserve the pinned Confusion element/pattern diagnostic payload.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/14-data-type-declarations.md#L573"
+    },
+    {
+      "id": "atom-pname",
+      "chapter": 15,
+      "section": "15.7.7",
+      "feature": "PNAME",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/15-lexical-blocking/#1577-pname",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<PNAME SAMPLE>",
+      "expected": {
+        "result": {
+          "value": "SAMPLE",
+          "type": "STRING",
+          "primtype": "STRING"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/15-lexical-blocking.md#L301"
+    },
+    {
+      "id": "unwind-normal",
+      "chapter": 16,
+      "section": "16.6",
+      "feature": "UNWIND",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/16-errors-frames-etc/#166-unwind",
+      "origin": "authored",
+      "setup": [
+        "<SET OBSERVED 1>"
+      ],
+      "expression": "<UNWIND <+ .OBSERVED 2> <SET OBSERVED 9>>",
+      "expected": {
+        "result": {
+          "value": 3,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 1,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": ".OBSERVED",
+      "note": "A normal return must leave the cleanup unevaluated.",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/16-errors-frames-etc.md#L200"
+    },
+    {
+      "id": "double-percent",
+      "chapter": 17,
+      "section": "17.1.1",
+      "feature": "%%",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/17-macro-operations/#1711--and-",
+      "origin": "manual",
+      "setup": [
+        "<DEFINE SETUP () <SET A 0>>",
+        "<DEFINE NXT () <SET A <+ .A 1>>>"
+      ],
+      "expression": "[%%<SETUP> %<NXT> %<NXT> (%%<SETUP>) %<NXT>]",
+      "expected": {
+        "result": {
+          "value": [
+            {
+              "value": 1,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": 2,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": [],
+              "type": "LIST",
+              "primtype": "LIST"
+            },
+            {
+              "value": 1,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "VECTOR",
+          "primtype": "VECTOR"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "gaps": {
+        "loader": {
+          "issue": "#178",
+          "exception": "mdl-reader: .*double-percent\\.mud:3:\\d+: unsupported %% reader macro",
+          "output": "",
+          "classification": "reader",
+          "stage": "parse",
+          "construct": "file",
+          "line": 3,
+          "column": 28,
+          "expression_index": 3
+        },
+        "lang": {
+          "issue": "#178",
+          "exception": "mdl-compiler: 4:27: unsupported percent reader macro",
+          "output": ""
+        }
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/17-macro-operations.md#L5"
+    },
+    {
+      "id": "macro-increment",
+      "chapter": 17,
+      "section": "17.2.1",
+      "feature": "DEFMAC",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/17-macro-operations/#1721-defmac-and-expand",
+      "origin": "manual",
+      "setup": [
+        "<DEFMAC INC (ATM \"OPTIONAL\" (N 1))\n        #DECL ((VALUE) FORM (ATM) ATOM (N) <OR FIX FLOAT>)\n        <FORM SET .ATM <FORM + <FORM LVAL .ATM> .N>>>",
+        "<SET X 1>"
+      ],
+      "expression": "<INC X>",
+      "expected": {
+        "result": {
+          "value": 2,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 2,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": ".X",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/17-macro-operations.md#L236"
+    },
+    {
+      "id": "getbits",
+      "chapter": 18,
+      "section": "18.3",
+      "feature": "GETBITS",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/18-machine-words-and-bits/#183-getbits",
+      "origin": "manual",
+      "setup": [],
+      "expression": "<GETBITS #WORD *777777777777* <BITS 3>>",
+      "expected": {
+        "result": {
+          "value": 7,
+          "type": "WORD",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/18-machine-words-and-bits.md#L70"
+    }
+  ]
+}
