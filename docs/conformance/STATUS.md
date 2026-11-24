@@ -72,3 +72,35 @@ fallback evaluation, but disagree on the explicit removal result. The
 [preflight record](../evidence/L1-properties/PREFLIGHT.md) gives the observed
 results, options and recommendation. Resolving that decision and completing
 L0 are prerequisites for implementation.
+
+## PR #180 infrastructure hardening
+
+The inventory now describes a **historical** runtime snapshot. The generator
+reads the manual, runtime declarations, existing tests and lexical evidence
+from pinned Git objects. Moving lines before a declaration preserves the
+candidate names and updates their source locations. The live workflow
+runs the fixture corpus on every checkout of the shared runtime.
+
+The evidence schema binds each expected and observed result to a canonical
+fixture digest and one execution mode. It requires exactly one result per
+fixture/mode pair. Retained results also name the exact runtime and runner
+commits and digests, the manual revision and the observed toolchain. Native
+agreement refers to a specific fixture, observation and reference binary.
+Fixture changes require new observations and, where appropriate, renewed
+native review. A runtime change is tested live without changing the
+historical inventory.
+
+The next L0 slice after infrastructure integration is the chapter-by-chapter
+classification in #178. Keep operator, reader, type, error, transcript and
+platform denominators separate. Existing semantic contracts and test paths
+should be linked from the inventory where evidence is available. The
+remaining historical platform examples and every unclassified transcript
+candidate still need review before L0 acceptance.
+
+Racket 9.3 CS custom-port compatibility is tracked independently in
+[#181](https://github.com/quaat/mdl-racket/issues/181). The remaining manual
+gaps have scoped owners for
+[SQRT #182](https://github.com/quaat/mdl-racket/issues/182),
+[reader literals and macros #183](https://github.com/quaat/mdl-racket/issues/183),
+[EVAL and environments #184](https://github.com/quaat/mdl-racket/issues/184)
+and [locatives #185](https://github.com/quaat/mdl-racket/issues/185).

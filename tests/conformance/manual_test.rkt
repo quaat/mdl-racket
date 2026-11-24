@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require json racket/match racket/path
+(require json racket/match racket/path racket/runtime-path
          "../../mdl/loader.rkt" "../../mdl/runtime/core.rkt")
 
 ;; One process and one temporary source root per case and execution path.
@@ -25,6 +25,7 @@
 (define file (path->complete-path filename))
 (define result-port (current-output-port))
 (define output (open-output-string))
+(define-runtime-path project-root "../..")
 (define (observations get call)
   (hash 'result (describe (get "CONFORMANCE-RESULT") call)
         'effect (describe (get "CONFORMANCE-EFFECT") call)))
@@ -51,13 +52,23 @@
       [(equal? mode "lang")
        ;; The instantiation is eligible for a fixture diagnostic. A failure
        ;; while observing the result must fail the entire worker process.
-       (define failure
-         (with-handlers ([exn:fail? (lambda (e) (exn-message e))])
-           (dynamic-require file #f)
-           #f))
-       (if failure
-           (hash 'status "FAIL" 'failure (hash 'exception failure))
-           (observations mdl-gval mdl-apply))]
+       (parameterize ([current-library-collection-paths
+                       (cons project-root (current-library-collection-paths))])
+         ;; An ambient link to another MDL installation must not influence
+         ;; a result attributed to this checkout's runtime digest.
+         (for ([name '("reader.rkt" "main.rkt")])
+           (unless (equal? (file-or-directory-identity (collection-file-path name "mdl" "lang"))
+                           (file-or-directory-identity (build-path project-root "mdl" "lang" name)))
+             (error 'manual-test "frontend resolved outside this checkout: ~a" name)))
+         (define failure
+           (with-handlers ([exn:fail? (lambda (e) (exn-message e))])
+             (dynamic-require file #f)
+             #f))
+         (if failure
+             (hash 'status "FAIL" 'failure (hash 'exception failure))
+             (observations mdl-gval mdl-apply)))]
       [else (error 'manual-test "unknown execution path ~a" mode)])))
-(write-json (hash-set report 'output (get-output-string output)) result-port)
+(write-json (hash 'schema_version 1
+                  'observation (hash-set report 'output (get-output-string output)))
+            result-port)
 (newline result-port)

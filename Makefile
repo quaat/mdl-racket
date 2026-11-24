@@ -249,3 +249,7 @@ reference-probe:
 .PHONY: test-manual
 test-manual:
 	@$(PYTHON) scripts/test_manual.py --racket "$(RACKET)"
+
+.PHONY: test-conformance-harness
+test-conformance-harness:
+	@$(PYTHON) -m pytest -q tests/conformance

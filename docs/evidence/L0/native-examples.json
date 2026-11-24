@@ -1,11 +1,21 @@
 {
-  "schema_version": 1,
-  "source_commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
-  "exe_sha256": "da8472a991a8f2fe109c117cfe00c6207edb5bb8d9033dfe36f1e2d478380f68",
+  "schema_version": 2,
+  "provenance": {
+    "manifest_version": 2,
+    "manifest_sha256": "180468097b091217d0eeafd7b666158721bf153ad860948b3221975376966040",
+    "manual_revision": "89707367b951ea79bedc71f51ab213886e0f62ce",
+    "reference_revision": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+    "exe_sha256": "da8472a991a8f2fe109c117cfe00c6207edb5bb8d9033dfe36f1e2d478380f68",
+    "toolchain": {
+      "python": "3.13.5",
+      "machine": "x86_64"
+    }
+  },
   "protocol": "Bare Confusion, empty working directory per case, TZ=UTC, default RNG, final QUIT",
   "observations": [
     {
-      "name": "fix-literal",
+      "id": "fix-literal",
+      "fixture_sha256": "cda8a4865b93c0c5affccc8ed05834c23af078dd6ca526081300208a5398b350",
       "input": "1\n<QUIT>\n",
       "result_output": "1\n",
       "stderr": "",
@@ -13,7 +23,8 @@
       "ok": true
     },
     {
-      "name": "float-literal",
+      "id": "float-literal",
+      "fixture_sha256": "d294ff5de7bd751621e3c510e995da5603c7139019851b02926b59672078ce86",
       "input": "1.0\n<QUIT>\n",
       "result_output": "1.0000000\n",
       "stderr": "",
@@ -21,7 +32,8 @@
       "ok": true
     },
     {
-      "name": "atom-literal",
+      "id": "atom-literal",
+      "fixture_sha256": "4ff595f0491f5c6782cb4c3d67366070df48a375179c120b30821d4fa165eb40",
       "input": "GEORGE\n<QUIT>\n",
       "result_output": "GEORGE\n",
       "stderr": "",
@@ -29,7 +41,8 @@
       "ok": true
     },
     {
-      "name": "add",
+      "id": "add",
+      "fixture_sha256": "7e37bbe9e908fd80eaa0e35126af08ae8c0186dcfe3d2e0ba8abc72f04a98cc5",
       "input": "<+ 2 4 6>\n<QUIT>\n",
       "result_output": "12\n",
       "stderr": "",
@@ -37,7 +50,8 @@
       "ok": true
     },
     {
-      "name": "fix-cast",
+      "id": "fix-cast",
+      "fixture_sha256": "ec5fd8d83855d2fe36871648f6a95ab471efb233b2779278c69f21503793bf07",
       "input": "<FIX 1.0>\n<QUIT>\n",
       "result_output": "1\n",
       "stderr": "",
@@ -45,7 +59,8 @@
       "ok": true
     },
     {
-      "name": "mixed-division",
+      "id": "mixed-division",
+      "fixture_sha256": "7c3f3a218535ce3b6d7c233a65d12321ea571844639e6d3932650005e7616f53",
       "input": "</ 11 7 2.0>\n<QUIT>\n",
       "result_output": "0.5000000\n",
       "stderr": "",
@@ -53,7 +68,8 @@
       "ok": true
     },
     {
-      "name": "sqrt",
+      "id": "sqrt",
+      "fixture_sha256": "a2daeaaabb66be7973d7d3d121796ef6ff30c011193a3aa5caf93d083e65e765",
       "input": "<SQRT <+ <* 3 3> <* 4 4>>>\n<QUIT>\n",
       "result_output": "\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n SQRT \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
       "stderr": "Atom REP has neither LVAL nor GVAL\n",
@@ -61,7 +77,8 @@
       "ok": false
     },
     {
-      "name": "setg",
+      "id": "setg",
+      "fixture_sha256": "592060eeed0e1dea5c8bd951f60c6716a21d1770856207dcf15d5e5b2289f410",
       "input": "<SETG FOO <SETG BAR 500>>\n,BAR\n<QUIT>\n",
       "result_output": "500\n500\n",
       "stderr": "",
@@ -69,7 +86,8 @@
       "ok": true
     },
     {
-      "name": "gval",
+      "id": "gval",
+      "fixture_sha256": "c2824375153a2ab0dea931dee7ad9a3b8f99778d5f441d38236dd15fc10788bf",
       "input": "<SETG FOO <SETG BAR 500>>\n<SETG BAR FOO>\n,,BAR\n<QUIT>\n",
       "result_output": "500\nFOO\n500\n",
       "stderr": "",
@@ -77,7 +95,8 @@
       "ok": true
     },
     {
-      "name": "value",
+      "id": "value",
+      "fixture_sha256": "30b685fdcaeb59f613e30c97e21fefd4f9c2d6153d0d73358e87761cc646055a",
       "input": "<SET DOC-X 5>\n<SETG DOC-X 9>\n<VALUE DOC-X>\n<GVAL DOC-X>\n<QUIT>\n",
       "result_output": "5\n9\n5\n9\n",
       "stderr": "",
@@ -85,7 +104,8 @@
       "ok": true
     },
     {
-      "name": "binding-restoration",
+      "id": "binding-restoration",
+      "fixture_sha256": "7b1d75e47ef5d1baa897e72a201691072dc31d1e317cb7d730a1fc517a2e7aab",
       "input": "<SET X 0>\n<#FUNCTION ((X) <SET X <* .X .X>>) 5>\n.X\n<QUIT>\n",
       "result_output": "0\n25\n0\n",
       "stderr": "",
@@ -93,7 +113,8 @@
       "ok": true
     },
     {
-      "name": "named-binding-restoration",
+      "id": "named-binding-restoration",
+      "fixture_sha256": "c8f44c4f5e980e4784a50371050b455278228ce890582a67db6bdd26a18a5c3b",
       "input": "<SET X 0>\n<DEFINE DOC-SQUARE-SET (X) <SET X <* .X .X>>>\n<DOC-SQUARE-SET 5>\n.X\n<QUIT>\n",
       "result_output": "0\nDOC-SQUARE-SET\n25\n0\n",
       "stderr": "",
@@ -101,7 +122,8 @@
       "ok": true
     },
     {
-      "name": "define",
+      "id": "define",
+      "fixture_sha256": "202dedae6b41c9b9e5a5488080e2692fa6093523a5495b267a7dad6f67f3bd81",
       "input": "<DEFINE DOC-SQUARE (X) <* .X .X>>\n<DOC-SQUARE 5>\n<QUIT>\n",
       "result_output": "DOC-SQUARE\n25\n",
       "stderr": "",
@@ -109,7 +131,8 @@
       "ok": true
     },
     {
-      "name": "repeated-setg",
+      "id": "repeated-setg",
+      "fixture_sha256": "4343eb7b2cd8e8f1f6ae3ce8fc5fd6fc4744845650aa82d7ee4cc264e2df116d",
       "input": "<DEFINE DOC-RESET () <SETG DOC-COUNT 0>>\n<DEFINE DOC-STEP () <SETG DOC-COUNT <+ ,DOC-COUNT 1>>>\n<DOC-RESET>\n<DOC-STEP>\n<DOC-STEP>\n<QUIT>\n",
       "result_output": "DOC-RESET\nDOC-STEP\n0\n1\n2\n",
       "stderr": "",
@@ -117,7 +140,8 @@
       "ok": true
     },
     {
-      "name": "nested-lval",
+      "id": "nested-lval",
+      "fixture_sha256": "5a6a6d5ce1b917b0c23febeaaeb54376c3904574c0ddbee4138f8d9d3f1c822e",
       "input": "<DEFINE DOC-INC (TARGET) <SET .TARGET <+ ..TARGET 1>>>\n<SET DOC-A 0>\n<DOC-INC DOC-A>\n<DOC-INC DOC-A>\n.DOC-A\n<QUIT>\n",
       "result_output": "DOC-INC\n0\n1\n2\n2\n",
       "stderr": "",
@@ -125,7 +149,8 @@
       "ok": true
     },
     {
-      "name": "builtin-type",
+      "id": "builtin-type",
+      "fixture_sha256": "7d36e54a0bf8cc5894cd1c6beb9e7da0039957dcd66827a324830b782ea5bee5",
       "input": "<TYPE ,+>\n<QUIT>\n",
       "result_output": "SUBR\n",
       "stderr": "",
@@ -133,7 +158,8 @@
       "ok": true
     },
     {
-      "name": "float-primtype",
+      "id": "float-primtype",
+      "fixture_sha256": "ea66e7a9097d72a05b31de2e52b81ad0567204ae203db9fafafc4e921af7c562",
       "input": "<PRIMTYPE 1.0>\n<QUIT>\n",
       "result_output": "WORD\n",
       "stderr": "",
@@ -141,7 +167,8 @@
       "ok": true
     },
     {
-      "name": "evaluated-list",
+      "id": "evaluated-list",
+      "fixture_sha256": "356d2c1e752cb893eadfccd4105e90d245a357ae52cb6c0cb52dea0dbbf47d22",
       "input": "(1 2 <+ 3 4>)\n<QUIT>\n",
       "result_output": "(1 2 7)\n",
       "stderr": "",
@@ -149,7 +176,8 @@
       "ok": true
     },
     {
-      "name": "shared-rest",
+      "id": "shared-rest",
+      "fixture_sha256": "afd524253a92255efb59ce169e7e2099ec19a55bd6e2f863fdaa1d9118b455c7",
       "input": "<SET DOC-L (1 2 3)>\n<PUT <REST .DOC-L> 1 19>\n<NTH .DOC-L 2>\n.DOC-L\n<QUIT>\n",
       "result_output": "(1 2 3)\n(19 3)\n19\n(1 19 3)\n",
       "stderr": "",
@@ -157,7 +185,8 @@
       "ok": true
     },
     {
-      "name": "nth-past-end",
+      "id": "nth-past-end",
+      "fixture_sha256": "f4bce74a96ababcf3295bf4a55135c971afb6fb3b92c3e1074326b2f7cb1978e",
       "input": "<NTH (1 2) 3>\n<QUIT>\n",
       "result_output": "\n *ERROR* \n \"ARGUMENT-OUT-OF-RANGE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
       "stderr": "Atom REP has neither LVAL nor GVAL\n",
@@ -165,7 +194,8 @@
       "ok": false
     },
     {
-      "name": "empty-form",
+      "id": "empty-form",
+      "fixture_sha256": "88b2a87b8a14d0ce8ce51675517bea6486eeefa1a762f75dddc5885d040378b7",
       "input": "<>\n<QUIT>\n",
       "result_output": "#FALSE ()\n",
       "stderr": "",
@@ -173,7 +203,8 @@
       "ok": true
     },
     {
-      "name": "and-false-payload",
+      "id": "and-false-payload",
+      "fixture_sha256": "f4992053af82fb6370a99fe35559bda544b364ff1ca7f21537bb993817b37e77",
       "input": "<AND 3 #FALSE (1) 7>\n<QUIT>\n",
       "result_output": "#FALSE (1)\n",
       "stderr": "",
@@ -181,7 +212,8 @@
       "ok": true
     },
     {
-      "name": "member-string",
+      "id": "member-string",
+      "fixture_sha256": "b40c103d779d1efcff0a03f9694e78ad27ee3662c42f1d15a823f4a949e5b864",
       "input": "<MEMBER \"PART\" \"SUM OF PARTS\">\n<QUIT>\n",
       "result_output": "\"PARTS\"\n",
       "stderr": "",
@@ -189,7 +221,8 @@
       "ok": true
     },
     {
-      "name": "sequential-aux",
+      "id": "sequential-aux",
+      "fixture_sha256": "f048d9ac14038f32daa07b3fd0d1149444b90d29e4ace736bba5a0ebff9b145a",
       "input": "<DEFINE AUXEX (\"TUPLE\" T\n                 \"AUX\" (A <LENGTH .T>) (B <* 2 .A>))\n        ![.A .B]>\n<AUXEX 1 2 \"FOO\">\n<QUIT>\n",
       "result_output": "AUXEX\n![3 6!]\n",
       "stderr": "",
@@ -197,7 +230,8 @@
       "ok": true
     },
     {
-      "name": "eval",
+      "id": "eval",
+      "fixture_sha256": "a6070af4adfd3080043581e69ee3d28120108adf6e61f45540308573667b49c2",
       "input": "<SET F '<+ 1 2>>\n<EVAL .F>\n<QUIT>\n",
       "result_output": "<+ 1 2>\n3\n",
       "stderr": "",
@@ -205,7 +239,8 @@
       "ok": true
     },
     {
-      "name": "mapf-string",
+      "id": "mapf-string",
+      "fixture_sha256": "599c44b25ac6f981e5ad90efa82b15d3188614695c85c48332501e839911897d",
       "input": "<MAPF ,STRING 1 '[\"MODELING\" \"DEVELOPMENT\" \"LIBRARY\"]>\n<QUIT>\n",
       "result_output": "\"MDL\"\n",
       "stderr": "",
@@ -213,7 +248,8 @@
       "ok": true
     },
     {
-      "name": "princ",
+      "id": "princ",
+      "fixture_sha256": "9e23ec6f7bf2e105bb2a5d34ec576e12c7b93c95224ad646732a027514fd492a",
       "input": "<PRINC \"MDL\">\n<QUIT>\n",
       "result_output": "MDL\"MDL\"\n",
       "stderr": "",
@@ -221,7 +257,8 @@
       "ok": true
     },
     {
-      "name": "print",
+      "id": "print",
+      "fixture_sha256": "24675528d183c6bce2eb35ce0958cc388a4739cb1177d25e24240a0ab91138b2",
       "input": "<PRINT 17>\n<QUIT>\n",
       "result_output": "\n17 17\n",
       "stderr": "",
@@ -229,7 +266,8 @@
       "ok": true
     },
     {
-      "name": "setloc",
+      "id": "setloc",
+      "fixture_sha256": "ffb9f4f2f1946e9f032a2331143bd4b2802e04cd7acc73e6f99fd7b0ac3f3d5f",
       "input": "<SET DOC-L (1 2 3)>\n<SETLOC <AT .DOC-L 2> DOC-HI>\n<NTH .DOC-L 2>\n<QUIT>\n",
       "result_output": "(1 2 3)\n\n *ERROR* \n \"UNBOUND-VARIABLE\" \n \"In apply of form\" \n SETLOC \nLISTENING-AT-LEVEL 2 PROCESS 1\n2\n",
       "stderr": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n",
@@ -237,7 +275,8 @@
       "ok": false
     },
     {
-      "name": "association",
+      "id": "association",
+      "fixture_sha256": "0bfa85a90ecbc445851c4cebd8b6ff7de63de9672512e378a86270eadc4df1cc",
       "input": "<SET L '(1 2 3 4)>\n<PUT .L FOO \"L is a list.\">\n<GET .L FOO>\n<QUIT>\n",
       "result_output": "(1 2 3 4)\n(1 2 3 4)\n\"L is a list.\"\n",
       "stderr": "",
@@ -245,7 +284,8 @@
       "ok": true
     },
     {
-      "name": "numeric-get",
+      "id": "numeric-get",
+      "fixture_sha256": "3d6ad8718ee877dff8290c1f5e847c526a0b0fdf2e6698dc979db908e315e6c0",
       "input": "<SET L '(1 2 3 4)>\n<GET .L 3>\n<QUIT>\n",
       "result_output": "(1 2 3 4)\n3\n",
       "stderr": "",
@@ -253,7 +293,8 @@
       "ok": true
     },
     {
-      "name": "explicit-properties",
+      "id": "explicit-properties",
+      "fixture_sha256": "8b74294b10eb652b2f9b4df472343f98652af55c48a7dd707fe5887048e98fb8",
       "input": "<SET L '(1 2 3 4)>\n<PUTPROP .L 3 '![4]>\n<GETPROP .L 3>\n<GET .L 3>\n<QUIT>\n",
       "result_output": "(1 2 3 4)\n(1 2 3 4)\n![4!]\n3\n",
       "stderr": "",
@@ -261,7 +302,8 @@
       "ok": true
     },
     {
-      "name": "declaration-match",
+      "id": "declaration-match",
+      "fixture_sha256": "33bd2f911022cceb55fba5eaa063b66e90b23b497001c546aaf682325f2caa4c",
       "input": "<DECL? '[1 2 3] '<VECTOR [REST FIX]>>\n<QUIT>\n",
       "result_output": "T\n",
       "stderr": "",
@@ -269,7 +311,8 @@
       "ok": true
     },
     {
-      "name": "declaration-miss",
+      "id": "declaration-miss",
+      "fixture_sha256": "e4fed00b114aee4c4c60879b3fa2787c27d7f0c37b20099a5695a85c72cee22b",
       "input": "<DECL? '[1 2.0 3.0] '<VECTOR [REST FIX]>>\n<QUIT>\n",
       "result_output": "#FALSE (2.0000000 FIX)\n",
       "stderr": "",
@@ -277,7 +320,8 @@
       "ok": true
     },
     {
-      "name": "atom-pname",
+      "id": "atom-pname",
+      "fixture_sha256": "e842ea74cb14fb338a8444602f2d503caf01da5b75f200337a8554125d7e4123",
       "input": "<PNAME SAMPLE>\n<QUIT>\n",
       "result_output": "\"SAMPLE\"\n",
       "stderr": "",
@@ -285,7 +329,8 @@
       "ok": true
     },
     {
-      "name": "unwind-normal",
+      "id": "unwind-normal",
+      "fixture_sha256": "4b0e29c0a834a9b1a1fa17b637c1ab24302d49e1317e13f08fb605cf0d7d9dc1",
       "input": "<SET OBSERVED 1>\n<UNWIND <+ .OBSERVED 2> <SET OBSERVED 9>>\n.OBSERVED\n<QUIT>\n",
       "result_output": "1\n3\n1\n",
       "stderr": "",
@@ -293,7 +338,8 @@
       "ok": true
     },
     {
-      "name": "double-percent",
+      "id": "double-percent",
+      "fixture_sha256": "afb537ef44c7a2fde2d0503fdc8512afa2a292550f665cde266fead9bd84e75c",
       "input": "<DEFINE SETUP () <SET A 0>>\n<DEFINE NXT () <SET A <+ .A 1>>>\n[%%<SETUP> %<NXT> %<NXT> (%%<SETUP>) %<NXT>]\n<QUIT>\n",
       "result_output": "SETUP\nNXT\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n1\n2\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n0\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
       "stderr": "Read %% macros not supported\nRead %% macros not supported\nUnexpected ) in input\nUnexpected ] in input\n",
@@ -301,7 +347,8 @@
       "ok": false
     },
     {
-      "name": "macro-increment",
+      "id": "macro-increment",
+      "fixture_sha256": "649db83952f35ddd5de6f76d581a635d6ff89cebb1ff9265418bbaf81616e2b4",
       "input": "<DEFMAC INC (ATM \"OPTIONAL\" (N 1))\n        #DECL ((VALUE) FORM (ATM) ATOM (N) <OR FIX FLOAT>)\n        <FORM SET .ATM <FORM + <FORM LVAL .ATM> .N>>>\n<SET X 1>\n<INC X>\n.X\n<QUIT>\n",
       "result_output": "INC\n1\n2\n2\n",
       "stderr": "",
@@ -309,7 +356,8 @@
       "ok": true
     },
     {
-      "name": "getbits",
+      "id": "getbits",
+      "fixture_sha256": "045c25d0a4899c83c62be97e98929355891b8d36addfbb3d12857e6cf9ab14e0",
       "input": "<GETBITS #WORD *777777777777* <BITS 3>>\n<QUIT>\n",
       "result_output": "#WORD *0000000000000000000007*\n",
       "stderr": "",
@@ -317,7 +365,8 @@
       "ok": true
     },
     {
-      "name": "interrupt-level",
+      "id": "interrupt-level",
+      "fixture_sha256": "d1976210e7a249400b0cb0a48fd47631d533e60b2eaa77fec52ba4c1063cc45f",
       "input": "<INT-LEVEL 2>\n<INT-LEVEL>\n<QUIT>\n",
       "result_output": "0\n2\n",
       "stderr": "",
@@ -325,7 +374,8 @@
       "ok": true
     },
     {
-      "name": "sleep-zero",
+      "id": "sleep-zero",
+      "fixture_sha256": "478534cbbc94ef647782833a4fe1537fdc3c535b43db52cb91d7b0b2a0710ebd",
       "input": "<SLEEP 0>\n<QUIT>\n",
       "result_output": "T\n",
       "stderr": "",
@@ -333,7 +383,8 @@
       "ok": true
     },
     {
-      "name": "gc-result-type",
+      "id": "gc-result-type",
+      "fixture_sha256": "5b7b5764890e36d6c37500f5bbccff57cd81bde1ea24b7b0782f4c9c3d19e2fb",
       "input": "<TYPE <GC>>\n<QUIT>\n",
       "result_output": "ATOM\n",
       "stderr": "",
@@ -341,7 +392,8 @@
       "ok": true
     },
     {
-      "name": "time-eager",
+      "id": "time-eager",
+      "fixture_sha256": "f9a834d25fc491f031c8aa0fb23678b8df32187d6323a73642738bfabca2116c",
       "input": "<TYPE <TIME <SET SEEN 8>>>\n.SEEN\n<QUIT>\n",
       "result_output": "FLOAT\n8\n",
       "stderr": "",
@@ -349,7 +401,8 @@
       "ok": true
     },
     {
-      "name": "tail-construction",
+      "id": "tail-construction",
+      "fixture_sha256": "7ecc65ad4d23264ad70b743580089fd81650bd597f1e4ed05b935345bd0c5ff2",
       "input": "<SET FIRST (T)>\n<SET LAST .FIRST>\n<SET LAST <REST <PUTREST .LAST (3)>>>\n<SET LAST <REST <PUTREST .LAST (4)>>>\n<REST .FIRST>\n.LAST\n<QUIT>\n",
       "result_output": "(T)\n(T)\n(3)\n(4)\n(3 4)\n(4)\n",
       "stderr": "",

@@ -4,20 +4,24 @@
 import argparse
 from collections import Counter, defaultdict
 import hashlib
+import io
 import json
 from pathlib import Path
 import re
 import subprocess
+import tarfile
+import tempfile
+
+if __package__:
+    from . import conformance_evidence as evidence
+else:
+    import conformance_evidence as evidence
 
 ROOT = Path(__file__).resolve().parents[1]
-MANUAL = "https://mdl-language.readthedocs.io/en/latest/"
-MANUAL_COMMIT = "89707367b951ea79bedc71f51ab213886e0f62ce"
-SOURCE_BASE = f"https://github.com/taradinoc/mdl-docs/blob/{MANUAL_COMMIT}/docs/"
+MANUAL = evidence.MANUAL_URL
+MANUAL_COMMIT = evidence.MANUAL_REVISION
+SOURCE_BASE = evidence.MANUAL_SOURCE
 OUTPUT = ROOT / "docs/conformance"
-SOURCE_FILES = (
-    "mdl/parser.rkt", "mdl/compiler.rkt", "mdl/runtime/core.rkt",
-    "mdl/loader.rkt", "mdl/lang/reader.rkt",
-)
 KNOWN = {
     "SET": [121], "SETG": [121], "GVAL": [121], "LVAL": [121, 134],
     "TYPE": [129], "CHTYPE": [129], "NEWTYPE": [129],
@@ -32,7 +36,8 @@ DECISIONS = {
     "RANDOM": "ADR-0045: session-owned 36-bit RNG",
     "MAX": "ADR-0059: zero-argument result",
 }
-TRACKED = {"PRINT": [173], "PUTPROP": [179], "GETPROP": [179]}
+TRACKED = {"PRINT": [173], "PUTPROP": [179], "GETPROP": [179],
+           "SQRT": [182], "%%": [183], "EVAL": [184], "SETLOC": [185]}
 
 
 def relative(path):
@@ -71,8 +76,10 @@ def manual_pages(docs, fixtures, outcomes, agreements):
                 continue
             row = {"line": number, "source": f"{SOURCE_BASE}{path.name}#L{number}",
                    "status": "NOT_TESTED"}
+            heading = next((item["source"] for item in reversed(sections)
+                            if item["line"] <= number), None)
             for fixture in examples:
-                if fixture["origin"] != "manual":
+                if fixture["origin"] != "manual" or fixture["source"] != heading:
                     continue
                 program = fixture["expression"]
                 start = number - len(program.splitlines())
@@ -143,69 +150,39 @@ def appendix_entries(docs):
     return entries
 
 
-def implementation_maps():
-    sources = {name: (ROOT / name).read_text().splitlines() for name in SOURCE_FILES}
-    implementations = defaultdict(list)
-
-    def add(name, file, number, kind):
-        implementations[name].append({"file": file, "line": number, "kind": kind})
-
-    core = SOURCE_FILES[2]
-    in_registry = False
-    for number, line in enumerate(sources[core], 1):
-        if line.startswith("(define "):
-            in_registry = line == "(define builtin-table"
-        if in_registry and (match := re.match(r'^\s*(?:\(hash )?"([^"]+)" ', line)):
-            add(match[1], core, number, "runtime operator binding")
-        if "seed-root!" not in line and number in range(1800, 1910):
-            for match in re.finditer(r'\("([^"]+)" \. "[^"]+"\)', line):
-                add(match[1], core, number, "runtime type registration")
-    compiler = SOURCE_FILES[1]
-    in_forms = False
-    for number, line in enumerate(sources[compiler], 1):
-        if line.startswith("(define "):
-            in_forms = line.startswith("(define (compile-form n ")
-        if in_forms and (match := re.match(r"\s*\[\(([A-Z][A-Z0-9?! -]*)\)", line)):
-            for name in match[1].split():
-                add(name, compiler, number, "compiler special form")
-    loader = SOURCE_FILES[3]
-    for number, line in enumerate(sources[loader], 1):
-        match = re.search(r'mdl-define-subr! \(mdl-root-atom "([^"]+)"\)', line)
-        if match:
-            add(match[1], loader, number, "loader-only operator binding")
-    return implementations
+def implementation_maps(root, racket):
+    return evidence.parse_json(subprocess.check_output(
+        [racket, str(ROOT / "scripts/conformance_discovery.rkt"), str(root)], text=True,
+    ))
 
 
-def lexical_evidence(paths):
+def snapshot(checkout, revision, destination, *paths):
+    # Scan committed blobs only. A modified or untracked worktree file cannot
+    # become a manual page or implementation candidate.
+    archive = evidence.git("archive", "--format=tar", revision, "--", *paths, root=checkout)
+    with tarfile.open(fileobj=io.BytesIO(archive)) as source:
+        source.extractall(destination, filter="data")
+
+
+def lexical_evidence(root, paths):
     hits = defaultdict(set)
     for path in paths:
         content = path.read_text(errors="replace")
         for name in re.findall(r"<\s*([A-Z0-9?+=!&*/_-]+)(?=[\s>])", content):
-            hits[name].add(relative(path))
+            hits[name].add(path.relative_to(root).as_posix())
     return hits
 
 
-def coverage(docs):
-    fixtures = json.loads((ROOT / "tests/conformance/manifest.json").read_text())["cases"]
-    implementations = implementation_maps()
-    tests = lexical_evidence((ROOT / "tests").glob("*_test.rkt"))
-    native = lexical_evidence(sorted((ROOT / "docs/evidence").rglob("*.json")))
-    semantics = json.loads((OUTPUT / "semantics.json").read_text(encoding="utf-8"))
-    native_report = ROOT / "docs/evidence/L0/native-examples.json"
-    records = json.loads(native_report.read_text())["observations"]
-    observations = {item["name"]: item["ok"] for item in records}
-    reviewed = json.loads(native_report.with_name("native-agreement.json").read_text())["agreements"]
-    agreements = {
-        row["name"] for row in records
-        if row["ok"] and reviewed.get(row["name"]) == {
-            "input": row["input"], "result_output": row["result_output"]
-        }
-    }
-    manual_report = ROOT / "docs/evidence/L0/manual-summary.json"
+def coverage(docs, runtime_root, data, manual_report, native_report, native, agreement, racket):
+    fixtures = data["cases"]
+    implementations = implementation_maps(runtime_root, racket)
+    tests = lexical_evidence(runtime_root, (runtime_root / "tests").glob("*_test.rkt"))
+    native_mentions = lexical_evidence(runtime_root, (runtime_root / "docs/evidence").rglob("*.json"))
+    semantics = evidence.read_json(OUTPUT / "semantics.json")
     outcomes = defaultdict(dict)
-    for row in json.loads(manual_report.read_text())["results"]:
+    for row in manual_report["results"]:
         outcomes[row["id"]][row["mode"]] = row["status"]
-    sweep = json.loads((ROOT / "docs/evidence/M4/operator-head-sweep.json").read_text())
+    sweep = evidence.read_json(runtime_root / "docs/evidence/M4/operator-head-sweep.json")
     reachable = set(sweep["builtin_used"]) | {row["name"] for row in sweep["missing"]}
     entries = []
     for name, entry in sorted(appendix_entries(docs).items()):
@@ -227,11 +204,11 @@ def coverage(docs):
             "identity_and_mutation": None, "error_behavior": None,
             "implementation_candidates": candidates,
             "test_mentions": sorted(tests[name]),
-            "native_mentions": sorted(native[name]),
+            "native_mentions": sorted(native_mentions[name]),
             "manual_cases": fixture_matches,
             "fixture_reference": [
                 {"case": f["id"], "source": f["source"],
-                 "native_capture_completed": observations.get(f["id"]),
+                 "native_capture_completed": native[f["id"]]["ok"],
                  "runtime_results": dict(outcomes[f["id"]])}
                 for f in case_info
             ],
@@ -242,17 +219,24 @@ def coverage(docs):
             "zork_reachability": "static operator mention" if name in reachable else None,
             **semantics.get(name, {}),
         })
-    pages = manual_pages(docs, fixtures, outcomes, agreements)
-    return {"schema_version": 1, "manual_commit": MANUAL_COMMIT, "pages": pages,
-            "entries": entries}
+    pages = manual_pages(docs, fixtures, outcomes, agreement["agreements"])
+    return {
+        "schema_version": 2, "manual_commit": MANUAL_COMMIT,
+        "historical_runtime": manual_report["provenance"],
+        "native_reference": native_report["provenance"],
+        "pages": pages, "entries": entries,
+    }
 
 
 def matrix(data):
     counts = Counter(row["status"] for row in data["entries"])
+    revision = data["historical_runtime"]["runtime_revision"]
     lines = [
         "# MDL coverage inventory", "",
         f"Manual transcription commit `{MANUAL_COMMIT}`.",
-        "The [JSON inventory](coverage.json) contains the complete source index.",
+        f"Historical runtime snapshot `{revision}`.",
+        "The [JSON inventory](coverage.json) contains source candidates and retained evidence.",
+        "Current runtime regressions are checked separately by `make test-manual`.",
         "", "| Classification | Construct count |", "| --- | ---: |",
     ]
     for status in ("VERIFIED", "PARTIAL", "KNOWN_DEFECT", "UNSUPPORTED",
@@ -267,7 +251,8 @@ def matrix(data):
               "| --- | --- | --- | --- |"]
     for row in data["entries"]:
         name = row["name"].replace("|", "&#124;").replace("`", "&#96;")
-        links = ", ".join(f"[{p['file']}:{p['line']}](../../{p['file']}#L{p['line']})"
+        github = f"https://github.com/quaat/mdl-racket/blob/{revision}/"
+        links = ", ".join(f"[{p['file']}:{p['line']}]({github}{p['file']}#L{p['line']})"
                           for p in row["implementation_candidates"])
         cases = ", ".join(row["manual_cases"])
         lines.append(f"| `{name}` | {row['status']} | {links} | {cases} |")
@@ -278,16 +263,31 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manual_checkout", type=Path)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--racket", default="racket")
     args = parser.parse_args()
-    actual = subprocess.check_output(
-        ["git", "-C", str(args.manual_checkout), "rev-parse", "HEAD"], text=True
-    ).strip()
-    if actual != MANUAL_COMMIT:
-        parser.error(f"expected manual {MANUAL_COMMIT}, got {actual}")
-    if subprocess.check_output(["git", "-C", str(args.manual_checkout), "status",
-                                "--porcelain", "--untracked-files=no"], text=True).strip():
-        parser.error("manual checkout has modified tracked files")
-    data = coverage(args.manual_checkout / "docs")
+    try:
+        if evidence.git("rev-parse", "HEAD", root=args.manual_checkout).decode().strip() != MANUAL_COMMIT:
+            parser.error(f"expected manual checkout revision {MANUAL_COMMIT}")
+        reports = ROOT / "docs/evidence/L0"
+        data = evidence.load_manifest()
+        manual = evidence.validate_manual(evidence.read_json(reports / "manual-summary.json"),
+                                          data, historical=True)
+        native_report = evidence.read_json(reports / "native-examples.json")
+        agreement = evidence.read_json(reports / "native-agreement.json")
+        native = evidence.validate_native(native_report, agreement, data)
+        revision = manual["provenance"]["runtime_revision"]
+        with tempfile.TemporaryDirectory(prefix="mdl-inventory-") as temp:
+            manual_root = Path(temp) / "manual"
+            runtime_root = Path(temp) / "runtime"
+            manual_root.mkdir()
+            runtime_root.mkdir()
+            snapshot(args.manual_checkout, MANUAL_COMMIT, manual_root, "docs")
+            evidence.validate_manifest(data, manual_root / "docs")
+            snapshot(ROOT, revision, runtime_root, "mdl", "tests", "docs/evidence")
+            data = coverage(manual_root / "docs", runtime_root, data, manual, native_report,
+                            native, agreement, args.racket)
+    except (ValueError, OSError, subprocess.CalledProcessError) as exc:
+        parser.error(str(exc))
     outputs = {"coverage.json": json.dumps(data, indent=2) + "\n",
                "MDL-COVERAGE.md": matrix(data)}
     for name, content in outputs.items():
