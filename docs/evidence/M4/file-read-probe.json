@@ -1,0 +1,1709 @@
+{
+  "schema_version": 1,
+  "kind": "m4-file-read-reference",
+  "engine": "confusion-patched-1977",
+  "recorded_at": "2026-11-24T16:58:54.251519+00:00",
+  "interpreter": ".cache/build/confusion_patched/mdli",
+  "interpreter_sha256_before": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "interpreter_sha256_after": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "upstream_mdlzork_checked_out": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "game_dir": "mdlzork_771212/patched_confusion",
+  "files": {
+    "MADADV.HELP": {
+      "size": 4274,
+      "sha256": "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1"
+    },
+    "MADADV.INFO": {
+      "size": 1527,
+      "sha256": "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2"
+    }
+  },
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "shim_src_sha256": "d1fa86520eab80891c95c9cbec8a35401fd1fe55c1d6fa6b18165a30736ab925",
+  "protocol": "scripts/probe_file_read_reference.py (module docstring)",
+  "checks": {
+    "no_primitive_case_changed_a_file": true,
+    "game_case_files_changed": [
+      "MDL/MADADV.SAVE",
+      "MDL/ZORK.LOG"
+    ]
+  },
+  "cases": [
+    {
+      "name": "muddle",
+      "kind": "transcript",
+      "note": "MUDDLE > 100 selects DEV \"DSK\", SNM \"MDL\" in SAVE-IT",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/muddle-xnf2gx7n/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": ",MUDDLE\n<QUIT>\n",
+      "input_sha256": "f93fe0ab90f932025a00600020a0183dd12dec55e4d6d0fecb5a9e167accf380",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n101\n",
+      "stdout_sha256": "ac5c10a04b4fe0b475c0f0cdcd3ca53b23c9ec19ede6e7fec02a3133e3aea057",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n101\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        ",MUDDLE"
+      ]
+    },
+    {
+      "name": "open-help",
+      "kind": "transcript",
+      "note": "the game's 5-argument form; the printed CHANNEL shows its slots",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-help-ivf_7v1v/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<TYPE .C>\n<LENGTH .C>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "daaf94d026e51a2e37eb7cdc11b420475cf69b6c9b75e214281acf0a471744f9",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-help-ivf_7v1v/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n19\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "af1cc4f4b549a263b81fadcafe28e51ff41c615196fa3b8a4038d641fea175c7",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-help-ivf_7v1v/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n19\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<TYPE .C>",
+        "<LENGTH .C>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "open-info",
+      "kind": "transcript",
+      "note": "the INFO file",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-info-z1erauzy/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<TYPE .C>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "3a2f59abf04a062345fc8eca16b321ddc0c2476c998bcb6335be6f4175df565d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/open-info-z1erauzy/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "f0706d0568e8bda387d31daa10b21cb24affa3210bd6f73f6eaa15affefc911f",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/open-info-z1erauzy/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<TYPE .C>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "open-slots",
+      "kind": "transcript",
+      "note": "CHANNEL elements 1-18 one by one",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-slots-_2izrjzs/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<NTH .C 1>\n<NTH .C 2>\n<NTH .C 3>\n<NTH .C 4>\n<NTH .C 5>\n<NTH .C 6>\n<NTH .C 7>\n<NTH .C 8>\n<NTH .C 9>\n<NTH .C 10>\n<NTH .C 11>\n<NTH .C 12>\n<NTH .C 13>\n<NTH .C 14>\n<NTH .C 15>\n<NTH .C 16>\n<NTH .C 17>\n<NTH .C 18>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "d2415d5ef5053a2d970fa4e9d642edd8cbf5b7e461b606c775289cdccae61707",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-slots-_2izrjzs/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n3\n\"READ\"\n\"MADADV\"\n\"HELP\"\n\"DSK\"\n\"MDL\"\n\"MADADV\"\n\"HELP\"\n\"DSK\"\n\"$TMPDIR/file-read-probes/open-slots-_2izrjzs/game/MDL\"\n0\n0\n#LOSE *0000000000000000000000*\n0\n0\n0\n0\n10\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "ff476ccba6c42c040d9ec5ce8b93014db6340872ecb5248a634d55a62b00d16f",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-slots-_2izrjzs/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n3\n\"READ\"\n\"MADADV\"\n\"HELP\"\n\"DSK\"\n\"MDL\"\n\"MADADV\"\n\"HELP\"\n\"DSK\"\n\"$TMPDIR/file-read-probes/open-slots-_2izrjzs/game/MDL\"\n0\n0\n#LOSE *0000000000000000000000*\n0\n0\n0\n0\n10\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<NTH .C 1>",
+        "<NTH .C 2>",
+        "<NTH .C 3>",
+        "<NTH .C 4>",
+        "<NTH .C 5>",
+        "<NTH .C 6>",
+        "<NTH .C 7>",
+        "<NTH .C 8>",
+        "<NTH .C 9>",
+        "<NTH .C 10>",
+        "<NTH .C 11>",
+        "<NTH .C 12>",
+        "<NTH .C 13>",
+        "<NTH .C 14>",
+        "<NTH .C 15>",
+        "<NTH .C 16>",
+        "<NTH .C 17>",
+        "<NTH .C 18>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "open-missing",
+      "kind": "transcript",
+      "note": "absent file in the game directory: FALSE payload (FILE-TO-TTY's File not found. branch)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-missing-ss7h0t7w/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<OPEN \"READ\" \"NOSUCH\" \"FILE\" \"DSK\" \"MDL\">\n<QUIT>\n",
+      "input_sha256": "39e8dbe45c89ab1b99ae30f6c7ec71cbc0ee2b86c0f04b720b0f405e98e3f663",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"MDL/NOSUCH.FILE\" 2)\n",
+      "stdout_sha256": "8b7034a047617ca14d766c91537f356130b5051dd6fa776b77f900a452bcb643",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"MDL/NOSUCH.FILE\" 2)\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<OPEN \"READ\" \"NOSUCH\" \"FILE\" \"DSK\" \"MDL\">"
+      ]
+    },
+    {
+      "name": "open-lowercase",
+      "kind": "transcript",
+      "note": "case variant of the names: does Confusion fold case?",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-lowercase-ee1_xf4j/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<OPEN \"READ\" \"madadv\" \"help\" \"DSK\" \"MDL\">\n<QUIT>\n",
+      "input_sha256": "caae1988be0f04734d54abf4f061ae36b01f534c176be01b31352e84e23a151b",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"MDL/madadv.help\" 2)\n",
+      "stdout_sha256": "c9554712462ce3e379d8e97916a3c17d59310e6f257f78311f45de5aca6b0951",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"MDL/madadv.help\" 2)\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<OPEN \"READ\" \"madadv\" \"help\" \"DSK\" \"MDL\">"
+      ]
+    },
+    {
+      "name": "open-lowercase-dir",
+      "kind": "transcript",
+      "note": "case variant of the directory",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-lowercase-dir-1l2zc7jm/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"mdl\">\n<QUIT>\n",
+      "input_sha256": "296618205b2ca33a33589fac72f79d958f7b137b5fbe9b9b85366b2bc5904b27",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"mdl/MADADV.HELP\" 2)\n",
+      "stdout_sha256": "f71ca91eb847c426753e7253fdf0f1780bf9ea6f397ed0541a6c33e9517eb9ce",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"mdl/MADADV.HELP\" 2)\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"mdl\">"
+      ]
+    },
+    {
+      "name": "open-other-device",
+      "kind": "transcript",
+      "note": "another device name: is the device part of the file spec?",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-other-device-xs_7aidd/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"FOO\" \"MDL\">>\n<TYPE .C>\n<QUIT>\n",
+      "input_sha256": "adc55421ea09ae09ea4edf01e271ce879162d77625158c5ab9966edb5e868b76",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"FOO\" \"MDL\" \"MADADV\" \"HELP\" \"FOO\" \"$TMPDIR/file-read-probes/open-other-device-xs_7aidd/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stdout_sha256": "4a5dc99b25ab133108fc16d0bbd9761ac9f7d60e13936593a89a8232acea6a7c",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"FOO\" \"MDL\" \"MADADV\" \"HELP\" \"FOO\" \"$TMPDIR/file-read-probes/open-other-device-xs_7aidd/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"FOO\" \"MDL\">>",
+        "<TYPE .C>"
+      ]
+    },
+    {
+      "name": "open-four-args",
+      "kind": "transcript",
+      "note": "4-argument form (directory omitted)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-four-args-bjttbcv_/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\">>\n<TYPE .C>\n<QUIT>\n",
+      "input_sha256": "9093c3227acbd7e2ef9cf423c398860ae3ee6e8452e8c2e3b279996ac47bf193",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"$TMPDIR/file-read-probes/open-four-args-bjttbcv_/game/MADADV.HELP\" 2)\nFALSE\n",
+      "stdout_sha256": "60680a3c8537baccd7cb3e3cd0f354f8c16affa90deecc35f06cdffb54b82d57",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"$TMPDIR/file-read-probes/open-four-args-bjttbcv_/game/MADADV.HELP\" 2)\nFALSE\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\">>",
+        "<TYPE .C>"
+      ]
+    },
+    {
+      "name": "open-three-args",
+      "kind": "transcript",
+      "note": "3-argument form",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-three-args-9vu8sjb6/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\">>\n<TYPE .C>\n<QUIT>\n",
+      "input_sha256": "a22285e0b0ebbaff67bfce49263415b25cca421067aa018873cc86c73ec46f76",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"$TMPDIR/file-read-probes/open-three-args-9vu8sjb6/game/MADADV.HELP\" 2)\nFALSE\n",
+      "stdout_sha256": "d77d3d0304407b7039d5ae3add92d93924570eae638258743937998169896619",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"$TMPDIR/file-read-probes/open-three-args-9vu8sjb6/game/MADADV.HELP\" 2)\nFALSE\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\">>",
+        "<TYPE .C>"
+      ]
+    },
+    {
+      "name": "open-one-spec",
+      "kind": "transcript",
+      "note": "one file-spec STRING form",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-one-spec-18xqet_9/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MDL/MADADV.HELP\">>\n<TYPE .C>\n<QUIT>\n",
+      "input_sha256": "fc6f83cd3348d59757ee975aa7a08fea8e9b60f6dbee0009ad98063c0faa4892",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL/\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-one-spec-18xqet_9/game/MDL/\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stdout_sha256": "4a60939cdcaa7e1f5a1abc8e72a502f171a49ae01ae31dcade4b23b79dacc6c5",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL/\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-one-spec-18xqet_9/game/MDL/\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MDL/MADADV.HELP\">>",
+        "<TYPE .C>"
+      ]
+    },
+    {
+      "name": "open-dir-as-file",
+      "kind": "transcript",
+      "note": "a directory",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-dir-as-file-w5r4edub/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<OPEN \"READ\" \"MDL\" \"\" \"DSK\" \"\">\n<QUIT>\n",
+      "input_sha256": "d534d4ed809f984d0d5c640b7277128b62aaeeb6e4b2a3c741a98421cc3e23d4",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"/MDL\" 2)\n",
+      "stdout_sha256": "1a417cb61c7338cf06f0d58194db06ce26f63d6e8cc844549c365bfcadc4e98b",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#FALSE (\"No such file or directory\" \"/MDL\" 2)\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<OPEN \"READ\" \"MDL\" \"\" \"DSK\" \"\">"
+      ]
+    },
+    {
+      "name": "open-dotdot",
+      "kind": "transcript",
+      "note": "a directory with a parent component",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-dotdot-32z9paya/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL/../MDL\">>\n<TYPE .C>\n<QUIT>\n",
+      "input_sha256": "945df265a3c0b510fe0df6928ad331e90f2c2b1c7811cfe83ebd7a816f370c60",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL/../MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-dotdot-32z9paya/game/MDL/../MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stdout_sha256": "eb3be06a45cc645761955ecb5e9c9b132f2fcc34624f9b3cfcd6cb7f6f9fcb88",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL/../MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-dotdot-32z9paya/game/MDL/../MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL/../MDL\">>",
+        "<TYPE .C>"
+      ]
+    },
+    {
+      "name": "open-twice",
+      "kind": "transcript",
+      "note": "two channels on the same file",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/open-twice-abq5_nwr/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET D <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<==? .C .D>\n<FILE-LENGTH .D>\n<CLOSE .C>\n<CLOSE .D>\n<QUIT>\n",
+      "input_sha256": "5beebd147ccaf1458f785909f0f22bbad89bac1cae4881d91d15eb73f7079ace",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-twice-abq5_nwr/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [4 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-twice-abq5_nwr/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#FALSE ()\n4274\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "0932a68706b84206192511fd0343188cda0eac6cc25f26966fca36a1c3a04ee6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-twice-abq5_nwr/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [4 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/open-twice-abq5_nwr/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#FALSE ()\n4274\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET D <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<==? .C .D>",
+        "<FILE-LENGTH .D>",
+        "<CLOSE .C>",
+        "<CLOSE .D>"
+      ]
+    },
+    {
+      "name": "file-length-help",
+      "kind": "transcript",
+      "note": "units: MADADV.HELP is 4274 bytes (855 36-bit words of 5 characters)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/file-length-help-7d4dw0_8/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<FILE-LENGTH .C>\n<TYPE <FILE-LENGTH .C>>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "f511c3d35013353c4cd6bf9c06b9a7724e39a1d4db9ac26d0dec395d3e8c7dbf",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/file-length-help-7d4dw0_8/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n4274\nFIX\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "d462401b21b2207b2132370ee20ef55afa0f995a8bf90016248c74c272d4e946",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/file-length-help-7d4dw0_8/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n4274\nFIX\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<FILE-LENGTH .C>",
+        "<TYPE <FILE-LENGTH .C>>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "file-length-info",
+      "kind": "transcript",
+      "note": "units: MADADV.INFO is 1527 bytes",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/file-length-info-dui1sqet/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<FILE-LENGTH .C>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "e7457a7e25e0daf3f1cb9ce4172c070ed95344bc980cbf931cfd1131ff63ceac",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/file-length-info-dui1sqet/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n1527\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "faaede1c8cd2d926acdcef4db70768c84e8496bda309fc796eef49b13d10e50b",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/file-length-info-dui1sqet/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n1527\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<FILE-LENGTH .C>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "file-length-after-read",
+      "kind": "transcript",
+      "note": "FILE-LENGTH after reading 100 characters (length, not remaining)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/file-length-after-read-86qkj3qz/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C 100>\n<FILE-LENGTH .C>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "e7df50ce359e04b53e2b20f22d4a104d71f53c2b484e357bf3c02ef124e45f4a",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/file-length-after-read-86qkj3qz/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n1527\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "2e14c2af13d053be893a5bedbf3e3674ded2d224d930b8175a94558b6ec1e260",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/file-length-after-read-86qkj3qz/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n1527\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C 100>",
+        "<FILE-LENGTH .C>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "err-file-length-inchan",
+      "kind": "transcript",
+      "note": "terminal channel",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-file-length-inchan-4l0wn7gm/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FILE-LENGTH .INCHAN>\n<QUIT>\n",
+      "input_sha256": "2470c91007cb56b372a4ead82b69c02c92ba724691384d84ab77d740b52a34ef",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FILE-LENGTH-UNAVAILABLE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "e40e165ee9fdea3a0ed8e6b9ad15172f7c9361943ae3032fdb6bca3fd3f33892",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"FILE-LENGTH-UNAVAILABLE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<FILE-LENGTH .INCHAN>"
+      ]
+    },
+    {
+      "name": "err-file-length-no-args",
+      "kind": "transcript",
+      "note": "zero arguments",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-file-length-no-args-m_mbp0i2/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FILE-LENGTH>\n<QUIT>\n",
+      "input_sha256": "b15b76c34111ce2205bd4784cfa2cf57b25aef77492f6cb46c5dc449c23e03df",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "c80e2f42d788f1405de5e48e3f31c6238034aead3da2f29cbf1c01e45d9f16d7",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n *ERROR* \n \"TOO-FEW-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<FILE-LENGTH>"
+      ]
+    },
+    {
+      "name": "err-file-length-string",
+      "kind": "transcript",
+      "note": "non-CHANNEL",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-file-length-string-ha9mse1s/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FILE-LENGTH \"MDL/MADADV.HELP\">\n<QUIT>\n",
+      "input_sha256": "0881e1a8dffa94e81e36282744044c96cbaa945d389dc288384f2f34bfbb6a95",
+      "exit_status": -11,
+      "stdout_raw": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_canonical": "",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<FILE-LENGTH \"MDL/MADADV.HELP\">"
+      ]
+    },
+    {
+      "name": "err-file-length-two-args",
+      "kind": "transcript",
+      "note": "two arguments",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-file-length-two-args-auccvsa6/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<FILE-LENGTH .C .C>\n<QUIT>\n",
+      "input_sha256": "9975ce05f220086725213c91ec1715c28aeab71471aa000ee6c4f1797a2ffe3b",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-file-length-two-args-auccvsa6/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "6d562cd8d8b146792c3f0fbd41aff320b3462b4334f33366a91b132f22aff4a6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-file-length-two-args-auccvsa6/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\n *ERROR* \n \"TOO-MANY-ARGUMENTS-SUPPLIED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<FILE-LENGTH .C .C>"
+      ]
+    },
+    {
+      "name": "err-file-length-closed",
+      "kind": "transcript",
+      "note": "after CLOSE",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-file-length-closed-o4vzg_it/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<CLOSE .C>\n<FILE-LENGTH .C>\n<QUIT>\n",
+      "input_sha256": "5e194f323d3b38f4f8d05975cf449b587d4659ea673ea8c1a181ebd2de2a8d45",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-file-length-closed-o4vzg_it/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\n *ERROR* \n \"CHANNEL-CLOSED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stdout_sha256": "b3b41c59822198512a8a41fe3f096e3f7e99cf55a5c16f026674fd031398e097",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-file-length-closed-o4vzg_it/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\n *ERROR* \n \"CHANNEL-CLOSED\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<CLOSE .C>",
+        "<FILE-LENGTH .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-100",
+      "kind": "transcript",
+      "note": "the game's count form: two successive 100-character chunks",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-100-iab699sf/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C 100>\n.B\n<READSTRING .B .C 100>\n.B\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "9482eb3c0d5fffb309db47878036c3588bdf94255e0e928a754096f3c40fc03e",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-100-iab699sf/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n\"Useful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms whi\"\n100\n\"ch have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses pr\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "e79b6f5facb0383242308d25c46c531f469088bd032c5ba4dccdea99f55af41b",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-100-iab699sf/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n\"Useful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms whi\"\n100\n\"ch have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses pr\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C 100>",
+        ".B",
+        "<READSTRING .B .C 100>",
+        ".B",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-10",
+      "kind": "transcript",
+      "note": "count smaller than the buffer: the rest of the buffer is unchanged?",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-10-not3xxsb/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C 10>\n.B\n<READSTRING .B .C 10>\n<SUBSTRUC .B 0 20>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "6b7d7983c0b82b3c9bc36d35c44fdd79f21885583eb7327cfc942e70a73e20fd",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-10-not3xxsb/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n10\n\"Useful com^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n10\n\"mands\n\n   ^@^@^@^@^@^@^@^@^@^@\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "5ce9c49f73276395d5edaf7f2ca615b070a407c022dfe81d95363ffab511d40a",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-10-not3xxsb/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n10\n\"Useful com^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n10\n\"mands\n\n   ^@^@^@^@^@^@^@^@^@^@\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C 10>",
+        ".B",
+        "<READSTRING .B .C 10>",
+        "<SUBSTRUC .B 0 20>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-0",
+      "kind": "transcript",
+      "note": "count 0",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-0-vdpnk1a9/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C 0>\n<READSTRING .B .C 5>\n<SUBSTRUC .B 0 5>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "86ea57321901e57d8783c03e45091677acbb6343e9a6bc0c210d50f480d9c2f4",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-0-vdpnk1a9/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n5\n\"Usefu\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "ddc2fcd9573bbd1851b7a016d2ccea4fb60d13cbe248911f040cf0d4b67ca5cc",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-0-vdpnk1a9/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n5\n\"Usefu\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C 0>",
+        "<READSTRING .B .C 5>",
+        "<SUBSTRUC .B 0 5>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-gt-buffer",
+      "kind": "transcript",
+      "note": "count larger than the buffer",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-gt-buffer-ru4h8zsn/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 5>>\n<READSTRING .B .C 10>\n.B\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "98a5206f5570b250facb0806c7473b519fe1a6f3b2d53b8058b89119e5118acb",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-gt-buffer-ru4h8zsn/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@\"\n10\n\"Usefu\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "6ad0c1207791f20d7d59d8fc274b53bac63c7493e5b91d144cd9937f2ef30e81",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-gt-buffer-ru4h8zsn/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@\"\n10\n\"Usefu\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 5>>",
+        "<READSTRING .B .C 10>",
+        ".B",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-negative",
+      "kind": "transcript",
+      "note": "negative count",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-negative-d6tqkssr/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C -1>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "ff017de21136cc1a322c09cd47b73c9245172f07917cf6544e143f9578be299f",
+      "exit_status": -11,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-negative-d6tqkssr/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"",
+      "stdout_sha256": "c23f12b728717279331c20fb27dd111f88b41bed75e0198e6d0320699e759771",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-negative-d6tqkssr/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C -1>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-two-args",
+      "kind": "transcript",
+      "note": "no stop argument on a file channel",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-two-args-ejzyuh_q/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C>\n.B\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "ae3c4edd953c6a235811f2b366fb349946a17cf1491198be9dc00599605badfb",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-two-args-ejzyuh_q/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n\"Useful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms whi\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "ca0562a115fff01b372dd0b83cb0da353c117b767bd8d735e598ca461913c0c2",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-two-args-ejzyuh_q/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n\"Useful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms whi\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C>",
+        ".B",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-stop-newline",
+      "kind": "transcript",
+      "note": "STRING stop: is the stop character consumed and not stored?",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-stop-newline-gurn76x6/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C <STRING <ASCII 10>>>\n<SUBSTRUC .B 0 15>\n<READSTRING .B .C <STRING <ASCII 10>>>\n<READSTRING .B .C <STRING <ASCII 10>>>\n<SUBSTRUC .B 0 20>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "b3ed36005d827648b6d86b1ee24b170b25c5744a3a6ca0b659f84241f857f0cd",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-stop-newline-gurn76x6/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n15\n\"Useful commands\"\n0\n69\n\"    The 'brief' comm\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "623067c5994be731582f7a8c003f60651ce8e5c0b19b0792bed846ebb640ea5a",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-stop-newline-gurn76x6/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n15\n\"Useful commands\"\n0\n69\n\"    The 'brief' comm\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C <STRING <ASCII 10>>>",
+        "<SUBSTRUC .B 0 15>",
+        "<READSTRING .B .C <STRING <ASCII 10>>>",
+        "<READSTRING .B .C <STRING <ASCII 10>>>",
+        "<SUBSTRUC .B 0 20>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-breaks-info",
+      "kind": "transcript",
+      "note": "the last chunk: 15 x 100 by count, then ,BREAKS meets end of file after 27",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-breaks-info-hvjw3g9s/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>\n<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>\n<READSTRING .B .C ,BREAKS>\n<SUBSTRUC .B 0 27>\n.B\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "012fc4582a376ca5fca5dd4f2519cbc3af6ad64b3b4891287bc1a4ceb7406058",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-breaks-info-hvjw3g9s/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n0\n27\n\"is a skilled pickpocket). \n\"\n\"is a skilled pickpocket). \nre visiting, but more often he just wanders through and rips\nyou off (he \"\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "56eb690111e937825ad226c8bd3643000a83563ba480a84b96f09fec2afb6444",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-breaks-info-hvjw3g9s/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n0\n27\n\"is a skilled pickpocket). \n\"\n\"is a skilled pickpocket). \nre visiting, but more often he just wanders through and rips\nyou off (he \"\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>",
+        "<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>",
+        "<READSTRING .B .C ,BREAKS>",
+        "<SUBSTRUC .B 0 27>",
+        ".B",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-breaks-after-eof",
+      "kind": "transcript",
+      "note": "a second ,BREAKS read after end of file",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-breaks-after-eof-mvgbg1zj/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>\n<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>\n<READSTRING .B .C ,BREAKS>\n<READSTRING .B .C ,BREAKS>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "40f4d5830a0de8aab15c179986ca3c372c95af01df19b6b152e0516161b0a4ef",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-breaks-after-eof-mvgbg1zj/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n0\n27\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "3c0e5404d866bbc57ae39cc73992136d15a0028ed7268a146c56a0936594ae49",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-breaks-after-eof-mvgbg1zj/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n0\n27\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>",
+        "<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>",
+        "<READSTRING .B .C ,BREAKS>",
+        "<READSTRING .B .C ,BREAKS>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-after-eof",
+      "kind": "transcript",
+      "note": "a count read after end of file",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-after-eof-83w6ank6/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>\n<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>\n<READSTRING .B .C ,BREAKS>\n<READSTRING .B .C 100>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "d471dc38edd74fe3f5d9fd48b6564913941108a9eed2f6bd7b1368cb2782ee99",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-after-eof-83w6ank6/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n0\n27\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "1e9097bd05e38aefdf713959db45f835846c865287b2e5e68c341337383e3d17",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-after-eof-83w6ank6/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n0\n27\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>",
+        "<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>",
+        "<READSTRING .B .C ,BREAKS>",
+        "<READSTRING .B .C 100>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-crosses-eof",
+      "kind": "transcript",
+      "note": "a count read that meets end of file before the count",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-crosses-eof-w17piv0n/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>\n<READSTRING .B .C 100>\n<SUBSTRUC .B 0 27>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "72f0d0b8b7ef6f69bc608c4450036149478c26a0424494df4e7b8563e27aee6f",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-crosses-eof-w17piv0n/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n27\n\"is a skilled pickpocket). \n\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "3671e422b8c1deb95535c20fbe0300426a39ed72baa7dd08c0bfd58d10997b65",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-crosses-eof-w17piv0n/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n27\n\"is a skilled pickpocket). \n\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>",
+        "<READSTRING .B .C 100>",
+        "<SUBSTRUC .B 0 27>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-count-crosses-eof-next",
+      "kind": "transcript",
+      "note": "the count read after one that met end of file",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-count-crosses-eof-next-rcv6be9h/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>\n<READSTRING .B .C 100>\n<READSTRING .B .C 100>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "80d4f8ca28680952735200c2940cdb3dc0ecf73e0a578b2e155265ccec748568",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-crosses-eof-next-rcv6be9h/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n27\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "a9f8c8850d56d1a926388f7669db407bdbdc415dbbba7e61693f2136575d8277",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-count-crosses-eof-next-rcv6be9h/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n27\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "Error: Unexpected EOF\n",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<REPEAT ((I 15)) <READSTRING .B .C 100> <AND <0? <SET I <- .I 1>>> <RETURN .I>>>",
+        "<READSTRING .B .C 100>",
+        "<READSTRING .B .C 100>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-whole-info",
+      "kind": "transcript",
+      "note": "one count read larger than the file",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-whole-info-xyxiywko/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 2000>>\n<READSTRING .B .C 2000>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "315f153fe69dbb26811c18d3d59e1e4407dd2b9205e91e3d0b13609b33864678",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-whole-info-xyxiywko/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n1527\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "bfd4ce84716ff904f95e3abff8dace7ca88464facd628ca1f8301cf4c59b18ba",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-whole-info-xyxiywko/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n1527\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 2000>>",
+        "<READSTRING .B .C 2000>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-bang",
+      "kind": "transcript",
+      "note": "is ! an escape in a file channel? (file a!b!!c!<LF>de<LF>, 12 bytes, in the copy only)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-bang-yycztesj/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [
+        [
+          "write",
+          "MDL/BANG.TXT",
+          "a!b!!c!\nde\n"
+        ]
+      ],
+      "input": "<SET C <OPEN \"READ\" \"BANG\" \"TXT\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C 100>\n<SUBSTRUC .B 0 12>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "e172f97abc5feea9f7b042fd56fae7fb4ec6f815e0fc90ddcba726dd2637c62d",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"BANG\" \"TXT\" \"DSK\" \"MDL\" \"BANG\" \"TXT\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-bang-yycztesj/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n8\n\"ab!c\nde\n^@^@^@^@\"\n#CHANNEL [0 \"READ\" \"BANG\" \"TXT\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "0d9c20a4012917f95cbfae4bce576cf950693bbc2edc550fed387a923b74feff",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"BANG\" \"TXT\" \"DSK\" \"MDL\" \"BANG\" \"TXT\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-bang-yycztesj/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n8\n\"ab!c\nde\n^@^@^@^@\"\n#CHANNEL [0 \"READ\" \"BANG\" \"TXT\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"BANG\" \"TXT\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C 100>",
+        "<SUBSTRUC .B 0 12>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "readstring-crlf",
+      "kind": "transcript",
+      "note": "CR LF in a file are stored raw? (file ab<CR><LF>cd, 6 bytes, in the copy only)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/readstring-crlf-6tj9_2y_/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [
+        [
+          "write",
+          "MDL/CRLF.TXT",
+          "ab\r\ncd"
+        ]
+      ],
+      "input": "<SET C <OPEN \"READ\" \"CRLF\" \"TXT\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<FILE-LENGTH .C>\n<READSTRING .B .C 100>\n<SUBSTRUC .B 0 6>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "38947789d92c2aeb92e3b5bd65c07d86d3a07c642c7327441b247ca38a5d5856",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"CRLF\" \"TXT\" \"DSK\" \"MDL\" \"CRLF\" \"TXT\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-crlf-6tj9_2y_/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n6\n6\n\"ab\r\ncd\"\n#CHANNEL [0 \"READ\" \"CRLF\" \"TXT\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "7850c66490ac6d6465c14c6599c7326f01b2221318bdf91488bea63e8b1f1bea",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"CRLF\" \"TXT\" \"DSK\" \"MDL\" \"CRLF\" \"TXT\" \"DSK\" \"$TMPDIR/file-read-probes/readstring-crlf-6tj9_2y_/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n6\n6\n\"ab\ncd\"\n#CHANNEL [0 \"READ\" \"CRLF\" \"TXT\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"CRLF\" \"TXT\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<FILE-LENGTH .C>",
+        "<READSTRING .B .C 100>",
+        "<SUBSTRUC .B 0 6>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "err-readstring-closed",
+      "kind": "transcript",
+      "note": "READSTRING after CLOSE",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-readstring-closed-leax_fdt/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<CLOSE .C>\n<READSTRING .B .C 100>\n<QUIT>\n",
+      "input_sha256": "b273ab705f7e7ab71c652fdbd840def66d0f64c4c086cc03d86661e4d191d8ca",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-readstring-closed-leax_fdt/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_sha256": "d3709d4e117499282fd905d098d8ecdbb1caba662d4d9c32b271276343f21a18",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-readstring-closed-leax_fdt/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Attempt to read from closed channel\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<CLOSE .C>",
+        "<READSTRING .B .C 100>"
+      ]
+    },
+    {
+      "name": "err-readstring-fix-stop-inchan",
+      "kind": "transcript",
+      "note": "FIX stop on the terminal channel (count 0)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-readstring-fix-stop-inchan-towl0ajn/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET B <ISTRING 100>>\n<READSTRING .B .INCHAN 0>\n<QUIT>\n",
+      "input_sha256": "5a9071eedd89e1874d1ba8ebfea2653ede29b446629aa4384c0dc3ee06671256",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n",
+      "stdout_sha256": "01a987ba2f6d4b782e7808a2a179c3b3919eb49031a58e1e92edd70825aae551",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n0\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .INCHAN 0>"
+      ]
+    },
+    {
+      "name": "err-princ-read-channel",
+      "kind": "transcript",
+      "note": "PRINC to a READ channel",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-princ-read-channel-ij95yiwn/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<PRINC \"x\" .C>\n<QUIT>\n",
+      "input_sha256": "8f5882cb86490a48f78989fa53a769a35f3ab3ceb2d7b678867185309b6edffc",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-princ-read-channel-ij95yiwn/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_sha256": "192e255f77a47d2861331cf562e5cfa672f070cf3b5df1db2711728cf6b5d6df",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-princ-read-channel-ij95yiwn/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Channel for PRINC must be output channel\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<PRINC \"x\" .C>"
+      ]
+    },
+    {
+      "name": "err-printstring-read-channel",
+      "kind": "transcript",
+      "note": "PRINTSTRING to a READ channel",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-printstring-read-channel-_l_sl00o/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<PRINTSTRING \"x\" .C>\n<QUIT>\n",
+      "input_sha256": "97089476bd6a892bb08e83f44141f23a3f82e819a0fc4b43bb6c906d92622d7f",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-printstring-read-channel-_l_sl00o/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_sha256": "dec8e6d311cc7d9ec5db547454d987c2875645892ec84a5580584a645dc8da29",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-printstring-read-channel-_l_sl00o/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Channel for PRINTSTRING must be output channel\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<PRINTSTRING \"x\" .C>"
+      ]
+    },
+    {
+      "name": "err-crlf-read-channel",
+      "kind": "transcript",
+      "note": "CRLF to a READ channel",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-crlf-read-channel-mippwo3h/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<CRLF .C>\n<QUIT>\n",
+      "input_sha256": "d510b2b12e0129a4da1818f46dac944b4e4ca13146b813c8f0e075d343d1ad44",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-crlf-read-channel-mippwo3h/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_sha256": "fa390d844dbfa580d2e4277a2ba92ef424cfb65ded8a9c5e682b74201a048828",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/err-crlf-read-channel-mippwo3h/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Channel for TERPRI/CRLF must be output channel\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<CRLF .C>"
+      ]
+    },
+    {
+      "name": "printstring-count",
+      "kind": "transcript",
+      "note": "PRINTSTRING with a count: output and value",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/printstring-count-1zg_usy0/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<PRINTSTRING \"abcdef\" ,OUTCHAN 3>\n<PRINTSTRING \"abcdef\" ,OUTCHAN 0>\n<PRINTSTRING \"abcdef\" ,OUTCHAN 6>\n<QUIT>\n",
+      "input_sha256": "f20909b3b28ff45e84e7db93336b9625ce5a90fa8acf26d0b012f5c58e0a046e",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nabc\"abcdef\"\n\"abcdef\"\nabcdef\"abcdef\"\n",
+      "stdout_sha256": "4312f62d33d5317b6a10148b5ae750c68a485edd878d18957fbadf50571534ee",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nabc\"abcdef\"\n\"abcdef\"\nabcdef\"abcdef\"\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<PRINTSTRING \"abcdef\" ,OUTCHAN 3>",
+        "<PRINTSTRING \"abcdef\" ,OUTCHAN 0>",
+        "<PRINTSTRING \"abcdef\" ,OUTCHAN 6>"
+      ]
+    },
+    {
+      "name": "err-printstring-count-too-big",
+      "kind": "transcript",
+      "note": "count larger than the STRING",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-printstring-count-too-big-cxnr9dss/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<PRINTSTRING \"abc\" ,OUTCHAN 5>\n<QUIT>\n",
+      "input_sha256": "4437fc437f2195d4a30e55467bd786489d2b3ca7a81065656f5d6ded954c0798",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nabc\"abc\"\n",
+      "stdout_sha256": "a6982f5c8c0b8eed29a4a313475a7dbf305e3355f221ce825d1e1902513ba02c",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nabc\"abc\"\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<PRINTSTRING \"abc\" ,OUTCHAN 5>"
+      ]
+    },
+    {
+      "name": "close-value",
+      "kind": "transcript",
+      "note": "CLOSE's value",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/close-value-bpb1ix68/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<SET D <CLOSE .C>>\n<==? .D .C>\n<TYPE .D>\n<QUIT>\n",
+      "input_sha256": "35e4d3a83b98f0ac8d3afb8a95227fab0e6a4fc2d867bf0cca909753886baf95",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/close-value-bpb1ix68/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nT\nCHANNEL\n",
+      "stdout_sha256": "8c189297de7326aeec39cf10640c5eaeff4f4f69b87a3a0458121deca0220092",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/close-value-bpb1ix68/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nT\nCHANNEL\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<SET D <CLOSE .C>>",
+        "<==? .D .C>",
+        "<TYPE .D>"
+      ]
+    },
+    {
+      "name": "close-double",
+      "kind": "transcript",
+      "note": "CLOSE of a closed channel",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/close-double-stjtml00/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>\n<CLOSE .C>\n<CLOSE .C>\n<TYPE <CLOSE .C>>\n<QUIT>\n",
+      "input_sha256": "6b00ddded5e7a19980232d9e9b2928888b54b175077e549dddbd6bf2d6e762de",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/close-double-stjtml00/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stdout_sha256": "6ba9b1f00c3f9f409c4e9ba79ad2fde2c9c4fc8d1deb80a5cf5fb2b91fdf90ef",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"MADADV\" \"HELP\" \"DSK\" \"$TMPDIR/file-read-probes/close-double-stjtml00/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nCHANNEL\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\">>",
+        "<CLOSE .C>",
+        "<CLOSE .C>",
+        "<TYPE <CLOSE .C>>"
+      ]
+    },
+    {
+      "name": "close-after-read",
+      "kind": "transcript",
+      "note": "CLOSE after a read",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/close-after-read-45snjk5s/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>\n<SET B <ISTRING 100>>\n<READSTRING .B .C 100>\n<CLOSE .C>\n<QUIT>\n",
+      "input_sha256": "31685c3115988cc24fe6a8b88331210b60dc1c07b8d7c057e18ccb44c978e560",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/close-after-read-45snjk5s/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "1048470bb974bedc2bf8b9c9912bac9af854916418dab61a33ba9dac5bb65308",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#CHANNEL [3 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"MADADV\" \"INFO\" \"DSK\" \"$TMPDIR/file-read-probes/close-after-read-45snjk5s/game/MDL\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n100\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 0 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SET C <OPEN \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\">>",
+        "<SET B <ISTRING 100>>",
+        "<READSTRING .B .C 100>",
+        "<CLOSE .C>"
+      ]
+    },
+    {
+      "name": "err-close-no-args",
+      "kind": "transcript",
+      "note": "zero arguments",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-close-no-args-lc6lyh7b/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<CLOSE>\n<QUIT>\n",
+      "input_sha256": "18f6b886057ca21abf2a91714f71d1c76fcbb0bbff9fd38fedec7bb60b9de1ac",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_sha256": "995cd34fc86ffc0555ab911a93fd38cedb03aa1a58b6128b34d354d801923cbc",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Not enough args to CLOSE\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<CLOSE>"
+      ]
+    },
+    {
+      "name": "err-close-string",
+      "kind": "transcript",
+      "note": "non-CHANNEL",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/err-close-string-j1kiesyv/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<CLOSE \"x\">\n<QUIT>\n",
+      "input_sha256": "e1453ec3bd7b8188f514ffd3bdcdb192cd5adc2f702648019813564da577a614",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stdout_sha256": "995cd34fc86ffc0555ab911a93fd38cedb03aa1a58b6128b34d354d801923cbc",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+      "stderr_raw": "Argument to close must be of type CHANNEL\n",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<CLOSE \"x\">"
+      ]
+    },
+    {
+      "name": "file-to-tty-info",
+      "kind": "transcript",
+      "note": "FILE-TO-TTY of 77rooms.mud:960 on INFO: output, value, TELL-FLAG",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/file-to-tty-info-2oy9l9y5/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DEV \"DSK\">\n<SETG SNM \"MDL\">\n<SETG INBUF <ISTRING 100>>\n<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>\n<SETG TELL-FLAG <>>\n<DEFINE FILE-TO-TTY (FILE1 FILE2 \"OPTIONAL\" (DEV <VALUE DEV>) (SNM <VALUE SNM>) \"AUX\" (CH <OPEN \"READ\" .FILE1 .FILE2 .DEV .SNM>) LEN (BUF ,INBUF) (BUFLEN <LENGTH .BUF>) ITER) #DECL ((BUF FILE1 FILE2 DEV SNM) STRING (CH) <OR CHANNEL FALSE> (ITER LEN BUFLEN) FIX) <COND (.CH <UNWIND <PROG () <SET LEN <FILE-LENGTH .CH>> <SET ITER </ .LEN .BUFLEN>> <OR <0? <MOD .LEN .BUFLEN>> <SET ITER <+ .ITER 1>>> <CRLF ,OUTCHAN> <SETG TELL-FLAG T> <REPEAT (SLEN) #DECL ((SLEN) FIX) <COND (<1? .ITER> <SET SLEN <READSTRING .BUF .CH ,BREAKS>>) (<SET SLEN <READSTRING .BUF .CH .BUFLEN>>)> <PRINTSTRING .BUF ,OUTCHAN .SLEN> <COND (<0? <SET ITER <- .ITER 1>>> <CRLF ,OUTCHAN> <RETURN <CLOSE .CH>>)>>> <CLOSE .CH>>) (<TELL \"File not found.\">)>>\n<FILE-TO-TTY \"MADADV\" \"INFO\">\n,TELL-FLAG\n<QUIT>\n",
+      "input_sha256": "606cd351db1b16ec1d9194d90f1ca516b2c9e6fef288a8b7728294ce374bdab1",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DSK\"\n\"MDL\"\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n#FALSE ()\nFILE-TO-TTY\n\nYou are near a large dungeon, which is reputed to contain vast\nquantities of treasure.  Naturally, you wish to acquire some of it.  In\norder to do so, you must of course remove it from the dungeon; to\nreceive full credit for it, you must deliver it safely to the \"living\nroom\".  In addition to valuables, the dungeon contains various objects\nwhich may or may not be useful in your attempt to get rich; you may need\nsources of light, since dungeons are often dark, and weapons, since\ndungeons often have unfriendly things wandering about.\nTo determine how successful you have been, there is a score kept.  When\nyou find a valuable object (i.e., pick it up), you receive a certain\nnumber of points, which depends on the difficulty of finding it.  You\nreceive extra points for transporting the treasure safely to the living\nroom.  In addition, some particularly interesting rooms have a value\nassociated with your entering them.\nOf special note is a thief (always carrying a large bag) who likes to\nwander around in the dungeon (he has never been seen by the light of\nday).  He likes to take things; since he steals for pleasure rather than\nprofit, and is sadistic, he only takes things which you have seen. \nAlthough he prefers valuables, sometimes in his haste he may take\nsomething which is worthless; from time to time, he examines his take\nand discards objects which he doesn't like.  He may occasionally stop in\na room you are visiting, but more often he just wanders through and rips\nyou off (he is a skilled pickpocket). \n\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nT\n",
+      "stdout_sha256": "72ee18bb18bb1a553537368fe17a0cc8ea238578a77f8368fd662fdd707804a6",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DSK\"\n\"MDL\"\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n#FALSE ()\nFILE-TO-TTY\n\nYou are near a large dungeon, which is reputed to contain vast\nquantities of treasure.  Naturally, you wish to acquire some of it.  In\norder to do so, you must of course remove it from the dungeon; to\nreceive full credit for it, you must deliver it safely to the \"living\nroom\".  In addition to valuables, the dungeon contains various objects\nwhich may or may not be useful in your attempt to get rich; you may need\nsources of light, since dungeons are often dark, and weapons, since\ndungeons often have unfriendly things wandering about.\nTo determine how successful you have been, there is a score kept.  When\nyou find a valuable object (i.e., pick it up), you receive a certain\nnumber of points, which depends on the difficulty of finding it.  You\nreceive extra points for transporting the treasure safely to the living\nroom.  In addition, some particularly interesting rooms have a value\nassociated with your entering them.\nOf special note is a thief (always carrying a large bag) who likes to\nwander around in the dungeon (he has never been seen by the light of\nday).  He likes to take things; since he steals for pleasure rather than\nprofit, and is sadistic, he only takes things which you have seen. \nAlthough he prefers valuables, sometimes in his haste he may take\nsomething which is worthless; from time to time, he examines his take\nand discards objects which he doesn't like.  He may occasionally stop in\na room you are visiting, but more often he just wanders through and rips\nyou off (he is a skilled pickpocket). \n\n#CHANNEL [0 \"READ\" \"MADADV\" \"INFO\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SETG DEV \"DSK\">",
+        "<SETG SNM \"MDL\">",
+        "<SETG INBUF <ISTRING 100>>",
+        "<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>",
+        "<SETG TELL-FLAG <>>",
+        "<DEFINE FILE-TO-TTY (FILE1 FILE2 \"OPTIONAL\" (DEV <VALUE DEV>) (SNM <VALUE SNM>) \"AUX\" (CH <OPEN \"READ\" .FILE1 .FILE2 .DEV .SNM>) LEN (BUF ,INBUF) (BUFLEN <LENGTH .BUF>) ITER) #DECL ((BUF FILE1 FILE2 DEV SNM) STRING (CH) <OR CHANNEL FALSE> (ITER LEN BUFLEN) FIX) <COND (.CH <UNWIND <PROG () <SET LEN <FILE-LENGTH .CH>> <SET ITER </ .LEN .BUFLEN>> <OR <0? <MOD .LEN .BUFLEN>> <SET ITER <+ .ITER 1>>> <CRLF ,OUTCHAN> <SETG TELL-FLAG T> <REPEAT (SLEN) #DECL ((SLEN) FIX) <COND (<1? .ITER> <SET SLEN <READSTRING .BUF .CH ,BREAKS>>) (<SET SLEN <READSTRING .BUF .CH .BUFLEN>>)> <PRINTSTRING .BUF ,OUTCHAN .SLEN> <COND (<0? <SET ITER <- .ITER 1>>> <CRLF ,OUTCHAN> <RETURN <CLOSE .CH>>)>>> <CLOSE .CH>>) (<TELL \"File not found.\">)>>",
+        "<FILE-TO-TTY \"MADADV\" \"INFO\">",
+        ",TELL-FLAG"
+      ]
+    },
+    {
+      "name": "file-to-tty-help",
+      "kind": "transcript",
+      "note": "FILE-TO-TTY on HELP",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/file-to-tty-help-neyf0gde/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DEV \"DSK\">\n<SETG SNM \"MDL\">\n<SETG INBUF <ISTRING 100>>\n<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>\n<SETG TELL-FLAG <>>\n<DEFINE FILE-TO-TTY (FILE1 FILE2 \"OPTIONAL\" (DEV <VALUE DEV>) (SNM <VALUE SNM>) \"AUX\" (CH <OPEN \"READ\" .FILE1 .FILE2 .DEV .SNM>) LEN (BUF ,INBUF) (BUFLEN <LENGTH .BUF>) ITER) #DECL ((BUF FILE1 FILE2 DEV SNM) STRING (CH) <OR CHANNEL FALSE> (ITER LEN BUFLEN) FIX) <COND (.CH <UNWIND <PROG () <SET LEN <FILE-LENGTH .CH>> <SET ITER </ .LEN .BUFLEN>> <OR <0? <MOD .LEN .BUFLEN>> <SET ITER <+ .ITER 1>>> <CRLF ,OUTCHAN> <SETG TELL-FLAG T> <REPEAT (SLEN) #DECL ((SLEN) FIX) <COND (<1? .ITER> <SET SLEN <READSTRING .BUF .CH ,BREAKS>>) (<SET SLEN <READSTRING .BUF .CH .BUFLEN>>)> <PRINTSTRING .BUF ,OUTCHAN .SLEN> <COND (<0? <SET ITER <- .ITER 1>>> <CRLF ,OUTCHAN> <RETURN <CLOSE .CH>>)>>> <CLOSE .CH>>) (<TELL \"File not found.\">)>>\n<FILE-TO-TTY \"MADADV\" \"HELP\">\n<QUIT>\n",
+      "input_sha256": "c3b313f7889504092c1d8ff1ccb28e636938a42457ef941232b05d47294d43a0",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DSK\"\n\"MDL\"\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n#FALSE ()\nFILE-TO-TTY\n\nUseful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms which have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses printing of long room\ndescriptions for all rooms; 'unsup' turns this off.\n    The 'info' command prints a file which might give some idea of\nwhat the game is about.\n    The 'quit' command (or ctrl-G) prints your score, and asks whether\nyou wish to continue playing.\n    The 'script', 'unscript', 'save', and 'restore' commands are\nuseful if you are a local user.  \nDungeon Command Parser\n    \n    A command is one line of text terminated by a carriage return.\nFor reasons of simplicity all words are distinguished by their first\nfive letters.  All others are ignored.  For example, your typing\n'DISASSEMBLE THE ENCYLOPEDIA' while meaningless is also creating\nexcess effort for your fingers.  Note also that ambiguities can be\nintroduced by this:  'unscr' is 'UNSCRipt', not 'UNSCRew'.\n\n    You are talking to a fairly stupid parser, which understands the\nfollowing types of things.\n\n Actions:       \n    Among the more obvious of these, TAKE, DROP, etc.  Fairly general\n    forms of these may be used:  PICK UP, PUT DOWN, etc.\n\n Directions:\n    NORTH, SOUTH, UP, DOWN, etc. and their various abbreviations.\n    Other more obscure directions (LAND, CLIMB) are appropriate in\n    only certain situations.\n    \n Objects: \n    Most objects have names, and can be referenced by them.\n\n Adjectives:\n    Some adjectives are understood and are required when there are\n    two objects which can be referenced with the same 'name' (e.g.\n    DOORs, BUTTONs)\n\n Prepositions:\n    It may be necessary in some cases to include prepositions, but\n    the parser attempts to handle cases which aren't ambiguous\n    without.  Thus 'Give car to demon' will work, as will 'Give demon\n    car.'  'Give car demon' probably won't do anything interesting. \n    When a preposition is used, it should be appropriate:  'Give car\n    with demon' does not parse.\n\n Sentences:\n\n    The parser understands a reasonable number of things.  Rather\n    than listing them, we advise you to do reasonable things.\n\n Ambiguity:\n\n    The parser tries to be clever about what to do in the case of\n    actions which require objects in the case that the object is not\n    specified.  If there is only one possible object, the parser will\n    assume that it should be used.  Otherwise, the parser will ask.\n    Most questions asked by the parser can be answered (e.g. With\n    what?).\n         \n  Inventory:  Lists the objects in your possession.\n\n  Look: Prints a description of your surroundings.\n\n  Containment:  \n\n     Some objects can contain other objects.  Many such containers can\n     be opened and closed; the rest are always open.  They may or may\n     not be transparent.  For you to access (take, for example) an\n     object which is in a container, the container must be open; for you\n     to see such an object, the container must either be open or\n     transparent.  Containers have a capacity, and objects have sizes;\n     the number of objects which will fit therefore depends on their\n     sizes.  You may \"put\" any object you have access to (it need not be\n     in your hands) into any other object; at some point, the program\n     will attempt to pick it up if you don't already have it, which\n     process may fail if you're carrying too much.  Although  containers\n     can contain other containers, the program doesn't access more than\n     one level down.\n\n  Fighting:\n\n     Occupants of the dungeon will, as a rule, fight back when\n     attacked; they may in some cases attack you unprovoked.  Useful\n     verbs here are 'attack <villain> with <weapon>', 'kill', etc. \n     Knife-throwing may or may not be useful.  The adventurer has a\n     fighting strength, which varies with time:  in particular, being\n     in a fight, getting killed, and getting injured, all lower it. \n     One's carrying capacity may also be reduced after a fight. \n     Strength is regained with time.  (Thus, it is not a good idea to\n     fight someone immediately after being killed.)  Other details\n     may become apparent in the course of a few melees.  The\n     'diagnose' command describes your state of health.\n\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stdout_sha256": "c66e165e5ef3047db24777d93229bf5a162897c38ead81ab4656927475573b89",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DSK\"\n\"MDL\"\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n#FALSE ()\nFILE-TO-TTY\n\nUseful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms which have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses printing of long room\ndescriptions for all rooms; 'unsup' turns this off.\n    The 'info' command prints a file which might give some idea of\nwhat the game is about.\n    The 'quit' command (or ctrl-G) prints your score, and asks whether\nyou wish to continue playing.\n    The 'script', 'unscript', 'save', and 'restore' commands are\nuseful if you are a local user.  \nDungeon Command Parser\n    \n    A command is one line of text terminated by a carriage return.\nFor reasons of simplicity all words are distinguished by their first\nfive letters.  All others are ignored.  For example, your typing\n'DISASSEMBLE THE ENCYLOPEDIA' while meaningless is also creating\nexcess effort for your fingers.  Note also that ambiguities can be\nintroduced by this:  'unscr' is 'UNSCRipt', not 'UNSCRew'.\n\n    You are talking to a fairly stupid parser, which understands the\nfollowing types of things.\n\n Actions:       \n    Among the more obvious of these, TAKE, DROP, etc.  Fairly general\n    forms of these may be used:  PICK UP, PUT DOWN, etc.\n\n Directions:\n    NORTH, SOUTH, UP, DOWN, etc. and their various abbreviations.\n    Other more obscure directions (LAND, CLIMB) are appropriate in\n    only certain situations.\n    \n Objects: \n    Most objects have names, and can be referenced by them.\n\n Adjectives:\n    Some adjectives are understood and are required when there are\n    two objects which can be referenced with the same 'name' (e.g.\n    DOORs, BUTTONs)\n\n Prepositions:\n    It may be necessary in some cases to include prepositions, but\n    the parser attempts to handle cases which aren't ambiguous\n    without.  Thus 'Give car to demon' will work, as will 'Give demon\n    car.'  'Give car demon' probably won't do anything interesting. \n    When a preposition is used, it should be appropriate:  'Give car\n    with demon' does not parse.\n\n Sentences:\n\n    The parser understands a reasonable number of things.  Rather\n    than listing them, we advise you to do reasonable things.\n\n Ambiguity:\n\n    The parser tries to be clever about what to do in the case of\n    actions which require objects in the case that the object is not\n    specified.  If there is only one possible object, the parser will\n    assume that it should be used.  Otherwise, the parser will ask.\n    Most questions asked by the parser can be answered (e.g. With\n    what?).\n         \n  Inventory:  Lists the objects in your possession.\n\n  Look: Prints a description of your surroundings.\n\n  Containment:  \n\n     Some objects can contain other objects.  Many such containers can\n     be opened and closed; the rest are always open.  They may or may\n     not be transparent.  For you to access (take, for example) an\n     object which is in a container, the container must be open; for you\n     to see such an object, the container must either be open or\n     transparent.  Containers have a capacity, and objects have sizes;\n     the number of objects which will fit therefore depends on their\n     sizes.  You may \"put\" any object you have access to (it need not be\n     in your hands) into any other object; at some point, the program\n     will attempt to pick it up if you don't already have it, which\n     process may fail if you're carrying too much.  Although  containers\n     can contain other containers, the program doesn't access more than\n     one level down.\n\n  Fighting:\n\n     Occupants of the dungeon will, as a rule, fight back when\n     attacked; they may in some cases attack you unprovoked.  Useful\n     verbs here are 'attack <villain> with <weapon>', 'kill', etc. \n     Knife-throwing may or may not be useful.  The adventurer has a\n     fighting strength, which varies with time:  in particular, being\n     in a fight, getting killed, and getting injured, all lower it. \n     One's carrying capacity may also be reduced after a fight. \n     Strength is regained with time.  (Thus, it is not a good idea to\n     fight someone immediately after being killed.)  Other details\n     may become apparent in the course of a few melees.  The\n     'diagnose' command describes your state of health.\n\n#CHANNEL [0 \"READ\" \"MADADV\" \"HELP\" \"DSK\" \"MDL\" \"\" \"\" \"\" \"\" 1 0 #LOSE *0000000000000000000000* 0 0 0 0 10 0]\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.01,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SETG DEV \"DSK\">",
+        "<SETG SNM \"MDL\">",
+        "<SETG INBUF <ISTRING 100>>",
+        "<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>",
+        "<SETG TELL-FLAG <>>",
+        "<DEFINE FILE-TO-TTY (FILE1 FILE2 \"OPTIONAL\" (DEV <VALUE DEV>) (SNM <VALUE SNM>) \"AUX\" (CH <OPEN \"READ\" .FILE1 .FILE2 .DEV .SNM>) LEN (BUF ,INBUF) (BUFLEN <LENGTH .BUF>) ITER) #DECL ((BUF FILE1 FILE2 DEV SNM) STRING (CH) <OR CHANNEL FALSE> (ITER LEN BUFLEN) FIX) <COND (.CH <UNWIND <PROG () <SET LEN <FILE-LENGTH .CH>> <SET ITER </ .LEN .BUFLEN>> <OR <0? <MOD .LEN .BUFLEN>> <SET ITER <+ .ITER 1>>> <CRLF ,OUTCHAN> <SETG TELL-FLAG T> <REPEAT (SLEN) #DECL ((SLEN) FIX) <COND (<1? .ITER> <SET SLEN <READSTRING .BUF .CH ,BREAKS>>) (<SET SLEN <READSTRING .BUF .CH .BUFLEN>>)> <PRINTSTRING .BUF ,OUTCHAN .SLEN> <COND (<0? <SET ITER <- .ITER 1>>> <CRLF ,OUTCHAN> <RETURN <CLOSE .CH>>)>>> <CLOSE .CH>>) (<TELL \"File not found.\">)>>",
+        "<FILE-TO-TTY \"MADADV\" \"HELP\">"
+      ]
+    },
+    {
+      "name": "file-to-tty-missing",
+      "kind": "transcript",
+      "note": "FILE-TO-TTY on an absent file (TELL stubbed as PRINC + CRLF)",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/file-to-tty-missing-y3ho18pi/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<SETG DEV \"DSK\">\n<SETG SNM \"MDL\">\n<SETG INBUF <ISTRING 100>>\n<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>\n<SETG TELL-FLAG <>>\n<DEFINE FILE-TO-TTY (FILE1 FILE2 \"OPTIONAL\" (DEV <VALUE DEV>) (SNM <VALUE SNM>) \"AUX\" (CH <OPEN \"READ\" .FILE1 .FILE2 .DEV .SNM>) LEN (BUF ,INBUF) (BUFLEN <LENGTH .BUF>) ITER) #DECL ((BUF FILE1 FILE2 DEV SNM) STRING (CH) <OR CHANNEL FALSE> (ITER LEN BUFLEN) FIX) <COND (.CH <UNWIND <PROG () <SET LEN <FILE-LENGTH .CH>> <SET ITER </ .LEN .BUFLEN>> <OR <0? <MOD .LEN .BUFLEN>> <SET ITER <+ .ITER 1>>> <CRLF ,OUTCHAN> <SETG TELL-FLAG T> <REPEAT (SLEN) #DECL ((SLEN) FIX) <COND (<1? .ITER> <SET SLEN <READSTRING .BUF .CH ,BREAKS>>) (<SET SLEN <READSTRING .BUF .CH .BUFLEN>>)> <PRINTSTRING .BUF ,OUTCHAN .SLEN> <COND (<0? <SET ITER <- .ITER 1>>> <CRLF ,OUTCHAN> <RETURN <CLOSE .CH>>)>>> <CLOSE .CH>>) (<TELL \"File not found.\">)>>\n<SETG TELL <FUNCTION (S) <PRINC .S> <CRLF> T>>\n<FILE-TO-TTY \"NOSUCH\" \"FILE\">\n<QUIT>\n",
+      "input_sha256": "017af91584e964ebd417a6dbbc8e774a6405d3b5c551693e46a1f6b2dd7d995e",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DSK\"\n\"MDL\"\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n#FALSE ()\nFILE-TO-TTY\n#FUNCTION ((S) <PRINC .S> <CRLF> T)\nFile not found.\nT\n",
+      "stdout_sha256": "66fff361b9435953053dbed8b4877a8970a565c65d12e10504dd3bc98bed00b1",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"DSK\"\n\"MDL\"\n\"^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@\"\n\"^C^@\"\n#FALSE ()\nFILE-TO-TTY\n#FUNCTION ((S) <PRINC .S> <CRLF> T)\nFile not found.\nT\n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.0,
+      "files_changed": {},
+      "files_removed": [],
+      "forms": [
+        "<SETG DEV \"DSK\">",
+        "<SETG SNM \"MDL\">",
+        "<SETG INBUF <ISTRING 100>>",
+        "<SETG BREAKS <STRING <ASCII 3> <ASCII 0>>>",
+        "<SETG TELL-FLAG <>>",
+        "<DEFINE FILE-TO-TTY (FILE1 FILE2 \"OPTIONAL\" (DEV <VALUE DEV>) (SNM <VALUE SNM>) \"AUX\" (CH <OPEN \"READ\" .FILE1 .FILE2 .DEV .SNM>) LEN (BUF ,INBUF) (BUFLEN <LENGTH .BUF>) ITER) #DECL ((BUF FILE1 FILE2 DEV SNM) STRING (CH) <OR CHANNEL FALSE> (ITER LEN BUFLEN) FIX) <COND (.CH <UNWIND <PROG () <SET LEN <FILE-LENGTH .CH>> <SET ITER </ .LEN .BUFLEN>> <OR <0? <MOD .LEN .BUFLEN>> <SET ITER <+ .ITER 1>>> <CRLF ,OUTCHAN> <SETG TELL-FLAG T> <REPEAT (SLEN) #DECL ((SLEN) FIX) <COND (<1? .ITER> <SET SLEN <READSTRING .BUF .CH ,BREAKS>>) (<SET SLEN <READSTRING .BUF .CH .BUFLEN>>)> <PRINTSTRING .BUF ,OUTCHAN .SLEN> <COND (<0? <SET ITER <- .ITER 1>>> <CRLF ,OUTCHAN> <RETURN <CLOSE .CH>>)>>> <CLOSE .CH>>) (<TELL \"File not found.\">)>>",
+        "<SETG TELL <FUNCTION (S) <PRINC .S> <CRLF> T>>",
+        "<FILE-TO-TTY \"NOSUCH\" \"FILE\">"
+      ]
+    },
+    {
+      "name": "game-help-info",
+      "kind": "transcript",
+      "note": "faithful boot, then help, info, ?, quit y",
+      "mode": "pipe",
+      "clock": {
+        "epoch": 250776000,
+        "tz": "UTC"
+      },
+      "cwd": "$TMPDIR/session-probes/game-help-info-luhjbctn/game",
+      "removed_before_boot": [
+        "SAVEFILE/ZORK.SAVE"
+      ],
+      "setup": [],
+      "input": "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\nhelp\ninfo\n?\nquit\ny\n",
+      "input_sha256": "ca329d498721c45bd06e83a41140806185cf058158d20241c779dcba0d983908",
+      "exit_status": 0,
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\r\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\r\nfront door.\nThere is a small mailbox here.\n>\nUseful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms which have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses printing of long room\ndescriptions for all rooms; 'unsup' turns this off.\n    The 'info' command prints a file which might give some idea of\nwhat the game is about.\n    The 'quit' command (or ctrl-G) prints your score, and asks whether\nyou wish to continue playing.\n    The 'script', 'unscript', 'save', and 'restore' commands are\nuseful if you are a local user.  \nDungeon Command Parser\n    \n    A command is one line of text terminated by a carriage return.\nFor reasons of simplicity all words are distinguished by their first\nfive letters.  All others are ignored.  For example, your typing\n'DISASSEMBLE THE ENCYLOPEDIA' while meaningless is also creating\nexcess effort for your fingers.  Note also that ambiguities can be\nintroduced by this:  'unscr' is 'UNSCRipt', not 'UNSCRew'.\n\n    You are talking to a fairly stupid parser, which understands the\nfollowing types of things.\n\n Actions:       \n    Among the more obvious of these, TAKE, DROP, etc.  Fairly general\n    forms of these may be used:  PICK UP, PUT DOWN, etc.\n\n Directions:\n    NORTH, SOUTH, UP, DOWN, etc. and their various abbreviations.\n    Other more obscure directions (LAND, CLIMB) are appropriate in\n    only certain situations.\n    \n Objects: \n    Most objects have names, and can be referenced by them.\n\n Adjectives:\n    Some adjectives are understood and are required when there are\n    two objects which can be referenced with the same 'name' (e.g.\n    DOORs, BUTTONs)\n\n Prepositions:\n    It may be necessary in some cases to include prepositions, but\n    the parser attempts to handle cases which aren't ambiguous\n    without.  Thus 'Give car to demon' will work, as will 'Give demon\n    car.'  'Give car demon' probably won't do anything interesting. \n    When a preposition is used, it should be appropriate:  'Give car\n    with demon' does not parse.\n\n Sentences:\n\n    The parser understands a reasonable number of things.  Rather\n    than listing them, we advise you to do reasonable things.\n\n Ambiguity:\n\n    The parser tries to be clever about what to do in the case of\n    actions which require objects in the case that the object is not\n    specified.  If there is only one possible object, the parser will\n    assume that it should be used.  Otherwise, the parser will ask.\n    Most questions asked by the parser can be answered (e.g. With\n    what?).\n         \n  Inventory:  Lists the objects in your possession.\n\n  Look: Prints a description of your surroundings.\n\n  Containment:  \n\n     Some objects can contain other objects.  Many such containers can\n     be opened and closed; the rest are always open.  They may or may\n     not be transparent.  For you to access (take, for example) an\n     object which is in a container, the container must be open; for you\n     to see such an object, the container must either be open or\n     transparent.  Containers have a capacity, and objects have sizes;\n     the number of objects which will fit therefore depends on their\n     sizes.  You may \"put\" any object you have access to (it need not be\n     in your hands) into any other object; at some point, the program\n     will attempt to pick it up if you don't already have it, which\n     process may fail if you're carrying too much.  Although  containers\n     can contain other containers, the program doesn't access more than\n     one level down.\n\n  Fighting:\n\n     Occupants of the dungeon will, as a rule, fight back when\n     attacked; they may in some cases attack you unprovoked.  Useful\n     verbs here are 'attack <villain> with <weapon>', 'kill', etc. \n     Knife-throwing may or may not be useful.  The adventurer has a\n     fighting strength, which varies with time:  in particular, being\n     in a fight, getting killed, and getting injured, all lower it. \n     One's carrying capacity may also be reduced after a fight. \n     Strength is regained with time.  (Thus, it is not a good idea to\n     fight someone immediately after being killed.)  Other details\n     may become apparent in the course of a few melees.  The\n     'diagnose' command describes your state of health.\n\n>\nYou are near a large dungeon, which is reputed to contain vast\nquantities of treasure.  Naturally, you wish to acquire some of it.  In\norder to do so, you must of course remove it from the dungeon; to\nreceive full credit for it, you must deliver it safely to the \"living\nroom\".  In addition to valuables, the dungeon contains various objects\nwhich may or may not be useful in your attempt to get rich; you may need\nsources of light, since dungeons are often dark, and weapons, since\ndungeons often have unfriendly things wandering about.\nTo determine how successful you have been, there is a score kept.  When\nyou find a valuable object (i.e., pick it up), you receive a certain\nnumber of points, which depends on the difficulty of finding it.  You\nreceive extra points for transporting the treasure safely to the living\nroom.  In addition, some particularly interesting rooms have a value\nassociated with your entering them.\nOf special note is a thief (always carrying a large bag) who likes to\nwander around in the dungeon (he has never been seen by the light of\nday).  He likes to take things; since he steals for pleasure rather than\nprofit, and is sadistic, he only takes things which you have seen. \nAlthough he prefers valuables, sometimes in his haste he may take\nsomething which is worthless; from time to time, he examines his take\nand discards objects which he doesn't like.  He may occasionally stop in\na room you are visiting, but more often he just wanders through and rips\nyou off (he is a skilled pickpocket). \n\n>\nUseful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms which have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses printing of long room\ndescriptions for all rooms; 'unsup' turns this off.\n    The 'info' command prints a file which might give some idea of\nwhat the game is about.\n    The 'quit' command (or ctrl-G) prints your score, and asks whether\nyou wish to continue playing.\n    The 'script', 'unscript', 'save', and 'restore' commands are\nuseful if you are a local user.  \nDungeon Command Parser\n    \n    A command is one line of text terminated by a carriage return.\nFor reasons of simplicity all words are distinguished by their first\nfive letters.  All others are ignored.  For example, your typing\n'DISASSEMBLE THE ENCYLOPEDIA' while meaningless is also creating\nexcess effort for your fingers.  Note also that ambiguities can be\nintroduced by this:  'unscr' is 'UNSCRipt', not 'UNSCRew'.\n\n    You are talking to a fairly stupid parser, which understands the\nfollowing types of things.\n\n Actions:       \n    Among the more obvious of these, TAKE, DROP, etc.  Fairly general\n    forms of these may be used:  PICK UP, PUT DOWN, etc.\n\n Directions:\n    NORTH, SOUTH, UP, DOWN, etc. and their various abbreviations.\n    Other more obscure directions (LAND, CLIMB) are appropriate in\n    only certain situations.\n    \n Objects: \n    Most objects have names, and can be referenced by them.\n\n Adjectives:\n    Some adjectives are understood and are required when there are\n    two objects which can be referenced with the same 'name' (e.g.\n    DOORs, BUTTONs)\n\n Prepositions:\n    It may be necessary in some cases to include prepositions, but\n    the parser attempts to handle cases which aren't ambiguous\n    without.  Thus 'Give car to demon' will work, as will 'Give demon\n    car.'  'Give car demon' probably won't do anything interesting. \n    When a preposition is used, it should be appropriate:  'Give car\n    with demon' does not parse.\n\n Sentences:\n\n    The parser understands a reasonable number of things.  Rather\n    than listing them, we advise you to do reasonable things.\n\n Ambiguity:\n\n    The parser tries to be clever about what to do in the case of\n    actions which require objects in the case that the object is not\n    specified.  If there is only one possible object, the parser will\n    assume that it should be used.  Otherwise, the parser will ask.\n    Most questions asked by the parser can be answered (e.g. With\n    what?).\n         \n  Inventory:  Lists the objects in your possession.\n\n  Look: Prints a description of your surroundings.\n\n  Containment:  \n\n     Some objects can contain other objects.  Many such containers can\n     be opened and closed; the rest are always open.  They may or may\n     not be transparent.  For you to access (take, for example) an\n     object which is in a container, the container must be open; for you\n     to see such an object, the container must either be open or\n     transparent.  Containers have a capacity, and objects have sizes;\n     the number of objects which will fit therefore depends on their\n     sizes.  You may \"put\" any object you have access to (it need not be\n     in your hands) into any other object; at some point, the program\n     will attempt to pick it up if you don't already have it, which\n     process may fail if you're carrying too much.  Although  containers\n     can contain other containers, the program doesn't access more than\n     one level down.\n\n  Fighting:\n\n     Occupants of the dungeon will, as a rule, fight back when\n     attacked; they may in some cases attack you unprovoked.  Useful\n     verbs here are 'attack <villain> with <weapon>', 'kill', etc. \n     Knife-throwing may or may not be useful.  The adventurer has a\n     fighting strength, which varies with time:  in particular, being\n     in a fight, getting killed, and getting injured, all lower it. \n     One's carrying capacity may also be reduced after a fight. \n     Strength is regained with time.  (Thus, it is not a good idea to\n     fight someone immediately after being killed.)  Other details\n     may become apparent in the course of a few melees.  The\n     'diagnose' command describes your state of health.\n\n>\nYour score would be 0 [total of 500 points], in 4 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stdout_sha256": "ef533e9f2f6af4925034c452123701060067f40b2303629203345dd90226dd3f",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nWelcome to Dungeon.\nThis version created December 12.\n\nYou are in an open field west of a big white house, with a boarded\nfront door.\nThere is a small mailbox here.\n>\nUseful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms which have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses printing of long room\ndescriptions for all rooms; 'unsup' turns this off.\n    The 'info' command prints a file which might give some idea of\nwhat the game is about.\n    The 'quit' command (or ctrl-G) prints your score, and asks whether\nyou wish to continue playing.\n    The 'script', 'unscript', 'save', and 'restore' commands are\nuseful if you are a local user.  \nDungeon Command Parser\n    \n    A command is one line of text terminated by a carriage return.\nFor reasons of simplicity all words are distinguished by their first\nfive letters.  All others are ignored.  For example, your typing\n'DISASSEMBLE THE ENCYLOPEDIA' while meaningless is also creating\nexcess effort for your fingers.  Note also that ambiguities can be\nintroduced by this:  'unscr' is 'UNSCRipt', not 'UNSCRew'.\n\n    You are talking to a fairly stupid parser, which understands the\nfollowing types of things.\n\n Actions:       \n    Among the more obvious of these, TAKE, DROP, etc.  Fairly general\n    forms of these may be used:  PICK UP, PUT DOWN, etc.\n\n Directions:\n    NORTH, SOUTH, UP, DOWN, etc. and their various abbreviations.\n    Other more obscure directions (LAND, CLIMB) are appropriate in\n    only certain situations.\n    \n Objects: \n    Most objects have names, and can be referenced by them.\n\n Adjectives:\n    Some adjectives are understood and are required when there are\n    two objects which can be referenced with the same 'name' (e.g.\n    DOORs, BUTTONs)\n\n Prepositions:\n    It may be necessary in some cases to include prepositions, but\n    the parser attempts to handle cases which aren't ambiguous\n    without.  Thus 'Give car to demon' will work, as will 'Give demon\n    car.'  'Give car demon' probably won't do anything interesting. \n    When a preposition is used, it should be appropriate:  'Give car\n    with demon' does not parse.\n\n Sentences:\n\n    The parser understands a reasonable number of things.  Rather\n    than listing them, we advise you to do reasonable things.\n\n Ambiguity:\n\n    The parser tries to be clever about what to do in the case of\n    actions which require objects in the case that the object is not\n    specified.  If there is only one possible object, the parser will\n    assume that it should be used.  Otherwise, the parser will ask.\n    Most questions asked by the parser can be answered (e.g. With\n    what?).\n         \n  Inventory:  Lists the objects in your possession.\n\n  Look: Prints a description of your surroundings.\n\n  Containment:  \n\n     Some objects can contain other objects.  Many such containers can\n     be opened and closed; the rest are always open.  They may or may\n     not be transparent.  For you to access (take, for example) an\n     object which is in a container, the container must be open; for you\n     to see such an object, the container must either be open or\n     transparent.  Containers have a capacity, and objects have sizes;\n     the number of objects which will fit therefore depends on their\n     sizes.  You may \"put\" any object you have access to (it need not be\n     in your hands) into any other object; at some point, the program\n     will attempt to pick it up if you don't already have it, which\n     process may fail if you're carrying too much.  Although  containers\n     can contain other containers, the program doesn't access more than\n     one level down.\n\n  Fighting:\n\n     Occupants of the dungeon will, as a rule, fight back when\n     attacked; they may in some cases attack you unprovoked.  Useful\n     verbs here are 'attack <villain> with <weapon>', 'kill', etc. \n     Knife-throwing may or may not be useful.  The adventurer has a\n     fighting strength, which varies with time:  in particular, being\n     in a fight, getting killed, and getting injured, all lower it. \n     One's carrying capacity may also be reduced after a fight. \n     Strength is regained with time.  (Thus, it is not a good idea to\n     fight someone immediately after being killed.)  Other details\n     may become apparent in the course of a few melees.  The\n     'diagnose' command describes your state of health.\n\n>\nYou are near a large dungeon, which is reputed to contain vast\nquantities of treasure.  Naturally, you wish to acquire some of it.  In\norder to do so, you must of course remove it from the dungeon; to\nreceive full credit for it, you must deliver it safely to the \"living\nroom\".  In addition to valuables, the dungeon contains various objects\nwhich may or may not be useful in your attempt to get rich; you may need\nsources of light, since dungeons are often dark, and weapons, since\ndungeons often have unfriendly things wandering about.\nTo determine how successful you have been, there is a score kept.  When\nyou find a valuable object (i.e., pick it up), you receive a certain\nnumber of points, which depends on the difficulty of finding it.  You\nreceive extra points for transporting the treasure safely to the living\nroom.  In addition, some particularly interesting rooms have a value\nassociated with your entering them.\nOf special note is a thief (always carrying a large bag) who likes to\nwander around in the dungeon (he has never been seen by the light of\nday).  He likes to take things; since he steals for pleasure rather than\nprofit, and is sadistic, he only takes things which you have seen. \nAlthough he prefers valuables, sometimes in his haste he may take\nsomething which is worthless; from time to time, he examines his take\nand discards objects which he doesn't like.  He may occasionally stop in\na room you are visiting, but more often he just wanders through and rips\nyou off (he is a skilled pickpocket). \n\n>\nUseful commands\n\n    The 'brief' command suppresses printing of long room descriptions\nfor rooms which have been visited.  The 'unbrief' command turns this\noff.  The 'superbrief' command suppresses printing of long room\ndescriptions for all rooms; 'unsup' turns this off.\n    The 'info' command prints a file which might give some idea of\nwhat the game is about.\n    The 'quit' command (or ctrl-G) prints your score, and asks whether\nyou wish to continue playing.\n    The 'script', 'unscript', 'save', and 'restore' commands are\nuseful if you are a local user.  \nDungeon Command Parser\n    \n    A command is one line of text terminated by a carriage return.\nFor reasons of simplicity all words are distinguished by their first\nfive letters.  All others are ignored.  For example, your typing\n'DISASSEMBLE THE ENCYLOPEDIA' while meaningless is also creating\nexcess effort for your fingers.  Note also that ambiguities can be\nintroduced by this:  'unscr' is 'UNSCRipt', not 'UNSCRew'.\n\n    You are talking to a fairly stupid parser, which understands the\nfollowing types of things.\n\n Actions:       \n    Among the more obvious of these, TAKE, DROP, etc.  Fairly general\n    forms of these may be used:  PICK UP, PUT DOWN, etc.\n\n Directions:\n    NORTH, SOUTH, UP, DOWN, etc. and their various abbreviations.\n    Other more obscure directions (LAND, CLIMB) are appropriate in\n    only certain situations.\n    \n Objects: \n    Most objects have names, and can be referenced by them.\n\n Adjectives:\n    Some adjectives are understood and are required when there are\n    two objects which can be referenced with the same 'name' (e.g.\n    DOORs, BUTTONs)\n\n Prepositions:\n    It may be necessary in some cases to include prepositions, but\n    the parser attempts to handle cases which aren't ambiguous\n    without.  Thus 'Give car to demon' will work, as will 'Give demon\n    car.'  'Give car demon' probably won't do anything interesting. \n    When a preposition is used, it should be appropriate:  'Give car\n    with demon' does not parse.\n\n Sentences:\n\n    The parser understands a reasonable number of things.  Rather\n    than listing them, we advise you to do reasonable things.\n\n Ambiguity:\n\n    The parser tries to be clever about what to do in the case of\n    actions which require objects in the case that the object is not\n    specified.  If there is only one possible object, the parser will\n    assume that it should be used.  Otherwise, the parser will ask.\n    Most questions asked by the parser can be answered (e.g. With\n    what?).\n         \n  Inventory:  Lists the objects in your possession.\n\n  Look: Prints a description of your surroundings.\n\n  Containment:  \n\n     Some objects can contain other objects.  Many such containers can\n     be opened and closed; the rest are always open.  They may or may\n     not be transparent.  For you to access (take, for example) an\n     object which is in a container, the container must be open; for you\n     to see such an object, the container must either be open or\n     transparent.  Containers have a capacity, and objects have sizes;\n     the number of objects which will fit therefore depends on their\n     sizes.  You may \"put\" any object you have access to (it need not be\n     in your hands) into any other object; at some point, the program\n     will attempt to pick it up if you don't already have it, which\n     process may fail if you're carrying too much.  Although  containers\n     can contain other containers, the program doesn't access more than\n     one level down.\n\n  Fighting:\n\n     Occupants of the dungeon will, as a rule, fight back when\n     attacked; they may in some cases attack you unprovoked.  Useful\n     verbs here are 'attack <villain> with <weapon>', 'kill', etc. \n     Knife-throwing may or may not be useful.  The adventurer has a\n     fighting strength, which varies with time:  in particular, being\n     in a fight, getting killed, and getting injured, all lower it. \n     One's carrying capacity may also be reduced after a fight. \n     Strength is regained with time.  (Thus, it is not a good idea to\n     fight someone immediately after being killed.)  Other details\n     may become apparent in the course of a few melees.  The\n     'diagnose' command describes your state of health.\n\n>\nYour score would be 0 [total of 500 points], in 4 moves.\nThis score gives you the rank of Beginner.\nDo you wish to leave the game? (Y is affirmative): \n",
+      "stderr_raw": "",
+      "elapsed_seconds": 0.16,
+      "files_changed": {
+        "MDL/MADADV.SAVE": {
+          "before": {
+            "size": 879667,
+            "sha256": "6293a39ff55452b1c1ca9b512272f7f0616070184bb1724bc9fb849c2622f0c4",
+            "mode": "0o644"
+          },
+          "after": {
+            "size": 874632,
+            "sha256": "d127ec63c3e2370766763e11afaa417b913b6897d9158ea87995d93329d2d933",
+            "mode": "0o644"
+          }
+        },
+        "MDL/ZORK.LOG": {
+          "before": null,
+          "after": {
+            "size": 130,
+            "sha256": "763a34a2e0d3ed42068e0adb1619f7c095b0cf5a33c243e7195e39b73080573a",
+            "mode": "0o644"
+          }
+        }
+      },
+      "files_removed": [],
+      "forms": null
+    }
+  ]
+}
