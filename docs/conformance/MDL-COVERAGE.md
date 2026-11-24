@@ -22,7 +22,7 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | [04-values-of-atoms](https://mdl-language.readthedocs.io/en/latest/04-values-of-atoms/) | 12 | 18 | 3 |
 | [05-simple-functions](https://mdl-language.readthedocs.io/en/latest/05-simple-functions/) | 6 | 39 | 5 |
 | [06-data-types](https://mdl-language.readthedocs.io/en/latest/06-data-types/) | 13 | 45 | 2 |
-| [07-structured-objects](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/) | 54 | 81 | 2 |
+| [07-structured-objects](https://mdl-language.readthedocs.io/en/latest/07-structured-objects/) | 54 | 81 | 3 |
 | [08-truth](https://mdl-language.readthedocs.io/en/latest/08-truth/) | 12 | 16 | 3 |
 | [09-functions](https://mdl-language.readthedocs.io/en/latest/09-functions/) | 15 | 20 | 2 |
 | [10-looping](https://mdl-language.readthedocs.io/en/latest/10-looping/) | 17 | 9 | 1 |
@@ -36,10 +36,10 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | [18-machine-words-and-bits](https://mdl-language.readthedocs.io/en/latest/18-machine-words-and-bits/) | 7 | 12 | 1 |
 | [19-compiled-programs](https://mdl-language.readthedocs.io/en/latest/19-compiled-programs/) | 10 | 2 | 0 |
 | [20-coroutines](https://mdl-language.readthedocs.io/en/latest/20-coroutines/) | 20 | 0 | 0 |
-| [21-interrupts](https://mdl-language.readthedocs.io/en/latest/21-interrupts/) | 33 | 0 | 0 |
-| [22-storage-management](https://mdl-language.readthedocs.io/en/latest/22-storage-management/) | 15 | 0 | 0 |
-| [23-mdl-as-a-system-process](https://mdl-language.readthedocs.io/en/latest/23-mdl-as-a-system-process/) | 10 | 0 | 0 |
-| [24-efficiency-and-tastefulness](https://mdl-language.readthedocs.io/en/latest/24-efficiency-and-tastefulness/) | 9 | 0 | 0 |
+| [21-interrupts](https://mdl-language.readthedocs.io/en/latest/21-interrupts/) | 33 | 0 | 2 |
+| [22-storage-management](https://mdl-language.readthedocs.io/en/latest/22-storage-management/) | 15 | 0 | 1 |
+| [23-mdl-as-a-system-process](https://mdl-language.readthedocs.io/en/latest/23-mdl-as-a-system-process/) | 10 | 0 | 1 |
+| [24-efficiency-and-tastefulness](https://mdl-language.readthedocs.io/en/latest/24-efficiency-and-tastefulness/) | 9 | 0 | 1 |
 | [appendix-1-a-look-inside](https://mdl-language.readthedocs.io/en/latest/appendix-1-a-look-inside/) | 4 | 0 | 0 |
 | [appendix-2-predefined-subroutines](https://mdl-language.readthedocs.io/en/latest/appendix-2-predefined-subroutines/) | 1 | 0 | 0 |
 | [appendix-3-predefined-types](https://mdl-language.readthedocs.io/en/latest/appendix-3-predefined-types/) | 1 | 0 | 0 |
@@ -305,7 +305,7 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | `G?` | PARTIAL | [mdl/runtime/core.rkt:4887](../../mdl/runtime/core.rkt#L4887) |  |
 | `GASSIGNED?` | PARTIAL | [mdl/runtime/core.rkt:4777](../../mdl/runtime/core.rkt#L4777) |  |
 | `GBOUND?` | NOT_TESTED |  |  |
-| `GC` | PARTIAL | [mdl/runtime/core.rkt:4805](../../mdl/runtime/core.rkt#L4805) |  |
+| `GC` | PARTIAL | [mdl/runtime/core.rkt:4805](../../mdl/runtime/core.rkt#L4805) | gc-result-type |
 | `GC-DUMP` | NOT_TESTED |  |  |
 | `GC-MON` | NOT_TESTED |  |  |
 | `GC-READ` | NOT_TESTED |  |  |
@@ -344,7 +344,7 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | `INITIAL` | NOT_TESTED |  |  |
 | `INSERT` | PARTIAL | [mdl/runtime/core.rkt:4865](../../mdl/runtime/core.rkt#L4865) |  |
 | `INT-DEVICE-WRONG-TYPE-EVALUATION-RESULT` | NOT_TESTED |  |  |
-| `INT-LEVEL` | PARTIAL | [mdl/runtime/core.rkt:4828](../../mdl/runtime/core.rkt#L4828) |  |
+| `INT-LEVEL` | PARTIAL | [mdl/runtime/core.rkt:4828](../../mdl/runtime/core.rkt#L4828) | interrupt-level |
 | `INTERNAL` | NOT_TESTED |  |  |
 | `INTERNAL-BACK-OR-TOP-OF-A-LIST` | NOT_TESTED |  |  |
 | `INTERNAL-INTERRUPT` | NOT_TESTED |  |  |
@@ -458,7 +458,7 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | `NOT-IN-ARG-LIST` | NOT_TESTED |  |  |
 | `NOT-IN-MAP-FUNCTION` | NOT_TESTED |  |  |
 | `NOT-IN-PROG` | NOT_TESTED |  |  |
-| `NTH` | PARTIAL | [mdl/runtime/core.rkt:4841](../../mdl/runtime/core.rkt#L4841) |  |
+| `NTH` | PARTIAL | [mdl/runtime/core.rkt:4841](../../mdl/runtime/core.rkt#L4841) | nth-past-end |
 | `NTH-BY-A-NEGATIVE-NUMBER` | NOT_TESTED |  |  |
 | `NTH-REST-PUT-OUT-OF-RANGE` | NOT_TESTED |  |  |
 | `NULL-STRING` | NOT_TESTED |  |  |
@@ -504,7 +504,7 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | `PUT-DECL` | NOT_TESTED |  |  |
 | `PUTBITS` | PARTIAL | [mdl/runtime/core.rkt:4791](../../mdl/runtime/core.rkt#L4791) |  |
 | `PUTPROP` | UNSUPPORTED |  | explicit-properties |
-| `PUTREST` | PARTIAL | [mdl/runtime/core.rkt:4854](../../mdl/runtime/core.rkt#L4854) |  |
+| `PUTREST` | PARTIAL | [mdl/runtime/core.rkt:4854](../../mdl/runtime/core.rkt#L4854) | tail-construction |
 | `QUICK-ENTRY` | NOT_TESTED |  |  |
 | `QUICK-RSUBR` | NOT_TESTED |  |  |
 | `QUIT` | PARTIAL | [mdl/runtime/core.rkt:4825](../../mdl/runtime/core.rkt#L4825) |  |
@@ -554,7 +554,7 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | `SETG` | KNOWN_DEFECT | [mdl/runtime/core.rkt:4776](../../mdl/runtime/core.rkt#L4776), [mdl/compiler.rkt:627](../../mdl/compiler.rkt#L627) | setg, repeated-setg |
 | `SETLOC` | UNSUPPORTED |  | setloc |
 | `SIN` | NOT_TESTED |  |  |
-| `SLEEP` | PARTIAL | [mdl/runtime/core.rkt:4878](../../mdl/runtime/core.rkt#L4878) |  |
+| `SLEEP` | PARTIAL | [mdl/runtime/core.rkt:4878](../../mdl/runtime/core.rkt#L4878) | sleep-zero |
 | `SNAME` | NOT_TESTED |  |  |
 | `SNM` | NOT_TESTED |  |  |
 | `SORT` | NOT_TESTED |  |  |
@@ -589,7 +589,7 @@ The [JSON inventory](coverage.json) contains the complete source index.
 | `TERPRI` | PARTIAL | [mdl/runtime/core.rkt:4811](../../mdl/runtime/core.rkt#L4811) |  |
 | `THIRD-ARG-WRONG-TYPE` | NOT_TESTED |  |  |
 | `THIS-PROCESS` | NOT_TESTED |  |  |
-| `TIME` | PARTIAL | [mdl/runtime/core.rkt:4879](../../mdl/runtime/core.rkt#L4879) |  |
+| `TIME` | PARTIAL | [mdl/runtime/core.rkt:4879](../../mdl/runtime/core.rkt#L4879) | time-eager |
 | `TO` | NOT_TESTED |  |  |
 | `TOO-FEW-ARGUMENTS-SUPPLIED` | NOT_TESTED |  |  |
 | `TOO-MANY-ARGS-TO-PRIMTYPE-DECL` | NOT_TESTED |  |  |

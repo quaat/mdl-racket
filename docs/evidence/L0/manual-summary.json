@@ -1,0 +1,644 @@
+{
+  "schema_version": 1,
+  "toolchain": "Racket 8.10 BC",
+  "summary": {
+    "PASS": 72,
+    "XFAIL": 16
+  },
+  "chapters": {
+    "2": {
+      "PASS": 6
+    },
+    "3": {
+      "PASS": 6,
+      "XFAIL": 2
+    },
+    "4": {
+      "PASS": 6
+    },
+    "5": {
+      "XFAIL": 4,
+      "PASS": 6
+    },
+    "6": {
+      "PASS": 4
+    },
+    "7": {
+      "PASS": 6
+    },
+    "8": {
+      "PASS": 6
+    },
+    "9": {
+      "PASS": 2,
+      "XFAIL": 2
+    },
+    "10": {
+      "PASS": 2
+    },
+    "11": {
+      "PASS": 2,
+      "XFAIL": 2
+    },
+    "12": {
+      "XFAIL": 2
+    },
+    "13": {
+      "PASS": 4,
+      "XFAIL": 2
+    },
+    "14": {
+      "PASS": 4
+    },
+    "15": {
+      "PASS": 2
+    },
+    "16": {
+      "PASS": 2
+    },
+    "17": {
+      "XFAIL": 2,
+      "PASS": 2
+    },
+    "18": {
+      "PASS": 2
+    },
+    "21": {
+      "PASS": 4
+    },
+    "22": {
+      "PASS": 2
+    },
+    "23": {
+      "PASS": 2
+    },
+    "24": {
+      "PASS": 2
+    }
+  },
+  "features": {
+    "FIX literal": {
+      "PASS": 2
+    },
+    "FLOAT literal": {
+      "PASS": 2
+    },
+    "ATOM literal": {
+      "PASS": 2
+    },
+    "+": {
+      "PASS": 2
+    },
+    "FIX": {
+      "PASS": 2
+    },
+    "/": {
+      "PASS": 2
+    },
+    "SQRT": {
+      "XFAIL": 2
+    },
+    "SETG": {
+      "PASS": 4
+    },
+    "GVAL": {
+      "PASS": 2
+    },
+    "VALUE": {
+      "PASS": 2
+    },
+    "dynamic binding": {
+      "XFAIL": 2,
+      "PASS": 2
+    },
+    "DEFINE": {
+      "PASS": 2
+    },
+    "nested LVAL": {
+      "XFAIL": 2
+    },
+    "TYPE": {
+      "PASS": 2
+    },
+    "PRIMTYPE": {
+      "PASS": 2
+    },
+    "LIST evaluation": {
+      "PASS": 2
+    },
+    "REST": {
+      "PASS": 2
+    },
+    "NTH": {
+      "PASS": 2
+    },
+    "FALSE": {
+      "PASS": 2
+    },
+    "AND": {
+      "PASS": 2
+    },
+    "MEMBER": {
+      "PASS": 2
+    },
+    "AUX": {
+      "PASS": 2
+    },
+    "EVAL": {
+      "XFAIL": 2
+    },
+    "MAPF": {
+      "PASS": 2
+    },
+    "PRINC": {
+      "PASS": 2
+    },
+    "PRINT": {
+      "XFAIL": 2
+    },
+    "SETLOC": {
+      "XFAIL": 2
+    },
+    "GET": {
+      "PASS": 4
+    },
+    "PUTPROP/GETPROP": {
+      "XFAIL": 2
+    },
+    "DECL?": {
+      "PASS": 4
+    },
+    "PNAME": {
+      "PASS": 2
+    },
+    "UNWIND": {
+      "PASS": 2
+    },
+    "%%": {
+      "XFAIL": 2
+    },
+    "DEFMAC": {
+      "PASS": 2
+    },
+    "GETBITS": {
+      "PASS": 2
+    },
+    "INT-LEVEL": {
+      "PASS": 2
+    },
+    "SLEEP": {
+      "PASS": 2
+    },
+    "GC": {
+      "PASS": 2
+    },
+    "TIME": {
+      "PASS": 2
+    },
+    "PUTREST": {
+      "PASS": 2
+    }
+  },
+  "results": [
+    {
+      "id": "fix-literal",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "fix-literal",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "float-literal",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "float-literal",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "atom-literal",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "atom-literal",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "add",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "add",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "fix-cast",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "fix-cast",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "mixed-division",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "mixed-division",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "sqrt",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "sqrt",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "setg",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "setg",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "gval",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "gval",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "value",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "value",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "binding-restoration",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "binding-restoration",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "named-binding-restoration",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "named-binding-restoration",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "define",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "define",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "repeated-setg",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "repeated-setg",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "nested-lval",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "nested-lval",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "builtin-type",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "builtin-type",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "float-primtype",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "float-primtype",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "evaluated-list",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "evaluated-list",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "shared-rest",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "shared-rest",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "nth-past-end",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "nth-past-end",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "empty-form",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "empty-form",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "and-false-payload",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "and-false-payload",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "member-string",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "member-string",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "sequential-aux",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "sequential-aux",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "eval",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "eval",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "mapf-string",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "mapf-string",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "princ",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "princ",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "print",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "print",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "setloc",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "setloc",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "association",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "association",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "numeric-get",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "numeric-get",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "explicit-properties",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "explicit-properties",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "declaration-match",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "declaration-match",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "declaration-miss",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "declaration-miss",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "atom-pname",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "atom-pname",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "unwind-normal",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "unwind-normal",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "double-percent",
+      "mode": "loader",
+      "status": "XFAIL"
+    },
+    {
+      "id": "double-percent",
+      "mode": "lang",
+      "status": "XFAIL"
+    },
+    {
+      "id": "macro-increment",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "macro-increment",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "getbits",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "getbits",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "interrupt-level",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "interrupt-level",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "sleep-zero",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "sleep-zero",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "gc-result-type",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "gc-result-type",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "time-eager",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "time-eager",
+      "mode": "lang",
+      "status": "PASS"
+    },
+    {
+      "id": "tail-construction",
+      "mode": "loader",
+      "status": "PASS"
+    },
+    {
+      "id": "tail-construction",
+      "mode": "lang",
+      "status": "PASS"
+    }
+  ]
+}

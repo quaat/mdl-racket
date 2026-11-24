@@ -22,7 +22,7 @@ No source conflict with the L0 changes was found.
 Racket 8.10 BC, matching the CI version and VM, passed the language suite and
 historical source checks. The initial Racket 9.3 CS run exposed six
 host-loop assertion failures on the baseline. See the commands, lock SHAs,
-and scenario outcomes in the [verification record](../evidence/L0/BASELINE.md).
+and 11 passing M4 scenarios in the [verification record](../evidence/L0/BASELINE.md).
 
 ## Coverage
 
@@ -36,9 +36,10 @@ and scenario outcomes in the [verification record](../evidence/L0/BASELINE.md).
   not validate the operator's full semantics. Whole constructs remain
   unclassified as `VERIFIED` until their semantics, negative cases, and both
   execution paths have been audited. The inventory's unfilled fields record
-  work still needed. There is no overall conformance percentage.
-- `make test-manual` exercises 38 fixtures across 17 chapters in the
-  executable loader and `#lang mdl`. On 8.10 BC, 60 checks passed and 16
+  work still needed. Exact matched transcript examples can be verified
+  in isolation. There is no overall conformance percentage.
+- `make test-manual` exercises 44 fixtures across 21 chapters in the
+  executable loader and `#lang mdl`. On 8.10 BC, 72 checks passed and 16
   matched tracked gaps. The runner reports fixture, chapter, feature and
   execution path. See the [fixture manifest](../../tests/conformance/manifest.json).
 - The supplied candidate Racket tests passed all 10 test cases when run with
@@ -46,7 +47,8 @@ and scenario outcomes in the [verification record](../evidence/L0/BASELINE.md).
   adaptations. The supplied gap notes were treated as candidate input.
   Native Confusion confirmed nested LVAL and explicit property lookup.
   It rejected SQRT, SETLOC and double-percent reader macros in the recorded
-  probes. Those are reference limits, with expected MDL results still
+  probes. The range-error example signaled ARGUMENT-OUT-OF-RANGE.
+  The three missing facilities are reference limits, with expected MDL results still
   drawn from the manual. [Native observations](../evidence/L0/native-examples.json)
 - The independent review checked source citations, failure classification,
   multiline signatures, reference cross-checks and unchanged production
@@ -57,7 +59,9 @@ and scenario outcomes in the [verification record](../evidence/L0/BASELINE.md).
 
 ## Next iteration
 
-Complete L0's semantic annotations and fixture classification. The matrix
+Complete L0's semantic annotations and fixture classification. Draft
+[PR #180](https://github.com/quaat/mdl-racket/pull/180) contains the current
+infrastructure and evidence. The matrix
 indexes the remainder so the next pass can resolve setup, expectations and
 platform requirements from stable source locations. Review L0 before
 starting runtime changes.

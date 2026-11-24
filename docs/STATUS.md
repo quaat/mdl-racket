@@ -1,5 +1,8 @@
 # Status — 2026-11-24 (`main` = `065098d`: M3 accepted; M4 S1–S7 SCENARIO_PARITY (mainline, scenario-scoped); WP4 replay persistence proof of concept on mainline (#165); M4_ACCEPTED NOT YET; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN)
 
+The parallel [language conformance status](conformance/STATUS.md) records L0
+and its regression evidence. Gameplay acceptance remains with epic #163.
+
 ## Current state (2026-11-23)
 
 States used below: **PASS (mainline)** = verified on `main`; **PASS (branch

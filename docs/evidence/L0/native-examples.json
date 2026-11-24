@@ -157,6 +157,14 @@
       "ok": true
     },
     {
+      "name": "nth-past-end",
+      "input": "<NTH (1 2) 3>\n<QUIT>\n",
+      "result_output": "\n *ERROR* \n \"ARGUMENT-OUT-OF-RANGE\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
+      "stderr": "Atom REP has neither LVAL nor GVAL\n",
+      "exit_code": 0,
+      "ok": false
+    },
+    {
       "name": "empty-form",
       "input": "<>\n<QUIT>\n",
       "result_output": "#FALSE ()\n",
@@ -304,6 +312,46 @@
       "name": "getbits",
       "input": "<GETBITS #WORD *777777777777* <BITS 3>>\n<QUIT>\n",
       "result_output": "#WORD *0000000000000000000007*\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "interrupt-level",
+      "input": "<INT-LEVEL 2>\n<INT-LEVEL>\n<QUIT>\n",
+      "result_output": "0\n2\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "sleep-zero",
+      "input": "<SLEEP 0>\n<QUIT>\n",
+      "result_output": "T\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "gc-result-type",
+      "input": "<TYPE <GC>>\n<QUIT>\n",
+      "result_output": "ATOM\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "time-eager",
+      "input": "<TYPE <TIME <SET SEEN 8>>>\n.SEEN\n<QUIT>\n",
+      "result_output": "FLOAT\n8\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "tail-construction",
+      "input": "<SET FIRST (T)>\n<SET LAST .FIRST>\n<SET LAST <REST <PUTREST .LAST (3)>>>\n<SET LAST <REST <PUTREST .LAST (4)>>>\n<REST .FIRST>\n.LAST\n<QUIT>\n",
+      "result_output": "(T)\n(T)\n(3)\n(4)\n(3 4)\n(4)\n",
       "stderr": "",
       "exit_code": 0,
       "ok": true

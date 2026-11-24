@@ -47,6 +47,7 @@ or rebuild the checkout when switching Racket versions.
 | `make test-historical` | **PASS**, exit 0 on both versions. |
 | `make m3-source-progress` | **PASS**, exit 0 on 9.3 and on 8.10 after `raco make scripts/mdl_load.rkt scripts/m3_house_boot_run.rkt`. 36 historical files parsed, 1,229 original forms loaded, zero skips. The first 8.10 command exited 2 because an invoked script still had 9.3 bytecode. |
 | `M3_NATIVE=require make m3-check` | **PASS**, exit 0 on 9.3 and on 8.10 after recompilation. All seven stages passed, including fresh native parity. The first 8.10 command exited 2 on stale runner bytecode. |
+| `make m3-native-parity` | **PASS**, exit 0 on 8.10 BC. Both selected parity stages passed. |
 | `make test-m3-andq`, `make test-m3-historical-gc`, `make test-m3-start-back`, `make test-m3-saveit`, `make test-m3-clock-seed`, `make test-m3-interactive`, `make test-m3-session`, `make test-m3-launcher`, `make test-m3-bang`, `make test-boot-reference` | **PASS**, exit 0 on 9.3 CS. |
 
 M3 uses the approved fixed-clock house-boot capture with epoch 250776000
@@ -56,32 +57,34 @@ fixtures with the same clock epoch and documented D1 normalization.
 Replay additionally verifies the documented RNG checkpoint contract.
 These are scenario-scoped results.
 
-| Racket 8.10 BC M4 target | Outcome at draft review |
+| Racket 8.10 BC M4 target | Outcome |
 | --- | --- |
 | `make test-m4-house-cellar` | **PASS**, exit 0. 12 prefixes and the expected adjacent strict frontiers. |
 | `make test-m4-mailbox-drop` | **PASS**, exit 0. 9 prefixes. |
 | `make test-m4-orphan-prompt` | **PASS**, exit 0. 10 prefixes. |
-| `make test-m4-top-parser` | See local gate log. |
-| `make test-m4-sword-glow` | See local gate log. |
-| `make test-m4-troll-combat` | See local gate log. |
-| `make test-m4-parser-ambiguity` | See local gate log. |
-| `make test-m4-replay-persistence` | See local gate log. |
-| `make test-m4-cyclops-room` | See local gate log. |
-| `make test-m4-mirror-bat` | See local gate log. |
-| `make test-m4-strange-passage` | See local gate log. |
+| `make test-m4-top-parser` | **PASS**, exit 0. 11 prefixes. |
+| `make test-m4-sword-glow` | **PASS**, exit 0. 14 prefixes. |
+| `make test-m4-troll-combat` | **PASS**, exit 0. 23 prefixes. |
+| `make test-m4-parser-ambiguity` | **PASS**, exit 0. 35 prefixes. |
+| `make test-m4-replay-persistence` | **PASS**, exit 0. WP4.5/WP4.6, including fresh-process restore, RNG and TIME checkpoints. |
+| `make test-m4-cyclops-room` | **PASS**, exit 0. 41 prefixes. |
+| `make test-m4-mirror-bat` | **PASS**, exit 0. 38 prefixes. |
+| `make test-m4-strange-passage` | **PASS**, exit 0. 32 prefixes. |
 
 ## L0 artifacts
 
-- `make test-manual` under Racket 8.10 BC exited 0 with 60 PASS and 16
-  XFAIL across 38 fixtures. The initial harness conflated module host
+- `make test-manual` under Racket 8.10 BC exited 0 with 72 PASS and 16
+  XFAIL across 44 fixtures. The initial harness conflated module host
   printing with explicit MDL output. Two expectation errors were
   resolved using the manual's UNWIND rule and the existing accepted DECL?
   payload. The [fixture manifest](../../tests/conformance/manifest.json)
-  retains both the manual and accepted declaration values.
+  retains both the manual and accepted declaration values. The
+  [machine-readable summary](manual-summary.json) includes both paths
+  for each fixture. The NTH range check is a positive diagnostic test.
 - `.venv/bin/python -m scripts.probe_manual --output artifacts/l0/native.json`
-  exited 1. Of 38 observations, 35 completed and three hit native
-  limitations. The complete [probe record](native-examples.json) preserves
-  diagnostics for SQRT, SETLOC and %%. Native inputs were bare local
+  exited 1. Of 44 observations, 40 completed without diagnostics, three
+  hit native limitations and one signaled the expected range error. The complete [probe record](native-examples.json) preserves
+  diagnostics for SQRT, SETLOC, %% and the out-of-range NTH. Native inputs were bare local
   programs in fresh empty working directories, with default RNG, UTC
   and final QUIT. These observations are separate from approved game
   transcripts.

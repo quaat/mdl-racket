@@ -20,7 +20,8 @@ compared. This observation wrapper should not be used to prove exact
 read-time interning order. An explicit known gap matches its issue-linked
 diagnostic. For loader failures this includes the stage, construct and
 location. A different failure is FAIL. An unexpected success is XPASS.
-Both fail the Make target.
+Both fail the Make target. A documented error can instead be an expected
+result and pass only when its specific diagnostic matches.
 
 Worker limits are 20 seconds wall time, 15 seconds CPU, 768 MiB address
 space and 1 MiB per captured output file. Run checked-in fixtures only.

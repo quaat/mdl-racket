@@ -62,20 +62,24 @@ def run_fixture(case, mode, racket):
 
 def classify(case, mode, report):
     gap = case.get("gaps", {}).get(mode)
-    if report == case["expected"]:
+    expected_error = case.get("expected_errors", {}).get(mode)
+    if expected_error:
+        return "PASS" if matches_diagnostic(report, mode, expected_error) else "FAIL"
+    if report == case.get("expected"):
         return "XPASS" if gap else "PASS"
-    if gap and report.get("status") == "FAIL":
-        failure = report.get("failure") or {}
-        matches = re.fullmatch(gap["exception"], failure.get("exception", ""))
-        if mode == "loader":
-            matches = matches and all(
-                failure.get(key) == gap[key]
-                for key in ("classification", "stage", "construct", "expression_index",
-                            "line", "column")
-            )
-        if matches and report["output"] == gap["output"]:
-            return "XFAIL"
-    return "FAIL"
+    return "XFAIL" if gap and matches_diagnostic(report, mode, gap) else "FAIL"
+
+
+def matches_diagnostic(report, mode, expected):
+    if report.get("status") != "FAIL" or report.get("output") != expected["output"]:
+        return False
+    failure = report.get("failure") or {}
+    if not re.fullmatch(expected["exception"], failure.get("exception", "")):
+        return False
+    return mode != "loader" or all(
+        failure.get(key) == expected[key]
+        for key in ("classification", "stage", "construct", "expression_index", "line", "column")
+    )
 
 
 def main():
@@ -109,7 +113,8 @@ def main():
                 "id": case["id"], "chapter": case["chapter"], "feature": case["feature"],
                 "specification": case["specification"], "source": case["source"],
                 "mode": mode, "status": status,
-                "actual": actual, "expected": case["expected"], "gap": gap,
+                "actual": actual, "expected": case.get("expected"),
+                "expected_error": case.get("expected_errors", {}).get(mode), "gap": gap,
             }
             rows.append(row)
             by_chapter.setdefault(str(case["chapter"]), Counter())[status] += 1

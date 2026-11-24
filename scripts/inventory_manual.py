@@ -53,22 +53,46 @@ def page_sections(path, lines):
     return sections
 
 
-def manual_pages(docs):
+def normalized_form(source):
+    return " ".join(source.split())
+
+
+def manual_pages(docs, fixtures, outcomes, native):
     pages = []
     for path in sorted(docs.glob("*.md")):
         content = path.read_bytes()
         lines = content.decode("utf-8").splitlines()
         sections = page_sections(path, lines)
-        prompt_lines = [
-            {"line": number, "source": f"{SOURCE_BASE}{path.name}#L{number}",
-             "status": "NOT_TESTED"}
-            for number, line in enumerate(lines, 1)
-            if re.match(r"^(?: {4}|\t)\S", line) and re.search(r"(?<![!\\])\$\s*$", line)
-        ]
+        chapter = path.stem.split("-", maxsplit=1)[0]
+        examples = [f for f in fixtures if f"{f['chapter']:02}" == chapter]
+        prompt_lines = []
+        for number, line in enumerate(lines, 1):
+            if not re.match(r"^(?: {4}|\t)\S", line) or not re.search(r"(?<![!\\])\$\s*$", line):
+                continue
+            row = {"line": number, "source": f"{SOURCE_BASE}{path.name}#L{number}",
+                   "status": "NOT_TESTED"}
+            for fixture in examples:
+                if fixture["origin"] != "manual":
+                    continue
+                program = fixture["expression"]
+                start = number - len(program.splitlines())
+                if normalized_form("\n".join(lines[max(start, 0):number]).rstrip()[:-1]) != normalized_form(program):
+                    continue
+                name = fixture["id"]
+                row["fixture"] = name
+                if fixture.get("manual_expected"):
+                    row["status"] = "ACCEPTED_DEVIATION"
+                elif all(value == "XFAIL" for value in outcomes.get(name, {}).values()) and name in outcomes:
+                    row["status"] = "UNSUPPORTED"
+                elif set(outcomes.get(name, {}).values()) == {"PASS"}:
+                    row["status"] = "VERIFIED" if native.get(name) else "PARTIAL"
+                break
+            prompt_lines.append(row)
         pages.append({
             "page": path.stem, "url": MANUAL if path.stem == "index" else f"{MANUAL}{path.stem}/",
             "source": f"{SOURCE_BASE}{path.name}", "sha256": hashlib.sha256(content).hexdigest(),
             "sections": sections, "transcript_prompt_lines": prompt_lines,
+            "manual_cases": [f["id"] for f in examples],
         })
     return pages
 
@@ -166,6 +190,10 @@ def coverage(docs):
     native_report = ROOT / "docs/evidence/L0/native-examples.json"
     observations = {item["name"]: item["ok"] for item in
                     json.loads(native_report.read_text())["observations"]}
+    manual_report = ROOT / "docs/evidence/L0/manual-summary.json"
+    outcomes = defaultdict(dict)
+    for row in json.loads(manual_report.read_text())["results"]:
+        outcomes[row["id"]][row["mode"]] = row["status"]
     sweep = json.loads((ROOT / "docs/evidence/M4/operator-head-sweep.json").read_text())
     reachable = set(sweep["builtin_used"]) | {row["name"] for row in sweep["missing"]}
     entries = []
@@ -192,7 +220,8 @@ def coverage(docs):
             "manual_cases": fixture_matches,
             "fixture_reference": [
                 {"case": f["id"], "source": f["source"],
-                 "native_capture_completed": observations.get(f["id"])}
+                 "native_capture_completed": observations.get(f["id"]),
+                 "runtime_results": dict(outcomes[f["id"]])}
                 for f in case_info
             ],
             "issues": KNOWN.get(name, TRACKED.get(name, [])),
@@ -202,10 +231,7 @@ def coverage(docs):
             "zork_reachability": "static operator mention" if name in reachable else None,
             **semantics.get(name, {}),
         })
-    pages = manual_pages(docs)
-    for page in pages:
-        chapter = page["page"].split("-", maxsplit=1)[0]
-        page["manual_cases"] = [f["id"] for f in fixtures if f"{f['chapter']:02}" == chapter]
+    pages = manual_pages(docs, fixtures, outcomes, observations)
     return {"schema_version": 1, "manual_commit": MANUAL_COMMIT, "pages": pages,
             "entries": entries}
 

@@ -581,6 +581,33 @@
       "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/07-structured-objects.md#L165"
     },
     {
+      "id": "nth-past-end",
+      "chapter": 7,
+      "section": "7.1.2",
+      "feature": "NTH",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/07-structured-objects/#712-nth-1",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<NTH (1 2) 3>",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/07-structured-objects.md#L20",
+      "expected_errors": {
+        "loader": {
+          "exception": "mdl-nth: index out of range",
+          "output": "",
+          "classification": "runtime",
+          "stage": "execute",
+          "construct": "SETG",
+          "expression_index": 1,
+          "line": 1,
+          "column": 1
+        },
+        "lang": {
+          "exception": "mdl-nth: index out of range",
+          "output": ""
+        }
+      }
+    },
+    {
       "id": "empty-form",
       "chapter": 8,
       "section": "8.1",
@@ -1215,6 +1242,153 @@
         "output": ""
       },
       "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/18-machine-words-and-bits.md#L70"
+    },
+    {
+      "id": "interrupt-level",
+      "chapter": 21,
+      "section": "21.7.2",
+      "feature": "INT-LEVEL",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/21-interrupts/#2172-int-level",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<INT-LEVEL 2>",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/21-interrupts.md#L293",
+      "expected": {
+        "result": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "effect": {
+          "value": 2,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": "<INT-LEVEL>"
+    },
+    {
+      "id": "sleep-zero",
+      "chapter": 21,
+      "section": "21.10.2",
+      "feature": "SLEEP",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/21-interrupts/#21102-sleep",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<SLEEP 0>",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/21-interrupts.md#L713",
+      "expected": {
+        "result": {
+          "value": "T",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      }
+    },
+    {
+      "id": "gc-result-type",
+      "chapter": 22,
+      "section": "22.5",
+      "feature": "GC",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/22-storage-management/#225-gc",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<TYPE <GC>>",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/22-storage-management.md#L190",
+      "expected": {
+        "result": {
+          "value": "FIX",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 0,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "note": "Asserts only the type of the reclaimed-word count. The count depends on the storage model."
+    },
+    {
+      "id": "time-eager",
+      "chapter": 23,
+      "section": "23.1",
+      "feature": "TIME",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/23-mdl-as-a-system-process/#231-time",
+      "origin": "authored",
+      "setup": [],
+      "expression": "<TYPE <TIME <SET SEEN 8>>>",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/23-mdl-as-a-system-process.md#L7",
+      "expected": {
+        "result": {
+          "value": "FLOAT",
+          "type": "ATOM",
+          "primtype": "ATOM"
+        },
+        "effect": {
+          "value": 8,
+          "type": "FIX",
+          "primtype": "WORD"
+        },
+        "output": ""
+      },
+      "effect_expression": ".SEEN",
+      "note": "Asserts eager evaluation and return type without comparing a TIME value across engines."
+    },
+    {
+      "id": "tail-construction",
+      "chapter": 24,
+      "section": "24.2",
+      "feature": "PUTREST",
+      "specification": "https://mdl-language.readthedocs.io/en/latest/24-efficiency-and-tastefulness/#242-creating-a-list-in-forward-order",
+      "origin": "authored",
+      "setup": [
+        "<SET FIRST (T)>",
+        "<SET LAST .FIRST>",
+        "<SET LAST <REST <PUTREST .LAST (3)>>>",
+        "<SET LAST <REST <PUTREST .LAST (4)>>>"
+      ],
+      "expression": "<REST .FIRST>",
+      "source": "https://github.com/taradinoc/mdl-docs/blob/89707367b951ea79bedc71f51ab213886e0f62ce/docs/24-efficiency-and-tastefulness.md#L172",
+      "expected": {
+        "result": {
+          "value": [
+            {
+              "value": 3,
+              "type": "FIX",
+              "primtype": "WORD"
+            },
+            {
+              "value": 4,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "LIST",
+          "primtype": "LIST"
+        },
+        "effect": {
+          "value": [
+            {
+              "value": 4,
+              "type": "FIX",
+              "primtype": "WORD"
+            }
+          ],
+          "type": "LIST",
+          "primtype": "LIST"
+        },
+        "output": ""
+      },
+      "effect_expression": ".LAST"
     }
   ]
 }
