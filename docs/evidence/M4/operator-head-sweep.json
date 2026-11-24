@@ -124,6 +124,7 @@
    "GUNASSIGN",
    "GVAL",
    "HANDLER",
+   "IMAGE",
    "INSERT",
    "INT-LEVEL",
    "ISTRING",
@@ -178,10 +179,12 @@
    "SAVE",
    "SET",
    "SETG",
+   "SLEEP",
    "SPNAME",
    "STRING",
    "SUBSTRUC",
    "TERPRI",
+   "TIME",
    "TOP",
    "TYPE",
    "TYPE?",
@@ -244,10 +247,10 @@
  "summary": {
   "distinct_operator_names": 380,
   "by_class": {
-   "builtin": 118,
+   "builtin": 120,
    "game": 234,
    "local": 0,
-   "missing": 23,
+   "missing": 21,
    "missing-not-live": 5
   },
   "sites": 9183,
@@ -654,23 +657,6 @@
    ]
   },
   {
-   "name": "IMAGE",
-   "class": "missing",
-   "in_confusion_root": true,
-   "live_site_count": 1,
-   "sites": [
-    {
-     "file": "77act2.mud",
-     "line": 57,
-     "col": 10,
-     "kind": "head",
-     "function": "FWEEP",
-     "context": [],
-     "local_formal": false
-    }
-   ]
-  },
-  {
    "name": "IPC-OFF",
    "class": "missing",
    "in_confusion_root": false,
@@ -826,41 +812,6 @@
      "context": [
       "superseded"
      ],
-     "local_formal": false
-    }
-   ]
-  },
-  {
-   "name": "SLEEP",
-   "class": "missing",
-   "in_confusion_root": true,
-   "live_site_count": 3,
-   "sites": [
-    {
-     "file": "77act2.mud",
-     "line": 58,
-     "col": 24,
-     "kind": "head",
-     "function": "FWEEP",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "77rooms.mud",
-     "line": 740,
-     "col": 34,
-     "kind": "head",
-     "function": "RECORD",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "77rooms.mud",
-     "line": 746,
-     "col": 25,
-     "kind": "head",
-     "function": "RECORD",
-     "context": [],
      "local_formal": false
     }
    ]
@@ -3770,89 +3721,6 @@
    ]
   },
   {
-   "name": "TIME",
-   "count": 11,
-   "sites": [
-    {
-     "kind": "atom",
-     "file": "77rooms.mud",
-     "line": 188,
-     "function": "PLAY-TIME",
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77rooms.mud",
-     "line": 190,
-     "function": "PLAY-TIME",
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 1385,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2819,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2902,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2904,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2906,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2908,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2910,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2912,
-     "function": null,
-     "context": []
-    },
-    {
-     "kind": "atom",
-     "file": "77dung.mud",
-     "line": 2916,
-     "function": null,
-     "context": []
-    }
-   ]
-  },
-  {
    "name": "TOPLEVEL",
    "count": 1,
    "sites": [
@@ -3935,6 +3803,7 @@
   "GETTIMEDATE",
   "GVAL",
   "HANDLER",
+  "IMAGE",
   "INSERT",
   "INT-LEVEL",
   "ISTRING",
@@ -3992,6 +3861,7 @@
   "SAVE",
   "SET",
   "SETG",
+  "SLEEP",
   "SPNAME",
   "STRING",
   "SUBSTRUC",

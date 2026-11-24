@@ -2,7 +2,7 @@
   "schema_version": 1,
   "kind": "m4-function-type-reference",
   "engine": "confusion-patched-1977",
-  "recorded_at": "2026-11-24T01:04:48.624164+00:00",
+  "recorded_at": "2026-11-24T06:29:18.497696+00:00",
   "interpreter": ".cache/build/confusion_patched/mdli",
   "interpreter_sha256_before": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
   "interpreter_sha256_after": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
@@ -112,6 +112,9 @@
     "MIN",
     "MAX",
     "ABS",
+    "IMAGE",
+    "SLEEP",
+    "TIME",
     "RANDOM",
     "GETTIMEDATE",
     "MOD",
@@ -153,7 +156,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/define-function-7xo2i_6w/game",
+      "cwd": "$TMPDIR/session-probes/define-function-08bjcrzy/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFINE F (X) <+ .X 1>>\n<TYPE ,F>\n<PRIMTYPE ,F>\n<TYPE? ,F FUNCTION>\n<TYPE? ,F SUBR FSUBR FUNCTION>\n<TYPE? ,F SUBR FSUBR>\n<TYPE? ,F MACRO>\n<NEWTYPE NOFFSET WORD>\n<TYPE? ,F NOFFSET>\n<COND (<TYPE? ,F NOFFSET> ,F) (F)>\n<==? <TYPE ,F> FUNCTION>\n<APPLICABLE? ,F>\n<DECL? ,F FUNCTION>\n<DECL? ,F <OR ATOM FALSE NOFFSET>>\n<F 4>\n<APPLY ,F 4>\n<MAPF ,LIST ,F (1 2 3)>\n<QUIT>\n",
@@ -195,7 +198,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/define-shapes-r2jj01_j/game",
+      "cwd": "$TMPDIR/session-probes/define-shapes-lipug2va/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFINE G () 1>\n<TYPE ,G>\n<DEFINE H (X) #DECL ((X) FIX) <+ .X 1>>\n<TYPE ,H>\n<DEFINE K (X \"OPTIONAL\" (Y 2) \"AUX\" (Z 3)) <+ .X .Y .Z>>\n<TYPE ,K>\n<K 1>\n<DEFINE T1 (\"TUPLE\" A) .A>\n<TYPE ,T1>\n<DEFINE A1 ACT (X) <RETURN .X .ACT>>\n<TYPE ,A1>\n<A1 7>\n<DEFINE N1 (X \"NAME\" ACT) <RETURN .X .ACT>>\n<TYPE ,N1>\n<DEFINE Q1 ('X) .X>\n<TYPE ,Q1>\n<Q1 <+ 1 2>>\n<QUIT>\n",
@@ -205,7 +208,7 @@
       "stdout_sha256": "f291e7f34c0696752ea48e5f7000c6678a7f83d974dc83656cdd066cb216b513",
       "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nG\nFUNCTION\nH\nFUNCTION\nK\nFUNCTION\n6\nT1\nFUNCTION\nA1\nFUNCTION\n7\nN1\nFUNCTION\nQ1\nFUNCTION\n<+ 1 2>\n",
       "stderr_raw": "",
-      "elapsed_seconds": 0.01,
+      "elapsed_seconds": 0.0,
       "files_removed": [],
       "forms": [
         "<DEFINE G () 1>",
@@ -237,7 +240,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/function-identity-9y370cvx/game",
+      "cwd": "$TMPDIR/session-probes/function-identity-zsc_89uq/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFINE F (X) .X>\n<==? ,F ,F>\n<SETG F2 ,F>\n<==? ,F ,F2>\n<=? ,F ,F2>\n<TYPE ,F2>\n<==? ,F <GVAL F>>\n<DEFINE G (X) .X>\n<==? ,F ,G>\n<=? ,F ,G>\n<SET L ,F>\n<==? .L ,F>\n<QUIT>\n",
@@ -274,7 +277,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/function-literal-garitdda/game",
+      "cwd": "$TMPDIR/session-probes/function-literal-502qc8vs/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<TYPE <FUNCTION (X) .X>>\n<PRIMTYPE <FUNCTION (X) .X>>\n<SETG FL <FUNCTION (X) .X>>\n<TYPE ,FL>\n<FL 5>\n<QUIT>\n",
@@ -304,7 +307,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/function-structure-imyayhm2/game",
+      "cwd": "$TMPDIR/session-probes/function-structure-pzlfroqo/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFINE F (X) <+ .X 1>>\n<LENGTH ,F>\n<1 ,F>\n<2 ,F>\n<EMPTY? ,F>\n<SET L <CHTYPE ,F LIST>>\n<TYPE .L>\n.L\n<==? <REST .L> <REST <CHTYPE ,F LIST>>>\n<SET F3 <CHTYPE .L FUNCTION>>\n<TYPE .F3>\n<APPLY .F3 4>\n<CHTYPE '((Y) <* .Y 2>) FUNCTION>\n<APPLY <CHTYPE '((Y) <* .Y 2>) FUNCTION> 5>\n<QUIT>\n",
@@ -343,7 +346,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/function-printing-7rspxdky/game",
+      "cwd": "$TMPDIR/session-probes/function-printing-ykazkbju/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFINE F (X) <+ .X 1>>\n,F\n<UNPARSE ,F>\n<PRIN1 ,F>\n<PRINC ,F>\n<QUIT>\n",
@@ -373,7 +376,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/function-uvector-1cosmtnc/game",
+      "cwd": "$TMPDIR/session-probes/function-uvector-wae5omi6/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFINE F (X) .X>\n<DEFINE G (X) .X>\n<SET U <UVECTOR ,F ,G>>\n<UTYPE .U>\n<TYPE <1 .U>>\n<QUIT>\n",
@@ -403,7 +406,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/macro-pu9dshxx/game",
+      "cwd": "$TMPDIR/session-probes/macro-mqr6gsa7/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFMAC M () <FORM + 1 2>>\n<TYPE ,M>\n<PRIMTYPE ,M>\n<TYPE? ,M MACRO>\n<TYPE? ,M FUNCTION>\n<APPLICABLE? ,M>\n<M>\n<QUIT>\n",
@@ -435,7 +438,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/builtin-subr-qusfzsk9/game",
+      "cwd": "$TMPDIR/session-probes/builtin-subr-6yda243x/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<TYPE ,+>\n<PRIMTYPE ,+>\n<TYPE? ,+ SUBR>\n<TYPE? ,+ FUNCTION>\n<APPLICABLE? ,+>\n<DECL? ,+ SUBR>\n<==? ,+ ,+>\n<SETG PLUS ,+>\n<==? ,PLUS ,+>\n<TYPE ,PLUS>\n<PLUS 1 2>\n<TYPEPRIM SUBR>\n<TYPEPRIM FSUBR>\n<TYPEPRIM FUNCTION>\n<TYPEPRIM MACRO>\n<QUIT>\n",
@@ -475,15 +478,15 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/builtin-subr-types-xmnb1xzd/game",
+      "cwd": "$TMPDIR/session-probes/builtin-subr-types-axg8hikr/game",
       "removed_before_boot": [],
       "setup": [],
-      "input": "<TYPE ,TYPE>\n<TYPE ,TYPE?>\n<TYPE ,AND?>\n<TYPE ,EMPTY?>\n<TYPE ,LENGTH?>\n<TYPE ,LVAL>\n<TYPE ,GVAL>\n<TYPE ,VALUE>\n<TYPE ,SET>\n<TYPE ,SETG>\n<TYPE ,GASSIGNED?>\n<TYPE ,ASSIGNED?>\n<TYPE ,MANIFEST>\n<TYPE ,DECL?>\n<TYPE ,GUNASSIGN>\n<TYPE ,PRIMTYPE>\n<TYPE ,TYPEPRIM>\n<TYPE ,NEWTYPE>\n<TYPE ,CHTYPE>\n<TYPE ,CHUTYPE>\n<TYPE ,FIX>\n<TYPE ,FLOAT>\n<TYPE ,BITS>\n<TYPE ,GETBITS>\n<TYPE ,PUTBITS>\n<TYPE ,ANDB>\n<TYPE ,ORB>\n<TYPE ,XORB>\n<TYPE ,EQVB>\n<TYPE ,LSH>\n<TYPE ,UTYPE>\n<TYPE ,LIST>\n<TYPE ,VECTOR>\n<TYPE ,IVECTOR>\n<TYPE ,UVECTOR>\n<TYPE ,IUVECTOR>\n<TYPE ,STRING>\n<TYPE ,ISTRING>\n<TYPE ,GC>\n<TYPE ,BLOAT>\n<TYPE ,ASCII>\n<TYPE ,UNPARSE>\n<TYPE ,PRINTSTRING>\n<TYPE ,SUBSTRUC>\n<TYPE ,TERPRI>\n<TYPE ,CRLF>\n<TYPE ,RESET>\n<TYPE ,PRINC>\n<TYPE ,PRIN1>\n<TYPE ,READSTRING>\n<TYPE ,ERROR>\n<TYPE ,ERRET>\n<TYPE ,EVENT>\n<TYPE ,HANDLER>\n<TYPE ,OFF>\n<TYPE ,ON>\n<TYPE ,SAVE>\n<TYPE ,RESTORE>\n<TYPE ,QUIT>\n<TYPE ,OPEN>\n<TYPE ,REP>\n<TYPE ,INT-LEVEL>\n<TYPE ,ENABLE>\n<TYPE ,DISABLE>\n<TYPE ,MAPF>\n<TYPE ,MAPR>\n<TYPE ,MAPRET>\n<TYPE ,MAPSTOP>\n<TYPE ,MAPLEAVE>\n<TYPE ,APPLY>\n<TYPE ,LENGTH>\n<TYPE ,REST>\n<TYPE ,BACK>\n<TYPE ,TOP>\n<TYPE ,NTH>\n<TYPE ,PUT>\n<TYPE ,GET>\n<TYPE ,MEMQ>\n<TYPE ,MEMBER>\n<TYPE ,PUTREST>\n<TYPE ,FORM>\n<TYPE ,EXPAND>\n<TYPE ,ATOM>\n<TYPE ,MOBLIST>\n<TYPE ,BLOCK>\n<TYPE ,ENDBLOCK>\n<TYPE ,ROOT>\n<TYPE ,LOOKUP>\n<TYPE ,INSERT>\n<TYPE ,REMOVE>\n<TYPE ,OBLIST?>\n<TYPE ,PNAME>\n<TYPE ,SPNAME>\n<TYPE ,+>\n<TYPE ,->\n<TYPE ,*>\n<TYPE ,/>\n<TYPE ,MIN>\n<TYPE ,MAX>\n<TYPE ,ABS>\n<TYPE ,RANDOM>\n<TYPE ,GETTIMEDATE>\n<TYPE ,MOD>\n<TYPE ,0?>\n<TYPE ,1?>\n<TYPE ,L?>\n<TYPE ,L=?>\n<TYPE ,G?>\n<TYPE ,G=?>\n<TYPE ,=?>\n<TYPE ,N=?>\n<TYPE ,==?>\n<TYPE ,N==?>\n<TYPE ,FLOAD>\n<QUIT>\n",
-      "input_sha256": "26a9353f8ad39e86e298992f1ec0d93e2d57e097cca331865f6223c711d935c3",
+      "input": "<TYPE ,TYPE>\n<TYPE ,TYPE?>\n<TYPE ,AND?>\n<TYPE ,EMPTY?>\n<TYPE ,LENGTH?>\n<TYPE ,LVAL>\n<TYPE ,GVAL>\n<TYPE ,VALUE>\n<TYPE ,SET>\n<TYPE ,SETG>\n<TYPE ,GASSIGNED?>\n<TYPE ,ASSIGNED?>\n<TYPE ,MANIFEST>\n<TYPE ,DECL?>\n<TYPE ,GUNASSIGN>\n<TYPE ,PRIMTYPE>\n<TYPE ,TYPEPRIM>\n<TYPE ,NEWTYPE>\n<TYPE ,CHTYPE>\n<TYPE ,CHUTYPE>\n<TYPE ,FIX>\n<TYPE ,FLOAT>\n<TYPE ,BITS>\n<TYPE ,GETBITS>\n<TYPE ,PUTBITS>\n<TYPE ,ANDB>\n<TYPE ,ORB>\n<TYPE ,XORB>\n<TYPE ,EQVB>\n<TYPE ,LSH>\n<TYPE ,UTYPE>\n<TYPE ,LIST>\n<TYPE ,VECTOR>\n<TYPE ,IVECTOR>\n<TYPE ,UVECTOR>\n<TYPE ,IUVECTOR>\n<TYPE ,STRING>\n<TYPE ,ISTRING>\n<TYPE ,GC>\n<TYPE ,BLOAT>\n<TYPE ,ASCII>\n<TYPE ,UNPARSE>\n<TYPE ,PRINTSTRING>\n<TYPE ,SUBSTRUC>\n<TYPE ,TERPRI>\n<TYPE ,CRLF>\n<TYPE ,RESET>\n<TYPE ,PRINC>\n<TYPE ,PRIN1>\n<TYPE ,READSTRING>\n<TYPE ,ERROR>\n<TYPE ,ERRET>\n<TYPE ,EVENT>\n<TYPE ,HANDLER>\n<TYPE ,OFF>\n<TYPE ,ON>\n<TYPE ,SAVE>\n<TYPE ,RESTORE>\n<TYPE ,QUIT>\n<TYPE ,OPEN>\n<TYPE ,REP>\n<TYPE ,INT-LEVEL>\n<TYPE ,ENABLE>\n<TYPE ,DISABLE>\n<TYPE ,MAPF>\n<TYPE ,MAPR>\n<TYPE ,MAPRET>\n<TYPE ,MAPSTOP>\n<TYPE ,MAPLEAVE>\n<TYPE ,APPLY>\n<TYPE ,LENGTH>\n<TYPE ,REST>\n<TYPE ,BACK>\n<TYPE ,TOP>\n<TYPE ,NTH>\n<TYPE ,PUT>\n<TYPE ,GET>\n<TYPE ,MEMQ>\n<TYPE ,MEMBER>\n<TYPE ,PUTREST>\n<TYPE ,FORM>\n<TYPE ,EXPAND>\n<TYPE ,ATOM>\n<TYPE ,MOBLIST>\n<TYPE ,BLOCK>\n<TYPE ,ENDBLOCK>\n<TYPE ,ROOT>\n<TYPE ,LOOKUP>\n<TYPE ,INSERT>\n<TYPE ,REMOVE>\n<TYPE ,OBLIST?>\n<TYPE ,PNAME>\n<TYPE ,SPNAME>\n<TYPE ,+>\n<TYPE ,->\n<TYPE ,*>\n<TYPE ,/>\n<TYPE ,MIN>\n<TYPE ,MAX>\n<TYPE ,ABS>\n<TYPE ,IMAGE>\n<TYPE ,SLEEP>\n<TYPE ,TIME>\n<TYPE ,RANDOM>\n<TYPE ,GETTIMEDATE>\n<TYPE ,MOD>\n<TYPE ,0?>\n<TYPE ,1?>\n<TYPE ,L?>\n<TYPE ,L=?>\n<TYPE ,G?>\n<TYPE ,G=?>\n<TYPE ,=?>\n<TYPE ,N=?>\n<TYPE ,==?>\n<TYPE ,N==?>\n<TYPE ,FLOAD>\n<QUIT>\n",
+      "input_sha256": "aa7b4599b8504564fb863eb960713bf399487e81fb66be10de18ff037cd4cb05",
       "exit_status": 0,
-      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\n",
-      "stdout_sha256": "5b42855aa416e2c4a742d5884df6f8b5bc476b75bf5e0e7ddb117b9f7d861983",
-      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\n",
+      "stdout_raw": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\n",
+      "stdout_sha256": "44b6b6ad3493296eef3fb564db44ca7f2da6533c2844aed6522596ba3e178270",
+      "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\nSUBR\n",
       "stderr_raw": "",
       "elapsed_seconds": 0.01,
       "files_removed": [],
@@ -588,6 +591,9 @@
         "<TYPE ,MIN>",
         "<TYPE ,MAX>",
         "<TYPE ,ABS>",
+        "<TYPE ,IMAGE>",
+        "<TYPE ,SLEEP>",
+        "<TYPE ,TIME>",
         "<TYPE ,RANDOM>",
         "<TYPE ,GETTIMEDATE>",
         "<TYPE ,MOD>",
@@ -614,7 +620,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/special-form-types-rjqbuwxx/game",
+      "cwd": "$TMPDIR/session-probes/special-form-types-b2hk70c0/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<TYPE ,QUOTE>\n<TYPE ,DEFINE>\n<TYPE ,DEFMAC>\n<TYPE ,FUNCTION>\n<TYPE ,PROG>\n<TYPE ,REPEAT>\n<TYPE ,RETURN>\n<TYPE ,AGAIN>\n<TYPE ,UNWIND>\n<TYPE ,GDECL>\n<TYPE ,COND>\n<TYPE ,AND>\n<TYPE ,OR>\n<TYPE ,NOT>\n<QUIT>\n",
@@ -624,7 +630,7 @@
       "stdout_sha256": "4a2258ff44bb37c99fe2f2cc42a2c471491f01939db3d5c7ee0787c95726bdf2",
       "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFSUBR\nFSUBR\nFSUBR\nFSUBR\nFSUBR\nFSUBR\nSUBR\nSUBR\nFSUBR\nFSUBR\nFSUBR\nFSUBR\nFSUBR\nSUBR\n",
       "stderr_raw": "",
-      "elapsed_seconds": 0.0,
+      "elapsed_seconds": 0.01,
       "files_removed": [],
       "forms": [
         "<TYPE ,QUOTE>",
@@ -653,7 +659,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/fsubr-nf37228p/game",
+      "cwd": "$TMPDIR/session-probes/fsubr-_w3v877m/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<TYPE ,COND>\n<PRIMTYPE ,COND>\n<TYPE? ,COND SUBR FSUBR>\n<APPLICABLE? ,COND>\n<GASSIGNED? COND>\n<QUIT>\n",
@@ -663,7 +669,7 @@
       "stdout_sha256": "9046f8ef6220bd2d0fbd255842a9691ea1e0284e170336ff4a22d1d7257a4795",
       "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nFSUBR\nWORD\nFSUBR\nT\nT\n",
       "stderr_raw": "",
-      "elapsed_seconds": 0.0,
+      "elapsed_seconds": 0.01,
       "files_removed": [],
       "forms": [
         "<TYPE ,COND>",
@@ -683,7 +689,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/applicable-other-sqlspeix/game",
+      "cwd": "$TMPDIR/session-probes/applicable-other-dhsynsiq/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<APPLICABLE? 3>\n<APPLICABLE? FOO>\n<APPLICABLE? (1 2)>\n<APPLICABLE? <>>\n<QUIT>\n",
@@ -712,7 +718,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/subr-printing-ad50mktw/game",
+      "cwd": "$TMPDIR/session-probes/subr-printing-9xlsflik/game",
       "removed_before_boot": [],
       "setup": [],
       "input": ",+\n<UNPARSE ,+>\n<QUIT>\n",
@@ -722,7 +728,7 @@
       "stdout_sha256": "1dc5ebbc4a55c77fbeda8a968eda9c0cbec3532c500eab83e5ef43c3f8fd92b3",
       "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#SUBR *0000000000000000000117*\n\"#SUBR *0000000000000000000117*\"\n",
       "stderr_raw": "",
-      "elapsed_seconds": 0.01,
+      "elapsed_seconds": 0.0,
       "files_removed": [],
       "forms": [
         ",+",
@@ -739,7 +745,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/err-chtype-subr-list-meg4oyts/game",
+      "cwd": "$TMPDIR/session-probes/err-chtype-subr-list-4sj_olv4/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<CHTYPE ,+ LIST>\n<QUIT>\n",
@@ -765,7 +771,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/err-decl-applicable-vnsogs70/game",
+      "cwd": "$TMPDIR/session-probes/err-decl-applicable-lohjhyw_/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<DEFINE F (X) .X>\n<DECL? ,F APPLICABLE>\n<QUIT>\n",
@@ -775,7 +781,7 @@
       "stdout_sha256": "4e83a746669daf6108e9adf26a2bad273bc3d8c98a2ba8e9a6957e1ad8c2818a",
       "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nF\n\n *ERROR* \n \"BAD-TYPE-SPECIFICATION1\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n",
       "stderr_raw": "Atom REP has neither LVAL nor GVAL\n",
-      "elapsed_seconds": 0.01,
+      "elapsed_seconds": 0.0,
       "files_removed": [],
       "forms": [
         "<DEFINE F (X) .X>",
@@ -792,7 +798,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/err-chtype-vector-function-mrtl99r1/game",
+      "cwd": "$TMPDIR/session-probes/err-chtype-vector-function-atiun2x4/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<CHTYPE [1 2] FUNCTION>\n<QUIT>\n",
@@ -818,7 +824,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/err-apply-fix-function-nuu4b_y6/game",
+      "cwd": "$TMPDIR/session-probes/err-apply-fix-function-90y546fu/game",
       "removed_before_boot": [],
       "setup": [],
       "input": "<CHTYPE 1 FUNCTION>\n<QUIT>\n",
@@ -844,7 +850,7 @@
         "epoch": 250776000,
         "tz": "UTC"
       },
-      "cwd": "$TMPDIR/session-probes/game-sword-glow-s0780lpg/game",
+      "cwd": "$TMPDIR/session-probes/game-sword-glow-pq2m8wjn/game",
       "removed_before_boot": [
         "SAVEFILE/ZORK.SAVE"
       ],
@@ -856,7 +862,7 @@
       "stdout_sha256": "bc386e73a9fe0433be6f020923926f884846cd227fbc16555a064d4ae37facaf",
       "stdout_canonical": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n81prim.mud loaded\n77defs.mud loaded\n77makstr.mud loaded\n81tell-repl.mud loaded\n77act1.mud loaded\n77act2.mud loaded\n77act3.mud loaded\n77rooms.mud loaded\n77patch.mud loaded\n77np.mud loaded\n78melee.mud loaded\n77dung.mud loaded\n\"DONE\"\nFUNCTION\nLIST\n#FALSE ()\nWORD\nFUNCTION\nFUNCTION\n#FALSE ()\nFUNCTION\nHACK\nSWORD-GLOW\nATOM\n0\nSWORD-GLOW\nT\nSUBR\n",
       "stderr_raw": "",
-      "elapsed_seconds": 0.17,
+      "elapsed_seconds": 0.14,
       "files_removed": [],
       "forms": [
         "<FLOAD \"77loadall.mud\">",

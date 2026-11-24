@@ -1,0 +1,53 @@
+{
+  "name": "mirror-bat",
+  "description": "M4 S9 scenario (issues #168, #169), the mirror and the bat: IMAGE and SLEEP. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000 = 1977-12-12 12:00:00 UTC, zone UTC, microseconds 0, as house-boot). The commands are case F10 of tests/scenarios/failure-inventory-cases.json: the troll-combat path to the troll's death (third blow under this seed), the round room (CAROUSEL-OUT draws RANDOM; under this clock the listed detours land in the Grail Room), the crawlway, `rub mirror` (MIRROR-MIRROR 77act1.mud:434 swaps Mirror Room 2 and 1), the coal mine entrance and the Squeaky Room, then `west` into the Bat Room without garlic: ROOM-INFO applies BATS-ROOM (77act2.mud:25) with WALK-IN -> FLY-ME (:38) -> <FWEEP 4 1> (:43; FWEEP :53), which evaluates <IMAGE 7> (:57) and <SLEEP 1> (:58) three times (three BEL bytes in the transcript; natively three one-second waits, here none under the fixed clock), then the bat drops the player in a RANDOM mine room (BAT-DROPS), and `look`. Each command was confirmed by the pinned native reference (two byte-identical runs); see docs/evidence/M4/MIRROR-BAT-REFERENCE.md. Input ends after `look` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take sword",
+    "inventory",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "east",
+    "kill troll with sword",
+    "kill troll with sword",
+    "kill troll with sword",
+    "north",
+    "east",
+    "se",
+    "south",
+    "se",
+    "east",
+    "se",
+    "south",
+    "se",
+    "south",
+    "look",
+    "se",
+    "east",
+    "sw",
+    "rub mirror",
+    "west",
+    "west",
+    "north",
+    "nw",
+    "west",
+    "look"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/mirror-bat-reference.json",
+    "case": "T1-mirror-bat-pipe"
+  }
+}
