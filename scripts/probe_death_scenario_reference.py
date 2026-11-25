@@ -141,6 +141,41 @@ assert DIAG_FORMS.count(_FIND_OLD) == 1 and DIAG_FORMS.count(_CP_END) == 1
 TIMERS_DIAG_FORMS = (DIAG_FORMS.replace(_FIND_OLD, _FIND_NEW)
                      .replace(_CP_END, _TIMERS_FIELDS + _CP_END))
 
+# The Phase 3b "dam" profile: TIMERS_DIAG_FORMS with the Flood Control Dam #3
+# objects and room found once and more checkpoint fields before CP-END: the
+# gate and tide flags (77act1.mud:677, BOLT-FUNCTION), the Maintenance Room's
+# RVARS (MAINT-ROOM's water level) and RMUNGBIT, the leak clock MNTIN's CFLAG
+# and CTICK, the wrench's OROOM, the tube's OOPEN?, the putty's OROOM and OCAN,
+# the trunk's OROOM and OVISON bit (BOLT-FUNCTION makes it visible), and the
+# matchbook's ORAND (matches left), OLIGHT? and FLAMEBIT with the match clock
+# MATIN's CFLAG and CTICK (MATCH-FUNCTION, 77act1.mud:1925).
+_DAM_FIND_OLD = '<SETG DIAG-THIEF <FIND-OBJ "THIEF">> T>'
+_DAM_FIND_NEW = ('<SETG DIAG-THIEF <FIND-OBJ "THIEF">> <SETG DIAG-MAINT <FIND-ROOM "MAINT">> '
+                 '<SETG DIAG-WRENC <FIND-OBJ "WRENC">> <SETG DIAG-TUBE <FIND-OBJ "TUBE">> '
+                 '<SETG DIAG-PUTTY <FIND-OBJ "PUTTY">> <SETG DIAG-TRUNK <FIND-OBJ "TRUNK">> '
+                 '<SETG DIAG-MATCH <FIND-OBJ "MATCH">> T>')
+_DAM_FIELDS = (
+    '<DIAG "CP-GATE-FLAG" ,GATE-FLAG!-FLAG> '
+    '<DIAG "CP-LOW-TIDE" ,LOW-TIDE!-FLAG> '
+    '<DIAG "CP-MAINT-RVARS" <RVARS ,DIAG-MAINT>> '
+    '<DIAG "CP-MAINT-MUNGED" <DIAG-BIT <RBITS ,DIAG-MAINT> ,RMUNGBIT>> '
+    '<DIAG "CP-MNTIN-CFLAG" <CFLAG ,MNTIN>> '
+    '<DIAG "CP-MNTIN-CTICK" <CTICK ,MNTIN>> '
+    '<DIAG "CP-WRENC-OROOM" <DIAG-ROOM ,DIAG-WRENC>> '
+    '<DIAG "CP-TUBE-OOPEN" <OOPEN? ,DIAG-TUBE>> '
+    '<DIAG "CP-PUTTY-OROOM" <DIAG-ROOM ,DIAG-PUTTY>> '
+    '<DIAG "CP-PUTTY-OCAN" <COND (<OCAN ,DIAG-PUTTY> <OID <OCAN ,DIAG-PUTTY>>)>> '
+    '<DIAG "CP-TRUNK-OROOM" <DIAG-ROOM ,DIAG-TRUNK>> '
+    '<DIAG "CP-TRUNK-VISIBLE" <DIAG-BIT <OFLAGS ,DIAG-TRUNK> ,OVISON>> '
+    '<DIAG "CP-MATCH-ORAND" <ORAND ,DIAG-MATCH>> '
+    '<DIAG "CP-MATCH-OLIGHT" <OLIGHT? ,DIAG-MATCH>> '
+    '<DIAG "CP-MATCH-FLAMING" <DIAG-BIT <OFLAGS ,DIAG-MATCH> ,FLAMEBIT>> '
+    '<DIAG "CP-MATIN-CFLAG" <CFLAG ,MATIN>> '
+    '<DIAG "CP-MATIN-CTICK" <CTICK ,MATIN>> ')
+assert TIMERS_DIAG_FORMS.count(_DAM_FIND_OLD) == 1 and TIMERS_DIAG_FORMS.count(_CP_END) == 1
+DAM_DIAG_FORMS = (TIMERS_DIAG_FORMS.replace(_DAM_FIND_OLD, _DAM_FIND_NEW)
+                  .replace(_CP_END, _DAM_FIELDS + _CP_END))
+
 # Scenario name -> its checkpoint profile's diagnostic forms.
 PROFILES = {
     "grue-resurrection": DIAG_FORMS,
@@ -150,6 +185,9 @@ PROFILES = {
     "thief-robbery": TIMERS_DIAG_FORMS,
     "cure-recovery": TIMERS_DIAG_FORMS,
     "lamp-burnout": TIMERS_DIAG_FORMS,
+    "dam-sluice": DAM_DIAG_FORMS,
+    "maint-leak": DAM_DIAG_FORMS,
+    "match-clock": DAM_DIAG_FORMS,
 }
 NAMES = tuple(PROFILES)
 
@@ -326,7 +364,7 @@ def main() -> int:
     # a long scenario's reference would hold O(n^2) log text.  Each is replaced
     # by its sha256 and size; what the runner uses from it, its last
     # checkpoint, is kept in end_checkpoints, and X1's log is kept in full.
-    compact = diag_forms is TIMERS_DIAG_FORMS
+    compact = diag_forms is TIMERS_DIAG_FORMS or diag_forms is DAM_DIAG_FORMS
     if compact:
         for r in rows[3 + n:]:
             log = r.pop("diag_log", "").encode("latin-1")
