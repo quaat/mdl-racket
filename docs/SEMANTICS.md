@@ -1526,6 +1526,49 @@ show the original strict-definition error, then verify definition,
 late registration, strict call-time failure, explicit `DECL?` failure,
 and the unchanged source progression.
 
+### Amendment: still-undefined attached TYPE names are not enforced (issue #193, INV-11; specification before implementation)
+
+Maintainer decision 2026-11-25 (DECISIONS.md, amendment to the #98 ADR).
+This replaces the "still neither ... raises `unknown declaration type`"
+sentence above for attached declarations only:
+
+* At each attached check (argument, OPTIONAL/AUX binding, SET of a declared
+  local, VALUE result), a retained unresolved TYPE ATOM is looked up again.
+  If it is still neither a registered TYPE nor an ATOM with a `DECL`
+  association, that Pattern position matches any value (FALSE, FIX, an
+  OBJECT, an ATOM, a structure). It is not normalized to `ANY` at
+  definition: the decision is made per check.
+* If the name is a registered TYPE by then (NEWTYPE), it matches exactly
+  that TYPE; if it has a `DECL` association, the associated Pattern is
+  normalized strictly (an unknown name, cycle or malformed Pattern inside
+  it still raises) and matched.
+* Nested positions follow the same rule: in `<OR UNDEF FIX>` the OR
+  matches any value; in `<LIST UNDEF FIX>` or `<LIST [REST UNDEF]>` the
+  UNDEF positions match any element while the structure TYPE, the other
+  element Patterns and the required length stay strict.
+* Unchanged and strict: explicit `DECL?` (pinned Confusion also rejects
+  `<DECL? 1 PRSOBJ>` with BAD-TYPE-SPECIFICATION1,
+  `docs/evidence/M3/DEFERRED-DECL-TYPE.md`), positional declarations,
+  GDECL/SETG and CHTYPE declaration checks, and every known type in every
+  declaration.
+
+**Recorded deviation.** The manual requires every attached declaration to
+be checked; this runtime does not enforce an attached Pattern position
+whose TYPE name is undefined when checked. That aligns with pinned
+Confusion for undefined names only: Confusion checks no attached
+declarations at all, while this runtime still checks every known type, so
+that broader difference remains. The 1977 sources need it for `PRSOBJ`
+(MAINT-ROOM 77act1.mud:739-741, WIRE-FUNCTION 77act2.mud:585-587,
+GNOME-FUNCTION 77act2.mud:768-769), defined in no 1977 source file.
+
+Tests (`tests/deferred_decl_type_test.rkt`) must first fail on the old
+call-time error, then cover: undefined names accepting FALSE, FIX, an
+OBJECT-like structure and an ATOM; late NEWTYPE and late `DECL`
+association enforced (wrong value fails, right value passes), including
+nested late definitions; nested undefined names in OR, structure and REST
+Patterns with the rest strict; explicit `DECL?`, positional declarations
+and GDECL still failing; known types still strict.
+
 ## M3 duplicate attached ATOM declarations (issue #100; specification before implementation)
 
 The original `77act2.mud:424` `BALLOON` function declares `M` twice in one
