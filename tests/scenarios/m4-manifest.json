@@ -188,6 +188,24 @@
       "runner_test": "tests/historical_boat_river_test.rkt",
       "issue": "epic #163 Phase 3b (objects beyond the house, other clock events)",
       "covers": "mirror-bat's path to Mirror Room 1, the pump from Reservoir North by the Atlantis Room, down the slide and back through the troll room to the Dam Base; the boat inflated with the pump, boarded (AVEHICLE), launched onto the River Frigid, landed, left, deflated and taken; the thief takes the grail and the trident from rooms the hero has left"
+    },
+    {
+      "id": "S14a",
+      "name": "dam-sluice",
+      "target": "test-m4-dam-sluice",
+      "scenario_file": "tests/scenarios/dam-sluice.json",
+      "runner_test": "tests/historical_dam_sluice_test.rkt",
+      "issue": "#193 (INV-11; the #98 ADR amendment), epic #163 Phase 3b (objects beyond the house)",
+      "covers": "the Maintenance Room entered (MAINT-ROOM's #DECL names the undefined type PRSOBJ, not enforced); the wrench; `turn bolt with wrench` refused without GATE-FLAG; the yellow button (GATE-FLAG T); the bolt turned: the sluice gates open (LOW-TIDE T, the trunk visible); the drained reservoir, the trunk taken (RAW-SCORE 40 -> 55), across the reservoir bed to Reservoir North"
+    },
+    {
+      "id": "S14b",
+      "name": "maint-leak",
+      "target": "test-m4-maint-leak",
+      "scenario_file": "tests/scenarios/maint-leak.json",
+      "runner_test": "tests/historical_maint_leak_test.rkt",
+      "issue": "#193 (INV-11; the #98 ADR amendment), epic #163 Phase 3b (other clock events)",
+      "covers": "the Maintenance Room entered (MAINT-ROOM's #DECL names the undefined type PRSOBJ, not enforced); the blue button's leak queues the clock event MNTIN (CTICK -1, fires on every clock pass), the water level rises each turn and five times during `wait`; the putty plugs the leak (RVARS -1, MNTIN CTICK 0); the blue button jammed"
     }
   ],
   "persistence": [
@@ -271,14 +289,6 @@
     {
       "file": "tests/scenarios/failure-inventory-cases.json",
       "reason": "M4 Phase 1 discovery evidence (GAMEPLAY-FAILURE-INVENTORY.md); command sequences, not a gated parity check"
-    },
-    {
-      "file": "tests/scenarios/dam-sluice.json",
-      "reason": "M4 Phase 3b native reference only (the dam's sluice gates): this runtime stops at command 23 on entering the Maintenance Room (INV-11, PRSOBJ); tracked as an expected failure by make xfail-m4-dam-frontier, not a gated parity check"
-    },
-    {
-      "file": "tests/scenarios/maint-leak.json",
-      "reason": "M4 Phase 3b native reference only (the leak clock MNTIN): this runtime stops at command 23 on entering the Maintenance Room (INV-11, PRSOBJ); tracked as an expected failure by make xfail-m4-dam-frontier, not a gated parity check"
     }
   ]
 }
