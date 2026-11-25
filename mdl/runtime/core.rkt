@@ -401,6 +401,10 @@
     [(specialty) (decl-failure-leaf (caddr pattern))]
     [(type) (cadr pattern)]
     [(applicable) (cadr pattern)]
+    ;; A retained attached name (#98) that failed has been defined since
+    ;; (#193): its leaf is the name ATOM. Attached checks report only the
+    ;; declared ATOM, never this leaf; DECL? never retains a name.
+    [(unresolved) (cadr pattern)]
     [(or) (decl-failure-leaf (last (cdr pattern)))]
     [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
@@ -424,11 +428,19 @@
   (case (car pattern)
     [(specialty) (decl-match value (caddr pattern) budget)]
     [(unresolved)
-     (decl-match value
-                 (parameterize ([current-decl-defer-unknown? #f])
-                   (normalize-decl-pattern (cadr pattern)
-                                           (caddr pattern) (cadddr pattern)))
-                 budget)]
+     ;; Issue #193 (amendment to the #98 ADR): a retained attached TYPE name
+     ;; that is still undefined at this check -- no registered TYPE and no
+     ;; DECL association -- is not enforced at this position, as in pinned
+     ;; Confusion. A name defined since is resolved strictly, as before.
+     (if (and (not (hash-has-key? (atom-space-types (current-mdl-atom-space))
+                                  (cadr pattern)))
+              (not (association-lookup (cadr pattern) (mdl-root-atom "DECL"))))
+         #t
+         (decl-match value
+                     (parameterize ([current-decl-defer-unknown? #f])
+                       (normalize-decl-pattern (cadr pattern)
+                                               (caddr pattern) (cadddr pattern)))
+                     budget))]
     [(all)
      (let loop ([constraints (cdr pattern)])
        (cond [(null? constraints) #t]
