@@ -15,13 +15,12 @@
 ;; `wait` CURIN reaches 0 and CURE-CLOCK (78melee.mud:504) raises ASTRENGTH
 ;; to 0 and disables CURIN: "You are in perfect health.". Then `score`.
 ;;
-;; robber_hroom is not compared here (#:ignore-keys, timers-checkpoint/no-hroom):
-;; the ROBBER demon moves the thief (HROOM) on every turn, the end-of-input
-;; turn included, so with it 34 of the 35 shorter prefixes would be re-run per
-;; prefix in single-run mode (35 boots, about four minutes; that full
-;; comparison passed once, TIMERS-SCORING.md). The thief's walk is compared in
-;; full in thief-robbery; here thief_oroom, robber_hflag and robber_hobjs are
-;; (the thief never meets the hero and takes nothing).
+;; The ROBBER demon moves the thief (HROOM) on every turn, the end-of-input
+;; turn included. robber_hroom is compared at every READSTRING entry, at the
+;; end and in per-prefix mode, but not used to classify end-of-input tails
+;; (#:eof-classification-ignore-keys, ADR-0062 amendment): otherwise 34 of the
+;; 35 shorter prefixes would be re-run per prefix in single-run mode (35
+;; boots). The thief never meets the hero and takes nothing.
 ;;
 ;; Compared with the pinned Confusion captures in
 ;; docs/evidence/M4/cure-recovery-reference.json (CURE-RECOVERY-REFERENCE.md)
@@ -84,8 +83,8 @@
 
 ;; --- the scenario ------------------------------------------------------------------------
 (run-m4-scenario "cure-recovery" commands
-                 #:checkpoint timers-checkpoint/no-hroom
-                 #:ignore-keys '(robber_hroom)
+                 #:checkpoint timers-checkpoint
+                 #:eof-classification-ignore-keys '(robber_hroom)
                  #:check-turn
                  (lambda (k transcript)
                    (when (>= k 32)

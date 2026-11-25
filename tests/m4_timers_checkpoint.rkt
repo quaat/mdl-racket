@@ -21,7 +21,7 @@
 ;; the storage ledger, the output and the MDL error record around every read.
 (require racket/string "m4_scenario_runner.rkt" "m4_death_checkpoint.rkt"
          (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global))
-(provide timers-checkpoint timers-checkpoint/no-hroom)
+(provide timers-checkpoint)
 
 (define (list-items s lst)
   (for/list ([i (in-range 1 (add1 (mdl-session-call s "LENGTH" lst)))])
@@ -37,6 +37,19 @@
                                  " " (render s (field s ev "CTICK")) ")"))
                 " ")
    ")"))
+
+;; The RID of the ROBBER demon's HROOM, rendered like the reference's PRIN1.
+;; The thief's walk over ,ROOMS reaches rooms whose RID is not a plain name:
+;; the room "!" (created by FIND-ROOM for NULEXIT, 77dung.mud:2053), which
+;; PRIN1 prints escaped as \! (reference lamp-burnout, entry 105: "\!!-ROOMS",
+;; its trailer stripped). The runtime's UNPARSE does not implement escaping
+;; (core.rkt, mdl-unparse-value), so this renders only the PNAMEs observed:
+;; [A-Za-z0-9-] as they are, "!" as \!, any other PNAME a strict error.
+(define (hroom-rid s room)
+  (define pname (render s (field s room "RID")))
+  (cond [(regexp-match? #px"^[A-Za-z0-9-]+$" pname) pname]
+        [(equal? pname "!") "\\!"]
+        [else (error 'timers-checkpoint "HROOM RID ~s needs PRIN1 escaping not rendered here" pname)]))
 
 (define (timers-checkpoint s)
   (define (obj id) (mdl-session-call s "FIND-OBJ" id))
@@ -60,16 +73,6 @@
              'tcase_oopen (render s (field s tcase "OOPEN?"))
              'tcase_contents (oids s (field s tcase "OCONTENTS"))
              'thief_oroom (room-of (obj "THIEF"))
-             'robber_hroom (rid (field s robber "HROOM"))
+             'robber_hroom (hroom-rid s (field s robber "HROOM"))
              'robber_hflag (render s (field s robber "HFLAG"))
              'robber_hobjs (oids s (field s robber "HOBJS"))))
-
-;; The same without robber_hroom, for the scenarios that declare
-;; #:ignore-keys '(robber_hroom): the ROBBER demon moves the thief on every
-;; turn, the end-of-input turn included, so with that field every shorter
-;; prefix has a non-standard end checkpoint and is re-run per prefix (one
-;; boot each). thief-robbery compares it; the scenarios whose subject is not
-;; the thief do not (thief_oroom, robber_hflag and robber_hobjs are still
-;; compared there).
-(define (timers-checkpoint/no-hroom s)
-  (hash-remove (timers-checkpoint s) 'robber_hroom))

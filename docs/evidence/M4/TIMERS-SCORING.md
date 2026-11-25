@@ -13,7 +13,7 @@ one fixed clock and seed). Not a PLAYABLE, GAMEPLAY_RELIABILITY or M4 claim.
 | Pinned reference | `.cache/build/confusion_patched/mdli`, sha256 `6df359f6…b789`, unchanged before and after every capture (checked by the probe and with `sha256sum`); `make reference-build` not run |
 | Clock / RNG | fixed epoch 250776000 (1977-12-12 12:00 UTC), TZ UTC; START seeds RANDOM from DSKDATE (seed 10438660480); no RANDOM override, no seed search, no game-specific random override |
 | Native protocol | `scripts/probe_death_scenario_reference.py NAME OUT.json`, generalised with checkpoint profiles (below): a fresh copy of the game directory under `$TMPDIR` for every run, pipe mode; each reference captured twice, transcripts byte-identical |
-| Ours | Racket v7.9 [bc]; the shared runner `tests/m4_scenario_runner.rkt`, unchanged; guarded (no write or delete, empty cwd, game-directory hashes unchanged) and watchdogged |
+| Ours | Racket v7.9 [bc]; the shared runner `tests/m4_scenario_runner.rkt` with one opt-in option (`#:eof-classification-ignore-keys`, default `'()`); guarded (no write or delete, empty cwd, game-directory hashes unchanged) and watchdogged |
 
 ## Route choice (no seed search)
 
@@ -45,7 +45,7 @@ one fixed clock and seed). Not a PLAYABLE, GAMEPLAY_RELIABILITY or M4 claim.
 | cure-recovery | `test-m4-cure-recovery` | 35 | Wounded at command 18 (ASTRENGTH -1, CURIN 29), `west`; `diagnose`: cured after 28, 23, 18, 13, 8, 3 moves; command 31 (`wait`): CURE-CLOCK, ASTRENGTH 0, CURIN disabled; "You are in perfect health." [Reference](CURE-RECOVERY-REFERENCE.md) |
 | lamp-burnout | `test-m4-lamp-burnout` | 131 | `turn on lamp` (command 7): LNTIN on, 349. Dimmer warnings after commands 95, 108, 116, 121; "The lamp is dying." 124; "I hope you have more light than from a lamp." 125 (OLIGHT? 0, LNTIN at 0); `turn on lamp`: "You can't turn that on."; `down`: "It is pitch black. ..." Capture 74 s (265 native runs). [Reference](LAMP-BURNOUT-REFERENCE.md) |
 
-## Checkpoint profile "timers" (probe generalised, runner unchanged)
+## Checkpoint profile "timers" (probe generalised)
 
 `scripts/probe_death_scenario_reference.py` now maps each scenario to a
 checkpoint profile (`PROFILES`). The death scenarios keep `DIAG_FORMS`
@@ -62,19 +62,33 @@ sha256 and size instead of the log (`diag_logs`; their last checkpoints are
 `end_checkpoints`, X1's log is kept): lamp-burnout's reference is 4.1 MB with
 that, 13.8 MB without.
 
-**The thief's end-of-input move.** The ROBBER demon moves the thief's HROOM
-on every turn, the end-of-input turn included (the documented single-run
-coverage loss, docs/TESTING.md). With HROOM in the checkpoint every shorter
-prefix except k = 0 is non-standard and re-run (one boot each).
-thief-robbery compares HROOM everywhere (21 boots). treasure-deposit,
-cure-recovery and lamp-burnout declare `#:ignore-keys '(robber_hroom)`
-(checkpoint `timers-checkpoint/no-hroom`): HROOM is not compared there, the
-thief's room, HFLAG and bag are. The full comparison was run once for
-treasure-deposit (single-run, 19 boots, 117 s, exit 0) and cure-recovery
-(single-run, 35 boots, 227 s, exit 0) before the declaration was added
-(treasure-deposit's test as committed in `e4c1f02`; cure-recovery's the
-same test with `timers-checkpoint`, not committed in that form);
-lamp-burnout's (131 boots) was not run.
+**The thief's end-of-input move (runner option, ADR-0062 amendment).** The
+ROBBER demon moves the thief's HROOM on every turn, the end-of-input turn
+included. With HROOM in the checkpoint every shorter prefix except k = 0
+would be classified non-standard and re-run (one boot each). thief-robbery
+classifies with it (21 boots). treasure-deposit, cure-recovery and
+lamp-burnout declare the new opt-in `#:eof-classification-ignore-keys
+'(robber_hroom)` of `tests/m4_scenario_runner.rkt`: the field is removed from
+both sides only in `non-standard-eof-tails`, and stays compared at every
+READSTRING entry, at the single run's end, in reboots and in per-prefix mode.
+The default `'()` leaves every other scenario unchanged; each listed key must
+be a compared reference checkpoint field (strict error otherwise). Lost
+coverage: for the prefixes classified standard thanks to the option, the
+thief's move during the skipped end-of-input turn is not executed by this
+runtime there; the same ROBBER code is compared at every regular turn
+through HROOM. (A first version of this slice used `#:ignore-keys` instead,
+which dropped the field entirely; replaced on review.)
+
+**Rendering finding (test infrastructure, not a runtime divergence).**
+Comparing HROOM in lamp-burnout failed at first at entry 105: expected `\!`,
+actual `!`. The thief's walk over ,ROOMS reaches the room whose RID is `!`
+(created by FIND-ROOM for NULEXIT, 77dung.mud:2053, through EXIT,
+77makstr.mud:41); native PRIN1 prints that ATOM escaped (`\!!-ROOMS`), while
+the checkpoint rendered the bare PNAME. The runtime's UNPARSE implements no
+escaping (core.rkt `mdl-unparse-value`: safe PNAMEs only), and the game never
+prints this name. `tests/m4_timers_checkpoint.rkt` now renders HROOM's RID
+strictly: `[A-Za-z0-9-]` PNAMEs as they are, `!` as `\!`, any other PNAME a
+strict error. The earlier `#:ignore-keys` version had hidden this.
 
 ## Results
 
@@ -89,7 +103,7 @@ system").
 | `racket tests/historical_thief_robbery_test.rkt` (single-run) | 0 | 22 turns; 21 boots (20 reboots: HROOM moves on every end-of-input turn but k = 0); 128.5 s |
 | `racket tests/historical_cure_recovery_test.rkt` (single-run) | 0 | 36 turns; 1 boot; 6.0 s |
 | `racket tests/historical_lamp_burnout_test.rkt` (single-run) | 0 | 132 turns; 1 boot; 6.4 s |
-| treasure-deposit and cure-recovery single-run with HROOM compared (before `#:ignore-keys`) | 0 | 19 boots 117.0 s; 35 boots 227.2 s |
+| treasure-deposit and cure-recovery single-run with HROOM also used for classification (first version) | 0 | 19 boots 117.0 s; 35 boots 227.2 s |
 | `M4_SCENARIO_MODE=per-prefix racket tests/historical_treasure_deposit_test.rkt` | 0 | 22 boots, 136.2 s |
 | `M4_SCENARIO_MODE=per-prefix racket tests/historical_thief_robbery_test.rkt` | 0 | 22 boots, 135.3 s |
 | `M4_SCENARIO_MODE=per-prefix racket tests/historical_cure_recovery_test.rkt` | 0 | 36 boots, 235.1 s |
@@ -110,7 +124,9 @@ integrity check passes). Checkpoint mutations change one field of diagnostic
 checkpoint K; the "a" variant shows the test's own reference assertion
 failing first, the "b" variant comments out the asserting lines so that the
 runner itself has to find it. Every mutation and test edit was reverted with
-`git checkout`; `git status` was clean after each.
+`git checkout`; `git status` was clean after each. M1–M8b ran with the
+first version of this slice (HROOM ignored in three scenarios); M9 and M10
+with the classification option.
 
 | # | Mutation | Result |
 |---|---|---|
@@ -126,6 +142,8 @@ runner itself has to find it. Every mutation and test edit was reverted with
 | M7 | lamp-burnout: `I hope` -> `I hopE` (burn-out, K = 125) | exit 1: earliest failing k = 125, kind transcript |
 | M8 | lamp-burnout: checkpoint 125 `lamp_olight` 0 -> 1 | exit 1 at the test's reference check (`(lamp 125)`, line 67) |
 | M8b | M8 with the `(lamp 125)`, `(lamp 132)` and entry-versus-end assertions removed | exit 1: earliest failing k = 125, kind checkpoint, field `lamp_olight` |
+| M9 | lamp-burnout: checkpoint 60 `robber_hroom` CRAW1 -> MAZE1 (a mid-run thief position; the field is in `#:eof-classification-ignore-keys`) | exit 1: earliest failing k = 60, kind checkpoint, field `robber_hroom` (still compared at every entry) |
+| M10 | lamp-burnout declares `#:eof-classification-ignore-keys '(robber_hroomx)` | exit 1 before any run: "end-of-input classification key robber_hroomx is not a compared reference checkpoint field" |
 
 ## Gameplay branches (`gameplay-branches.json`)
 
@@ -167,7 +185,7 @@ A local branch result, not a mainline acceptance.
 
 ## Security and licensing
 
-No runtime code changed, and the runner is unchanged. The new test files,
+No runtime code changed. The runner gained one opt-in option (default unchanged). The new test files,
 checkpoint module and probe profile are test infrastructure; no new file
 access (the guard shows no write or delete attempt). Native runs used
 disposable `$TMPDIR` copies only; `.cache/upstream` was not written; mdli was
@@ -179,7 +197,8 @@ Confusion code was copied. New scripts and tests are original MIT-0 code.
 - Each scenario is one fixed clock and seed; other seeds take other branches
   (the thief may take the painting on the deposit route, or not on the
   robbery route).
-- robber_hroom is not compared in three of the four scenarios (above).
+- robber_hroom does not decide reboots in three of the four scenarios (above); the thief's end-of-input moves are executed by this runtime only in thief-robbery and in per-prefix mode.
+- HROOM's RID rendering covers only the PNAMEs observed (`!` escaped); another unsafe PNAME fails strictly.
 - lamp-burnout's reference is 4.1 MB; its per-prefix run is about 20 minutes.
 - The four single-run targets add about two and a half minutes to `make
   m4-check` (thief-robbery's 21 boots: 124 s of the 150 s). CI's m4-check

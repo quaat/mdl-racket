@@ -128,8 +128,9 @@ prompt of its READSTRING entry, and declared prefixes that end by the game's
 own QUIT instead of end of input. They are branch evidence until merged.
 
 The four Phase 3 scenarios ([record](docs/evidence/M4/TIMERS-SCORING.md))
-need no runner change: a wider read-only checkpoint (lamp and clock events,
-painting, trophy case, thief). They cover the treasure deposit, the cure
+use a wider read-only checkpoint (lamp and clock events, painting, trophy
+case, thief) and one opt-in runner option that keeps the thief's room out of
+the end-of-input classification only (ADR-0062 amendment). They cover the treasure deposit, the cure
 clock and the lamp burn-out; the thief is seen stealing but not fighting, so
 the thief branch stays uncovered. On that branch `make m4-check` exits 0:
 SCENARIO_PARITY PASS for 18 scenarios, GAMEPLAY_RELIABILITY NOT YET with 17

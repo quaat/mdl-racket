@@ -17,15 +17,13 @@
 ;; the cellar, now dark ("It is pitch black.  You are likely to be eaten by a
 ;; grue."), `score`.
 ;;
-;; robber_hroom is not compared here (#:ignore-keys). The ROBBER demon moves
-;; the thief on every turn, the end-of-input turn included, so with it every
-;; one of the 131 shorter prefixes would have a non-standard end checkpoint
-;; and be re-run per prefix (131 boots, about 20 minutes) in single-run mode.
-;; The hero stays above ground until the last two commands, the thief never
-;; meets him and his bag stays empty (thief_oroom, robber_hflag and
-;; robber_hobjs are compared); the thief's walk (HROOM) is compared turn by
-;; turn and at every prefix's end of input in treasure-deposit, thief-robbery
-;; and cure-recovery.
+;; The ROBBER demon moves the thief (HROOM) on every turn, the end-of-input
+;; turn included. robber_hroom is compared at every READSTRING entry, at the
+;; end and in per-prefix mode, but not used to classify end-of-input tails
+;; (#:eof-classification-ignore-keys, ADR-0062 amendment): otherwise every one
+;; of the 131 shorter prefixes would be re-run per prefix (131 boots, about
+;; 20 minutes) in single-run mode. The hero stays above ground until the last
+;; two commands; the thief never meets him and his bag stays empty.
 ;;
 ;; Compared with the pinned Confusion captures in
 ;; docs/evidence/M4/lamp-burnout-reference.json (LAMP-BURNOUT-REFERENCE.md)
@@ -97,8 +95,8 @@
 
 ;; --- the scenario ------------------------------------------------------------------------
 (run-m4-scenario "lamp-burnout" commands
-                 #:checkpoint timers-checkpoint/no-hroom
-                 #:ignore-keys '(robber_hroom)
+                 #:checkpoint timers-checkpoint
+                 #:eof-classification-ignore-keys '(robber_hroom)
                  #:check-turn
                  (lambda (k transcript)
                    (when (>= k 126)

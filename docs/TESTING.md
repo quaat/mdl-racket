@@ -184,19 +184,24 @@ checkpoints at READSTRING entry (the newer per-prefix tests compared only
 end checkpoints) and the one-READSTRING-per-command check.
 
 *The thief's end-of-input move (M4 Phase 3).* The Phase 3 checkpoint
-profile (`tests/m4_timers_checkpoint.rkt`) reads the ROBBER demon's HROOM,
-which the demon changes on every turn, the end-of-input turn included. With
-that field every shorter prefix (except k = 0) has a non-standard end
-checkpoint and is re-run per prefix, so the field's cost is one boot per
-prefix. thief-robbery compares it everywhere (21 boots in single-run mode);
-treasure-deposit, cure-recovery and lamp-burnout declare
-`#:ignore-keys '(robber_hroom)` (checkpoint `timers-checkpoint/no-hroom`), so
-HROOM is not compared there at all, while the thief's room, HFLAG and bag
-are. For those three the full comparison was run once (treasure-deposit and
-cure-recovery in single-run mode, 19 and 35 boots, exit 0; TIMERS-SCORING.md);
-lamp-burnout (131 prefixes) was not. The Phase 3 references keep each Dkk
-case's log as its sha256 and size (`diag_logs`): their last checkpoints are
-`end_checkpoints`, and the logs grow with k.
+(`tests/m4_timers_checkpoint.rkt`) reads the ROBBER demon's HROOM, which the
+demon changes on every turn, the end-of-input turn included. With that field
+every shorter prefix (except k = 0) would have a non-standard end checkpoint
+and be re-run (one boot each). thief-robbery classifies with it (21 boots in
+single-run mode). treasure-deposit, cure-recovery and lamp-burnout declare
+`#:eof-classification-ignore-keys '(robber_hroom)` (ADR-0062 amendment): the
+field is left out only of that classification, and is still compared at
+every READSTRING entry, at the single run's end, in reboots and in
+per-prefix mode. Lost coverage, precisely: for those prefixes the thief's
+move during the skipped end-of-input turn is not executed by this runtime
+there; the same ROBBER demon code runs at every regular turn of the single
+run and is compared there through HROOM (and in per-prefix mode at every
+prefix's end of input). Rendering: the thief's walk reaches the room whose
+RID is `!` (NULEXIT's FIND-ROOM), which PRIN1 prints as `\!`; the checkpoint
+renders that one escaped PNAME and fails strictly on any other unsafe one.
+The Phase 3 references keep each Dkk case's log as its sha256 and size
+(`diag_logs`): their last checkpoints are `end_checkpoints`, and the logs
+grow with k.
 
 *Diagnostic stdout hashes.* In every M4 reference, the diagnostic runs'
 (X1, Dkk) `stdout_sha256` is the hash of the raw native stdout. That stdout
