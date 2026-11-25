@@ -123,6 +123,8 @@ m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 | The lamp burns out (Phase 3, same branch) | `test-m4-lamp-burnout` | 118 `wait`s, LIGHT-INT warnings |
 | The match clock (Phase 3b, branch `feat/m4-dam`) | `test-m4-match-clock` | MATIN: fires, `wait`, turned off, out of matches |
 | The boat and the river (Phase 3b, same branch) | `test-m4-boat-river` | the pump, inflate, board, launch, land, deflate |
+| The dam's sluice gates (S14, branch `feat/m4-prsobj-decl`) | `test-m4-dam-sluice` | the Maintenance Room, the yellow button, the bolt, the trunk |
+| The Maintenance Room leak (S14, same branch) | `test-m4-maint-leak` | the clock event MNTIN, the putty |
 
 The three Phase 2 death scenarios ([record](docs/evidence/M4/DEATH-BRANCHES.md))
 use two opt-in runner options (ADR-0062 amendment): the death question as the
@@ -141,19 +143,27 @@ of 23 required branches covered. They are branch evidence until merged.
 The two Phase 3b scenarios ([record](docs/evidence/M4/DAM-CLOCKS.md)) go
 beyond the house with wider read-only checkpoints (dam, clocks, boats) and no
 runtime change. They cover one other clock event (the match clock) and one
-listed puzzle (the boat); the branch for puzzles beyond the house lists four
-more (the dam, the balloon, the coal mine, the gas room), which stay
-unexercised. **The dam is blocked (INV-11, gate result BLOCKED for the dam):**
-entering its Maintenance Room ends the session in this runtime, because the
-room's function declares the undefined type PRSOBJ, which pinned Confusion
-does not check; the native dam and leak references are committed and `make
-xfail-m4-dam-frontier` tracks the expected failure until a maintainer
-decision. On that branch `make m4-check` exits 0: SCENARIO_PARITY PASS for
-20 scenarios, GAMEPLAY_RELIABILITY NOT YET with 18 of 23 required branches
-covered and open blockers INV-06, INV-07 and INV-11. They are branch evidence until
-merged.
+listed puzzle (the boat). The dam was blocked there (INV-11): entering its
+Maintenance Room ended the session, because the room's function declares the
+undefined type PRSOBJ, which pinned Confusion does not check.
 
-`make m4-check` runs all twenty plus the persistence check; options
+**S14 (#193, INV-11 fixed; branch `feat/m4-prsobj-decl`, gate PASS,
+scenario-scoped; [record](docs/evidence/M4/S14-PRSOBJ-DECL.md)).** By
+maintainer decision the #98 declaration ADR is amended: a TYPE name in an
+attached declaration that is still undefined when checked is not enforced,
+as in pinned Confusion. This is a recorded deviation from the manual,
+limited to undefined names. Known types stay strict, as do `DECL?`,
+positional declarations and GDECL. No source change. The dam (`make
+test-m4-dam-sluice`) and its leak clock MNTIN (`make test-m4-maint-leak`)
+now match the committed native references at every turn, in single-run and
+per-prefix modes; `make xfail-m4-dam-frontier` is retired. Puzzles beyond
+the house: two of the five listed (the boat, the dam) are exercised; the
+balloon, the coal mine and the gas room are not, so that branch stays
+uncovered. On that branch `make m4-check` exits 0: SCENARIO_PARITY PASS for 22
+scenarios, GAMEPLAY_RELIABILITY NOT YET with 18 of 23 required branches
+covered and open blockers INV-06 and INV-07. Branch evidence until merged.
+
+`make m4-check` runs all twenty-two plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:
