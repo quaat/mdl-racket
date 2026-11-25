@@ -114,8 +114,16 @@ m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 | The mirror and the bat (S9) | `test-m4-mirror-bat` | IMAGE, SLEEP |
 | The Strange Passage (S9) | `test-m4-strange-passage` | TIME |
 | Help and info (S10) | `test-m4-help-info` | read-only allowlist |
+| Death by grue, resurrection (Phase 2, branch `feat/m4-death-branches`) | `test-m4-grue-resurrection` | possessions scattered |
+| Death by grue, refused (Phase 2, same branch) | `test-m4-grue-refusal` | the game's QUIT; native ZORK.LOG not written (ADR-0055) |
+| Killed by the troll (Phase 2, same branch) | `test-m4-troll-death` | staggered, wounded, killed, resurrected |
 
-`make m4-check` runs all eleven plus the persistence check; options
+The three Phase 2 death scenarios ([record](docs/evidence/M4/DEATH-BRANCHES.md))
+use two opt-in runner options (ADR-0062 amendment): the death question as the
+prompt of its READSTRING entry, and declared prefixes that end by the game's
+own QUIT instead of end of input. They are branch evidence until merged.
+
+`make m4-check` runs all fourteen plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:
