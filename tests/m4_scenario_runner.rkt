@@ -565,6 +565,13 @@
   (check-equal? commands expected-commands)
   (check-equal? (hash-ref scenario 'fixed_epoch) fixed-epoch)
   (check-equal? (hash-ref scenario 'tz) "UTC")
+  ;; The test's declarations must equal the scenario file's (independent
+  ;; review): not only indirectly through the reference generated from it.
+  (check-equal? (for/hasheqv ([(key v) (in-hash (hash-ref scenario 'entry_prompts (hasheq)))])
+                  (values (string->number (symbol->string key)) v))
+                entry-prompts "scenario entry_prompts")
+  (check-equal? (sort (hash-ref scenario 'quit_prefixes '()) <) (sort quit-prefixes <)
+                "scenario quit_prefixes")
   (check-equal? (hash-ref reference 'interpreter_sha256_before) m4-pinned-mdli)
   (check-equal? (hash-ref reference 'interpreter_sha256_after) m4-pinned-mdli)
   (check-equal? (hash-ref reference 'upstream_mdlzork_checked_out) m4-pinned-upstream)
@@ -577,6 +584,11 @@
   (check-true (hash-ref ref-checks 'diag_game_part_equals_t1_game_part_bytes))
   (check-true (hash-ref ref-checks 'prefix_runs_consistent_with_t1))
   (define has-end-checkpoints? (hash-has-key? reference 'end_checkpoints))
+  ;; A quit prefix's end state is the native state at QUIT, which only
+  ;; end_checkpoints record; without them end-cp would fall back to the
+  ;; READSTRING-entry checkpoint (independent review).
+  (when (pair? quit-prefixes)
+    (check-true has-end-checkpoints? "a scenario with quit prefixes needs end_checkpoints"))
   (when has-end-checkpoints?
     (check-true (hash-ref ref-checks 'diag_prefix_game_parts_equal_prefix_game_parts)))
   ;; Declared entry prompts and endings equal the reference's (a reference

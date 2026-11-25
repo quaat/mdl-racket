@@ -121,7 +121,8 @@ under `/tmp` fail with "Read-only file system").
 | `scoring.final-score-on-quit` | + grue-refusal (beside test-m3-session) | FINISH <> after death |
 
 `timers.cure-clock-recovery` stays UNCOVERED: troll-death enables the CURIN
-clock and checkpoints it counting down, but recovery is not reached.
+clock and checkpoints its tick (re-armed at the death turn, 29 -> 30, then
+counting down), but recovery is not reached.
 
 ## make m4-check
 
@@ -170,3 +171,28 @@ Confusion code was copied. New scripts and tests are original MIT-0 code.
 Phase 2 continues with the uncovered combat/timer branches (unconsciousness,
 cure-clock recovery, the thief) and Phase 3 objects; a scenario that walks
 long enough after troll-death's wound would cover `timers.cure-clock-recovery`.
+
+## Independent review (2026-11-25)
+
+A read-only independent review of `origin/main...HEAD` checked:
+
+* that the default path is unchanged for scenarios declaring neither option
+  (prompt count k+2, EOF tails, D3 ending, reboot selection, guards);
+* whether the new options could cause a false pass;
+* the probe, the checkpoint purity, the branch claims, the wiring and the
+  docs.
+
+It found no defect. Verdict: approve with nits. Changes made in response:
+
+* **Quit scenarios require `end_checkpoints`.** Without them, a quit
+  prefix's end state would fall back to the entry checkpoint.
+* **Declarations are cross-checked against the scenario file.** The runner
+  compares the test's `#:entry-prompts` and `#:quit-prefixes` with the
+  scenario JSON. Mutation check: removing 8 from grue-refusal's
+  `quit_prefixes` fails at that check (exit 1).
+* **Wording.** The cure-clock wording now says the tick is re-armed at the
+  death turn (29 → 30), then counts down. The CI comment no longer says
+  "eleven".
+* **TESTING note.** It explains why the diagnostic runs' `stdout_sha256`
+  values do not match their path-normalised `stdout_raw`. This predates
+  this slice, and the runner does not use those runs.

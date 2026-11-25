@@ -61,7 +61,7 @@
         {"id": "timers.cure-clock-recovery", "required": true,
          "description": "the CURE clock restores the hero's strength after a wound",
          "checks": [],
-         "note": "troll-death enables the CURIN clock after the hero's light wound and checkpoints its CTICK counting down, but no scenario reaches the recovery itself"},
+         "note": "troll-death enables the CURIN clock after the hero's light wound and checkpoints its CTICK (re-armed at the death turn, then counting down), but no scenario reaches the recovery itself"},
         {"id": "timers.other-clock-events", "required": true,
          "description": "CEVENT clock interrupts beyond the troll and cure clocks (CLOCK-INT 77rooms.mud:1657)",
          "checks": []}

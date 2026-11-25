@@ -182,6 +182,13 @@ exist). Coverage gained: the per-turn
 checkpoints at READSTRING entry (the newer per-prefix tests compared only
 end checkpoints) and the one-READSTRING-per-command check.
 
+*Diagnostic stdout hashes.* In every M4 reference, the diagnostic runs'
+(X1, Dkk) `stdout_sha256` is the hash of the raw native stdout. That stdout
+echoes the disposable `$TMPDIR` log path, and the stored `stdout_raw` has the
+path normalised. So the two do not match for those cases. This is not
+corruption, and the runner never uses diagnostic stdouts. The P/T1/T1b
+transcripts it compares contain no path, and their hashes are re-checked.
+
 **Per-prefix mode** (`M4_SCENARIO_MODE=per-prefix`; `make
 m4-scenarios-per-prefix` runs all fourteen; not on CI's default path). The
 pre-runner protocol through the same module: one boot per prefix k = 0..n

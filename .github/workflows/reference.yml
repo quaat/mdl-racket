@@ -99,9 +99,9 @@ jobs:
           set -o pipefail
           make m3-check 2>&1 | tee artifacts/ci-logs/m3-check.log
       # M4 (epic #163 Phase 7): one `make m4-check` step runs, sequentially,
-      # every check declared in tests/scenarios/m4-manifest.json (the eleven
-      # native-parity scenario targets and the WP4 replay-persistence check
-      # that used to be twelve separate steps) and reports the five acceptance
+      # every check declared in tests/scenarios/m4-manifest.json (every
+      # native-parity scenario target and the WP4 replay-persistence check,
+      # which used to be separate steps) and reports the five acceptance
       # terms separately. Each target is bounded by M4_TARGET_TIMEOUT; its full
       # log is kept in artifacts/m4-check/logs/<target>.log and a failing
       # target's last lines are printed here. The PLAYABLE sub-checks
