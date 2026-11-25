@@ -590,8 +590,9 @@
 ;; value is the actual pattern (pinned mdl_decl.cpp:66), so <DECL? <CHTYPE 1
 ;; NOFFSET> RAPPLIC> matches RAPPLIC's <OR ATOM FALSE NOFFSET> property and
 ;; the miss payload carries the resolved pattern's leaf: #FALSE (3 NOFFSET)
-;; (declq-consults-atom-decl). Attached #DECL checking does not consult atom
-;; properties in this slice. SETG likewise ignores them (the recorded
+;; (declq-consults-atom-decl). Attached #DECL checking consults DECL
+;; associations too (#98, #193: normalize-decl-pattern and the (unresolved)
+;; case of decl-match). SETG ignores them (the recorded
 ;; setg-ignores-atom-decl case, consistent with D1's non-enforcement).
 (define (mdl-decl? value pattern)
   (define resolved?

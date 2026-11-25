@@ -106,7 +106,17 @@
            (lambda () (run "<DEFINE F (X) #DECL ((X) FUTURE) .X> <PUT FUTURE DECL '<OR FIX FALSE>> <F A>")))
 (check-exn #rx"DECL.*X does not satisfy declaration"
            (lambda () (run "<DEFINE F (X) #DECL ((X) <LIST FUTURE>) .X> <PUT FUTURE DECL 'FIX> <F (A)>")))
-;; an association whose target is itself unknown stays a strict error
+;; The order of definition matters for an association's own target
+;; (independent review): an association that already exists when the
+;; function is defined is followed with the attached deferral, so an unknown
+;; name inside it is retained and, while still undefined, matches any value;
+;; once defined it is strict.
+(check-equal? (run "<PUT ALIAS DECL '<OR BAR FIX>> <DEFINE F (X) #DECL ((X) ALIAS) .X> <F 1.5>") 1.5)
+(check-equal? (run "<PUT ALIAS DECL '<OR BAR FIX>> <DEFINE F (X) #DECL ((X) ALIAS) .X> <F 7>") 7)
+(check-exn #rx"X does not satisfy declaration"
+           (lambda () (run "<PUT ALIAS DECL '<OR BAR FIX>> <DEFINE F (X) #DECL ((X) ALIAS) .X> <NEWTYPE BAR LIST> <F 1.5>")))
+;; ...whereas an association added after the definition is normalized
+;; strictly at the check: an unknown target there stays a strict error.
 (check-exn #rx"unknown declaration type NOWHERE"
            (lambda () (run "<DEFINE F (X) #DECL ((X) FUTURE) .X> <PUT FUTURE DECL 'NOWHERE> <F 1>")))
 

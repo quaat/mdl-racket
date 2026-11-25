@@ -191,3 +191,38 @@ copied; new tests are original MIT-0 code.
 Independent review of the `decl-match` change and its invariants
 (declarations are in AGENTS.md's mandatory-review list), then merge; next
 the remaining uncovered branches (`make m4-check`).
+
+## Orchestrator gate and independent review (2026-11-25)
+
+**Gate at 47da216** (sequential, Racket v7.9 BC). Every target exited 0:
+
+* `make test`, test-historical, m3-source-progress, test-m3-interactive,
+  test-m3-session, test-m3-launcher, test-m3-bang and m3-check;
+* `make m4-check` (SCENARIO_PARITY PASS for 22 scenarios;
+  GAMEPLAY_RELIABILITY NOT YET at 18 of 23; open blockers INV-06 and
+  INV-07 only);
+* `make m4-scenarios-per-prefix` (4216 s);
+* `git diff --check`.
+
+**Independent review**, read-only. Verdict: approve with nits. It found:
+
+* **Scope.** Unresolved nodes are created only for attached declarations.
+  Every strict path normalizes without the deferral, and nothing is cached.
+* **Leaf fix.** The `decl-failure-leaf` change affects only error messages.
+* **Source sweep.** A parser read all 358 `#DECL` occurrences in the 13
+  load-order files: 35 type names, all defined, except **PRSOBJ**
+  (MAINT-ROOM, WIRE-FUNCTION, GNOME-FUNCTION). So in the 1977 game the
+  change unchecks exactly the decided three functions and nothing else.
+* **Order-dependence.** An association that already exists at definition is
+  followed with the deferral, so an unknown name inside it is retained, and
+  is unchecked while undefined. An association added later is strict for an
+  unknown target. Kept as is; it is now stated exactly in the ADR amendment
+  and SEMANTICS. A new test pins it: unchecked while undefined (FLOAT and
+  FIX accepted), strict after `<NEWTYPE BAR LIST>` ("X does not satisfy
+  declaration"). The 1977 sources never reach this case.
+
+Also fixed:
+
+* a stale `core.rkt` comment ("attached checking does not consult atom
+  properties");
+* the BOAT-RIVER-REFERENCE note about INV-11.

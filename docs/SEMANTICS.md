@@ -1541,7 +1541,10 @@ sentence above for attached declarations only:
 * If the name is a registered TYPE by then (NEWTYPE), it matches exactly
   that TYPE; if it has a `DECL` association, the associated Pattern is
   normalized strictly (an unknown name, cycle or malformed Pattern inside
-  it still raises) and matched.
+  it still raises) and matched. This applies to an association added after
+  the definition. An association that already existed at definition was
+  followed with the deferral then, so an unknown name inside it is itself a
+  retained name and follows this rule (unchecked while undefined).
 * Nested positions follow the same rule: in `<OR UNDEF FIX>` the OR
   matches any value; in `<LIST UNDEF FIX>` or `<LIST [REST UNDEF]>` the
   UNDEF positions match any element while the structure TYPE, the other

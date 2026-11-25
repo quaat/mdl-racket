@@ -131,8 +131,16 @@ Precisely:
 * If the name has been defined by then (NEWTYPE, or a `DECL` association
   via `PUT`), it is checked strictly as that type or Pattern, exactly as
   before. Resolution happens at every check, so a later definition takes
-  effect for functions defined earlier. A `DECL` association whose target
-  is itself unknown, cyclic or malformed is still a strict error.
+  effect for functions defined earlier. A `DECL` association *added after
+  the definition* whose target is itself unknown, cyclic or malformed is
+  still a strict error at the check.
+* Order matters for an association's own target (independent review). An
+  association that already exists when the function is defined is followed
+  with the attached deferral (the #98 behaviour). So an unknown name inside
+  it, for example BAR in `<OR BAR FIX>`, is retained, and while still
+  undefined it matches any value; once defined it is strict. The 1977
+  sources never reach this case: their only association, RAPPLIC, names
+  defined types. Pinned by `tests/deferred_decl_type_test.rkt`.
 * Explicit `DECL?`, positional (RSUBR-style `"VALUE"`) declarations and
   every other path that normalizes a Pattern without the attached deferral
   (GDECL, checked against an existing value and at each SETG; a NEWTYPE's
