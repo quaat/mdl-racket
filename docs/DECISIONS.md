@@ -2159,6 +2159,39 @@ default is unchanged for the other scenarios. Only terminal READSTRINGs are
 entries (ADR-0055 amendment: file READSTRING never calls the observer), and
 the guard also fails on a file CHANNEL left open at the end of a run.
 
+**Amendment (M4 Phase 2, epic #163, 2026-11-25): death question and declared
+QUIT endings.** Status: proposed (branch `feat/m4-death-branches`; evidence
+`docs/evidence/M4/DEATH-BRANCHES.md`). Two opt-in options; a scenario that
+declares neither runs exactly as before (every entry prompted by `>`, every
+prefix ending by D3 with no OPEN recorded).
+
+- `#:entry-prompts`: READSTRING entries whose prompt is not RDCOM's `>`
+  (JIGS-UP's `Do you want me to try to patch you?`, answered through
+  YES/NO's terminal READSTRING). The head of such an entry ends after its
+  text, with no counted `>` before it; the `>` count stays strict (one per
+  undeclared entry reached, plus the RDCOM prompt of the READSTRING that
+  dies at end of input). The reference records the same map, verified by
+  its capture against a YES/NO wrapper in the diagnostic run.
+- `#:quit-prefixes` with `#:quit-open-records`: the prefixes whose run ends
+  by the game's own QUIT (FINISH -> RECORD -> QUIT) instead of input
+  exhaustion. The declaration must equal the reference's per-prefix
+  `endings` (from each native run's stderr). Such a run must end with the
+  host loop's `'quit` outcome and no MDL ERROR (ADR-0054), never by input
+  exhaustion or a strict failure; leave exactly the input after the
+  quitting answer unread; and have recorded exactly the declared OPENs
+  (RECORD's denied `READB`/`PRINT` of MDL/ZORK.LOG, ADR-0055). The no-write
+  guard is unchanged. The end checkpoint is the reference's state at QUIT.
+  In single-run mode the run is observed up to the entry whose answer
+  quit; every declared quit prefix below n is re-run per prefix.
+- The native ZORK.LOG append of a quitting run is the documented ADR-0055
+  deviation (no file, no console output; S11, inventory F13); SAVE-IT's
+  MADADV.SAVE rewrite is ADR-0048's. Neither is normalised away: the
+  transcripts are byte-identical, and the reference records the native
+  file effects separately (`native_zork_log`, `prefix_files_changed`).
+- Not decided here: which further endings (e.g. `'quit-after-mdl-error`,
+  INV-07) a scenario may declare. Only `'quit` with no MDL ERROR is
+  accepted.
+
 ## ADR-0063: `make m4-check` reports the five M4 terms from declared manifests
 
 Status: proposed (2026-11-25, branch `feat/m4-check`; Phase 7 of epic #163).

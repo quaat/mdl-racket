@@ -130,8 +130,8 @@ byte before the first difference.
 | F9 `c-int` | 2 | "Nothing happens." | Strict `mdl-gval: unassigned MDL global TIME` | 0 | **INV-04** |
 | F10 Bat Room | 37 | Three BEL bytes (`<IMAGE 7>`), three `<SLEEP 1>` (run took 3.25 s), "A deranged giant vampire bat … lifts you away…." | Strict `mdl-eval: unassigned or non-applicable MDL operator IMAGE` after the Bat Room description | 36: the troll fight, the round room's RANDOM landings and the mirror all match | **INV-02 / INV-03** |
 | F11 verb battery | 125 | — | **Byte-identical**, no strict failure (`fault_skip_failures` empty) | all | parity: no failure |
-| F12 grue death, patched | 10 | Death, `y`, resurrection in the forest, possessions scattered | Identical | all | parity: no failure |
-| F13 grue death, refused | 8 | Death, `n`, FINISH, RECORD, QUIT. Writes `MDL/ZORK.LOG`. | Identical. Outcome `quit`. Denied OPENs `READB MDL/ZORK.LOG 2` and `PRINT MDL/ZORK.LOG 13`. `look` unread. | all | parity (ADR-0055 deviation: no log) |
+| F12 grue death, patched | 10 | Death, `y`, resurrection in the forest, possessions scattered | Identical | all | parity: no failure; **promoted** (extended with carried possessions) to the gated scenario `test-m4-grue-resurrection` ([DEATH-BRANCHES](DEATH-BRANCHES.md)). "Patched" is the game's own word ("Do you want me to try to patch you?"); the sources were not patched |
+| F13 grue death, refused | 8 | Death, `n`, FINISH, RECORD, QUIT. Writes `MDL/ZORK.LOG`. | Identical. Outcome `quit`. Denied OPENs `READB MDL/ZORK.LOG 2` and `PRINT MDL/ZORK.LOG 13`. `look` unread. | all | parity (ADR-0055 deviation: no log); **promoted** unchanged to the gated scenario `test-m4-grue-refusal` ([DEATH-BRANCHES](DEATH-BRANCHES.md)) |
 
 In every run of ours, `mdl_errors` is empty. Each failure above is a host
 strict failure: it ends the session before the game's own ERROR handler

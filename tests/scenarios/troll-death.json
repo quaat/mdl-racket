@@ -1,0 +1,44 @@
+{
+  "name": "troll-death",
+  "description": "M4 Phase 2 scenario (epic #163, death and recovery; combat): the hero is killed by the troll. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0). The troll-combat path without the sword: take the lamp, the rug, the trap door, the lamp on, `down`, `east` into the troll room, then `wait` eight times. The troll fights the unarmed hero through the demon FIGHTING (78melee.mud:282) -> BLOW (78melee.mud:377): under this clock and seed the sixth `wait` staggers the hero, the seventh wounds him (a light wound), the eighth kills him (\"The troll's axe removes your head.\" then JIGS-UP: \"It appears that that last blow was too much for you. ...\"), and the question (YES/NO, a READSTRING entry whose prompt is the question, not `>`) is answered `y`: the carried lit lamp goes first, the hero is resurrected in the forest and his possessions scattered. Then `look`, `inventory`, `diagnose`, `score`. Prefix 19 (input ends at the question) resurrects too: the empty answer leaves the stale `w` of `wait` in INBUF, which is not a refusal. Each command was confirmed by the pinned native reference; see docs/evidence/M4/TROLL-DEATH-REFERENCE.md. Input ends after `score` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "east",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "y",
+    "look",
+    "inventory",
+    "diagnose",
+    "score"
+  ],
+  "entry_prompts": {
+    "19": "Do you want me to try to patch you?"
+  },
+  "quit_prefixes": [],
+  "reference": {
+    "file": "docs/evidence/M4/troll-death-reference.json",
+    "case": "T1-troll-death-pipe"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "grue-refusal",
+  "description": "M4 Phase 2 scenario (epic #163, death and recovery): death by grue, `n`, the game's own FINISH -> RECORD -> QUIT. Promotes the discovery run F13 (GAMEPLAY-FAILURE-INVENTORY.md) unchanged. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0). Into the kitchen, `up` into the dark attic, `north`: JIGS-UP (77rooms.mud:870), SCORE-UPD -10, DEATHS 1, the question (YES/NO, a READSTRING entry whose prompt is the question, not `>`), `n`: \"What?  You don't trust me? ...\", FINISH <> (77rooms.mud:700) prints the score, RECORD (77rooms.mud:722) tries to open MDL/ZORK.LOG (natively it appends a line; under ADR-0055 both OPENs are denied: READB status 2, PRINT status 13), QUIT. The last command `look` is never read: the run ends by the game's QUIT, not by end of input (the runner's declared quit ending). Prefixes 6, 7 and 8 end by QUIT (6: the empty answer at end of input leaves the stale `n` of `north` in INBUF, which refuses); prefixes 0-5 end by end of input (D3). Each command was confirmed by the pinned native reference; see docs/evidence/M4/GRUE-REFUSAL-REFERENCE.md.",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "up",
+    "north",
+    "n",
+    "look"
+  ],
+  "entry_prompts": {
+    "6": "Do you want me to try to patch you?"
+  },
+  "quit_prefixes": [
+    6,
+    7,
+    8
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/grue-refusal-reference.json",
+    "case": "T1-grue-refusal-pipe"
+  }
+}

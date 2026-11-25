@@ -261,7 +261,11 @@
 ;; to EVENT-K of the READSTRING entries reached when it happened (default: the
 ;; run's own k, as in a per-prefix run); the other guards, only known at the
 ;; end, to K-DEFAULT.
-(define (guard-failure r k-default stage #:event-k [event-k (lambda (entries) k-default)])
+(define (open-record-list session)
+  (for/list ([o (in-list (mdl-session-open-records session))])
+    (list (mdl-open-record-mode o) (mdl-open-record-file-spec o) (mdl-open-record-status o))))
+(define (guard-failure r k-default stage #:event-k [event-k (lambda (entries) k-default)]
+                       #:open-records [open-records '()])
   (define writes (run-result-writes r))
   (define sleeps (run-result-sleeps r))
   (cond
@@ -276,9 +280,13 @@
                  (format "the temporary cwd is not empty: ~s" (run-result-cwd-after r)))]
     [(not (equal? (run-result-manifest-after r) (run-result-manifest-before r)))
      (mk-failure k-default "run-guard" stage "the game directory changed")]
-    [(pair? (mdl-session-open-records (run-result-session r)))
+    ;; RECORD's denied OPENs (ADR-0055): none, except in a run declared to
+    ;; end by the game's QUIT (FINISH -> RECORD -> QUIT), where they must be
+    ;; exactly OPEN-RECORDS (mode file-spec status), in order.
+    [(not (equal? (open-record-list (run-result-session r)) open-records))
      (mk-failure k-default "run-guard" stage
-                 (format "open RECORD channels: ~s" (mdl-session-open-records (run-result-session r))))]
+                 (format "RECORD OPENs ~s, expected ~s"
+                         (open-record-list (run-result-session r)) open-records))]
     ;; M4 S10: every read-only file CHANNEL the game opened was CLOSEd.
     [(assq 'open (map reverse (mdl-session-file-channels (run-result-session r))))
      (mk-failure k-default "run-guard" stage
@@ -302,26 +310,48 @@
                (eqv? (hash-ref report 'completed_expressions #f) 1229)))
      (mk-failure k "run-guard" stage (format "unexpected FLOAD report ~s" report))]
     [else #f]))
-;; The end of a scenario run: D3 input exhaustion (never a quit or a strict
-;; failure), the host loop's events, all input consumed.
-(define (ending-failure r k stage)
+;; The end of a scenario run. ENDING 'eof (the default for every prefix): D3
+;; input exhaustion (never a quit or a strict failure). ENDING 'quit (only a
+;; prefix the scenario declares with #:quit-prefixes): the game's own QUIT,
+;; i.e. the host loop's outcome of kind 'quit with no MDL ERROR signalled
+;; (ADR-0054), never input exhaustion or a strict failure. Both: the host
+;; loop's events, and the input left unread is exactly UNREAD ("" for 'eof).
+(define (ending-failure r k stage [ending 'eof] [unread ""])
   (define result (run-result-result r))
   (cond
-    [(not (exn:fail:mdl-input-exhausted? result))
+    [(and (eq? ending 'eof) (not (exn:fail:mdl-input-exhausted? result)))
      (mk-failure k "run-guard" stage
                  (format "the run did not end by input exhaustion: ~a; output tail ~s"
                          (result-text result) (output-tail (run-result-raw r))))]
+    [(and (eq? ending 'quit)
+          (not (and (mdl-session-outcome? result)
+                    (eq? (mdl-session-outcome-kind result) 'quit)
+                    (null? (mdl-session-outcome-mdl-errors result)))))
+     (mk-failure k "run-guard" stage
+                 (format "the run did not end by the game's QUIT (declared quit ending): ~a; output tail ~s"
+                         (if (mdl-session-outcome? result)
+                             (format "outcome ~a, MDL errors ~s" (mdl-session-outcome-kind result)
+                                     (mdl-session-outcome-mdl-errors result))
+                             (result-text result))
+                         (output-tail (run-result-raw r))))]
+    [(not (memq ending '(eof quit))) (error 'm4-scenario "unknown ending ~s" ending)]
     [(not (equal? (map car (run-result-events r)) '(entry-returned pass)))
      (mk-failure k "run-guard" stage (format "host loop events ~s" (map car (run-result-events r))))]
-    [(not (equal? (port->string (run-result-input r)) ""))
-     (mk-failure k "run-guard" stage "input was not fully consumed")]
+    [(not (equal? (port->string (run-result-input r)) unread))
+     (mk-failure k "run-guard" stage
+                 (if (equal? unread "")
+                     "input was not fully consumed"
+                     (format "the input left unread differs from ~s" unread)))]
     [else #f]))
 
 ;; --- the reference ---------------------------------------------------------------
 ;; A reference stdout, integrity-checked against its recorded sha256 (latin-1
 ;; text in the JSON, CR kept), with only D1 applied (the Confusion/LISTEN
 ;; banner up to "LISTENING-AT-LEVEL 1 PROCESS 1" and the "DONE" line).
-(define (reference-transcript c lines)
+;; ENDING: how the native run ended, from its stderr: 'eof (Confusion's
+;; "Error: Unexpected EOF" at the READSTRING after the end of input) or 'quit
+;; (the game's QUIT: empty stderr); exit status 0 either way.
+(define (reference-transcript c lines [ending 'eof])
   (define name (hash-ref c 'name))
   (check-equal? (hash-ref c 'mode) "pipe" name)
   (check-equal? (hash-ref c 'kind) "transcript" name)
@@ -329,7 +359,12 @@
   (check-equal? (hash-ref c 'input)
                 (string-append "<FLOAD \"77loadall.mud\">\n<SAVE-IT>\n" (lines->input lines)) name)
   (check-equal? (hash-ref c 'exit_status) 0 name)
-  (check-equal? (hash-ref c 'stderr_raw) "Error: Unexpected EOF\n" name)
+  (check-equal? (hash-ref c 'stderr_raw)
+                (case ending
+                  [(eof) "Error: Unexpected EOF\n"]
+                  [(quit) ""]
+                  [else (error 'reference-transcript "unknown ending ~s" ending)])
+                name)
   (define raw (hash-ref c 'stdout_raw))
   (check-equal? (bytes->hex-string
                  (sha256-bytes (apply bytes (map char->integer (string->list raw)))))
@@ -358,7 +393,16 @@
 ;; 'line-initial counts only a `>` at the start of the text or after a LF, for
 ;; a scenario whose game text itself holds `>` (help-info). The count check is
 ;; the same in both.
-(define (prompt-head text k label [split 'any])
+;; ENTRY-PROMPTS (M4 Phase 2 death scenarios, opt-in; default none): a hash
+;; READSTRING entry index -> prompt text, for the entries that are not RDCOM
+;; reads. JIGS-UP's "Do you want me to try to patch you?" is printed without a
+;; CRLF and answered through YES/NO's READSTRING (77defs.mud:431), with no `>`.
+;; The head of such an entry ends after the first occurrence of its text
+;; after the previous entry's head, and no counted `>` may lie in between.
+;; COUNT: the number of counted `>` the text must hold (default k + 2, one per
+;; entry 0..k+1; see prompt-count), strict as before.
+(define (prompt-head text k label [split 'any]
+                     #:entry-prompts [entry-prompts (hasheqv)] #:count [count (+ k 2)])
   (define positions
     (for/list ([c (in-string text)] [i (in-naturals)]
                #:when (and (char=? c #\>)
@@ -367,10 +411,35 @@
                              [(line-initial) (or (zero? i) (char=? (string-ref text (sub1 i)) #\newline))]
                              [else (error 'm4-scenario "prompt split must be any or line-initial, not ~s" split)])))
       i))
-  (unless (= (length positions) (+ k 2))
+  (unless (= (length positions) count)
     (error 'm4-scenario "~a: expected ~a prompts `>` in the reference stdout, found ~a; the prompt split is ambiguous (use M4_SCENARIO_MODE=per-prefix)"
-           label (+ k 2) (length positions)))
-  (substring text 0 (add1 (list-ref positions k))))
+           label count (length positions)))
+  (define end
+    (for/fold ([pos 0]) ([j (in-range 0 (add1 k))])
+      (define literal (hash-ref entry-prompts j #f))
+      (cond
+        [literal
+         (define m (regexp-match-positions (regexp-quote literal) text pos))
+         (unless (and m (not (for/or ([p (in-list positions)]) (and (<= pos p) (< p (caar m))))))
+           (error 'm4-scenario "~a: the prompt ~s of READSTRING entry ~a is not the next prompt in the reference stdout"
+                  label literal j))
+         (cdar m)]
+        [else
+         (define p (for/first ([p (in-list positions)] #:when (>= p pos)) p))
+         (unless p
+           (error 'm4-scenario "~a: no prompt `>` for READSTRING entry ~a in the reference stdout" label j))
+         (add1 p)])))
+  (substring text 0 end))
+
+;; The number of counted `>` in the native stdout of a prefix whose last
+;; observed READSTRING entry is LAST-ENTRY: one per entry 0..LAST-ENTRY that
+;; is not in ENTRY-PROMPTS, plus, when the prefix ENDING is 'eof, the prompt
+;; of the READSTRING that dies at end of input (it follows the empty command
+;; of entry LAST-ENTRY, so it is RDCOM's `>`). Without ENTRY-PROMPTS and
+;; with an 'eof ending: LAST-ENTRY + 2.
+(define (prompt-count last-entry ending entry-prompts)
+  (+ (for/sum ([j (in-range 0 (add1 last-entry))]) (if (hash-has-key? entry-prompts j) 0 1))
+     (case ending [(eof) 1] [(quit) 0] [else (error 'm4-scenario "unknown ending ~s" ending)])))
 
 ;; The single-run split of the native prefix-k stdout P_k: its head, through
 ;; the prompt of READSTRING entry k (prompt-head, strict on the prompt count),
@@ -379,14 +448,18 @@
 ;; a prefix of T1 is implied by the run itself (outputs only grow, and the
 ;; whole output must equal T1), so a reference inconsistency there surfaces as
 ;; a failing turn, never as a silent pass.
-(define (eof-split pk k label [split 'any]) (prompt-head pk k label split))
+(define (eof-split pk k label [split 'any]
+                   #:entry-prompts [entry-prompts (hasheqv)] #:count [count (+ k 2)])
+  (prompt-head pk k label split #:entry-prompts entry-prompts #:count count))
 
 ;; The prefixes k < n whose native end-of-input tail is not standard: the tail
 ;; text is not exactly "Beg pardon?\n>", or the end checkpoint differs from the
 ;; (transformed) READSTRING-entry checkpoint. TAIL, END-CP, ENTRY-CP: k ->
-;; value. Returns a list of (k reason ...), ascending.
-(define (non-standard-eof-tails n tail end-cp entry-cp)
-  (for*/list ([k (in-range 0 n)]
+;; value. KS: the prefixes to classify (default 0..n-1). Returns a list of
+;; (k reason ...), ascending.
+(define (non-standard-eof-tails n tail end-cp entry-cp #:ks [ks (range n)])
+  (for*/list ([k (in-list ks)]
+              #:when (< k n)
               [reasons (in-value
                         (append (if (equal? (tail k) standard-eof-tail)
                                     '()
@@ -419,6 +492,18 @@
 ;; single run's k = n, reboots, per-prefix runs). The reference is compared
 ;; without END-ONLY-KEYS at READSTRING entries, so a missing or extra key is
 ;; still a failure.
+;; ENTRY-PROMPTS (opt-in, M4 Phase 2 death scenarios; ADR-0062 amendment): the
+;; READSTRING entries whose prompt is not RDCOM's `>` (prompt-head); the
+;; reference records the same map (`entry_prompts`).
+;; QUIT-PREFIXES / QUIT-OPEN-RECORDS (opt-in, same amendment): the prefixes k
+;; (0..n; n is the whole scenario) whose run ends by the game's own QUIT
+;; (FINISH -> RECORD -> QUIT) instead of end of input (D3); the reference
+;; records every prefix's native ending (`endings`, from its stderr) and they
+;; must agree. Such a run must end with the host loop's 'quit outcome and no
+;; MDL ERROR, leave exactly the input after the quitting answer unread, and
+;; record exactly QUIT-OPEN-RECORDS (RECORD's denied OPENs, ADR-0055); every
+;; other run must still end by D3 and record no OPEN. The default (no quit
+;; prefix, no entry prompt) is the unchanged protocol of every other scenario.
 (define (run-m4-scenario name expected-commands
                          #:checkpoint checkpoint
                          #:turn-checkpoint [turn-checkpoint checkpoint]
@@ -426,17 +511,39 @@
                          #:ignore-keys [ignore-keys '()]
                          #:eof-transform [eof-transform values]
                          #:check-turn [check-turn void]
-                         #:prompt-split [prompt-split 'any])
+                         #:prompt-split [prompt-split 'any]
+                         #:entry-prompts [entry-prompts (hasheqv)]
+                         #:quit-prefixes [quit-prefixes '()]
+                         #:quit-open-records [quit-open-records '()])
   (unless (eq? (null? end-only-keys) (eq? turn-checkpoint checkpoint))
     (error 'm4-scenario "#:end-only-keys and #:turn-checkpoint must be given together"))
   (unless (memq prompt-split '(any line-initial))
     (error 'm4-scenario "#:prompt-split must be 'any or 'line-initial, not ~s" prompt-split))
+  (unless (and (hash? entry-prompts)
+               (for/and ([(j p) (in-hash entry-prompts)])
+                 (and (exact-nonnegative-integer? j) (string? p) (positive? (string-length p))
+                      (not (regexp-match? #rx">" p)))))
+    (error 'm4-scenario "#:entry-prompts must map entry indexes to non-empty prompt texts without `>`, not ~s"
+           entry-prompts))
+  (unless (and (list? quit-prefixes) (andmap exact-nonnegative-integer? quit-prefixes)
+               (equal? quit-prefixes (remove-duplicates quit-prefixes)))
+    (error 'm4-scenario "#:quit-prefixes must be a list of distinct prefix lengths, not ~s" quit-prefixes))
+  (unless (eq? (null? quit-prefixes) (null? quit-open-records))
+    (error 'm4-scenario "#:quit-prefixes and #:quit-open-records must be given together"))
+  (unless (and (list? quit-open-records)
+               (andmap (lambda (o) (and (list? o) (= 3 (length o)) (string? (first o))
+                                        (string? (second o)) (exact-integer? (third o))))
+                       quit-open-records))
+    (error 'm4-scenario "#:quit-open-records must be a list of (mode file-spec status), not ~s"
+           quit-open-records))
   (parameterize ([current-check-handler raise])
     (run-m4-scenario* name expected-commands checkpoint turn-checkpoint end-only-keys
-                      (cons 'n ignore-keys) eof-transform check-turn prompt-split)))
+                      (cons 'n ignore-keys) eof-transform check-turn prompt-split
+                      entry-prompts quit-prefixes quit-open-records)))
 
 (define (run-m4-scenario* name expected-commands checkpoint turn-checkpoint end-only-keys
-                          ignore-keys eof-transform check-turn prompt-split)
+                          ignore-keys eof-transform check-turn prompt-split
+                          entry-prompts quit-prefixes quit-open-records)
   (unless (directory-exists? m4-source-root)
     (error 'm4-scenario "pinned source missing: ~a" m4-source-root))
   (define mode (scenario-mode))
@@ -472,6 +579,17 @@
   (define has-end-checkpoints? (hash-has-key? reference 'end_checkpoints))
   (when has-end-checkpoints?
     (check-true (hash-ref ref-checks 'diag_prefix_game_parts_equal_prefix_game_parts)))
+  ;; Declared entry prompts and endings equal the reference's (a reference
+  ;; without them has none: every entry is `>`, every prefix ends by D3).
+  (for ([k (in-list quit-prefixes)])
+    (unless (<= k n) (error 'm4-scenario "quit prefix ~a is beyond the ~a commands" k n)))
+  (check-equal? (for/hasheqv ([(j p) (in-hash (hash-ref reference 'entry_prompts (hasheq)))])
+                  (values (string->number (symbol->string j)) p))
+                entry-prompts "entry_prompts")
+  (define (ending-of k) (if (memv k quit-prefixes) 'quit 'eof))
+  (check-equal? (hash-ref reference 'endings (for/list ([k (in-range 0 (add1 n))]) "eof"))
+                (for/list ([k (in-range 0 (add1 n))]) (symbol->string (ending-of k)))
+                "endings")
   (define cases (for/hash ([c (in-list (hash-ref reference 'cases))]) (values (hash-ref c 'name) c)))
   (define (prefix-case-name k)
     (if (= k n)
@@ -483,9 +601,27 @@
       (reference-transcript (hash-ref cases (prefix-case-name k)
                                       (lambda () (error 'm4-scenario "no reference case ~a"
                                                         (prefix-case-name k))))
-                            (take commands k))))
+                            (take commands k)
+                            (ending-of k))))
+  ;; X1's checkpoints: one per READSTRING entry 0..q of the whole run, then
+  ;; its end state (the entry that dies at end of input, or the state at
+  ;; QUIT). q = n unless the whole run ends by QUIT, at entry q <= n.
   (define diag-checkpoints (hash-ref (hash-ref reference 'diagnostic) 'checkpoints))
-  (check-equal? (length diag-checkpoints) (+ 2 n))
+  (define q (- (length diag-checkpoints) 2))
+  (if (eq? (ending-of n) 'eof)
+      (check-equal? (length diag-checkpoints) (+ 2 n))
+      (check-true (<= 0 q n) (format "X1 checkpoint count ~a" (length diag-checkpoints))))
+  ;; The last READSTRING entry this runtime observes in the run of prefix k:
+  ;; end of input, k (the READSTRING after it dies before its entry); QUIT,
+  ;; the entry whose answer quit (q, or k when that answer met end of input).
+  (define (last-entry k) (if (eq? (ending-of k) 'eof) k (min k q)))
+  ;; The input a run of prefix k leaves unread: none at end of input; after
+  ;; a QUIT at entry e, the commands after command e+1.
+  (define (unread-input k)
+    (if (eq? (ending-of k) 'eof)
+        ""
+        (lines->input (drop (take commands k) (min k (add1 (last-entry k)))))))
+  (define (expected-open-records k) (if (eq? (ending-of k) 'quit) quit-open-records '()))
   (when has-end-checkpoints?
     (check-equal? (length (hash-ref reference 'end_checkpoints)) (add1 n)))
   (define (raw-cp h) (for/hasheq ([(key v) (in-hash h)] #:unless (memq key ignore-keys))
@@ -507,8 +643,8 @@
   (define (end-cp k) (if has-end-checkpoints?
                          (list-ref (hash-ref reference 'end_checkpoints) k)
                          (list-ref diag-checkpoints k)))
-  ;; The end-of-input state of the whole run (k = n) is X1's last checkpoint.
-  (check-equal? (raw-cp (end-cp n)) (raw-cp (list-ref diag-checkpoints (add1 n))) "end checkpoint n")
+  ;; The end state of the whole run (k = n) is X1's last checkpoint.
+  (check-equal? (raw-cp (end-cp n)) (raw-cp (last diag-checkpoints)) "end checkpoint n")
 
   ;; --- the per-prefix protocol for one prefix k (per-prefix mode, reboots) ---
   (define (check-prefix-run k stage)
@@ -523,8 +659,8 @@
               (struct-copy failure f [k k]
                            [message (format "prefix ~a run: ~a" k (failure-message f))])
               f))
-        (guard-failure r k stage)
-        (ending-failure r k stage)
+        (guard-failure r k stage #:open-records (expected-open-records k))
+        (ending-failure r k stage (ending-of k) (unread-input k))
         (and (not (equal? (run-result-raw r) expected))
              (mk-failure k "transcript" stage "the whole prefix output differs from the native prefix stdout (D1 only)"
                          #:expected expected #:actual (run-result-raw r)))
@@ -533,12 +669,15 @@
           (cond [(exn? ours)
                  (mk-failure k "checkpoint" stage (format "reading the checkpoint failed: ~a" (exn-message ours)))]
                 [(not (equal? ours ref))
-                 (mk-failure k "checkpoint" stage "the state after end of input differs from the end checkpoint"
+                 (mk-failure k "checkpoint" stage
+                             (format "the state after ~a differs from the end checkpoint"
+                                     (if (eq? (ending-of k) 'quit) "the game's QUIT" "end of input"))
                              #:cp-diffs (cp-diffs ref ours))]
                 [else #f]))
         (turn-check-failure k (run-result-raw r) stage)
-        (begin (printf "~a prefix ~a: transcript and end checkpoint ~a equal the reference (~a s)\n"
-                       name k k (real->decimal-string (run-result-elapsed r) 1))
+        (begin (printf "~a prefix ~a: transcript and end checkpoint ~a equal the reference (~a s)~a\n"
+                       name k k (real->decimal-string (run-result-elapsed r) 1)
+                       (if (eq? (ending-of k) 'quit) "; ended by the game's QUIT" ""))
                #f)))
   (define (turn-check-failure k transcript stage)
     (with-handlers ([exn? (lambda (e) (mk-failure k "scenario-check" stage (exn-message e)))])
@@ -548,20 +687,39 @@
   ;; --- single-run mode ---
   (define (single-run)
     ;; Reference-side split and classification.
+    ;; The single run reaches READSTRING entries 0..q (q = n unless it ends
+    ;; by QUIT). Head k for k <= q: prefix k reaches entry k too (its input
+    ;; is the same up to there), and its last entry is k.
     (define t1 (vector-ref transcripts n))
-    (define heads (for/vector ([k (in-range 0 (add1 n))])
-                    (eof-split (vector-ref transcripts k) k (prefix-case-name k) prompt-split)))
+    (for ([k (in-range (add1 q) n)])
+      (unless (eq? (ending-of k) 'quit)
+        (error 'm4-scenario "prefix ~a is beyond the single run's last READSTRING entry ~a but not a quit prefix" k q)))
+    (define heads (for/vector ([k (in-range 0 (add1 q))])
+                    (eof-split (vector-ref transcripts k) k (prefix-case-name k) prompt-split
+                               #:entry-prompts entry-prompts
+                               #:count (prompt-count (last-entry k) (ending-of k) entry-prompts))))
     (define (tail k) (substring (vector-ref transcripts k) (string-length (vector-ref heads k))))
+    ;; Re-run per prefix: every end-of-input prefix k < n whose tail is not
+    ;; standard, and every declared quit prefix k < n (its run never meets
+    ;; the end of input the single run's turn k stands for).
     (define reboots
-      (non-standard-eof-tails n tail
-                              (lambda (k) (raw-cp (end-cp k)))
-                              (lambda (k) (raw-cp (eof-transform (entry-cp k))))))
+      (sort (append
+             (non-standard-eof-tails n tail
+                                     (lambda (k) (raw-cp (end-cp k)))
+                                     (lambda (k) (raw-cp (eof-transform (entry-cp k))))
+                                     #:ks (filter (lambda (k) (eq? (ending-of k) 'eof)) (range n)))
+             (for/list ([k (in-list (sort quit-prefixes <))] #:when (< k n))
+               (list k "declared quit ending")))
+            < #:key car))
     (for ([row (in-list reboots)])
-      (printf "~a: prefix ~a's end-of-input tail is not standard (~a); it is re-run per prefix\n"
-              name (car row) (string-join (cdr row) "; ")))
+      (if (eq? (ending-of (car row)) 'quit)
+          (printf "~a: prefix ~a ends by the game's QUIT (declared); it is re-run per prefix\n"
+                  name (car row))
+          (printf "~a: prefix ~a's end-of-input tail is not standard (~a); it is re-run per prefix\n"
+                  name (car row) (string-join (cdr row) "; "))))
     ;; The run.
-    (define snapshots (make-vector (add1 n) #f))
-    (define completes (make-vector (add1 n) #f))
+    (define snapshots (make-vector (add1 q) #f))
+    (define completes (make-vector (add1 q) #f))
     (define extra-entries '())
     (define (snapshot session output)
       (define out (get-output-string output))
@@ -592,10 +750,10 @@
       (vector out cp perturbed))
     (define (observer kind k info session output)
       (case kind
-        [(enter) (if (<= k n)
+        [(enter) (if (<= k q)
                      (vector-set! snapshots k (snapshot session output))
                      (set! extra-entries (cons k extra-entries)))]
-        [(complete) (when (<= 0 k n)
+        [(complete) (when (<= 0 k q)
                       (vector-set! completes k (cons (hash-ref info 'raw) (hash-ref info 'reason))))]))
     (define r (run-game commands #:observer observer #:deadline deadline #:turn-limit turn-limit
                         #:scenario-limit scenario-limit))
@@ -639,7 +797,7 @@
                              k (car complete) (cdr complete) (car expected-unit) (cdr expected-unit)))]
         [else (turn-check-failure k (vector-ref snap 0) stage)]))
     (define single-failure
-      (or (for/or ([k (in-range 0 (add1 n))])
+      (or (for/or ([k (in-range 0 (add1 q))])
             (or (turn-failure k)
                 ;; Entry k was reached but its READSTRING call never returned.
                 (and (not (vector-ref completes k))
@@ -652,12 +810,15 @@
                                name k k)
                        #f)))
           (and (pair? extra-entries)
-               (mk-failure n "run-guard" stage (format "unexpected READSTRING entries ~a" (reverse extra-entries))))
-          ;; End of input of the whole run (the T1 tail and end checkpoint n).
-          (let ([stage "single-run end of input"])
+               (mk-failure (min n (add1 q)) "run-guard" stage
+                           (format "unexpected READSTRING entries ~a" (reverse extra-entries))))
+          ;; End of the whole run: end of input (the T1 tail), or the game's
+          ;; QUIT when declared; then end checkpoint n.
+          (let ([stage (if (eq? (ending-of n) 'quit) "single-run end (QUIT)" "single-run end of input")])
             (or (load-failure r n stage)
-                (guard-failure r n stage #:event-k (lambda (entries) (min n entries)))
-                (ending-failure r n stage)
+                (guard-failure r n stage #:event-k (lambda (entries) (min n entries))
+                               #:open-records (expected-open-records n))
+                (ending-failure r n stage (ending-of n) (unread-input n))
                 (and (not (equal? (run-result-raw r) t1))
                      (mk-failure n "transcript" stage "the whole output differs from the native T1 stdout (D1 only)"
                                  #:expected t1 #:actual (run-result-raw r)))
@@ -666,7 +827,9 @@
                   (cond [(exn? ours)
                          (mk-failure n "checkpoint" stage (format "reading the checkpoint failed: ~a" (exn-message ours)))]
                         [(not (equal? ours ref))
-                         (mk-failure n "checkpoint" stage "the state after end of input differs from the end checkpoint"
+                         (mk-failure n "checkpoint" stage
+                                     (format "the state after ~a differs from the end checkpoint"
+                                             (if (eq? (ending-of n) 'quit) "the game's QUIT" "end of input"))
                                      #:cp-diffs (cp-diffs ref ours))]
                         [else #f]))
                 (turn-check-failure n (run-result-raw r) stage)))))
@@ -684,7 +847,9 @@
           (filter (lambda (k) (< k limit-k)) (map car reboots))))
     (define reboot-failure
       (for/or ([k (in-list reboot-ks)])
-        (check-prefix-run k "reboot (non-standard end-of-input tail)")))
+        (check-prefix-run k (if (eq? (ending-of k) 'quit)
+                                "reboot (declared quit ending)"
+                                "reboot (non-standard end-of-input tail)"))))
     (values (or reboot-failure single-failure)
             (add1 (length reboot-ks))
             (- n (length reboots))))
@@ -775,6 +940,39 @@
   (check-exn #rx"expected 3 prompts"
              (lambda () (prompt-head "Welcome.\n>a >b\n>" 1 "P01" 'line-initial)))
   (check-exn #rx"prompt split" (lambda () (prompt-head p0 0 "P00" 'mid-line)))
+  ;; #:entry-prompts (ADR-0062 amendment, M4 Phase 2): YES/NO's question is
+  ;; the prompt of its READSTRING entry; the `>` count is prompt-count's.
+  (define q "Q?")
+  (define ep (hasheqv 1 q))
+  (check-equal? (prompt-count 0 'eof (hasheqv)) 2)
+  (check-equal? (prompt-count 4 'eof (hasheqv)) 6)
+  (check-equal? (prompt-count 1 'eof ep) 2)        ; entries 0 and the dying one
+  (check-equal? (prompt-count 1 'quit ep) 1)       ; entry 0 only
+  (check-equal? (prompt-count 2 'eof ep) 3)
+  (check-exn #rx"unknown ending" (lambda () (prompt-count 1 'crash ep)))
+  ;; quit at the question: entries 0 (`>`) and 1 (Q?), no prompt after
+  (define pq "Welcome.\n>Dead.\nQ?\nWhat?\nScore.\n")
+  (check-equal? (prompt-head pq 1 "P01" #:entry-prompts ep #:count (prompt-count 1 'quit ep))
+                "Welcome.\n>Dead.\nQ?")
+  (check-equal? (prompt-head pq 0 "P00" #:entry-prompts ep #:count 1) "Welcome.\n>")
+  ;; resurrection, `look`, then end of input: Q?, two RDCOM prompts, the dying one
+  (define py "Welcome.\n>Dead.\nQ?Now.\n>Forest.\n>Beg pardon?\n>")
+  (check-equal? (prompt-count 3 'eof ep) 4)
+  (check-equal? (prompt-head py 3 "P03" #:entry-prompts ep #:count (prompt-count 3 'eof ep))
+                "Welcome.\n>Dead.\nQ?Now.\n>Forest.\n>")
+  (check-equal? (prompt-head py 1 "P03" #:entry-prompts ep #:count 4) "Welcome.\n>Dead.\nQ?")
+  (check-equal? (prompt-head py 2 "P03" #:entry-prompts ep #:count 4) "Welcome.\n>Dead.\nQ?Now.\n>")
+  ;; strict: a wrong count, a missing question, a `>` before the question
+  (check-exn #rx"expected 5 prompts"
+             (lambda () (prompt-head py 3 "P03" #:entry-prompts ep #:count 5)))
+  (check-exn #rx"is not the next prompt"
+             (lambda () (prompt-head "Welcome.\n>Dead.\n>Q?" 1 "P01" #:entry-prompts ep #:count 2)))
+  (check-exn #rx"is not the next prompt"
+             (lambda () (prompt-head "Welcome.\n>Dead.\n>" 1 "P01" #:entry-prompts ep #:count 2)))
+  (check-exn #rx"no prompt `>` for READSTRING entry 2"
+             (lambda () (prompt-head "Welcome.\n>Q?x" 2 "P02" #:entry-prompts ep #:count 1)))
+  ;; without entry prompts the head is unchanged (through the (k+1)-th `>`)
+  (check-equal? (prompt-head p1 1 "P01" #:entry-prompts (hasheqv) #:count 3) (prompt-head p1 1 "P01"))
   ;; Classification: the tail text and the end checkpoint both decide.
   (define tails (vector "Beg pardon?\n>" "Beg pardon?\nYour sword glows.\n>" "Beg pardon?\n>"
                         "Beg pardon?\n>"))
@@ -787,6 +985,12 @@
                   (2 "end checkpoint fields (a)")))
   (check-equal? (non-standard-eof-tails 1 (lambda (k) "Beg pardoN?\n>") (lambda (k) 1) (lambda (k) 1))
                 '((0 "tail \"Beg pardoN?\\n>\"")))
+  ;; #:ks restricts the classification (quit prefixes are not classified).
+  (check-equal? (non-standard-eof-tails 3 (lambda (k) (vector-ref tails k))
+                                        (lambda (k) (vector-ref end k))
+                                        (lambda (k) (vector-ref entry k))
+                                        #:ks '(0 2))
+                '((2 "end checkpoint fields (a)")))
   ;; k = n is never re-run (the single run's own end of input covers it).
   (check-equal? (non-standard-eof-tails 0 (lambda (k) "x") (lambda (k) 1) (lambda (k) 2)) '())
   ;; Differences.

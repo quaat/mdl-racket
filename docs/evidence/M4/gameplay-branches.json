@@ -17,11 +17,12 @@
          "checks": ["test-m4-cyclops-room"]},
         {"id": "combat.hero-wounded", "required": true,
          "description": "a villain's blow wounds the hero (BLOW 78melee.mud:377 against the hero; strength drops)",
-         "checks": [],
-         "note": "not reached under the fixed clock and seed (S6 record); needs a native clock/seed search (epic #163 Phase 2)"},
+         "checks": ["test-m4-troll-death"],
+         "note": "covered under the fixed clock and seed by troll-death: the troll's blow gives the unarmed hero a light wound (ASTRENGTH 0 -> -1, CURIN enabled); the sword-armed hero of troll-combat (S6) is still never hit"},
         {"id": "combat.hero-staggered-or-unconscious", "required": true,
          "description": "the hero is staggered or knocked unconscious",
-         "checks": []},
+         "checks": ["test-m4-troll-death"],
+         "note": "staggered only (troll-death: ASTAGGERED set by the troll's blow, cleared the next turn); knocked unconscious is not reached"},
         {"id": "combat.thief", "required": true,
          "description": "the thief (ROBBER) fights, steals and is fought",
          "checks": [],
@@ -33,15 +34,18 @@
       "branches": [
         {"id": "death.resurrection-accepted", "required": true,
          "description": "death (JIGS-UP 77rooms.mud:870), `y`, resurrection in the forest, possessions scattered",
-         "checks": [],
-         "evidence_only": ["failure-inventory F12 (native and ours identical; discovery run, not a gated check)"]},
+         "checks": ["test-m4-grue-resurrection", "test-m4-troll-death"],
+         "evidence_only": ["failure-inventory F12 (discovery run; promoted and extended as test-m4-grue-resurrection)"],
+         "note": "covered under the fixed clock and seed: death by grue (grue-resurrection) and by the troll (troll-death), answered `y`, and an end-of-input answer whose stale INBUF `w` is not a refusal (troll-death prefix 19); the carried non-valuable possessions and the lamp scattered over RANDOM-LIST. Not exercised: ROB-ADV's valuables (OTVAL > 0) going to ROOMS, more possessions than RANDOM-LIST rooms, a vehicle, the third death (DEATHS >= 2 ends the game)"},
         {"id": "death.resurrection-refused-quit", "required": true,
          "description": "death, `n`, FINISH -> RECORD -> QUIT",
-         "checks": [],
-         "evidence_only": ["failure-inventory F13 (discovery run, not a gated check)"]},
+         "checks": ["test-m4-grue-refusal", "test-m4-grue-resurrection"],
+         "evidence_only": ["failure-inventory F13 (discovery run; promoted unchanged as test-m4-grue-refusal)"],
+         "note": "covered under the fixed clock and seed: `n` (grue-refusal) and an end-of-input answer whose stale INBUF `n` refuses (grue-refusal prefix 6, grue-resurrection prefix 11); each ends by FINISH <> -> RECORD -> QUIT (the runner's declared quit ending); RECORD's OPENs are denied (ADR-0055) where the native run writes MDL/ZORK.LOG"},
         {"id": "death.killed-in-combat", "required": true,
          "description": "the hero dies from a villain's blow",
-         "checks": []}
+         "checks": ["test-m4-troll-death"],
+         "note": "covered under the fixed clock and seed by the troll (unarmed hero, eighth `wait`); no other villain"}
       ]
     },
     {
@@ -57,7 +61,7 @@
         {"id": "timers.cure-clock-recovery", "required": true,
          "description": "the CURE clock restores the hero's strength after a wound",
          "checks": [],
-         "note": "troll-combat checkpoints the cure clock, but the hero is never wounded, so recovery is not exercised"},
+         "note": "troll-death enables the CURIN clock after the hero's light wound and checkpoints its CTICK counting down, but no scenario reaches the recovery itself"},
         {"id": "timers.other-clock-events", "required": true,
          "description": "CEVENT clock interrupts beyond the troll and cure clocks (CLOCK-INT 77rooms.mud:1657)",
          "checks": []}
@@ -89,7 +93,8 @@
          "checks": ["test-m4-house-cellar", "test-m4-troll-combat", "test-m4-cyclops-room"]},
         {"id": "scoring.final-score-on-quit", "required": true,
          "description": "the score and rank printed by FINISH on quit",
-         "checks": ["test-m3-session"]},
+         "checks": ["test-m3-session", "test-m4-grue-refusal"],
+         "note": "test-m3-session: FINISH after `quit`/`y`; grue-refusal: FINISH <> after a refused resurrection (no question)"},
         {"id": "scoring.treasure-deposit", "required": true,
          "description": "treasures taken and put in the trophy case (SCORE-OBJ, 77rooms.mud:654-668)",
          "checks": []}

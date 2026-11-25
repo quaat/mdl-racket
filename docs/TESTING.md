@@ -4,7 +4,7 @@
 
 `make m4-check` (`scripts/m4_check.py`, epic #163 Phase 7) runs every check
 declared in [`tests/scenarios/m4-manifest.json`](../tests/scenarios/m4-manifest.json),
-one at a time: `make sources`; the eleven M4 native-parity scenario targets;
+one at a time: `make sources`; the fourteen M4 native-parity scenario targets;
 the WP4 persistence check `test-m4-replay-persistence` (a separate entry,
 never counted as a scenario); and the PLAYABLE evidence sub-checks
 `test-m3-session` and `test-m3-launcher`. It then reports the five
@@ -60,10 +60,11 @@ per-scenario steps; per-target logs are uploaded with
 
 ## M4 scenario runner (2026-11-24)
 
-The eleven M4 native-parity scenarios (`make test-m4-house-cellar`,
+The fourteen M4 native-parity scenarios (`make test-m4-house-cellar`,
 `-mailbox-drop`, `-orphan-prompt`, `-top-parser`, `-sword-glow`,
 `-troll-combat`, `-parser-ambiguity`, `-cyclops-room`, `-mirror-bat`,
-`-strange-passage`, `-help-info`) run through one shared driver,
+`-strange-passage`, `-help-info`, `-grue-resurrection`, `-grue-refusal`,
+`-troll-death`) run through one shared driver,
 `tests/m4_scenario_runner.rkt`. Each test file keeps only its command list,
 its scenario-specific reference assertions, its read-only checkpoint function
 and its post-FLOAD sections. Every comparison is byte-exact after ADR-0053
@@ -101,6 +102,39 @@ READSTRING from a read-only file CHANNEL (FILE-TO-TTY) never calls the
 observer (ADR-0055 amendment). The run guard also fails on a file CHANNEL
 left open at the end of a run. Unit tests: `tests/m4_scenario_runner.rkt`'s
 test submodule.
+
+*Death question and declared QUIT endings (ADR-0062 amendment, M4 Phase 2;
+opt-in, today only the three death scenarios).* JIGS-UP's question `Do you
+want me to try to patch you?` is printed without CRLF and answered through
+YES/NO's terminal READSTRING, with no `>`. A scenario declares such entries
+with `#:entry-prompts` (entry index -> prompt text; the reference records the
+same `entry_prompts`, checked by the capture against a YES/NO wrapper in the
+diagnostic): the head of such an entry ends after that text, and no counted
+`>` may lie before it. The count stays strict: a prefix whose last observed
+entry is e holds one `>` per entry 0..e that is not declared, plus one for
+the READSTRING that dies at end of input (always RDCOM's `>`, as it follows
+the empty command); without declarations this is k + 2 as before.
+A scenario also declares the prefixes whose run ends by the game's own QUIT
+(`#:quit-prefixes`, with `#:quit-open-records`): the reference records every
+prefix's native ending from its stderr (`endings`: end of input =
+`Error: Unexpected EOF`, QUIT = empty) and the declaration must equal it.
+For a declared quit prefix the run must end with the host loop's `'quit`
+outcome and no MDL ERROR (never input exhaustion or a strict failure), leave
+exactly the input after the quitting answer unread, and have recorded
+exactly the declared OPENs (RECORD's denied `READB`/`PRINT` of MDL/ZORK.LOG,
+ADR-0055); every other run must still end by D3 with no OPEN recorded, and
+the no-write guard holds for all. The end checkpoint of a quit prefix is the
+reference's state at QUIT (taken in a QUIT wrapper). In single-run mode the
+run is observed at entries 0..q (q = n, or the entry whose answer quit) and
+compared at its own end (QUIT or end of input) with T1 and end checkpoint n;
+every declared quit prefix below n is re-run per prefix (it never meets the
+end of input that single-run turn k stands for). Natively a quitting run
+appends a line to MDL/ZORK.LOG in its game copy; this runtime writes no file
+(ADR-0055; ADR-0048 for SAVE-IT's MADADV.SAVE), and RECORD prints nothing,
+so the transcripts are identical. An end of input inside YES/NO is not a
+quit by itself: YES/NO's READSTRING returns 0 and the stale first character
+of INBUF answers (grue prefixes: `n` of `north`, a refusal and QUIT;
+troll-death prefix 19: `w` of `wait`, a yes).
 
 *End-of-input tails.* A native prefix-k run ends with input exhaustion: RDCOM
 reads an empty line, prints `Beg pardon?`, the demons run, a prompt follows,
@@ -143,13 +177,13 @@ at a READSTRING entry that changes the RANDOM state, the storage ledger, the
 session output or the record of signalled MDL errors fails with kind
 `run-guard`; other mutation by a read (interning a new ATOM, game code that
 sets state) is not observed, so checkpoint functions must stay pure reads of
-existing names (as all ten do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
+existing names (as all fourteen do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
 exist). Coverage gained: the per-turn
 checkpoints at READSTRING entry (the newer per-prefix tests compared only
 end checkpoints) and the one-READSTRING-per-command check.
 
 **Per-prefix mode** (`M4_SCENARIO_MODE=per-prefix`; `make
-m4-scenarios-per-prefix` runs all ten; not on CI's default path). The
+m4-scenarios-per-prefix` runs all fourteen; not on CI's default path). The
 pre-runner protocol through the same module: one boot per prefix k = 0..n
 with only k commands; the whole output equals the native prefix-k stdout and
 the state after end of input equals the reference end checkpoint k
@@ -186,7 +220,8 @@ Reproduce:
 export PLTCOLLECTS=":$PWD" TMPDIR=/tmp
 make test-m4-mirror-bat                          # single-run (default)
 M4_SCENARIO_MODE=per-prefix racket tests/historical_mirror_bat_test.rkt
-make m4-scenarios-per-prefix                     # all ten, per-prefix
+make test-m4-grue-refusal                        # declared QUIT ending
+make m4-scenarios-per-prefix                     # all fourteen, per-prefix
 raco test tests/m4_scenario_runner.rkt           # runner unit tests (also in make test)
 ```
 
