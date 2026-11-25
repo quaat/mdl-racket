@@ -200,6 +200,72 @@ assert DAM_DIAG_FORMS.count(_BOAT_FIND_OLD) == 1 and DAM_DIAG_FORMS.count(_CP_EN
 BOAT_DIAG_FORMS = (DAM_DIAG_FORMS.replace(_BOAT_FIND_OLD, _BOAT_FIND_NEW)
                    .replace(_CP_END, _BOAT_FIELDS + _CP_END))
 
+# The Phase 3c "puzzles" profile: BOAT_DIAG_FORMS with the balloon, coal-mine
+# and gas-room objects found once and more checkpoint fields before CP-END:
+#   the balloon (BALLOON, WIRE-FUNCTION and BURNUP, 77act2.mud:419-610): the
+#   balloon's OROOM, BLOC (RID), BINF!-FLAG (the burning object's OID),
+#   BTIE!-FLAG, the receptacle's OOPEN? and OCONTENTS, the clocks BINT and
+#   BRNIN (CFLAG, CTICK), the guidebook's OROOM, OCAN and OLIGHT?;
+#   the way there: the rope's OROOM and DOME-FLAG (ROPE-FUNCTION), the
+#   torch's OROOM and OLIGHT? and GLACIER-FLAG (GLACIER, 77act1.mud:116);
+#   the coal mine (DUMBWAITER, MACHINE-FUNCTION, MSWITCH-FUNCTION and NO-OBJS,
+#   77act2.mud:74-185): CAGE-TOP!-FLAG, the OROOM of the two basket objects
+#   TBASK and FBASK, TBASK's OCONTENTS, the coal's OROOM and OCAN, the
+#   machine's OOPEN? and OCONTENTS, the diamond's OROOM and OCAN, the
+#   screwdriver's OROOM, LIGHT-SHAFT and EMPTY-HANDED!-FLAG;
+#   the candles (CANDLES, 77act1.mud:1947): OROOM, OCAN, OLIGHT? and the
+#   clock CNDIN (CFLAG, CTICK); the gas room (BOOM-ROOM, 77act2.mud:3): the
+#   bracelet's OROOM.
+_PUZ_FIND_OLD = '<SETG DIAG-PUMP <FIND-OBJ "PUMP">> T>'
+_PUZ_FIND_NEW = ('<SETG DIAG-PUMP <FIND-OBJ "PUMP">> <SETG DIAG-BALLO <FIND-OBJ "BALLO">> '
+                 '<SETG DIAG-RECEP <FIND-OBJ "RECEP">> <SETG DIAG-GUIDE <FIND-OBJ "GUIDE">> '
+                 '<SETG DIAG-ROPE <FIND-OBJ "ROPE">> <SETG DIAG-TORCH <FIND-OBJ "TORCH">> '
+                 '<SETG DIAG-TBASK <FIND-OBJ "TBASK">> <SETG DIAG-FBASK <FIND-OBJ "FBASK">> '
+                 '<SETG DIAG-COAL <FIND-OBJ "COAL">> <SETG DIAG-MACHI <FIND-OBJ "MACHI">> '
+                 '<SETG DIAG-DIAMO <FIND-OBJ "DIAMO">> <SETG DIAG-SCREW <FIND-OBJ "SCREW">> '
+                 '<SETG DIAG-CANDL <FIND-OBJ "CANDL">> <SETG DIAG-BRACE <FIND-OBJ "BRACE">> T>')
+_PUZ_FIELDS = (
+    '<DIAG "CP-BALLO-OROOM" <DIAG-ROOM ,DIAG-BALLO>> '
+    '<DIAG "CP-BLOC" <RID ,BLOC>> '
+    '<DIAG "CP-BINF" <COND (,BINF!-FLAG <OID ,BINF!-FLAG>)>> '
+    '<DIAG "CP-BTIE" ,BTIE!-FLAG> '
+    '<DIAG "CP-RECEP-OOPEN" <OOPEN? ,DIAG-RECEP>> '
+    '<DIAG "CP-RECEP-CONTENTS" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-RECEP>>> '
+    '<DIAG "CP-BINT-CFLAG" <CFLAG ,BINT>> '
+    '<DIAG "CP-BINT-CTICK" <CTICK ,BINT>> '
+    '<DIAG "CP-BRNIN-CFLAG" <CFLAG ,BRNIN>> '
+    '<DIAG "CP-BRNIN-CTICK" <CTICK ,BRNIN>> '
+    '<DIAG "CP-GUIDE-OROOM" <DIAG-ROOM ,DIAG-GUIDE>> '
+    '<DIAG "CP-GUIDE-OCAN" <COND (<OCAN ,DIAG-GUIDE> <OID <OCAN ,DIAG-GUIDE>>)>> '
+    '<DIAG "CP-GUIDE-OLIGHT" <OLIGHT? ,DIAG-GUIDE>> '
+    '<DIAG "CP-ROPE-OROOM" <DIAG-ROOM ,DIAG-ROPE>> '
+    '<DIAG "CP-DOME-FLAG" ,DOME-FLAG!-FLAG> '
+    '<DIAG "CP-TORCH-OROOM" <DIAG-ROOM ,DIAG-TORCH>> '
+    '<DIAG "CP-TORCH-OLIGHT" <OLIGHT? ,DIAG-TORCH>> '
+    '<DIAG "CP-GLACIER-FLAG" ,GLACIER-FLAG!-FLAG> '
+    '<DIAG "CP-CAGE-TOP" ,CAGE-TOP!-FLAG> '
+    '<DIAG "CP-TBASK-OROOM" <DIAG-ROOM ,DIAG-TBASK>> '
+    '<DIAG "CP-TBASK-CONTENTS" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-TBASK>>> '
+    '<DIAG "CP-FBASK-OROOM" <DIAG-ROOM ,DIAG-FBASK>> '
+    '<DIAG "CP-COAL-OROOM" <DIAG-ROOM ,DIAG-COAL>> '
+    '<DIAG "CP-COAL-OCAN" <COND (<OCAN ,DIAG-COAL> <OID <OCAN ,DIAG-COAL>>)>> '
+    '<DIAG "CP-MACHI-OOPEN" <OOPEN? ,DIAG-MACHI>> '
+    '<DIAG "CP-MACHI-CONTENTS" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-MACHI>>> '
+    '<DIAG "CP-DIAMO-OROOM" <DIAG-ROOM ,DIAG-DIAMO>> '
+    '<DIAG "CP-DIAMO-OCAN" <COND (<OCAN ,DIAG-DIAMO> <OID <OCAN ,DIAG-DIAMO>>)>> '
+    '<DIAG "CP-SCREW-OROOM" <DIAG-ROOM ,DIAG-SCREW>> '
+    '<DIAG "CP-LIGHT-SHAFT" ,LIGHT-SHAFT> '
+    '<DIAG "CP-EMPTY-HANDED" ,EMPTY-HANDED!-FLAG> '
+    '<DIAG "CP-CANDL-OROOM" <DIAG-ROOM ,DIAG-CANDL>> '
+    '<DIAG "CP-CANDL-OCAN" <COND (<OCAN ,DIAG-CANDL> <OID <OCAN ,DIAG-CANDL>>)>> '
+    '<DIAG "CP-CANDL-OLIGHT" <OLIGHT? ,DIAG-CANDL>> '
+    '<DIAG "CP-CNDIN-CFLAG" <CFLAG ,CNDIN>> '
+    '<DIAG "CP-CNDIN-CTICK" <CTICK ,CNDIN>> '
+    '<DIAG "CP-BRACE-OROOM" <DIAG-ROOM ,DIAG-BRACE>> ')
+assert BOAT_DIAG_FORMS.count(_PUZ_FIND_OLD) == 1 and BOAT_DIAG_FORMS.count(_CP_END) == 1
+PUZZLES_DIAG_FORMS = (BOAT_DIAG_FORMS.replace(_PUZ_FIND_OLD, _PUZ_FIND_NEW)
+                      .replace(_CP_END, _PUZ_FIELDS + _CP_END))
+
 # Scenario name -> its checkpoint profile's diagnostic forms.
 PROFILES = {
     "grue-resurrection": DIAG_FORMS,
@@ -213,6 +279,9 @@ PROFILES = {
     "maint-leak": DAM_DIAG_FORMS,
     "match-clock": DAM_DIAG_FORMS,
     "boat-river": BOAT_DIAG_FORMS,
+    "balloon-ledge": PUZZLES_DIAG_FORMS,
+    "coal-machine": PUZZLES_DIAG_FORMS,
+    "gas-room": PUZZLES_DIAG_FORMS,
 }
 NAMES = tuple(PROFILES)
 
@@ -389,7 +458,8 @@ def main() -> int:
     # a long scenario's reference would hold O(n^2) log text.  Each is replaced
     # by its sha256 and size; what the runner uses from it, its last
     # checkpoint, is kept in end_checkpoints, and X1's log is kept in full.
-    compact = any(diag_forms is f for f in (TIMERS_DIAG_FORMS, DAM_DIAG_FORMS, BOAT_DIAG_FORMS))
+    compact = any(diag_forms is f for f in (TIMERS_DIAG_FORMS, DAM_DIAG_FORMS, BOAT_DIAG_FORMS,
+                                            PUZZLES_DIAG_FORMS))
     if compact:
         for r in rows[3 + n:]:
             log = r.pop("diag_log", "").encode("latin-1")
