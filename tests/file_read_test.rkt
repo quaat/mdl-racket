@@ -354,7 +354,15 @@
                 '(("MADADV" "HELP" "DSK" "MDL" "00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1" 4274)
                   ("MADADV" "INFO" "DSK" "MDL" "36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2" 1527))))
 
-(test-case "the pinned HELP and INFO read back byte for byte"
+;; Pinned-source case: the smoke suite (scripts/test_racket.sh, CI without
+;; `make sources`) never has the pinned game; `make test-historical` re-runs
+;; this file with MDL_PINNED_SOURCES=1 after `make sources`, where a missing
+;; source is a failure, never a skip.
+(define pinned-required? (equal? (getenv "MDL_PINNED_SOURCES") "1"))
+(unless pinned-required?
+  (printf "file_read_test: pinned HELP/INFO case not run here (make test-historical runs it with MDL_PINNED_SOURCES=1)\n"))
+(when pinned-required?
+ (test-case "the pinned HELP and INFO read back byte for byte"
   (unless (directory-exists? default-source-root)
     (error 'file-read-test "pinned source missing: ~a" default-source-root))
   (define s (session default-source-root zork-read-only-files))
@@ -371,4 +379,4 @@
                   (file->bytes (build-path default-source-root "MDL" (string-append "MADADV." name))))
     (c s "CLOSE" ch))
   ;; MADADV.SAVE is in the same directory and is not readable
-  (check-exn #rx"not on this session's read-only allowlist" (lambda () (open s "MADADV" "SAVE"))))
+  (check-exn #rx"not on this session's read-only allowlist" (lambda () (open s "MADADV" "SAVE")))))
