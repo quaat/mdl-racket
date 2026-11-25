@@ -1651,6 +1651,64 @@ call; the S11 tests run under a security guard that records every write or
 delete attempt and assert there are none. No server or web client can reach
 OPEN or the host loop.
 
+**Amendment (M4 S10, issue #171, accepted 2026-11-24): a read-only allowlist
+for `help` and `info`.** Maintainer decision on #171, 2026-11-24, verbatim
+choice: **"Read-only allowlist"** — OPEN "READ" succeeds only for exactly
+`MDL/MADADV.HELP` and `MDL/MADADV.INFO` in the pinned game directory,
+hash-checked and read-only; everything else stays denied. Contract:
+SEMANTICS "M4 S10: read-only allowlist for OPEN "READ" (help, info)".
+Evidence: `evidence/M4/HELP-INFO-REFERENCE.md` (`file-read-probe.json`,
+`help-info-reference.json`), `evidence/M4/S10-HELP-INFO.md`.
+
+1. Decision item 1 is amended for mode `"READ"` only: the five-STRING form
+   `<OPEN "READ" name1 name2 device directory>` (FILE-TO-TTY, 77rooms.mud:961)
+   returns an open read-only file CHANNEL **iff** `(name1 name2 device
+   directory)` equals, string for string and case-sensitively, an entry of
+   the session's host-supplied allowlist. The 1977 game's allowlist
+   (`zork/game-files.rkt`) has exactly two entries: `("MADADV" "HELP" "DSK"
+   "MDL")` → `MDL/MADADV.HELP`, 4274 bytes, sha256
+   `00fc24d63869f94d9715ca43d53018c5019ef051d9d6074e113cc5bdafbf2ae1`, and
+   `("MADADV" "INFO" "DSK" "MDL")` → `MDL/MADADV.INFO`, 1527 bytes, sha256
+   `36e6eead79f88df939fbe15ef23856f6ba7e594753b994440c38ed1fb2434aa2`. The
+   relative path is built as Confusion builds the file spec (`directory "/"
+   name1 "." name2`, the device not part of it) and resolved inside the
+   session's game directory (the `make-mdl-session` root). Every other OPEN
+   "READ" (any other name, device, directory, case variant, arity) stays the
+   strict error it was, **before any file-system access**; no FALSE-returning
+   denial is introduced. Every other mode is unchanged.
+2. **Integrity.** At each granted OPEN the host checks that neither the
+   directory nor the file is a symbolic link, that the file is a regular file
+   of the pinned size, opens it, checks that the opened file is the one at the
+   path (file identity of the open port equals the path's own, non-followed
+   identity), reads the whole content into memory and closes the host file;
+   the runtime then checks the size and sha256 against the pinned constants.
+   Any failure is a strict error. The CHANNEL is served from that immutable
+   byte string: no host file handle stays open and the content cannot change
+   between check and use.
+3. **Orchestrator decisions within this amendment (2026-11-25, recorded as
+   such):** (a) a **missing** allowlisted file is a strict error (a broken
+   install, the same class as a hash mismatch), never FALSE and never the
+   game's `File not found.` path; (b) a second CLOSE of a closed file CHANNEL
+   returns the CHANNEL, as natively; (c) CHANNEL element 10 (natively the
+   absolute host directory) holds the requested directory name (`"MDL"`),
+   never a host path — recorded deviation, nothing in the game reads it; (d)
+   the native crashes (FILE-LENGTH of a non-CHANNEL; a negative READSTRING
+   count; a count larger than the buffer, which natively writes past it) are
+   strict errors here — recorded deviations.
+4. Read-only: the file CHANNEL's mode is READ; PRINC, PRIN1, PRINTSTRING,
+   TERPRI, CRLF and IMAGE on it fail as on any non-PRINT channel. File
+   READSTRING never flushes, never calls the ADR-0061 input observer and is
+   never logged as input or counted as a turn. FILE-LENGTH and CLOSE are
+   supported for file CHANNELs only (CLOSE of a terminal CHANNEL, RESET and
+   ACCESS of a file CHANNEL stay strict).
+5. Bookkeeping: granted opens are not added to `mdl-open-records` (which
+   keeps recording denials only); the session lists its file CHANNELs and
+   their state (`mdl-session-file-channels`). Sessions never share them.
+
+**Updated deviations:** HELP/INFO now print the shipped files as natively
+(transcript parity, scenario `help-info`). ZORK.LOG and DO-SCRIPT's deviations
+above are unchanged.
+
 ## ADR-0056: One SEGMENT representation, a LIST-primtype typed value
 
 Status: accepted (M4 S2, 2026-11-23).
@@ -2089,3 +2147,14 @@ epic #163). Evidence: `docs/evidence/M4/SINGLE-RUN-RUNNER.md`.
 - Comparison stays ADR-0053 D1 only, byte for byte. Failures write a
   divergence report `artifacts/scenario-divergence/<scenario>-<mode>.json`
   and still fail the test.
+
+**Amendment (M4 S10, #171, 2026-11-25): per-scenario prompt split.** The
+default split counts every `>` of a native stdout as an RDCOM prompt. A
+scenario whose game text itself holds `>` (help-info: the help file's
+`'attack <villain> with <weapon>'`) declares `#:prompt-split
+'line-initial`, which counts only `>` at the start of a line. The count stays
+strict in both modes (exactly k + 2 prompts in prefix k, n + 2 in T1), so a
+mid-line prompt or a stray line-initial `>` is an error, never a guess. The
+default is unchanged for the other scenarios. Only terminal READSTRINGs are
+entries (ADR-0055 amendment: file READSTRING never calls the observer), and
+the guard also fails on a file CHANNEL left open at the end of a run.

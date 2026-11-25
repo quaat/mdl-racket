@@ -10,7 +10,7 @@
 ;;   zork-replay-state         the selected game state of a session
 ;;   zork-dskdate              DSKDATE (81tell-repl.mud:57) of a clock read
 (require racket/runtime-path racket/list racket/string racket/date json
-         "../mdl/loader.rkt" "../mdl/replay.rkt" "../mdl/runtime/clock.rkt"
+         "../mdl/loader.rkt" "../mdl/replay.rkt" "../mdl/runtime/clock.rkt" "game-files.rkt"
          (only-in "../mdl/runtime/core.rkt" mdl-atom? mdl-atom-pname mdl-truthy?
                   mdl-false? mdl-string-snapshot))
 
@@ -185,7 +185,8 @@
 
 (define zork-replay-profile
   (replay-profile "zork-1977-run.mud/v1" "77loadall.mud" "SAVE-IT" zork-game-files zork-upstream
-                  zork-prompt-refusal zork-replay-state zork-moves zork-seed))
+                  zork-prompt-refusal zork-replay-state zork-moves zork-seed
+                  zork-read-only-files))
 
 (define (with-default-root kws vals)
   (if (memq '#:source-root kws)

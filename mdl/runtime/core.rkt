@@ -28,6 +28,8 @@
          mdl-session-outcome-mdl-errors
          mdl-open-records mdl-open-record? mdl-open-record-mode
          mdl-open-record-file-spec mdl-open-record-status
+         (struct-out mdl-read-only-file) mdl-read-only-file-relative-path
+         mdl-file-channels mdl-file-length mdl-close
          make-mdl-context mdl-context? mdl-context-globals mdl-context-locals
          mdl-context-atom-space call-with-mdl-context mdl-ensure-terminal-channels!
          mdl-random-state-snapshot mdl-error-messages
@@ -1822,7 +1824,14 @@
                             input-observer
                             ;; M4 S9 (#170): how many times TIME was called
                             ;; in this session (host-only; TIME's value).
-                            [time-calls #:mutable]))
+                            [time-calls #:mutable]
+                            ;; M4 S10 (#171, ADR-0055 amendment): the host's
+                            ;; read-only allowlist (mdl-read-only-file list),
+                            ;; the host reader (entry -> bytes) or #f, and the
+                            ;; session's file CHANNEL records, newest first.
+                            ;; Host-only; never reachable from MDL.
+                            read-only-files read-only-reader
+                            [file-channels #:mutable]))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1830,9 +1839,12 @@
 
 (define (make-mdl-atom-space #:clock [clock real-mdl-clock]
                              #:time-zone [time-zone 'local]
-                             #:input-observer [input-observer #f])
+                             #:input-observer [input-observer #f]
+                             #:read-only-files [read-only-files '()]
+                             #:read-only-reader [read-only-reader #f])
   (unless (mdl-clock? clock)
     (raise-argument-error 'make-mdl-atom-space "mdl-clock?" clock))
+  (check-read-only-files! 'make-mdl-atom-space read-only-files read-only-reader)
   (unless (or (not input-observer)
               (and (procedure? input-observer)
                    (procedure-arity-includes? input-observer 2)))
@@ -1912,7 +1924,8 @@
               ;; R1 channels: the canonical seeded ROOT INCHAN/OUTCHAN
               ;; (seed-root! fails if either is missing from the inventory).
               (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)
-              '() clock time-zone '() '() input-observer 0))
+              '() clock time-zone '() '() input-observer 0
+              read-only-files read-only-reader '()))
 
 ;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
 ;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
@@ -2353,16 +2366,161 @@
     (error 'OPEN "every argument must be a STRING (ADR-0055)"))
   (define-values (mode name1 name2 device directory)
     (apply values (map mdl-string-content args)))
-  (define denial (assoc mode open-denials))
-  (unless denial
-    (error 'OPEN "mode ~s is not supported; only READB, PRINT and PRINTO are (ADR-0055)" mode))
   (define file-spec (string-append directory "/" name1 "." name2))
-  (define status (caddr denial))
+  (cond
+    [(equal? mode "READ") (open-read-only name1 name2 device directory file-spec)]
+    [else
+     (define denial (assoc mode open-denials))
+     (unless denial
+       (error 'OPEN "mode ~s is not supported; only READB, PRINT and PRINTO are (ADR-0055)" mode))
+     (define status (caddr denial))
+     (define space (current-mdl-atom-space))
+     (set-atom-space-open-records!
+      space (cons (mdl-open-record mode (string->immutable-string file-spec) status)
+                  (atom-space-open-records space)))
+     (mdl-false (list (string-copy (cadr denial)) (string-copy file-spec) status))]))
+
+;; M4 S10 (issue #171; ADR-0055 amendment, maintainer decision 2026-11-24
+;; "Read-only allowlist"). A host grants read access to individual files by
+;; giving the session a list of mdl-read-only-file entries: the four names of
+;; the five-STRING OPEN form, the pinned sha256 (lowercase hex) and size. A
+;; name is 1-32 characters of [A-Za-z0-9], so no separator, dot, ".." or empty
+;; component can occur; the file is directory/name1.name2 inside the session's
+;; game directory (Confusion's file spec; the device is not part of it). The
+;; host reader (mdl/loader.rkt) resolves and reads the file; this runtime
+;; checks size and sha256 again before serving it.
+(define read-only-name-rx #px"^[A-Za-z0-9]{1,32}$")
+(define read-only-max-size 1048576)
+(struct mdl-read-only-file (name1 name2 device directory sha256 size)
+  #:transparent
+  #:guard
+  (lambda (name1 name2 device directory sha256 size _)
+    (for ([n (in-list (list name1 name2 device directory))])
+      (unless (and (string? n) (regexp-match? read-only-name-rx n))
+        (raise-argument-error 'mdl-read-only-file "a name of 1-32 characters [A-Za-z0-9]" n)))
+    (unless (and (string? sha256) (regexp-match? #px"^[0-9a-f]{64}$" sha256))
+      (raise-argument-error 'mdl-read-only-file "a lowercase hexadecimal sha256" sha256))
+    ;; At least 1 byte: the size pre-check before reading is what keeps a FIFO
+    ;; or device file (never opened, never read) from being served or blocking
+    ;; the read (independent review of S10).
+    (unless (and (exact-integer? size) (<= 1 size read-only-max-size))
+      (raise-argument-error 'mdl-read-only-file
+                            (format "an exact size in 1..~a" read-only-max-size) size))
+    (values (string->immutable-string name1) (string->immutable-string name2)
+            (string->immutable-string device) (string->immutable-string directory)
+            (string->immutable-string sha256) size)))
+(define (read-only-file-key f)
+  (list (mdl-read-only-file-name1 f) (mdl-read-only-file-name2 f)
+        (mdl-read-only-file-device f) (mdl-read-only-file-directory f)))
+(define (mdl-read-only-file-relative-path f)
+  (string-append (mdl-read-only-file-directory f) "/" (mdl-read-only-file-name1 f)
+                 "." (mdl-read-only-file-name2 f)))
+(define (check-read-only-files! who files reader)
+  (unless (and (list? files) (andmap mdl-read-only-file? files))
+    (raise-argument-error who "(listof mdl-read-only-file?)" files))
+  (unless (= (length (remove-duplicates (map read-only-file-key files))) (length files))
+    (error who "duplicate read-only allowlist entry (ADR-0055 amendment)"))
+  (when (and (pair? files) (not (and (procedure? reader) (procedure-arity-includes? reader 1))))
+    (raise-argument-error who "a host reader procedure for a non-empty read-only allowlist" reader)))
+
+;; OPEN "READ": exact, case-sensitive match of the four names against the
+;; allowlist BEFORE any file-system access; no match is the strict error.
+;; A match reads the whole content through the host reader (which checks the
+;; path, links, file identity and size), checks size and sha256 here, and
+;; serves a fresh read-only CHANNEL from the immutable bytes.
+(define (open-read-only name1 name2 device directory file-spec)
   (define space (current-mdl-atom-space))
-  (set-atom-space-open-records!
-   space (cons (mdl-open-record mode (string->immutable-string file-spec) status)
-               (atom-space-open-records space)))
-  (mdl-false (list (string-copy (cadr denial)) (string-copy file-spec) status)))
+  (define entry
+    (for/first ([f (in-list (atom-space-read-only-files space))]
+                #:when (equal? (read-only-file-key f) (list name1 name2 device directory)))
+      f))
+  (unless entry
+    (error 'OPEN
+           "mode \"READ\" is not supported for ~a: it is not on this session's read-only allowlist (ADR-0055 amendment)"
+           file-spec))
+  (define content ((atom-space-read-only-reader space) entry))
+  (unless (and (bytes? content) (= (bytes-length content) (mdl-read-only-file-size entry)))
+    (error 'OPEN "~a: content size differs from the pinned size ~a (ADR-0055 amendment)"
+           file-spec (mdl-read-only-file-size entry)))
+  (unless (equal? (bytes->hex-string* (sha256-bytes content)) (mdl-read-only-file-sha256 entry))
+    (error 'OPEN "~a: content sha256 differs from the pinned sha256 ~a (ADR-0055 amendment)"
+           file-spec (mdl-read-only-file-sha256 entry)))
+  (define in-use
+    (for/list ([fc (in-list (atom-space-file-channels space))]
+               #:unless (file-channel-closed? fc))
+      (file-channel-number fc)))
+  (define number (for/first ([n (in-naturals 3)] #:unless (memv n in-use)) n))
+  ;; Confusion's file CHANNEL (HELP-INFO-REFERENCE.md): one predecessor slot,
+  ;; then [number "READ" name1 name2 device directory name1 name2 device
+  ;; directory status 0 #LOSE 0 0 0 0 10 0]. Element 10 is natively the
+  ;; absolute host directory; here the requested directory (deviation: never
+  ;; a host path, ADR-0055 amendment decision (c)).
+  (define storage (mdl-vector 0 number (string-copy "READ")
+                              (string-copy name1) (string-copy name2)
+                              (string-copy device) (string-copy directory)
+                              (string-copy name1) (string-copy name2)
+                              (string-copy device) (string-copy directory)
+                              0 0 (mdl-chtype 0 (mdl-root-atom "LOSE")) 0 0 0 0 10 0))
+  (define view (mdl-rest storage 1))
+  (define fc (file-channel (string->immutable-string file-spec) view (bytes-length content)
+                           number (open-input-bytes content) #f))
+  (hash-set! (atom-space-channels space) (mdl-array-storage storage)
+             (host-channel 'READ #f #f fc))
+  ;; ADR-0058: TOP refuses it as it refuses terminal CHANNELs.
+  (hash-set! channel-storages (mdl-array-storage storage) #t)
+  (set-atom-space-file-channels! space (cons fc (atom-space-file-channels space)))
+  (mdl-typed-value (mdl-root-atom "CHANNEL") view))
+(define (bytes->hex-string* bs)
+  (apply string-append
+         (for/list ([b (in-bytes bs)])
+           (string-append (if (< b 16) "0" "") (number->string b 16)))))
+
+;; Host introspection: the session's file CHANNELs, oldest first, as
+;; (file-spec open|closed).
+(define (mdl-file-channels)
+  (for/list ([fc (in-list (reverse (atom-space-file-channels (current-mdl-atom-space))))])
+    (list (file-channel-spec fc) (if (file-channel-closed? fc) 'closed 'open))))
+
+;; The file record of an open file CHANNEL argument, after the CHANNEL checks
+;; shared with READSTRING (TYPE, registered in this session, mode slot).
+(define (file-channel-argument who channel)
+  (define host (registered-channel-host who channel "argument must be of type CHANNEL"))
+  (unless (channel-mode-intact? channel host)
+    (error who "CHANNEL is not open in this MDL session"))
+  host)
+
+;; M4 S10: <FILE-LENGTH channel>, the content length in characters (= bytes;
+;; native 4274 / 1527). Strict refusals carry the reference's ERROR names.
+(define (mdl-file-length . args)
+  (cond [(null? args) (error 'FILE-LENGTH "TOO-FEW-ARGUMENTS-SUPPLIED")]
+        [(pair? (cdr args)) (error 'FILE-LENGTH "TOO-MANY-ARGUMENTS-SUPPLIED")])
+  (define host (file-channel-argument 'FILE-LENGTH (car args)))
+  (define fc (host-channel-file host))
+  (unless fc
+    (error 'FILE-LENGTH "FILE-LENGTH-UNAVAILABLE: not a file CHANNEL (ADR-0055 amendment)"))
+  (when (file-channel-closed? fc)
+    (error 'FILE-LENGTH "CHANNEL-CLOSED"))
+  (file-channel-length fc))
+
+;; M4 S10: <CLOSE channel> for a file CHANNEL: releases the content, marks the
+;; record closed and clears elements 1 and 7-10 as Confusion does; returns the
+;; CHANNEL. A closed file CHANNEL is returned again (native; decision (b)).
+;; CLOSE of a terminal CHANNEL is not supported.
+(define (mdl-close . args)
+  (cond [(null? args) (error 'CLOSE "TOO-FEW-ARGUMENTS-SUPPLIED")]
+        [(pair? (cdr args)) (error 'CLOSE "TOO-MANY-ARGUMENTS-SUPPLIED")])
+  (define channel (car args))
+  (define host (file-channel-argument 'CLOSE channel))
+  (define fc (host-channel-file host))
+  (unless fc
+    (error 'CLOSE "CLOSE of a terminal CHANNEL is not supported (ADR-0055)"))
+  (unless (file-channel-closed? fc)
+    (set-file-channel-port! fc #f)
+    (set-file-channel-closed?! fc #t)
+    (define view (file-channel-view fc))
+    (mdl-put! view 1 0)
+    (for ([i (in-range 7 11)]) (mdl-put! view i (string-copy ""))))
+  channel)
 
 ;; RESTORE stays intentionally unsupported (ADR-0048): it never reads or
 ;; writes a file and fails after ordinary SUBR argument evaluation.
@@ -3023,7 +3181,15 @@
 ;; at-eof? (ADR-0050) is the READ channel's host-side end-of-input flag: set
 ;; by a READSTRING that meets end of input, cleared by RESET. No CHANNEL slot
 ;; shows it (Confusion keeps it in STATUS, slot 11).
-(struct host-channel (direction port [at-eof? #:mutable]))
+(struct host-channel (direction port [at-eof? #:mutable] file))
+;; M4 S10 (#171, ADR-0055 amendment): the host record of a read-only file
+;; CHANNEL (host-channel-file; #f for a terminal CHANNEL). spec: the file spec
+;; "directory/name1.name2"; view: the CHANNEL's VECTOR view (slots updated at
+;; end of file and CLOSE); length: the content length in characters; port: an
+;; input port over the immutable content bytes, #f once closed. A file CHANNEL
+;; has no terminal port (host-channel-port is #f), so no terminal operation
+;; can reach it.
+(struct file-channel (spec view length number [port #:mutable] [closed? #:mutable]))
 
 ;; ADR-0050 (review follow-up): terminal INPUT uses only a host-supplied
 ;; port. A session input channel without one is a strict error; READSTRING
@@ -3083,7 +3249,7 @@
                               0 0 80 0 24 0 0 10 0))
   (hash-set! (atom-space-channels (current-mdl-atom-space))
              (mdl-array-storage storage)
-             (host-channel (string->symbol mode) port #f))
+             (host-channel (string->symbol mode) port #f #f))
   (hash-set! channel-storages (mdl-array-storage storage) #t)
   (mdl-typed-value (mdl-root-atom "CHANNEL") (mdl-rest storage 1)))
 
@@ -3114,11 +3280,15 @@
                           #:input-port [input-port #f]
                           #:clock [clock real-mdl-clock]
                           #:time-zone [time-zone 'local]
-                          #:input-observer [input-observer #f])
+                          #:input-observer [input-observer #f]
+                          #:read-only-files [read-only-files '()]
+                          #:read-only-reader [read-only-reader #f])
   (define context (mdl-context (make-hasheq) (list (make-hasheq))
                                (make-mdl-atom-space #:clock clock
                                                     #:time-zone time-zone
-                                                    #:input-observer input-observer)))
+                                                    #:input-observer input-observer
+                                                    #:read-only-files read-only-files
+                                                    #:read-only-reader read-only-reader)))
   (call-with-mdl-context
    context
    (lambda ()
@@ -3227,6 +3397,9 @@
                                         "argument must be of type CHANNEL"))
   (unless (channel-mode-intact? channel host)
     (error 'RESET "CHANNEL is not open in this MDL session"))
+  ;; M4 S10: natively RESET re-opens a file; not modelled (not used by the game).
+  (when (host-channel-file host)
+    (error 'RESET "RESET of a file CHANNEL is not supported (ADR-0055 amendment)"))
   (when (eq? (host-channel-direction host) 'READ)
     (set-host-channel-at-eof?! host #f))
   channel)
@@ -4211,6 +4384,74 @@
                                     (mdl-string-view-storage buffer)
                                     buffer))))
     (error 'READSTRING "buffer must be a mutable STRING (ADR-0050)"))
+  (if (host-channel-file host)
+      (readstring-file host buffer (and (= n 3) (caddr args)))
+      (readstring-terminal host buffer channel args n)))
+
+;; The ADR-0050 / S13 part A read loop shared by terminal and file READSTRING.
+;; NEXT-CHAR yields the next character or eof; LIMIT is how many characters
+;; may be stored (at most the buffer view's length); STOPS the stop
+;; characters. One unit is read per free slot: a character c, or the escape
+;; pair `!` c, which yields c (the `!` is never stored or counted). The stop
+;; test and the ASCII check apply to c whether or not it was escaped, so an
+;; escaped stop character still ends the read and is consumed. `!`
+;; immediately followed by end of input is stored as a literal `!`. A unit
+;; starts only when there is room, so pairing resumes on the next READSTRING.
+;; Returns (values count reason), reason 'full, 'stop or 'eof.
+(define (readstring-units next-char buffer limit stops)
+  (define (store-and-continue count ch)
+    (mdl-string-set! buffer count ch)
+    (add1 count))
+  (let loop ([count 0])
+    (if (>= count limit)
+        (values count 'full)
+        (let* ([lead (next-char)]
+               [escaped? (and (char? lead) (char=? lead #\!))]
+               [ch (if escaped? (next-char) lead)])
+          (cond
+            [(eof-object? ch)
+             (values (if escaped? (store-and-continue count #\!) count) 'eof)]
+            [(> (char->integer ch) 127)
+             (error 'READSTRING "non-ASCII character (code ~a) in channel input is not supported (ADR-0050)"
+                    (char->integer ch))]
+            [(memv ch stops) (values count 'stop)]
+            [else (loop (store-and-continue count ch))])))))
+
+;; M4 S10 (#171; ADR-0055 amendment): READSTRING from a read-only file
+;; CHANNEL. No terminal flush, and the ADR-0061 input observer is never
+;; called: a file read is not input. STOP: #f (until the buffer is full), a
+;; STRING of stop characters, or a FIX count 0..buffer length (native crashes
+;; on a negative count and writes past the buffer for a larger one: strict
+;; here). Meeting end of file returns the partial count, sets the end-of-file
+;; flag and CHANNEL element 11 (status) to 1, as natively; any later read is a
+;; strict error (native host error "Unexpected EOF"), never the terminal's
+;; exn:fail:mdl-input-exhausted.
+(define (readstring-file host buffer stop)
+  (define fc (host-channel-file host))
+  (define size (mdl-string-length buffer))
+  (define-values (limit stops)
+    (cond [(not stop) (values size '())]
+          [(mdl-string? stop) (values size (string->list (mdl-string-content stop)))]
+          [(exact-integer? stop)
+           (unless (<= 0 stop size)
+             (error 'READSTRING "count ~a is outside 0..~a, the buffer length (ADR-0055 amendment)"
+                    stop size))
+           (values stop '())]
+          [else (error 'READSTRING "stop must be a STRING or a FIX count")]))
+  (when (file-channel-closed? fc)
+    (error 'READSTRING "attempt to read from a closed channel (ADR-0055 amendment)"))
+  (when (host-channel-at-eof? host)
+    (error 'READSTRING "unexpected end of file: ~a was already read to its end (ADR-0055 amendment)"
+           (file-channel-spec fc)))
+  (define port (file-channel-port fc))
+  (define-values (count reason)
+    (readstring-units (lambda () (read-char port)) buffer limit stops))
+  (when (eq? reason 'eof)
+    (set-host-channel-at-eof?! host #t)
+    (mdl-put! (file-channel-view fc) 11 1))
+  count)
+
+(define (readstring-terminal host buffer channel args n)
   (define stops
     (cond [(= n 2) '()]
           [(mdl-string? (caddr args)) (string->list (mdl-string-content (caddr args)))]
@@ -4245,32 +4486,12 @@
                 (hasheq 'raw (get-output-string consumed) 'reason reason 'count count)))
     count)
   ;; S13 part A (ADR-0050 §3 as amended 2026-11-23; maintainer decision:
-  ;; follow pinned Confusion, evidence READSTRING-BANG-REFERENCE.md). One unit
-  ;; is read per free slot: a character c, or the escape pair `!` c, which
-  ;; yields c (the `!` is never stored or counted). The stop test and the
-  ;; ASCII check apply to c whether or not it was escaped, so an escaped stop
-  ;; character still ends the read and is consumed. `!` immediately followed
-  ;; by end of input is stored as a literal `!` and the end-of-input flag is
-  ;; set. A unit starts only when the buffer has room, so pairing resumes on
-  ;; the next READSTRING after a full buffer.
-  (define (store-and-continue count ch)
-    (mdl-string-set! buffer count ch)
-    (add1 count))
-  (let loop ([count 0])
-    (if (>= count size)
-        (finish count 'full)
-        (let* ([lead (next-char)]
-               [escaped? (and (char? lead) (char=? lead #\!))]
-               [ch (if escaped? (next-char) lead)])
-          (cond
-            [(eof-object? ch)
-             (set-host-channel-at-eof?! host #t)
-             (finish (if escaped? (store-and-continue count #\!) count) 'eof)]
-            [(> (char->integer ch) 127)
-             (error 'READSTRING "non-ASCII character (code ~a) in terminal input is not supported (ADR-0050)"
-                    (char->integer ch))]
-            [(memv ch stops) (finish count 'stop)]
-            [else (loop (store-and-continue count ch))])))))
+  ;; follow pinned Confusion, evidence READSTRING-BANG-REFERENCE.md): the
+  ;; unit rules of readstring-units. End of input sets the flag.
+  (define-values (count reason) (readstring-units next-char buffer size stops))
+  (when (eq? reason 'eof)
+    (set-host-channel-at-eof?! host #t))
+  (finish count reason))
 
 ;; SUBSTRUC (MDL manual ch. 7, section 7.1.7)
 ;;
@@ -4824,6 +5045,8 @@
         "RESTORE" mdl-restore
         "QUIT" mdl-quit
         "OPEN" mdl-open
+        "FILE-LENGTH" mdl-file-length
+        "CLOSE" mdl-close
         "REP" mdl-default-rep
         "INT-LEVEL" mdl-int-level
         "ENABLE" mdl-enable

@@ -183,7 +183,10 @@
    (check-equal? attempted-files '())
    (check-equal? attempted-writes '())))
 
-(scenario "CLOSE and the wider file API stay unsupported"
+;; Since M4 S10 (#171) CLOSE and FILE-LENGTH exist for the read-only file
+;; CHANNELs of the allowlist only (tests/file_read_test.rkt); the denial FALSE
+;; is not a CHANNEL, so both refuse it.
+(scenario "CLOSE and FILE-LENGTH refuse the denial FALSE"
   (check-exn #rx"CLOSE" (lambda () (run "<CLOSE <OPEN \"PRINT\" \"ZORK\" \"LOG\" \"DSK\" \"MDL\">>")))
   (check-exn #rx"FILE-LENGTH" (lambda () (run "<FILE-LENGTH <OPEN \"READB\" \"ZORK\" \"LOG\" \"DSK\" \"MDL\">>"))))
 

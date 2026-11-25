@@ -2,10 +2,10 @@
 
 ## M4 scenario runner (2026-11-24)
 
-The ten M4 native-parity scenarios (`make test-m4-house-cellar`,
+The eleven M4 native-parity scenarios (`make test-m4-house-cellar`,
 `-mailbox-drop`, `-orphan-prompt`, `-top-parser`, `-sword-glow`,
 `-troll-combat`, `-parser-ambiguity`, `-cyclops-room`, `-mirror-bat`,
-`-strange-passage`) run through one shared driver,
+`-strange-passage`, `-help-info`) run through one shared driver,
 `tests/m4_scenario_runner.rkt`. Each test file keeps only its command list,
 its scenario-specific reference assertions, its read-only checkpoint function
 and its post-FLOAD sections. Every comparison is byte-exact after ADR-0053
@@ -31,6 +31,18 @@ no runtime hook was added) snapshots, at the entry of READSTRING call k
 At the end of the run (D3 input exhaustion) the whole output must equal the
 native T1 stdout, which includes T1's own end-of-input tail, and the final
 state must equal end checkpoint n.
+
+*Prompt split (ADR-0062 amendment, M4 S10).* By default every `>` of a
+native stdout counts as a prompt. A scenario whose game text itself contains
+`>` declares `#:prompt-split 'line-initial` (today only help-info: the help
+file's `'attack <villain> with <weapon>'`), and then only a `>` at the start
+of a line counts. The count check is the same strict one; the reference
+records the split its capture used (`prompt_split`) and the runner requires
+the scenario to declare the same. Only terminal READSTRINGs are entries: a
+READSTRING from a read-only file CHANNEL (FILE-TO-TTY) never calls the
+observer (ADR-0055 amendment). The run guard also fails on a file CHANNEL
+left open at the end of a run. Unit tests: `tests/m4_scenario_runner.rkt`'s
+test submodule.
 
 *End-of-input tails.* A native prefix-k run ends with input exhaustion: RDCOM
 reads an empty line, prints `Beg pardon?`, the demons run, a prompt follows,

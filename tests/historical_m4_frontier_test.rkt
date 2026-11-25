@@ -46,18 +46,24 @@
 ;;       only. Full parity with checkpoints for `take sword` and the sword
 ;;       demon is tests/historical_sword_glow_test.rkt. No further strict
 ;;       failure is reached on that path (S5b evidence).
-;;   F3 help / info (maintainer decision 2026-11-23: leave strict for now):
+;;   F3 help / info (strict until M4 S10; resolved by #171, maintainer
+;;     decision 2026-11-24 "Read-only allowlist", ADR-0055 amendment):
 ;;     HELP/INFO -> FILE-TO-TTY (77rooms.mud:954-985) -> <OPEN "READ" "MADADV"
-;;     "HELP"|"INFO" ...> (77rooms.mud:961) on the pinned MDL/MADADV.HELP /
-;;     MDL/MADADV.INFO. OPEN supports only RECORD's denied write modes
-;;     (ADR-0055), so this is a strict error. Native prints the file text.
+;;     "HELP"|"INFO" "DSK" "MDL"> (77rooms.mud:961) on the pinned, hash-checked
+;;     MDL/MADADV.HELP / MDL/MADADV.INFO, then FILE-LENGTH, file READSTRING
+;;     and CLOSE. Positive regression: the output equals the pinned reference
+;;     prefixes P02 (north, help) and P04 (north, help, east, info) of
+;;     docs/evidence/M4/help-info-reference.json, D1 only. Full parity with
+;;     checkpoints is tests/historical_help_info_test.rkt. A file off the
+;;     allowlist (MADADV.SAVE, same directory) stays a strict OPEN error
+;;     (tests/file_read_test.rkt). No unresolved frontier case remains here.
 ;;
 ;; (The game sources have CRLF line ends; a multi-line string literal keeps its
 ;; CR, exactly as Confusion prints it.)
 ;; Fixed session clock 250776000 / UTC; guarded like the S1 test (no writes);
 ;; watchdogged. Run with: racket tests/historical_m4_frontier_test.rkt
 (require rackunit racket/runtime-path racket/port racket/string racket/list
-         racket/file json "../mdl/loader.rkt")
+         racket/file json "../mdl/loader.rkt" "../zork/game-files.rkt")
 
 (current-check-handler (lambda (e) (raise e)))
 
@@ -81,7 +87,8 @@
      (lambda (who host port mode) (void))))
   (define session
     (make-mdl-session source-root #:input-port input #:output-port output
-                      #:clock (make-fixed-mdl-clock 250776000) #:time-zone 'utc))
+                      #:clock (make-fixed-mdl-clock 250776000) #:time-zone 'utc
+                      #:read-only-files zork-read-only-files))
   (define done (make-channel))
   (define worker
     (parameterize ([current-security-guard guard] [current-directory cwd])
@@ -100,18 +107,6 @@
   (check-equal? writes '())
   (check-equal? (hash-ref (first outcome) 'status) "PASS")
   (values (second outcome) (get-output-string output) (port->string input)))
-
-;; An unresolved frontier case.
-(define (check-frontier label lines expected-tail expected-message)
-  (define-values (result raw unread) (run-game lines))
-  (check-pred exn:fail? result label)
-  (check-false (exn:fail:mdl-input-exhausted? result) label)
-  (check-equal? (exn-message result) expected-message label)
-  (check-true (string-suffix? raw expected-tail)
-              (format "~a: output tail ~s" label
-                      (substring raw (max 0 (- (string-length raw) 200)))))
-  (check-equal? unread "" label)
-  (printf "~a: strict failure as recorded: ~a\n" label expected-message))
 
 ;; A resolved frontier case: the output equals a pinned reference transcript
 ;; (D1 only) and the run ends by input exhaustion with all input consumed.
@@ -171,8 +166,14 @@
                 ">sword:\r\n  Taken.\nnewspaper:")
 (printf "F4 take all (living room): resolved; output equals reference F4-living-room-take-all-pipe (D1 only)\n")
 
-;; F3 (strict by maintainer decision): help and info stop at OPEN "READ".
-(check-frontier "F3 help" '("help") "There is a small mailbox here.\n>"
-              "OPEN: mode \"READ\" is not supported; only READB, PRINT and PRINTO are (ADR-0055)")
-(check-frontier "F3 info" '("info") "There is a small mailbox here.\n>"
-              "OPEN: mode \"READ\" is not supported; only READB, PRINT and PRINTO are (ADR-0055)")
+;; F3 (resolved by M4 S10, #171): help and info print the pinned files, as
+;; natively; positive regressions against the help-info reference prefixes.
+(define-runtime-path help-info-reference-file "../docs/evidence/M4/help-info-reference.json")
+(define help-text (bytes->string/latin-1 (file->bytes (build-path source-root "MDL" "MADADV.HELP"))))
+(define info-text (bytes->string/latin-1 (file->bytes (build-path source-root "MDL" "MADADV.INFO"))))
+(check-resolved "F3 help" help-info-reference-file "P02-help-info-prefix"
+                '("north" "help") (string-append ">\n" help-text "\n>"))
+(printf "F3 help: resolved; output equals reference P02 (D1 only)\n")
+(check-resolved "F3 info" help-info-reference-file "P04-help-info-prefix"
+                '("north" "help" "east" "info") (string-append ">\n" info-text "\n>"))
+(printf "F3 info: resolved; output equals reference P04 (D1 only)\n")

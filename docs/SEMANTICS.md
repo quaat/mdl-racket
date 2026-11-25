@@ -2898,7 +2898,7 @@ in `docs/evidence/M3/OPEN-FAILURE-REFERENCE.md` (`open-failure-probe.json`).
 | 354 | DO-SCRIPT | `<OPEN "PRINT" "ZORK" "SCRIPT" "DSK" .UNM>` | denied FALSE (same 5-STRING PRINT form; not exercised). Visible policy deviation: the game prints `I can't open the script channel.` where Confusion creates `ZORK.SCRIPT` |
 | 392 | DO-SAVE | `<OPEN "PRINTB" <STRING …>>` | strict unsupported |
 | 412 | DO-RESTORE | `<OPEN "READB" .STR>` (one file-spec STRING) | strict unsupported |
-| 961 | FILE-TO-TTY (HELP, INFO, …) | `<OPEN "READ" .FILE1 .FILE2 .DEV .SNM>` | strict unsupported |
+| 961 | FILE-TO-TTY (HELP, INFO, …) | `<OPEN "READ" .FILE1 .FILE2 .DEV .SNM>` | strict unsupported; *amended by M4 S10*: a read-only file CHANNEL for exactly the two allowlisted files (see "M4 S10: read-only allowlist") |
 
 **`<OPEN mode name1 name2 device directory>`** (the RECORD form).
 - Exactly five arguments, each a STRING (native or REST view). Mode must be
@@ -2932,6 +2932,10 @@ console transcript, so no visible output differs.
 
 **CLOSE** and the rest of the file API (FILE-LENGTH, ACCESS, READSTRING from a
 file, SLEEP) stay unsupported (strict). No success-shaped CLOSE exists.
+*Amended by M4 S10 (#171):* FILE-LENGTH, READSTRING and CLOSE are supported
+on the read-only file CHANNELs of the allowlist only (see "M4 S10: read-only
+allowlist"); SLEEP by M4 S9. ACCESS, and CLOSE of any other CHANNEL, stay
+strict.
 
 ## M4 S2: CHTYPE to SEGMENT and runtime-built SEGMENTs (frontier F1; ADR-0056)
 
@@ -3633,3 +3637,139 @@ as natively; a server host bounds a session by other means). Code:
 `mdl/runtime/core.rkt` (`mdl-image`, `mdl-sleep`, `mdl-time`,
 `current-mdl-sleeper`), `mdl/runtime/clock.rkt` (`mdl-clock-live?`); tests
 `tests/p0prims_test.rkt`, `tests/replay_sleep_time_test.rkt`.
+
+## M4 S10: read-only allowlist for OPEN "READ" (help, info; #171; ADR-0055 amendment)
+
+Specification written before implementation. Authority: maintainer decision
+on #171 (2026-11-24, "Read-only allowlist") and the orchestrator decisions
+recorded in the ADR-0055 amendment; MDL manual §11.2.1 (OPEN), §11.3 (end of
+file), §11.4.1.2 (READSTRING), §11.6 (FILE-LENGTH), §11.2.5 (CLOSE); pinned
+Confusion observations in `docs/evidence/M4/HELP-INFO-REFERENCE.md`
+(`file-read-probe.json`, script `scripts/probe_file_read_reference.py`).
+Game use: HELP / INFO / `?` → FILE-TO-TTY (77rooms.mud:954-985) with DEV
+"DSK" and SNM "MDL" (SAVE-IT, MUDDLE 101 > 100, :20-21) and ,INBUF a
+100-character STRING (:1539), ,BREAKS `<STRING <ASCII 3> <ASCII 0>>` (:958).
+
+**Host allowlist.** A session is made with `#:read-only-files` (default
+empty): a list of `mdl-read-only-file` entries, each `name1 name2 device
+directory sha256 size`. Every name is 1–32 characters of `[A-Za-z0-9]` (so no
+path separator, dot, `..` or empty component can appear), sha256 is 64
+lowercase hex digits, size an exact integer in 0–1048576; duplicates of the
+four names are refused at session creation. The relative path is
+`directory/name1.name2`, the file spec Confusion builds (the device is not
+part of it). The 1977 game's list is `zork-read-only-files`
+(`zork/game-files.rkt`): MADADV HELP DSK MDL (4274 bytes, `00fc24d6…2ae1`) and
+MADADV INFO DSK MDL (1527 bytes, `36e6eead…4aa2`). `run-zork`, the replay
+profile and the M4 scenario runner pass it; a session without it has no
+readable file at all.
+
+**`<OPEN "READ" name1 name2 device directory>`.**
+1. Arity and argument types are checked first, unchanged (five STRINGs).
+2. The four names (STRING contents, REST views allowed) are compared with
+   each allowlist entry by `string=?` — exact and case-sensitive (Confusion
+   does not fold case: `"madadv"` is ENOENT natively). No match: the strict
+   error `OPEN: mode "READ" is not supported for <directory/name1.name2>: it
+   is not on this session's read-only allowlist (ADR-0055 amendment)`, raised
+   before any file-system access. This covers every other file, directory,
+   device, case variant and path trick; natively several of them open a file
+   (`"FOO"` device, `"MDL/../MDL"`, the one-spec form), here all are strict.
+3. Match: the host reader (`mdl/loader.rkt`) resolves the path inside the
+   session's canonical root, refuses a symbolic link as the directory or the
+   file, a missing file, a directory, and a size other than the entry's
+   (checked before reading; entries require a size of at least 1, so a FIFO
+   or device file is refused by size before it is read);
+   opens the file, checks that the port's file identity equals the path's own
+   (non-followed) identity, reads exactly `size` bytes (one more byte would be
+   an error) and closes the file. The runtime then checks the byte length and
+   the sha256 against the entry. Every failure is a strict error, including a
+   missing file (orchestrator decision (a): a broken install, never FALSE).
+4. The result is a fresh CHANNEL of 19 elements, as natively: `[n "READ"
+   name1 name2 device directory name1 name2 device directory 0 0 #LOSE 0 0 0
+   0 10 0]` with fresh STRINGs. n is the lowest number ≥ 3 not used by
+   another open file CHANNEL of the session (natively the host descriptor: 3,
+   then 4). **Deviation:** element 10 is the requested directory (`"MDL"`),
+   never the absolute host directory Confusion puts there (decision (c); no
+   game code reads it). Element 13 is a LOSE word 0 (`#LOSE
+   *0000000000000000000000*`), as printed natively. The CHANNEL is registered in the
+   session as a READ channel with a host file record (content bytes, read
+   position, end-of-file flag, closed flag); it has no terminal port, so no
+   terminal operation can reach it; TOP refuses it as it refuses terminal
+   CHANNELs (ADR-0058).
+5. Granted opens are not added to `mdl-open-records` (still denials only);
+   `mdl-session-file-channels` lists the session's file CHANNELs, oldest
+   first, as `(file-spec state)` with state `open` or `closed`.
+
+**`<FILE-LENGTH channel>`.** Exactly one argument (`TOO-FEW-ARGUMENTS-SUPPLIED`
+/ `TOO-MANY-ARGUMENTS-SUPPLIED`). A non-CHANNEL is a strict error
+(**deviation**: natively a crash). A registered CHANNEL that is not a file
+CHANNEL fails with `FILE-LENGTH-UNAVAILABLE` (natively an MDL ERROR; here a
+strict host error, like every refusal in this slice). A closed file CHANNEL
+fails with `CHANNEL-CLOSED`. Otherwise the FIX length in **characters**,
+which for these ASCII files equals bytes (native 4274 and 1527; not 36-bit
+words), independent of the read position.
+
+**READSTRING from a file CHANNEL** `<READSTRING buffer channel [stop]>`.
+Buffer, arity, channel registration and mode checks are those of ADR-0050.
+Then, for a file CHANNEL:
+- closed → strict error `READSTRING: attempt to read from a closed channel`
+  (native host error `Attempt to read from closed channel`);
+- the end-of-file flag already set → strict error `READSTRING: unexpected end
+  of file: …` (native host error `Error: Unexpected EOF`). This is a plain
+  strict error, never `exn:fail:mdl-input-exhausted` (which means the
+  terminal input ended, ADR-0050 D3);
+- the third argument: absent → read until the buffer is full; a STRING →
+  stop characters, read until the buffer is full, a stop character is read
+  (consumed, not stored) or end of file; a FIX → a count: read until that
+  many characters are stored or end of file. The count must be 0 ≤ count ≤
+  the buffer length (**deviation**: natively a negative count crashes and a
+  larger count writes past the buffer; strict errors here, decision (d));
+- reading uses the ADR-0050 unit rules, including the `!` escape (natively
+  `!` escapes in file input too: `a!b!!c!<LF>de<LF>` → 8 `ab!c<LF>de<LF>`);
+  CR and LF are stored raw; a character above 127 is a strict error;
+- characters are stored from position 1 of the view; the rest of the buffer
+  is unchanged (FILE-TO-TTY's last chunk leaves the previous chunk's tail in
+  ,INBUF, as natively);
+- meeting end of file returns the count stored so far, sets the end-of-file
+  flag and sets CHANNEL element 11 (status) to 1, as natively;
+- the value is the FIX count;
+- **no flush** of the terminal output, **no call of the ADR-0061 input
+  observer**: a file read is not input, is not logged by replay persistence
+  and is not a turn of the scenario runner.
+Terminal READSTRING is unchanged (a FIX stop there stays strict).
+
+**`<CLOSE channel>`.** Exactly one argument (strict otherwise; native `Not
+enough args to CLOSE`); a non-CHANNEL is a strict error (`Argument to close
+must be of type CHANNEL`); a CHANNEL not registered in this session is "not
+open"; a terminal CHANNEL is a strict error (CLOSE of the terminal is not
+supported). For an open file CHANNEL: the content is released (the record
+keeps no bytes and no port), the record is marked closed, element 1 becomes
+0 and elements 7–10 empty STRINGs (status unchanged), as natively. Value: the
+same CHANNEL (`==?`). A closed file CHANNEL: CLOSE returns it again without
+change (native; decision (b)). After CLOSE, READSTRING and FILE-LENGTH fail
+strictly.
+
+**Output to a file CHANNEL**: PRINC, PRIN1, PRINTSTRING, TERPRI, CRLF and
+IMAGE refuse it (`requires an output channel`), as natively. **RESET** of a
+file CHANNEL is a strict error (not used by the game; natively RESET
+re-opens). **ACCESS** stays unimplemented.
+
+**PRINTSTRING with a count** is unchanged (M3): it writes `min(count,
+length)` characters; natively a larger count writes the whole STRING too.
+Value: the count written (recorded deviation: Confusion returns the STRING;
+FILE-TO-TTY discards it).
+
+**FILE-TO-TTY end to end.** For HELP: FILE-LENGTH 4274, ITER 43, 42 count
+reads of 100 and a ,BREAKS read of 74 that meets end of file, each written by
+PRINTSTRING with its count, CRLF before and after, `<RETURN <CLOSE .CH>>`
+(the UNWIND cleanup does not run: RETURN leaves the REPEAT inside the PROG,
+not the UNWIND). INFO: 1527, 15 × 100 + 27. The output is byte-identical to
+native (scenario `help-info`).
+
+**Not supported / out of scope.** Any file not on the allowlist, every other
+OPEN arity and mode change, writing, ACCESS, RESET of a file CHANNEL, CLOSE
+of a terminal CHANNEL, a FIX stop on the terminal. Code: `mdl/runtime/core.rkt`
+(`mdl-open`, `mdl-file-length`, `mdl-close`, `mdl-readstring`,
+`mdl-read-only-file`), `mdl/loader.rkt` (`#:read-only-files`, the host
+reader, `mdl-session-file-channels`), `zork/game-files.rkt`; tests
+`tests/file_read_test.rkt`, `tests/help_info_replay_test.rkt`,
+`tests/historical_help_info_test.rkt`.

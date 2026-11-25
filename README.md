@@ -38,8 +38,15 @@ ADR-0052); MEMBER (structural search, STRING substring); QUIT as a session
 outcome (`'quit` / `'quit-after-mdl-error`, ADR-0054); OPEN under a virtual
 no-file policy (RECORD's form only, ADR-0055); SAVE as an in-session record.
 
-**Unsupported (strict errors):** RESTORE, CLOSE and other file I/O (`info`,
-`help`), PRINT (the game's ERROR handler path), non-ASCII
+**Read-only files (M4 S10, #171, ADR-0055 amendment):** `help`, `info` and
+`?` print the two shipped files `MDL/MADADV.HELP` and `MDL/MADADV.INFO` as
+natively (OPEN "READ", FILE-LENGTH, file READSTRING, CLOSE); only those two
+files, hash-checked against pinned sha256 values, can be read; every other
+OPEN "READ" is a strict error (`make test-m4-help-info`,
+[record](docs/evidence/M4/S10-HELP-INFO.md)).
+
+**Unsupported (strict errors):** RESTORE, writing files, any other file read,
+ACCESS, PRINT (the game's ERROR handler path), non-ASCII
 terminal input, a session without an explicit output port (S13, ADR-0050),
 and every MDL construct not listed in [SEMANTICS](docs/SEMANTICS.md). Typed
 `!` follows pinned Confusion (S13: `nor!th` reads as `north`).
@@ -595,14 +602,15 @@ failures are raised, not swallowed. Options: `#:input`, `#:output`,
 | 130 | interrupted (Ctrl-C) |
 
 Disclosed limitations: SAVE makes an in-session record only and RESTORE is
-unsupported (ADR-0048); the game never writes files (OPEN is denied,
-ADR-0055; the launcher also refuses file writes and network use under a
+unsupported (ADR-0048); the game never writes files (OPEN is denied except
+read-only access to the two help/info files, ADR-0055; the launcher also
+refuses file writes and network use under a
 security guard); unsupported constructs stop the game strictly with an error
 instead of being approximated. Known gaps include `put X in` (stops with a
 strict failure in the parser path: unsupported TOP per the S11 record, or an
 unsupported built-in CHTYPE conversion from the opening room) and file I/O
-commands such as `info`/`help` (strict OPEN `"READ"` failure) and `script`
-(prints `I can't open the script channel.`).
+commands such as `script` (prints `I can't open the script channel.`);
+`help` and `info` read only their two pinned files (ADR-0055 amendment).
 There is no MDL REPL, evaluator, web server or persistence. Tests:
 `make test-m3-launcher`; evidence:
 [S12 launcher record](docs/evidence/M3/S12-LAUNCHER.md).

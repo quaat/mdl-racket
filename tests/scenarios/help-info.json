@@ -1,0 +1,24 @@
+{
+  "name": "help-info",
+  "description": "M4 S10 scenario (issue #171, maintainer decision 2026-11-24 \"Read-only allowlist\"): the help and info commands. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0). `north`, then `help` (HELP -> <FILE-TO-TTY \"MADADV\" \"HELP\">, 77rooms.mud:956-985: OPEN \"READ\" of MDL/MADADV.HELP, FILE-LENGTH 4274, 42 READSTRINGs of 100 characters by count and a last one with the stop STRING ,BREAKS that meets end of file after 74, each chunk written by PRINTSTRING with its count, CRLF, CLOSE), `east`, `info` (MDL/MADADV.INFO, 1527 characters: 15 chunks + 27), `open window`, `?` (LEX maps it to HELP: the file is opened, read and closed a second time), `west` into the kitchen, `score`. The help text contains two '>' characters inside a line ('attack <villain> with <weapon>'), so the runner splits prompts at line-initial '>' only (#:prompt-split 'line-initial). Each command was confirmed by the pinned native reference (two byte-identical runs); see docs/evidence/M4/HELP-INFO-REFERENCE.md. Input ends after `score` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "help",
+    "east",
+    "info",
+    "open window",
+    "?",
+    "west",
+    "score"
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/help-info-reference.json",
+    "case": "T1-help-info-pipe"
+  }
+}

@@ -220,16 +220,18 @@
 (check-equal? (open-records c3) '(("READB" "MDL/ZORK.LOG" 2) ("PRINT" "MDL/ZORK.LOG" 13)))
 
 ;; === an unsupported host operation stays a strict failure ============================
-;; "info" reaches FILE-TO-TTY's <OPEN "READ" ...> (77rooms.mud:961), which is
-;; outside the supported OPEN forms. It is a host strict error: it is not an
-;; MDL ERROR, so HANDLE never runs and no FINISH/RECORD/QUIT follows.
-(define s4 (run-game '("north" "info" "quit" "y")))
+;; "restore" reaches RESTORE (DO-RESTORE, 77rooms.mud:403-445), unsupported by
+;; ADR-0048 (inventory INV-06). It is a host strict error: it is not an MDL
+;; ERROR, so HANDLE never runs and no FINISH/RECORD/QUIT follows. (Until M4 S10
+;; this case used "info", whose OPEN "READ" is now on the read-only allowlist,
+;; ADR-0055 amendment, #171.)
+(define s4 (run-game '("north" "restore" "quit" "y")))
 (check-clean-run s4 "strict")
 (define s4-result (run-result-result s4))
 (check-pred exn:fail? s4-result)
 (check-false (exn:fail:mdl-input-exhausted? s4-result))
 (check-false (mdl-session-outcome? s4-result))
-(check-regexp-match #rx"^OPEN: mode \"READ\" is not supported" (exn-message s4-result))
+(check-regexp-match #rx"^RESTORE: restoring a saved image is not supported" (exn-message s4-result))
 (check-false (regexp-match? #rx"I'm sorry|Do you wish to leave" (run-result-raw s4)))
 (check-equal? (port->string (run-result-input s4)) "quit\ny\n")
 (check-equal? (open-records s4) '())

@@ -16,7 +16,8 @@
          mdl-quit-signal? mdl-session-outcome? mdl-session-outcome-kind
          mdl-session-outcome-mdl-errors
          mdl-session-open-records mdl-open-record? mdl-open-record-mode
-         mdl-open-record-file-spec mdl-open-record-status)
+         mdl-open-record-file-spec mdl-open-record-status
+         mdl-read-only-file mdl-read-only-file? mdl-session-file-channels)
 
 ;; input-port/output-port: the explicit host ports given to make-mdl-session
 ;; (#f when omitted); the host top-level loop requires both (ADR-0050).
@@ -88,12 +89,17 @@
 ;; input-observer (ADR-0061): an optional host-only procedure called by
 ;; READSTRING ('enter at each call's entry, 'complete with the raw characters
 ;; the call consumed); the replay persistence host uses it. MDL code cannot
-;; reach it.
+;; reach it. File READSTRING (below) never calls it.
+;; read-only-files (M4 S10, #171; ADR-0055 amendment): the host's read-only
+;; allowlist, a list of mdl-read-only-file entries (default: none, so OPEN
+;; "READ" reads nothing). Each names directory/name1.name2 inside SOURCE-ROOT;
+;; read-only-file-bytes below reads it at each granted OPEN.
 (define (make-mdl-session source-root #:output-port [output-port #f]
                           #:input-port [input-port #f]
                           #:clock [clock real-mdl-clock]
                           #:time-zone [time-zone 'local]
-                          #:input-observer [input-observer #f])
+                          #:input-observer [input-observer #f]
+                          #:read-only-files [read-only-files '()])
   (define root (canonical-path (path->complete-path source-root)))
   (unless (directory-exists? root)
     (raise-argument-error 'make-mdl-session "existing source-root directory" source-root))
@@ -115,7 +121,10 @@
   (define context (make-mdl-context #:output-port output-port
                                     #:input-port input-port
                                     #:clock clock #:time-zone time-zone
-                                    #:input-observer input-observer))
+                                    #:input-observer input-observer
+                                    #:read-only-files read-only-files
+                                    #:read-only-reader
+                                    (lambda (entry) (read-only-file-bytes root entry))))
   (define session
     (mdl-session root (mdl-context-globals context) (mdl-context-locals context)
                  (mdl-context-atom-space context) loader-namespace (box '())
@@ -136,6 +145,40 @@
                       (mdl-string-snapshot 'mdl-fload name
                                            "FLOAD expects a STRING path"))))))
   session)
+
+;; M4 S10 (#171; ADR-0055 amendment): the content of one allowlisted file,
+;; ROOT/directory/name1.name2 (ROOT is the session's canonical root). Strict
+;; on: a symbolic link as the directory or the file, a missing directory or
+;; file (a broken install, never FALSE), a non-regular file, a size other than
+;; the pinned one (checked before reading), a file whose identity changed
+;; between the checks and the open, and a content length other than the
+;; pinned size. The host file is closed on every path, including a failure
+;; (call-with-input-file*, independent review of S10); the runtime checks
+;; the sha256. Only paths inside ROOT are touched, and only for reading.
+(define (read-only-file-bytes root entry)
+  (define rel (mdl-read-only-file-relative-path entry))
+  (define (fail fmt . args)
+    (apply error 'OPEN (string-append "~a: " fmt " (ADR-0055 amendment)") rel args))
+  (define dir (build-path root (mdl-read-only-file-directory entry)))
+  (define file (build-path dir (string-append (mdl-read-only-file-name1 entry) "."
+                                              (mdl-read-only-file-name2 entry))))
+  (define size (mdl-read-only-file-size entry))
+  (when (link-exists? dir) (fail "the directory is a symbolic link"))
+  (unless (directory-exists? dir) (fail "the pinned file is missing (no directory)"))
+  (when (link-exists? file) (fail "the file is a symbolic link"))
+  (cond [(directory-exists? file) (fail "not a regular file")]
+        [(not (file-exists? file)) (fail "the pinned file is missing")])
+  (unless (inside-root? root file) (fail "outside the game directory"))
+  (unless (= (file-size file) size) (fail "size ~a differs from the pinned size ~a" (file-size file) size))
+  (call-with-input-file* file
+    (lambda (in)
+      (unless (equal? (port-file-identity in) (file-or-directory-identity file #t))
+        (fail "the opened file is not the checked file"))
+      (define content (read-bytes (add1 size) in))
+      (define got (if (eof-object? content) #"" content))
+      (unless (= (bytes-length got) size)
+        (fail "size ~a differs from the pinned size ~a" (bytes-length got) size))
+      (bytes->immutable-bytes got))))
 
 (define (inside-root? root path)
   (define rel (find-relative-path root path))
@@ -364,6 +407,11 @@
 
 ;; Test/introspection boundary (ADR-0048): the session's SAVE records,
 ;; oldest first. Host-only; no MDL primitive exposes them.
+;; Host introspection (M4 S10): the session's read-only file CHANNELs,
+;; oldest first, as (file-spec open|closed).
+(define (mdl-session-file-channels session)
+  (call-in-session session mdl-file-channels))
+
 (define (mdl-session-save-records session)
   (call-in-session session mdl-save-records))
 
