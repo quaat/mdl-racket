@@ -115,11 +115,61 @@ scenarios declare `#:eof-classification-ignore-keys '(robber_hroom)`.
 
 ## Results
 
-RESULTS_PLACEHOLDER
+Run with `PLTCOLLECTS=":$PWD"`, `TMPDIR=/tmp`, outside the tool sandbox
+(inside it, the runner's `/tmp` work directories fail with "Read-only file
+system"). Native captures ran inside the sandbox with its `$TMPDIR`.
+
+| Command | Exit | Result |
+|---|---|---|
+| `python3 -I scripts/probe_death_scenario_reference.py NAME …` (match-clock, boat-river, dam-sluice, maint-leak; twice each) | 0 | `CAPTURE OK` eight times; transcript cases byte-identical between captures; mdli sha256 unchanged |
+| `racket tests/historical_match_clock_test.rkt` (single-run) | 0 | 35 turns; 1 boot; 34 of 34 shorter prefixes standard; 6.1 s |
+| `racket tests/historical_boat_river_test.rkt` (single-run) | 0 | 59 turns; 4 boots (reboots of prefixes 34, 47, 48: the thief's bag, his appearance in the Dam, the sword's glow); 22.1 s |
+| `M4_SCENARIO_MODE=per-prefix make test-m4-match-clock` | 0 | 35 boots, 203.2 s |
+| `M4_SCENARIO_MODE=per-prefix make test-m4-boat-river` | 0 | 59 boots, 379.5 s |
+| `make xfail-m4-dam-frontier` | 0 | both routes XFAIL as recorded (entries 0–22 equal the reference, k = 23 PRSOBJ); 12 s |
+| first single run of the dam-sluice route (before the frontier test) | 1 | `earliest failing k = 23, kind run-guard … unknown declaration type PRSOBJ` (the finding) |
+| `make test PYTHON=/usr/bin/python3` | 0 | 4929 Racket tests passed; Python 104 passed, 1 deselected; 114 s |
+| `make m4-check PYTHON=/usr/bin/python3` | 0 | 546 s at `68877de` (dirty: this record's mutation table only); see below |
+| `git diff --check 67bd41f` | 0 | |
+
+## make m4-check
+
+Manifest completeness PASS; `sources` and all twenty scenario targets PASS
+(the new ones: match-clock 5.8 s, boat-river 21.8 s),
+`test-m4-replay-persistence` PASS, `test-m3-session` and `test-m3-launcher`
+PASS.
+
+| Term | Status | Scope / reasons |
+|---|---|---|
+| SCENARIO_PARITY | PASS | 20 scenarios, each under one fixed clock and seed (250776000, UTC); per scenario, not gameplay coverage |
+| GAMEPLAY_RELIABILITY | NOT YET | 19 of 23 required branches covered (was 17; PROVISIONAL list); uncovered: combat.thief, save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07, INV-11 |
+| PLAYABLE | NOT RUN | sub-checks only; no PLAYABLE gate |
+| FULL_COMPLETION | NOT RUN | no complete-game check |
+| M4_ACCEPTED | NOT YET | R2–R5 unmet |
+
+A local branch result, not a mainline acceptance.
 
 ## Mutation checks (each reverted; `git status` clean afterwards)
 
-MUTATIONS_PLACEHOLDER
+Native mutations change one byte in every reference transcript from the key
+turn on (the prefix stdouts P_k, k >= K, T1 and T1b; their sha256 updated so
+the integrity check passes; helper script kept outside the repository).
+Checkpoint mutations change one field of diagnostic checkpoint K; the "a"
+variant shows the test's own reference assertion failing first, the "b"
+variant removes the asserting forms (the key-turn table and the
+entry-versus-end check) so that the runner itself has to find it. Every
+mutation and test edit was reverted with `git checkout`; `git status` was
+clean after each.
+
+| # | Mutation | Result |
+|---|---|---|
+| M1 | match-clock: `desk.\nThe match has gone out.` -> `… gone Out.` (MATIN fires, K = 25; 11 cases) | exit 1: earliest failing k = 25, kind transcript (single-run) |
+| M2a | match-clock: checkpoint 24 `matin_ctick` 1 -> 2 | exit 1 at the test's reference check (key-turn table, line 68) |
+| M2b | M2a with the table and the entry-versus-end check removed | exit 1: earliest failing k = 24, kind checkpoint, field `matin_ctick` |
+| M3 | boat-river: `appears seaworthy.` -> `appears seaworthY.` (inflate, K = 49; 11 cases) | exit 1: earliest failing k = 49, kind transcript |
+| M4a | boat-river: checkpoint 50 `winner_avehicle` RBOAT -> #FALSE () | exit 1 at the test's reference check (key-turn table, line 70) |
+| M4b | M4a with the table and the entry-versus-end check removed | exit 1: earliest failing k = 50, kind checkpoint, field `winner_avehicle` |
+| M5 | dam frontier: dam-sluice `waiting room for groups` -> `waiting rooM …` (the Dam Lobby, K = 22; 21 cases) | exit 1: the XFAIL assertion "earliest failing k = 23, kind run-guard" fails; the runner reported k = 22, kind transcript (the frontier test does compare entries 0–22) |
 
 ## Gameplay branches (`gameplay-branches.json`)
 
