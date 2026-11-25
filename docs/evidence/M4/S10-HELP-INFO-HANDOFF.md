@@ -1,5 +1,9 @@
 # M4 S10 (issue #171) help / info: handoff (WIP, 2026-11-24)
 
+> **Superseded (2026-11-25):** the work was resumed and completed; see
+> [S10-HELP-INFO.md](S10-HELP-INFO.md). This file is kept as the record of the
+> interruption only.
+
 Branch `feat/m4-help-info-allowlist` (from main `6b826d5`), worktree
 `.claude/worktrees/m4-helpinfo`. Work stopped early on the coordinator's
 request (usage limit). Gate state: **NOT RUN**. No runtime code changed yet.
