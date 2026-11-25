@@ -57,7 +57,7 @@ These are tracked separately and never collapsed into one PASS. Since
 ADR-0063 proposed; rules in [TESTING](TESTING.md)) from the declared
 [scenario manifest](../tests/scenarios/m4-manifest.json) and the declared
 [gameplay branches](evidence/M4/gameplay-branches.json). The column below is
-**a local branch result** (`feat/m4-check` at `17a4805` = `main` `513272f`
+**a local branch result** (`feat/m4-check` at `013af37` = `main` `513272f`
 plus the check scaffold, no runtime change; Racket v7.9 BC; `make m4-check`
 exit 0; [record](evidence/M4/M4-CHECK.md)). It is not a mainline acceptance.
 
