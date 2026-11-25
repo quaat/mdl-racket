@@ -4,8 +4,9 @@
 troll-death, and the M4 Phase 3 timer, object and scoring scenarios
 (epic #163 Phase 3): treasure-deposit, thief-robbery, cure-recovery and
 lamp-burnout, and the M4 Phase 3b scenarios beyond the house: match-clock and
-boat-river, and the native-only dam-sluice and maint-leak references
-(tests/scenarios/<name>.json).
+boat-river, and the native-only dam-sluice and maint-leak references, and the
+M4 Phase 3c puzzle scenarios coal-machine and gas-room and the native-only
+balloon-ledge reference (tests/scenarios/<name>.json).
 
 Read-only reference investigation. Nothing here is runtime code, and the game
 sources under .cache/upstream are never written: every run boots a fresh copy
@@ -81,7 +82,12 @@ GATE-FLAG, LOW-TIDE, the Maintenance Room's RVARS and RMUNGBIT, the leak clock
 MNTIN, the wrench, the tube, the putty, the trunk, the matchbook and the match
 clock MATIN) or the "boat" profile (BOAT_DIAG_FORMS: the dam fields, then the
 winner's AVEHICLE and the OROOM of the folded boat, the inflated boat and the
-pump), compacted like the timers profile.
+pump), compacted like the timers profile.  The Phase 3c scenarios use the
+"puzzles" profile (PUZZLES_DIAG_FORMS: the boat fields, then the balloon, its
+receptacle, BLOC, BINF, BTIE and the clocks BINT and BRNIN, the guidebook,
+the rope and DOME-FLAG, the torch and GLACIER-FLAG, the coal-mine basket,
+coal, machine, diamond and screwdriver with CAGE-TOP, LIGHT-SHAFT and
+EMPTY-HANDED, the candles and CNDIN, the bracelet), compacted likewise.
 
 Confusion is GPLv3 and is used only as a behaviour reference; no Confusion
 source is copied into this script.
