@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "name": "m4-gameplay-branches",
+  "date": "2026-11-25",
+  "description": "The declared required gameplay branches for the M4 acceptance term GAMEPLAY_RELIABILITY ('every declared required gameplay branch runs without an unexpected runtime failure', docs/STATUS.md). scripts/m4_check.py derives each branch's state only from checks it actually ran in the same invocation: a branch with no covering check is UNCOVERED, and GAMEPLAY_RELIABILITY is never PASS while any required branch is UNCOVERED, any covering check did not run or failed, or any blocking inventory item is open. A covering check proves only what its scenario exercises, under one fixed clock and seed.",
+  "list_status": "PROVISIONAL (conservative reading, 2026-11-25): the six categories are the ones epic #163 names (combat, death and recovery, timers, objects, scoring, save/load); the branches inside each are this file's reading of PLAN M4 'Build' and of the failure inventory's unexercised areas. The maintainer has not yet approved a final required-branch list. Adding a branch can only turn the term away from PASS.",
+  "checks_namespace": "Each entry in `checks` is a make target listed in tests/scenarios/m4-manifest.json (scenarios, persistence or playable_subchecks). Discovery runs that are not gated checks (tests/scenarios/failure-inventory-cases.json) are cited in `evidence_only` and never count as coverage.",
+  "categories": [
+    {
+      "name": "combat",
+      "branches": [
+        {"id": "combat.troll-killed-hero-unhurt", "required": true,
+         "description": "the hero kills the troll with the sword; the troll misses every counterattack",
+         "checks": ["test-m4-troll-combat"]},
+        {"id": "combat.cyclops-wake-attack", "required": true,
+         "description": "the cyclops fed, watered, put to sleep, woken (RVARS -2 -> 2, FIGHTBIT) and fled from",
+         "checks": ["test-m4-cyclops-room"]},
+        {"id": "combat.hero-wounded", "required": true,
+         "description": "a villain's blow wounds the hero (BLOW 78melee.mud:377 against the hero; strength drops)",
+         "checks": [],
+         "note": "not reached under the fixed clock and seed (S6 record); needs a native clock/seed search (epic #163 Phase 2)"},
+        {"id": "combat.hero-staggered-or-unconscious", "required": true,
+         "description": "the hero is staggered or knocked unconscious",
+         "checks": []},
+        {"id": "combat.thief", "required": true,
+         "description": "the thief (ROBBER) fights, steals and is fought",
+         "checks": [],
+         "note": "inventory limitation: the thief's fight and his treasure room are not exercised"}
+      ]
+    },
+    {
+      "name": "death-and-recovery",
+      "branches": [
+        {"id": "death.resurrection-accepted", "required": true,
+         "description": "death (JIGS-UP 77rooms.mud:870), `y`, resurrection in the forest, possessions scattered",
+         "checks": [],
+         "evidence_only": ["failure-inventory F12 (native and ours identical; discovery run, not a gated check)"]},
+        {"id": "death.resurrection-refused-quit", "required": true,
+         "description": "death, `n`, FINISH -> RECORD -> QUIT",
+         "checks": [],
+         "evidence_only": ["failure-inventory F13 (discovery run, not a gated check)"]},
+        {"id": "death.killed-in-combat", "required": true,
+         "description": "the hero dies from a villain's blow",
+         "checks": []}
+      ]
+    },
+    {
+      "name": "timers",
+      "branches": [
+        {"id": "timers.sword-glow-demon", "required": true,
+         "description": "the SWORD-GLOW demon changes the glow level as villains come near and go",
+         "checks": ["test-m4-sword-glow", "test-m4-troll-combat", "test-m4-mirror-bat"]},
+        {"id": "timers.lamp-burnout", "required": true,
+         "description": "the lamp's LIGHT-INT countdown warns and the lamp goes out (77act1.mud:2006)",
+         "checks": [],
+         "note": "the pending lamp event survives a WP4 replay restore (test-m4-replay-persistence) but no native scenario reaches the countdown messages or burn-out"},
+        {"id": "timers.cure-clock-recovery", "required": true,
+         "description": "the CURE clock restores the hero's strength after a wound",
+         "checks": [],
+         "note": "troll-combat checkpoints the cure clock, but the hero is never wounded, so recovery is not exercised"},
+        {"id": "timers.other-clock-events", "required": true,
+         "description": "CEVENT clock interrupts beyond the troll and cure clocks (CLOCK-INT 77rooms.mud:1657)",
+         "checks": []}
+      ]
+    },
+    {
+      "name": "objects",
+      "branches": [
+        {"id": "objects.take-drop-containers", "required": true,
+         "description": "take, drop, open containers, take from and put into containers",
+         "checks": ["test-m4-house-cellar", "test-m4-mailbox-drop", "test-m4-top-parser"]},
+        {"id": "objects.all-everything", "required": true,
+         "description": "take all, drop all, put all in (EVERYTHING)",
+         "checks": ["test-m4-top-parser", "test-m4-parser-ambiguity"]},
+        {"id": "objects.light-sources", "required": true,
+         "description": "turning the lamp on; darkness without light",
+         "checks": ["test-m4-house-cellar", "test-m4-parser-ambiguity"]},
+        {"id": "objects.puzzles-beyond-the-house", "required": true,
+         "description": "the dam, the boat and the river, the balloon, the coal-mine machine and basket, the gas room",
+         "checks": [],
+         "note": "inventory limitation: not exercised in either engine"}
+      ]
+    },
+    {
+      "name": "scoring",
+      "branches": [
+        {"id": "scoring.room-and-score-command", "required": true,
+         "description": "room values on first entry (kitchen, cellar) and the `score` text",
+         "checks": ["test-m4-house-cellar", "test-m4-troll-combat", "test-m4-cyclops-room"]},
+        {"id": "scoring.final-score-on-quit", "required": true,
+         "description": "the score and rank printed by FINISH on quit",
+         "checks": ["test-m3-session"]},
+        {"id": "scoring.treasure-deposit", "required": true,
+         "description": "treasures taken and put in the trophy case (SCORE-OBJ, 77rooms.mud:654-668)",
+         "checks": []}
+      ]
+    },
+    {
+      "name": "save-load",
+      "branches": [
+        {"id": "save.host-replay-persistence", "required": true,
+         "description": "host save at the RDCOM prompt and restore by deterministic replay, in-process and in a fresh process (WP4, ADR-0061)",
+         "checks": ["test-m4-replay-persistence"]},
+        {"id": "save.game-save-command", "required": true,
+         "description": "the game's own `save` command (in-session record, ADR-0048)",
+         "checks": [],
+         "evidence_only": ["failure-inventory F3 (text parity; discovery run, not a gated check)"]},
+        {"id": "save.game-restore-command", "required": true,
+         "description": "the game's own `restore` command",
+         "checks": [],
+         "blocked_by": ["INV-06"]},
+        {"id": "save.player-facing-resume", "required": true,
+         "description": "a player saves and resumes a session (WP4.7)",
+         "checks": [],
+         "note": "needs an ADR-0055 amendment; not implemented"}
+      ]
+    }
+  ],
+  "blocking_inventory": [
+    {"id": "INV-06", "title": "native RESTORE is strict: `restore` ends the session after \"Restored.\" (F4, F5)",
+     "class": "(a) reachable by ordinary play", "severity": "P1",
+     "issue": "#172", "issue_source": "orchestrator brief 2026-11-25; GAMEPLAY-FAILURE-INVENTORY.md still reads 'to create' (not verified locally: gh not authenticated)",
+     "status": "open"},
+    {"id": "INV-07", "title": "PRINT is unassigned on the game's ERROR handler path (HANDLE, 77rooms.mud:251)",
+     "class": "(b) error path", "severity": "P2",
+     "issue": "#173", "issue_source": "orchestrator brief 2026-11-25; GAMEPLAY-FAILURE-INVENTORY.md still reads 'to create' (not verified locally: gh not authenticated)",
+     "status": "open"}
+  ],
+  "resolved_inventory": [
+    {"id": "INV-01", "fixed_by": "M4 S8 (#167, PR #175)"},
+    {"id": "INV-02", "fixed_by": "M4 S9 (#168, PR #176)"},
+    {"id": "INV-03", "fixed_by": "M4 S9 (#169, PR #176)"},
+    {"id": "INV-04", "fixed_by": "M4 S9 (#170, PR #176)"},
+    {"id": "INV-05", "fixed_by": "M4 S10 (#171, PR #189)"}
+  ]
+}
