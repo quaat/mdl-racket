@@ -112,6 +112,19 @@ system").
 | `make m4-check PYTHON=/usr/bin/python3` | 0 | 577 s; SCENARIO_PARITY PASS (18 scenarios); GAMEPLAY_RELIABILITY NOT YET (17 of 23); see [below](#make-m4-check) |
 | `git diff --check` | 0 | |
 
+Re-run after the classification option (commit `b45186c`):
+
+| Command | Exit | Result |
+|---|---|---|
+| `raco test tests/m4_scenario_runner.rkt` | 0 | 59 unit tests (new: classification with ignored keys) |
+| `racket tests/historical_treasure_deposit_test.rkt` (single-run) | 0 | 2 boots (prefix 15), 11.4 s |
+| `racket tests/historical_cure_recovery_test.rkt` (single-run) | 0 | 1 boot, 6.0 s |
+| `racket tests/historical_lamp_burnout_test.rkt` (single-run) | 0 | 1 boot, 6.4 s (first attempt exit 1 at k = 105: the `\!` rendering finding above) |
+| `M4_SCENARIO_MODE=per-prefix racket tests/historical_lamp_burnout_test.rkt` | 0 | 132 boots, 1285.5 s; HROOM compared at every prefix's end |
+| `make test PYTHON=/usr/bin/python3` | 0 | 4929 Racket tests passed; Python 104 passed, 1 deselected |
+| `make m4-check PYTHON=/usr/bin/python3` | 0 | 579 s at `b45186c`; new targets 11.8 s, 125.4 s, 6.2 s, 7.1 s; terms unchanged (SCENARIO_PARITY PASS 18; GAMEPLAY_RELIABILITY NOT YET 17 of 23) |
+| `git diff --check` | 0 | |
+
 The probe's sha256 at capture time was `51316c47…4a9f`; a later docstring
 change (the `diag_logs` paragraph) makes it `7111e920…fa9f`, with no code
 change.
