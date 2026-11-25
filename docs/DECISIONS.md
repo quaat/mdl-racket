@@ -2158,3 +2158,37 @@ mid-line prompt or a stray line-initial `>` is an error, never a guess. The
 default is unchanged for the other scenarios. Only terminal READSTRINGs are
 entries (ADR-0055 amendment: file READSTRING never calls the observer), and
 the guard also fails on a file CHANNEL left open at the end of a run.
+
+## ADR-0063: `make m4-check` reports the five M4 terms from declared manifests
+
+Status: proposed (2026-11-25, branch `feat/m4-check`; Phase 7 of epic #163).
+Evidence: `docs/evidence/M4/M4-CHECK.md`. Needs maintainer review of the
+conservative readings marked below.
+
+- One declared list, `tests/scenarios/m4-manifest.json`, names every check
+  `make m4-check` runs: the M4 native-parity scenario targets, the WP4
+  persistence check (a separate entry, never a scenario) and the PLAYABLE
+  evidence sub-checks. Nothing is discovered at run time;
+  `tests/test_m4_check.py` fails when a `test-m4-*` target or a
+  `tests/scenarios/*.json` file is neither declared nor excluded with a reason.
+- The five terms are computed separately (rules in TESTING, "M4
+  acceptance-term check"). Statuses: PASS, FAIL, NOT RUN (not executed),
+  NOT YET (executed what exists; requirements unmet).
+- *Conservative reading 1:* the required gameplay branches are
+  `docs/evidence/M4/gameplay-branches.json` (23 branches in the epic's six
+  categories), marked PROVISIONAL until the maintainer approves the list.
+  Only gated checks that ran in the same invocation count as coverage;
+  discovery runs (failure-inventory F3, F12, F13) do not. Open blocking
+  inventory items (INV-06 RESTORE, INV-07 PRINT in HANDLE) keep
+  GAMEPLAY_RELIABILITY from PASS.
+- *Conservative reading 2:* PLAYABLE is NOT RUN while no PLAYABLE gate
+  exists; its sub-checks can make it FAIL but never PASS.
+- *Conservative reading 3:* M4_ACCEPTED also needs PLAN's "accepted
+  exceptions are source-justified", which only a committed maintainer record
+  (`maintainer_record` in the manifest) satisfies. A script PASS is the
+  technical result of one commit, never mainline acceptance.
+- Exit policy: 0 when nothing FAILs (NOT RUN / NOT YET allowed), 1 on any
+  FAIL, 3 with `--require-accepted` when M4_ACCEPTED is not PASS.
+- CI: the reference workflow's twelve per-scenario steps are replaced by one
+  `make m4-check` step running the same targets sequentially; per-target logs
+  are uploaded from `artifacts/m4-check/logs/`.
