@@ -131,7 +131,9 @@ The four Phase 3 scenarios ([record](docs/evidence/M4/TIMERS-SCORING.md))
 need no runner change: a wider read-only checkpoint (lamp and clock events,
 painting, trophy case, thief). They cover the treasure deposit, the cure
 clock and the lamp burn-out; the thief is seen stealing but not fighting, so
-the thief branch stays uncovered. They are branch evidence until merged.
+the thief branch stays uncovered. On that branch `make m4-check` exits 0:
+SCENARIO_PARITY PASS for 18 scenarios, GAMEPLAY_RELIABILITY NOT YET with 17
+of 23 required branches covered. They are branch evidence until merged.
 
 `make m4-check` runs all eighteen plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.

@@ -78,7 +78,29 @@ lamp-burnout's (131 boots) was not run.
 
 ## Results
 
-RESULTS-PLACEHOLDER
+Run with `PLTCOLLECTS=":$PWD"`, `TMPDIR=/tmp`, outside the tool sandbox
+(inside it, the runner's `/tmp` work directories fail with "Read-only file
+system").
+
+| Command | Exit | Result |
+|---|---|---|
+| `python3 -I scripts/probe_death_scenario_reference.py NAME …` (four scenarios, twice each) | 0 | `CAPTURE OK` eight times; the second captures identical (10 s, 9 s, 17 s, 74 s) |
+| `racket tests/historical_treasure_deposit_test.rkt` (single-run) | 0 | 22 turns; 2 boots (reboot of prefix 15: the thief appears); 11.5 s |
+| `racket tests/historical_thief_robbery_test.rkt` (single-run) | 0 | 22 turns; 21 boots (20 reboots: HROOM moves on every end-of-input turn but k = 0); 128.5 s |
+| `racket tests/historical_cure_recovery_test.rkt` (single-run) | 0 | 36 turns; 1 boot; 6.0 s |
+| `racket tests/historical_lamp_burnout_test.rkt` (single-run) | 0 | 132 turns; 1 boot; 6.4 s |
+| treasure-deposit and cure-recovery single-run with HROOM compared (before `#:ignore-keys`) | 0 | 19 boots 117.0 s; 35 boots 227.2 s |
+| `M4_SCENARIO_MODE=per-prefix racket tests/historical_treasure_deposit_test.rkt` | 0 | 22 boots, 136.2 s |
+| `M4_SCENARIO_MODE=per-prefix racket tests/historical_thief_robbery_test.rkt` | 0 | 22 boots, 135.3 s |
+| `M4_SCENARIO_MODE=per-prefix racket tests/historical_cure_recovery_test.rkt` | 0 | 36 boots, 235.1 s |
+| `M4_SCENARIO_MODE=per-prefix racket tests/historical_lamp_burnout_test.rkt` | 0 | 132 boots, 1315.6 s |
+| `make test PYTHON=/usr/bin/python3` | 0 | 4927 Racket tests passed; Python 104 passed, 1 deselected |
+| `make m4-check PYTHON=/usr/bin/python3` | 0 | 577 s; SCENARIO_PARITY PASS (18 scenarios); GAMEPLAY_RELIABILITY NOT YET (17 of 23); see [below](#make-m4-check) |
+| `git diff --check` | 0 | |
+
+The probe's sha256 at capture time was `51316c47…4a9f`; a later docstring
+change (the `diag_logs` paragraph) makes it `7111e920…fa9f`, with no code
+change.
 
 ## Mutation checks (each reverted; `git status` clean afterwards)
 
@@ -126,7 +148,22 @@ Not newly covered:
 
 ## make m4-check
 
-M4CHECK-PLACEHOLDER
+`PLTCOLLECTS=":$PWD" TMPDIR=/tmp PYTHONPATH=.sandbox-pydeps/lib make m4-check
+PYTHON=/usr/bin/python3`, exit 0, 577 s, at commit `81d963e` (clean tree).
+Manifest completeness PASS; `sources` and all eighteen scenario targets PASS
+(the new ones: treasure-deposit 11.8 s, thief-robbery 124.4 s, cure-recovery
+6.4 s, lamp-burnout 7.4 s), `test-m4-replay-persistence` PASS,
+`test-m3-session` and `test-m3-launcher` PASS.
+
+| Term | Status | Scope / reasons |
+|---|---|---|
+| SCENARIO_PARITY | PASS | 18 scenarios, each under one fixed clock and seed (250776000, UTC); per scenario, not gameplay coverage |
+| GAMEPLAY_RELIABILITY | NOT YET | 17 of 23 required branches covered (was 14; PROVISIONAL list); uncovered: combat.thief, timers.other-clock-events, objects.puzzles-beyond-the-house, save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07 |
+| PLAYABLE | NOT RUN | sub-checks only; no PLAYABLE gate |
+| FULL_COMPLETION | NOT RUN | no complete-game check |
+| M4_ACCEPTED | NOT YET | R2–R5 unmet |
+
+A local branch result, not a mainline acceptance.
 
 ## Security and licensing
 
@@ -145,7 +182,8 @@ Confusion code was copied. New scripts and tests are original MIT-0 code.
 - robber_hroom is not compared in three of the four scenarios (above).
 - lamp-burnout's reference is 4.1 MB; its per-prefix run is about 20 minutes.
 - The four single-run targets add about two and a half minutes to `make
-  m4-check` (thief-robbery's 21 boots dominate).
+  m4-check` (thief-robbery's 21 boots: 124 s of the 150 s). CI's m4-check
+  step has a 40-minute budget; this local run took 577 s in all.
 - The Phase 3 references drop the Dkk logs (hash and size kept); an auditor
   who wants them re-runs the probe (deterministic, 2 minutes in all).
 
