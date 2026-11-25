@@ -149,7 +149,7 @@ room's function declares the undefined type PRSOBJ, which pinned Confusion
 does not check; the native dam and leak references are committed and `make
 xfail-m4-dam-frontier` tracks the expected failure until a maintainer
 decision. On that branch `make m4-check` exits 0: SCENARIO_PARITY PASS for
-20 scenarios, GAMEPLAY_RELIABILITY NOT YET with 19 of 23 required branches
+20 scenarios, GAMEPLAY_RELIABILITY NOT YET with 18 of 23 required branches
 covered and open blockers INV-06, INV-07 and INV-11. They are branch evidence until
 merged.
 

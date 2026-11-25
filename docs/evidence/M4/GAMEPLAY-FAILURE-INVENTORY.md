@@ -270,7 +270,9 @@ and tracked as an expected failure by `make xfail-m4-dam-frontier`.*
   room (`north` from the Dam Lobby) applies the room action; the attached
   check of PRSO raises `mdl-decl: DECL 740:9: unknown declaration type
   PRSOBJ`. The same undefined type is declared by WIRE-FUNCTION
-  (77act2.mud:585-587, the balloon's wire), which is not run.
+  (77act2.mud:585-587, the balloon's wire) and GNOME-FUNCTION
+  (77act2.mud:768-769, the volcano gnome's action and the GNOIN clock
+  handler), neither of which is run.
 - *Native:* Pinned Confusion does not check attached declarations: the room
   description, then play goes on (the yellow and blue buttons, the leak
   clock MNTIN; references `dam-sluice-reference.json` and

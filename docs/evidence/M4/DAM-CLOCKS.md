@@ -50,8 +50,10 @@ HELLO, RING, EAT and ROBBER-FUNCTION in 77act1.mud, SHAKE in 77act2.mud). The de
 DECISIONS.md "Defer unresolved TYPE atoms in attached declarations") lets
 such a definition load but keeps the check strict at call time and never
 lets an unknown name match as ANY; pinned Confusion does not check attached
-declarations at all, so the native game runs. WIRE-FUNCTION (77act2.mud:585,
-the balloon's wire) declares the same type (source-derived; not run).
+declarations at all, so the native game runs. WIRE-FUNCTION (77act2.mud:585-587,
+the balloon's wire) and GNOME-FUNCTION (77act2.mud:768-769, the volcano
+gnome's action and the GNOIN clock handler) declare the same type
+(source-derived; not run; added by the independent review).
 
 As the slice brief requires, no runtime semantics were changed. The finding
 is INV-11 in [GAMEPLAY-FAILURE-INVENTORY.md](GAMEPLAY-FAILURE-INVENTORY.md)
@@ -62,8 +64,10 @@ declaration's still-undefined TYPE name is not checked, following the pinned
 reference (a recorded deviation, limited to unresolved names); (3) a
 separately versioned source patch defining PRSOBJ (changes upstream
 provenance; needs approval). **Recommended next action:** a maintainer
-decision between (2) and (3) (issue to be filed), then promote dam-sluice
-and maint-leak to gated scenarios with the committed references.
+decision between (2) and (3) (#193), then promote dam-sluice and maint-leak
+to gated scenarios with the committed references. **Decided 2026-11-25
+(maintainer, #193): option (2)**, an ADR amendment. Its implementation and
+the promotion are the next slice.
 
 **Tracked expected failure.** `make xfail-m4-dam-frontier`
 (`tests/historical_dam_frontier_test.rkt`; not in the manifest's scenarios,
@@ -142,7 +146,7 @@ PASS.
 | Term | Status | Scope / reasons |
 |---|---|---|
 | SCENARIO_PARITY | PASS | 20 scenarios, each under one fixed clock and seed (250776000, UTC); per scenario, not gameplay coverage |
-| GAMEPLAY_RELIABILITY | NOT YET | 19 of 23 required branches covered (was 17; PROVISIONAL list); uncovered: combat.thief, save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07, INV-11 |
+| GAMEPLAY_RELIABILITY | NOT YET | 18 of 23 required branches covered (was 17; PROVISIONAL list); uncovered: combat.thief, objects.puzzles-beyond-the-house, save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07, INV-11 |
 | PLAYABLE | NOT RUN | sub-checks only; no PLAYABLE gate |
 | FULL_COMPLETION | NOT RUN | no complete-game check |
 | M4_ACCEPTED | NOT YET | R2–R5 unmet |
@@ -176,9 +180,9 @@ clean after each.
 | Branch | Covering checks | Precision |
 |---|---|---|
 | `timers.other-clock-events` | match-clock | one clock event, MATIN, queued, fired at a regular tick and at a `wait`, set to 0 by `turn off match`; MNTIN is recorded natively (maint-leak, `evidence_only`) but blocked by INV-11; the candle, balloon, burn, fuse, ledge, safe, gnome, bucket and sphere clocks are not reached |
-| `objects.puzzles-beyond-the-house` | boat-river | ONE of the five listed puzzles, the boat: inflated with the pump, boarded, launched (first river room only), landed, deflated. Not exercised: the river downstream, the dam (recorded natively, `evidence_only`, blocked by INV-11), the balloon (its wire declares PRSOBJ too), the coal-mine machine and basket, the gas room. The maintainer may split the branch per puzzle; four would then be uncovered |
+| `objects.puzzles-beyond-the-house` | none (boat-river is evidence only) | UNCOVERED (read as strictly as combat.thief). boat-river exercises ONE of the five listed puzzles, the boat: inflated with the pump, boarded, launched (first river room only), landed, deflated. Not exercised: the river downstream, the dam (recorded natively, `evidence_only`, blocked by INV-11), the balloon (its wire declares PRSOBJ too; so does the volcano gnome), the coal-mine machine and basket, the gas room. The maintainer may split the branch per puzzle; four would then be uncovered |
 
-New blocking item: INV-11 (open, no issue yet). GAMEPLAY_RELIABILITY stays
+New blocking item: INV-11 (#193; maintainer decision 2026-11-25: ADR amendment, next slice). GAMEPLAY_RELIABILITY stays
 NOT YET.
 
 ## Security and licensing
@@ -194,10 +198,10 @@ scripts and tests are original MIT-0 code.
 
 - Each scenario is one fixed clock and seed; other seeds take other branches
   (boat-river reuses mirror-bat's RANDOM round-room route).
-- `objects.puzzles-beyond-the-house` is covered by one of five listed
-  puzzles; `combat.thief` was kept UNCOVERED for a similar partial match
-  (its description asks for all three actions). The maintainer may prefer to
-  split this branch rather than count it covered.
+- `objects.puzzles-beyond-the-house` is left UNCOVERED, as `combat.thief`
+  is: only one of the five listed puzzles is exercised. The maintainer may
+  split it per puzzle. Note the asymmetry: `timers.other-clock-events` counts
+  as covered by one clock, because its description lists no clocks.
 - The dam, its leak clock and the balloon's wire are unreachable in this
   runtime until INV-11 is decided; the native references are committed for
   that promotion.
@@ -206,6 +210,52 @@ scripts and tests are original MIT-0 code.
 
 ## Next actionable task
 
-File the INV-11 issue and obtain the maintainer decision on attached
-declarations naming an undefined TYPE (ADR #98 amendment or a provenance
-patch); then promote dam-sluice and maint-leak.
+Implement the decided #98 ADR amendment (#193): an attached
+declaration's TYPE name still undefined when checked is not enforced. Then
+promote dam-sluice and maint-leak to gated scenarios and retire
+`make xfail-m4-dam-frontier`.
+
+## Orchestrator gate and independent review (2026-11-25)
+
+**Gate at 3e4128e.** This is after the orchestrator's branch change: the
+objects branch is left uncovered and INV-11 is filed as #193. Sequential,
+Racket v7.9 BC. Every target exited 0:
+
+* `make test`, test-historical, m3-source-progress, test-m3-interactive,
+  test-m3-session, test-m3-launcher, test-m3-bang and m3-check;
+* `make m4-check` (543 s);
+* `make xfail-m4-dam-frontier` (both routes XFAIL at k = 23, PRSOBJ);
+* `make m4-scenarios-per-prefix` (3748 s, all twenty scenarios);
+* `git diff --check`.
+
+The m4-check terms at that commit:
+
+| Term | Status | Scope / reasons |
+|---|---|---|
+| SCENARIO_PARITY | PASS | 20 scenarios, each under one fixed clock and seed |
+| GAMEPLAY_RELIABILITY | NOT YET | 18 of 23 required branches covered; uncovered: combat.thief, objects.puzzles-beyond-the-house, save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07, INV-11 |
+| PLAYABLE | NOT RUN | sub-checks only |
+| FULL_COMPLETION | NOT RUN | no complete-game check |
+| M4_ACCEPTED | NOT YET | R2–R5 unmet |
+
+A local branch result.
+
+**Independent review**, read-only. It checked:
+
+* the earlier probe profiles and all 11 references' diagnostic inputs:
+  byte-identical, 0 mismatches;
+* the checkpoint reads: pure, and every ID exists;
+* every key turn against the references;
+* the XFAIL test: it cannot pass vacuously.
+
+Verdict: approve with nits. Doc fixes made in response:
+
+* the 19 → 18 counts and the objects-branch wording;
+* #193 references;
+* the boat test header's re-run list, which now includes prefix 48;
+* INV-11's scope extended to GNOME-FUNCTION (77act2.mud:768-769, the
+  volcano gnome and the GNOIN clock handler).
+
+Accepted risk: `make xfail-m4-dam-frontier` is not in m4-check or CI. The
+next slice implements the decided ADR amendment and replaces the XFAIL with
+gated dam scenarios.

@@ -24,8 +24,8 @@
 ;; The thief (ROBBER demon) takes the grail and the trident from rooms the
 ;; hero has left (HOBJS (GRAIL) at entry 35, (TRIDE GRAIL) at 54) and never
 ;; meets the hero. He appears in the Dam during prefix 47's end-of-input
-;; turn (that prefix, and prefix 34 whose end-of-input turn changes his bag,
-;; are re-run). robber_hroom is compared at every READSTRING entry, at the end
+;; turn (that prefix, prefix 34 whose end-of-input turn changes his bag, and
+;; prefix 48 whose end-of-input tail ends the sword's glow, are re-run). robber_hroom is compared at every READSTRING entry, at the end
 ;; and in per-prefix mode, but not used to classify end-of-input tails
 ;; (#:eof-classification-ignore-keys, ADR-0062 amendment).
 ;;
