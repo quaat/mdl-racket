@@ -128,7 +128,78 @@ gas-room declares the death question (`#:entry-prompts`, entry 58).
 
 ## Results
 
-RESULTS-PLACEHOLDER
+Run with `PLTCOLLECTS=":$PWD" TMPDIR=/tmp PYTHONPATH=$PWD/.sandbox-pydeps/lib`,
+`PYTHON=/usr/bin/python3`, outside the tool sandbox, one heavy job at a time
+(inside it, the runner's `/tmp` work directories fail with "Read-only file
+system"). Native captures ran inside the sandbox with its `$TMPDIR`.
+
+| Command | Exit | Result |
+|---|---|---|
+| `python3 -I scripts/probe_death_scenario_reference.py NAME …` (gas-room, coal-machine, balloon-ledge; twice each) | 0 | `CAPTURE OK` six times; all transcript cases byte-identical between captures (64, 96, 83), diagnostic game parts and logs, X1 checkpoints, RANDOM draws and end checkpoints identical; mdli sha256 unchanged |
+| every committed reference's `diag_forms` against `PROFILES` | — | 14 of 14 equal (the eleven earlier profiles unchanged) |
+| first single run of balloon-ledge (minimal test, before the XFAIL test) | 1 | `earliest failing k = 57, kind run-guard … DECL 424:9: PRSO does not satisfy declaration` (the finding) |
+| `make test-m4-coal-machine` (single-run) | 0 | all 95 turns match (D1 only); 5 boots (prefixes 36, 38: the sword's glow; 53, 61: the thief's bag); 30.9 s |
+| `make test-m4-gas-room` (single-run) | 0 | all 63 turns match; 5 boots (36, 38; 53; 58: the death question); 30.4 s |
+| `M4_SCENARIO_MODE=per-prefix make test-m4-coal-machine` | 0 | all 95 turns match; 95 boots, 763.6 s |
+| `M4_SCENARIO_MODE=per-prefix make test-m4-gas-room` | 0 | all 63 turns match; 63 boots, 419.4 s |
+| `make xfail-m4-balloon-frontier` | 0 | XFAIL as recorded (entries 0-56 equal the reference; k = 57: BALLOON's PRSO #DECL); 25 s |
+| `make test PYTHON=/usr/bin/python3` | 0 | 4971 Racket tests passed; Python 104 passed, 1 deselected; 123 s |
+| `make m4-check PYTHON=/usr/bin/python3` | 0 | 635 s at `ada327e` (dirty: STATUS and README only); see below |
+| `python3 -m pytest tests/test_m4_check.py` | 0 | 30 passed (manifest completeness) |
+| `git diff --check 6cd1b68` | 0 | |
+
+## make m4-check
+
+Manifest completeness PASS; `sources` and all twenty-four scenario targets
+PASS (the new ones: coal-machine 29.0 s, gas-room 31.0 s),
+`test-m4-replay-persistence` PASS, `test-m3-session` and `test-m3-launcher`
+PASS.
+
+| Term | Status | Scope / reasons |
+|---|---|---|
+| SCENARIO_PARITY | PASS | 24 scenarios, each under one fixed clock and seed (250776000, UTC); per scenario, not gameplay coverage |
+| GAMEPLAY_RELIABILITY | NOT YET | 18 of 23 required branches covered (unchanged; PROVISIONAL list); uncovered: combat.thief, objects.puzzles-beyond-the-house, save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07, INV-12 |
+| PLAYABLE | NOT RUN | sub-checks only; no PLAYABLE gate |
+| FULL_COMPLETION | NOT RUN | no complete-game check |
+| M4_ACCEPTED | NOT YET | R2-R5 unmet |
+
+A local branch result, not a mainline acceptance.
+
+## Mutation checks (each reverted with `git checkout`; `git status` clean afterwards)
+
+Native mutations change one string in every reference transcript case from
+the key turn on (the prefix stdouts P_k, k >= K, T1 and T1b; their sha256
+updated so the integrity check passes; `transcript.game_output_raw`, which
+the tests' own reference assertions read, left as is; helper script kept
+outside the repository). Checkpoint mutations change one field of
+diagnostic checkpoint K; the "a" variant shows the test's own reference
+assertion failing first, the "b" variant removes the asserting forms (the
+key-turn table and the entry-versus-end check) so that the runner itself has
+to find it.
+
+| # | Mutation | Result |
+|---|---|---|
+| M1 | coal-machine: `excitement abates.` -> `excitement Abates.` (the machine, K = 87; 9 cases) | exit 1: earliest failing k = 87, kind transcript (single-run) |
+| M2a | coal-machine: checkpoint 87 `machi_contents` (DIAMO) -> (COAL) | exit 1 at the test's reference check (key-turn table, line 101) |
+| M2b | M2a with the table and the entry-versus-end check removed | exit 1: earliest failing k = 87, kind checkpoint, field `machi_contents` |
+| M3 | gas-room: `I would have thought twice` -> `… Twice` (the explosion, K = 58; 6 cases) | exit 1: earliest failing k = 58, kind transcript |
+| M4a | gas-room: checkpoint 58 `deaths` 1 -> 0 | exit 1 at the test's reference check (key-turn table, line 66) |
+| M4b | M4a with the table and the entry-versus-end check removed | exit 1: earliest failing k = 58, kind checkpoint |
+| M5 | balloon frontier: `>Opened.` -> `>OpeneD.` (`open receptacle`, K = 55; 28 cases) | exit 1: the XFAIL assertion "earliest failing k = 57, kind run-guard" fails (line 107; the runner's last equal entry is 54) |
+
+One helper slip, not a result: a first M4b run also removed the `ends`
+definition (exit 1, unbound identifier) and a first M5 run passed a literal
+`\n` (0 cases mutated, exit 0); both were redone as recorded above.
+
+## Gameplay branches (`gameplay-branches.json`)
+
+| Branch | Covering checks | Precision |
+|---|---|---|
+| `objects.puzzles-beyond-the-house` | none (evidence only: boat-river, dam-sluice, coal-machine, gas-room; xfail-m4-balloon-frontier) | UNCOVERED (read as strictly as combat.thief): four of the five listed puzzles are exercised by gated scenarios (the boat, the dam, the coal-mine machine and basket, the gas room); the balloon is blocked by INV-12. Not exercised either: the river downstream, the reservoir refilling, the gas room's ON branch, the volcano gnome |
+| `timers.other-clock-events` | match-clock, maint-leak (unchanged) | note extended: the candle clock CNDIN is queued and fired in coal-machine and gas-room (evidence beyond the cited checks); BINT and BRNIN are native only (INV-12) |
+
+New blocking item: INV-12 (open; no issue yet). GAMEPLAY_RELIABILITY stays
+NOT YET.
 
 ## Security and licensing
 
