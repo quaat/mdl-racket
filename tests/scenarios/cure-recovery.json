@@ -1,0 +1,53 @@
+{
+  "name": "cure-recovery",
+  "description": "M4 Phase 3 scenario (epic #163; timers): the CURE clock heals the hero's wound. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0); unmodified pinned sources, START seeds RANDOM from DSKDATE, no RANDOM override and no seed search. The troll-death path for seven `wait`s (the sixth staggers the unarmed hero, the seventh wounds him: ASTRENGTH -1, CURIN enabled with CTICK CURE-WAIT = 30), then `west` back to the cellar, away from the troll, `diagnose`, and `wait`/`diagnose` seven times. WAIT (77rooms.mud:1619) runs CLOCK-DEMON up to three more times per turn and stops when an event fires; CURE-CLOCK (78melee.mud:504) raises ASTRENGTH to 0 and disables CURIN on the sixth `wait` (\"You are in perfect health.\"). Then `score`. Each command was confirmed by the pinned native reference; see docs/evidence/M4/CURE-RECOVERY-REFERENCE.md. Input ends after `score` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "east",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "wait",
+    "west",
+    "diagnose",
+    "wait",
+    "diagnose",
+    "wait",
+    "diagnose",
+    "wait",
+    "diagnose",
+    "wait",
+    "diagnose",
+    "wait",
+    "diagnose",
+    "wait",
+    "diagnose",
+    "wait",
+    "diagnose",
+    "score"
+  ],
+  "entry_prompts": {},
+  "quit_prefixes": [],
+  "reference": {
+    "file": "docs/evidence/M4/cure-recovery-reference.json",
+    "case": "T1-cure-recovery-pipe"
+  }
+}

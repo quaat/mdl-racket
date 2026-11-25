@@ -1,0 +1,39 @@
+{
+  "name": "thief-robbery",
+  "description": "M4 Phase 3 scenario (epic #163; the thief, observed): the treasure route of treasure-deposit without the `look` in the cellar. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0); unmodified pinned sources, START seeds RANDOM from DSKDATE, no RANDOM override and no seed search. Under this clock and seed the ROBBER demon (77act1.mud:1284) brings the thief through the Gallery on the turn of `take painting` and he takes the painting from the hero (\"A seedy-looking individual with a large bag just wandered through the room. ...\"); in the Studio he passes again and finds nothing. Up the chimney, `west`, `open case`, `put painting in case` (\"I can't see a paint here.\"), `look`, `score` (39: the painting's OFVAL stays scored), `inventory` (the lamp only). The thief is not fought. Each command was confirmed by the pinned native reference; see docs/evidence/M4/THIEF-ROBBERY-REFERENCE.md. Input ends after `inventory` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "south",
+    "south",
+    "take painting",
+    "south",
+    "up",
+    "west",
+    "open case",
+    "put painting in case",
+    "look",
+    "score",
+    "inventory"
+  ],
+  "entry_prompts": {},
+  "quit_prefixes": [],
+  "reference": {
+    "file": "docs/evidence/M4/thief-robbery-reference.json",
+    "case": "T1-thief-robbery-pipe"
+  }
+}

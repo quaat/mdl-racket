@@ -1,0 +1,39 @@
+{
+  "name": "treasure-deposit",
+  "description": "M4 Phase 3 scenario (epic #163; scoring): a treasure taken and put in the trophy case. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0); unmodified pinned sources, START seeds RANDOM from DSKDATE, no RANDOM override and no seed search. The house-cellar path (lamp, rug, trap door, lamp on, `down`; the trap door crashes shut), `look` in the cellar, then `south` twice to the Gallery, `take painting` (OFVAL 4 scored by SCORE-OBJ), `south` to the Studio and `up` the chimney (CHIMNEY-FUNCTION: at most two objects, the lamp among them) to the kitchen, `west` to the living room, `open case`, `put painting in case` (the living room's action sets ASCORE to RAW-SCORE plus the OTVALs in the case: 39 + 7 = 46), `look`, `score`. The `look` in the cellar is part of the route: without it (thief-robbery) the thief takes the painting in the Gallery under this clock and seed; the route was chosen, not the randomness. Each command was confirmed by the pinned native reference; see docs/evidence/M4/TREASURE-DEPOSIT-REFERENCE.md. Input ends after `score` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "look",
+    "south",
+    "south",
+    "take painting",
+    "south",
+    "up",
+    "west",
+    "open case",
+    "put painting in case",
+    "look",
+    "score"
+  ],
+  "entry_prompts": {},
+  "quit_prefixes": [],
+  "reference": {
+    "file": "docs/evidence/M4/treasure-deposit-reference.json",
+    "case": "T1-treasure-deposit-pipe"
+  }
+}
