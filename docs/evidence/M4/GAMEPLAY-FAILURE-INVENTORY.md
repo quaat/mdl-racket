@@ -10,7 +10,7 @@ response. An unassigned operator, or a strict error that reaches the
 launcher and ends the session, is a runtime failure. No runtime code was
 changed in this slice. Fixes are separate slices (see the fix order at the
 end). Issue and PR columns read "to create" where no issue exists yet
-(INV-06 is #172, INV-07 is #173).
+(INV-06 is #172, INV-07 is #173; INV-11, added by M4 Phase 3b, has none yet).
 
 ## Provenance and commands
 
@@ -173,6 +173,7 @@ result, and the fix and regression test.
 | INV-08 CLOSE / FILE-LENGTH / ACCESS / file READSTRING | Behind INV-05, and behind a successful OPEN in RECORD and DO-UNSCRIPT | (b) | decided-strict (ADR-0055) | P3 | **partly fixed** by M4 S10 (#171): FILE-LENGTH, file READSTRING and CLOSE on the allowlisted read-only CHANNELs only; ACCESS, and CLOSE of any other CHANNEL, stay strict (unreachable: RECORD's and DO-SCRIPT's OPENs are still denied) | #171 |
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
+| **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)) | to create (maintainer decision) |
 
 **INV-01: ABS.** *Status: fixed by M4 S8 (#167). ABS is a builtin, and the operator sweep JSON was regenerated, so ABS is now class `builtin`.*
 
@@ -255,6 +256,45 @@ result, and the fix and regression test.
 - ITS-only branches under `<L? ,MUDDLE 100>`: ITS-GET-NAME FIELD (77rooms.mud:119); UNAME, IPC-OFF and IPC-ON (77rooms.mud:57–58, 77patch.mud:39–40, START-ZORK is never called); USE (77defs.mud:1); SNAME (77rooms.mud:22).
 - 77rooms.mud's DO-SAVE and DO-RESTORE, superseded by 77patch.mud:9 and :13: SAVE-GAME, RESTORE-GAME, SNAME, CLOSE, OPEN "READ" and "PRINTB".
 - DISPATCH's error branch (81tell-repl.mud:133): no NOFFSET in data (X1).
+
+**INV-11: PRSOBJ in MAINT-ROOM's #DECL.** *Found by M4 Phase 3b
+(2026-11-25, local branch `feat/m4-dam`); recorded by [DAM-CLOCKS.md](DAM-CLOCKS.md)
+and tracked as an expected failure by `make xfail-m4-dam-frontier`.*
+
+- *First failing location and call path:* 77act1.mud:737 MAINT-ROOM, the
+  Maintenance Room's RACTION (77dung.mud:1323). Its attached declaration
+  (77act1.mud:739-741) gives the AUX PRSO (`<2 .PV>`, an OBJECT or FALSE)
+  the type `PRSOBJ`, which no 1977 source file defines (grep: the only other
+  uses of the name are local variables: HELLO, RING, EAT and ROBBER-FUNCTION
+  in 77act1.mud, SHAKE in 77act2.mud). Entering the
+  room (`north` from the Dam Lobby) applies the room action; the attached
+  check of PRSO raises `mdl-decl: DECL 740:9: unknown declaration type
+  PRSOBJ`. The same undefined type is declared by WIRE-FUNCTION
+  (77act2.mud:585-587, the balloon's wire), which is not run.
+- *Native:* Pinned Confusion does not check attached declarations: the room
+  description, then play goes on (the yellow and blue buttons, the leak
+  clock MNTIN; references `dam-sluice-reference.json` and
+  `maint-leak-reference.json`, captured twice).
+- *Ours:* READSTRING entries 0-22 equal the native reference; at command
+  23 the room description is printed, then the strict failure ends the
+  session (kind `run-guard`, earliest failing k = 23).
+- *Root cause:* the deliberate deviation of the deferred-declaration ADR
+  (issue #98; DECISIONS.md "Defer unresolved TYPE atoms in attached
+  declarations"): unknown TYPE names in attached declarations load, but stay
+  strict at check time and never match as ANY.
+- *Options (maintainer decision; this slice changed no runtime semantics):*
+  (1) keep the strict check and accept that the dam, the leak and the
+  balloon wire are unreachable; (2) amend the ADR so that an attached
+  declaration's TYPE name that is still undefined is not checked, following
+  the pinned reference (a recorded deviation from the manual's attached-check
+  rule, limited to unresolved names); (3) a separately versioned source patch
+  defining PRSOBJ (for example as `<OR OBJECT FALSE>`), which changes
+  upstream provenance and needs approval. Recommended next action: a
+  maintainer decision between (2) and (3), then promote dam-sluice and
+  maint-leak to gated scenarios with their committed native references.
+- *Regression test:* `tests/historical_dam_frontier_test.rkt` fails (XPASS)
+  once the room can be entered; the two routes then become `test-m4-*`
+  scenarios.
 
 ### No failure found (exercised in both engines)
 
@@ -368,6 +408,10 @@ during the load, which completes.
 8. P3: #120 (security track, not gameplay), #121, #126, #127 (re-audit
    per new area), #129, #134; INV-08 to INV-10 need no work beyond the
    decisions above.
+9. **INV-11 PRSOBJ in MAINT-ROOM** (P1, (a), found by M4 Phase 3b after
+   this ranking). **Maintainer decision** on attached declarations naming
+   an undefined TYPE (ADR #98 amendment or a provenance-recorded source
+   patch); see INV-11 above.
 
 After each fix, re-run the matching F case in both engines. Re-run F8 and
 F10 to find the next frontier: the Strange Passage, the treasure room and

@@ -3,7 +3,9 @@
 (epic #163, death and recovery): grue-resurrection, grue-refusal and
 troll-death, and the M4 Phase 3 timer, object and scoring scenarios
 (epic #163 Phase 3): treasure-deposit, thief-robbery, cure-recovery and
-lamp-burnout (tests/scenarios/<name>.json).
+lamp-burnout, and the M4 Phase 3b scenarios beyond the house: match-clock and
+boat-river, and the native-only dam-sluice and maint-leak references
+(tests/scenarios/<name>.json).
 
 Read-only reference investigation. Nothing here is runtime code, and the game
 sources under .cache/upstream are never written: every run boots a fresh copy
@@ -73,7 +75,13 @@ OCONTENTS (OIDs), the thief's OROOM, and the ROBBER demon's HROOM (RID),
 HFLAG and HOBJS (OIDs: the thief's bag).  Pure reads as well.  A timers
 capture keeps each Dkk case's log only as diag_log_sha256 and diag_log_bytes
 (the logs grow with k; their last checkpoints are end_checkpoints, and X1's
-log is kept in full); the reference says so in `diag_logs`.
+log is kept in full); the reference says so in `diag_logs`.  The Phase 3b
+scenarios use the "dam" profile (DAM_DIAG_FORMS: the timers fields, then
+GATE-FLAG, LOW-TIDE, the Maintenance Room's RVARS and RMUNGBIT, the leak clock
+MNTIN, the wrench, the tube, the putty, the trunk, the matchbook and the match
+clock MATIN) or the "boat" profile (BOAT_DIAG_FORMS: the dam fields, then the
+winner's AVEHICLE and the OROOM of the folded boat, the inflated boat and the
+pump), compacted like the timers profile.
 
 Confusion is GPLv3 and is used only as a behaviour reference; no Confusion
 source is copied into this script.

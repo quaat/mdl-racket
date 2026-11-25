@@ -121,6 +121,8 @@ m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 | The thief takes the painting (Phase 3, same branch) | `test-m4-thief-robbery` | observed under the fixed seed; no fight |
 | The cure clock heals a wound (Phase 3, same branch) | `test-m4-cure-recovery` | CURIN countdown, CURE-CLOCK |
 | The lamp burns out (Phase 3, same branch) | `test-m4-lamp-burnout` | 118 `wait`s, LIGHT-INT warnings |
+| The match clock (Phase 3b, branch `feat/m4-dam`) | `test-m4-match-clock` | MATIN: fires, `wait`, turned off, out of matches |
+| The boat and the river (Phase 3b, same branch) | `test-m4-boat-river` | the pump, inflate, board, launch, land, deflate |
 
 The three Phase 2 death scenarios ([record](docs/evidence/M4/DEATH-BRANCHES.md))
 use two opt-in runner options (ADR-0062 amendment): the death question as the
@@ -136,7 +138,20 @@ the thief branch stays uncovered. On that branch `make m4-check` exits 0:
 SCENARIO_PARITY PASS for 18 scenarios, GAMEPLAY_RELIABILITY NOT YET with 17
 of 23 required branches covered. They are branch evidence until merged.
 
-`make m4-check` runs all eighteen plus the persistence check; options
+The two Phase 3b scenarios ([record](docs/evidence/M4/DAM-CLOCKS.md)) go
+beyond the house with wider read-only checkpoints (dam, clocks, boats) and no
+runtime change. They cover one other clock event (the match clock) and one
+listed puzzle (the boat); the branch for puzzles beyond the house lists four
+more (the dam, the balloon, the coal mine, the gas room), which stay
+unexercised. **The dam is blocked (INV-11, gate result BLOCKED for the dam):**
+entering its Maintenance Room ends the session in this runtime, because the
+room's function declares the undefined type PRSOBJ, which pinned Confusion
+does not check; the native dam and leak references are committed and `make
+xfail-m4-dam-frontier` tracks the expected failure until a maintainer
+decision. On that branch M4_CHECK_SUMMARY. They are branch evidence until
+merged.
+
+`make m4-check` runs all twenty plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:
