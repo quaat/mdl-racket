@@ -135,7 +135,7 @@
      "status": "open"},
     {"id": "INV-12", "title": "BALLOON's attached #DECL (PRSO) <OR OBJECT DIRECTION> rejects the #FALSE () CLOCK-DEMON leaves in PRSVEC: the balloon cannot be boarded (balloon-ledge, command 57)",
      "class": "(a) reachable by ordinary play", "severity": "P1",
-     "issue": "none yet (local finding of epic #163 Phase 3c; to be filed by the orchestrator)", "issue_source": "docs/evidence/M4/PUZZLES.md; GAMEPLAY-FAILURE-INVENTORY.md (INV-12)",
+     "issue": "#196", "issue_source": "docs/evidence/M4/PUZZLES.md; GAMEPLAY-FAILURE-INVENTORY.md (INV-12)",
      "status": "open"}
   ],
   "resolved_inventory": [

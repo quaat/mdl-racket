@@ -11,7 +11,7 @@ launcher and ends the session, is a runtime failure. No runtime code was
 changed in this slice. Fixes are separate slices (see the fix order at the
 end). Issue and PR columns read "to create" where no issue exists yet
 (INV-06 is #172, INV-07 is #173; INV-11, added by M4 Phase 3b, is #193;
-INV-12, added by M4 Phase 3c, has no issue yet).
+INV-12, added by M4 Phase 3c, is #196).
 
 ## Provenance and commands
 
@@ -175,7 +175,7 @@ result, and the fix and regression test.
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
 | **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)); **fixed** by M4 S14 (#193, the #98 ADR amendment): the dam-sluice and maint-leak scenarios match native at all 42 and 36 turns | #193 |
-| **INV-12** BALLOON's PRSO #DECL | troll16, then the balloon route of tests/scenarios/balloon-ledge.json to the Volcano Bottom, `open receptacle` `put guide in receptacle` `board basket` (command 57) | (a) | the game's own value violates an attached declaration of known types: CLOCK-DEMON sets PRSVEC 2 to #FALSE (), BALLOON (READ-OUT) declares PRSO `<OR OBJECT DIRECTION>`; strict here (known types, #98 and its #193 amendment), unchecked natively | **P1**: the balloon cannot be flown (any turn in it) | confirmed in both engines (M4 Phase 3c, 2026-11-25; [PUZZLES.md](PUZZLES.md)); tracked by `make xfail-m4-balloon-frontier` | none yet |
+| **INV-12** BALLOON's PRSO #DECL | troll16, then the balloon route of tests/scenarios/balloon-ledge.json to the Volcano Bottom, `open receptacle` `put guide in receptacle` `board basket` (command 57) | (a) | the game's own value violates an attached declaration of known types: CLOCK-DEMON sets PRSVEC 2 to #FALSE (), BALLOON (READ-OUT) declares PRSO `<OR OBJECT DIRECTION>`; strict here (known types, #98 and its #193 amendment), unchecked natively | **P1**: the balloon cannot be flown (any turn in it) | confirmed in both engines (M4 Phase 3c, 2026-11-25; [PUZZLES.md](PUZZLES.md)); tracked by `make xfail-m4-balloon-frontier` | #196 (maintainer decision pending) |
 
 **INV-01: ABS.** *Status: fixed by M4 S8 (#167). ABS is a builtin, and the operator sweep JSON was regenerated, so ABS is now class `builtin`.*
 
