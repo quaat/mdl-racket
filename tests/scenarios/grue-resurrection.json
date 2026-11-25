@@ -1,0 +1,42 @@
+{
+  "name": "grue-resurrection",
+  "description": "M4 Phase 2 scenario (epic #163, death and recovery): death by grue, `y`, resurrection with the possessions scattered. Promotes the discovery run F12 (GAMEPLAY-FAILURE-INVENTORY.md; \"patched\" there is the game's own word: JIGS-UP asks \"Do you want me to try to patch you?\"), extended so the hero carries something to scatter. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0). Into the kitchen; take the sack and the bottle; the sword from the living room (the lamp stays there); `up` into the dark attic; `north`: WALK's <PROB 75> for an unlit room (77rooms.mud:1063) succeeds under this clock and seed and there is no north exit, so JIGS-UP (77rooms.mud:870) \"Oh, no!  You walked into the slavering fangs of a lurking grue.\": SCORE-UPD -10, DEATHS 1, the question (YES/NO, 77defs.mud:431, a READSTRING entry whose prompt is the question, not `>`), `y`: the lamp (in the living room) is put first in the hero's possessions, GOTO FORE1, EGYPT-FLAG set, ROB-ADV finds no valuable, the four possessions go one each to the first rooms of RANDOM-LIST (77dung.mud:1476: living room, kitchen, clearing, forest). Then `look`, `inventory`, and a walk that sees the scattered sack (forest), sword (kitchen) and lamp (living room), and `score`. Prefix 11 (input ends at the question) is a native QUIT: the empty answer leaves the stale `n` of `north` in INBUF, which refuses (FINISH -> RECORD -> QUIT). Each command was confirmed by the pinned native reference; see docs/evidence/M4/GRUE-RESURRECTION-REFERENCE.md. Input ends after `score` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "take sack",
+    "take bottle",
+    "west",
+    "take sword",
+    "east",
+    "up",
+    "north",
+    "y",
+    "look",
+    "inventory",
+    "east",
+    "west",
+    "east",
+    "west",
+    "west",
+    "score"
+  ],
+  "entry_prompts": {
+    "11": "Do you want me to try to patch you?"
+  },
+  "quit_prefixes": [
+    11
+  ],
+  "reference": {
+    "file": "docs/evidence/M4/grue-resurrection-reference.json",
+    "case": "T1-grue-resurrection-pipe"
+  }
+}

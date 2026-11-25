@@ -107,6 +107,33 @@
       "runner_test": "tests/historical_help_info_test.rkt",
       "issue": "#171 (issue), #189 (PR)",
       "covers": "help, info and ? through the read-only allowlist (ADR-0055 amendment)"
+    },
+    {
+      "id": "S11a",
+      "name": "grue-resurrection",
+      "target": "test-m4-grue-resurrection",
+      "scenario_file": "tests/scenarios/grue-resurrection.json",
+      "runner_test": "tests/historical_grue_resurrection_test.rkt",
+      "issue": "epic #163 Phase 2 (death and recovery)",
+      "covers": "death by grue in the dark attic (JIGS-UP), `y`, resurrection in the forest, the carried sword, bottle and sack and the lamp scattered over RANDOM-LIST (no valuable: ROB-ADV's valuables branch not reached), the scattered objects seen again; prefix 11 (end of input at the question) ends by the game's QUIT (stale `n` in INBUF)"
+    },
+    {
+      "id": "S11b",
+      "name": "grue-refusal",
+      "target": "test-m4-grue-refusal",
+      "scenario_file": "tests/scenarios/grue-refusal.json",
+      "runner_test": "tests/historical_grue_refusal_test.rkt",
+      "issue": "epic #163 Phase 2 (death and recovery)",
+      "covers": "death by grue, `n`, FINISH <> (score and rank) -> RECORD (both OPENs denied, ADR-0055; natively writes MDL/ZORK.LOG) -> QUIT, the rest of the input unread (declared quit ending)"
+    },
+    {
+      "id": "S11c",
+      "name": "troll-death",
+      "target": "test-m4-troll-death",
+      "scenario_file": "tests/scenarios/troll-death.json",
+      "runner_test": "tests/historical_troll_death_test.rkt",
+      "issue": "epic #163 Phase 2 (death and recovery; combat)",
+      "covers": "unarmed in the troll room: the troll staggers, wounds (ASTRENGTH -1, CURIN enabled) and kills the hero; `y`, resurrection with the wound kept, the lit lamp scattered; diagnose and score after death"
     }
   ],
   "persistence": [
