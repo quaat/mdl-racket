@@ -170,6 +170,24 @@
       "runner_test": "tests/historical_lamp_burnout_test.rkt",
       "issue": "epic #163 Phase 3 (timers, objects, scoring)",
       "covers": "the lamp on and 118 `wait`s: LNTIN 350 ticks, then LIGHT-INT's four dimmer warnings, `The lamp is dying.`, burn-out (OLIGHT? 0); `turn on lamp` refused; the dark cellar"
+    },
+    {
+      "id": "S13a",
+      "name": "match-clock",
+      "target": "test-m4-match-clock",
+      "scenario_file": "tests/scenarios/match-clock.json",
+      "runner_test": "tests/historical_match_clock_test.rkt",
+      "issue": "epic #163 Phase 3b (objects beyond the house, other clock events)",
+      "covers": "the matchbook in the Dam Lobby (troll-combat's path, then the reservoir and the Dam): MATCH-FUNCTION queues the clock event MATIN (CTICK 2) at each `light match`; it fires at the next tick (`look`, and a `wait` that stops there), `turn off match` sets it to 0, the fifth light finds no match left (ORAND 0)"
+    },
+    {
+      "id": "S13b",
+      "name": "boat-river",
+      "target": "test-m4-boat-river",
+      "scenario_file": "tests/scenarios/boat-river.json",
+      "runner_test": "tests/historical_boat_river_test.rkt",
+      "issue": "epic #163 Phase 3b (objects beyond the house, other clock events)",
+      "covers": "mirror-bat's path to Mirror Room 1, the pump from Reservoir North by the Atlantis Room, down the slide and back through the troll room to the Dam Base; the boat inflated with the pump, boarded (AVEHICLE), launched onto the River Frigid, landed, left, deflated and taken; the thief takes the grail and the trident from rooms the hero has left"
     }
   ],
   "persistence": [
@@ -253,6 +271,14 @@
     {
       "file": "tests/scenarios/failure-inventory-cases.json",
       "reason": "M4 Phase 1 discovery evidence (GAMEPLAY-FAILURE-INVENTORY.md); command sequences, not a gated parity check"
+    },
+    {
+      "file": "tests/scenarios/dam-sluice.json",
+      "reason": "M4 Phase 3b native reference only (the dam's sluice gates): this runtime stops at command 23 on entering the Maintenance Room (INV-11, PRSOBJ); tracked as an expected failure by make xfail-m4-dam-frontier, not a gated parity check"
+    },
+    {
+      "file": "tests/scenarios/maint-leak.json",
+      "reason": "M4 Phase 3b native reference only (the leak clock MNTIN): this runtime stops at command 23 on entering the Maintenance Room (INV-11, PRSOBJ); tracked as an expected failure by make xfail-m4-dam-frontier, not a gated parity check"
     }
   ]
 }

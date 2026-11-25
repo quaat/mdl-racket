@@ -4,7 +4,7 @@
 
 `make m4-check` (`scripts/m4_check.py`, epic #163 Phase 7) runs every check
 declared in [`tests/scenarios/m4-manifest.json`](../tests/scenarios/m4-manifest.json),
-one at a time: `make sources`; the eighteen M4 native-parity scenario targets;
+one at a time: `make sources`; the twenty M4 native-parity scenario targets;
 the WP4 persistence check `test-m4-replay-persistence` (a separate entry,
 never counted as a scenario); and the PLAYABLE evidence sub-checks
 `test-m3-session` and `test-m3-launcher`. It then reports the five
@@ -60,12 +60,12 @@ per-scenario steps; per-target logs are uploaded with
 
 ## M4 scenario runner (2026-11-24)
 
-The eighteen M4 native-parity scenarios (`make test-m4-house-cellar`,
+The twenty M4 native-parity scenarios (`make test-m4-house-cellar`,
 `-mailbox-drop`, `-orphan-prompt`, `-top-parser`, `-sword-glow`,
 `-troll-combat`, `-parser-ambiguity`, `-cyclops-room`, `-mirror-bat`,
 `-strange-passage`, `-help-info`, `-grue-resurrection`, `-grue-refusal`,
 `-troll-death`, `-treasure-deposit`, `-thief-robbery`, `-cure-recovery`,
-`-lamp-burnout`) run through one shared driver,
+`-lamp-burnout`, `-match-clock`, `-boat-river`) run through one shared driver,
 `tests/m4_scenario_runner.rkt`. Each test file keeps only its command list,
 its scenario-specific reference assertions, its read-only checkpoint function
 and its post-FLOAD sections. Every comparison is byte-exact after ADR-0053
@@ -178,7 +178,7 @@ at a READSTRING entry that changes the RANDOM state, the storage ledger, the
 session output or the record of signalled MDL errors fails with kind
 `run-guard`; other mutation by a read (interning a new ATOM, game code that
 sets state) is not observed, so checkpoint functions must stay pure reads of
-existing names (as all eighteen do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
+existing names (as all twenty do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
 exist). Coverage gained: the per-turn
 checkpoints at READSTRING entry (the newer per-prefix tests compared only
 end checkpoints) and the one-READSTRING-per-command check.
@@ -203,6 +203,20 @@ The Phase 3 references keep each Dkk case's log as its sha256 and size
 (`diag_logs`): their last checkpoints are `end_checkpoints`, and the logs
 grow with k.
 
+*Beyond the house (M4 Phase 3b).* match-clock and boat-river use the "dam"
+and "boat" checkpoint profiles (`tests/m4_dam_checkpoint.rkt`,
+`tests/m4_boat_checkpoint.rkt`: the timers fields plus the dam flags, the
+Maintenance Room, the leak and match clocks, the boats, the pump and the
+winner's vehicle) and declare `#:eof-classification-ignore-keys
+'(robber_hroom)` like the Phase 3 scenarios. `make xfail-m4-dam-frontier`
+(`tests/historical_dam_frontier_test.rkt`) is not a parity check and not in
+the manifest's scenarios: a tracked expected failure (INV-11) that runs the
+dam-sluice and maint-leak routes, checks their committed native references,
+and passes only while this runtime still stops at command 23 (entering the
+Maintenance Room: `unknown declaration type PRSOBJ`). It fails (XPASS) once
+the room can be entered, so that both routes are promoted to scenarios.
+Evidence: [DAM-CLOCKS.md](evidence/M4/DAM-CLOCKS.md).
+
 *Diagnostic stdout hashes.* In every M4 reference, the diagnostic runs'
 (X1, Dkk) `stdout_sha256` is the hash of the raw native stdout. That stdout
 echoes the disposable `$TMPDIR` log path, and the stored `stdout_raw` has the
@@ -211,7 +225,7 @@ corruption, and the runner never uses diagnostic stdouts. The P/T1/T1b
 transcripts it compares contain no path, and their hashes are re-checked.
 
 **Per-prefix mode** (`M4_SCENARIO_MODE=per-prefix`; `make
-m4-scenarios-per-prefix` runs all eighteen; not on CI's default path). The
+m4-scenarios-per-prefix` runs all twenty; not on CI's default path). The
 pre-runner protocol through the same module: one boot per prefix k = 0..n
 with only k commands; the whole output equals the native prefix-k stdout and
 the state after end of input equals the reference end checkpoint k
@@ -249,7 +263,7 @@ export PLTCOLLECTS=":$PWD" TMPDIR=/tmp
 make test-m4-mirror-bat                          # single-run (default)
 M4_SCENARIO_MODE=per-prefix racket tests/historical_mirror_bat_test.rkt
 make test-m4-grue-refusal                        # declared QUIT ending
-make m4-scenarios-per-prefix                     # all eighteen, per-prefix
+make m4-scenarios-per-prefix                     # all twenty, per-prefix
 raco test tests/m4_scenario_runner.rkt           # runner unit tests (also in make test)
 ```
 

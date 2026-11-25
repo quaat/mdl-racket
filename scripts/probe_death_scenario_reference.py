@@ -3,7 +3,9 @@
 (epic #163, death and recovery): grue-resurrection, grue-refusal and
 troll-death, and the M4 Phase 3 timer, object and scoring scenarios
 (epic #163 Phase 3): treasure-deposit, thief-robbery, cure-recovery and
-lamp-burnout (tests/scenarios/<name>.json).
+lamp-burnout, and the M4 Phase 3b scenarios beyond the house: match-clock and
+boat-river, and the native-only dam-sluice and maint-leak references
+(tests/scenarios/<name>.json).
 
 Read-only reference investigation. Nothing here is runtime code, and the game
 sources under .cache/upstream are never written: every run boots a fresh copy
@@ -73,7 +75,13 @@ OCONTENTS (OIDs), the thief's OROOM, and the ROBBER demon's HROOM (RID),
 HFLAG and HOBJS (OIDs: the thief's bag).  Pure reads as well.  A timers
 capture keeps each Dkk case's log only as diag_log_sha256 and diag_log_bytes
 (the logs grow with k; their last checkpoints are end_checkpoints, and X1's
-log is kept in full); the reference says so in `diag_logs`.
+log is kept in full); the reference says so in `diag_logs`.  The Phase 3b
+scenarios use the "dam" profile (DAM_DIAG_FORMS: the timers fields, then
+GATE-FLAG, LOW-TIDE, the Maintenance Room's RVARS and RMUNGBIT, the leak clock
+MNTIN, the wrench, the tube, the putty, the trunk, the matchbook and the match
+clock MATIN) or the "boat" profile (BOAT_DIAG_FORMS: the dam fields, then the
+winner's AVEHICLE and the OROOM of the folded boat, the inflated boat and the
+pump), compacted like the timers profile.
 
 Confusion is GPLv3 and is used only as a behaviour reference; no Confusion
 source is copied into this script.
@@ -141,6 +149,57 @@ assert DIAG_FORMS.count(_FIND_OLD) == 1 and DIAG_FORMS.count(_CP_END) == 1
 TIMERS_DIAG_FORMS = (DIAG_FORMS.replace(_FIND_OLD, _FIND_NEW)
                      .replace(_CP_END, _TIMERS_FIELDS + _CP_END))
 
+# The Phase 3b "dam" profile: TIMERS_DIAG_FORMS with the Flood Control Dam #3
+# objects and room found once and more checkpoint fields before CP-END: the
+# gate and tide flags (77act1.mud:677, BOLT-FUNCTION), the Maintenance Room's
+# RVARS (MAINT-ROOM's water level) and RMUNGBIT, the leak clock MNTIN's CFLAG
+# and CTICK, the wrench's OROOM, the tube's OOPEN?, the putty's OROOM and OCAN,
+# the trunk's OROOM and OVISON bit (BOLT-FUNCTION makes it visible), and the
+# matchbook's ORAND (matches left), OLIGHT? and FLAMEBIT with the match clock
+# MATIN's CFLAG and CTICK (MATCH-FUNCTION, 77act1.mud:1925).
+_DAM_FIND_OLD = '<SETG DIAG-THIEF <FIND-OBJ "THIEF">> T>'
+_DAM_FIND_NEW = ('<SETG DIAG-THIEF <FIND-OBJ "THIEF">> <SETG DIAG-MAINT <FIND-ROOM "MAINT">> '
+                 '<SETG DIAG-WRENC <FIND-OBJ "WRENC">> <SETG DIAG-TUBE <FIND-OBJ "TUBE">> '
+                 '<SETG DIAG-PUTTY <FIND-OBJ "PUTTY">> <SETG DIAG-TRUNK <FIND-OBJ "TRUNK">> '
+                 '<SETG DIAG-MATCH <FIND-OBJ "MATCH">> T>')
+_DAM_FIELDS = (
+    '<DIAG "CP-GATE-FLAG" ,GATE-FLAG!-FLAG> '
+    '<DIAG "CP-LOW-TIDE" ,LOW-TIDE!-FLAG> '
+    '<DIAG "CP-MAINT-RVARS" <RVARS ,DIAG-MAINT>> '
+    '<DIAG "CP-MAINT-MUNGED" <DIAG-BIT <RBITS ,DIAG-MAINT> ,RMUNGBIT>> '
+    '<DIAG "CP-MNTIN-CFLAG" <CFLAG ,MNTIN>> '
+    '<DIAG "CP-MNTIN-CTICK" <CTICK ,MNTIN>> '
+    '<DIAG "CP-WRENC-OROOM" <DIAG-ROOM ,DIAG-WRENC>> '
+    '<DIAG "CP-TUBE-OOPEN" <OOPEN? ,DIAG-TUBE>> '
+    '<DIAG "CP-PUTTY-OROOM" <DIAG-ROOM ,DIAG-PUTTY>> '
+    '<DIAG "CP-PUTTY-OCAN" <COND (<OCAN ,DIAG-PUTTY> <OID <OCAN ,DIAG-PUTTY>>)>> '
+    '<DIAG "CP-TRUNK-OROOM" <DIAG-ROOM ,DIAG-TRUNK>> '
+    '<DIAG "CP-TRUNK-VISIBLE" <DIAG-BIT <OFLAGS ,DIAG-TRUNK> ,OVISON>> '
+    '<DIAG "CP-MATCH-ORAND" <ORAND ,DIAG-MATCH>> '
+    '<DIAG "CP-MATCH-OLIGHT" <OLIGHT? ,DIAG-MATCH>> '
+    '<DIAG "CP-MATCH-FLAMING" <DIAG-BIT <OFLAGS ,DIAG-MATCH> ,FLAMEBIT>> '
+    '<DIAG "CP-MATIN-CFLAG" <CFLAG ,MATIN>> '
+    '<DIAG "CP-MATIN-CTICK" <CTICK ,MATIN>> ')
+assert TIMERS_DIAG_FORMS.count(_DAM_FIND_OLD) == 1 and TIMERS_DIAG_FORMS.count(_CP_END) == 1
+DAM_DIAG_FORMS = (TIMERS_DIAG_FORMS.replace(_DAM_FIND_OLD, _DAM_FIND_NEW)
+                  .replace(_CP_END, _DAM_FIELDS + _CP_END))
+
+# The Phase 3b "boat" profile: DAM_DIAG_FORMS with the boat objects found once
+# and more checkpoint fields before CP-END: the winner's AVEHICLE (OID), the
+# OROOM of the folded boat IBOAT, the inflated boat RBOAT and the pump
+# (IBOAT-FUNCTION and RBOAT-FUNCTION, 77act2.mud:256-297).
+_BOAT_FIND_OLD = '<SETG DIAG-MATCH <FIND-OBJ "MATCH">> T>'
+_BOAT_FIND_NEW = ('<SETG DIAG-MATCH <FIND-OBJ "MATCH">> <SETG DIAG-IBOAT <FIND-OBJ "IBOAT">> '
+                  '<SETG DIAG-RBOAT <FIND-OBJ "RBOAT">> <SETG DIAG-PUMP <FIND-OBJ "PUMP">> T>')
+_BOAT_FIELDS = (
+    '<DIAG "CP-WINNER-AVEHICLE" <COND (<AVEHICLE ,WINNER> <OID <AVEHICLE ,WINNER>>)>> '
+    '<DIAG "CP-IBOAT-OROOM" <DIAG-ROOM ,DIAG-IBOAT>> '
+    '<DIAG "CP-RBOAT-OROOM" <DIAG-ROOM ,DIAG-RBOAT>> '
+    '<DIAG "CP-PUMP-OROOM" <DIAG-ROOM ,DIAG-PUMP>> ')
+assert DAM_DIAG_FORMS.count(_BOAT_FIND_OLD) == 1 and DAM_DIAG_FORMS.count(_CP_END) == 1
+BOAT_DIAG_FORMS = (DAM_DIAG_FORMS.replace(_BOAT_FIND_OLD, _BOAT_FIND_NEW)
+                   .replace(_CP_END, _BOAT_FIELDS + _CP_END))
+
 # Scenario name -> its checkpoint profile's diagnostic forms.
 PROFILES = {
     "grue-resurrection": DIAG_FORMS,
@@ -150,6 +209,10 @@ PROFILES = {
     "thief-robbery": TIMERS_DIAG_FORMS,
     "cure-recovery": TIMERS_DIAG_FORMS,
     "lamp-burnout": TIMERS_DIAG_FORMS,
+    "dam-sluice": DAM_DIAG_FORMS,
+    "maint-leak": DAM_DIAG_FORMS,
+    "match-clock": DAM_DIAG_FORMS,
+    "boat-river": BOAT_DIAG_FORMS,
 }
 NAMES = tuple(PROFILES)
 
@@ -326,7 +389,7 @@ def main() -> int:
     # a long scenario's reference would hold O(n^2) log text.  Each is replaced
     # by its sha256 and size; what the runner uses from it, its last
     # checkpoint, is kept in end_checkpoints, and X1's log is kept in full.
-    compact = diag_forms is TIMERS_DIAG_FORMS
+    compact = any(diag_forms is f for f in (TIMERS_DIAG_FORMS, DAM_DIAG_FORMS, BOAT_DIAG_FORMS))
     if compact:
         for r in rows[3 + n:]:
             log = r.pop("diag_log", "").encode("latin-1")
