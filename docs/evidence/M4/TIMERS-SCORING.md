@@ -64,7 +64,7 @@ that, 13.8 MB without.
 
 **The thief's end-of-input move (runner option, ADR-0062 amendment).** The
 ROBBER demon moves the thief's HROOM on every turn, the end-of-input turn
-included. With HROOM in the checkpoint every shorter prefix except k = 0
+included. With HROOM in the checkpoint almost every shorter prefix
 would be classified non-standard and re-run (one boot each). thief-robbery
 classifies with it (21 boots). treasure-deposit, cure-recovery and
 lamp-burnout declare the new opt-in `#:eof-classification-ignore-keys
@@ -103,7 +103,7 @@ system").
 | `racket tests/historical_thief_robbery_test.rkt` (single-run) | 0 | 22 turns; 21 boots (20 reboots: HROOM moves on every end-of-input turn but k = 0); 128.5 s |
 | `racket tests/historical_cure_recovery_test.rkt` (single-run) | 0 | 36 turns; 1 boot; 6.0 s |
 | `racket tests/historical_lamp_burnout_test.rkt` (single-run) | 0 | 132 turns; 1 boot; 6.4 s |
-| treasure-deposit and cure-recovery single-run with HROOM also used for classification (first version) | 0 | 19 boots 117.0 s; 35 boots 227.2 s |
+| treasure-deposit and cure-recovery single-run with HROOM also used for classification (an earlier variant) | 0 | 19 boots 117.0 s; 35 boots 227.2 s |
 | `M4_SCENARIO_MODE=per-prefix racket tests/historical_treasure_deposit_test.rkt` | 0 | 22 boots, 136.2 s |
 | `M4_SCENARIO_MODE=per-prefix racket tests/historical_thief_robbery_test.rkt` | 0 | 22 boots, 135.3 s |
 | `M4_SCENARIO_MODE=per-prefix racket tests/historical_cure_recovery_test.rkt` | 0 | 36 boots, 235.1 s |
@@ -164,7 +164,7 @@ with the classification option.
 |---|---|---|
 | `scoring.treasure-deposit` | treasure-deposit | one treasure taken and put in the case (ASCORE = RAW-SCORE + OTVALs); several treasures and taking one out of the case are not exercised |
 | `timers.cure-clock-recovery` | cure-recovery | one light wound healed; several wounds (CURIN re-armed per point) not exercised |
-| `timers.lamp-burnout` | lamp-burnout | the lamp on and carried throughout; turning it off to pause the clock, the countdown away from the hero and moving in the dark are not exercised |
+| `timers.lamp-burnout` | lamp-burnout | the lamp on and carried throughout; turning it off to pause the clock, the countdown away from the hero and moving from a dark room are not exercised |
 
 Not newly covered:
 
@@ -210,7 +210,7 @@ Confusion code was copied. New scripts and tests are original MIT-0 code.
 - Each scenario is one fixed clock and seed; other seeds take other branches
   (the thief may take the painting on the deposit route, or not on the
   robbery route).
-- robber_hroom does not decide reboots in three of the four scenarios (above); the thief's end-of-input moves are executed by this runtime only in thief-robbery and in per-prefix mode.
+- robber_hroom does not decide reboots in three of the four scenarios (above); the thief's end-of-input moves are executed by this runtime only in thief-robbery, in treasure-deposit's prefix-15 reboot, and in per-prefix mode.
 - HROOM's RID rendering covers only the PNAMEs observed (`!` escaped); another unsafe PNAME fails strictly.
 - lamp-burnout's reference is 4.1 MB; its per-prefix run is about 20 minutes.
 - The four single-run targets add about two and a half minutes to `make
@@ -224,3 +224,47 @@ Confusion code was copied. New scripts and tests are original MIT-0 code.
 Phase 3 continues with the objects branch beyond the house (the dam, the
 boat, the balloon, the coal mine) and a thief fight; the maintainer may
 decide whether `combat.thief` should be split into stealing and fighting.
+
+## Independent review and gate (2026-11-25)
+
+A read-only independent review of `origin/main...HEAD` (HEAD 9f36f6a)
+checked:
+
+* the runner option's default path and the false-pass question;
+* that the death profile's probe forms are byte-identical to the committed
+  death references;
+* that native diagnostics have no side effects;
+* that checkpoint reads are pure and the `\!` rendering is right;
+* every key turn against the references;
+* that the branch claims are precise and the route disclosure is complete.
+
+Verdict: approve with nits, plus one evidence gap. The per-prefix runs of
+treasure-deposit and cure-recovery predated the switch from
+`#:ignore-keys` to `#:eof-classification-ignore-keys`. In those runs HROOM
+was not compared at each prefix's end.
+
+**Gap closed by the orchestrator's gate at 9f36f6a** (sequential, Racket
+v7.9 BC). Every target exited 0: `make test`, test-historical,
+m3-source-progress, test-m3-interactive, test-m3-session, test-m3-launcher,
+test-m3-bang, m3-check, `make m4-check` (SCENARIO_PARITY PASS for 18
+scenarios) and `make m4-scenarios-per-prefix` (3513 s). The per-prefix
+results for the four new scenarios, now comparing HROOM at every prefix's
+end:
+
+| Scenario | Turns matched | Boots | Time |
+|---|---|---|---|
+| treasure-deposit | 22 | 22 | 132.4 s |
+| thief-robbery | 22 | 22 | 131.8 s |
+| cure-recovery | 36 | 36 | 228.5 s |
+| lamp-burnout | 132 | 132 | 1212.9 s |
+
+Nits fixed after the review:
+
+* The runner rejects a key declared both end-only and
+  classification-ignored.
+* The new keyword is documented at `run-m4-scenario`.
+* Prefix counts corrected: "almost every" shorter prefix, and 130 of 131
+  for lamp-burnout.
+* The treasure-deposit P15 reboot is listed among the runs that execute the
+  thief's end-of-input move.
+* The lamp wording now reads "moving from a dark room".

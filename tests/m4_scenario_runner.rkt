@@ -516,6 +516,11 @@
 (define (run-m4-scenario name expected-commands
                          #:checkpoint checkpoint
                          #:turn-checkpoint [turn-checkpoint checkpoint]
+                         ;; #:eof-classification-ignore-keys: fields left out
+                         ;; only when classifying which prefixes have a
+                         ;; non-standard end-of-input tail (and are re-run);
+                         ;; still compared at every READSTRING entry, at the
+                         ;; end and in per-prefix mode (ADR-0062 amendment).
                          #:end-only-keys [end-only-keys '()]
                          #:ignore-keys [ignore-keys '()]
                          #:eof-classification-ignore-keys [eof-classification-ignore-keys '()]
@@ -531,6 +536,12 @@
                (equal? eof-classification-ignore-keys (remove-duplicates eof-classification-ignore-keys)))
     (error 'm4-scenario "#:eof-classification-ignore-keys must be a list of distinct field symbols, not ~s"
            eof-classification-ignore-keys))
+  ;; An end-only key is not compared at READSTRING entries, so it cannot also
+  ;; be a classification key, which promises comparison at every entry
+  ;; (independent review).
+  (for ([key (in-list eof-classification-ignore-keys)])
+    (when (memq key end-only-keys)
+      (error 'm4-scenario "~a cannot be both an end-only key and an end-of-input classification key" key)))
   (unless (memq prompt-split '(any line-initial))
     (error 'm4-scenario "#:prompt-split must be 'any or 'line-initial, not ~s" prompt-split))
   (unless (and (hash? entry-prompts)

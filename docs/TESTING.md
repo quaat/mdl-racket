@@ -186,7 +186,7 @@ end checkpoints) and the one-READSTRING-per-command check.
 *The thief's end-of-input move (M4 Phase 3).* The Phase 3 checkpoint
 (`tests/m4_timers_checkpoint.rkt`) reads the ROBBER demon's HROOM, which the
 demon changes on every turn, the end-of-input turn included. With that field
-every shorter prefix (except k = 0) would have a non-standard end checkpoint
+almost every shorter prefix would have a non-standard end checkpoint
 and be re-run (one boot each). thief-robbery classifies with it (21 boots in
 single-run mode). treasure-deposit, cure-recovery and lamp-burnout declare
 `#:eof-classification-ignore-keys '(robber_hroom)` (ADR-0062 amendment): the

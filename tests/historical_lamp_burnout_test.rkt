@@ -20,8 +20,8 @@
 ;; The ROBBER demon moves the thief (HROOM) on every turn, the end-of-input
 ;; turn included. robber_hroom is compared at every READSTRING entry, at the
 ;; end and in per-prefix mode, but not used to classify end-of-input tails
-;; (#:eof-classification-ignore-keys, ADR-0062 amendment): otherwise every one
-;; of the 131 shorter prefixes would be re-run per prefix (131 boots, about
+;; (#:eof-classification-ignore-keys, ADR-0062 amendment): otherwise 130 of
+;; the 131 shorter prefixes would be re-run per prefix (131 boots, about
 ;; 20 minutes) in single-run mode. The hero stays above ground until the last
 ;; two commands; the thief never meets him and his bag stays empty.
 ;;
