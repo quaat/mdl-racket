@@ -340,8 +340,25 @@ def sha256_file(path: Path) -> str | None:
 
 
 def git(*args: str) -> str | None:
-    r = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+    # safe.directory: CI containers check the repository out as another user,
+    # and git then refuses to read it ("dubious ownership"), which left the
+    # report without a commit. Trusting exactly this checkout for this one
+    # read-only call changes nothing else.
+    r = subprocess.run(["git", "-c", f"safe.directory={ROOT}", *args], cwd=ROOT,
+                       capture_output=True, text=True)
     return r.stdout.strip() if r.returncode == 0 else None
+
+
+def git_commit() -> tuple[str | None, str]:
+    """The checked-out commit and where it came from. GITHUB_SHA (on a
+    pull_request event, GitHub's merge commit) only when git cannot answer."""
+    sha = git("rev-parse", "HEAD")
+    if sha:
+        return sha, "git rev-parse HEAD"
+    env = os.environ.get("GITHUB_SHA")
+    if env:
+        return env, "GITHUB_SHA (git unavailable)"
+    return None, "unavailable"
 
 
 def tool_version(cmd: list[str]) -> str | None:
@@ -467,6 +484,7 @@ def main(argv: list[str] | None = None) -> int:
             scen_counts[e["name"]] = len(load_json(ROOT / e["scenario_file"])["commands"])
         except (OSError, KeyError, ValueError):
             scen_counts[e["name"]] = None
+    commit, commit_source = git_commit()
     report = {
         "schema_version": 1,
         "target": "make m4-check",
@@ -474,7 +492,8 @@ def main(argv: list[str] | None = None) -> int:
         "mode": {"scenarios_only": args.scenarios_only, "per_prefix": args.per_prefix,
                  "skip": args.skip, "require_accepted": args.require_accepted,
                  "target_timeout_s": args.target_timeout},
-        "git_commit": git("rev-parse", "HEAD"),
+        "git_commit": commit,
+        "git_commit_source": commit_source,
         "git_branch": git("rev-parse", "--abbrev-ref", "HEAD"),
         "git_worktree_dirty": bool(dirty) if dirty is not None else None,
         "sources_lock": {k: v["commit"] for k, v in lock["sources"].items()},
