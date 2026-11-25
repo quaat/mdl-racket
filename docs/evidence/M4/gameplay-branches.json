@@ -83,9 +83,9 @@
          "checks": ["test-m4-house-cellar", "test-m4-parser-ambiguity"]},
         {"id": "objects.puzzles-beyond-the-house", "required": true,
          "description": "the dam, the boat and the river, the balloon, the coal-mine machine and basket, the gas room",
-         "checks": ["test-m4-boat-river"],
-         "evidence_only": ["dam-sluice native reference (the dam's sluice gates; not gated: INV-11, make xfail-m4-dam-frontier)"],
-         "note": "covered under the fixed clock and seed by ONE listed puzzle, the boat (boat-river): the pump fetched from Reservoir North, the folded boat inflated with it at the Dam Base (IBOAT-FUNCTION 77act2.mud:285), boarded, launched onto the River Frigid (RIVR1 only), landed, left, deflated and taken. Not exercised: the river downstream (RIVR2 on, the falls, the buoy); the dam (the yellow button, the wrench and bolt, the sluice gates, the drained reservoir) is recorded natively (dam-sluice) but this runtime stops on entering the Maintenance Room (INV-11); the balloon (its WIRE-FUNCTION, 77act2.mud:585, declares the same undefined PRSOBJ: source-derived, not run), the coal-mine machine and basket, the gas room. The branch lists five puzzles and one is covered: the maintainer may split it into one branch per puzzle, which would leave four uncovered"}
+         "checks": [],
+         "evidence_only": ["test-m4-boat-river (gated scenario: the boat only, one of the five listed puzzles)", "dam-sluice native reference (the dam's sluice gates; not gated: INV-11, make xfail-m4-dam-frontier)"],
+         "note": "UNCOVERED by this file's reading (five puzzles are listed and one is exercised; read as strictly as combat.thief). Exercised under the fixed clock and seed: ONE listed puzzle, the boat (boat-river): the pump fetched from Reservoir North, the folded boat inflated with it at the Dam Base (IBOAT-FUNCTION 77act2.mud:285), boarded, launched onto the River Frigid (RIVR1 only), landed, left, deflated and taken. Not exercised: the river downstream (RIVR2 on, the falls, the buoy); the dam (the yellow button, the wrench and bolt, the sluice gates, the drained reservoir) is recorded natively (dam-sluice) but this runtime stops on entering the Maintenance Room (INV-11); the balloon (its WIRE-FUNCTION, 77act2.mud:585, declares the same undefined PRSOBJ: source-derived, not run), the coal-mine machine and basket, the gas room. The maintainer may split this branch into one branch per puzzle; the boat would then be covered and four would remain"}
       ]
     },
     {
@@ -136,7 +136,7 @@
      "status": "open"},
     {"id": "INV-11", "title": "MAINT-ROOM's attached #DECL names the undefined type PRSOBJ: entering the dam's Maintenance Room ends the session (unknown declaration type PRSOBJ)",
      "class": "(a) reachable by ordinary play", "severity": "P1",
-     "issue": null, "issue_source": "not filed yet (local branch feat/m4-dam; the orchestrator files it); recorded in GAMEPLAY-FAILURE-INVENTORY.md and DAM-CLOCKS.md",
+     "issue": "#193", "issue_source": "filed by the orchestrator 2026-11-25 (maintainer decision pending); recorded in GAMEPLAY-FAILURE-INVENTORY.md and DAM-CLOCKS.md",
      "status": "open"}
   ],
   "resolved_inventory": [

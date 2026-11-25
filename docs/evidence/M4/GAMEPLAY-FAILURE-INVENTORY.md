@@ -10,7 +10,7 @@ response. An unassigned operator, or a strict error that reaches the
 launcher and ends the session, is a runtime failure. No runtime code was
 changed in this slice. Fixes are separate slices (see the fix order at the
 end). Issue and PR columns read "to create" where no issue exists yet
-(INV-06 is #172, INV-07 is #173; INV-11, added by M4 Phase 3b, has none yet).
+(INV-06 is #172, INV-07 is #173; INV-11, added by M4 Phase 3b, is #193).
 
 ## Provenance and commands
 
@@ -173,7 +173,7 @@ result, and the fix and regression test.
 | INV-08 CLOSE / FILE-LENGTH / ACCESS / file READSTRING | Behind INV-05, and behind a successful OPEN in RECORD and DO-UNSCRIPT | (b) | decided-strict (ADR-0055) | P3 | **partly fixed** by M4 S10 (#171): FILE-LENGTH, file READSTRING and CLOSE on the allowlisted read-only CHANNELs only; ACCESS, and CLOSE of any other CHANNEL, stay strict (unreachable: RECORD's and DO-SCRIPT's OPENs are still denied) | #171 |
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
-| **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)) | to create (maintainer decision) |
+| **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)) | #193 (maintainer decision pending) |
 
 **INV-01: ABS.** *Status: fixed by M4 S8 (#167). ABS is a builtin, and the operator sweep JSON was regenerated, so ABS is now class `builtin`.*
 
