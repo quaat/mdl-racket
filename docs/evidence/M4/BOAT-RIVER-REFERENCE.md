@@ -14,7 +14,8 @@ for every run. Fixed clock: shim `scripts/reference/fixed_time.c` (sha256
 ## Route choice (no seed search)
 
 The pump is in Reservoir North. With the reservoir full (the dam's sluice
-gates closed, which this runtime cannot change: INV-11) the only way in is
+gates closed; when this was captured the runtime could not open them,
+INV-11, since fixed by S14 / #193) the only way in is
 the Atlantis Room, below the Cave east of Mirror Room 1. mirror-bat's first
 thirty-one commands reach Mirror Room 1 (the round room's RANDOM exits under
 this clock and seed, then `rub mirror`); they are reused unchanged. Four

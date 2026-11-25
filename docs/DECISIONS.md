@@ -113,6 +113,58 @@ the manual's declaration checks when the function runs.
 or DECL association can make a previously defined Pattern valid. The source
 frontier can advance without changing upstream bytes.
 
+**Amendment (M4 issue #193, INV-11; maintainer decision 2026-11-25):**
+"Amend the deferred-declaration ADR: a type name in an attached declaration
+that is still undefined when checked is not enforced, matching Confusion.
+This is a recorded deviation from the manual's strict reading, limited to
+undefined type names; known types stay strict. No source change."
+
+Precisely:
+
+* A TYPE ATOM in an attached `#DECL` Pattern that was unresolved at
+  definition (retained as above) and is *still* unresolved when checked —
+  no registered TYPE of that name and no `DECL` association on it — matches
+  any value at that position (argument binding, AUX/OPTIONAL binding,
+  assignment and the VALUE result alike). This holds at top level and
+  nested inside `OR`, structure and `[REST ...]`/NTH Patterns; the rest of
+  such a Pattern stays strict.
+* If the name has been defined by then (NEWTYPE, or a `DECL` association
+  via `PUT`), it is checked strictly as that type or Pattern, exactly as
+  before. Resolution happens at every check, so a later definition takes
+  effect for functions defined earlier. A `DECL` association *added after
+  the definition* whose target is itself unknown, cyclic or malformed is
+  still a strict error at the check.
+* Order matters for an association's own target (independent review). An
+  association that already exists when the function is defined is followed
+  with the attached deferral (the #98 behaviour). So an unknown name inside
+  it, for example BAR in `<OR BAR FIX>`, is retained, and while still
+  undefined it matches any value; once defined it is strict. The 1977
+  sources never reach this case: their only association, RAPPLIC, names
+  defined types. Pinned by `tests/deferred_decl_type_test.rkt`.
+* Explicit `DECL?`, positional (RSUBR-style `"VALUE"`) declarations and
+  every other path that normalizes a Pattern without the attached deferral
+  (GDECL, checked against an existing value and at each SETG; a NEWTYPE's
+  `DECL` association checked by CHTYPE) are unchanged: an unknown name
+  there still raises `unknown declaration type`. Every known type stays
+  strict everywhere.
+* This is a recorded deviation from the manual's attached-check rule and an
+  alignment with pinned Confusion for undefined names only. Pinned Confusion
+  checks no attached declarations at all; this runtime still checks every
+  known type in attached declarations, so that difference remains.
+
+**Why:** MAINT-ROOM (77act1.mud:739-741), WIRE-FUNCTION (77act2.mud:585-587)
+and GNOME-FUNCTION (77act2.mud:768-769) declare `PRSOBJ`, which no 1977
+source file defines; under the strict reading entering the dam's
+Maintenance Room ended the session (INV-11), while the native game runs.
+The alternative, a versioned source patch defining PRSOBJ, would change
+upstream provenance.
+
+**Consequence:** The dam puzzle and its leak clock become reachable without
+changing upstream bytes. A typo in a type name in an attached declaration
+is no longer reported at call time; it is still reported by `DECL?`,
+positional declarations and GDECL. Evidence:
+`docs/evidence/M4/S14-PRSOBJ-DECL.md`.
+
 ## ADR: Lazy NTH declaration matching for M3 issue #96
 
 **Decision:** Normalize `[n pattern ...]` as a counted sequence in the

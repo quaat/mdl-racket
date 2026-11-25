@@ -64,9 +64,8 @@
          "note": "covered under the fixed clock and seed by cure-recovery: one light wound from the troll (ASTRENGTH -1), CURIN counted down through WAIT and diagnose (28 -> 2) and CURE-CLOCK healing it (ASTRENGTH 0, CURIN disabled). Not exercised: several wounds (CURIN re-armed to CURE-WAIT per remaining point), a positive ASTRENGTH reset to 0. troll-death also enables CURIN and checkpoints its CTICK"},
         {"id": "timers.other-clock-events", "required": true,
          "description": "CEVENT clock interrupts beyond the troll and cure clocks (CLOCK-INT 77rooms.mud:1657)",
-         "checks": ["test-m4-match-clock"],
-         "evidence_only": ["maint-leak native reference (the Maintenance Room leak clock MNTIN; not gated: INV-11, make xfail-m4-dam-frontier)"],
-         "note": "covered under the fixed clock and seed by one clock event, the match clock MATIN (match-clock: MATCH-FUNCTION 77act1.mud:1925 queues it with CTICK 2 at each `light match`; it fires at the next tick under a regular command and under a `wait`, which stops there; `turn off match` sets it to 0; the CLOCKER's whole event list is checkpointed every turn). The dam's leak clock MNTIN (CTICK -1, fires on every clock pass) is recorded natively (maint-leak) but this runtime stops on entering the Maintenance Room (INV-11). Not reached: the candle (CNDIN), balloon (BINT, BRNIN), fuse (FUSIN), ledge (LEDIN), safe (SAFIN), gnome (VLGIN, GNOIN), bucket (BCKIN) and sphere (SPHIN) clocks"}
+         "checks": ["test-m4-match-clock", "test-m4-maint-leak"],
+         "note": "covered under the fixed clock and seed by two clock events: the match clock MATIN (match-clock: MATCH-FUNCTION 77act1.mud:1925 queues it with CTICK 2 at each `light match`; it fires at the next tick under a regular command and under a `wait`, which stops there; `turn off match` sets it to 0) and the dam's leak clock MNTIN (maint-leak: MAINT-ROOM 77act1.mud:737 queues it with CTICK -1 at `push blue button`, so it fires on every CLOCK-DEMON pass and raises the Maintenance Room's water level, five passes during one `wait`; LEAK-FUNCTION's putty sets it to 0; reachable since INV-11 was fixed, #193). The CLOCKER's whole event list is checkpointed every turn. Not reached: the candle (CNDIN), balloon (BINT, BRNIN), fuse (FUSIN), ledge (LEDIN), safe (SAFIN), gnome (VLGIN, GNOIN), bucket (BCKIN) and sphere (SPHIN) clocks"}
       ]
     },
     {
@@ -84,8 +83,8 @@
         {"id": "objects.puzzles-beyond-the-house", "required": true,
          "description": "the dam, the boat and the river, the balloon, the coal-mine machine and basket, the gas room",
          "checks": [],
-         "evidence_only": ["test-m4-boat-river (gated scenario: the boat only, one of the five listed puzzles)", "dam-sluice native reference (the dam's sluice gates; not gated: INV-11, make xfail-m4-dam-frontier)"],
-         "note": "UNCOVERED by this file's reading (five puzzles are listed and one is exercised; read as strictly as combat.thief). Exercised under the fixed clock and seed: ONE listed puzzle, the boat (boat-river): the pump fetched from Reservoir North, the folded boat inflated with it at the Dam Base (IBOAT-FUNCTION 77act2.mud:285), boarded, launched onto the River Frigid (RIVR1 only), landed, left, deflated and taken. Not exercised: the river downstream (RIVR2 on, the falls, the buoy); the dam (the yellow button, the wrench and bolt, the sluice gates, the drained reservoir) is recorded natively (dam-sluice) but this runtime stops on entering the Maintenance Room (INV-11); the balloon (its WIRE-FUNCTION, 77act2.mud:585, declares the same undefined PRSOBJ, as does GNOME-FUNCTION, 77act2.mud:768: source-derived, not run), the coal-mine machine and basket, the gas room. The maintainer may split this branch into one branch per puzzle; the boat would then be covered and four would remain"}
+         "evidence_only": ["test-m4-boat-river (gated scenario: the boat, one of the five listed puzzles)", "test-m4-dam-sluice (gated scenario: the dam, one of the five listed puzzles)"],
+         "note": "UNCOVERED by this file's reading (five puzzles are listed and two are exercised; read as strictly as combat.thief). Exercised under the fixed clock and seed: TWO listed puzzles. The boat (boat-river): the pump fetched from Reservoir North, the folded boat inflated with it at the Dam Base (IBOAT-FUNCTION 77act2.mud:285), boarded, launched onto the River Frigid (RIVR1 only), landed, left, deflated and taken. The dam (dam-sluice; reachable since INV-11 was fixed, #193): the wrench, the bolt refused without GATE-FLAG, the yellow button, the bolt turned (BOLT-FUNCTION 77act1.mud:701: the sluice gates open, LOW-TIDE), the trunk taken from the drained reservoir, across the reservoir bed. Not exercised: the river downstream (RIVR2 on, the falls, the buoy); the reservoir refilling (the gates closed again); the balloon (its WIRE-FUNCTION, 77act2.mud:585, declares the same undefined PRSOBJ, as does GNOME-FUNCTION, 77act2.mud:768: now unchecked like MAINT-ROOM's, source-derived, not run), the coal-mine machine and basket, the gas room. The maintainer may split this branch into one branch per puzzle; the boat and the dam would then be covered and three would remain"}
       ]
     },
     {
@@ -133,10 +132,6 @@
     {"id": "INV-07", "title": "PRINT is unassigned on the game's ERROR handler path (HANDLE, 77rooms.mud:251)",
      "class": "(b) error path", "severity": "P2",
      "issue": "#173", "issue_source": "verified with gh by the orchestrator 2026-11-25 (open, maintainer decision pending); linked in GAMEPLAY-FAILURE-INVENTORY.md",
-     "status": "open"},
-    {"id": "INV-11", "title": "MAINT-ROOM's attached #DECL names the undefined type PRSOBJ: entering the dam's Maintenance Room ends the session (unknown declaration type PRSOBJ)",
-     "class": "(a) reachable by ordinary play", "severity": "P1",
-     "issue": "#193", "issue_source": "filed by the orchestrator 2026-11-25; maintainer decision 2026-11-25: amend the #98 ADR (undefined attached TYPE names unchecked), implementation pending; recorded in GAMEPLAY-FAILURE-INVENTORY.md and DAM-CLOCKS.md",
      "status": "open"}
   ],
   "resolved_inventory": [
@@ -144,6 +139,7 @@
     {"id": "INV-02", "fixed_by": "M4 S9 (#168, PR #176)"},
     {"id": "INV-03", "fixed_by": "M4 S9 (#169, PR #176)"},
     {"id": "INV-04", "fixed_by": "M4 S9 (#170, PR #176)"},
-    {"id": "INV-05", "fixed_by": "M4 S10 (#171, PR #189)"}
+    {"id": "INV-05", "fixed_by": "M4 S10 (#171, PR #189)"},
+    {"id": "INV-11", "fixed_by": "M4 S14 (#193; the #98 ADR amendment, local branch feat/m4-prsobj-decl; gated by test-m4-dam-sluice and test-m4-maint-leak)"}
   ]
 }

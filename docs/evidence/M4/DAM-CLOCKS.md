@@ -6,6 +6,15 @@ Phase 3b (objects beyond the house; other clock events). Gate label:
 each under one fixed clock and seed, and one frontier finding recorded as a
 tracked expected failure). Not a PLAYABLE, GAMEPLAY_RELIABILITY or M4 claim.
 
+> **Update (M4 S14, #193, 2026-11-25).** INV-11 is fixed by the #98 ADR
+> amendment (an attached declaration's TYPE name still undefined when
+> checked is not enforced; no source change). dam-sluice and maint-leak are
+> now gated scenarios (`make test-m4-dam-sluice`, `make test-m4-maint-leak`)
+> against the references below, unchanged; `make xfail-m4-dam-frontier` and
+> `tests/historical_dam_frontier_test.rkt` are retired. Evidence:
+> [S14-PRSOBJ-DECL.md](S14-PRSOBJ-DECL.md). The record below is kept as
+> written at the time.
+
 ## Provenance
 
 | Item | Value |

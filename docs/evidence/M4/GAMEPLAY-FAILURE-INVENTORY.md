@@ -173,7 +173,7 @@ result, and the fix and regression test.
 | INV-08 CLOSE / FILE-LENGTH / ACCESS / file READSTRING | Behind INV-05, and behind a successful OPEN in RECORD and DO-UNSCRIPT | (b) | decided-strict (ADR-0055) | P3 | **partly fixed** by M4 S10 (#171): FILE-LENGTH, file READSTRING and CLOSE on the allowlisted read-only CHANNELs only; ACCESS, and CLOSE of any other CHANNEL, stay strict (unreachable: RECORD's and DO-SCRIPT's OPENs are still denied) | #171 |
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
-| **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)) | #193 (maintainer decision pending) |
+| **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)); **fixed** by M4 S14 (#193, the #98 ADR amendment): the dam-sluice and maint-leak scenarios match native at all 42 and 36 turns | #193 |
 
 **INV-01: ABS.** *Status: fixed by M4 S8 (#167). ABS is a builtin, and the operator sweep JSON was regenerated, so ABS is now class `builtin`.*
 
@@ -257,9 +257,14 @@ result, and the fix and regression test.
 - 77rooms.mud's DO-SAVE and DO-RESTORE, superseded by 77patch.mud:9 and :13: SAVE-GAME, RESTORE-GAME, SNAME, CLOSE, OPEN "READ" and "PRINTB".
 - DISPATCH's error branch (81tell-repl.mud:133): no NOFFSET in data (X1).
 
-**INV-11: PRSOBJ in MAINT-ROOM's #DECL.** *Found by M4 Phase 3b
-(2026-11-25, local branch `feat/m4-dam`); recorded by [DAM-CLOCKS.md](DAM-CLOCKS.md)
-and tracked as an expected failure by `make xfail-m4-dam-frontier`.*
+**INV-11: PRSOBJ in MAINT-ROOM's #DECL.** *Status: fixed by M4 S14 (#193;
+maintainer decision 2026-11-25, option (2): the #98 ADR amendment, an
+attached declaration's TYPE name still undefined when checked is not
+enforced; no source change). The dam-sluice and maint-leak routes are gated
+scenarios (`make test-m4-dam-sluice`, `make test-m4-maint-leak`); the XFAIL
+`make xfail-m4-dam-frontier` is retired. See
+[S14-PRSOBJ-DECL.md](S14-PRSOBJ-DECL.md). Found by M4 Phase 3b (2026-11-25,
+local branch `feat/m4-dam`); recorded by [DAM-CLOCKS.md](DAM-CLOCKS.md).*
 
 - *First failing location and call path:* 77act1.mud:737 MAINT-ROOM, the
   Maintenance Room's RACTION (77dung.mud:1323). Its attached declaration
@@ -294,9 +299,10 @@ and tracked as an expected failure by `make xfail-m4-dam-frontier`.*
   upstream provenance and needs approval. Recommended next action: a
   maintainer decision between (2) and (3), then promote dam-sluice and
   maint-leak to gated scenarios with their committed native references.
-- *Regression test:* `tests/historical_dam_frontier_test.rkt` fails (XPASS)
-  once the room can be entered; the two routes then become `test-m4-*`
-  scenarios.
+- *Regression test:* `tests/historical_dam_sluice_test.rkt` and
+  `tests/historical_maint_leak_test.rkt` (gated scenarios; they replaced the
+  XFAIL `tests/historical_dam_frontier_test.rkt`), and the unit tests in
+  `tests/deferred_decl_type_test.rkt`.
 
 ### No failure found (exercised in both engines)
 
@@ -410,7 +416,8 @@ during the load, which completes.
 8. P3: #120 (security track, not gameplay), #121, #126, #127 (re-audit
    per new area), #129, #134; INV-08 to INV-10 need no work beyond the
    decisions above.
-9. **INV-11 PRSOBJ in MAINT-ROOM** (P1, (a), found by M4 Phase 3b after
+9. **INV-11 PRSOBJ in MAINT-ROOM** — *fixed by M4 S14 (#193), option (2)
+   decided 2026-11-25.* (P1, (a), found by M4 Phase 3b after
    this ranking). **Maintainer decision** on attached declarations naming
    an undefined TYPE (ADR #98 amendment or a provenance-recorded source
    patch); see INV-11 above.

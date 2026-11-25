@@ -203,19 +203,20 @@ The Phase 3 references keep each Dkk case's log as its sha256 and size
 (`diag_logs`): their last checkpoints are `end_checkpoints`, and the logs
 grow with k.
 
-*Beyond the house (M4 Phase 3b).* match-clock and boat-river use the "dam"
-and "boat" checkpoint profiles (`tests/m4_dam_checkpoint.rkt`,
-`tests/m4_boat_checkpoint.rkt`: the timers fields plus the dam flags, the
-Maintenance Room, the leak and match clocks, the boats, the pump and the
-winner's vehicle) and declare `#:eof-classification-ignore-keys
-'(robber_hroom)` like the Phase 3 scenarios. `make xfail-m4-dam-frontier`
-(`tests/historical_dam_frontier_test.rkt`) is not a parity check and not in
-the manifest's scenarios: a tracked expected failure (INV-11) that runs the
-dam-sluice and maint-leak routes, checks their committed native references,
-and passes only while this runtime still stops at command 23 (entering the
-Maintenance Room: `unknown declaration type PRSOBJ`). It fails (XPASS) once
-the room can be entered, so that both routes are promoted to scenarios.
-Evidence: [DAM-CLOCKS.md](evidence/M4/DAM-CLOCKS.md).
+*Beyond the house (M4 Phase 3b, S14).* match-clock, boat-river, dam-sluice
+and maint-leak use the "dam" and "boat" checkpoint profiles
+(`tests/m4_dam_checkpoint.rkt`, `tests/m4_boat_checkpoint.rkt`: the timers
+fields plus the dam flags, the Maintenance Room, the leak and match clocks,
+the boats, the pump and the winner's vehicle) and declare
+`#:eof-classification-ignore-keys '(robber_hroom)` like the Phase 3
+scenarios. dam-sluice (`make test-m4-dam-sluice`) and maint-leak
+(`make test-m4-maint-leak`) enter the Maintenance Room, whose action
+MAINT-ROOM declares the undefined type PRSOBJ; they became gated scenarios
+with the #98 ADR amendment (#193, INV-11 fixed: an attached declaration's
+TYPE name still undefined when checked is not enforced). They replace the
+retired XFAIL `make xfail-m4-dam-frontier`; its native key-turn assertions
+moved into the two tests. Evidence: [DAM-CLOCKS.md](evidence/M4/DAM-CLOCKS.md),
+[S14-PRSOBJ-DECL.md](evidence/M4/S14-PRSOBJ-DECL.md).
 
 *Diagnostic stdout hashes.* In every M4 reference, the diagnostic runs'
 (X1, Dkk) `stdout_sha256` is the hash of the raw native stdout. That stdout
@@ -365,6 +366,9 @@ Native probes and frozen source results are in
 ## M3 deferred TYPE atom checkpoint (2026-11-21)
 
 Issue #98 adds `tests/deferred_decl_type_test.rkt` to the Racket suite.
+(Issue #193 later amended its call-time rule: a still-undefined attached
+TYPE name is not enforced; the same file covers the amendment. See
+[S14-PRSOBJ-DECL.md](evidence/M4/S14-PRSOBJ-DECL.md).)
 Run `TMPDIR=/tmp raco test tests/deferred_decl_type_test.rkt
 tests/declaration_test.rkt`, `make test`, `make m2-check` and
 `make m3-source-progress` against locked sources. The last target measures

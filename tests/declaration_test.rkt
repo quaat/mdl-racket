@@ -50,8 +50,10 @@
 (check-equal? (mdl-list->list
                (run "<DEFINE F (X) #DECL ((X) <LIST FIX>) .X> <F (1)>"))
               '(1))
-(check-exn #rx"unknown declaration type UNKNOWN-TYPE"
-           (lambda () (run "<DEFINE F (X) #DECL ((X) UNKNOWN-TYPE) .X> <F 1>")))
+;; An attached TYPE name still undefined when checked is not enforced (#193,
+;; amendment to the #98 ADR; tests/deferred_decl_type_test.rkt); DECL? below
+;; stays strict.
+(check-equal? (run "<DEFINE F (X) #DECL ((X) UNKNOWN-TYPE) .X> <F 1>") 1)
 (check-equal? (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X> <F 2>") 2)
 
 ;; #DECL is a DECL-typed value in any expression position, like the
