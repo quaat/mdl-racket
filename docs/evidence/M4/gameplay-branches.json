@@ -119,11 +119,11 @@
   "blocking_inventory": [
     {"id": "INV-06", "title": "native RESTORE is strict: `restore` ends the session after \"Restored.\" (F4, F5)",
      "class": "(a) reachable by ordinary play", "severity": "P1",
-     "issue": "#172", "issue_source": "orchestrator brief 2026-11-25; GAMEPLAY-FAILURE-INVENTORY.md still reads 'to create' (not verified locally: gh not authenticated)",
+     "issue": "#172", "issue_source": "verified with gh by the orchestrator 2026-11-25 (open, maintainer decision pending); linked in GAMEPLAY-FAILURE-INVENTORY.md",
      "status": "open"},
     {"id": "INV-07", "title": "PRINT is unassigned on the game's ERROR handler path (HANDLE, 77rooms.mud:251)",
      "class": "(b) error path", "severity": "P2",
-     "issue": "#173", "issue_source": "orchestrator brief 2026-11-25; GAMEPLAY-FAILURE-INVENTORY.md still reads 'to create' (not verified locally: gh not authenticated)",
+     "issue": "#173", "issue_source": "verified with gh by the orchestrator 2026-11-25 (open, maintainer decision pending); linked in GAMEPLAY-FAILURE-INVENTORY.md",
      "status": "open"}
   ],
   "resolved_inventory": [
