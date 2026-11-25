@@ -60,7 +60,8 @@ PLAYABLE claim and not the M4 gate.
 * `mdl/loader.rkt`: `make-mdl-session #:read-only-files` (default empty) and
   the host reader `read-only-file-bytes`: path `root/directory/name1.name2`
   from the validated entry only; refuses a symbolic-link directory or file, a
-  missing or non-regular file, a size ≠ pinned (before reading), and an
+  missing file, a directory (a FIFO or device is refused by the size
+  pre-check; entries require size ≥ 1), a size ≠ pinned (before reading), and an
   opened file whose identity differs from the checked path; reads at most
   size+1 bytes; closes the file. `mdl-session-file-channels` for hosts.
 * `zork/game-files.rkt`: the two pinned entries. Passed by `run-zork`, the
@@ -207,3 +208,39 @@ available memory 2.5–2.6 GB before each job.
 No Confusion source was copied (GPLv3 reference only). The help and info
 files are read from the pinned upstream checkout at run time, as the game
 sources are; nothing new is bundled.
+
+## Independent review (2026-11-25)
+
+A read-only independent review of `origin/main...HEAD` at f12f9ed checked
+for allowlist bypasses, the TOCTOU and identity checks, host paths reachable
+from MDL, read-only enforcement, the READSTRING refactor, layout against the
+probe, replay, the runner and the docs. Verdict: approve with nits; no
+blocking defect. Changes made in response:
+
+* **Host handle on failure paths.** `call-with-input-file` left the file open
+  when the identity or length check raised inside it. The reader now uses
+  `call-with-input-file*`, which closes the file on every path, so ADR-0055
+  amendment item 2 ("no host file handle stays open") holds.
+* **Non-regular files.** Only directories were refused explicitly. A FIFO or
+  device file is kept out by the size pre-check, which needs a non-zero
+  pinned size. Allowlist entries now require a size of at least 1. New test:
+  a size-0 entry is refused. It failed without the guard (1/17) and passes
+  with it. The docs no longer say "non-regular".
+* **Tighter test.** The tampered-HELP restore test asserts
+  `exn:fail:replay-restore?` and the exact message
+  `MADADV.HELP … content sha256 differs`.
+* **SEMANTICS correction.** The native LOSE print has 22 zeros, as recorded
+  in the probe.
+
+Left as recorded, not changed:
+
+* The directory-component race: content is contained by the size and
+  sha256 checks.
+* Racket file-system exceptions can name absolute host paths. They are host
+  exceptions, never MDL ERRORs, so MDL cannot read them; a future server host
+  must sanitise them.
+* Two cases are not probed and not used by the game: a count read that ends
+  exactly at EOF, and reuse of the channel number.
+* Checkpoints do not record the allowlist hashes: a changed file fails
+  strictly at the next live `help`.
+* Closed file records are not pruned.

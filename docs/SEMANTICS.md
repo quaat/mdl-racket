@@ -3675,7 +3675,9 @@ readable file at all.
    (`"FOO"` device, `"MDL/../MDL"`, the one-spec form), here all are strict.
 3. Match: the host reader (`mdl/loader.rkt`) resolves the path inside the
    session's canonical root, refuses a symbolic link as the directory or the
-   file, a missing or non-regular file, and a size other than the entry's;
+   file, a missing file, a directory, and a size other than the entry's
+   (checked before reading; entries require a size of at least 1, so a FIFO
+   or device file is refused by size before it is read);
    opens the file, checks that the port's file identity equals the path's own
    (non-followed) identity, reads exactly `size` bytes (one more byte would be
    an error) and closes the file. The runtime then checks the byte length and
@@ -3688,7 +3690,7 @@ readable file at all.
    then 4). **Deviation:** element 10 is the requested directory (`"MDL"`),
    never the absolute host directory Confusion puts there (decision (c); no
    game code reads it). Element 13 is a LOSE word 0 (`#LOSE
-   *000000000000*`), as printed natively. The CHANNEL is registered in the
+   *0000000000000000000000*`), as printed natively. The CHANNEL is registered in the
    session as a READ channel with a host file record (content bytes, read
    position, end-of-file flag, closed flag); it has no terminal port, so no
    terminal operation can reach it; TOP refuses it as it refuses terminal

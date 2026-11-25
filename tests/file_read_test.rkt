@@ -256,6 +256,8 @@
                             (lambda () (mdl-read-only-file "A" "HELP" "DSK" "MDL" "00" 22))
                             (lambda () (mdl-read-only-file "A" "HELP" "DSK" "MDL" (string-upcase (sha text)) 22))
                             (lambda () (mdl-read-only-file "A" "HELP" "DSK" "MDL" (sha text) -1))
+                            ;; size 0: the size pre-check could not keep out a FIFO
+                            (lambda () (mdl-read-only-file "A" "HELP" "DSK" "MDL" (sha #"") 0))
                             (lambda () (mdl-read-only-file "A" "HELP" "DSK" "MDL" (sha text) (* 2 1048576)))
                             (lambda () (session root (list (grant "T" "TXT" text) (grant "T" "TXT" text))))
                             (lambda () (session root (list "MDL/T.TXT")))))])

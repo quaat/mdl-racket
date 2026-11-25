@@ -152,7 +152,8 @@
 ;; file (a broken install, never FALSE), a non-regular file, a size other than
 ;; the pinned one (checked before reading), a file whose identity changed
 ;; between the checks and the open, and a content length other than the
-;; pinned size. The host file is closed before returning; the runtime checks
+;; pinned size. The host file is closed on every path, including a failure
+;; (call-with-input-file*, independent review of S10); the runtime checks
 ;; the sha256. Only paths inside ROOT are touched, and only for reading.
 (define (read-only-file-bytes root entry)
   (define rel (mdl-read-only-file-relative-path entry))
@@ -169,7 +170,7 @@
         [(not (file-exists? file)) (fail "the pinned file is missing")])
   (unless (inside-root? root file) (fail "outside the game directory"))
   (unless (= (file-size file) size) (fail "size ~a differs from the pinned size ~a" (file-size file) size))
-  (call-with-input-file file
+  (call-with-input-file* file
     (lambda (in)
       (unless (equal? (port-file-identity in) (file-or-directory-identity file #t))
         (fail "the opened file is not the checked file"))

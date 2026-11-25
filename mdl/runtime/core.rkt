@@ -2400,9 +2400,12 @@
         (raise-argument-error 'mdl-read-only-file "a name of 1-32 characters [A-Za-z0-9]" n)))
     (unless (and (string? sha256) (regexp-match? #px"^[0-9a-f]{64}$" sha256))
       (raise-argument-error 'mdl-read-only-file "a lowercase hexadecimal sha256" sha256))
-    (unless (and (exact-integer? size) (<= 0 size read-only-max-size))
+    ;; At least 1 byte: the size pre-check before reading is what keeps a FIFO
+    ;; or device file (never opened, never read) from being served or blocking
+    ;; the read (independent review of S10).
+    (unless (and (exact-integer? size) (<= 1 size read-only-max-size))
       (raise-argument-error 'mdl-read-only-file
-                            (format "an exact size in 0..~a" read-only-max-size) size))
+                            (format "an exact size in 1..~a" read-only-max-size) size))
     (values (string->immutable-string name1) (string->immutable-string name2)
             (string->immutable-string device) (string->immutable-string directory)
             (string->immutable-string sha256) size)))
