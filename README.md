@@ -78,15 +78,23 @@ The reference CI workflow runs all of these.
 [STATUS](docs/STATUS.md) and epic
 [#163](https://github.com/quaat/mdl-racket/issues/163):
 
-| Term | State |
+`make m4-check` computes the five terms from the declared
+[scenario manifest](tests/scenarios/m4-manifest.json) and
+[gameplay branches](docs/evidence/M4/gameplay-branches.json) and reports
+them separately ([TESTING](docs/TESTING.md),
+[record](docs/evidence/M4/M4-CHECK.md)). The column is a **local branch
+result** (`feat/m4-check`, `main` 513272f plus the check scaffold, no
+runtime change; Racket v7.9 BC; exit 0), not mainline acceptance:
+
+| Term | State (local `make m4-check`, 2026-11-25) |
 |---|---|
-| SCENARIO_PARITY | PASS for S1–S7 |
-| GAMEPLAY_RELIABILITY | NOT RUN |
-| PLAYABLE | NOT RUN |
-| FULL_COMPLETION | NOT RUN |
+| SCENARIO_PARITY | PASS for the 11 declared scenarios (S1–S10), each under one fixed clock and seed |
+| GAMEPLAY_RELIABILITY | NOT YET: 9 of 23 declared required branches covered (provisional list); open blockers INV-06 RESTORE, INV-07 PRINT in HANDLE |
+| PLAYABLE | NOT RUN: no PLAYABLE gate; quit-session and launcher sub-checks pass |
+| FULL_COMPLETION | NOT RUN (Phase 6) |
 | M4_ACCEPTED | NOT YET |
 
-**Native scenarios (mainline).** Each is compared with pinned Confusion
+**Native scenarios (merged on `main`).** Each is compared with pinned Confusion
 turn by turn, with state checkpoints, and each PASS is
 scenario-scoped. The targets run each scenario in one boot and check every
 turn at its READSTRING prompt (`tests/m4_scenario_runner.rkt`,
@@ -102,6 +110,13 @@ m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 | Take the sword | `test-m4-sword-glow` | FUNCTION/SUBR TYPEs |
 | Troll combat with the sword | `test-m4-troll-combat` | one combat branch |
 | Parser rejection and ambiguity | `test-m4-parser-ambiguity` | `Which door?` |
+| The cyclops (S8) | `test-m4-cyclops-room` | ABS |
+| The mirror and the bat (S9) | `test-m4-mirror-bat` | IMAGE, SLEEP |
+| The Strange Passage (S9) | `test-m4-strange-passage` | TIME |
+| Help and info (S10) | `test-m4-help-info` | read-only allowlist |
+
+`make m4-check` runs all eleven plus the persistence check; options
+`M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:
 - MAX (ADR-0059);
@@ -117,11 +132,14 @@ against the native troll-combat run. Limits:
 
 Evidence: [docs/evidence/M4](docs/evidence/M4/).
 
-**Next steps** (epic #163):
-1. A gameplay failure inventory and a single-run checkpoint runner.
-2. Combat, death and recovery branches.
+**Next steps** (epic #163; the failure inventory, the single-run runner and
+the `make m4-check` scaffold are done):
+1. Maintainer review of the provisional required-branch list
+   (`gameplay-branches.json`).
+2. Combat, death and recovery branches (the uncovered branches listed by
+   `make m4-check`).
 3. Lamp and clock events, objects, scoring.
-4. Player-facing saves, after an ADR-0055 amendment.
+4. RESTORE (INV-06) and player-facing saves, after an ADR-0055 amendment.
 
 **Previous M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
 summarised above; details in [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).

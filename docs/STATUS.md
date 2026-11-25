@@ -1,4 +1,4 @@
-# Status — 2026-11-24 (`main` = `065098d`: M3 accepted; M4 S1–S7 SCENARIO_PARITY (mainline, scenario-scoped); WP4 replay persistence proof of concept on mainline (#165); M4_ACCEPTED NOT YET; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN)
+# Status — 2026-11-25 (`main` = `513272f`: M3 accepted; M4 S1–S10 merged (11 native-parity scenarios); SCENARIO_PARITY PASS for those 11 in a local `make m4-check` run on branch `feat/m4-check` (main + check scaffold, no runtime change; scenario-scoped, one fixed clock and seed); WP4 replay persistence proof of concept; GAMEPLAY_RELIABILITY NOT YET; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN; M4_ACCEPTED NOT YET)
 
 ## Current state (2026-11-23)
 
@@ -24,7 +24,7 @@ Racket v7.9 BC; CI: racket:8.10-bc (runs 45176163020, 45176121779).
 | Local session smoke | **PASS (mainline)** | quit/n, inventory, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written (`make test-m3-session`, `make test-m3-launcher`) |
 | PLAYABLE | NOT RUN | M4 ([backlog](evidence/M4/SCENARIO-BACKLOG.md)) |
 
-### M4 on `main` = `b6b86d0` (2026-11-23)
+### M4 on `main` (`b6b86d0` 2026-11-23; S8–S10 and the runner merged up to `513272f`, 2026-11-25)
 
 M4 scenarios run on `main` with the session clock fixed at 250776000 UTC,
 compared prefix by prefix with pinned native Confusion and read-only state
@@ -41,26 +41,37 @@ checkpoints ([M4 baseline record](evidence/M4/M4-MAINLINE-BASELINE.md)):
 | S5b TYPE of DEFINEd functions (FUNCTION) and built-ins (SUBR); take sword | **PASS (mainline, scenario-scoped)** | #161; `make test-m4-sword-glow` (14 prefixes); ADR-0060 |
 | S6 troll combat with the sword | **PASS (mainline, scenario-scoped)** | #162; `make test-m4-troll-combat` (23 prefixes + checkpoints; troll dies on the third blow); [S6 record](evidence/M4/S6-TROLL-COMBAT.md) |
 | S7 parser rejection and ambiguity (`Which door?`) | **PASS (mainline, scenario-scoped)** | #164; `make test-m4-parser-ambiguity` (35 prefixes + checkpoints: LEXV, PRSVEC, PARSE-WON, ORPHANS, MOVES); no runtime change; [S7 record](evidence/M4/S7-PARSER-AMBIGUITY.md) |
-| S8 ABS; the cyclops (#167) | **PASS (branch evidence `feat/m4-abs-cyclops`, scenario-scoped; not merged)** | `tests/abs_test.rkt` (ABS on FIX/FLOAT, −2^35 strict overflow, arity/type refusals); `make test-m4-cyclops-room` (41 prefixes + checkpoints: cyclops RVARS −1/−2/2, SLEEPBIT, FIGHTBIT, CYCLOPS-FLAG, 22 RANDOM draws); [S8 record](evidence/M4/S8-ABS-CYCLOPS.md) |
-| S9 IMAGE, SLEEP, TIME; the bat and the Strange Passage (#168–#170) | **PASS (branch evidence `feat/m4-image-sleep-time`, scenario-scoped; not merged)** | `tests/p0prims_test.rkt` (IMAGE exact byte 0–127; SLEEP waits only on a live clock, `mdl-clock-live?`, no clock read; TIME session-derived FLOAT, documented deviation); `make test-m4-mirror-bat` (38 prefixes + checkpoints, three BEL bytes, no wait under the fixed clock); `make test-m4-strange-passage` (32 prefixes + checkpoints: `odysseus`, BLROO, `c-int`); `tests/replay_sleep_time_test.rkt`; ADR-0052 amendment, ADR-0061 note; [S9 record](evidence/M4/S9-IMAGE-SLEEP-TIME.md) |
-| S10 help and info under a read-only allowlist (#171; maintainer decision 2026-11-24) | **PASS (branch evidence `feat/m4-help-info-allowlist`, scenario-scoped; not merged)** | ADR-0055 amendment: OPEN "READ" only for MDL/MADADV.HELP and MDL/MADADV.INFO, hash-checked, read-only, served from memory; FILE-LENGTH (characters), file READSTRING (count / stop, EOF partial count, never the input observer), CLOSE; every other OPEN "READ" strict before any file access; `tests/file_read_test.rkt` (17); `make test-m4-help-info` (9 turns single run + 9 prefixes per prefix, `,INBUF` checkpoints; ADR-0062 `#:prompt-split 'line-initial`); `tests/help_info_replay_test.rkt` (replay across help/info exact; tampered file strict); F3 resolved; INV-05 fixed, INV-08 partly; 11 mutations detected; [S10 record](evidence/M4/S10-HELP-INFO.md) |
+| S8 ABS; the cyclops (#167) | **PASS (mainline: PR #175, main 9f16d47, post-merge CI success; scenario-scoped)** | `tests/abs_test.rkt` (ABS on FIX/FLOAT, −2^35 strict overflow, arity/type refusals); `make test-m4-cyclops-room` (41 prefixes + checkpoints: cyclops RVARS −1/−2/2, SLEEPBIT, FIGHTBIT, CYCLOPS-FLAG, 22 RANDOM draws); [S8 record](evidence/M4/S8-ABS-CYCLOPS.md) |
+| S9 IMAGE, SLEEP, TIME; the bat and the Strange Passage (#168–#170) | **PASS (mainline: PR #176, main 522b563, post-merge CI success; scenario-scoped)** | `tests/p0prims_test.rkt` (IMAGE exact byte 0–127; SLEEP waits only on a live clock, `mdl-clock-live?`, no clock read; TIME session-derived FLOAT, documented deviation); `make test-m4-mirror-bat` (38 prefixes + checkpoints, three BEL bytes, no wait under the fixed clock); `make test-m4-strange-passage` (32 prefixes + checkpoints: `odysseus`, BLROO, `c-int`); `tests/replay_sleep_time_test.rkt`; ADR-0052 amendment, ADR-0061 note; [S9 record](evidence/M4/S9-IMAGE-SLEEP-TIME.md) |
+| S10 help and info under a read-only allowlist (#171; maintainer decision 2026-11-24) | **PASS (mainline: PR #189, main 513272f, post-merge CI success; scenario-scoped)** | ADR-0055 amendment: OPEN "READ" only for MDL/MADADV.HELP and MDL/MADADV.INFO, hash-checked, read-only, served from memory; FILE-LENGTH (characters), file READSTRING (count / stop, EOF partial count, never the input observer), CLOSE; every other OPEN "READ" strict before any file access; `tests/file_read_test.rkt` (17); `make test-m4-help-info` (9 turns single run + 9 prefixes per prefix, `,INBUF` checkpoints; ADR-0062 `#:prompt-split 'line-initial`); `tests/help_info_replay_test.rkt` (replay across help/info exact; tampered file strict); F3 resolved; INV-05 fixed, INV-08 partly; 11 mutations detected; [S10 record](evidence/M4/S10-HELP-INFO.md) |
 | Manual DrRacket checks (quit, Stop) | **PASS** | [record](evidence/M4/DRRACKET-MANUAL-CHECK.md) |
 | WP4 host persistence by deterministic replay (ADR-0061; WP4.1–4.5 + WP4.6 regressions) | **PASS (mainline, proof of concept, scenario-scoped)** | #165 (independent review: no blocking defects; findings fixed); `make test-m4-replay-persistence` (troll combat saved at the RDCOM prompt before the first kill, restored in-process and in a fresh process: both RNG words, MOVES, 34-field state and transcript digests verified; pre-save + post-restore output = native T1; save after combat; pending lamp event; resumed clock; tampering; independence; 0.85 s replay per 100 commands + 6 s boot); `replay_clock_test`, `replay_checkpoint_test` in `make test`; player-facing SAVE/LOAD not implemented (needs an ADR-0055 amendment); [WP4 record](evidence/M4/WP4-REPLAY-PERSISTENCE.md) |
-| Phase 1 single-run per-turn scenario runner (ADR-0062, proposed) | **PASS (branch evidence `feat/m4-single-run-runner`; test infrastructure, no runtime change; not merged)** | `tests/m4_scenario_runner.rkt` drives all ten scenario tests: one boot per scenario, output and READSTRING-entry checkpoints compared at every turn, whole transcript and end state at end of input, non-standard end-of-input tails re-run per prefix (sword-glow 0, troll-combat 0, mirror-bat 33); both modes pass on all ten; 9 mutations give the same earliest failing k in both modes; divergence JSON and watchdog; `make test-m4-*` 1608.9 s → 292.3 s locally; lost coverage stated (212 standard EOF tails, `lit` read only at end); `make m4-scenarios-per-prefix` keeps the old protocol; [record](evidence/M4/SINGLE-RUN-RUNNER.md) |
+| Phase 1 single-run per-turn scenario runner (ADR-0062, proposed) | **PASS (mainline: PR #188, main 6b826d5, post-merge CI success; test infrastructure, no runtime change)** | `tests/m4_scenario_runner.rkt` drives all ten scenario tests: one boot per scenario, output and READSTRING-entry checkpoints compared at every turn, whole transcript and end state at end of input, non-standard end-of-input tails re-run per prefix (sword-glow 0, troll-combat 0, mirror-bat 33); both modes pass on all ten; 9 mutations give the same earliest failing k in both modes; divergence JSON and watchdog; `make test-m4-*` 1608.9 s → 292.3 s locally; lost coverage stated (212 standard EOF tails, `lit` read only at end); `make m4-scenarios-per-prefix` keeps the old protocol; [record](evidence/M4/SINGLE-RUN-RUNNER.md) |
 | M4 comprehensive-equivalence gate | NOT YET PASSED | scenario, state, save/restore and completion criteria not met |
 | PLAYABLE | NOT RUN | no playability gate executed |
 
 #### Acceptance terms (epic [#163](https://github.com/quaat/mdl-racket/issues/163))
 
-These are tracked separately and never collapsed into one PASS.
+These are tracked separately and never collapsed into one PASS. Since
+2026-11-25 they are computed by `make m4-check` (`scripts/m4_check.py`,
+ADR-0063 proposed; rules in [TESTING](TESTING.md)) from the declared
+[scenario manifest](../tests/scenarios/m4-manifest.json) and the declared
+[gameplay branches](evidence/M4/gameplay-branches.json). The column below is
+**a local branch result** (`feat/m4-check` at `013af37` = `main` `513272f`
+plus the check scaffold, no runtime change; Racket v7.9 BC; `make m4-check`
+exit 0; [record](evidence/M4/M4-CHECK.md)). It is not a mainline acceptance.
 
-| Term | Meaning | State on `main` = `065098d` |
+| Term | Meaning | State (local `make m4-check`, branch `feat/m4-check`, 2026-11-25) |
 |---|---|---|
-| SCENARIO_PARITY | each specified scenario matches pinned Confusion in text and in state checkpoints | **PASS for S1–S7** (7 scenarios; per-scenario, each under one fixed clock and seed) |
-| GAMEPLAY_RELIABILITY | every declared required gameplay branch runs without an unexpected runtime failure | NOT RUN: the branch list (combat, death and recovery, timers, objects, scoring, save/load) and the failure inventory are still to be written (#163 Phase 1) |
-| PLAYABLE | a user can start, interact, progress, quit and resume through a verified session | NOT RUN: quit works (M3 session smoke); resume is a proof of concept only and not player-facing (WP4.7) |
-| FULL_COMPLETION | the game's real completion condition is reached and verified | NOT RUN (#163 Phase 6) |
-| M4_ACCEPTED | every M4 requirement in [PLAN](PLAN.md) is met (`make m4-check`, not yet written) | NOT YET |
+| SCENARIO_PARITY | each specified scenario matches pinned Confusion in text and in state checkpoints | **PASS for the 11 declared scenarios** (S1–S10: house-cellar, mailbox-drop, orphan-prompt, top-parser, sword-glow, troll-combat, parser-ambiguity, cyclops-room, mirror-bat, strange-passage, help-info), each under one fixed clock (250776000 UTC) and seed; per scenario, not gameplay coverage |
+| GAMEPLAY_RELIABILITY | every declared required gameplay branch runs without an unexpected runtime failure | **NOT YET**: 9 of 23 declared required branches (PROVISIONAL list, epic categories combat, death and recovery, timers, objects, scoring, save/load) have a covering check, all passing; 14 have none (hero wounded/staggered/killed, the thief, both death branches, lamp burn-out, cure recovery, other clock events, puzzles beyond the house, treasure scoring, the game's save, restore, player-facing resume); open blockers INV-06 RESTORE (#172) and INV-07 PRINT in HANDLE (#173) |
+| PLAYABLE | a user can start, interact, progress, quit and resume through a verified session | NOT RUN: no PLAYABLE gate exists. Sub-checks run as evidence and passed (`test-m3-session`, `test-m3-launcher`); missing: player-facing resume (WP4.7), the full playthrough (Phase 6) |
+| FULL_COMPLETION | the game's real completion condition is reached and verified | NOT RUN: no complete-game check (#163 Phase 6) |
+| M4_ACCEPTED | every M4 requirement in [PLAN](PLAN.md) is met (`make m4-check`) | **NOT YET**: GAMEPLAY_RELIABILITY, PLAYABLE and FULL_COMPLETION are not PASS, and "accepted exceptions are source-justified" has no maintainer record |
+
+WP4 persistence (`test-m4-replay-persistence`) also passed in that run; it is
+reported as its own check and as coverage of the branch
+`save.host-replay-persistence`, never as a scenario.
 
 Gates: `c8964bf` (S1–S3) every target exit 0 locally (Racket v7.9 BC,
 `M3_NATIVE=require`) and in CI (racket:8.10-bc, runs 45230824479,

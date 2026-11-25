@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "name": "m4-manifest",
+  "description": "The single declared list of checks that `make m4-check` (scripts/m4_check.py) runs. Every M4 native-parity scenario target, the WP4 persistence check and the PLAYABLE evidence sub-checks are listed here; tests/test_m4_check.py fails when a `test-m4-*` Makefile target or a tests/scenarios/*.json file is neither listed nor explicitly excluded with a reason, so a new scenario cannot be silently omitted. The acceptance terms are defined in docs/STATUS.md (epic #163); the required gameplay branches are declared in docs/evidence/M4/gameplay-branches.json.",
+  "clock": {
+    "fixed_epoch": 250776000,
+    "tz": "UTC",
+    "rng_seed": 10438660480,
+    "note": "Every scenario boots by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on this one fixed session clock (ADR-0052); START seeds RANDOM from DSKDATE with this seed. A scenario PASS is scoped to this clock and seed."
+  },
+  "scenarios": [
+    {
+      "id": "S1",
+      "name": "house-cellar",
+      "target": "test-m4-house-cellar",
+      "scenario_file": "tests/scenarios/house-cellar.json",
+      "runner_test": "tests/historical_house_cellar_test.rkt",
+      "issue": "#153 (PR)",
+      "covers": "enter the house through the window, take and light the lamp, move the rug, open the trap door, descend into the cellar, score; also runs the recorded strict frontier test (historical_m4_frontier_test.rkt, not parity)"
+    },
+    {
+      "id": "S2",
+      "name": "mailbox-drop",
+      "target": "test-m4-mailbox-drop",
+      "scenario_file": "tests/scenarios/mailbox-drop.json",
+      "runner_test": "tests/historical_mailbox_drop_test.rkt",
+      "issue": "#154 (PR)",
+      "covers": "open the mailbox, take and drop the leaflet twice (INSERT-OBJECT, CHTYPE to SEGMENT), inventory, look"
+    },
+    {
+      "id": "S3",
+      "name": "orphan-prompt",
+      "target": "test-m4-orphan-prompt",
+      "scenario_file": "tests/scenarios/orphan-prompt.json",
+      "runner_test": "tests/historical_orphan_prompt_test.rkt",
+      "issue": "#155 (PR)",
+      "covers": "the parser's orphan prompts `at what?` / `with what?` and their continuations (CHTYPE to/from CHARACTER)"
+    },
+    {
+      "id": "S4",
+      "name": "top-parser",
+      "target": "test-m4-top-parser",
+      "scenario_file": "tests/scenarios/top-parser.json",
+      "runner_test": "tests/historical_top_parser_test.rkt",
+      "issue": "#157 (issue), #158 (PR)",
+      "covers": "TOP in SPARSE and EVERYTHING: dangling preposition, put all in, take all, drop all"
+    },
+    {
+      "id": "S5b",
+      "name": "sword-glow",
+      "target": "test-m4-sword-glow",
+      "scenario_file": "tests/scenarios/sword-glow.json",
+      "runner_test": "tests/historical_sword_glow_test.rkt",
+      "issue": "#161 (PR)",
+      "covers": "take the sword (TYPE of a DEFINEd FUNCTION), the SWORD-GLOW demon's faint and bright glow near the troll"
+    },
+    {
+      "id": "S6",
+      "name": "troll-combat",
+      "target": "test-m4-troll-combat",
+      "scenario_file": "tests/scenarios/troll-combat.json",
+      "runner_test": "tests/historical_troll_combat_test.rkt",
+      "issue": "#162 (PR)",
+      "covers": "one combat branch: the troll dies on the third blow, the hero is never hit; diagnose, score, inventory after the fight"
+    },
+    {
+      "id": "S7",
+      "name": "parser-ambiguity",
+      "target": "test-m4-parser-ambiguity",
+      "scenario_file": "tests/scenarios/parser-ambiguity.json",
+      "runner_test": "tests/historical_parser_ambiguity_test.rkt",
+      "issue": "#164 (PR)",
+      "covers": "parser rejection messages, 5-letter truncation, empty and blank lines, buzz words, `Which door?` answered by an adjective, darkness"
+    },
+    {
+      "id": "S8",
+      "name": "cyclops-room",
+      "target": "test-m4-cyclops-room",
+      "scenario_file": "tests/scenarios/cyclops-room.json",
+      "runner_test": "tests/historical_cyclops_room_test.rkt",
+      "issue": "#167 (issue), #175 (PR)",
+      "covers": "the maze into the Cyclops Room (ABS), feed, water, wake and flee the cyclops"
+    },
+    {
+      "id": "S9a",
+      "name": "mirror-bat",
+      "target": "test-m4-mirror-bat",
+      "scenario_file": "tests/scenarios/mirror-bat.json",
+      "runner_test": "tests/historical_mirror_bat_test.rkt",
+      "issue": "#168, #169 (issues), #176 (PR)",
+      "covers": "the round room's RANDOM landings, rub mirror, the Bat Room (IMAGE, SLEEP under the fixed clock), the bat's RANDOM drop"
+    },
+    {
+      "id": "S9b",
+      "name": "strange-passage",
+      "target": "test-m4-strange-passage",
+      "scenario_file": "tests/scenarios/strange-passage.json",
+      "runner_test": "tests/historical_strange_passage_test.rkt",
+      "issue": "#170 (issue), #176 (PR)",
+      "covers": "odysseus, the Strange Passage (room action TIME), c-int (verb function TIME), back to the living room"
+    },
+    {
+      "id": "S10",
+      "name": "help-info",
+      "target": "test-m4-help-info",
+      "scenario_file": "tests/scenarios/help-info.json",
+      "runner_test": "tests/historical_help_info_test.rkt",
+      "issue": "#171 (issue), #189 (PR)",
+      "covers": "help, info and ? through the read-only allowlist (ADR-0055 amendment)"
+    }
+  ],
+  "persistence": [
+    {
+      "name": "replay-persistence",
+      "target": "test-m4-replay-persistence",
+      "issue": "#165 (PR)",
+      "covers": "WP4 host persistence by deterministic replay (ADR-0061): troll combat saved at the RDCOM prompt, restored in-process and in a fresh process, verified against the native transcript; replay across SLEEP/TIME and help/info. A host-level proof of concept, not a player-facing save and not a scenario."
+    }
+  ],
+  "playable_subchecks": [
+    {
+      "name": "local-session-quit",
+      "target": "test-m3-session",
+      "covers": "start, six commands, quit/n, inventory, quit/y through the game's own FINISH -> RECORD -> QUIT, byte-identical to native"
+    },
+    {
+      "name": "local-launcher",
+      "target": "test-m3-launcher",
+      "covers": "the local launcher run-zork and its CLI exit codes, EOF, fresh state per run, break propagation"
+    }
+  ],
+  "playable_missing": [
+    "no declared PLAYABLE gate (start, interact, progress, quit and resume through one verified session) exists yet",
+    "player-facing save and resume (WP4.7, needs an ADR-0055 amendment); the game's own RESTORE is strict (INV-06)",
+    "progress beyond the recorded scenarios is not verified: full playthrough (epic #163 Phase 6)"
+  ],
+  "full_completion": {
+    "check": null,
+    "reason": "no complete-game run exists yet: the 500-point completion playthrough is epic #163 Phase 6"
+  },
+  "m4_plan_requirements": [
+    {
+      "id": "R1-scenarios-and-snapshots",
+      "text": "reference scenarios and state snapshots have passing diff reports (PLAN M4 Gate)",
+      "satisfied_by_term": "SCENARIO_PARITY"
+    },
+    {
+      "id": "R2-required-gameplay-branches",
+      "text": "scripted paths across map/puzzles; inventory, game death, NPCs, lamp/timers, parser edge cases, randomness, scoring, save/restore (PLAN M4 Build)",
+      "satisfied_by_term": "GAMEPLAY_RELIABILITY"
+    },
+    {
+      "id": "R3-playable-session",
+      "text": "a user can start, interact, progress, quit and resume through a verified session (STATUS acceptance terms)",
+      "satisfied_by_term": "PLAYABLE"
+    },
+    {
+      "id": "R4-completing-game-run",
+      "text": "completing-game run verified (PLAN M4 Gate; 500-point completion)",
+      "satisfied_by_term": "FULL_COMPLETION"
+    },
+    {
+      "id": "R5-accepted-exceptions-justified",
+      "text": "accepted exceptions are source-justified (PLAN M4 Gate); a maintainer review, not machine-checkable",
+      "satisfied_by_term": null,
+      "maintainer_record": null
+    }
+  ],
+  "excluded_scenario_files": [
+    {
+      "file": "tests/scenarios/m4-manifest.json",
+      "reason": "this manifest"
+    },
+    {
+      "file": "tests/scenarios/house-boot.json",
+      "reason": "M3 SMOKE_PARITY scenario (make m3-check, ADR-0053), not an M4 scenario"
+    },
+    {
+      "file": "tests/scenarios/house-quit.json",
+      "reason": "M3 local session smoke input (make test-m3-session); run here as the PLAYABLE sub-check local-session-quit"
+    },
+    {
+      "file": "tests/scenarios/house.json",
+      "reason": "M2 native reference capture from the ZORK.SAVE restore (make reference-capture), not an M4 scenario"
+    },
+    {
+      "file": "tests/scenarios/primitives.json",
+      "reason": "M2 native primitive probes (make reference-probe), not a game scenario"
+    },
+    {
+      "file": "tests/scenarios/failure-inventory-cases.json",
+      "reason": "M4 Phase 1 discovery evidence (GAMEPLAY-FAILURE-INVENTORY.md); command sequences, not a gated parity check"
+    }
+  ]
+}

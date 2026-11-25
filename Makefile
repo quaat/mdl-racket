@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage test-m4-help-info m4-scenarios-per-prefix play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage test-m4-help-info m4-scenarios-per-prefix m4-check play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -21,7 +21,7 @@ test-racket:
 	@bash scripts/test_racket.sh
 
 test-python:
-	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py tests/test_boot_reference.py tests/test_smoke_parity.py tests/test_sweep_operator_heads.py
+	@$(PYTHON) -m pytest -q tests/test_harness.py tests/test_fetch_sources.py tests/test_reference_pty.py tests/test_probe.py tests/test_m3_source_progress.py tests/test_boot_reference.py tests/test_smoke_parity.py tests/test_sweep_operator_heads.py tests/test_m4_check.py
 
 test-historical: sources
 	@racket tests/historical_vfload_test.rkt
@@ -186,6 +186,20 @@ m4-scenarios-per-prefix: sources
 	  echo "== M4_SCENARIO_MODE=per-prefix racket $$t"; \
 	  M4_SCENARIO_MODE=per-prefix racket $$t || exit 1; \
 	done
+
+# M4 acceptance-term report (epic #163 Phase 7; scripts/m4_check.py). Runs
+# every check declared in tests/scenarios/m4-manifest.json, sequentially:
+# `make sources`, the eleven M4 scenario targets (SCENARIO_PARITY), the WP4
+# persistence check and the PLAYABLE evidence sub-checks, then reports the five
+# terms SCENARIO_PARITY, GAMEPLAY_RELIABILITY (branches declared in
+# docs/evidence/M4/gameplay-branches.json), PLAYABLE, FULL_COMPLETION and
+# M4_ACCEPTED separately. Exit 0 when nothing FAILs (NOT RUN / NOT YET allowed),
+# 1 on any FAIL; pass M4_CHECK_ARGS="--require-accepted" to exit 3 unless
+# M4_ACCEPTED is PASS, "--scenarios-only" for the scenario part only, or
+# "--per-prefix" to add `make m4-scenarios-per-prefix`. Report:
+# artifacts/m4-check/m4-check.json; logs: artifacts/m4-check/logs/.
+m4-check:
+	@$(PYTHON) scripts/m4_check.py $(M4_CHECK_ARGS)
 
 # S12 (WP4): the local launcher zork/main.rkt (run-zork) and its command line
 # zork/cli.rkt: the S11 house-quit transcript through run-zork, EOF, notice,

@@ -1,5 +1,63 @@
 # Test strategy, reference capture, and parity contract
 
+## M4 acceptance-term check (`make m4-check`, 2026-11-25)
+
+`make m4-check` (`scripts/m4_check.py`, epic #163 Phase 7) runs every check
+declared in [`tests/scenarios/m4-manifest.json`](../tests/scenarios/m4-manifest.json),
+one at a time: `make sources`; the eleven M4 native-parity scenario targets;
+the WP4 persistence check `test-m4-replay-persistence` (a separate entry,
+never counted as a scenario); and the PLAYABLE evidence sub-checks
+`test-m3-session` and `test-m3-launcher`. It then reports the five
+acceptance terms of [STATUS](STATUS.md) separately, never as one PASS:
+
+| Term | Rule in `m4_check.py` |
+|---|---|
+| SCENARIO_PARITY | PASS only if every declared scenario target exits 0 (scope: N scenarios, each under one fixed clock and seed); FAIL if any fails, if `--per-prefix` fails, or if the manifest is incomplete; NOT RUN if any scenario did not run |
+| GAMEPLAY_RELIABILITY | per required branch of [`gameplay-branches.json`](evidence/M4/gameplay-branches.json): UNCOVERED (no covering check), PASS (all covering checks ran and passed), FAIL, or NOT RUN. The term is FAIL if a covering check failed; NOT YET while any required branch is UNCOVERED or a blocking inventory item is open; NOT RUN if a covering check did not run; PASS only otherwise. Discovery runs (failure-inventory cases) never count as coverage |
+| PLAYABLE | NOT RUN: no verified PLAYABLE gate exists. The sub-checks are run as evidence; a failing one makes the term FAIL; passing ones never make it PASS |
+| FULL_COMPLETION | NOT RUN: no complete-game check is declared (Phase 6) |
+| M4_ACCEPTED | PASS only if all four terms PASS and every `m4_plan_requirements` entry is met (a manual requirement needs a committed maintainer record); otherwise NOT YET with the unmet list |
+
+**Statuses.** PASS; FAIL; NOT RUN (not executed: skipped, prerequisite
+failed, or no check exists); NOT YET (what exists was executed, the
+requirements are not met).
+
+**Exit policy.** 0 when no term and no executed check is FAIL (NOT RUN and
+NOT YET are allowed); 1 on any FAIL, including an incomplete manifest or a
+failed `make sources`; with `--require-accepted`, 3 when M4_ACCEPTED is not
+PASS and nothing failed.
+
+**Options** (`make m4-check M4_CHECK_ARGS="..."`): `--scenarios-only` (only
+`sources` and the scenario targets; persistence and PLAYABLE sub-checks NOT
+RUN); `--per-prefix` (adds `make m4-scenarios-per-prefix`, slow);
+`--skip TARGET` (repeatable; reported NOT RUN, so a skipped scenario makes
+SCENARIO_PARITY NOT RUN); `--require-accepted`. `M4_TARGET_TIMEOUT` bounds
+each target (default 1800 s; a timeout is a FAIL).
+
+**Output.** `artifacts/m4-check/m4-check.json` (git commit, branch and dirty
+flag, `sources.lock.json` commits, Racket and Python versions, mdli sha256
+for provenance, manifest sha256s, every command with exit code, duration and
+log, the terms with scope and reasons, the exit code) and one log per target
+in `artifacts/m4-check/logs/`; a failing target's last 40 log lines are
+printed. A result is the technical result of that commit; a local branch run
+is never mainline acceptance.
+
+**Manifest completeness.** `tests/test_m4_check.py` (in `make test-python`)
+fails when a `test-m4-*` Makefile target is not in the manifest, a
+`tests/scenarios/*.json` file is neither a scenario nor excluded with a
+reason, the manifest's `runner_test` list differs from the Makefile's
+`M4_SCENARIO_TESTS` (`m4-scenarios-per-prefix`), a target does not run its
+runner test, or a gameplay branch cites a check m4-check does not run. The
+same check runs at the start of `make m4-check`. The term rules are tested on
+fake results there (any scenario failure fails SCENARIO_PARITY; an uncovered
+branch or an open blocker keeps GAMEPLAY_RELIABILITY from PASS; M4_ACCEPTED
+is never PASS unless all four terms PASS).
+
+**CI.** The reference workflow runs one `make m4-check` step (skipping the
+two M3 sub-checks that earlier steps already ran) in place of the twelve
+per-scenario steps; per-target logs are uploaded with
+`artifacts/m4-check/`. Evidence: [M4-CHECK.md](evidence/M4/M4-CHECK.md).
+
 ## M4 scenario runner (2026-11-24)
 
 The eleven M4 native-parity scenarios (`make test-m4-house-cellar`,
