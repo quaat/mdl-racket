@@ -15,9 +15,14 @@
 ;; The `look` in the cellar is part of the route: without it (thief-robbery)
 ;; the thief takes the painting in the Gallery under this clock and seed.
 ;;
-;; The ROBBER demon moves the thief (HROOM) on every turn, the end-of-input
-;; turn included, so most shorter prefixes have a non-standard end checkpoint
-;; and are re-run per prefix in single-run mode (docs/TESTING.md).
+;; robber_hroom is not compared here (#:ignore-keys, timers-checkpoint/no-hroom):
+;; the ROBBER demon moves the thief (HROOM) on every turn, the end-of-input
+;; turn included, so with it 18 of the 21 shorter prefixes would be re-run per
+;; prefix in single-run mode (19 boots, about two minutes; that full
+;; comparison passed once, TIMERS-SCORING.md). The thief's walk is compared in
+;; full in thief-robbery; here thief_oroom, robber_hflag and robber_hobjs are
+;; (he never takes anything and is never seen with the hero in T1). Prefix 15
+;; stays non-standard: at its end of input the thief appears in the Studio.
 ;;
 ;; Compared with the pinned Confusion captures in
 ;; docs/evidence/M4/treasure-deposit-reference.json
@@ -67,7 +72,8 @@
 
 ;; --- the scenario ------------------------------------------------------------------------
 (run-m4-scenario "treasure-deposit" commands
-                 #:checkpoint timers-checkpoint
+                 #:checkpoint timers-checkpoint/no-hroom
+                 #:ignore-keys '(robber_hroom)
                  #:check-turn
                  (lambda (k transcript)
                    (when (>= k 20)

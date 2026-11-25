@@ -21,7 +21,7 @@
 ;; the storage ledger, the output and the MDL error record around every read.
 (require racket/string "m4_scenario_runner.rkt" "m4_death_checkpoint.rkt"
          (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global))
-(provide timers-checkpoint)
+(provide timers-checkpoint timers-checkpoint/no-hroom)
 
 (define (list-items s lst)
   (for/list ([i (in-range 1 (add1 (mdl-session-call s "LENGTH" lst)))])
@@ -63,3 +63,13 @@
              'robber_hroom (rid (field s robber "HROOM"))
              'robber_hflag (render s (field s robber "HFLAG"))
              'robber_hobjs (oids s (field s robber "HOBJS"))))
+
+;; The same without robber_hroom, for the scenarios that declare
+;; #:ignore-keys '(robber_hroom): the ROBBER demon moves the thief on every
+;; turn, the end-of-input turn included, so with that field every shorter
+;; prefix has a non-standard end checkpoint and is re-run per prefix (one
+;; boot each). thief-robbery compares it; the scenarios whose subject is not
+;; the thief do not (thief_oroom, robber_hflag and robber_hobjs are still
+;; compared there).
+(define (timers-checkpoint/no-hroom s)
+  (hash-remove (timers-checkpoint s) 'robber_hroom))

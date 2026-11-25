@@ -134,6 +134,42 @@
       "runner_test": "tests/historical_troll_death_test.rkt",
       "issue": "epic #163 Phase 2 (death and recovery; combat)",
       "covers": "unarmed in the troll room: the troll staggers, wounds (ASTRENGTH -1, CURIN enabled) and kills the hero; `y`, resurrection with the wound kept, the lit lamp scattered; diagnose and score after death"
+    },
+    {
+      "id": "S12a",
+      "name": "treasure-deposit",
+      "target": "test-m4-treasure-deposit",
+      "scenario_file": "tests/scenarios/treasure-deposit.json",
+      "runner_test": "tests/historical_treasure_deposit_test.rkt",
+      "issue": "epic #163 Phase 3 (timers, objects, scoring)",
+      "covers": "the painting taken in the Gallery (OFVAL 4), up the Studio chimney (CHIMNEY-FUNCTION, lamp plus one object), `open case`, `put painting in case`: ASCORE = RAW-SCORE + OTVAL 7 = 46, the case listed by `look`, `score`"
+    },
+    {
+      "id": "S12b",
+      "name": "thief-robbery",
+      "target": "test-m4-thief-robbery",
+      "scenario_file": "tests/scenarios/thief-robbery.json",
+      "runner_test": "tests/historical_thief_robbery_test.rkt",
+      "issue": "epic #163 Phase 3 (timers, objects, scoring)",
+      "covers": "observed under the fixed seed: the ROBBER demon's thief takes the painting from the hero in the Gallery and passes him again in the Studio; the painting stays in his bag (HOBJS); the thief is never seen in a room with the hero and never fought; prefix 12's end-of-input turn has him take it from the room"
+    },
+    {
+      "id": "S12c",
+      "name": "cure-recovery",
+      "target": "test-m4-cure-recovery",
+      "scenario_file": "tests/scenarios/cure-recovery.json",
+      "runner_test": "tests/historical_cure_recovery_test.rkt",
+      "issue": "epic #163 Phase 3 (timers, objects, scoring)",
+      "covers": "wounded by the troll (troll-death's path), back to the cellar; the CURIN clock counts down under WAIT and diagnose (28 -> 2) and CURE-CLOCK heals the light wound (ASTRENGTH -1 -> 0, CURIN disabled)"
+    },
+    {
+      "id": "S12d",
+      "name": "lamp-burnout",
+      "target": "test-m4-lamp-burnout",
+      "scenario_file": "tests/scenarios/lamp-burnout.json",
+      "runner_test": "tests/historical_lamp_burnout_test.rkt",
+      "issue": "epic #163 Phase 3 (timers, objects, scoring)",
+      "covers": "the lamp on and 118 `wait`s: LNTIN 350 ticks, then LIGHT-INT's four dimmer warnings, `The lamp is dying.`, burn-out (OLIGHT? 0); `turn on lamp` refused; the dark cellar"
     }
   ],
   "persistence": [

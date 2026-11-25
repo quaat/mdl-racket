@@ -26,7 +26,7 @@
         {"id": "combat.thief", "required": true,
          "description": "the thief (ROBBER) fights, steals and is fought",
          "checks": [],
-         "note": "inventory limitation: the thief's fight and his treasure room are not exercised"}
+         "note": "UNCOVERED by this file's reading (the description asks for all three): only the stealing is exercised. test-m4-thief-robbery (a gated scenario, observed under the fixed clock and seed, not chased) shows the ROBBER demon's thief taking the painting from the hero in the Gallery (and, at prefix 12's end of input, from the room), passing again without finding anything, and keeping it in his bag (HOBJS); he is never seen in a room with the hero, never fights and is never fought, and his treasure room is not reached"}
       ]
     },
     {
@@ -56,15 +56,16 @@
          "checks": ["test-m4-sword-glow", "test-m4-troll-combat", "test-m4-mirror-bat"]},
         {"id": "timers.lamp-burnout", "required": true,
          "description": "the lamp's LIGHT-INT countdown warns and the lamp goes out (77act1.mud:2006)",
-         "checks": [],
-         "note": "the pending lamp event survives a WP4 replay restore (test-m4-replay-persistence) but no native scenario reaches the countdown messages or burn-out"},
+         "checks": ["test-m4-lamp-burnout"],
+         "note": "covered under the fixed clock and seed by lamp-burnout: the lamp on and carried in the lit living room for 118 `wait`s, LNTIN 350 ticks then LAMP-TICKS 50 30 20 10 4 0, the four dimmer warnings, `The lamp is dying.`, burn-out (OLIGHT? 0) and `turn on lamp` refused, then the dark cellar. Not exercised: turning the lamp off to pause the clock, the countdown while the lamp is not with the hero (LIGHT-INT prints nothing then), moving in the dark after burn-out. The pending lamp event also survives a WP4 replay restore (test-m4-replay-persistence)"},
         {"id": "timers.cure-clock-recovery", "required": true,
          "description": "the CURE clock restores the hero's strength after a wound",
-         "checks": [],
-         "note": "troll-death enables the CURIN clock after the hero's light wound and checkpoints its CTICK (re-armed at the death turn, then counting down), but no scenario reaches the recovery itself"},
+         "checks": ["test-m4-cure-recovery"],
+         "note": "covered under the fixed clock and seed by cure-recovery: one light wound from the troll (ASTRENGTH -1), CURIN counted down through WAIT and diagnose (28 -> 2) and CURE-CLOCK healing it (ASTRENGTH 0, CURIN disabled). Not exercised: several wounds (CURIN re-armed to CURE-WAIT per remaining point), a positive ASTRENGTH reset to 0. troll-death also enables CURIN and checkpoints its CTICK"},
         {"id": "timers.other-clock-events", "required": true,
          "description": "CEVENT clock interrupts beyond the troll and cure clocks (CLOCK-INT 77rooms.mud:1657)",
-         "checks": []}
+         "checks": [],
+         "note": "the lamp's LNTIN (its own branch, timers.lamp-burnout) and CURIN are the only CEVENTs any scenario queues (the Phase 3 scenarios checkpoint the CLOCKER's whole event list each turn); the match, candle, balloon, fuse, gnome and other clocks are not reached"}
       ]
     },
     {
@@ -97,7 +98,8 @@
          "note": "test-m3-session: FINISH after `quit`/`y`; grue-refusal: FINISH <> after a refused resurrection (no question)"},
         {"id": "scoring.treasure-deposit", "required": true,
          "description": "treasures taken and put in the trophy case (SCORE-OBJ, 77rooms.mud:654-668)",
-         "checks": []}
+         "checks": ["test-m4-treasure-deposit"],
+         "note": "covered under the fixed clock and seed by treasure-deposit: one treasure, the painting, taken (SCORE-OBJ, OFVAL 4) and put in the opened case (the living room's action: ASCORE = RAW-SCORE + the case's OTVALs = 39 + 7), listed by `look`, `score` 46. Not exercised: several treasures, taking one back out of the case, a treasure the thief has taken (thief-robbery shows that the painting then never reaches the case)"}
       ]
     },
     {
