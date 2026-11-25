@@ -64,8 +64,9 @@
          "note": "covered under the fixed clock and seed by cure-recovery: one light wound from the troll (ASTRENGTH -1), CURIN counted down through WAIT and diagnose (28 -> 2) and CURE-CLOCK healing it (ASTRENGTH 0, CURIN disabled). Not exercised: several wounds (CURIN re-armed to CURE-WAIT per remaining point), a positive ASTRENGTH reset to 0. troll-death also enables CURIN and checkpoints its CTICK"},
         {"id": "timers.other-clock-events", "required": true,
          "description": "CEVENT clock interrupts beyond the troll and cure clocks (CLOCK-INT 77rooms.mud:1657)",
-         "checks": [],
-         "note": "the lamp's LNTIN (its own branch, timers.lamp-burnout) and CURIN are the only CEVENTs any scenario queues (the Phase 3 scenarios checkpoint the CLOCKER's whole event list each turn); the match, candle, balloon, fuse, gnome and other clocks are not reached"}
+         "checks": ["test-m4-match-clock"],
+         "evidence_only": ["maint-leak native reference (the Maintenance Room leak clock MNTIN; not gated: INV-11, make xfail-m4-dam-frontier)"],
+         "note": "covered under the fixed clock and seed by one clock event, the match clock MATIN (match-clock: MATCH-FUNCTION 77act1.mud:1925 queues it with CTICK 2 at each `light match`; it fires at the next tick under a regular command and under a `wait`, which stops there; `turn off match` sets it to 0; the CLOCKER's whole event list is checkpointed every turn). The dam's leak clock MNTIN (CTICK -1, fires on every clock pass) is recorded natively (maint-leak) but this runtime stops on entering the Maintenance Room (INV-11). Not reached: the candle (CNDIN), balloon (BINT, BRNIN), fuse (FUSIN), ledge (LEDIN), safe (SAFIN), gnome (VLGIN, GNOIN), bucket (BCKIN) and sphere (SPHIN) clocks"}
       ]
     },
     {
@@ -82,8 +83,9 @@
          "checks": ["test-m4-house-cellar", "test-m4-parser-ambiguity"]},
         {"id": "objects.puzzles-beyond-the-house", "required": true,
          "description": "the dam, the boat and the river, the balloon, the coal-mine machine and basket, the gas room",
-         "checks": [],
-         "note": "inventory limitation: not exercised in either engine"}
+         "checks": ["test-m4-boat-river"],
+         "evidence_only": ["dam-sluice native reference (the dam's sluice gates; not gated: INV-11, make xfail-m4-dam-frontier)"],
+         "note": "covered under the fixed clock and seed by ONE listed puzzle, the boat (boat-river): the pump fetched from Reservoir North, the folded boat inflated with it at the Dam Base (IBOAT-FUNCTION 77act2.mud:285), boarded, launched onto the River Frigid (RIVR1 only), landed, left, deflated and taken. Not exercised: the river downstream (RIVR2 on, the falls, the buoy); the dam (the yellow button, the wrench and bolt, the sluice gates, the drained reservoir) is recorded natively (dam-sluice) but this runtime stops on entering the Maintenance Room (INV-11); the balloon (its WIRE-FUNCTION, 77act2.mud:585, declares the same undefined PRSOBJ: source-derived, not run), the coal-mine machine and basket, the gas room. The branch lists five puzzles and one is covered: the maintainer may split it into one branch per puzzle, which would leave four uncovered"}
       ]
     },
     {
@@ -131,6 +133,10 @@
     {"id": "INV-07", "title": "PRINT is unassigned on the game's ERROR handler path (HANDLE, 77rooms.mud:251)",
      "class": "(b) error path", "severity": "P2",
      "issue": "#173", "issue_source": "verified with gh by the orchestrator 2026-11-25 (open, maintainer decision pending); linked in GAMEPLAY-FAILURE-INVENTORY.md",
+     "status": "open"},
+    {"id": "INV-11", "title": "MAINT-ROOM's attached #DECL names the undefined type PRSOBJ: entering the dam's Maintenance Room ends the session (unknown declaration type PRSOBJ)",
+     "class": "(a) reachable by ordinary play", "severity": "P1",
+     "issue": null, "issue_source": "not filed yet (local branch feat/m4-dam; the orchestrator files it); recorded in GAMEPLAY-FAILURE-INVENTORY.md and DAM-CLOCKS.md",
      "status": "open"}
   ],
   "resolved_inventory": [

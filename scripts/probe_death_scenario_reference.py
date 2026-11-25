@@ -176,6 +176,22 @@ assert TIMERS_DIAG_FORMS.count(_DAM_FIND_OLD) == 1 and TIMERS_DIAG_FORMS.count(_
 DAM_DIAG_FORMS = (TIMERS_DIAG_FORMS.replace(_DAM_FIND_OLD, _DAM_FIND_NEW)
                   .replace(_CP_END, _DAM_FIELDS + _CP_END))
 
+# The Phase 3b "boat" profile: DAM_DIAG_FORMS with the boat objects found once
+# and more checkpoint fields before CP-END: the winner's AVEHICLE (OID), the
+# OROOM of the folded boat IBOAT, the inflated boat RBOAT and the pump
+# (IBOAT-FUNCTION and RBOAT-FUNCTION, 77act2.mud:256-297).
+_BOAT_FIND_OLD = '<SETG DIAG-MATCH <FIND-OBJ "MATCH">> T>'
+_BOAT_FIND_NEW = ('<SETG DIAG-MATCH <FIND-OBJ "MATCH">> <SETG DIAG-IBOAT <FIND-OBJ "IBOAT">> '
+                  '<SETG DIAG-RBOAT <FIND-OBJ "RBOAT">> <SETG DIAG-PUMP <FIND-OBJ "PUMP">> T>')
+_BOAT_FIELDS = (
+    '<DIAG "CP-WINNER-AVEHICLE" <COND (<AVEHICLE ,WINNER> <OID <AVEHICLE ,WINNER>>)>> '
+    '<DIAG "CP-IBOAT-OROOM" <DIAG-ROOM ,DIAG-IBOAT>> '
+    '<DIAG "CP-RBOAT-OROOM" <DIAG-ROOM ,DIAG-RBOAT>> '
+    '<DIAG "CP-PUMP-OROOM" <DIAG-ROOM ,DIAG-PUMP>> ')
+assert DAM_DIAG_FORMS.count(_BOAT_FIND_OLD) == 1 and DAM_DIAG_FORMS.count(_CP_END) == 1
+BOAT_DIAG_FORMS = (DAM_DIAG_FORMS.replace(_BOAT_FIND_OLD, _BOAT_FIND_NEW)
+                   .replace(_CP_END, _BOAT_FIELDS + _CP_END))
+
 # Scenario name -> its checkpoint profile's diagnostic forms.
 PROFILES = {
     "grue-resurrection": DIAG_FORMS,
@@ -188,6 +204,7 @@ PROFILES = {
     "dam-sluice": DAM_DIAG_FORMS,
     "maint-leak": DAM_DIAG_FORMS,
     "match-clock": DAM_DIAG_FORMS,
+    "boat-river": BOAT_DIAG_FORMS,
 }
 NAMES = tuple(PROFILES)
 
@@ -364,7 +381,7 @@ def main() -> int:
     # a long scenario's reference would hold O(n^2) log text.  Each is replaced
     # by its sha256 and size; what the runner uses from it, its last
     # checkpoint, is kept in end_checkpoints, and X1's log is kept in full.
-    compact = diag_forms is TIMERS_DIAG_FORMS or diag_forms is DAM_DIAG_FORMS
+    compact = any(diag_forms is f for f in (TIMERS_DIAG_FORMS, DAM_DIAG_FORMS, BOAT_DIAG_FORMS))
     if compact:
         for r in rows[3 + n:]:
             log = r.pop("diag_log", "").encode("latin-1")
