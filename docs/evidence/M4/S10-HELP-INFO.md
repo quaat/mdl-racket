@@ -175,7 +175,32 @@ PLAYABLE claim and not the M4 gate.
 | `raco test tests/function_type_test.rkt` | 0 | 340 passed |
 | `pytest tests/test_sweep_operator_heads.py` | 0 | 6 passed |
 
-Final sequential verification: see the next section.
+## Final sequential verification (after all mutations were reverted)
+
+Run one at a time, outside the command sandbox (several pre-existing tests
+create directories directly under `/tmp`), with `PLTCOLLECTS=":$PWD"
+PYTHONPATH=$PWD/.sandbox-pydeps/lib TMPDIR=/tmp PYTHON=/usr/bin/python3`;
+available memory 2.5–2.6 GB before each job.
+
+| Command | Exit | Notes |
+|---|---|---|
+| `make test` | 0 | 4910 Racket tests passed; pytest 74 passed, 1 deselected |
+| `make test-m4-house-cellar` | 0 | 12 turns; frontier: F1, F2, F2b, F-TOP, F4, **F3 help / info** resolved |
+| `make test-m4-mailbox-drop` | 0 | 9 turns |
+| `make test-m4-orphan-prompt` | 0 | 10 turns |
+| `make test-m4-top-parser` | 0 | 11 turns |
+| `make test-m4-sword-glow` | 0 | 14 turns (2 boots) |
+| `make test-m4-troll-combat` | 0 | 23 turns (2 boots) |
+| `make test-m4-parser-ambiguity` | 0 | 35 turns |
+| `make test-m4-replay-persistence` | 0 | troll-combat persistence, S9 replay, **help-info replay** |
+| `make test-m4-cyclops-room` | 0 | 41 turns |
+| `make test-m4-mirror-bat` | 0 | 38 turns (2 boots) |
+| `make test-m4-strange-passage` | 0 | 32 turns |
+| `make test-m4-help-info` | 0 | 9 turns, 1 boot |
+| `make m3-check` | 0 | overall PASS (incl. native fresh capture parity) |
+| `make test-m3-launcher` | 0 | 57 passed (strict example now `restore`) |
+| `make test-m3-session` | 0 | 85 passed |
+| `git diff --check` (worktree, and `6b826d5..HEAD`) | 0, 0 | |
 
 ## Licensing
 
