@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Pinned-Confusion reference capture for the M4 Phase 2 death scenarios
 (epic #163, death and recovery): grue-resurrection, grue-refusal and
-troll-death (tests/scenarios/<name>.json).
+troll-death, and the M4 Phase 3 timer, object and scoring scenarios
+(epic #163 Phase 3): treasure-deposit, thief-robbery, cure-recovery and
+lamp-burnout (tests/scenarios/<name>.json).
 
 Read-only reference investigation. Nothing here is runtime code, and the game
 sources under .cache/upstream are never written: every run boots a fresh copy
@@ -61,6 +63,18 @@ FIGHTBIT; the lamp's OROOM, OCAN and OLIGHT?; the OROOM of the sword, the
 sack and the bottle; INBUF as the list of its 100 character codes.  No game
 state is written.
 
+Checkpoint profiles (PROFILES): the death scenarios use exactly the fields
+above (DIAG_FORMS, unchanged since their capture).  The Phase 3 scenarios use
+the "timers" profile (TIMERS_DIAG_FORMS): the same fields, then the lamp's
+LIGHT-INT counter (<1 <ORAND lamp>>), LNTIN's CFLAG and CTICK, every clock
+event of the CLOCKER demon in HOBJS order as (CID CFLAG CTICK), the
+painting's OROOM, OCAN, OFVAL and OTVAL, the trophy case's OOPEN? and
+OCONTENTS (OIDs), the thief's OROOM, and the ROBBER demon's HROOM (RID),
+HFLAG and HOBJS (OIDs: the thief's bag).  Pure reads as well.  A timers
+capture keeps each Dkk case's log only as diag_log_sha256 and diag_log_bytes
+(the logs grow with k; their last checkpoints are end_checkpoints, and X1's
+log is kept in full); the reference says so in `diag_logs`.
+
 Confusion is GPLv3 and is used only as a behaviour reference; no Confusion
 source is copied into this script.
 """
@@ -80,7 +94,6 @@ import probe_session_reference as psr  # noqa: E402
 from probe_house_cellar_reference import (  # noqa: E402
     game_part, split_responses, parse_diag)
 
-NAMES = ("grue-resurrection", "grue-refusal", "troll-death")
 PINNED_SHA256 = "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789"
 EOF_STDERR = "Error: Unexpected EOF\n"
 STD_TAIL = "Beg pardon?\n>"
@@ -101,6 +114,44 @@ DIAG_FORMS = r'''<SETG DIAG-CH <OPEN "PRINT" "@LOG@">>
 <SETG DIAG-ORIG-QUIT ,QUIT>
 <SETG QUIT <FUNCTION ("TUPLE" DIAG-A) <DIAG "QUIT-NARGS" <LENGTH .DIAG-A>> <DIAG-STATE> <CLOSE ,DIAG-CH> <APPLY ,DIAG-ORIG-QUIT !.DIAG-A>>>
 '''
+
+# The Phase 3 "timers" profile: DIAG_FORMS with more objects found once and
+# more checkpoint fields before CP-END (each replacement must apply once).
+_FIND_OLD = '<SETG DIAG-BOTTL <FIND-OBJ "BOTTL">> T>'
+_FIND_NEW = ('<SETG DIAG-BOTTL <FIND-OBJ "BOTTL">> <SETG DIAG-PAINT <FIND-OBJ "PAINT">> '
+             '<SETG DIAG-TCASE <FIND-OBJ "TCASE">> <SETG DIAG-THIEF <FIND-OBJ "THIEF">> T>')
+_CP_END = '<DIAG "CP-END" ,DIAG-N>'
+_TIMERS_FIELDS = (
+    '<DIAG "CP-LAMP-CNT" <1 <ORAND ,DIAG-LAMP>>> '
+    '<DIAG "CP-LNTIN-CFLAG" <CFLAG ,LNTIN>> '
+    '<DIAG "CP-LNTIN-CTICK" <CTICK ,LNTIN>> '
+    '<DIAG "CP-CLOCK-EVENTS" <MAPF ,LIST <FUNCTION (DIAG-E) <LIST <CID .DIAG-E> <CFLAG .DIAG-E> '
+    '<CTICK .DIAG-E>>> <HOBJS ,CLOCKER>>> '
+    '<DIAG "CP-PAINT-OROOM" <DIAG-ROOM ,DIAG-PAINT>> '
+    '<DIAG "CP-PAINT-OCAN" <COND (<OCAN ,DIAG-PAINT> <OID <OCAN ,DIAG-PAINT>>)>> '
+    '<DIAG "CP-PAINT-OFVAL" <OFVAL ,DIAG-PAINT>> '
+    '<DIAG "CP-PAINT-OTVAL" <OTVAL ,DIAG-PAINT>> '
+    '<DIAG "CP-TCASE-OOPEN" <OOPEN? ,DIAG-TCASE>> '
+    '<DIAG "CP-TCASE-CONTENTS" <MAPF ,LIST ,OID <OCONTENTS ,DIAG-TCASE>>> '
+    '<DIAG "CP-THIEF-OROOM" <DIAG-ROOM ,DIAG-THIEF>> '
+    '<DIAG "CP-ROBBER-HROOM" <RID <HROOM ,ROBBER-DEMON>>> '
+    '<DIAG "CP-ROBBER-HFLAG" <HFLAG ,ROBBER-DEMON>> '
+    '<DIAG "CP-ROBBER-HOBJS" <MAPF ,LIST ,OID <HOBJS ,ROBBER-DEMON>>> ')
+assert DIAG_FORMS.count(_FIND_OLD) == 1 and DIAG_FORMS.count(_CP_END) == 1
+TIMERS_DIAG_FORMS = (DIAG_FORMS.replace(_FIND_OLD, _FIND_NEW)
+                     .replace(_CP_END, _TIMERS_FIELDS + _CP_END))
+
+# Scenario name -> its checkpoint profile's diagnostic forms.
+PROFILES = {
+    "grue-resurrection": DIAG_FORMS,
+    "grue-refusal": DIAG_FORMS,
+    "troll-death": DIAG_FORMS,
+    "treasure-deposit": TIMERS_DIAG_FORMS,
+    "thief-robbery": TIMERS_DIAG_FORMS,
+    "cure-recovery": TIMERS_DIAG_FORMS,
+    "lamp-burnout": TIMERS_DIAG_FORMS,
+}
+NAMES = tuple(PROFILES)
 
 
 def prompt_heads(game: str, last_entry: int, entry_prompts: dict[int, str]) -> list[str]:
@@ -165,6 +216,7 @@ def main() -> int:
     ap.add_argument("--shim-src", type=Path, default=psr.DEFAULT_SHIM_SRC)
     a = ap.parse_args()
     tag = a.name
+    diag_forms = PROFILES[tag]
     scenario_file = psr.ROOT / f"tests/scenarios/{tag}.json"
     if not psr.EXE.is_file() or not psr.GAME.is_dir():
         raise SystemExit("missing pinned mdli or game sources")
@@ -180,7 +232,7 @@ def main() -> int:
     declared_endings = ["quit" if k in quit_prefixes else "eof" for k in range(n + 1)]
     entry_fload = '<FLOAD "77loadall.mud">\n'
     plain_input = psr.ENTRY + psr.lines(*cmds)
-    diag_input = entry_fload + DIAG_FORMS + "<SAVE-IT>\n" + psr.lines(*cmds)
+    diag_input = entry_fload + diag_forms + "<SAVE-IT>\n" + psr.lines(*cmds)
     base = Path(os.environ.get("TMPDIR", "/tmp")) / f"{tag}-probes"
     base.mkdir(parents=True, exist_ok=True)
     shim = psr.build_shim(a.shim_src, Path(tempfile.mkdtemp(prefix="shim-", dir=base)))
@@ -201,7 +253,7 @@ def main() -> int:
                               f"per-prefix candidate runs)"})
     for k in range(n):
         cases.append({"name": f"D{k:02d}-{tag}-diag-prefix", "kind": "diagnostic",
-                      "input": entry_fload + DIAG_FORMS + "<SAVE-IT>\n" + psr.lines(*cmds[:k]),
+                      "input": entry_fload + diag_forms + "<SAVE-IT>\n" + psr.lines(*cmds[:k]),
                       "note": f"DIAGNOSTIC: X1 cut after {k} commands; its last checkpoint is "
                               f"the end state of prefix {k} (end checkpoint {k})"})
     rows = [psr.run_case(c, base, shim) for c in cases]
@@ -270,6 +322,16 @@ def main() -> int:
     for r in rows:
         for key in ("files_before", "changed_file_text"):
             r.pop(key, None)
+    # Timers profile: the Dkk logs grow with k (one checkpoint per entry), so
+    # a long scenario's reference would hold O(n^2) log text.  Each is replaced
+    # by its sha256 and size; what the runner uses from it, its last
+    # checkpoint, is kept in end_checkpoints, and X1's log is kept in full.
+    compact = diag_forms is TIMERS_DIAG_FORMS
+    if compact:
+        for r in rows[3 + n:]:
+            log = r.pop("diag_log", "").encode("latin-1")
+            r["diag_log_sha256"] = psr.sha256_bytes(log)
+            r["diag_log_bytes"] = len(log)
     head = subprocess.run(["git", "-C", str(psr.UPSTREAM_ROOT), "rev-parse", "HEAD"],
                           capture_output=True, text=True).stdout.strip()
     res = {
@@ -308,9 +370,12 @@ def main() -> int:
                           "from the death question on each row holds the NEXT command's "
                           "response (informational; the runner uses entry_prompts)",
         },
-        "diagnostic": {"source_case": x1["name"], "diag_forms": DIAG_FORMS, **diag,
+        "diagnostic": {"source_case": x1["name"], "diag_forms": diag_forms, **diag,
                        **devents[n]},
         "end_checkpoints": end_checkpoints,
+        "diag_logs": ("Dkk cases: diag_log replaced by diag_log_sha256 and diag_log_bytes; "
+                      "their last checkpoints are end_checkpoints; X1's diag_log kept in full")
+        if compact else "every diagnostic case keeps its diag_log",
         "cases": rows,
     }
     text = json.dumps(res, indent=2, ensure_ascii=False) + "\n"

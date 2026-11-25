@@ -4,7 +4,7 @@
 
 `make m4-check` (`scripts/m4_check.py`, epic #163 Phase 7) runs every check
 declared in [`tests/scenarios/m4-manifest.json`](../tests/scenarios/m4-manifest.json),
-one at a time: `make sources`; the fourteen M4 native-parity scenario targets;
+one at a time: `make sources`; the eighteen M4 native-parity scenario targets;
 the WP4 persistence check `test-m4-replay-persistence` (a separate entry,
 never counted as a scenario); and the PLAYABLE evidence sub-checks
 `test-m3-session` and `test-m3-launcher`. It then reports the five
@@ -60,11 +60,12 @@ per-scenario steps; per-target logs are uploaded with
 
 ## M4 scenario runner (2026-11-24)
 
-The fourteen M4 native-parity scenarios (`make test-m4-house-cellar`,
+The eighteen M4 native-parity scenarios (`make test-m4-house-cellar`,
 `-mailbox-drop`, `-orphan-prompt`, `-top-parser`, `-sword-glow`,
 `-troll-combat`, `-parser-ambiguity`, `-cyclops-room`, `-mirror-bat`,
 `-strange-passage`, `-help-info`, `-grue-resurrection`, `-grue-refusal`,
-`-troll-death`) run through one shared driver,
+`-troll-death`, `-treasure-deposit`, `-thief-robbery`, `-cure-recovery`,
+`-lamp-burnout`) run through one shared driver,
 `tests/m4_scenario_runner.rkt`. Each test file keeps only its command list,
 its scenario-specific reference assertions, its read-only checkpoint function
 and its post-FLOAD sections. Every comparison is byte-exact after ADR-0053
@@ -177,10 +178,30 @@ at a READSTRING entry that changes the RANDOM state, the storage ledger, the
 session output or the record of signalled MDL errors fails with kind
 `run-guard`; other mutation by a read (interning a new ATOM, game code that
 sets state) is not observed, so checkpoint functions must stay pure reads of
-existing names (as all fourteen do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
+existing names (as all eighteen do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
 exist). Coverage gained: the per-turn
 checkpoints at READSTRING entry (the newer per-prefix tests compared only
 end checkpoints) and the one-READSTRING-per-command check.
+
+*The thief's end-of-input move (M4 Phase 3).* The Phase 3 checkpoint
+(`tests/m4_timers_checkpoint.rkt`) reads the ROBBER demon's HROOM, which the
+demon changes on every turn, the end-of-input turn included. With that field
+almost every shorter prefix would have a non-standard end checkpoint
+and be re-run (one boot each). thief-robbery classifies with it (21 boots in
+single-run mode). treasure-deposit, cure-recovery and lamp-burnout declare
+`#:eof-classification-ignore-keys '(robber_hroom)` (ADR-0062 amendment): the
+field is left out only of that classification, and is still compared at
+every READSTRING entry, at the single run's end, in reboots and in
+per-prefix mode. Lost coverage, precisely: for those prefixes the thief's
+move during the skipped end-of-input turn is not executed by this runtime
+there; the same ROBBER demon code runs at every regular turn of the single
+run and is compared there through HROOM (and in per-prefix mode at every
+prefix's end of input). Rendering: the thief's walk reaches the room whose
+RID is `!` (NULEXIT's FIND-ROOM), which PRIN1 prints as `\!`; the checkpoint
+renders that one escaped PNAME and fails strictly on any other unsafe one.
+The Phase 3 references keep each Dkk case's log as its sha256 and size
+(`diag_logs`): their last checkpoints are `end_checkpoints`, and the logs
+grow with k.
 
 *Diagnostic stdout hashes.* In every M4 reference, the diagnostic runs'
 (X1, Dkk) `stdout_sha256` is the hash of the raw native stdout. That stdout
@@ -190,7 +211,7 @@ corruption, and the runner never uses diagnostic stdouts. The P/T1/T1b
 transcripts it compares contain no path, and their hashes are re-checked.
 
 **Per-prefix mode** (`M4_SCENARIO_MODE=per-prefix`; `make
-m4-scenarios-per-prefix` runs all fourteen; not on CI's default path). The
+m4-scenarios-per-prefix` runs all eighteen; not on CI's default path). The
 pre-runner protocol through the same module: one boot per prefix k = 0..n
 with only k commands; the whole output equals the native prefix-k stdout and
 the state after end of input equals the reference end checkpoint k
@@ -228,7 +249,7 @@ export PLTCOLLECTS=":$PWD" TMPDIR=/tmp
 make test-m4-mirror-bat                          # single-run (default)
 M4_SCENARIO_MODE=per-prefix racket tests/historical_mirror_bat_test.rkt
 make test-m4-grue-refusal                        # declared QUIT ending
-make m4-scenarios-per-prefix                     # all fourteen, per-prefix
+make m4-scenarios-per-prefix                     # all eighteen, per-prefix
 raco test tests/m4_scenario_runner.rkt           # runner unit tests (also in make test)
 ```
 

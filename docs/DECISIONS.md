@@ -2192,6 +2192,27 @@ prefix ending by D3 with no OPEN recorded).
   INV-07) a scenario may declare. Only `'quit` with no MDL ERROR is
   accepted.
 
+**Amendment (M4 Phase 3, epic #163, 2026-11-25): fields not used to classify
+end-of-input tails.** Status: proposed (branch `feat/m4-timers-scoring`;
+evidence `docs/evidence/M4/TIMERS-SCORING.md`). Opt-in
+`#:eof-classification-ignore-keys` (default `'()`: every other scenario runs
+exactly as before) lists checkpoint fields that the single-run mode leaves
+out, on both sides, only when it decides which shorter prefixes have a
+standard end-of-input tail (`non-standard-eof-tails`). Those fields stay
+compared at every READSTRING entry, in the end checkpoint after the single
+run's end of input, in every reboot and in per-prefix mode. Each listed key
+must be a compared reference checkpoint field (strict error otherwise, as for
+`#:end-only-keys`). Used by treasure-deposit, cure-recovery and lamp-burnout
+for `robber_hroom`: the ROBBER demon moves the thief on every turn, the
+end-of-input turn included, so with the field every shorter prefix would be
+re-run (one boot each). Coverage lost, stated exactly: for a prefix k
+classified standard only thanks to the option, the thief's move during the
+skipped end-of-input turn at k is not executed by this runtime there (as for
+every standard prefix, ADR-0062); the same ROBBER demon code runs at every
+regular turn of the single run, and its HROOM is compared at every entry.
+A difference in any other field, or in the tail text, still makes the prefix
+non-standard (treasure-deposit prefix 15 is re-run).
+
 ## ADR-0063: `make m4-check` reports the five M4 terms from declared manifests
 
 Status: proposed (2026-11-25, branch `feat/m4-check`; Phase 7 of epic #163).

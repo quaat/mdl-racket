@@ -455,9 +455,18 @@
 ;; The prefixes k < n whose native end-of-input tail is not standard: the tail
 ;; text is not exactly "Beg pardon?\n>", or the end checkpoint differs from the
 ;; (transformed) READSTRING-entry checkpoint. TAIL, END-CP, ENTRY-CP: k ->
-;; value. KS: the prefixes to classify (default 0..n-1). Returns a list of
+;; value. KS: the prefixes to classify (default 0..n-1). IGNORE-KEYS: fields
+;; removed from both checkpoints (hasheqs) for this classification only
+;; (#:eof-classification-ignore-keys of run-m4-scenario). Returns a list of
 ;; (k reason ...), ascending.
-(define (non-standard-eof-tails n tail end-cp entry-cp #:ks [ks (range n)])
+(define (non-standard-eof-tails n tail end-cp0 entry-cp0 #:ks [ks (range n)]
+                                #:ignore-keys [ignore-keys '()])
+  (define (strip h) (if (null? ignore-keys)
+                        h
+                        (for/hasheq ([(key v) (in-hash h)] #:unless (memq key ignore-keys))
+                          (values key v))))
+  (define (end-cp k) (strip (end-cp0 k)))
+  (define (entry-cp k) (strip (entry-cp0 k)))
   (for*/list ([k (in-list ks)]
               #:when (< k n)
               [reasons (in-value
@@ -507,8 +516,14 @@
 (define (run-m4-scenario name expected-commands
                          #:checkpoint checkpoint
                          #:turn-checkpoint [turn-checkpoint checkpoint]
+                         ;; #:eof-classification-ignore-keys: fields left out
+                         ;; only when classifying which prefixes have a
+                         ;; non-standard end-of-input tail (and are re-run);
+                         ;; still compared at every READSTRING entry, at the
+                         ;; end and in per-prefix mode (ADR-0062 amendment).
                          #:end-only-keys [end-only-keys '()]
                          #:ignore-keys [ignore-keys '()]
+                         #:eof-classification-ignore-keys [eof-classification-ignore-keys '()]
                          #:eof-transform [eof-transform values]
                          #:check-turn [check-turn void]
                          #:prompt-split [prompt-split 'any]
@@ -517,6 +532,16 @@
                          #:quit-open-records [quit-open-records '()])
   (unless (eq? (null? end-only-keys) (eq? turn-checkpoint checkpoint))
     (error 'm4-scenario "#:end-only-keys and #:turn-checkpoint must be given together"))
+  (unless (and (list? eof-classification-ignore-keys) (andmap symbol? eof-classification-ignore-keys)
+               (equal? eof-classification-ignore-keys (remove-duplicates eof-classification-ignore-keys)))
+    (error 'm4-scenario "#:eof-classification-ignore-keys must be a list of distinct field symbols, not ~s"
+           eof-classification-ignore-keys))
+  ;; An end-only key is not compared at READSTRING entries, so it cannot also
+  ;; be a classification key, which promises comparison at every entry
+  ;; (independent review).
+  (for ([key (in-list eof-classification-ignore-keys)])
+    (when (memq key end-only-keys)
+      (error 'm4-scenario "~a cannot be both an end-only key and an end-of-input classification key" key)))
   (unless (memq prompt-split '(any line-initial))
     (error 'm4-scenario "#:prompt-split must be 'any or 'line-initial, not ~s" prompt-split))
   (unless (and (hash? entry-prompts)
@@ -538,11 +563,11 @@
            quit-open-records))
   (parameterize ([current-check-handler raise])
     (run-m4-scenario* name expected-commands checkpoint turn-checkpoint end-only-keys
-                      (cons 'n ignore-keys) eof-transform check-turn prompt-split
-                      entry-prompts quit-prefixes quit-open-records)))
+                      (cons 'n ignore-keys) eof-classification-ignore-keys eof-transform
+                      check-turn prompt-split entry-prompts quit-prefixes quit-open-records)))
 
 (define (run-m4-scenario* name expected-commands checkpoint turn-checkpoint end-only-keys
-                          ignore-keys eof-transform check-turn prompt-split
+                          ignore-keys eof-classification-ignore-keys eof-transform check-turn prompt-split
                           entry-prompts quit-prefixes quit-open-records)
   (unless (directory-exists? m4-source-root)
     (error 'm4-scenario "pinned source missing: ~a" m4-source-root))
@@ -652,6 +677,12 @@
       (error 'm4-scenario "end-only key ~a is not a reference checkpoint field" key)))
   (when (pair? end-only-keys)
     (printf "~a: fields read only after end of input (allocating reads): ~a\n" name end-only-keys))
+  (for ([key (in-list eof-classification-ignore-keys)])
+    (unless (hash-has-key? (expected-cp (entry-cp 0)) key)
+      (error 'm4-scenario "end-of-input classification key ~a is not a compared reference checkpoint field" key)))
+  (when (pair? eof-classification-ignore-keys)
+    (printf "~a: fields not used to classify end-of-input tails (still compared): ~a\n"
+            name eof-classification-ignore-keys))
   (define (end-cp k) (if has-end-checkpoints?
                          (list-ref (hash-ref reference 'end_checkpoints) k)
                          (list-ref diag-checkpoints k)))
@@ -719,7 +750,8 @@
              (non-standard-eof-tails n tail
                                      (lambda (k) (raw-cp (end-cp k)))
                                      (lambda (k) (raw-cp (eof-transform (entry-cp k))))
-                                     #:ks (filter (lambda (k) (eq? (ending-of k) 'eof)) (range n)))
+                                     #:ks (filter (lambda (k) (eq? (ending-of k) 'eof)) (range n))
+                                     #:ignore-keys eof-classification-ignore-keys)
              (for/list ([k (in-list (sort quit-prefixes <))] #:when (< k n))
                (list k "declared quit ending")))
             < #:key car))
@@ -1003,6 +1035,21 @@
                                         (lambda (k) (vector-ref entry k))
                                         #:ks '(0 2))
                 '((2 "end checkpoint fields (a)")))
+  ;; #:ignore-keys (#:eof-classification-ignore-keys): the listed fields are
+  ;; removed from both sides for the classification only; a difference in
+  ;; another field, or in the tail, still makes the prefix non-standard.
+  (define entry2 (vector (hasheq 'a "1" 'h "R0") (hasheq 'a "1" 'h "R1") (hasheq 'a "2" 'h "R2")))
+  (define end2 (vector (hasheq 'a "1" 'h "R1") (hasheq 'a "1" 'h "R2") (hasheq 'a "9" 'h "R3")))
+  (check-equal? (non-standard-eof-tails 3 (lambda (k) "Beg pardon?\n>")
+                                        (lambda (k) (vector-ref end2 k))
+                                        (lambda (k) (vector-ref entry2 k)))
+                '((0 "end checkpoint fields (h)") (1 "end checkpoint fields (h)")
+                  (2 "end checkpoint fields (a h)")))
+  (check-equal? (non-standard-eof-tails 3 (lambda (k) (if (= k 1) "Beg pardon?\nX\n>" "Beg pardon?\n>"))
+                                        (lambda (k) (vector-ref end2 k))
+                                        (lambda (k) (vector-ref entry2 k))
+                                        #:ignore-keys '(h))
+                '((1 "tail \"Beg pardon?\\nX\\n>\"") (2 "end checkpoint fields (a)")))
   ;; k = n is never re-run (the single run's own end of input covers it).
   (check-equal? (non-standard-eof-tails 0 (lambda (k) "x") (lambda (k) 1) (lambda (k) 2)) '())
   ;; Differences.
