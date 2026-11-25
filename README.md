@@ -117,13 +117,23 @@ m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 | Death by grue, resurrection (Phase 2, branch `feat/m4-death-branches`) | `test-m4-grue-resurrection` | possessions scattered |
 | Death by grue, refused (Phase 2, same branch) | `test-m4-grue-refusal` | the game's QUIT; native ZORK.LOG not written (ADR-0055) |
 | Killed by the troll (Phase 2, same branch) | `test-m4-troll-death` | staggered, wounded, killed, resurrected |
+| A treasure in the trophy case (Phase 3, branch `feat/m4-timers-scoring`) | `test-m4-treasure-deposit` | the painting, score 46 |
+| The thief takes the painting (Phase 3, same branch) | `test-m4-thief-robbery` | observed under the fixed seed; no fight |
+| The cure clock heals a wound (Phase 3, same branch) | `test-m4-cure-recovery` | CURIN countdown, CURE-CLOCK |
+| The lamp burns out (Phase 3, same branch) | `test-m4-lamp-burnout` | 118 `wait`s, LIGHT-INT warnings |
 
 The three Phase 2 death scenarios ([record](docs/evidence/M4/DEATH-BRANCHES.md))
 use two opt-in runner options (ADR-0062 amendment): the death question as the
 prompt of its READSTRING entry, and declared prefixes that end by the game's
 own QUIT instead of end of input. They are branch evidence until merged.
 
-`make m4-check` runs all fourteen plus the persistence check; options
+The four Phase 3 scenarios ([record](docs/evidence/M4/TIMERS-SCORING.md))
+need no runner change: a wider read-only checkpoint (lamp and clock events,
+painting, trophy case, thief). They cover the treasure deposit, the cure
+clock and the lamp burn-out; the thief is seen stealing but not fighting, so
+the thief branch stays uncovered. They are branch evidence until merged.
+
+`make m4-check` runs all eighteen plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:

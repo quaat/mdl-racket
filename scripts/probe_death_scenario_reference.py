@@ -70,7 +70,10 @@ LIGHT-INT counter (<1 <ORAND lamp>>), LNTIN's CFLAG and CTICK, every clock
 event of the CLOCKER demon in HOBJS order as (CID CFLAG CTICK), the
 painting's OROOM, OCAN, OFVAL and OTVAL, the trophy case's OOPEN? and
 OCONTENTS (OIDs), the thief's OROOM, and the ROBBER demon's HROOM (RID),
-HFLAG and HOBJS (OIDs: the thief's bag).  Pure reads as well.
+HFLAG and HOBJS (OIDs: the thief's bag).  Pure reads as well.  A timers
+capture keeps each Dkk case's log only as diag_log_sha256 and diag_log_bytes
+(the logs grow with k; their last checkpoints are end_checkpoints, and X1's
+log is kept in full); the reference says so in `diag_logs`.
 
 Confusion is GPLv3 and is used only as a behaviour reference; no Confusion
 source is copied into this script.
