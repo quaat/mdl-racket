@@ -432,6 +432,8 @@
      ;; that is still undefined at this check -- no registered TYPE and no
      ;; DECL association -- is not enforced at this position, as in pinned
      ;; Confusion. A name defined since is resolved strictly, as before.
+     ;; Since #196 attached checks are evaluated only for the test-only
+     ;; recorder (check-declared!); DECL? never retains a name.
      (if (and (not (hash-has-key? (atom-space-types (current-mdl-atom-space))
                                   (cadr pattern)))
               (not (association-lookup (cadr pattern) (mdl-root-atom "DECL"))))
@@ -612,30 +614,34 @@
      (mdl-false (list (cadr result) (caddr result)))]
     [else (mdl-false '())]))
 
-;; The attached-declaration check (manual chapter 14; the #98 ADR and its #193
-;; amendment). KIND says which binding is checked: argument, optional, rest,
-;; aux (a FUNCTION's "AUX"), prog-aux (a PROG/REPEAT auxiliary), name (an
-;; activation formal), set (SET of a declared local) or value (the result).
-;; A failing check is the strict error below, unless the session was made
-;; with the host-only, test-only decl-violation recorder (M4 #196, SEMANTICS
-;; "Diagnostic-only: attached-declaration violation recorder"): then the
-;; recorder is called once with a description of the violation and the check
-;; proceeds as if it had passed. Only this mismatch branch consults the
-;; recorder: errors raised while checking (an unknown or cyclic DECL
-;; association, the traversal limit) and every other declaration path
-;; (DECL?, GDECL/SETG, positional declarations, CHTYPE) stay strict.
+;; The attached-declaration check point (manual chapter 14; the #98 ADR, its
+;; #193 amendment and its #196 amendment). KIND says which binding it is:
+;; argument, optional, rest, aux (a FUNCTION's "AUX"), prog-aux (a PROG/REPEAT
+;; auxiliary), name (an activation formal), set (SET of a declared local) or
+;; value (the result).
+;;
+;; M4 #196 (maintainer decision 2026-11-26; DECISIONS.md, SEMANTICS "Amendment:
+;; attached declarations are not enforced"): attached #DECLs are not enforced,
+;; matching pinned Confusion. Without the host-only, test-only decl-violation
+;; recorder (every production host) nothing is evaluated here: the value is
+;; returned unchanged and no Pattern is matched, so nothing matching could raise
+;; is raised either. With the recorder (SEMANTICS "Diagnostic-only:
+;; attached-declaration violation recorder") the check is evaluated exactly as
+;; before #196: a value that does not match is reported once and proceeds, and
+;; an error raised while matching (a later DECL association whose target is
+;; unknown or cyclic, the traversal limit) still raises in that host. The
+;; recorder read below is its only read site. Definition-time validation of the
+;; #DECL (mdl-make-declaration) and every other declaration path (DECL?,
+;; GDECL/SETG, positional declarations, CHTYPE) are unchanged and strict.
 (define (check-declared! decl name value [kind 'value])
-  (when (and decl (not (eq? value unassigned)))
+  (define recorder (atom-space-decl-violation-recorder (current-mdl-atom-space)))
+  (when (and recorder decl (not (eq? value unassigned)))
     (define pattern (if (eq? name 'VALUE)
                         (mdl-decl-value-result decl)
                         (hash-ref (mdl-decl-value-bindings decl) name #f)))
     (when (and pattern (not (matches-decl? value pattern)))
-      (define recorder (atom-space-decl-violation-recorder (current-mdl-atom-space)))
       (define binding (if (eq? name 'VALUE) "VALUE" (mdl-atom-pname name)))
-      (if recorder
-          (recorder (decl-violation-info decl binding kind pattern value))
-          (decl-error "DECL" (mdl-decl-value-line decl) (mdl-decl-value-column decl)
-                      "~a does not satisfy declaration" binding))))
+      (recorder (decl-violation-info decl binding kind pattern value))))
   value)
 
 (define (check-frame-binding! frame atom value kind)
