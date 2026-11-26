@@ -1572,6 +1572,67 @@ nested late definitions; nested undefined names in OR, structure and REST
 Patterns with the rest strict; explicit `DECL?`, positional declarations
 and GDECL still failing; known types still strict.
 
+### Diagnostic-only: attached-declaration violation recorder (M4 issue #196; not a semantic choice)
+
+Maintainer decision 2026-11-26 on #196 ("sweep first"): gather data on
+which attached declarations the 1977 game violates on its own play paths
+before deciding INV-12. This is a **host-only, test-only diagnostic mode**.
+It changes no semantics: nothing in production uses it, and every rule
+above stays as written.
+
+* **Hook.** `make-mdl-session`, `make-mdl-context` and
+  `make-mdl-atom-space` accept `#:decl-violation-recorder`: `#f` (the
+  default) or a procedure of one argument (anything else is a contract
+  error). It is stored in an immutable field of the session's atom space
+  at construction and read at exactly one place, the mismatch branch of
+  the attached-declaration check (`check-declared!` in
+  `mdl/runtime/core.rkt`).
+* **Absent (the default; always in `run-zork`, the command line and the
+  replay host):** every attached check is strict, raising
+  `mdl-decl: DECL line:column: NAME does not satisfy declaration` exactly as
+  before.
+* **Present:** an attached check whose value does not match its Pattern
+  calls the recorder once with a description and then proceeds as if the
+  check had passed (the binding, assignment or result keeps the value).
+  The description is a `hasheq`: `binding` (PNAME, or `"VALUE"`), `kind`
+  (`argument`, `optional`, `rest`, `aux` for a FUNCTION's "AUX", `prog-aux`
+  for a PROG/REPEAT auxiliary, `name` for an activation formal, `set`,
+  `value`), `pattern` (the normalized Pattern rendered as MDL text; a name
+  declared twice renders its constraints joined by ` & `), `value-type`,
+  `value-summary` (bounded: FIX, FLOAT, ATOM PNAME, a STRING up to 40
+  characters, `#FALSE ()`, otherwise `#TYPE`), `value` (the value itself,
+  for the host) and the `#DECL`'s `line` and `column`. The runtime does not
+  know the file or the enclosing function; the sweep resolves them from
+  line and column by parsing the loaded files with the project reader.
+* **Unaffected, strict with the recorder on:** explicit `DECL?` (a
+  predicate; it returns its FALSE and never calls the recorder); `DECL?` of
+  an unknown name; positional declarations; GDECL and SETG; CHTYPE to a
+  NEWTYPE with a `DECL` association; malformed attached declarations
+  (definition-time errors); errors raised *while* checking (an association
+  added later whose target is unknown, cyclic or malformed; the traversal
+  limit). An unassigned binding is still not checked, and a still-undefined
+  name (#193) still matches, so neither is recorded.
+* **Unreachable from MDL.** No SUBR, ROOT name, GVAL or association exposes
+  or sets it; MDL code can neither read nor enable it. The only callers that
+  pass it are `tests/m4_scenario_runner.rkt` (when the sweep sets its
+  `current-m4-decl-violation-recorder` parameter) and
+  `tests/decl_violation_sweep.rkt`.
+
+Control flow touched: the attached-check call sites now pass the binding
+kind (`check-frame-binding!` gained a `kind` argument at its six call sites:
+SET, compiled formal binding, PROG auxiliaries, interpreted formal binding;
+`check-result!` passes `value`). The strict path is otherwise unchanged.
+
+Tests: `tests/decl_violation_recorder_test.rkt` (in `make test`; failed
+first on the unknown keyword) covers each kind recorded once with the right
+description and the call proceeding; the same calls raising the old error
+without the recorder; DECL?, GDECL/SETG, positional, CHTYPE and
+checking-time errors strict with it on; argument validation; and isolation
+(one read site, immutable field, no production host passes it, run-zork and
+the replay host fail strictly on a toy game's violation). The sweep:
+`make m4-decl-sweep`, docs/TESTING.md and
+`docs/evidence/M4/DECL-VIOLATION-SWEEP.md`.
+
 ## M3 duplicate attached ATOM declarations (issue #100; specification before implementation)
 
 The original `77act2.mud:424` `BALLOON` function declares `M` twice in one

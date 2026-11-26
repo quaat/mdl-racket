@@ -58,7 +58,8 @@
                   current-mdl-sleeper))
 (provide run-m4-scenario m4-reference m4-run-load-only
          m4-source-root m4-pinned-mdli m4-pinned-upstream
-         render strip-trailers field oids bit-set? or-false)
+         render strip-trailers field oids bit-set? or-false
+         current-m4-decl-violation-recorder m4-run-commands reference-transcript)
 
 (define-runtime-path m4-source-root
   "../.cache/upstream/mdlzork/mdlzork_771212/patched_confusion")
@@ -117,6 +118,19 @@
   (if (eqv? 0 (mdl-session-call s "CHTYPE" w (mdl-session-atom s "FIX"))) "#FALSE ()" "T"))
 (define (or-false v f) (if (mdl-truthy? v) (f v) "#FALSE ()"))
 
+;; --- diagnostic only: the attached-declaration violation sweep (M4 #196) ------------
+;; #f (the default: every scenario run is strict, exactly as before) or a
+;; procedure (info k n session) for tests/decl_violation_sweep.rkt only. When
+;; set, each game run below makes its session with make-mdl-session's host-only
+;; #:decl-violation-recorder, so an attached #DECL check that would fail is
+;; reported here and the run proceeds (docs/SEMANTICS.md "Diagnostic-only:
+;; attached-declaration violation recorder"). INFO: the runtime's description;
+;; K: READSTRING entries made so far (the violation belongs to command K,
+;; 1-based; 0 = during the boot); N: the number of commands fed to this run
+;; (#f for a load-only run); SESSION: the run's session (read-only use).
+;; No scenario target, m4-check or production host sets it.
+(define current-m4-decl-violation-recorder (make-parameter #f))
+
 ;; --- guarded, watchdogged game runs ------------------------------------------------
 (define original-guard (current-security-guard))
 (define (tree-manifest dir0)
@@ -135,7 +149,8 @@
 
 ;; writes/sleeps: (k . detail), k = READSTRING entries reached at the time.
 (struct run-result (session load-report result raw events input writes cwd-after
-                            manifest-before manifest-after sleeps entries elapsed))
+                            manifest-before manifest-after sleeps entries elapsed
+                            output-port))
 
 ;; LINES: the commands, or #f to load only (no SAVE-IT). OBSERVER: #f or
 ;; (kind k info session output-port) called inside READSTRING; k is the
@@ -171,12 +186,18 @@
          (set! writes (cons (cons entries (list who path modes)) writes))))
      (lambda (who host port mode) (void))))
   (define events '())
+  (define decl-recorder (current-m4-decl-violation-recorder))
   (set! session
         (make-mdl-session m4-source-root #:input-port input #:output-port output
                           #:clock (make-fixed-mdl-clock fixed-epoch) #:time-zone 'utc
                           #:input-observer observer
                           ;; ADR-0055 amendment (#171): help/info's two files.
-                          #:read-only-files zork-read-only-files))
+                          #:read-only-files zork-read-only-files
+                          ;; #f unless the diagnostic sweep set it (M4 #196).
+                          #:decl-violation-recorder
+                          (and decl-recorder
+                               (lambda (info)
+                                 (decl-recorder info entries (and lines (length lines)) session)))))
   (define start (current-inexact-milliseconds))
   (define done (make-channel))
   (define worker
@@ -214,7 +235,8 @@
   (delete-directory/files cwd)
   (run-result session (first outcome) (second outcome) (get-output-string output)
               (reverse events) input (reverse writes) cwd-after
-              manifest-before (tree-manifest m4-source-root) (reverse sleeps) entries elapsed))
+              manifest-before (tree-manifest m4-source-root) (reverse sleeps) entries elapsed
+              output))
 
 ;; A load-only session (no SAVE-IT), guarded and watchdogged, for the
 ;; scenario tests' post-FLOAD sections. Returns the session.
@@ -225,6 +247,30 @@
   (define f (or (guard-failure r 0 label) (load-failure r 0 label)))
   (when f (error 'm4-scenario "~a: ~a" label (failure-message f)))
   (run-result-session r))
+
+;; Diagnostic only (M4 #196 targeted probes): one guarded, watchdogged boot fed
+;; LINES, with no reference comparison. Returns a hash: output (the raw
+;; transcript), ending (input-exhausted, quit, or the strict failure's
+;; message), entries (READSTRING entries reached) and guard (#f, or the guard
+;; failure's message: a file write, a sleeper call, a changed game directory),
+;; session (the run's session, usable afterwards by host calls) and output-now
+;; (a thunk: the session's whole output so far, including any after the run).
+(define (m4-run-commands lines)
+  (define limit (env-seconds "M4_SCENARIO_TIMEOUT" 900))
+  (define r (run-game lines #:deadline (+ (current-inexact-milliseconds) (* 1000.0 limit))
+                      #:turn-limit (env-seconds "M4_SCENARIO_TURN_TIMEOUT" 120)
+                      #:scenario-limit limit))
+  (define result (run-result-result r))
+  (define f (or (guard-failure r (run-result-entries r) "probe") (load-failure r 0 "probe")))
+  (hasheq 'output (run-result-raw r)
+          'ending (cond [(exn:fail:mdl-input-exhausted? result) "input-exhausted"]
+                        [(mdl-session-outcome? result)
+                         (format "~a" (mdl-session-outcome-kind result))]
+                        [else (result-text result)])
+          'entries (run-result-entries r)
+          'guard (and f (failure-message f))
+          'session (run-result-session r)
+          'output-now (lambda () (get-output-string (run-result-output-port r)))))
 
 ;; --- failures ------------------------------------------------------------------------
 ;; k: the earliest failing turn (commands consumed); kind: "transcript",

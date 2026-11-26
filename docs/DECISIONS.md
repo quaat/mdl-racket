@@ -165,6 +165,18 @@ is no longer reported at call time; it is still reported by `DECL?`,
 positional declarations and GDECL. Evidence:
 `docs/evidence/M4/S14-PRSOBJ-DECL.md`.
 
+**Diagnostic recorder (M4 issue #196; maintainer decision 2026-11-26,
+"sweep first"). Not an amendment.** INV-12 (BALLOON's PRSO and BINF) is
+pending. To decide it with data, the runtime gained a host-only, test-only
+`#:decl-violation-recorder` (SEMANTICS "Diagnostic-only: attached-declaration
+violation recorder"): when a test host passes one, an attached check that
+would fail is recorded and proceeds; when absent (every production host),
+attached checks are exactly as specified above. `make m4-decl-sweep`
+(diagnostic, outside `make test` and `make m4-check`) runs the gated
+scenarios, the balloon route and targeted probes with it and publishes the
+violated sites: `docs/evidence/M4/DECL-VIOLATION-SWEEP.md`. This ADR is
+unchanged; the decision on INV-12 remains the maintainer's.
+
 ## ADR: Lazy NTH declaration matching for M3 issue #96
 
 **Decision:** Normalize `[n pattern ...]` as a counted sequence in the
