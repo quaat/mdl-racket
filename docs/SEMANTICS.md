@@ -4276,3 +4276,25 @@ non-ATOM OBLIST names, of unreachable empty PNAMEs and of escaped PNAMEs.
 PRINC still refuses ATOMs (ADR-0050, unchanged).
 
 Tests: `tests/print_trailer_test.rkt`.
+
+**The game's ERROR handler path (INV-07).** With PRINT (B1) and trailers,
+an MDL ERROR signalled during play runs the game's HANDLE (77rooms.mud:215,
+installed at load at level 8) to the end of its general branch: `<PUT
+,OUTCHAN 13 80>`; `<PUT <1 <BACK ,INCHAN>> 6 #LOSE 27>`; XUNM "MTRZORK" is
+not in WINNERS; TELL of the apology and of `,VERS`; `<MAPF <> <FUNCTION
+(X) <PRINT .X>> .ZORK>`; `<FINISH #FALSE (". Error.")>`, i.e. SCORE without
+the question, RECORD (both OPENs denied, ADR-0055) and QUIT; the host loop
+returns `'quit-after-mdl-error` (ADR-0054). Nothing here is specific to
+HANDLE: it uses the ordinary ERROR delivery (ADR-0025) and the primitives
+above. No ordinary command signals an ERROR in the pinned sources (DA is
+never called and itself needs the unimplemented APPLICABLE?; FIND-PREP's
+ERROR runs only at load), so the regression injects one, test-only
+(`tests/historical_handle_test.rkt`, [I173-HANDLE.md](evidence/M4/I173-HANDLE.md)).
+Pinned Confusion stubs HANDLER/EVENT, so the expected bytes come from the
+source and the manual, anchored to native captures for the transcript
+before the ERROR and for the shape of the PRINTed tuple. At INT-LEVEL 8 or
+more the ERROR is not delivered and the session ends with the strict
+failure (manual: an interrupt at or below the current level is not
+handled; ADR-0025). Still strict on this path: an ERROR argument whose TYPE
+PRINT does not print (VECTOR, FORM, FLOAT, NEWTYPE values); host failures
+are never turned into MDL ERRORs (ADR-0064 class C, and class B unchanged).

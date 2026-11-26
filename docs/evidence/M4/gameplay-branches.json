@@ -143,10 +143,6 @@
     {"id": "INV-06", "title": "native RESTORE is strict: `restore` ends the session after \"Restored.\" (F4, F5)",
      "class": "(a) reachable by ordinary play", "severity": "P1",
      "issue": "#172", "issue_source": "maintainer decision 2026-11-26 (#172): deterministic replay for player-facing persistence; the game's RESTORE only where equivalence with the native continuation is demonstrated (ADR-0048 and ADR-0061 amendments). Open until implemented (Phase C).",
-     "status": "open"},
-    {"id": "INV-07", "title": "PRINT is unassigned on the game's ERROR handler path (HANDLE, 77rooms.mud:251)",
-     "class": "(b) error path", "severity": "P2",
-     "issue": "#173", "issue_source": "maintainer decision 2026-11-26 (#173): implement PRINT per the manual (11.1.2.1); MDL errors and host failures classified separately (ADR-0064). Open until implemented (Phase B).",
      "status": "open"}
   ],
   "resolved_inventory": [
@@ -156,6 +152,7 @@
     {"id": "INV-04", "fixed_by": "M4 S9 (#170, PR #176)"},
     {"id": "INV-05", "fixed_by": "M4 S10 (#171, PR #189)"},
     {"id": "INV-11", "fixed_by": "M4 S14 (#193; the #98 ADR amendment, local branch feat/m4-prsobj-decl; gated by test-m4-dam-sluice and test-m4-maint-leak)"},
-    {"id": "INV-12", "fixed_by": "M4 S16 (#196; the attached-declaration ADR amendment: attached #DECLs are not enforced, local branch feat/m4-attached-decl-unenforced; gated by test-m4-balloon-ledge)"}
+    {"id": "INV-12", "fixed_by": "M4 S16 (#196; the attached-declaration ADR amendment: attached #DECLs are not enforced, local branch feat/m4-attached-decl-unenforced; gated by test-m4-balloon-ledge)"},
+    {"id": "INV-07", "fixed_by": "M4 #173 B1 (PRINT, PR #207) and B2 (OBLIST trailers; the game's HANDLE general branch runs to FINISH and QUIT; gated by tests/historical_handle_test.rkt in make test-historical)"}
   ]
 }
