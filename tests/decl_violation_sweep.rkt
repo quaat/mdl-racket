@@ -272,6 +272,98 @@
            (hash-ref v 'line) (hash-ref v 'column) (hash-ref v 'binding) (length cands)))
   (car cands))
 
+;; --- static candidates: PRSVEC slots read under a declaration without FALSE ---------
+;; CLOCK-DEMON (77rooms.mud:1633-1634) puts <> in PRSVEC 2 and 3 before every
+;; clock action and the parser leaves slot 3 FALSE without an indirect object,
+;; so a binding initialized from <2 ,PRSVEC> / <3 ,PRSVEC> (or <2 .V> with V
+;; bound to ,PRSVEC in the same list), or bound to ,PRSVEC itself with a
+;; positional structure Pattern, whose declaration admits no FALSE (no FALSE
+;; and no ANY in the Pattern, resp. in its element 2 or 3), may be violated
+;; on some path. A source-level scan of the FUNCTION/DEFINE/PROG binding
+;; lists only (not arguments passed from callers, not other values): the
+;; static-only reachability class of the report.
+(define (node->text n)
+  (define v (mdl-node-value n))
+  (define (seq open close) (string-append open (string-join (map node->text v) " ") close))
+  (case (mdl-node-kind n)
+    [(atom escaped-atom) v]
+    [(string) (format "~s" v)]
+    [(global) (if (string? v) (string-append "," v) (string-append "," (node->text v)))]
+    [(local) (string-append "." v)]
+    [(form) (seq "<" ">")]
+    [(list) (seq "(" ")")]
+    [(vector) (seq "[" "]")]
+    [(uvector) (seq "![" "!]")]
+    [(quote) (string-append "'" (node->text v))]
+    [else (format "#<~a>" (mdl-node-kind n))]))
+(define (admits-false? n)
+  (regexp-match? #px"(^|[^A-Z0-9-])(FALSE|ANY)($|[^A-Z0-9-])" (node->text n)))
+(define (atom-text n) (and (memq (mdl-node-kind n) '(atom escaped-atom)) (string-upcase (mdl-node-value n))))
+
+(define (static-candidates)
+  (define out '())
+  (for ([file (in-list (loaded-files))])
+    (define nodes (parse-mdl (file->string (build-path m4-source-root file)) #:source file))
+    (define (walk n top)
+      (define v (mdl-node-value n))
+      (define items (and (eq? (mdl-node-kind n) 'form) (list? v) v))
+      (define h (and items (pair? items) (atom-text (car items))))
+      (define top* (if (and (member h '("DEFINE" "DEFMAC")) (not top) (pair? (cdr items)))
+                       (atom-text (cadr items)) top))
+      (when (member h '("DEFINE" "DEFMAC" "FUNCTION" "PROG" "REPEAT"))
+        (define binding-list (findf (lambda (x) (eq? (mdl-node-kind x) 'list)) (cdr items)))
+        (define decl (findf (lambda (x) (eq? (mdl-node-kind x) 'decl)) (cdr items)))
+        (when (and binding-list decl
+                   ;; an atom-list declaration (positional RSUBR-style metadata is unchecked)
+                   (pair? (mdl-node-value decl)) (eq? (mdl-node-kind (car (mdl-node-value decl))) 'list))
+          (define patterns ; name -> list of pattern nodes
+            (for*/fold ([h (hash)]) ([(item i) (in-parallel (in-list (mdl-node-value decl)) (in-naturals))]
+                                     #:when (even? i)
+                                     [a (in-list (mdl-node-value item))])
+              (hash-update h (atom-text a) (lambda (l) (append l (list (list-ref (mdl-node-value decl) (add1 i))))) '())))
+          (define prsvec-locals '())
+          (for ([b (in-list (mdl-node-value binding-list))]
+                #:when (and (eq? (mdl-node-kind b) 'list) (= 2 (length (mdl-node-value b)))))
+            (define name (atom-text (car (mdl-node-value b))))
+            (define init (cadr (mdl-node-value b)))
+            (define (prsvec-ref? x)
+              (or (and (eq? (mdl-node-kind x) 'global) (equal? (mdl-node-value x) "PRSVEC"))
+                  (and (eq? (mdl-node-kind x) 'local) (member (string-upcase (mdl-node-value x)) prsvec-locals))))
+            (define slot
+              (cond [(and (eq? (mdl-node-kind init) 'form) (= 2 (length (mdl-node-value init)))
+                          (member (atom-text (car (mdl-node-value init))) '("2" "3"))
+                          (prsvec-ref? (cadr (mdl-node-value init))))
+                     (atom-text (car (mdl-node-value init)))]
+                    [(prsvec-ref? init) (set! prsvec-locals (cons name prsvec-locals)) "whole"]
+                    [else #f]))
+            (when slot
+              (for ([pat (in-list (hash-ref patterns name '()))])
+                (define flagged?
+                  (if (equal? slot "whole")
+                      (let ([pv (mdl-node-value pat)])
+                        (and (eq? (mdl-node-kind pat) 'form) (list? pv)
+                             (for/or ([el (in-list (cdr pv))] [i (in-naturals 1)])
+                               (and (memv i '(2 3)) (not (eq? (mdl-node-kind el) 'vector))
+                                    (not (admits-false? el))))))
+                      (not (admits-false? pat))))
+                (when flagged?
+                  (set! out (cons (hasheq 'file file 'line (mdl-node-line decl) 'column (mdl-node-column decl)
+                                          'decl (format "~a:~a" file (mdl-node-line decl))
+                                          'function (or top* 'null) 'construct h 'binding name
+                                          'initializer (node->text init)
+                                          'slot slot 'pattern (node->text pat)
+                                          ;; PRSOBJ is defined by no 1977 file: not enforced (#193)
+                                          'enforced_when_undefined
+                                          (if (regexp-match? #px"(^|[^A-Z0-9-])PRSOBJ($|[^A-Z0-9-])" (node->text pat))
+                                              "no: PRSOBJ is an undefined TYPE name (#193 amendment)"
+                                              "yes"))
+                                  out))))))))
+      (cond [(mdl-node? v) (walk v top*)]
+            [(and (list? v) (andmap mdl-node? v)) (for ([c (in-list v)]) (walk c top*))]
+            [else (void)]))
+    (for ([n (in-list nodes)]) (walk n #f)))
+  (reverse out))
+
 ;; --- aggregation ---------------------------------------------------------------------
 (define (ranges ks)
   ;; (1 2 3 7) -> "1-3, 7"
@@ -413,7 +505,17 @@
                               'elapsed_seconds (hash-ref r 'elapsed_seconds)))
              'units_crashed (reverse failures)
              'distinct_sites (length sites)
-             'sites sites)))
+             'sites sites
+             'static_prsvec_candidates
+             (for/list ([c (in-list (static-candidates))])
+               (define observed
+                 (findf (lambda (site) (and (equal? (hash-ref site 'file) (hash-ref c 'file))
+                                            (equal? (hash-ref site 'line) (hash-ref c 'line))
+                                            (equal? (hash-ref site 'binding) (hash-ref c 'binding))))
+                        sites))
+               (hash-set c 'observed_in_sweep
+                         (if observed (hash-ref observed 'reachability) "no (static-only)")))
+             'static_scan_note "Source scan of DEFINE/FUNCTION/PROG binding lists: a binding initialized from PRSVEC slot 2 or 3 (directly, or through a local bound to ,PRSVEC) whose declared Pattern names neither FALSE nor ANY, or a binding of ,PRSVEC itself whose positional structure Pattern's element 2 or 3 admits no FALSE. Not covered: arguments passed in by callers, values from other sources (e.g. BINF), dynamic reachability.")))
   (call-with-output-file out #:exists 'truncate
     (lambda (o) (write-json doc o) (newline o)))
   (printf "\n~a distinct site(s); report ~a\n" (length sites) out)
@@ -424,6 +526,10 @@
             (hash-ref s 'observed_values)
             (for/list ([u (in-list (hash-ref s 'units))])
               (format "~a[~a]" (hash-ref u 'unit) (hash-ref u 'single_run_turns)))))
+  (printf "static PRSVEC candidates:\n")
+  (for ([c (in-list (hash-ref doc 'static_prsvec_candidates))])
+    (printf "  ~a ~a ~a ~a ~a: ~a [~a]\n" (hash-ref c 'decl) (hash-ref c 'function) (hash-ref c 'construct)
+            (hash-ref c 'binding) (hash-ref c 'initializer) (hash-ref c 'pattern) (hash-ref c 'observed_in_sweep)))
   (when (pair? failures)
     (eprintf "units without a result: ~a (logs in ~a)\n" (reverse failures) (build-path work "logs")))
   (null? failures))
