@@ -4274,12 +4274,18 @@ tokens with single spaces (`unparse-uninterned`: `"QQ!-#FALSE ()"`,
 (no OBLIST, named OBLIST, recursion) and 3. ROOT's bare `!-`: §15.5 says
 the separator `!-` alone refers to ROOT; §15.4 read literally would give
 `P!-ROOT`; Confusion prints `P!-` in both native cases; followed.
-Reference-specific, followed: the token split. **Unnamed OBLIST (recorded
-disposition, ADR-0064 amendment):** §15.2.1 ("ATOMs in that OBLIST will
-PRINT the name as if they were in no OBLIST") admits two readings, the
-whole ATOM printed as if on no OBLIST (`QX!-#FALSE ()`) or the missing name
-printed as an ATOM on no OBLIST (`QX!-!-#FALSE ()`); pinned Confusion
-prints the second; followed; no game path reaches it.
+Reference-specific, followed: the token split. **Unnamed OBLIST
+(reference-resolved ambiguity, accepted by the maintainer 2026-11-26,
+ADR-0064 amendment):** §15.2.1 ("ATOMs in that OBLIST will PRINT the name
+as if they were in no OBLIST") does not settle the text; pinned Confusion
+prints `QX!-!-#FALSE ()` when a trailer is needed, and that is the
+representation; `QX!-#FALSE ()` stays the ATOM on no OBLIST. Removing the
+name association changes nothing else (identity, membership, bindings,
+other associations, the OBLIST path), a still-reachable ATOM prints with
+no trailer, and renaming or restoring the name changes only the trailer
+(`tests/oblist_name_print_test.rkt`, 5 native cases
+[`i173-oblist-name-cases.json`](evidence/M4/i173-oblist-name-cases.json)).
+READ/PARSE of these texts is not claimed (#177).
 Intentional deviation: the strict refusal of non-terminating trailers, of
 non-ATOM OBLIST names, of unreachable empty PNAMEs and of escaped PNAMEs.
 PRINC still refuses ATOMs (ADR-0050, unchanged).

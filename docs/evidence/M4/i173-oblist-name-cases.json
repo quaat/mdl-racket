@@ -1,0 +1,26 @@
+{
+ "schema_version": 1,
+ "name": "m4-i173-oblist-name",
+ "cases": [
+  {
+   "name": "name-removed-membership-identity",
+   "expression": "<PROG () <SETG OBQ1 <MOBLIST OBQ1 7>> <SET X <INSERT \"QX1\" ,OBQ1>> <PUT ,OBQ1 OBLIST> (<==? <LOOKUP \"QX1\" ,OBQ1> .X> <==? <OBLIST? .X> ,OBQ1> <==? <GET OBQ1 OBLIST> ,OBQ1>)>"
+  },
+  {
+   "name": "name-removed-bindings-properties-path",
+   "expression": "<PROG () <SETG OBQ2 <MOBLIST OBQ2 7>> <SET X <INSERT \"QX2\" ,OBQ2>> <SETG .X 42> <SET .X 7> <PUT .X PROPZ 9> <SET P .OBLIST> <PUT ,OBQ2 OBLIST> (<GVAL .X> <LVAL .X> <GET .X PROPZ> <==? .P .OBLIST>)>"
+  },
+  {
+   "name": "name-removed-reachable-no-trailer",
+   "expression": "<PROG () <SETG OBQ3 <MOBLIST OBQ3 7>> <SET X <INSERT \"QX3\" ,OBQ3>> <PUT ,OBQ3 OBLIST> <PROG ((OBLIST (,OBQ3 <ROOT>))) <PRIN1 .X> <TERPRI>> <PRIN1 .X> <TERPRI> 0>"
+  },
+  {
+   "name": "name-removed-restored-renamed",
+   "expression": "<PROG () <SETG OBQ4 <MOBLIST OBQ4 7>> <SET X <INSERT \"QX4\" ,OBQ4>> <PUT ,OBQ4 OBLIST> <PRIN1 .X> <TERPRI> <PUT ,OBQ4 OBLIST OBQ4> <PRIN1 .X> <TERPRI> <PUT ,OBQ4 OBLIST OTHERNAME> <PRIN1 .X> <TERPRI> <==? <LOOKUP \"QX4\" ,OBQ4> .X>>"
+  },
+  {
+   "name": "printers-agree",
+   "expression": "<PROG () <SETG OBQ5 <MOBLIST OBQ5 7>> <SET X <INSERT \"QX5\" ,OBQ5>> <PRIN1 .X> <PRINT .X> <TERPRI> <PRINC <UNPARSE .X>> <TERPRI> <PUT ,OBQ5 OBLIST> <PRIN1 .X> <PRINT .X> <TERPRI> <PRINC <UNPARSE .X>> <TERPRI> <SET Y <ATOM \"QU5\">> <PRIN1 .Y> <PRINT .Y> <TERPRI> <PRINC <UNPARSE .Y>> <TERPRI> <SET R ZQROOT5!-> <INSERT \"ZQROOT5\" <1 .OBLIST>> <PRIN1 .R> <PRINT .R> <TERPRI> <PRINC <UNPARSE .R>> <TERPRI> 0>"
+  }
+ ]
+}

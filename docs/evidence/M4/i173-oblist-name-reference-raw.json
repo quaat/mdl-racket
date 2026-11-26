@@ -1,0 +1,36 @@
+{
+ "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+ "protocol": "raw stdout bytes after the LISTENING marker; stdin expression then <QUIT>",
+ "cases": [
+  {
+   "name": "name-removed-membership-identity",
+   "exit_code": 0,
+   "result_bytes": "(T T T)\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "name-removed-bindings-properties-path",
+   "exit_code": 0,
+   "result_bytes": "(42 7 9 T)\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "name-removed-reachable-no-trailer",
+   "exit_code": 0,
+   "result_bytes": "QX3\nQX3!-!-#FALSE ()\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "name-removed-restored-renamed",
+   "exit_code": 0,
+   "result_bytes": "QX4!-!-#FALSE ()\nQX4!-OBQ4\nQX4!-OTHERNAME\nT\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "printers-agree",
+   "exit_code": 0,
+   "result_bytes": "QX5!-OBQ5\nQX5!-OBQ5 \nQX5!-OBQ5\nQX5!-!-#FALSE ()\nQX5!-!-#FALSE () \nQX5!-!-#FALSE ()\nQU5!-#FALSE ()\nQU5!-#FALSE () \nQU5!-#FALSE ()\nZQROOT5!-\nZQROOT5!- \nZQROOT5!-\n0\n",
+   "stderr_bytes": ""
+  }
+ ]
+}

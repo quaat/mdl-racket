@@ -2592,14 +2592,26 @@ game's HANDLE path as a regression (`tests/historical_handle_test.rkt`;
 SEMANTICS "M4 #173 B2"). Class B (language-level errors) is unchanged:
 no host exception is converted into an MDL ERROR; that work belongs to the
 general conformance issue.
-- *Amendment (2026-11-26, B2, recorded disposition; flagged on the PR for
-  the maintainer).* An ATOM on an OBLIST whose name association was removed
-  prints `P!-!-#FALSE ()`, as pinned Confusion prints it. Manual §15.2.1
-  ("ATOMs in that OBLIST will PRINT the name as if they were in no OBLIST")
-  admits that reading as well as `P!-#FALSE ()`; the evidence hierarchy
-  resolves the ambiguity by the reference. No game path reaches it. If the
-  maintainer reads §15.2.1 the other way, the change is one line in
-  `atom-print-tokens` and one native-case classification.
+- *Amendment (2026-11-26, B2), **accepted by the maintainer** (decision on
+  PR #208, 2026-11-26).* An ATOM on an OBLIST whose name association was
+  removed prints, when a trailer is required, `P!-!-#FALSE ()`, as pinned
+  Confusion prints it; `P!-#FALSE ()` stays the representation of an ATOM
+  on no OBLIST. Classification: a **reference-resolved semantic ambiguity**,
+  not a deliberate deviation: the manual (§15.2.1, §15.4, §15.5, §15.7.4)
+  is the primary authority, and §15.2.1 ("ATOMs in that OBLIST will PRINT
+  the name as if they were in no OBLIST") does not settle the exact text;
+  the reproducible native evidence does. Removing the name association
+  changes nothing else: ATOM identity, OBLIST membership, local and global
+  bindings, other associations and the OBLIST path are unchanged, and an
+  ATOM still reachable through the current path prints with no trailer
+  (the ordinary minimal-trailer rule). Renaming or restoring the name
+  changes only the printed trailer. Also accepted: the refusal of
+  non-terminating trailers (historical hangs are not reproduced), and the
+  shared `atom-print-tokens` for PRIN1, PRINT and UNPARSE. Regressions:
+  `tests/oblist_name_print_test.rkt` (native cases
+  `evidence/M4/i173-oblist-name-*.json`). Not claimed: READ/PARSE
+  round-trips of unnamed or uninterned ATOMs (language-conformance
+  backlog, #177).
 
 - *Context.* The game's error handler HANDLE (`77rooms.mud:251`) calls PRINT,
   which this runtime does not define (INV-07). More generally, the runtime

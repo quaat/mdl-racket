@@ -167,6 +167,32 @@ Each restored and re-run green.
 list, so `make test` and CI never ran it (it was run directly during B1).
 It is added now, with `tests/print_trailer_test.rkt`.
 
+## Follow-up after the merge (maintainer decision on PR #208)
+
+The maintainer accepted the unnamed-OBLIST form `P!-!-#FALSE ()` as a
+reference-resolved ambiguity (ADR-0064 amendment) and asked for targeted
+regressions. Five native cases
+([`i173-oblist-name-cases.json`](i173-oblist-name-cases.json),
+[`i173-oblist-name-reference-raw.json`](i173-oblist-name-reference-raw.json)),
+captured twice identically in a disposable copy (same tools; upstream tree
+hash unchanged), all byte-identical here (`tests/oblist_name_print_test.rkt`,
+in `make test`):
+
+| Case | Native and ours |
+|---|---|
+| removing the name keeps membership, identity and the name->OBLIST association | `(T T T)` |
+| GVAL, LVAL, an unrelated association and the OBLIST path survive | `(42 7 9 T)` |
+| unnamed but reachable: no trailer; off the path: the unnamed form | `QX3`, `QX3!-!-#FALSE ()` |
+| removed, restored, renamed | `QX4!-!-#FALSE ()`, `QX4!-OBQ4`, `QX4!-OTHERNAME`, identity `T` |
+| PRIN1, PRINT and UNPARSE agree (named, unnamed, no OBLIST, shadowed ROOT) | e.g. `QX5!-OBQ5`, `\nQX5!-OBQ5 `, `"QX5!-OBQ5"` |
+
+These are regression guards: the behaviour was already as decided, so they
+pass before and after; the mutation "an unnamed OBLIST's ATOMs always get a
+trailer" fails `name-removed-reachable-no-trailer`. The HANDLE test's guard
+now refuses a write, delete or network attempt at once (it only recorded
+them before); run H4 proves it with a host write attempt from inside the
+guarded run (refused, recorded, nothing created).
+
 ## Deviations and limitations
 
 - Strict where Confusion prints: non-terminating trailers (Confusion does
