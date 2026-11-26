@@ -265,6 +265,30 @@
    "exit_code": 0,
    "result_bytes": "SUBR\nSUBR\n",
    "stderr_bytes": ""
+  },
+  {
+   "name": "width-printstring-control-counts-2",
+   "exit_code": 0,
+   "result_bytes": "\nab^A\n4\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-image-no-advance",
+   "exit_code": 0,
+   "result_bytes": "\nabA\n2\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-string-control-chars",
+   "exit_code": 0,
+   "result_bytes": "\n\"a\tb\nc\u000bd\fe\rf^Ag^[h\"\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "printstring-control-chars",
+   "exit_code": 0,
+   "result_bytes": "\na\tb\nc\u000bd\fe\rf^Ag^[h\n0\n",
+   "stderr_bytes": ""
   }
  ]
 }

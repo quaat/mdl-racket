@@ -72,7 +72,8 @@
     "width-printstring-lf-counted" "width-princ-cr-resets"
     "width-terpri-crlf-reset" "width-list-of-strings" "width-nested-list"
     "width-false-breaks" "width-empty-list-token" "width-character-token"
-    "width-empty-pname-atom" "width-handle-80" "print-type-subr"))
+    "width-empty-pname-atom" "width-handle-80" "print-type-subr"
+    "width-image-no-advance"))
 (for ([name (in-list supported)])
   (define row (hash-ref native name))
   ;; The native run itself was clean for every supported case.
@@ -85,7 +86,11 @@
                             '("print-form" "print-vector" "print-chtype-newtype-list"
                               "print-chtype-newtype-string" "print-arity-0"
                               "print-arity-3" "print-non-channel"
-                              "print-input-channel" "error-handler-native"))
+                              "print-input-channel" "error-handler-native"
+                              ;; control characters: checked case by case below
+                              "width-printstring-control-counts-2"
+                              "printstring-control-chars"
+                              "prin1-string-control-chars"))
                     string<?)
               (sort (hash-keys native) string<?))
 
@@ -192,6 +197,46 @@
          "<PRINTSTRING \"ab\">" #:setup "<PUT .OUTCHAN 13 -5>")
 (refused #rx"^mdl-terpri: CHANNEL element 14 \\(column\\) must be a nonnegative FIX"
          "<TERPRI>" #:setup "<PUT .OUTCHAN 14 <>>")
+
+;; A refused call leaves the column (element 14) as it was: output is
+;; all-or-nothing, so no partial write and no column update (review of #173).
+(define (column-after-refusal setup source)
+  (parameterize ([current-namespace ns])
+    (call-with-mdl-context
+     (make-mdl-context #:output-port (open-output-string))
+     (lambda ()
+       (define (run-all text)
+         (for/last ([expr (in-list (compile-program (parse-mdl text)))]) (eval expr)))
+       (run-all setup)
+       (define before (run-all "<14 .OUTCHAN>"))
+       (check-exn exn:fail? (lambda () (run-all source)) source)
+       (list before (run-all "<14 .OUTCHAN>"))))))
+(check-equal? (column-after-refusal "<PUT .OUTCHAN 13 10> <PRINC \"abc\">" "<PRINT (1 [2])>")
+              '(3 3))
+(check-equal? (column-after-refusal "<PUT .OUTCHAN 13 10> <PRINC \"abc\">"
+                                    "<PRIN1 (A B C D E F G <ASCII 27>)>")
+              '(3 3))
+(check-equal? (column-after-refusal "<PUT .OUTCHAN 13 10> <PRINC \"ab\">" "<PRINT 1 2>")
+              '(2 2))
+
+;; --- control characters (native cases added after the review of #173) -------------
+;; Confusion writes TAB, LF, VT, FF and CR raw and every other control
+;; character as ^X (two columns), in PRIN1 and PRINTSTRING alike.
+;; This runtime: PRINTSTRING writes the byte itself (pre-existing deviation,
+;; recorded in SEMANTICS "M4 #173", #206) but counts it as two columns, so the
+;; column matches Confusion; PRIN1 refuses the STRING (strict).
+(let ([native-text (lambda (name) (hash-ref (hash-ref native name) 'result_bytes))]
+      [ours (lambda (name) (let-values ([(_ text) (run* (hash-ref cases name) #:listen? #t)]) text))])
+  (check-equal? (native-text "width-printstring-control-counts-2") "\nab^A\n4\n")
+  (check-equal? (ours "width-printstring-control-counts-2") "\nab\u0001\n4\n")
+  (check-equal? (native-text "printstring-control-chars")
+                "\na\tb\nc\vd\fe\rf^Ag^[h\n0\n")
+  (check-equal? (ours "printstring-control-chars")
+                "\na\tb\nc\vd\fe\rf\u0001g\u001bh\n0\n")
+  (check-equal? (native-text "prin1-string-control-chars")
+                "\n\"a\tb\nc\vd\fe\rf^Ag^[h\"\n0\n")
+  (check-exn #rx"^PRIN1: UNPARSE STRING: control character \\(code 9\\)"
+             (lambda () (ours "prin1-string-control-chars"))))
 
 ;; A shared (not cyclic) sublist prints twice.
 (check-equal? (written "<SET M (1)> <PRINT (.M .M)>") "\n((1) (1)) ")

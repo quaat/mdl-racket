@@ -146,7 +146,8 @@ After 4008a65:
 | `pytest tests/test_sweep_operator_heads.py` (local `.sandbox-pydeps`, `.cache` linked read-only for the run) | 0 | 6 passed |
 
 `make test`, `make m4-check`, the `historical_*` tests and the M4 scenario
-checkpoints were **not run** (orchestrator gate; memory-constrained host).
+checkpoints were not run by the implementer; the orchestrator gate below
+ran them.
 
 Adapted existing tests (contract changed by the decision, not weakened):
 `prin1_test` and `princ_test` now assert native breaking and PRIN1 of
@@ -177,6 +178,72 @@ and self-referencing LIST/FALSE; different error texts; non-FIX or negative
 elements 13/14 are strict errors; PRINT does not bind OUTCHAN for the call;
 the break points before a top-level object and before `)` and the LF column
 count follow Confusion (manual silent; unresolved for ITS).
+
+## Orchestrator gate (branch head 8f56288, before merging main)
+
+Run sequentially by the orchestrator (`gate.sh`, one heavy job at a time,
+`make PYTHON=/usr/bin/python3 <target>`):
+
+| Target | Exit | Seconds |
+|---|---:|---:|
+| `test` | 0 | 129 |
+| `test-historical` | 0 | 16 |
+| `test-m2-g3` | 0 | 1 |
+| `m3-source-progress` | 0 | 16 |
+| `test-m3-interactive` | 0 | 7 |
+| `test-m3-session` | 0 | 23 |
+| `test-m3-launcher` | 0 | 42 |
+| `test-m3-bang` | 0 | 51 |
+| `m3-check` | 0 | 26 |
+| `m4-check` | 0 | 754 |
+| `m4-scenarios-per-prefix` | 0 | 7389 |
+
+`m4-check`: SCENARIO_PARITY PASS (26 scenarios), GAMEPLAY_RELIABILITY NOT
+YET (20 of 23; the save branches; INV-06, INV-07 open), as on `main`. All 26
+scenarios, single-run and per-prefix, are unchanged by the new PRINT,
+the line-breaking model and the initial width 0.
+
+## Independent review and follow-up
+
+An independent review (not the implementer) found nothing blocking. Its
+should-fix items and nits, and what was done:
+
+| Finding | Disposition |
+|---|---|
+| "Confirmed case by case" overclaims; the break after `(`, before `)` and PRINTSTRING advancing the column are reference-specific | SEMANTICS reworded: the rule reproduces the native cases, it is inferred from them; the classification lists these points as reference-specific |
+| Column effect of a control character and of IMAGE not evidenced natively | two native cases added (below) |
+| DECISIONS still says "No line breaking"; the initial width 0 is not recorded | ADR-0050 amended (struck through, amendment 2026-11-26) |
+| No STATUS row | added |
+| SEMANTICS says STRINGs print control characters as `^X` | corrected and evidenced: TAB, LF, VT, FF, CR raw, others `^X` (case `prin1-string-control-chars`) |
+| `channel-output-port` dead (its last callers were rewritten) | removed |
+| `STRVAL` in `host_loop_test` now returns a VECTOR | renamed `VECVAL` |
+| No test that a refused call leaves element 14 unchanged | added (`column-after-refusal`, 3 checks); a regression guard: the behaviour was already correct, so it passes with and without the follow-up |
+
+**Recapture (after merging `main` 3786e6c).** Four cases appended to
+`i173-print-cases.json` (48 cases); same tools and protocol as above
+(wrappers re-created in the session scratchpad: `probe_in_copy.py` sha256
+`d4d23256…55c7`, `raw_all.py` `218a967d…522e`), a fresh disposable copy,
+two runs. Both tools deterministic (run 1 == run 2); the first 44 rows of
+both files identical to the earlier capture (only `recorded_at` changes);
+upstream tree hash `3041a19b…40c8` before and after.
+
+| Case | Native | Ours |
+|---|---|---|
+| `width-image-no-advance`: width 10, `<PRINC "ab"> <IMAGE 65>`, then `<14 .OUTCHAN>` | `abA`, `2` | same (added to the byte-identical set: 36 of 48) |
+| `width-printstring-control-counts-2`: width 10, PRINTSTRING `"ab"` + ASCII 1, then `<14 .OUTCHAN>` | `ab^A`, `4` | `ab` + byte 1, `4` (column agrees; glyph differs) |
+| `printstring-control-chars`: PRINTSTRING of TAB, LF, VT, FF, CR, ASCII 1, ESC | the first five raw; `^A`, `^[` | all seven raw |
+| `prin1-string-control-chars`: PRIN1 of the same STRING | `"a<TAB>b<LF>c<VT>d<FF>e<CR>f^Ag^[h"` | strict `PRIN1: UNPARSE STRING: control character (code 9)` |
+
+A first attempt also included DEL (ASCII 127): Confusion writes `^` and
+byte 0xBF; the probe tool (UTF-8 text mode) cannot decode that, so DEL was
+removed from the committed cases and is recorded here only.
+
+**Newly evidenced pre-existing deviation.** PRINTSTRING writing a control
+character (other than TAB, LF, VT, FF, CR) as the raw byte predates this
+slice and was never compared natively; Confusion writes `^X`. Not on any
+game path (the game's PRINTSTRING arguments are its own text). Left
+unchanged here and tracked in #206, as is the strictness of PRIN1 for such
+STRINGs.
 
 ## For the HANDLE slice (not done here)
 

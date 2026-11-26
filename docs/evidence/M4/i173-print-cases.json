@@ -177,6 +177,22 @@
   {
    "name": "print-type-subr",
    "expression": "<TYPE ,PRINT>\n<TYPE? ,PRINT SUBR>"
+  },
+  {
+   "name": "width-printstring-control-counts-2",
+   "expression": "<PROG (C) <TERPRI> <PUT .OUTCHAN 13 10> <PRINTSTRING <STRING \"ab\" <ASCII 1>>> <SET C <14 .OUTCHAN>> <PUT .OUTCHAN 13 0> <TERPRI> .C>"
+  },
+  {
+   "name": "width-image-no-advance",
+   "expression": "<PROG (C) <TERPRI> <PUT .OUTCHAN 13 10> <PRINC \"ab\"> <IMAGE 65> <SET C <14 .OUTCHAN>> <PUT .OUTCHAN 13 0> <TERPRI> .C>"
+  },
+  {
+   "name": "prin1-string-control-chars",
+   "expression": "<PROG () <TERPRI> <PRIN1 <STRING \"a\" <ASCII 9> \"b\" <ASCII 10> \"c\" <ASCII 11> \"d\" <ASCII 12> \"e\" <ASCII 13> \"f\" <ASCII 1> \"g\" <ASCII 27> \"h\">> <TERPRI> 0>"
+  },
+  {
+   "name": "printstring-control-chars",
+   "expression": "<PROG () <TERPRI> <PRINTSTRING <STRING \"a\" <ASCII 9> \"b\" <ASCII 10> \"c\" <ASCII 11> \"d\" <ASCII 12> \"e\" <ASCII 13> \"f\" <ASCII 1> \"g\" <ASCII 27> \"h\">> <TERPRI> 0>"
   }
  ]
 }

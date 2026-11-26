@@ -4125,8 +4125,11 @@ Strict errors (Confusion prints them; this runtime has no faithful printer
 yet): FORM (`<FOO 1>`), VECTOR (`[1 2]`), UVECTOR, TUPLE, FLOAT, every
 CHTYPE'd or NEWTYPE value (`#ZZ (1 2)`, `#ZS "ab"`), SUBR, FUNCTION and every
 other TYPE; ATOMs that need `\` escapes or an OBLIST trailer; STRING or
-CHARACTER containing a control character (Confusion `^X`) or a character
-above 127; a self-referencing LIST or FALSE (a cyclic tail, or an element
+CHARACTER containing a control character or a character above 127. (Inside
+a STRING Confusion writes TAB, LF, VT, FF and CR raw and every other
+control character as `^X`, e.g. ASCII 1 as `^A`, ESC as `^[`: case
+`prin1-string-control-chars`; DEL, observed once outside the committed
+cases, comes out as `^` followed by byte 0xBF); a self-referencing LIST or FALSE (a cyclic tail, or an element
 that contains an enclosing LIST/FALSE), where Confusion would not terminate.
 The PRINC TYPE set is unchanged (STRING, CHARACTER, FIX).
 
@@ -4137,16 +4140,20 @@ both from the CHANNEL's slots on every call, so `<PUT .OUTCHAN 13 n>` and
 `<PUT .OUTCHAN 14 n>` take effect at the next output (manual §11.2.8), and C
 is readable (`<PRINT FOO>` then `<14 .OUTCHAN>` → 4). Both must be FIXes
 ≥ 0; anything else is a strict error before output (Confusion reads the raw
-word; not modelled). The rule, confirmed case by case against Confusion:
+word; not modelled). The rule below reproduces every native case in
+`i173-print-cases.json`; it is inferred from those cases, not taken from
+the manual, and the classification further down says which parts the
+manual supports:
 1. *Column.* When W ≠ 0, every character written by PRINTSTRING, PRINC,
    PRIN1 or PRINT adds one to C, except that a carriage return sets C to 0;
    a line feed inside a STRING counts as one column (`width-printstring-lf-counted`:
    `"abcdefg<LF>xy"` leaves C = 10). The newline written by TERPRI, CRLF or
    PRINT's first step sets C to 0. When W = 0 nothing changes C: it is
    neither advanced nor reset (`width-zero-no-tracking`). IMAGE does not
-   move C (Confusion writes its byte without advancing). For width purposes
-   a control character other than TAB, LF, VT, FF and CR counts 2 (Confusion
-   prints it as `^X`); only PRINTSTRING can write one.
+   move C (`width-image-no-advance`: `<PRINC "ab"> <IMAGE 65>` leaves
+   C = 2). A control character other than TAB, LF, VT, FF and CR counts 2
+   (Confusion prints it as `^X`: `width-printstring-control-counts-2`,
+   `"ab" <ASCII 1>` leaves C = 4); only PRINTSTRING can write one here.
 2. *Tokens.* PRINC writes its object as one token. PRIN1/PRINT write: FIX,
    ATOM, CHARACTER, a whole STRING (quotes included) and `()` as one token
    each; a non-empty LIST as the token `(`, its elements (each after a
@@ -4174,18 +4181,26 @@ the game's startup before RDCOM sets 1000 (the game sets 13 only at
 - *Conforming (manual and Confusion agree):* the PRINT sequence, return
   value and single evaluation; the PRIN1 representations listed above;
   breaking at separators "detected in advance" from CHANNEL elements.
-- *Reference-specific, followed (manual silent):* breaking before the first
-  token of a PRINC/PRIN1 object at a positive column and before a closing
-  `)`; a line feed in a STRING counting as a column (on ITS the source's CR
-  would reset it); W = 0 freezing C; the initial W = 0; LF-only newline
-  (existing Unix terminal normalisation, M3 CRLF section).
+- *Reference-specific, followed (manual silent):* the token granularity
+  itself, in particular breaking after `(` before a LIST's first element
+  and before a closing `)`; breaking before the first token of a
+  PRINC/PRIN1 object at a positive column; PRINTSTRING advancing C (taken
+  from the native cases; not established from the manual); a control character counting 2 columns and IMAGE leaving C
+  alone (both observed natively); a line feed in a STRING counting as a
+  column (on ITS the source's CR would reset it); W = 0 freezing C; the
+  initial W = 0; LF-only newline (existing Unix terminal normalisation, M3
+  CRLF section).
 - *Intentional deviations:* error texts and strict Racket errors where
   Confusion prints on stderr and returns to level 1; strict errors for the
   TYPEs above that Confusion prints; non-FIX or negative elements 13/14 are
   strict errors; output is all-or-nothing per call; PRINT does not bind
   OUTCHAN for the call (§11.2.7, existing deviation; no PRINTTYPE exists to
-  observe it); PRINTSTRING still writes control characters raw (existing)
-  although they count 2 columns.
+  observe it); PRINTSTRING still writes control characters other than
+  TAB, LF, VT, FF and CR as the raw byte (pre-existing behaviour, never
+  natively evidenced before) where Confusion writes `^X`
+  (`printstring-control-chars`), although they count 2 columns as in
+  Confusion. Not on any game path; disposition tracked in #206, not
+  changed in this slice.
 - *Unresolved (recorded, not decided):* whether historical ITS MDL breaks
   before a closing bracket or before a top-level object at a positive
   column; the ITS terminal's initial width.
@@ -4197,5 +4212,5 @@ handler never runs: `<ERROR FOO "BAR">` prints `\n *ERROR* \n FOO \n "BAR" `
 `error-handler-native`). A native comparison of the game's HANDLE path
 therefore cannot be obtained by signalling an ERROR in the pinned build.
 
-Tests: `tests/print_test.rkt` (differential against the raw reference),
-`tests/prin1_test.rkt`, `tests/princ_test.rkt`.
+Tests: `tests/print_test.rkt` (differential against the raw reference;
+48 native cases), `tests/prin1_test.rkt`, `tests/princ_test.rkt`.

@@ -3495,8 +3495,6 @@
              [(mdl-crlf) "CRLF"]
              [else who])))
   host)
-(define (channel-output-port who channel)
-  (host-channel-output-port/strict who (channel-output-host who channel)))
 
 ;; ADR-0050: the host record of a CHANNEL registered in this session (TYPE the
 ;; ROOT atom CHANNEL, keyed by backing storage). A non-CHANNEL fails with

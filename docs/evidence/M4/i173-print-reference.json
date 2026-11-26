@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "m4-i173-print",
-  "recorded_at": "2026-11-26T17:40:31.859493+00:00",
+  "recorded_at": "2026-11-26T20:10:29.409242+00:00",
   "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
   "protocol": "one local process per case; stdin expression then <QUIT>",
   "cases": [
@@ -530,6 +530,54 @@
       "stderr": "",
       "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
       "result_output": "SUBR\nSUBR\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "width-printstring-control-counts-2",
+      "expression": "<PROG (C) <TERPRI> <PUT .OUTCHAN 13 10> <PRINTSTRING <STRING \"ab\" <ASCII 1>>> <SET C <14 .OUTCHAN>> <PUT .OUTCHAN 13 0> <TERPRI> .C>",
+      "input": "<PROG (C) <TERPRI> <PUT .OUTCHAN 13 10> <PRINTSTRING <STRING \"ab\" <ASCII 1>>> <SET C <14 .OUTCHAN>> <PUT .OUTCHAN 13 0> <TERPRI> .C>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nab^A\n4\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nab^A\n4\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "width-image-no-advance",
+      "expression": "<PROG (C) <TERPRI> <PUT .OUTCHAN 13 10> <PRINC \"ab\"> <IMAGE 65> <SET C <14 .OUTCHAN>> <PUT .OUTCHAN 13 0> <TERPRI> .C>",
+      "input": "<PROG (C) <TERPRI> <PUT .OUTCHAN 13 10> <PRINC \"ab\"> <IMAGE 65> <SET C <14 .OUTCHAN>> <PUT .OUTCHAN 13 0> <TERPRI> .C>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\nabA\n2\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\nabA\n2\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "prin1-string-control-chars",
+      "expression": "<PROG () <TERPRI> <PRIN1 <STRING \"a\" <ASCII 9> \"b\" <ASCII 10> \"c\" <ASCII 11> \"d\" <ASCII 12> \"e\" <ASCII 13> \"f\" <ASCII 1> \"g\" <ASCII 27> \"h\">> <TERPRI> 0>",
+      "input": "<PROG () <TERPRI> <PRIN1 <STRING \"a\" <ASCII 9> \"b\" <ASCII 10> \"c\" <ASCII 11> \"d\" <ASCII 12> \"e\" <ASCII 13> \"f\" <ASCII 1> \"g\" <ASCII 27> \"h\">> <TERPRI> 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\n\"a\tb\nc\u000bd\fe\nf^Ag^[h\"\n0\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\n\"a\tb\nc\u000bd\fe\nf^Ag^[h\"\n0\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "printstring-control-chars",
+      "expression": "<PROG () <TERPRI> <PRINTSTRING <STRING \"a\" <ASCII 9> \"b\" <ASCII 10> \"c\" <ASCII 11> \"d\" <ASCII 12> \"e\" <ASCII 13> \"f\" <ASCII 1> \"g\" <ASCII 27> \"h\">> <TERPRI> 0>",
+      "input": "<PROG () <TERPRI> <PRINTSTRING <STRING \"a\" <ASCII 9> \"b\" <ASCII 10> \"c\" <ASCII 11> \"d\" <ASCII 12> \"e\" <ASCII 13> \"f\" <ASCII 1> \"g\" <ASCII 27> \"h\">> <TERPRI> 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\na\tb\nc\u000bd\fe\nf^Ag^[h\n0\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\na\tb\nc\u000bd\fe\nf^Ag^[h\n0\n",
       "ok": true,
       "error": null
     }
