@@ -2036,7 +2036,7 @@ INITIAL but intern new flag atoms in FLAG. ENDBLOCK restores the prior
 lookup for the later VAL-NAMES definitions. The source reader compiles one
 expression at a time, so runtime atom resolution can follow the active
 search list. This slice does not implement DEFAULT insertion redirection,
-READ's explicit lookup argument, or print-time minimal trailer selection.
+READ's explicit lookup argument. (Print-time trailers: "M4 #173 B2".)
 
 ## M3 authoritative OBLIST path, ROOT identity and read-time atoms (review R3/R4)
 
@@ -2088,8 +2088,8 @@ ROOT, `<DEFINE ...>` still compiles as DEFINE). `%` read-eval runs mid-form,
 before the enclosing form's atoms are hoisted. The compiler's compile-time
 check for substituted ATOM names may intern a stray atom before raising its
 unsupported error. Not implemented: OBLIST's GVAL, DEFAULT insertion
-redirection, READ's look-up argument, `PARSE`/`READ` SUBRs and print-time
-trailer selection. Evidence: `evidence/M3/review/R3R4-oblist-reference.json`,
+redirection, READ's look-up argument and the `PARSE`/`READ` SUBRs (print-time
+trailers were added by M4 #173 B2). Evidence: `evidence/M3/review/R3R4-oblist-reference.json`,
 `R3R4-oblist-error-reference.json`, `confusion-root-names.json`; tests
 `tests/oblist_identity_test.rkt`.
 
@@ -2468,9 +2468,10 @@ Exact against pinned Confusion for: FIX in decimal (including the 36-bit
 extremes); STRING, quoted with `\"` and `\\`; CHARACTER as `!\c`; FALSE;
 LIST (recursive); and a plain ATOM whose PNAME is non-empty ASCII
 `[A-Za-z0-9-]`, does not parse as a number, and is found as the same atom
-on the current OBLIST path (LVAL of ROOT OBLIST, R3/R4). Strict errors: a
+on the current OBLIST path (LVAL of ROOT OBLIST, R3/R4), or such an ATOM
+with the OBLIST trailer of section "M4 #173 B2" below. Strict errors: a
 radix other than 10 (Confusion ignores the radix; deviation, not copied);
-ATOMs needing escapes or a trailer; control characters in STRING/CHARACTER
+ATOMs needing escapes; control characters in STRING/CHARACTER
 (Confusion prints `^X`); FLOAT, VECTOR, UVECTOR, WORD, FORM and other types.
 Source use: 77rooms.mud:164 only (a day-of-month FIX). Tests:
 `tests/unparse_test.rkt`.
@@ -4124,7 +4125,8 @@ representation, exact against Confusion for:
 Strict errors (Confusion prints them; this runtime has no faithful printer
 yet): FORM (`<FOO 1>`), VECTOR (`[1 2]`), UVECTOR, TUPLE, FLOAT, every
 CHTYPE'd or NEWTYPE value (`#ZZ (1 2)`, `#ZS "ab"`), SUBR, FUNCTION and every
-other TYPE; ATOMs that need `\` escapes or an OBLIST trailer; STRING or
+other TYPE; ATOMs that need `\` escapes (OBLIST trailers: "M4 #173 B2"
+below); STRING or
 CHARACTER containing a control character or a character above 127. (Inside
 a STRING Confusion writes TAB, LF, VT, FF and CR raw and every other
 control character as `^X`, e.g. ASCII 1 as `^A`, ESC as `^[`: case
@@ -4214,3 +4216,63 @@ therefore cannot be obtained by signalling an ERROR in the pinned build.
 
 Tests: `tests/print_test.rkt` (differential against the raw reference;
 48 native cases), `tests/prin1_test.rkt`, `tests/princ_test.rkt`.
+
+## M4 #173 B2: OBLIST trailers in PRIN1, PRINT and UNPARSE
+
+Specification written before implementation (ADR-0064, #173 part 2). Why:
+the game's own play-time ERRORs pass ATOMs of the ERRORS OBLIST
+(`UNASSIGNED-VARIABLE!-ERRORS`, 77defs.mud:458; `NO-PREP!-ERRORS`,
+77makstr.mud:129), and HANDLE PRINTs each ERROR argument (77rooms.mud:251).
+Authority: manual §15.4 ("it outputs as little of the trailer as is
+necessary to specify the ATOM uniquely to READ … if the ATOM is the first
+ATOM of that PNAME which READ would find in its normal look-up in the
+current .OBLIST, no trailer is output. Otherwise, `!-` is output and the
+name of the OBLIST is recursively PRIN1ed"), §15.2.1 (an OBLIST's name is
+the ATOM associated with it under the indicator OBLIST), §15.5 (ROOT is
+referred to by the bare separator `!-`), §15.7.4 (an ATOM on no OBLIST
+prints with the trailer `!-#FALSE ()`). Native evidence: 19 cases,
+[`i173-trailer-cases.json`](evidence/M4/i173-trailer-cases.json),
+[`i173-trailer-reference-raw.json`](evidence/M4/i173-trailer-reference-raw.json)
+(exact bytes), captured twice identically.
+
+**Rule.** For an ATOM A with a PNAME P that needs no `\` escape (the
+existing whitelist; others stay strict):
+1. A is *reachable* when looking P up on the current OBLIST path (the LVAL
+   of ROOT OBLIST, R3/R4) finds A itself: the text is P (unchanged).
+2. Otherwise let O be A's OBLIST:
+   - O is the session ROOT: the text is `P!-` (`prin1-root-not-on-path`:
+     `FOO!-`).
+   - A is on no OBLIST (made by ATOM, or REMOVEd): `P!-` followed by
+     `#FALSE ()` (`QQ!-#FALSE ()`, `RMV!-#FALSE ()`).
+   - O's name, `<GET O OBLIST>`, is an ATOM N: `P!-` followed by the text
+     of N by this same rule, recursively (`BAR!-OB1`, `ZZZ!-INITIAL`,
+     `LEAF!-INNER!-OBA`, and with nothing reachable
+     `LEAF2!-HIDDEN!-OBB!-INITIAL!-`). The name follows the association,
+     so `<PUT O OBLIST NEWNAME>` changes it (`prin1-oblist-renamed`).
+   - O has no name (the association was removed): `P!-!-#FALSE ()`, as
+     Confusion prints it (`prin1-oblist-name-removed`); the manual says
+     only that such ATOMs print "as if they were in no OBLIST".
+   - O's name is anything else: strict error.
+3. A shadowed ATOM (another ATOM of the same PNAME is found first) gets a
+   trailer (`T!-OB1`); the comparison is by identity (`==?`).
+4. Non-termination (§15.4: "there are obscure cases … for which the PRINT
+   trailer does not terminate", e.g. an OBLIST whose name is an
+   unreachable ATOM on that same OBLIST): a strict error when an OBLIST
+   would be visited twice in one trailer (intentional deviation; Confusion
+   would not terminate). An unreachable ATOM with an empty PNAME stays a
+   strict error (not evidenced).
+
+**Tokens (line width).** The trailer text is glued to the first token of
+the name's own PRIN1 tokens: `FOO!-ERRORS` is one token, and `QQ!-#FALSE ()`
+is the two tokens `QQ!-#FALSE` and `()` (separated), exactly as a FALSE
+prints (`width-trailer-token`, `width-uninterned-token`). UNPARSE joins the
+tokens with single spaces.
+
+**Classification.** Conforming (manual and Confusion agree): rules 1, 2
+(ROOT, no OBLIST, named OBLIST, recursion) and 3. Reference-specific,
+followed: the unnamed-OBLIST form `!-!-#FALSE ()`; the token split.
+Intentional deviation: the strict refusal of non-terminating trailers, of
+non-ATOM OBLIST names, of unreachable empty PNAMEs and of escaped PNAMEs.
+PRINC still refuses ATOMs (ADR-0050, unchanged).
+
+Tests: `tests/print_trailer_test.rkt`.
