@@ -349,6 +349,16 @@ failure `make xfail-m4-balloon-frontier`). Issue #196; maintainer decision
     CLOCK-DEMON has put `<>` in slot 2.
   The instrumented sweep decided on #196 is meant to confirm or rule these
   out.
+- *Sweep result (#196, 2026-11-26; diagnostic only, production unchanged;
+  [DECL-VIOLATION-SWEEP.md](DECL-VIOLATION-SWEEP.md)):* with the host-only
+  recorder letting attached checks proceed, the 24 gated scenarios record
+  no violation and still pass; balloon-ledge records BALLOON PRSO (k 57-66,
+  72-79) and BINF (`#OBJECT GUIDE`, k 59-67, 72-80) and **matches the native
+  reference at all 82 READSTRING entries**; MSWITCH IMP is confirmed by
+  `push switch` / `take switch` in a probe whose transcript equals native;
+  SPHERE PV is confirmed by a direct call only. 4 distinct sites, all AUX
+  bindings; recommendation in the record: option (2), not enforcing
+  attached declarations (2a).
 - *Ours:* READSTRING entries 0-56 equal the native reference (output and
   checkpoint); the turn of command 57 prints "You are in the basket." and
   ends on the strict failure (kind `run-guard`, earliest failing k = 57).
@@ -365,9 +375,8 @@ failure `make xfail-m4-balloon-frontier`). Issue #196; maintainer decision
   patch widening BALLOON's declaration (`(PRSO) <OR OBJECT DIRECTION
   FALSE>`, `(BINF) <OR FALSE OBJECT>`), which changes upstream provenance and
   needs approval. Recommended next action: a maintainer decision between
-  (2) and (3) (a sweep of other attached declarations violated on normal
-  play paths should inform it), then promote balloon-ledge to a gated
-  scenario with its committed native reference.
+  (2) and (3), now informed by the sweep above, then promote balloon-ledge
+  to a gated scenario with its committed native reference.
 - *Regression test:* `tests/historical_balloon_frontier_test.rkt` (`make
   xfail-m4-balloon-frontier`; XPASS once the balloon can be boarded).
 

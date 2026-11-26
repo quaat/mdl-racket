@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage test-m4-help-info test-m4-grue-resurrection test-m4-grue-refusal test-m4-troll-death test-m4-treasure-deposit test-m4-thief-robbery test-m4-cure-recovery test-m4-lamp-burnout test-m4-match-clock test-m4-boat-river test-m4-dam-sluice test-m4-maint-leak test-m4-coal-machine test-m4-gas-room xfail-m4-balloon-frontier m4-scenarios-per-prefix m4-check play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage test-m4-help-info test-m4-grue-resurrection test-m4-grue-refusal test-m4-troll-death test-m4-treasure-deposit test-m4-thief-robbery test-m4-cure-recovery test-m4-lamp-burnout test-m4-match-clock test-m4-boat-river test-m4-dam-sluice test-m4-maint-leak test-m4-coal-machine test-m4-gas-room xfail-m4-balloon-frontier m4-decl-sweep m4-scenarios-per-prefix m4-check play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -259,6 +259,18 @@ test-m4-gas-room: sources
 
 xfail-m4-balloon-frontier: sources
 	@racket tests/historical_balloon_frontier_test.rkt
+
+# M4 #196 (maintainer decision 2026-11-26, "sweep first"): DIAGNOSTIC ONLY,
+# not part of `make test`, `make m4-check` or any scenario target. Runs every
+# gated M4 scenario, the balloon-ledge route and the targeted probes of
+# tests/decl_sweep_probes.json with the host-only, test-only decl-violation
+# recorder on (attached #DECL violations are recorded and the run proceeds;
+# production stays strict), and writes docs/evidence/M4/decl-violation-sweep.json
+# (unit results and logs in artifacts/decl-sweep/). See docs/TESTING.md and
+# docs/evidence/M4/DECL-VIOLATION-SWEEP.md. Options:
+# M4_DECL_SWEEP_ARGS="--units a,b --reuse --out P --work D".
+m4-decl-sweep: sources
+	@racket tests/decl_violation_sweep.rkt $(M4_DECL_SWEEP_ARGS)
 
 # The twenty-four M4 native-parity scenarios in the per-prefix reboot mode (one boot
 # per command prefix; the pre-runner protocol, slower). Not on CI's default

@@ -1,5 +1,42 @@
 # Test strategy, reference capture, and parity contract
 
+## M4 attached-declaration violation sweep (diagnostic only; `make m4-decl-sweep`, 2026-11-26)
+
+Issue #196 ("sweep first"). `make m4-decl-sweep` runs
+`tests/decl_violation_sweep.rkt`: **not** part of `make test`, `make
+m4-check` or any scenario target, and not a parity check. It turns on the
+host-only, test-only decl-violation recorder (SEMANTICS "Diagnostic-only:
+attached-declaration violation recorder") through the scenario runner's
+`current-m4-decl-violation-recorder` parameter, so an attached `#DECL`
+check that would fail is recorded and the run proceeds. Production stays
+strict.
+
+Units, each in its own racket process, one at a time:
+
+* every gated scenario of `tests/scenarios/m4-manifest.json`: its own test
+  module (single-run mode, every READSTRING entry's output and checkpoint,
+  the whole transcript and end state, declared prefix re-runs);
+* `balloon-ledge` (INV-12): `run-m4-scenario` against its committed native
+  reference, as `historical_balloon_frontier_test.rkt` (all 81 commands);
+* the probe routes of `tests/decl_sweep_probes.json`: one boot, the whole
+  transcript (D1 only) compared with the native transcript-only capture
+  `docs/evidence/M4/decl-sweep-probes-reference.json`
+  (`python3 -I scripts/probe_decl_sweep_reference.py OUT.json`: T1 and T1b,
+  pipe mode, fixed clock and seed, fresh game copy under `$TMPDIR`);
+* `sphere-clock-direct`: a host call of SPHERE-FUNCTION after a boot, with
+  PRSVEC as CLOCK-DEMON leaves it (ours only, no route).
+
+Each violation carries k, the READSTRING entries made when it happened (it
+belongs to command k, 1-based; 0 is the boot). Sites are deduplicated by the
+`#DECL`'s file, line, column and binding, resolved by parsing the loaded
+files with the project reader. Output: `docs/evidence/M4/decl-violation-sweep.json`
+(sanitized paths), per-unit results and logs in `artifacts/decl-sweep/`
+(divergence reports of units that diverge under the recorder go to
+`artifacts/decl-sweep/scenario-divergence/`, never to the scenario targets'
+directory). Exit 0 when every unit produced a result (a unit that diverges
+from native with the recorder on is data) and the report was written.
+Options: `M4_DECL_SWEEP_ARGS="--units a,b --reuse --out P --work D"`.
+
 ## M4 acceptance-term check (`make m4-check`, 2026-11-25)
 
 `make m4-check` (`scripts/m4_check.py`, epic #163 Phase 7) runs every check
