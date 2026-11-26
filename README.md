@@ -182,6 +182,19 @@ SCENARIO_PARITY PASS for 24 scenarios, GAMEPLAY_RELIABILITY NOT YET with 18
 of 23 required branches covered and open blockers INV-06, INV-07 and INV-12.
 Next: a maintainer decision on INV-12. Branch evidence until merged.
 
+**#196 attached-declaration sweep (branch `feat/m4-decl-sweep`; diagnostic
+only, no semantic change; [record](docs/evidence/M4/DECL-VIOLATION-SWEEP.md)).**
+A host-only, test-only recorder (`make-mdl-session
+#:decl-violation-recorder`, never passed by `run-zork`, the command line or
+replay) lets `make m4-decl-sweep` run every gated scenario, the balloon route
+and targeted probes with attached `#DECL` violations recorded instead of
+fatal. Result: no violation on the 24 gated routes; the balloon violates
+BALLOON's PRSO and BINF declarations and, allowed to proceed, matches pinned
+Confusion through all 81 commands; MSWITCH (`push switch`) and SPHERE-FUNCTION
+are confirmed too. Production stays strict: the balloon is still blocked
+(`make xfail-m4-balloon-frontier`). Next: the maintainer's INV-12 decision
+(recommended: stop enforcing attached declarations, aligning with Confusion).
+
 `make m4-check` runs all twenty-four plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
