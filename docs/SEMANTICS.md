@@ -4082,7 +4082,7 @@ Specification written before implementation (maintainer decision #173,
 2026-11-26). Sources: manual chapter 11 (§11.1.2 output and separators,
 §11.1.2.1 PRINT, §11.1.2.2 PRIN1, §11.1.2.3 PRINC, §11.2.7 OUTCHAN,
 §11.2.8.1 output CHANNEL elements 13 and 14). Pinned Confusion `6df359f6…`
-(upstream `bdcd4a67`), 43 cases in
+(upstream `bdcd4a67`), 44 cases in
 [`i173-print-reference.json`](evidence/M4/i173-print-reference.json)
 (probe tool, CR/LF canonicalised) and
 [`i173-print-reference-raw.json`](evidence/M4/i173-print-reference-raw.json)
