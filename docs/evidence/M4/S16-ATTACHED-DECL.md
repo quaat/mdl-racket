@@ -2,7 +2,7 @@
 
 Date: 2026-11-26. Branch `feat/m4-attached-decl-unenforced` from `main`
 `8c398fe`. Issue #196 (INV-12; to be closed by the PR). Gate label:
-**@@GATE@@** for the declaration amendment and the promoted balloon-ledge
+**PASS (local branch, not merged; scenario-scoped)** for the declaration amendment and the promoted balloon-ledge
 scenario. Not a PLAYABLE, GAMEPLAY_RELIABILITY or M4 claim.
 
 ## Maintainer decision (#196, 2026-11-26)
@@ -132,14 +132,30 @@ production host that silently had a recorder would fail them.
 
 | Run | Before (strict core `8c398fe` runtime, new tests) | After (`8896f03`) |
 |---|---|---|
-| `make test-racket` | exit 2; raco `32/4707 test failures`: 11 modules abort at their first converted assertion (`... does not satisfy declaration`: applicable_decl, atom_props, attached_decl_unenforced, decl_violation_recorder, declaration_pattern, declaration, duplicate_decl, function_decl_metadata, mapf, nth_decl, special_decl) and deferred_decl_type has 21 failing checks | @@AFTER_RACKET@@ |
-| `racket tests/historical_decl_test.rkt` | exit 1 (`expected an error matching mdl-gassigned?...`) | @@AFTER_HDECL@@ |
-| `racket tests/historical_g3_test.rkt` | exit 1 (same) | @@AFTER_G3@@ |
+| `make test-racket` | exit 2; raco `32/4707 test failures`: 11 modules abort at their first converted assertion (`... does not satisfy declaration`: applicable_decl, atom_props, attached_decl_unenforced, decl_violation_recorder, declaration_pattern, declaration, duplicate_decl, function_decl_metadata, mapf, nth_decl, special_decl) and deferred_decl_type has 21 failing checks | `make test` exit 0: raco 5165 tests passed (the 12 modules included), pytest 104 passed, 1 deselected |
+| `racket tests/historical_decl_test.rkt` | exit 1 (`expected an error matching mdl-gassigned?...`) | exit 0 within `make test-historical` ("historical DECL probe passed: 20 assertions") |
+| `racket tests/historical_g3_test.rkt` | exit 1 (same) | exit 0 (`make test-m2-g3`: 58 assertions) |
 | `racket tests/historical_balloon_ledge_test.rkt` | exit 1: `earliest failing k = 57, kind run-guard ... DECL 424:9: PRSO does not satisfy declaration` | exit 0 |
 
 ## The balloon
 
-@@BALLOON@@
+`tests/historical_balloon_ledge_test.rkt` runs the 81 commands through the
+shared runner against the committed reference (not recaptured), with the
+puzzles checkpoint and `#:eof-classification-ignore-keys '(robber_hroom)`,
+plus the retired frontier test's native assertions (the rope, torch and
+glacier at entries 21-54; the balloon's HERE, AVEHICLE, BLOC, BINF, BTIE,
+receptacle, BINT and BRNIN at 16 entries; the key transcript lines) and
+`#:check-turn` checks on our side (burned from 59, tied from 68, untied from
+71, landed from 79).
+
+* Single-run (`make test-m4-balloon-ledge`): exit 0, "all 82 turns match the
+  reference (D1 only); 5 boots; 77 of 81 shorter prefixes have a standard
+  end-of-input tail (not re-run)", prefixes 50, 51, 52 and 60 re-run and
+  equal, 29.7 s.
+* Per-prefix (`M4_SCENARIO_MODE=per-prefix make test-m4-balloon-ledge`):
+  exit 0, "all 82 turns match the reference (D1 only); 82 boots, 644.2 s".
+* Before the runtime change: exit 1 at k = 57 (above). No later divergence
+  was found.
 
 ## Coverage
 
@@ -169,15 +185,60 @@ cites BINT and BRNIN as checkpointed in balloon-ledge.
 
 ## Sweep re-run
 
-@@SWEEP@@
+`make m4-decl-sweep` (exit 0) on `e98fe9b`; report
+[decl-violation-sweep.json](decl-violation-sweep.json). The sweep now runs
+every unit twice, each in its own process: with the recorder and without it
+(production). 27 units (25 gated scenarios, balloon-ledge now among them;
+the MSWITCH probe route; the SPHERE direct call), none crashed.
+
+* **With the recorder: the same 4 sites as the original sweep**, with the same
+  occurrence counts: BALLOON BINF (77act2.mud:424, aux, 43) and PRSO (aux,
+  40) on balloon-ledge (now "on a gated scenario route"); MSWITCH-FUNCTION IMP
+  (77act2.mud:142, aux, 3) on the probe; SPHERE-FUNCTION PV (77act3.mud:245,
+  aux, 1) by the direct call. 0 on the other 24 gated scenarios.
+* **Without the recorder every unit matches:** all 25 gated scenario modules
+  PASS (balloon-ledge included), the MSWITCH probe's whole transcript equals
+  native T1, and the SPHERE direct call returns with the same output as with
+  the recorder (the game's poisoning; ours only). 0 violations recorded in
+  production runs, as expected (no recorder).
 
 ## make m4-check
 
-@@M4CHECK@@
+`make m4-check` exit 0 on `8896f03` with the evidence docs uncommitted
+("dirty"); all 25 scenario targets, the persistence check and the PLAYABLE
+sub-checks PASS.
+
+| Term | Status | Scope / reasons |
+|---|---|---|
+| SCENARIO_PARITY | PASS | 25 scenarios, each under one fixed clock and seed (250776000, UTC) |
+| GAMEPLAY_RELIABILITY | NOT YET | 19 of 23 required branches covered (PROVISIONAL list); uncovered: combat.thief, save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07 |
+| PLAYABLE | NOT RUN | sub-checks only; no PLAYABLE gate; player-facing save/resume and a full playthrough missing |
+| FULL_COMPLETION | NOT RUN | no complete-game check |
+| M4_ACCEPTED | NOT YET | R2-R5 not met |
 
 ## Commands and results
 
-@@COMMANDS@@
+All with `PLTCOLLECTS=":$PWD" TMPDIR=/tmp PYTHON=/usr/bin/python3`, one heavy
+job at a time; logs under `artifacts/s16/` (not committed).
+
+| Command | Exit | Notes |
+|---|---|---|
+| `make test-racket` (before, runtime of `8c398fe`, new tests) | 2 | raco 32/4707 failures (12 modules) |
+| `racket tests/historical_balloon_ledge_test.rkt` (before) | 1 | k = 57, `DECL 424:9: PRSO does not satisfy declaration` |
+| `racket tests/historical_decl_test.rkt`, `racket tests/historical_g3_test.rkt` (before) | 1, 1 | expected the GASSIGNED? error |
+| `make test-m4-balloon-ledge` | 0 | 82 turns, single-run |
+| `M4_SCENARIO_MODE=per-prefix make test-m4-balloon-ledge` | 0 | 82 boots |
+| `make test` | 0 | raco 5165 passed; pytest 104 passed, 1 deselected |
+| `make test-historical` | 0 | |
+| `make test-m2-g3` | 0 | 58 assertions |
+| `make m3-check` | 0 | overall PASS, native fresh capture included |
+| `make m4-check` | 0 | table above |
+| `make m4-decl-sweep` | 0 | 27 units x 2 modes; 4 sites |
+| `git diff --check` | 0 | |
+
+Reproduce: `make test`, `make test-m4-balloon-ledge`,
+`M4_SCENARIO_MODE=per-prefix make test-m4-balloon-ledge`, `make m4-check`,
+`make m4-decl-sweep`.
 
 ## Limitations and risks
 

@@ -240,3 +240,15 @@ All runs: Racket v7.9 [bc], Python 3 from `/usr/bin/python3`,
   other values.
 - **Recorder values.** The recorder renders values in a bounded way. OBJECT
   and ROOM are shown by OID and RID.
+
+## Re-run after the decision (2026-11-26, M4 S16)
+
+After the #196 amendment (attached `#DECL`s not enforced in production) the
+sweep runs each unit twice, with and without the recorder; balloon-ledge is a
+gated unit. `make m4-decl-sweep` exit 0 on `e98fe9b`: 27 units, none crashed.
+With the recorder: **the same 4 sites** (BALLOON BINF 43 and PRSO 40
+occurrences, MSWITCH IMP 3, SPHERE PV 1; 0 on the other 24 gated
+scenarios). Without it: every gated scenario PASS, the MSWITCH probe equal to
+native T1, the SPHERE direct call with the same output. The JSON above is the
+re-run's report (the original run's figures are in the tables above). Record:
+[S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md).

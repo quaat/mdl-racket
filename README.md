@@ -198,7 +198,7 @@ still blocked (`make xfail-m4-balloon-frontier`). Next: the maintainer's INV-12 
 (Superseded by S16 below.)
 
 **S16 (#196, INV-12 fixed; branch `feat/m4-attached-decl-unenforced`, gate
-@@GATE@@; [record](docs/evidence/M4/S16-ATTACHED-DECL.md)).** By maintainer
+PASS, scenario-scoped; [record](docs/evidence/M4/S16-ATTACHED-DECL.md)).** By maintainer
 decision attached `#DECL`s are no longer enforced at all, as in pinned
 Confusion: a bound argument, OPTIONAL, REST, AUX, PROG auxiliary, NAME
 formal, `SET` of a declared local or VALUE result is never checked in
@@ -213,7 +213,7 @@ untied, the landing) now matches the committed native reference at every
 turn in single-run and per-prefix modes; `make xfail-m4-balloon-frontier`
 is retired. All five listed puzzles beyond the house are now exercised by
 gated checks (one route each; the river downstream, the balloon's other
-destinations and the volcano gnome are not). @@M4CHECK@@ Known
+destinations and the volcano gnome are not). On that branch `make m4-check` exits 0: SCENARIO_PARITY PASS for 25 scenarios, GAMEPLAY_RELIABILITY NOT YET with 19 of 23 required branches covered (objects.puzzles-beyond-the-house now covered) and open blockers INV-06 and INV-07 only. Known
 limitation found here: with MSETG's declaration gone, this runtime's
 `GASSIGNED?`/`SETG` accept a STRING as an ATOM name where Confusion stops
 (tracked XFAIL in `tests/declaration_test.rkt`). Branch evidence until
