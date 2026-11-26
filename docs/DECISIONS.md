@@ -1787,9 +1787,13 @@ confused with failure. HANDLE (77rooms.mud:213-252) turns an MDL ERROR into
 the outcome kind makes that path visible instead of letting it look like a
 clean user quit.
 
-**Consequences:** In this runtime HANDLE's ERROR path currently stops before
+**Consequences:** ~~In this runtime HANDLE's ERROR path currently stops before
 FINISH: it applies `PRINT` (77rooms.mud:251), which is unsupported, so that
-path is a strict failure today; the outcome kind covers it once PRINT exists.
+path is a strict failure today; the outcome kind covers it once PRINT exists.~~
+Since M4 #173 (PRINT, PR #207; OBLIST trailers, B2) HANDLE's general branch
+runs to FINISH and QUIT and the host loop returns `'quit-after-mdl-error`
+(`tests/historical_handle_test.rkt`). An ERROR argument PRINT cannot print
+here (VECTOR, FORM, FLOAT, NEWTYPE values) is still a strict failure.
 No game source, upstream provenance, license or GPLv3 code changed.
 
 ## ADR-0055: OPEN under a virtual no-file policy
@@ -2582,7 +2586,20 @@ Evidence: `docs/evidence/M4/I199-STRING-ATOM.md`; SEMANTICS "M4 #199".
 ## ADR-0064: Historical PRINT; MDL errors, language evaluation errors and host failures are classified separately (#173)
 
 Status: accepted direction (maintainer decision on #173, 2026-11-26).
-Implementation: epic #163 Phase B, in small separately reviewed PRs.
+Implementation: epic #163 Phase B, in small separately reviewed PRs:
+B1 PRINT (PR #207); B2 OBLIST trailers in PRIN1/PRINT/UNPARSE and the
+game's HANDLE path as a regression (`tests/historical_handle_test.rkt`;
+SEMANTICS "M4 #173 B2"). Class B (language-level errors) is unchanged:
+no host exception is converted into an MDL ERROR; that work belongs to the
+general conformance issue.
+- *Amendment (2026-11-26, B2, recorded disposition; flagged on the PR for
+  the maintainer).* An ATOM on an OBLIST whose name association was removed
+  prints `P!-!-#FALSE ()`, as pinned Confusion prints it. Manual §15.2.1
+  ("ATOMs in that OBLIST will PRINT the name as if they were in no OBLIST")
+  admits that reading as well as `P!-#FALSE ()`; the evidence hierarchy
+  resolves the ambiguity by the reference. No game path reaches it. If the
+  maintainer reads §15.2.1 the other way, the change is one line in
+  `atom-print-tokens` and one native-case classification.
 
 - *Context.* The game's error handler HANDLE (`77rooms.mud:251`) calls PRINT,
   which this runtime does not define (INV-07). More generally, the runtime

@@ -76,9 +76,9 @@
 (check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"42\">>")))
 ;; B2: pname with dot (not in whitelist).
 (check-exn #rx"UNPARSE ATOM: PNAME" (lambda () (run "<UNPARSE <ATOM \"A.B\">>")))
-;; B1: atom removed from OBLIST requires trailer notation — strict error.
-(check-exn #rx"UNPARSE ATOM: trailer notation not implemented"
-           (lambda () (run "<SET X <REMOVE FOO>> <UNPARSE .X>")))
+;; An ATOM removed from its OBLIST prints with the trailer !-#FALSE ()
+;; (manual 15.7.4; native i173-trailer prin1-removed-atom; M4 #173 B2).
+(check-equal? (run "<SET X <REMOVE FOO>> <UNPARSE .X>") "FOO!-#FALSE ()")
 
 ;; ── STRING ───────────────────────────────────────────────────────────────────
 ;; Confusion: <UNPARSE "hello"> → "\"hello\"" (the string itself contains "hello"
@@ -136,10 +136,9 @@
 ;; ── ATOM reachability uses the single authoritative search path (#118) ────
 ;; The current path is the LVAL of ROOT OBLIST, including PROG/AUX/formal
 ;; bindings, not the session's default path. An INITIAL atom UNPARSEd while
-;; OBLIST is bound to (ROOT) alone is not reachable: Confusion prints the
-;; trailer FOO!-INITIAL, which is not implemented, so this is a strict error.
-(check-exn #rx"UNPARSE ATOM: trailer notation not implemented"
-           (lambda () (run "<SETG A 'FOO> <PROG ((OBLIST (<ROOT>))) <UNPARSE ,A>>")))
+;; OBLIST is bound to (ROOT) alone is not reachable: it prints with the
+;; trailer FOO!-INITIAL (M4 #173 B2; native prin1-initial-not-on-path).
+(check-equal? (run "<SETG A 'FOO> <PROG ((OBLIST (<ROOT>))) <UNPARSE ,A>>") "FOO!-INITIAL")
 (check-equal? (run "<SETG A 'FOO> <PROG ((OBLIST (<GET INITIAL OBLIST> <ROOT>))) <UNPARSE ,A>>")
               "FOO")
 

@@ -179,7 +179,7 @@
          "<PRINT <STRING \"a\" <ASCII 27>>>")
 (refused #rx"^PRINT: UNPARSE CHARACTER: control character \\(code 9\\)" "<PRINT <ASCII 9>>")
 (refused #rx"^PRINT: non-ASCII character \\(code 233\\)" "<PRINT \"a\u00e9\">")
-(refused #rx"^PRINT: UNPARSE ATOM: trailer notation" "<PRINT <ATOM \"BAR\">>")
+(check-equal? (written "<PRINT <ATOM \"BAR\">>") "\nBAR!-#FALSE () ") ; M4 #173 B2
 (refused #rx"^PRINT: .*empty-PNAME ATOM not reachable" "<PRINT (<ATOM \"\">)>")
 ;; Self-referencing structures (Confusion would not terminate).
 (refused #rx"^PRINT: .*cyclic LIST" "<PRINT .L>"

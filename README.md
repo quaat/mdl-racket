@@ -88,10 +88,10 @@ PR #202 before its merge (the reference workflow runs on pull requests, not
 on pushes to `main`); the technical result of that content, not milestone
 acceptance):
 
-| Term | State on `main` `5b27177` |
+| Term | State on `main` `da973a7` + #173 B2 |
 |---|---|
 | SCENARIO_PARITY | PASS for the 26 declared scenarios, each under one fixed clock and seed |
-| GAMEPLAY_RELIABILITY | NOT YET: 20 of 23 required branches covered (baseline v1, approved by the maintainer 2026-11-26); uncovered: the game's save, the game's restore, player-facing resume; open blockers INV-06 RESTORE (#172), INV-07 PRINT in HANDLE (#173) |
+| GAMEPLAY_RELIABILITY | NOT YET: 20 of 23 required branches covered (baseline v1, approved by the maintainer 2026-11-26); uncovered: the game's save, the game's restore, player-facing resume; open blocker INV-06 RESTORE (#172); INV-07 PRINT in HANDLE (#173) resolved by #173 B1/B2 |
 | PLAYABLE | NOT RUN: no PLAYABLE gate yet (approved definition: start, progress, save, terminate the process, restore in a fresh process, continue, quit); quit-session and launcher sub-checks pass |
 | FULL_COMPLETION | NOT RUN: the real 500-point game, no synthetic endpoint (approved definition); no complete-game run yet |
 | M4_ACCEPTED | NOT YET: needs all four terms and the maintainer's R5 record; final gate `make m4-accept` |

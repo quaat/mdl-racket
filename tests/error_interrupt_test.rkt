@@ -53,3 +53,21 @@
    (check-equal? (mdl-apply (mdl-atom "ERROR") (mdl-atom "ONE") 2) 17)
    (check-eq? (mdl-gval (mdl-atom "SEEN-FRAME-TYPE")) (mdl-atom "FRAME"))
    (check-equal? (mdl-gval (mdl-atom "SEEN-ARG-COUNT")) 2)))
+
+;; ADR-0064 required regression (M4 #173 B2): no cross-session FRAME use. A
+;; FRAME that is still live in session A (A's handler is running) is refused
+;; by ERRET in another session B, and A's handler can still ERRET with it.
+(session
+ (lambda ()
+   (define header (mdl-apply (mdl-atom "EVENT") "ERROR" 8))
+   (define refused #f)
+   (mdl-apply (mdl-atom "HANDLER") header
+              (lambda (current-frame . args)
+                (session
+                 (lambda ()
+                   (check-exn #rx"ERRET requires a live ERROR FRAME in this session"
+                              (lambda () (mdl-apply (mdl-atom "ERRET") 1 current-frame)))
+                   (set! refused #t)))
+                (mdl-apply (mdl-atom "ERRET") 7 current-frame)))
+   (check-equal? (mdl-apply (mdl-atom "ERROR") (mdl-atom "CROSS")) 7)
+   (check-true refused)))

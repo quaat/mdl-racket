@@ -453,7 +453,7 @@ def test_real_branch_list_cannot_pass_today():
     terms = m.compute_terms(manifest, branches, every_pass, [])
     assert terms["SCENARIO_PARITY"]["status"] == PASS
     assert terms["GAMEPLAY_RELIABILITY"]["status"] == NOT_YET
-    assert {"INV-06", "INV-07"} <= set(terms["GAMEPLAY_RELIABILITY"]["blocking_open"])
+    assert {"INV-06"} <= set(terms["GAMEPLAY_RELIABILITY"]["blocking_open"])
     assert terms["PLAYABLE"]["status"] == NOT_RUN
     assert terms["FULL_COMPLETION"]["status"] == NOT_RUN
     assert terms["M4_ACCEPTED"]["status"] == NOT_YET

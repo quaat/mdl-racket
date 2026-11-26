@@ -50,11 +50,11 @@
 ;; A reachable ATOM with a plain PNAME prints its PNAME (UNPARSE rules).
 (check-equal? (written "<PRIN1 FOO>") "FOO")
 (check-equal? (written "<PRIN1 T>") "T")
-;; Not reachable on the OBLIST path: Confusion prints a trailer; refused.
+;; Not reachable on the OBLIST path: printed with a trailer (M4 #173 B2);
+;; an unreachable empty PNAME is still refused (not evidenced).
 (check-exn #rx"^PRIN1: .*trailer"
            (lambda () (written "<PRIN1 <ATOM \"\">>")))
-(check-exn #rx"^PRIN1: .*trailer"
-           (lambda () (written "<PRIN1 <ATOM \"BAR\">>")))
+(check-equal? (written "<PRIN1 <ATOM \"BAR\">>") "BAR!-#FALSE ()")
 ;; PNAMEs needing escapes are refused.
 (check-exn #rx"^PRIN1: .*not in safe-char whitelist"
            (lambda () (written "<PRIN1 A\\ B>")))

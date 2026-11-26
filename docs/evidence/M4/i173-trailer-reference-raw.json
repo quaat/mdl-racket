@@ -1,0 +1,132 @@
+{
+ "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+ "protocol": "raw stdout bytes after the LISTENING marker; stdin expression then <QUIT>",
+ "cases": [
+  {
+   "name": "prin1-errors-trailer",
+   "exit_code": 0,
+   "result_bytes": "UNASSIGNED-VARIABLE!-ERRORSUNASSIGNED-VARIABLE!-ERRORS\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-no-prep-errors",
+   "exit_code": 0,
+   "result_bytes": "NO-PREP!-ERRORSNO-PREP!-ERRORS\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-errors-trailer",
+   "exit_code": 0,
+   "result_bytes": "\nFOO!-ERRORS FOO!-ERRORS\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "unparse-errors-trailer",
+   "exit_code": 0,
+   "result_bytes": "\"FOO!-ERRORS\"\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "errors-oblist-name",
+   "exit_code": 0,
+   "result_bytes": "#FALSE ()#FALSE ()\nFALSE\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-moblist-trailer",
+   "exit_code": 0,
+   "result_bytes": "#OBLIST ![() () () () () () ()!]\nBAR!-OB1BAR!-OB1\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-trailer-shadowed",
+   "exit_code": 0,
+   "result_bytes": "#OBLIST ![() () () () () () ()!]\nT!-OB1\nT!-OB1T!-OB1\n#FALSE ()\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-root-not-on-path",
+   "exit_code": 0,
+   "result_bytes": "FOO\n#OBLIST ![() () () () () () ()!]\nFOO!-\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-initial-not-on-path",
+   "exit_code": 0,
+   "result_bytes": "ZZZ\n#OBLIST ![() () () () () () ()!]\nZZZ!-INITIAL\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-nested-oblist-name",
+   "exit_code": 0,
+   "result_bytes": "#OBLIST ![() () () () () () ()!]\nINNER!-OBA\n#OBLIST ![() () () () () () ()!]\nLEAF!-INNER!-OBALEAF!-INNER!-OBA\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-uninterned-atom",
+   "exit_code": 0,
+   "result_bytes": "QQ!-#FALSE ()QQ!-#FALSE ()\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-removed-atom",
+   "exit_code": 0,
+   "result_bytes": "RMV\nRMV!-#FALSE ()\nRMV!-#FALSE ()RMV!-#FALSE ()\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-list-with-trailer",
+   "exit_code": 0,
+   "result_bytes": "\n(A FOO!-ERRORS 1 \"s\") (A FOO!-ERRORS 1 \"s\")\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-tuple-like-handle",
+   "exit_code": 0,
+   "result_bytes": "\nUNASSIGNED-VARIABLE!-ERRORS \nFOO \nDA DA\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-trailer-token",
+   "exit_code": 0,
+   "result_bytes": "\nabcdef\nFOO!-ERRORS\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-oblist-name-unreachable",
+   "exit_code": 0,
+   "result_bytes": "#OBLIST ![() () () () () () ()!]\nHIDDEN!-OBB\n#OBLIST ![() () () () () () ()!]\nLEAF2!-HIDDEN!-OBB\nLEAF2!-HIDDEN!-OBB!-INITIAL!-\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-uninterned-token",
+   "exit_code": 0,
+   "result_bytes": "\nabcdefgh\nQQ!-#FALSE\n()x\nabcdefgh(1\nQQ!-#FALSE\n())\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-oblist-renamed",
+   "exit_code": 0,
+   "result_bytes": "#OBLIST ![() () () () () () ()!]\nRX!-OBR\n#OBLIST ![(RX!-NEWNAME) () () () () () ()!]\nRX!-NEWNAMERX!-NEWNAME\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-oblist-name-removed",
+   "exit_code": 0,
+   "result_bytes": "#OBLIST ![() () () () () () ()!]\nQX!-OBQ\n#OBLIST ![() () () () () (QX!-!-#FALSE ()) ()!]\nQX!-!-#FALSE ()QX!-!-#FALSE ()\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-root-shadowed",
+   "exit_code": 0,
+   "result_bytes": "ZQROOT\nZQROOT\nZQROOT!-ZQROOT!-\n#FALSE ()\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "unparse-uninterned",
+   "exit_code": 0,
+   "result_bytes": "\"QQ!-#FALSE ()\"\n\"(1 QQ!-#FALSE ())\"\n",
+   "stderr_bytes": ""
+  }
+ ]
+}

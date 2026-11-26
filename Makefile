@@ -32,6 +32,7 @@ test-historical: sources
 	@racket tests/historical_oblist_placement_test.rkt
 	@racket tests/historical_channel_start_test.rkt
 	@MDL_PINNED_SOURCES=1 raco test tests/file_read_test.rkt
+	@raco test tests/historical_handle_test.rkt
 
 test-m2-g3: sources
 	@racket tests/historical_g3_test.rkt
