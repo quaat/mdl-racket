@@ -82,16 +82,18 @@
 (check-equal? (run "#DECL #DECL ((X) FIX) 5") 5)
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL #DECL FIX")))
 
-;; Since M4 #196 attached declarations are not enforced (DECISIONS.md, the
-;; attached-declaration ADR amendment; tests/attached_decl_unenforced_test.rkt):
-;; the calls above and below that used to raise "does not satisfy
-;; declaration" now proceed with the value; the old assertions are listed in
-;; docs/evidence/M4/S16-ATTACHED-DECL.md.
+;; Note for this whole file: since M4 #196 attached declarations are not
+;; enforced (DECISIONS.md, the attached-declaration ADR amendment;
+;; tests/attached_decl_unenforced_test.rkt). Every call in this file that used
+;; to raise "does not satisfy declaration" now proceeds with the value; the
+;; old assertions are listed in docs/evidence/M4/S16-ATTACHED-DECL.md.
+
 ;; Review-derived regressions: manifest gating, frame isolation, and macro
 ;; declarations. A manifest global accepts only an ==?-identical reassignment
 ;; unless .REDEFINE is true; MANIFEST before assignment does not make the
 ;; global GASSIGNED?. A function's declaration never applies to another
-;; frame's bindings, and a DEFMAC's own declaration checks its bound formals.
+;; frame's bindings; a DEFMAC's own declaration is parsed but, like every
+;; attached declaration since #196, not enforced on its bound formals.
 (check-equal? (run "<SETG M 1> <MANIFEST M> <SETG M 1>") 1)
 (check-exn #rx"ATTEMPT-TO-CHANGE-MANIFEST-VARIABLE M"
            (lambda () (run "<SETG M 1> <MANIFEST M> <SETG M 2>")))

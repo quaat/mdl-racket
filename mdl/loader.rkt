@@ -92,9 +92,10 @@
 ;; reach it. File READSTRING (below) never calls it.
 ;; decl-violation-recorder (M4 #196; diagnostic only, SEMANTICS "Diagnostic-
 ;; only: attached-declaration violation recorder"): #f (the default) or a
-;; host-only, test-only procedure of one argument. When given, an attached
-;; #DECL check that would fail calls it with a description of the violation
-;; and proceeds; when absent every attached check is strict. run-zork, the
+;; host-only, test-only procedure of one argument. Attached #DECLs are not
+;; enforced (#196): when absent no attached check is evaluated; when given,
+;; every attached check is evaluated and one that would fail calls it with a
+;; description of the violation and proceeds. run-zork, the
 ;; command line and the replay host never pass it; MDL code cannot reach it.
 ;; read-only-files (M4 S10, #171; ADR-0055 amendment): the host's read-only
 ;; allowlist, a list of mdl-read-only-file entries (default: none, so OPEN

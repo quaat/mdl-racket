@@ -246,12 +246,19 @@ Reproduce: `make test`, `make test-m4-balloon-ledge`,
   `<MSETG "x" 3>` at GASSIGNED? ("1st arg to GASSIGNED? must be atom",
   `docs/evidence/M2/decl-error-reference.json` original-msetg-wrong-atom).
   This runtime's `binding-atom` accepts an MDL STRING as an ATOM name, so
-  GASSIGNED?/SETG (and other binding-atom users) proceed. MSETG's attached
-  `(FOO) ATOM` used to hide this. Tracked as an XFAIL assertion in
+  every MDL-reachable user of it proceeds with a STRING. The independent
+  review probed `SETG` (which interns: `,FOO` then gives the value), `GVAL`,
+  `GASSIGNED?`, `SET`, `LVAL`, `VALUE`, `GUNASSIGN` and `MANIFEST`, all of
+  which succeed; `ASSIGNED?`, `SPNAME` and `PNAME` correctly error. Confusion
+  evidence exists only for `GASSIGNED?`. MSETG's attached `(FOO) ATOM` used
+  to hide this. Game code that reaches these primitives without that guard
+  includes `DA` (77defs.mud:448-457), MSETG/PSETG (81prim.mud) and GET-ATOM
+  (77rooms.mud:451-460). Tracked as issue #199 and as an XFAIL assertion in
   `tests/declaration_test.rkt`; it needs its own slice (binding-atom is also
-  the host-call path, so the fix must separate MDL calls from host calls).
-  The gated routes never pass a STRING there (the sweep found no attached
-  violation on them).
+  the host-call path, so the fix must separate MDL calls from host calls, and
+  Confusion should be probed for each primitive first). The gated routes
+  never pass a STRING there (the sweep found no attached violation on them),
+  so today this is an error-path difference only.
 * **Lost safety net.** A runtime bug that produces a wrongly typed value is no
   longer stopped at an attached binding; it must show in output or state. The
   scenario checkpoints compare both; `make m4-decl-sweep` remains the
@@ -267,3 +274,34 @@ Reproduce: `make test`, `make test-m4-balloon-ledge`,
 Security and licensing: no change to exposure (the recorder stays host-only
 and unreachable from MDL; no evaluator exposed), no GPLv3 code copied, no
 upstream bytes changed.
+
+## Independent review (2026-11-26)
+
+A separate reviewer read `git diff 8c398fe HEAD` in full, ran the declaration test files one at a time and made three mutations in a scratch copy:
+
+| Mutation | Caught by |
+|---|---|
+| production evaluates the match without raising | `attached_decl_unenforced_test`, `decl_violation_recorder_test` |
+| `run-zork` passes a recorder | `decl_violation_recorder_test` |
+| the replay host passes a recorder | `decl_violation_recorder_test` |
+
+There were no blocking defects.
+
+Should-fix items, now applied:
+- the stale recorder comments in `mdl/loader.rkt` and `tests/m4_scenario_runner.rkt`, and the recorder Tests paragraph in SEMANTICS;
+- the STRING-as-ATOM divergence, which reaches every binding primitive listed above: now issue #199, and named in full in Limitations, the README and STATUS.
+
+Nits, applied:
+- the README wording;
+- recorder checks added for the DEFMAC and MAPF cases;
+- the #196 note in `declaration_test.rkt`, made file-wide, with the stale DEFMAC sentence corrected.
+
+Not applied: the interpreted-path OPTIONAL/REST/AUX/NAME production cases. They share `bind!` with the tested required argument.
+
+Full gate on `dda9c96` (sequential; logs `.claude/worktrees/baseline-logs/attdecl-*`); every target exited 0:
+- `make test`, `test-historical`, `test-m2-g3`;
+- `m3-source-progress`, `test-m3-interactive`, `test-m3-session`, `test-m3-launcher`, `test-m3-bang`, `m3-check`;
+- `m4-check`: SCENARIO_PARITY PASS (25), GAMEPLAY_RELIABILITY NOT YET 19/23, blockers INV-06 and INV-07;
+- `m4-decl-sweep`;
+- `m4-scenarios-per-prefix` (5971 s);
+- `git diff --check`.

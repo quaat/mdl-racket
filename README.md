@@ -214,9 +214,11 @@ turn in single-run and per-prefix modes; `make xfail-m4-balloon-frontier`
 is retired. All five listed puzzles beyond the house are now exercised by
 gated checks (one route each; the river downstream, the balloon's other
 destinations and the volcano gnome are not). On that branch `make m4-check` exits 0: SCENARIO_PARITY PASS for 25 scenarios, GAMEPLAY_RELIABILITY NOT YET with 19 of 23 required branches covered (objects.puzzles-beyond-the-house now covered) and open blockers INV-06 and INV-07 only. Known
-limitation found here: with MSETG's declaration gone, this runtime's
-`GASSIGNED?`/`SETG` accept a STRING as an ATOM name where Confusion stops
-(tracked XFAIL in `tests/declaration_test.rkt`). Branch evidence until
+limitation found here: with MSETG's declaration no longer enforced, this
+runtime's ATOM-taking binding primitives (`SETG`, `GVAL`, `GASSIGNED?`,
+`SET`, `LVAL`, `VALUE`, `GUNASSIGN`, `MANIFEST`) accept a STRING as an ATOM
+name where Confusion stops at least for `GASSIGNED?` (#199; tracked XFAIL in
+`tests/declaration_test.rkt`). Branch evidence until
 merged.
 
 `make m4-check` runs all twenty-five plus the persistence check; options

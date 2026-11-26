@@ -78,8 +78,9 @@
 (check-equal? (run "<DEFINE F (\"NAME\" A) #DECL ((A) FIX) 7> <F>") 7)
 (check-equal? (recorded "<DEFINE F (\"NAME\" A) #DECL ((A) FIX) 7> <F>") '("A"))
 ;; DEFMAC's formals and a FUNCTION applied by MAPF
-(check-equal? (run "<DEFMAC M ('X) #DECL ((X) FIX) <FORM QUOTE .X>> <M \"s\">") "s")
-(check-equal? (run "<LENGTH <MAPF ,LIST <FUNCTION (X) #DECL ((X) FIX) .X> '(1 A)>>") 2)
+(proceeds "<DEFMAC M ('X) #DECL ((X) FIX) <FORM QUOTE .X>> <M \"s\">" "s" '("X"))
+;; MAPF applies the FUNCTION twice: 1 satisfies FIX, only A is recorded
+(proceeds "<LENGTH <MAPF ,LIST <FUNCTION (X) #DECL ((X) FIX) .X> '(1 A)>>" 2 '("X"))
 
 ;; --- nested and compound Patterns: none enforced ------------------------------------
 (proceeds "<DEFINE F (X) #DECL ((X) <OR FALSE FIX>) .X> <F \"s\">" "s" '("X"))

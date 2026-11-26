@@ -1651,8 +1651,9 @@ the same error, raised at the same point.
 
 Tests: `tests/decl_violation_recorder_test.rkt` (in `make test`; failed
 first on the unknown keyword) covers each kind recorded once with the right
-description and the call proceeding; the same calls raising the old error
-without the recorder; DECL?, GDECL/SETG, positional, CHTYPE and
+description and the call proceeding; the same calls proceeding without the
+recorder too, with no attached check evaluated (since #196; before it they
+raised the old error); DECL?, GDECL/SETG, positional, CHTYPE and
 checking-time errors strict with it on; argument validation; and isolation
 (one read site, immutable field, no production host passes it; since #196,
 run-zork and the replay host run a toy game whose attached check would raise
