@@ -17,16 +17,16 @@
          "checks": ["test-m4-cyclops-room"]},
         {"id": "combat.hero-wounded", "required": true,
          "description": "a villain's blow wounds the hero (BLOW 78melee.mud:377 against the hero; strength drops)",
-         "checks": ["test-m4-troll-death"],
-         "note": "covered under the fixed clock and seed by troll-death: the troll's blow gives the unarmed hero a light wound (ASTRENGTH 0 -> -1, CURIN enabled); the sword-armed hero of troll-combat (S6) is still never hit"},
+         "checks": ["test-m4-troll-death", "test-m4-thief-fight"],
+         "note": "covered under the fixed clock and seed by troll-death: the troll's blow gives the unarmed hero a light wound (ASTRENGTH 0 -> -1, CURIN enabled); the sword-armed hero of troll-combat (S6) is still never hit. thief-fight: the thief's blow gives the sword-armed hero a light wound in the Treasure Room (ASTRENGTH 0 -> -1, CURIN enabled)"},
         {"id": "combat.hero-staggered-or-unconscious", "required": true,
          "description": "the hero is staggered or knocked unconscious",
-         "checks": ["test-m4-troll-death"],
-         "note": "staggered only (troll-death: ASTAGGERED set by the troll's blow, cleared the next turn); knocked unconscious is not reached"},
+         "checks": ["test-m4-troll-death", "test-m4-thief-fight"],
+         "note": "staggered: troll-death (ASTAGGERED set by the troll's blow, cleared the next turn). Knocked unconscious: thief-fight, transiently only: the thief's blow prints \"The thief knocks you out.\" (BLOW's UNCONSCIOUS against the hero, FIGHTING's OUT counter set) and his next blow in the same turn kills the hero (SITTING-DUCK); no READSTRING entry sees the hero unconscious, and recovering from it is not exercised"},
         {"id": "combat.thief", "required": true,
          "description": "the thief (ROBBER) fights, steals and is fought",
-         "checks": [],
-         "note": "UNCOVERED by this file's reading (the description asks for all three): only the stealing is exercised. test-m4-thief-robbery (a gated scenario, observed under the fixed clock and seed, not chased) shows the ROBBER demon's thief taking the painting from the hero in the Gallery (and, at prefix 12's end of input, from the room), passing again without finding anything, and keeping it in his bag (HOBJS); he is never seen in a room with the hero, never fights and is never fought, and his treasure room is not reached"}
+         "checks": ["test-m4-thief-robbery", "test-m4-thief-fight"],
+         "note": "covered under the fixed clock and seed by two gated scenarios together, neither alone. Steals: test-m4-thief-robbery (observed, not chased) shows the ROBBER demon's thief taking the painting from the hero in the Gallery (and, at prefix 12's end of input, from the room), passing again without finding anything, and keeping it in his bag (HOBJS); there he is never in a room with the hero. Fights and is fought: test-m4-thief-fight enters his Treasure Room (strange-passage's way past the cyclops, `up`): TREASURE-ROOM (77act1.mud:623) brings him there whatever the seed, with FIGHTBIT set, and the FIGHTING demon has him attack at once (a miss); `kill thief with sword` twice: the hero wounds him twice (OCAPAC 4 -> 3 -> 2), he wounds the hero, then knocks him out and kills him (JIGS-UP, patched with `y`). Not exercised: the thief appearing by chance in another room (the ROBBER demon's PROB 30 \"Someone carrying a large bag is casually leaning against one of the walls here\") or leaving a fight (\"Your opponent, determining discretion ...\"), the hero killing or knocking out the thief (his booty and the treasures reappearing, ROBBER-FUNCTION's DEAD!, OUT! and IN!), the stiletto knocked from his hand, giving or throwing him objects, the chalice taken, and the thief stealing from the hero's room while present (\"The other occupant just left ...\")"}
       ]
     },
     {
@@ -44,8 +44,8 @@
          "note": "covered under the fixed clock and seed: `n` (grue-refusal) and an end-of-input answer whose stale INBUF `n` refuses (grue-refusal prefix 6, grue-resurrection prefix 11); each ends by FINISH <> -> RECORD -> QUIT (the runner's declared quit ending); RECORD's OPENs are denied (ADR-0055) where the native run writes MDL/ZORK.LOG"},
         {"id": "death.killed-in-combat", "required": true,
          "description": "the hero dies from a villain's blow",
-         "checks": ["test-m4-troll-death"],
-         "note": "covered under the fixed clock and seed by the troll (unarmed hero, eighth `wait`); no other villain"}
+         "checks": ["test-m4-troll-death", "test-m4-thief-fight"],
+         "note": "covered under the fixed clock and seed by the troll (unarmed hero, eighth `wait`) and by the thief (thief-fight: the sword-armed hero knocked out and dispatched in the Treasure Room, `y`, patched in the forest); not the cyclops"}
       ]
     },
     {
