@@ -612,22 +612,94 @@
      (mdl-false (list (cadr result) (caddr result)))]
     [else (mdl-false '())]))
 
-(define (check-declared! decl name value)
+;; The attached-declaration check (manual chapter 14; the #98 ADR and its #193
+;; amendment). KIND says which binding is checked: argument, optional, rest,
+;; aux (a FUNCTION's "AUX"), prog-aux (a PROG/REPEAT auxiliary), name (an
+;; activation formal), set (SET of a declared local) or value (the result).
+;; A failing check is the strict error below, unless the session was made
+;; with the host-only, test-only decl-violation recorder (M4 #196, SEMANTICS
+;; "Diagnostic-only: attached-declaration violation recorder"): then the
+;; recorder is called once with a description of the violation and the check
+;; proceeds as if it had passed. Only this mismatch branch consults the
+;; recorder: errors raised while checking (an unknown or cyclic DECL
+;; association, the traversal limit) and every other declaration path
+;; (DECL?, GDECL/SETG, positional declarations, CHTYPE) stay strict.
+(define (check-declared! decl name value [kind 'value])
   (when (and decl (not (eq? value unassigned)))
     (define pattern (if (eq? name 'VALUE)
                         (mdl-decl-value-result decl)
                         (hash-ref (mdl-decl-value-bindings decl) name #f)))
     (when (and pattern (not (matches-decl? value pattern)))
-      (decl-error "DECL" (mdl-decl-value-line decl) (mdl-decl-value-column decl)
-                  "~a does not satisfy declaration"
-                  (if (eq? name 'VALUE) "VALUE" (mdl-atom-pname name)))))
+      (define recorder (atom-space-decl-violation-recorder (current-mdl-atom-space)))
+      (define binding (if (eq? name 'VALUE) "VALUE" (mdl-atom-pname name)))
+      (if recorder
+          (recorder (decl-violation-info decl binding kind pattern value))
+          (decl-error "DECL" (mdl-decl-value-line decl) (mdl-decl-value-column decl)
+                      "~a does not satisfy declaration" binding))))
   value)
 
-(define (check-frame-binding! frame atom value)
-  (check-declared! (hash-ref local-declarations frame #f) atom value))
+(define (check-frame-binding! frame atom value kind)
+  (check-declared! (hash-ref local-declarations frame #f) atom value kind))
 
 (define (check-result! decl value)
-  (check-declared! decl 'VALUE value))
+  (check-declared! decl 'VALUE value 'value))
+
+;; --- diagnostic only (M4 #196): the recorder's description of a violation ---
+;; Built only when a recorder is present. Keys: binding (PNAME string, or
+;; "VALUE"), kind (symbol, as check-declared!), pattern (the normalized
+;; Pattern rendered as MDL text; a name declared twice renders its
+;; constraints joined by " & "), value-type (TYPE PNAME), value-summary (a
+;; bounded rendering: FIX, FLOAT, ATOM PNAME, a STRING up to 40 characters,
+;; "#FALSE ()"; otherwise "#TYPE"), value (the value itself, for the host),
+;; line and column (of the #DECL in its source file).
+(define (decl-violation-info decl binding kind pattern value)
+  (hasheq 'binding binding 'kind kind
+          'pattern (render-normalized-decl pattern)
+          'value-type (mdl-atom-pname (mdl-type value))
+          'value-summary (decl-violation-value-summary value)
+          'value value
+          'line (mdl-decl-value-line decl) 'column (mdl-decl-value-column decl)))
+
+(define (decl-violation-value-summary value)
+  (cond
+    [(exact-integer? value) (number->string value)]
+    [(real? value) (number->string value)]
+    [(mdl-atom? value) (mdl-atom-pname value)]
+    [(string? value)
+     (format "~s" (if (> (string-length value) 40)
+                      (string-append (substring value 0 40) "...")
+                      value))]
+    [(and (mdl-false-value? value) (null? (mdl-false-value-payload value))) "#FALSE ()"]
+    [else (string-append "#" (mdl-atom-pname (mdl-type value)))]))
+
+(define (render-normalized-decl pattern)
+  (define (pname a) (mdl-atom-pname a))
+  (define (join items) (string-join (map render-normalized-decl items) " "))
+  (define (render-structure head required rest-spec)
+    (string-append
+     "<" head
+     (apply string-append
+            (for/list ([p (in-list required)])
+              (string-append
+               " "
+               (if (eq? (car p) 'nth)
+                   (format "[~a ~a]" (cadr p) (join (caddr p)))
+                   (render-normalized-decl p)))))
+     (if rest-spec (format " [REST ~a]" (join rest-spec)) "")
+     ">"))
+  (case (car pattern)
+    [(any) "ANY"]
+    [(type applicable unresolved) (pname (cadr pattern))]
+    [(primtype) (format "<PRIMTYPE ~a>" (pname (cadr pattern)))]
+    [(or) (format "<OR ~a>" (join (cdr pattern)))]
+    [(specialty) (format "<~a ~a>" (pname (cadr pattern))
+                         (render-normalized-decl (caddr pattern)))]
+    [(all) (string-join (map render-normalized-decl (cdr pattern)) " & ")]
+    [(structure) (render-structure (pname (cadr pattern)) (caddr pattern) (cadddr pattern))]
+    [(structure-primtype)
+     (render-structure (format "<PRIMTYPE ~a>" (pname (cadr pattern)))
+                       (caddr pattern) (cadddr pattern))]
+    [else (error 'mdl-decl "unknown normalized declaration pattern")]))
 
 ;; The LVAL of an ATOM is its innermost binding in the dynamic frame chain,
 ;; ending in the session's top-level frame. ROOT OBLIST is the one ATOM with
@@ -673,7 +745,7 @@
     (or (for/or ([frame (in-list frames)])
           (and (hash-has-key? frame atom) frame))
         (last frames)))
-  (check-frame-binding! target atom value)
+  (check-frame-binding! target atom value 'set)
   (hash-set! target atom value)
   value)
 
@@ -699,12 +771,12 @@
 (define (mdl-bind-function-formals fn specs args activation-frame thunk [decl #f])
   (define frame (make-hasheq))
   (when decl (hash-set! local-declarations frame decl))
-  (define (bind! atom value)
+  (define (bind! atom value kind)
     (require-atom 'mdl-bind-function-formals atom)
     (when (hash-has-key? frame atom)
       (error 'mdl-bind-function-formals
              "BAD-ARGUMENT-LIST: duplicate formal argument"))
-    (check-frame-binding! frame atom value)
+    (check-frame-binding! frame atom value kind)
     (hash-set! frame atom value))
   (define (spec-value spec)
     (define default (third spec))
@@ -717,13 +789,13 @@
          (when (null? remaining)
            (error 'mdl-bind-function-formals
                   "TOO-FEW-ARGUMENTS-SUPPLIED for ~a" (mdl-atom-pname fn)))
-         (bind! (second spec) (car remaining))
+         (bind! (second spec) (car remaining) 'argument)
          (set! remaining (cdr remaining))]
         [(optional)
          (if (null? remaining)
-             (bind! (second spec) (spec-value spec))
+             (bind! (second spec) (spec-value spec) 'optional)
              (begin
-               (bind! (second spec) (car remaining))
+               (bind! (second spec) (car remaining) 'optional)
                (set! remaining (cdr remaining))))]
         [(rest)
          (define kind (second spec))
@@ -732,14 +804,15 @@
                     (if (eq? kind 'tuple) (mdl-tuple-value '()) '())
                     (if (eq? kind 'tuple)
                         (mdl-tuple-value (apply mdl-list remaining))
-                        (apply mdl-list remaining))))
+                        (apply mdl-list remaining)))
+                'rest)
          (set! remaining '())]
-        [(aux) (bind! (second spec) (spec-value spec))]
+        [(aux) (bind! (second spec) (spec-value spec) 'aux)]
         [(name)
          (unless activation-frame
            (error 'mdl-bind-function-formals
                   "NAME formal without a function activation"))
-         (bind! (second spec) activation-frame)]
+         (bind! (second spec) activation-frame 'name)]
         [else (error 'mdl-bind-function-formals
                      "unknown formal specification ~a" spec)]))
     (unless (null? remaining)
@@ -787,7 +860,7 @@
       ;; are visible, while this initializer may still see an outer binding.
       (define initializer (cdr entry))
       (define value (if initializer (initializer) unassigned))
-      (check-frame-binding! frame atom value)
+      (check-frame-binding! frame atom value 'prog-aux)
       (hash-set! frame atom value))
     (thunk)))
 
@@ -1387,11 +1460,11 @@
                         (cons frame (current-mdl-activations))])
           (define locals (make-hasheq))
           (when decl (hash-set! local-declarations locals decl))
-          (define (bind! atom value)
+          (define (bind! atom value kind)
             (when (hash-has-key? locals atom)
               (error 'mdl-bind-interpreted
                      "BAD-ARGUMENT-LIST: duplicate formal argument"))
-            (check-frame-binding! locals atom value)
+            (check-frame-binding! locals atom value kind)
             (hash-set! locals atom value))
           (define remaining raw-list)
           (parameterize ([current-mdl-locals (cons locals (current-mdl-locals))])
@@ -1405,14 +1478,15 @@
               (case kind
                 [(required quoted)
                  (when (null? remaining) (too-few "Too few args in function call"))
-                 (bind! name (arg-value (car remaining) (not (eq? kind 'quoted))))
+                 (bind! name (arg-value (car remaining) (not (eq? kind 'quoted))) 'argument)
                  (set! remaining (cdr remaining))]
                 [(optional quoted-optional)
                  (if (null? remaining)
-                     (bind! name (if default (mdl-eval default) unassigned))
+                     (bind! name (if default (mdl-eval default) unassigned) 'optional)
                      (begin
                        (bind! name (arg-value (car remaining)
-                                              (not (eq? kind 'quoted-optional))))
+                                              (not (eq? kind 'quoted-optional)))
+                              'optional)
                        (set! remaining (cdr remaining))))]
                 [(rest-tuple rest-args)
                  (bind! name (if (null? remaining)
@@ -1427,10 +1501,11 @@
                                                           (mdl-eval (cdr entry))
                                                           (cdr entry)))
                                                     remaining))))
-                                     (apply mdl-list (map cdr remaining)))))
+                                     (apply mdl-list (map cdr remaining))))
+                        'rest)
                  (set! remaining '())]
-                [(aux) (bind! name (if default (mdl-eval default) unassigned))]
-                [(name) (bind! name frame)]
+                [(aux) (bind! name (if default (mdl-eval default) unassigned) 'aux)]
+                [(name) (bind! name frame 'name)]
                 [else (error 'mdl-bind-interpreted "unknown formal specification")]))
             (unless (null? remaining)
               (error 'mdl-bind-interpreted
@@ -1844,7 +1919,14 @@
                             ;; session's file CHANNEL records, newest first.
                             ;; Host-only; never reachable from MDL.
                             read-only-files read-only-reader
-                            [file-channels #:mutable]))
+                            [file-channels #:mutable]
+                            ;; M4 #196 (diagnostic only, SEMANTICS "Diagnostic-
+                            ;; only: attached-declaration violation recorder"):
+                            ;; a host-only, test-only procedure or #f (the
+                            ;; default; production hosts never pass one). Set
+                            ;; once at construction, read only by
+                            ;; check-declared!; never reachable from MDL.
+                            decl-violation-recorder))
 
 (define mdl-atom? atom-value?)
 (define mdl-atom-pname atom-value-pname)
@@ -1854,9 +1936,15 @@
                              #:time-zone [time-zone 'local]
                              #:input-observer [input-observer #f]
                              #:read-only-files [read-only-files '()]
-                             #:read-only-reader [read-only-reader #f])
+                             #:read-only-reader [read-only-reader #f]
+                             #:decl-violation-recorder [decl-violation-recorder #f])
   (unless (mdl-clock? clock)
     (raise-argument-error 'make-mdl-atom-space "mdl-clock?" clock))
+  (unless (or (not decl-violation-recorder)
+              (and (procedure? decl-violation-recorder)
+                   (procedure-arity-includes? decl-violation-recorder 1)))
+    (raise-argument-error 'make-mdl-atom-space "(or/c #f (procedure-arity-includes/c 1))"
+                          decl-violation-recorder))
   (check-read-only-files! 'make-mdl-atom-space read-only-files read-only-reader)
   (unless (or (not input-observer)
               (and (procedure? input-observer)
@@ -1938,7 +2026,7 @@
               ;; (seed-root! fails if either is missing from the inventory).
               (seed-root! "INCHAN") (seed-root! "OUTCHAN") (make-weak-hasheq)
               '() clock time-zone '() '() input-observer 0
-              read-only-files read-only-reader '()))
+              read-only-files read-only-reader '() decl-violation-recorder))
 
 ;; ROOT names that are not built-in TYPEs or builtin-table SUBRs, each in
 ;; pinned Confusion's startup ROOT (review/R3R4-oblist-reference.json
@@ -3295,13 +3383,16 @@
                           #:time-zone [time-zone 'local]
                           #:input-observer [input-observer #f]
                           #:read-only-files [read-only-files '()]
-                          #:read-only-reader [read-only-reader #f])
+                          #:read-only-reader [read-only-reader #f]
+                          #:decl-violation-recorder [decl-violation-recorder #f])
   (define context (mdl-context (make-hasheq) (list (make-hasheq))
                                (make-mdl-atom-space #:clock clock
                                                     #:time-zone time-zone
                                                     #:input-observer input-observer
                                                     #:read-only-files read-only-files
-                                                    #:read-only-reader read-only-reader)))
+                                                    #:read-only-reader read-only-reader
+                                                    #:decl-violation-recorder
+                                                    decl-violation-recorder)))
   (call-with-mdl-context
    context
    (lambda ()

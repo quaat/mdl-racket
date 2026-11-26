@@ -90,6 +90,12 @@
 ;; READSTRING ('enter at each call's entry, 'complete with the raw characters
 ;; the call consumed); the replay persistence host uses it. MDL code cannot
 ;; reach it. File READSTRING (below) never calls it.
+;; decl-violation-recorder (M4 #196; diagnostic only, SEMANTICS "Diagnostic-
+;; only: attached-declaration violation recorder"): #f (the default) or a
+;; host-only, test-only procedure of one argument. When given, an attached
+;; #DECL check that would fail calls it with a description of the violation
+;; and proceeds; when absent every attached check is strict. run-zork, the
+;; command line and the replay host never pass it; MDL code cannot reach it.
 ;; read-only-files (M4 S10, #171; ADR-0055 amendment): the host's read-only
 ;; allowlist, a list of mdl-read-only-file entries (default: none, so OPEN
 ;; "READ" reads nothing). Each names directory/name1.name2 inside SOURCE-ROOT;
@@ -99,7 +105,8 @@
                           #:clock [clock real-mdl-clock]
                           #:time-zone [time-zone 'local]
                           #:input-observer [input-observer #f]
-                          #:read-only-files [read-only-files '()])
+                          #:read-only-files [read-only-files '()]
+                          #:decl-violation-recorder [decl-violation-recorder #f])
   (define root (canonical-path (path->complete-path source-root)))
   (unless (directory-exists? root)
     (raise-argument-error 'make-mdl-session "existing source-root directory" source-root))
@@ -123,6 +130,7 @@
                                     #:clock clock #:time-zone time-zone
                                     #:input-observer input-observer
                                     #:read-only-files read-only-files
+                                    #:decl-violation-recorder decl-violation-recorder
                                     #:read-only-reader
                                     (lambda (entry) (read-only-file-bytes root entry))))
   (define session
