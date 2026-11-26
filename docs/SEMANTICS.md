@@ -2393,7 +2393,9 @@ existing value and its SETG refuses to change an assigned MANIFEST
 (§11.2.7 "PRINT binds OUTCHAN") is not modelled. Output is flushed only
 before each READSTRING and when the host loop exits, not after every SUBR.
 Line-width and other slots (e.g. `<PUT ,OUTCHAN 13 80>`) are stored but not
-interpreted (no PRINC/PRIN1 line breaking, ADR-0050). Tests:
+interpreted (no PRINC/PRIN1 line breaking, ADR-0050). *(Superseded for
+elements 13 and 14 by "M4 #173" below: output SUBRs now track the column
+and break lines at the width.)* Tests:
 `tests/channel_port_test.rkt`, `tests/channel_root_identity_test.rkt`,
 `tests/printstring_channel_test.rkt`, `tests/terminal_channel_test.rkt`.
 
@@ -2707,8 +2709,11 @@ forged, foreign or shifted (BACK/REST) view is refused.
   the existing UNPARSE ATOM rules (safe PNAME characters, reachable, no
   trailer), else a strict error.
 - Every other TYPE (ATOM for PRINC, STRING/CHARACTER/LIST/FALSE for PRIN1,
-  typed values, …) is a strict error.
-- **No line breaking.** The manual and Confusion insert a newline when the
+  typed values, …) is a strict error. *(Amended by "M4 #173": PRIN1 now
+  also prints STRING, CHARACTER, LIST and FALSE.)*
+- *(Superseded by "M4 #173": PRINC, PRIN1 and PRINT now break lines at the
+  CHANNEL width and track the column in element 14.)*
+  **No line breaking.** The manual and Confusion insert a newline when the
   column is positive and column + length exceeds the CHANNEL line width
   (slot 13, 0 = unlimited). This runtime ignores slot 13 and inserts
   nothing; RDCOM sets the width to 1000 (`<PUT .OUTCHAN 13 1000>`), which
@@ -4070,3 +4075,142 @@ the host lookup and the reader cannot disagree about which ATOM a name
 denotes. Tests: `tests/binding_atom_string_test.rkt`,
 `tests/declaration_test.rkt`; evidence
 [I199-STRING-ATOM.md](evidence/M4/I199-STRING-ATOM.md).
+
+## M4 #173: PRINT, PRIN1 of structures, and CHANNEL line width
+
+Specification written before implementation (maintainer decision #173,
+2026-11-26). Sources: manual chapter 11 (§11.1.2 output and separators,
+§11.1.2.1 PRINT, §11.1.2.2 PRIN1, §11.1.2.3 PRINC, §11.2.7 OUTCHAN,
+§11.2.8.1 output CHANNEL elements 13 and 14). Pinned Confusion `6df359f6…`
+(upstream `bdcd4a67`), 44 cases in
+[`i173-print-reference.json`](evidence/M4/i173-print-reference.json)
+(probe tool, CR/LF canonicalised) and
+[`i173-print-reference-raw.json`](evidence/M4/i173-print-reference-raw.json)
+(exact stdout bytes); record [I173-PRINT.md](evidence/M4/I173-PRINT.md).
+Game use: HANDLE (77rooms.mud:215-251) sets `<PUT ,OUTCHAN 13 80>` and
+PRINTs each ERROR argument with `<MAPF <> <FUNCTION (X) <PRINT .X>> .ZORK>`.
+
+**PRINT** `<PRINT object [channel]>` (new SUBR).
+- It is an ordinary SUBR: the normal call path evaluates each argument
+  once (compiled, `EVAL` of a FORM, `APPLY` and `MAPF` alike).
+- One or two arguments, otherwise `PRINT: PRINT takes an object and an
+  optional CHANNEL (ADR-0050)` (Confusion: `Too few arguments to PRINT` /
+  `Too many arguments to PRINT`). The CHANNEL defaults to the LVAL of
+  OUTCHAN and is validated exactly like PRINC/PRIN1: a non-CHANNEL fails
+  (`attempt to write to non-channel`; Confusion `Error: Attempt to write to
+  non-channel`), then a CHANNEL not open in this session, then a non-PRINT
+  CHANNEL (`PRINT requires an output channel`; Confusion `Channel for PRINT
+  must be output channel`).
+- The object's text is the PRIN1 text below. It is computed and validated
+  completely before anything is written: an object PRIN1 refuses writes
+  nothing, not even the leading newline.
+- Output, in order (manual §11.1.2.1): the line separator (a line feed, the
+  same byte TERPRI and CRLF write on this runtime's terminal ports and the
+  byte Confusion writes, `print-fix` raw `"\n42 "`); the PRIN1 text, laid
+  out from column 0 with the line-width rule below; one space.
+- Returns the object itself (`==?`). The object is never mutated; only the
+  CHANNEL's element 14 (column) changes.
+
+**PRIN1 text (extended by #173).** PRIN1 and PRINT write the UNPARSE
+representation, exact against Confusion for:
+- FIX in decimal; ATOM by the existing UNPARSE rules (safe PNAME, reachable
+  on the current OBLIST path, no trailer); an ATOM with an empty PNAME that
+  is reachable prints nothing, now at any depth (`(A ,NULL B)` prints
+  `(A  B)`, case `width-empty-pname-atom`);
+- STRING in double quotes with `\"` and `\\` escapes (`"a\"b\\c"`);
+  CHARACTER as `!\c` (`!\A`, `!\"`);
+- LIST as `(e1 e2 …)`, `()` when empty, recursively;
+- FALSE as `#FALSE ()` or `#FALSE (e1 …)`.
+Strict errors (Confusion prints them; this runtime has no faithful printer
+yet): FORM (`<FOO 1>`), VECTOR (`[1 2]`), UVECTOR, TUPLE, FLOAT, every
+CHTYPE'd or NEWTYPE value (`#ZZ (1 2)`, `#ZS "ab"`), SUBR, FUNCTION and every
+other TYPE; ATOMs that need `\` escapes or an OBLIST trailer; STRING or
+CHARACTER containing a control character or a character above 127. (Inside
+a STRING Confusion writes TAB, LF, VT, FF and CR raw and every other
+control character as `^X`, e.g. ASCII 1 as `^A`, ESC as `^[`: case
+`prin1-string-control-chars`; DEL, observed once outside the committed
+cases, comes out as `^` followed by byte 0xBF); a self-referencing LIST or FALSE (a cyclic tail, or an element
+that contains an enclosing LIST/FALSE), where Confusion would not terminate.
+The PRINC TYPE set is unchanged (STRING, CHARACTER, FIX).
+
+**Line width and column (§11.1.2, §11.2.8.1; replaces "No line breaking"
+of the M3 interactive terminal section).** Element 13 of an output CHANNEL
+is the line width W, element 14 the current column C. Each output SUBR reads
+both from the CHANNEL's slots on every call, so `<PUT .OUTCHAN 13 n>` and
+`<PUT .OUTCHAN 14 n>` take effect at the next output (manual §11.2.8), and C
+is readable (`<PRINT FOO>` then `<14 .OUTCHAN>` → 4). Both must be FIXes
+≥ 0; anything else is a strict error before output (Confusion reads the raw
+word; not modelled). The rule below reproduces every native case in
+`i173-print-cases.json`; it is inferred from those cases, not taken from
+the manual, and the classification further down says which parts the
+manual supports:
+1. *Column.* When W ≠ 0, every character written by PRINTSTRING, PRINC,
+   PRIN1 or PRINT adds one to C, except that a carriage return sets C to 0;
+   a line feed inside a STRING counts as one column (`width-printstring-lf-counted`:
+   `"abcdefg<LF>xy"` leaves C = 10). The newline written by TERPRI, CRLF or
+   PRINT's first step sets C to 0. When W = 0 nothing changes C: it is
+   neither advanced nor reset (`width-zero-no-tracking`). IMAGE does not
+   move C (`width-image-no-advance`: `<PRINC "ab"> <IMAGE 65>` leaves
+   C = 2). A control character other than TAB, LF, VT, FF and CR counts 2
+   (Confusion prints it as `^X`: `width-printstring-control-counts-2`,
+   `"ab" <ASCII 1>` leaves C = 4); only PRINTSTRING can write one here.
+2. *Tokens.* PRINC writes its object as one token. PRIN1/PRINT write: FIX,
+   ATOM, CHARACTER, a whole STRING (quotes included) and `()` as one token
+   each; a non-empty LIST as the token `(`, its elements (each after a
+   separating space, except the first) and the token `)`; a FALSE as the
+   token `#FALSE` followed by its LIST part as a separated element.
+3. *Break.* Before a token of n characters (n + 1 when a separating space
+   precedes it): if W ≠ 0 and C > 0 and n (+1) > W − C, a newline is written
+   instead of the separating space and C becomes 0. Otherwise the space (if
+   any) and the token are written. PRINTSTRING never breaks.
+Consequences checked natively: at width 10 `<PRINT (A B C D E F G H I J
+K)>` writes `\n(A B C D E\nF G H I J\nK) `; `(A B C D E)` breaks before the
+closing `)`; a scalar PRINT never breaks (it starts at column 0); `<PRINC
+"abcdefgh">` then `<PRIN1 "abc">` breaks before `"abc"`; a token that
+exactly fills the line does not break (`width-prin1-exact-fit`).
+
+**Initial width (decision in this slice, flagged for review).** A terminal
+PRINT CHANNEL now starts with W = 0 (unlimited), as pinned Confusion's
+(`default-width-and-column`: `<13 .OUTCHAN>` → 0; M3 `channel-slots`
+evidence). It was 80 here, a value nothing interpreted. Keeping 80 would
+make every fresh session break lines that Confusion does not, including
+the game's startup before RDCOM sets 1000 (the game sets 13 only at
+77rooms.mud:217 and :607). The READ CHANNEL's element 13 is unchanged.
+
+**Classification of differences.**
+- *Conforming (manual and Confusion agree):* the PRINT sequence, return
+  value and single evaluation; the PRIN1 representations listed above;
+  breaking at separators "detected in advance" from CHANNEL elements.
+- *Reference-specific, followed (manual silent):* the token granularity
+  itself, in particular breaking after `(` before a LIST's first element
+  and before a closing `)`; breaking before the first token of a
+  PRINC/PRIN1 object at a positive column; PRINTSTRING advancing C (taken
+  from the native cases; not established from the manual); a control character counting 2 columns and IMAGE leaving C
+  alone (both observed natively); a line feed in a STRING counting as a
+  column (on ITS the source's CR would reset it); W = 0 freezing C; the
+  initial W = 0; LF-only newline (existing Unix terminal normalisation, M3
+  CRLF section).
+- *Intentional deviations:* error texts and strict Racket errors where
+  Confusion prints on stderr and returns to level 1; strict errors for the
+  TYPEs above that Confusion prints; non-FIX or negative elements 13/14 are
+  strict errors; output is all-or-nothing per call; PRINT does not bind
+  OUTCHAN for the call (§11.2.7, existing deviation; no PRINTTYPE exists to
+  observe it); PRINTSTRING still writes control characters other than
+  TAB, LF, VT, FF and CR as the raw byte (pre-existing behaviour, never
+  natively evidenced before) where Confusion writes `^X`
+  (`printstring-control-chars`), although they count 2 columns as in
+  Confusion. Not on any game path; disposition tracked in #206, not
+  changed in this slice.
+- *Unresolved (recorded, not decided):* whether historical ITS MDL breaks
+  before a closing bracket or before a top-level object at a positive
+  column; the ITS terminal's initial width.
+
+**Native ERROR handling (input for the HANDLE slice, not implemented).**
+Pinned Confusion's HANDLER/EVENT are stubs (`T`), so an installed ERROR
+handler never runs: `<ERROR FOO "BAR">` prints `\n *ERROR* \n FOO \n "BAR" `
+(each item PRINTed) and enters `LISTENING-AT-LEVEL 2` (case
+`error-handler-native`). A native comparison of the game's HANDLE path
+therefore cannot be obtained by signalling an ERROR in the pinned build.
+
+Tests: `tests/print_test.rkt` (differential against the raw reference;
+48 native cases), `tests/prin1_test.rkt`, `tests/princ_test.rkt`.

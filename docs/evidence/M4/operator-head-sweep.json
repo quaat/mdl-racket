@@ -165,6 +165,7 @@
    "PRIMTYPE",
    "PRIN1",
    "PRINC",
+   "PRINT",
    "PRINTSTRING",
    "PUT",
    "PUTBITS",
@@ -249,10 +250,10 @@
  "summary": {
   "distinct_operator_names": 380,
   "by_class": {
-   "builtin": 122,
+   "builtin": 123,
    "game": 234,
    "local": 0,
-   "missing": 19,
+   "missing": 18,
    "missing-not-live": 5
   },
   "sites": 9183,
@@ -603,50 +604,6 @@
      "col": 19,
      "kind": "head",
      "function": "SP",
-     "context": [],
-     "local_formal": false
-    }
-   ]
-  },
-  {
-   "name": "PRINT",
-   "class": "missing",
-   "in_confusion_root": true,
-   "live_site_count": 4,
-   "sites": [
-    {
-     "file": "81prim.mud",
-     "line": 54,
-     "col": 43,
-     "kind": "head",
-     "function": "NEWSTRUC",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "81tell-repl.mud",
-     "line": 113,
-     "col": 11,
-     "kind": "head",
-     "function": "STACKDUMP",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "81tell-repl.mud",
-     "line": 114,
-     "col": 11,
-     "kind": "head",
-     "function": "STACKDUMP",
-     "context": [],
-     "local_formal": false
-    },
-    {
-     "file": "77rooms.mud",
-     "line": 251,
-     "col": 47,
-     "kind": "head",
-     "function": "HANDLE",
      "context": [],
      "local_formal": false
     }
@@ -3719,6 +3676,7 @@
   "PRIMTYPE",
   "PRIN1",
   "PRINC",
+  "PRINT",
   "PRINTSTRING",
   "PROG",
   "PUT",

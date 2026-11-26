@@ -1421,8 +1421,23 @@ loop").
    (default: the LVAL of OUTCHAN) and returns its argument. **PRIN1** writes
    a FIX, or an ATOM printable without trailers, the same way. Control
    characters other than CR and LF, and every other TYPE, are strict errors.
-   **No line breaking** is performed (deviation: manual and Confusion break
-   lines at the CHANNEL width; RDCOM sets the width to 1000).
+   ~~**No line breaking** is performed (deviation: manual and Confusion break
+   lines at the CHANNEL width; RDCOM sets the width to 1000).~~
+   **Amended 2026-11-26 (#173, maintainer direction "implement PRINT
+   according to the historical MDL manual"; ADR-0064):** (a) PRINT is a
+   SUBR (manual §11.1.2.1); PRIN1 and PRINT also write STRING, CHARACTER,
+   LIST and FALSE (the other TYPEs Confusion prints stay strict errors).
+   (b) Line breaking is implemented: CHANNEL element 13 is the line width,
+   element 14 the column, read on every call and updated by PRINTSTRING,
+   PRINC, PRIN1, PRINT, TERPRI and CRLF; the break rule is the one
+   reproducing the 48 native cases (SEMANTICS "M4 #173"; parts of it are
+   reference-specific and classified there). (c) **Initial width 0:** a
+   terminal PRINT CHANNEL now starts with element 13 = 0 (no breaking), as
+   pinned Confusion's (`default-width-and-column`), not 80. With 80, every
+   fresh session would break lines Confusion does not, including the
+   game's output before RDCOM sets 1000 (77rooms.mud:607); HANDLE sets 80
+   itself (77rooms.mud:217). The READ CHANNEL's element 13 is unchanged.
+   Evidence: `evidence/M4/I173-PRINT.md`.
 3. **READSTRING** `<READSTRING buffer channel [stop-string]>` reads the
    session input port into a mutable STRING view exactly as RDCOM and YES/NO
    use it: count returned, stop character consumed and not stored, full

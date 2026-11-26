@@ -50,11 +50,18 @@
 (check-equal? (pname (value-of "<TYPE <PRINC !\\.>>")) "CHARACTER")
 (check-equal? (value-of "<PRINC 42>") 42)
 
-;; --- no line breaking (ADR-0050 deviation) --------------------------------
-;; Confusion breaks when column + length exceeds the width (slot 13); this
-;; runtime never inserts a newline, whatever the width.
+;; --- line breaking (M4 #173, superseding the ADR-0050 deviation) -----------
+;; As Confusion: when the width (slot 13) is nonzero and the column (slot 14)
+;; is positive, an object that does not fit starts a new line
+;; (primitives-reference princ-linewidth; i173 width-* cases).
 (check-equal? (written "<PUT ,OUTCHAN 13 10> <PRINC \"aaaaaaaa\"> <PRINC \"bbbbbbbb\"> <PRINC 12345678901>")
-              "aaaaaaaabbbbbbbb12345678901")
+              "aaaaaaaa\nbbbbbbbb\n12345678901")
+(check-equal? (written "<PUT ,OUTCHAN 13 10> <PRINC \"aaaa\"> <PRINC \"bbbbbbbb\"> <PRINC \"cc\"> <PRINTSTRING \"dddddddddd\"> <PRINC \"ee\">")
+              "aaaa\nbbbbbbbbccdddddddddd\nee")
+;; At column 0 nothing breaks, however long; width 0 never breaks.
+(check-equal? (written "<PUT ,OUTCHAN 13 5> <PRINC \"abcdefghij\">") "abcdefghij")
+(check-equal? (written "<PUT ,OUTCHAN 13 0> <PRINC \"aaaaaaaa\"> <PRINC \"bbbbbbbb\">")
+              "aaaaaaaabbbbbbbb")
 (check-equal? (written "<PUT ,OUTCHAN 13 1000> <PRINC \">\">") ">")
 
 ;; --- strict errors -------------------------------------------------------------
