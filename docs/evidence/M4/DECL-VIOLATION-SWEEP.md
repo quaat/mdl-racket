@@ -252,3 +252,9 @@ scenarios). Without it: every gated scenario PASS, the MSWITCH probe equal to
 native T1, the SPHERE direct call with the same output. The JSON above is the
 re-run's report (the original run's figures are in the tables above). Record:
 [S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md).
+
+**Re-run with thief-fight (combat.thief slice, 2026-11-26).**
+- `make m4-decl-sweep` exit 0 on `614be36`, with 28 units, none crashed.
+- `thief-fight` records 0 violations and PASSes with and without the recorder.
+- The distinct sites are still the same 4.
+- `decl-violation-sweep.json` is regenerated.

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage test-m4-help-info test-m4-grue-resurrection test-m4-grue-refusal test-m4-troll-death test-m4-treasure-deposit test-m4-thief-robbery test-m4-cure-recovery test-m4-lamp-burnout test-m4-match-clock test-m4-boat-river test-m4-dam-sluice test-m4-maint-leak test-m4-coal-machine test-m4-gas-room test-m4-balloon-ledge m4-decl-sweep m4-scenarios-per-prefix m4-check play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
+.PHONY: doctor sources install test test-racket test-python test-historical test-m2-g3 test-m3-andq test-m3-historical-gc test-m3-start-back test-m3-saveit test-m3-interactive test-m3-clock-seed test-m3-session test-m3-launcher test-m4-house-cellar test-m4-mailbox-drop test-m4-orphan-prompt test-m4-top-parser test-m4-sword-glow test-m4-troll-combat test-m4-parser-ambiguity test-m4-replay-persistence test-m4-cyclops-room test-m4-mirror-bat test-m4-strange-passage test-m4-help-info test-m4-grue-resurrection test-m4-grue-refusal test-m4-troll-death test-m4-treasure-deposit test-m4-thief-robbery test-m4-cure-recovery test-m4-lamp-burnout test-m4-match-clock test-m4-boat-river test-m4-dam-sluice test-m4-maint-leak test-m4-coal-machine test-m4-gas-room test-m4-balloon-ledge test-m4-thief-fight m4-decl-sweep m4-scenarios-per-prefix m4-check play m2-check m3-source-progress check-source reference-build reference-capture reference-probe compare reference-capture-boot test-boot-reference m3-check m3-native-parity test-m3-bang
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 RACKET ?= racket
@@ -262,6 +262,16 @@ test-m4-gas-room: sources
 test-m4-balloon-ledge: sources
 	@racket tests/historical_balloon_ledge_test.rkt
 
+# M4 combat.thief (epic #163): the "thief" checkpoint profile of
+# scripts/probe_death_scenario_reference.py (the timers fields plus the
+# thief's strength and fight bits, the stiletto, the chalice, HACTION).
+# thief-fight: strange-passage's way to the Cyclops Room and `odysseus`, `up`
+# into the Treasure Room (TREASURE-ROOM brings the thief, who attacks at
+# once), two `kill thief with sword`: the thief is wounded twice, then knocks
+# the hero out and kills him; patched in the forest.
+test-m4-thief-fight: sources
+	@racket tests/historical_thief_fight_test.rkt
+
 # M4 #196 (maintainer decision 2026-11-26, "sweep first"): DIAGNOSTIC ONLY,
 # not part of `make test`, `make m4-check` or any scenario target. Runs every
 # gated M4 scenario (balloon-ledge included since #196) and the targeted
@@ -275,7 +285,7 @@ test-m4-balloon-ledge: sources
 m4-decl-sweep: sources
 	@racket tests/decl_violation_sweep.rkt $(M4_DECL_SWEEP_ARGS)
 
-# The twenty-five M4 native-parity scenarios in the per-prefix reboot mode (one boot
+# The twenty-six M4 native-parity scenarios in the per-prefix reboot mode (one boot
 # per command prefix; the pre-runner protocol, slower). Not on CI's default
 # path; the equivalence evidence is docs/evidence/M4/SINGLE-RUN-RUNNER.md.
 M4_SCENARIO_TESTS := tests/historical_house_cellar_test.rkt \
@@ -290,7 +300,8 @@ M4_SCENARIO_TESTS := tests/historical_house_cellar_test.rkt \
 	tests/historical_lamp_burnout_test.rkt tests/historical_match_clock_test.rkt \
 	tests/historical_boat_river_test.rkt tests/historical_dam_sluice_test.rkt \
 	tests/historical_maint_leak_test.rkt tests/historical_coal_machine_test.rkt \
-	tests/historical_gas_room_test.rkt tests/historical_balloon_ledge_test.rkt
+	tests/historical_gas_room_test.rkt tests/historical_balloon_ledge_test.rkt \
+	tests/historical_thief_fight_test.rkt
 m4-scenarios-per-prefix: sources
 	@for t in $(M4_SCENARIO_TESTS); do \
 	  echo "== M4_SCENARIO_MODE=per-prefix racket $$t"; \

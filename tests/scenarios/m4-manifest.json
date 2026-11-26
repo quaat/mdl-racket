@@ -233,6 +233,15 @@
       "runner_test": "tests/historical_balloon_ledge_test.rkt",
       "issue": "#196 (INV-12 resolved: attached declarations are not enforced, the attached-declaration ADR amendment); epic #163 Phase 3c (objects beyond the house: the balloon)",
       "covers": "troll-combat's sixteen commands; the attic's rope, the Dam Lobby's guidebook and matchbook; the rope tied to the Dome Room's railing, the torch thrown at the glacier (GLACIER-FLAG); the Volcano Bottom: the receptacle opened, the guidebook put in, the basket boarded (BALLOON's READ-OUT with PRSO #FALSE ()), the guidebook burned (BINF GUIDE; BINT and BRNIN queued), the balloon risen to VAIR1 and VAIR2, landed on the Narrow Ledge, left; the wire tied to the hook (WIRE-FUNCTION, BTIE, BINT disabled) and untied; the balloon boarded again, risen off the ledge, descending after `close receptacle`, landed at the Volcano Bottom; `disembark`, `score` (54)"
+    },
+    {
+      "id": "S17",
+      "name": "thief-fight",
+      "target": "test-m4-thief-fight",
+      "scenario_file": "tests/scenarios/thief-fight.json",
+      "runner_test": "tests/historical_thief_fight_test.rkt",
+      "issue": "epic #163 (combat.thief: the thief fights and is fought)",
+      "covers": "strange-passage's way to the Cyclops Room and `odysseus`; `up` into the Treasure Room: TREASURE-ROOM brings the thief (FIGHTBIT, the chalice's TAKEBIT cleared) and the FIGHTING demon has him attack at once; `kill thief with sword` twice: the hero wounds the thief twice (OCAPAC 4 -> 3 -> 2), the thief wounds the hero (ASTRENGTH -1, CURIN), then knocks him out and kills him; JIGS-UP's death question at READSTRING entry 28 answered `y` (patched in the forest); look, inventory, diagnose, score (50). The thief is not killed"
     }
   ],
   "persistence": [
