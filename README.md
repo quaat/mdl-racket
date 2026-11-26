@@ -127,6 +127,7 @@ m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 | The Maintenance Room leak (S14, same branch) | `test-m4-maint-leak` | the clock event MNTIN, the putty |
 | The coal-mine machine and basket (Phase 3c, branch `feat/m4-puzzles`) | `test-m4-coal-machine` | the basket lowered and raised, the empty-handed passage, coal into diamond |
 | The gas room (Phase 3c, same branch) | `test-m4-gas-room` | in with the lamp only, then with burning candles: the explosion |
+| The thief fights (combat.thief, branch `feat/m4-thief-fight`) | `test-m4-thief-fight` | the Treasure Room: both sides strike; the thief kills the hero |
 
 The three Phase 2 death scenarios ([record](docs/evidence/M4/DEATH-BRANCHES.md))
 use two opt-in runner options (ADR-0062 amendment): the death question as the
@@ -138,7 +139,7 @@ use a wider read-only checkpoint (lamp and clock events, painting, trophy
 case, thief) and one opt-in runner option that keeps the thief's room out of
 the end-of-input classification only (ADR-0062 amendment). They cover the treasure deposit, the cure
 clock and the lamp burn-out; the thief is seen stealing but not fighting, so
-the thief branch stays uncovered. On that branch `make m4-check` exits 0:
+the thief branch stayed uncovered there (covered since thief-fight, below). On that branch `make m4-check` exits 0:
 SCENARIO_PARITY PASS for 18 scenarios, GAMEPLAY_RELIABILITY NOT YET with 17
 of 23 required branches covered. They are branch evidence until merged.
 
@@ -221,7 +222,22 @@ name where Confusion stops at least for `GASSIGNED?` (#199; tracked XFAIL in
 `tests/declaration_test.rkt`). Branch evidence until
 merged.
 
-`make m4-check` runs all twenty-five plus the persistence check; options
+**combat.thief (branch `feat/m4-thief-fight`, gate PASS, scenario-scoped;
+[record](docs/evidence/M4/THIEF-FIGHT.md)).** No runtime change, no seed
+search. One more gated scenario under the same clock and seed, `make
+test-m4-thief-fight` (33 commands): strange-passage's way past the cyclops,
+then `up` into the Treasure Room, whose room action brings the thief there
+whatever the seed. He attacks at once (a miss); `kill thief with sword`
+twice: the hero wounds him twice, he wounds the hero, then knocks him out
+and kills him; `y`, patched in the forest. It matches pinned Confusion at
+every turn in single-run and per-prefix modes (native reference captured
+twice, transcripts byte-identical). With thief-robbery (stealing) this
+covers the `combat.thief` branch; not exercised: the thief appearing by
+chance elsewhere, leaving a fight, being knocked out or killed (his booty),
+and the hero recovering from unconsciousness. @@M4CHECK@@ Branch evidence
+until merged.
+
+`make m4-check` runs all twenty-six plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:
