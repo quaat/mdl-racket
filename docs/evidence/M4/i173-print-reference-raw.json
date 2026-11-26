@@ -259,6 +259,12 @@
    "exit_code": 0,
    "result_bytes": "T\n\n *ERROR* \n FOO \n \"BAR\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n\n7 7\n",
    "stderr_bytes": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n"
+  },
+  {
+   "name": "print-type-subr",
+   "exit_code": 0,
+   "result_bytes": "SUBR\nSUBR\n",
+   "stderr_bytes": ""
   }
  ]
 }

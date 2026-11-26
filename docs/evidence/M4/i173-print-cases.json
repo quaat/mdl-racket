@@ -173,6 +173,10 @@
   {
    "name": "error-handler-native",
    "expression": "<HANDLER <OR <GET ERROR!-INTERRUPTS INTERRUPT> <EVENT \"ERROR\" 8>> <FUNCTION (FRM \"TUPLE\" Z) <MAPF <> <FUNCTION (X) <PRINT .X>> .Z> <ERRET T .FRM>>>\n<ERROR FOO \"BAR\">\n<PRINT 7>"
+  },
+  {
+   "name": "print-type-subr",
+   "expression": "<TYPE ,PRINT>\n<TYPE? ,PRINT SUBR>"
   }
  ]
 }

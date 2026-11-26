@@ -36,6 +36,19 @@
 (check-equal? (hash-ref probe 'interpreter_sha256_after)
               (hash-ref probe 'interpreter_sha256_before))
 
+;; Built-ins added after this probe was recorded, each with the first line its
+;; own native capture printed for <TYPE ,name> (same pinned interpreter).
+(define-runtime-path i173-file "../docs/evidence/M4/i173-print-reference.json")
+(define (later-type-line file case-name)
+  (define data (call-with-input-file file read-json))
+  (check-equal? (hash-ref data 'interpreter_sha256)
+                (hash-ref probe 'interpreter_sha256_before))
+  (define c (findf (lambda (c) (equal? (hash-ref c 'name) case-name)) (hash-ref data 'cases)))
+  (check-true (hash-ref c 'ok) case-name)
+  (car (string-split (hash-ref c 'result_output) "\n")))
+(define later-builtins
+  (list (cons "PRINT" (later-type-line i173-file "print-type-subr"))))
+
 ;; --- a fresh context per case; one value (or exn) per form ---------------------
 (define (eval-forms forms)
   (parameterize ([current-namespace ns])
@@ -193,12 +206,17 @@
   (check-equal? (length names) (length ref))
   (check-true (andmap (lambda (l) (equal? l "SUBR")) ref))
   ;; The probed names are exactly this runtime's built-ins (plus the loader's
-  ;; FLOAD): a built-in added later must get reference evidence too.
+  ;; FLOAD): a built-in added later must get reference evidence too, listed
+  ;; in later-builtins below with its own native <TYPE ,name> line.
   (define table-names
     (parameterize ([current-namespace ns])
       (eval '(hash-keys builtin-table) (module->namespace 'mdl/runtime/core))))
-  (check-equal? (sort (remove "FLOAD" names) string<?) (sort table-names string<?)
-                "probe builtin_names vs builtin-table keys")
+  (check-equal? (sort (append (remove "FLOAD" names) (map car later-builtins)) string<?)
+                (sort table-names string<?)
+                "probe builtin_names (+ later built-ins) vs builtin-table keys")
+  (for ([entry (in-list later-builtins)])
+    (check-false (member (car entry) names) (car entry))
+    (check-equal? (run (format "<TYPE ,~a>" (car entry))) (cdr entry) (car entry)))
   (for ([n names] [line ref] #:unless (equal? n "FLOAD"))
     (define v (run (format "<TYPE ,~a>" n)))
     (check-equal? v line n)))

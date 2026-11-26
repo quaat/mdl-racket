@@ -26,7 +26,8 @@
 <DEFINE R1 () <PRINC "1"> <SETG REP ,R2>>
 <DEFINE R2 () <PRINC "2">>
 <DEFINE SWITCHER () <SETG REP ,R1> 5>
-<DEFINE STRVAL () <SETG REP ,R2> "s">
+;; M4 #173: PRIN1 prints STRINGs now; a VECTOR is still refused.
+<DEFINE STRVAL () <SETG REP ,R2> [1]>
 MDL
                   port)
     (void)))
@@ -94,7 +95,7 @@ MDL
   (check-regexp-match #rx"^host-loop: the GVAL of REP is not an applicable" (exn-message failure)))
 ;; An entry value PRIN1 cannot print is a strict error before any pass.
 (let-values ([(failure output events s in) (run "STRVAL" "")])
-  (check-regexp-match #rx"^PRIN1: unsupported TYPE STRING" (exn-message failure))
+  (check-regexp-match #rx"^PRIN1: unsupported TYPE VECTOR" (exn-message failure))
   (check-equal? (map car events) '(entry-returned)))
 (let-values ([(failure output events s in) (run "NO-SUCH-ENTRY" "")])
   (check-regexp-match #rx"NO-SUCH-ENTRY" (exn-message failure))

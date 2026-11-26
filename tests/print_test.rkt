@@ -72,7 +72,7 @@
     "width-printstring-lf-counted" "width-princ-cr-resets"
     "width-terpri-crlf-reset" "width-list-of-strings" "width-nested-list"
     "width-false-breaks" "width-empty-list-token" "width-character-token"
-    "width-empty-pname-atom" "width-handle-80"))
+    "width-empty-pname-atom" "width-handle-80" "print-type-subr"))
 (for ([name (in-list supported)])
   (define row (hash-ref native name))
   ;; The native run itself was clean for every supported case.
@@ -118,8 +118,9 @@
   (check-equal? v 2)
   (check-equal? text "\n2 "))
 
-;; --- every call path: compiled, EVAL of a FORM, APPLY, MAPF (HANDLE's shape) ----
-(check-equal? (written "<EVAL <FORM PRINT 1>>") "\n1 ")
+;; --- every call path: compiled, interpreted FUNCTION body, APPLY, MAPF (HANDLE's shape) ----
+;; A FUNCTION literal's body is interpreted (mdl-eval of its FORMs).
+(check-equal? (written "<SET F <FUNCTION (X) <PRINT .X>>> <F 1>") "\n1 ")
 (check-equal? (written "<APPLY ,PRINT 2>") "\n2 ")
 (check-equal? (written "<MAPF <> <FUNCTION (X) <PRINT .X>> (FOO \"BAR\" 3)>")
               "\nFOO \n\"BAR\" \n3 ")
@@ -172,7 +173,7 @@
 (refused #rx"^PRINT: UNPARSE STRING: control character \\(code 27\\)"
          "<PRINT <STRING \"a\" <ASCII 27>>>")
 (refused #rx"^PRINT: UNPARSE CHARACTER: control character \\(code 9\\)" "<PRINT <ASCII 9>>")
-(refused #rx"^PRINT: non-ASCII character \\(code 233\\)" "<PRINT <STRING <ASCII 233>>>")
+(refused #rx"^PRINT: non-ASCII character \\(code 233\\)" "<PRINT \"a\u00e9\">")
 (refused #rx"^PRINT: UNPARSE ATOM: trailer notation" "<PRINT <ATOM \"BAR\">>")
 (refused #rx"^PRINT: .*empty-PNAME ATOM not reachable" "<PRINT (<ATOM \"\">)>")
 ;; Self-referencing structures (Confusion would not terminate).

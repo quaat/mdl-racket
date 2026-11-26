@@ -290,10 +290,10 @@
   (in-fresh-session
    (check-exn #rx"unassigned or non-applicable MDL operator PARSE"
               (lambda () (run "<PARSE \"FOO\">")))
-   ;; (PRINC was the example here until S7 implemented it; PRINT is still
-   ;; an unimplemented ROOT SUBR.)
-   (check-exn #rx"unassigned or non-applicable MDL operator PRINT"
-              (lambda () (run "<PRINT \"FOO\">")))
+   ;; (PRINC was the example here until S7 implemented it, then PRINT until
+   ;; M4 #173; FLATSIZE is still an unimplemented ROOT SUBR.)
+   (check-exn #rx"unassigned or non-applicable MDL operator FLATSIZE"
+              (lambda () (run "<FLATSIZE \"FOO\" 10>")))
    ;; (MEMBER was the example here until S9 implemented it; STRCOMP is
    ;; still an unimplemented ROOT SUBR.)
    (check-exn #rx"unassigned MDL global STRCOMP"
