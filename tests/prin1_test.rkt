@@ -35,8 +35,12 @@
 ;; SCORE's shape: PRINC and PRIN1 interleaved, no separators added.
 (check-equal? (written "<PRINC \"Your score would be \"> <PRIN1 0> <PRINC \" [total of \"> <PRIN1 500>")
               "Your score would be 0 [total of 500")
-;; No line breaking (ADR-0050 deviation).
-(check-equal? (written "<PUT ,OUTCHAN 13 3> <PRIN1 12345> <PRIN1 67890>") "1234567890")
+;; Line breaking at the CHANNEL width (M4 #173, superseding the ADR-0050
+;; "no line breaking" deviation): a token that does not fit after a positive
+;; column starts a new line (Confusion width-prin1-positive-column).
+(check-equal? (written "<PUT ,OUTCHAN 13 3> <PRIN1 12345> <PRIN1 67890>") "12345\n67890")
+(check-equal? (written "<PUT ,OUTCHAN 13 10> <PRINC \"abcdefgh\"> <PRIN1 12> <PRIN1 3>")
+              "abcdefgh12\n3")
 
 ;; --- ATOM -------------------------------------------------------------------
 ;; The game's NULL (81tell-repl.mud): an empty PNAME inserted on ROOT prints
@@ -62,10 +66,8 @@
 (refused #rx"^PRIN1: PRIN1 takes an object and an optional CHANNEL" "<PRIN1 1 ,OUTCHAN 2>")
 (refused #rx"^PRIN1: PRIN1 requires an output channel" "<PRIN1 1 ,INCHAN>")
 (refused #rx"non-channel" "<PRIN1 1 2>")
-(refused #rx"^PRIN1: unsupported TYPE STRING" "<PRIN1 \"abc\">")
-(refused #rx"^PRIN1: unsupported TYPE CHARACTER" "<PRIN1 !\\a>")
-(refused #rx"^PRIN1: unsupported TYPE LIST" "<PRIN1 (1)>")
-(refused #rx"^PRIN1: unsupported TYPE FALSE" "<PRIN1 <>>")
+(refused #rx"^PRIN1: unsupported TYPE VECTOR" "<PRIN1 [1]>")
+(refused #rx"^PRIN1: unsupported TYPE FORM" "<PRIN1 '<FOO>>")
 (refused #rx"^PRIN1: unsupported TYPE FLOAT" "<PRIN1 1.5>")
 ;; Nothing is written for a refused object.
 (let ([out (open-output-string)])
@@ -75,6 +77,15 @@
                  (call-with-mdl-context
                   (make-mdl-context #:output-port out)
                   (lambda ()
-                    (for ([expr (in-list (compile-program (parse-mdl "<PRIN1 \"x\">")))])
+                    (for ([expr (in-list (compile-program (parse-mdl "<PRIN1 [1]>")))])
                       (eval expr)))))))
   (check-equal? (get-output-string out) ""))
+
+;; --- STRING, CHARACTER, LIST, FALSE (M4 #173; Confusion i173-print-reference) ---
+(check-equal? (written "<PRIN1 \"abc\">") "\"abc\"")
+(check-equal? (written "<PRIN1 \"a\\\"b\\\\c\">") "\"a\\\"b\\\\c\"")
+(check-equal? (written "<PRIN1 !\\a>") "!\\a")
+(check-equal? (written "<PRIN1 (1)>") "(1)")
+(check-equal? (written "<PRIN1 (1 (2 (3 ())) ())>") "(1 (2 (3 ())) ())")
+(check-equal? (written "<PRIN1 <>>") "#FALSE ()")
+(check-equal? (written "<PRIN1 #FALSE (1 \"x\")>") "#FALSE (1 \"x\")")
