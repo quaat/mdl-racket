@@ -241,7 +241,8 @@ other ATOMs' values intact. A `SET` of a free atom with no active parameter
 binding therefore persists after the function returns. This slice models
 those rules for simple required parameters with a stack of atom-keyed local
 frames and a separate atom-keyed global table. The runtime will reject
-unassigned reads and non-ATOM binding operands.
+unassigned reads and non-ATOM binding operands (a STRING included since #199;
+see "M4 #199" below).
 
 Nine pinned Confusion cases in `docs/evidence/M1/bindings-cases.json` and
 `bindings-reference.json` exited zero with empty stderr. They confirm
@@ -700,7 +701,10 @@ global at `3`. A second equivalent call returns `T`; conflicting reassignment
 enters its explicit `ERROR MSETG ... ALREADY-GASSIGNED` branch. Confusion
 does not have active local declaration checking, so its wrong-FOO error comes
 from `GASSIGNED?`, while the Racket implementation rejects at the declaration
-binding boundary.
+binding boundary. (Since #196 attached declarations are not enforced, so a
+non-ATOM FOO fails at `GASSIGNED?` here too; since #199 that includes a
+STRING FOO. MANIFEST's rejection of non-ATOM arguments is part of this
+MANIFEST deviation; see "M4 #199" below.)
 
 ## M2 D2 specification: SEGMENT (`!` splice) evaluation
 
@@ -2384,7 +2388,8 @@ the STRING); TERPRI returns `#FALSE ()`; CRLF returns `T`; both emit LF only.
 
 **Deviations and unmodelled behaviour.** This runtime's GDECL checks an
 existing value and its SETG refuses to change an assigned MANIFEST
-(Confusion does neither). Binding OUTCHAN for the duration of output
+(Confusion does neither; this MANIFEST also rejects non-ATOM arguments,
+"M4 #199" below). Binding OUTCHAN for the duration of output
 (§11.2.7 "PRINT binds OUTCHAN") is not modelled. Output is flushed only
 before each READSTRING and when the host loop exits, not after every SUBR.
 Line-width and other slots (e.g. `<PUT ,OUTCHAN 13 80>`) are stored but not
@@ -3971,3 +3976,97 @@ of a terminal CHANNEL, a FIX stop on the terminal. Code: `mdl/runtime/core.rkt`
 reader, `mdl-session-file-channels`), `zork/game-files.rkt`; tests
 `tests/file_read_test.rkt`, `tests/help_info_replay_test.rkt`,
 `tests/historical_help_info_test.rkt`.
+
+## M4 #199: the binding primitives take ATOMs only (STRING rejected)
+
+**Specification (MDL manual, chapter 4; chapter 14 for MANIFEST).** The
+first argument of `SET`, `SETG`, `LVAL`, `GVAL`, `VALUE`, `GUNASSIGN`,
+`ASSIGNED?` and `GASSIGNED?`, and each argument of `MANIFEST`, is an ATOM.
+The manual gives no conversion from a STRING (or any other TYPE) to an ATOM.
+
+**Reference (pinned Confusion; [I199 record](evidence/M4/I199-STRING-ATOM.md)).**
+Every one of these SUBRs rejects a STRING, a FIX and a FORM first argument,
+whether or not the spelled ATOM has a value, at top level and inside a
+FUNCTION, and the spelled ATOM is unchanged afterwards. Only MANIFEST accepts
+any argument: it has no compiler and does nothing (returns `T`). The
+original MSETG (81prim.mud) therefore stops at its first `GASSIGNED? .FOO`
+and PSETG at its first `SETG .FOO .BAR`, before `PURE-LIST` is created.
+
+**This runtime (since #199).**
+
+- `SETG`, `GVAL`, `GASSIGNED?`, `SET`, `LVAL`, `VALUE`, `GUNASSIGN` and
+  `MANIFEST` raise `mdl-<p>: expected an MDL ATOM` (`mdl-setg`, `mdl-gval`,
+  `mdl-gassigned?`, `mdl-set`, `mdl-lval`, `mdl-value`, `mdl-gunassign`,
+  `mdl-manifest`) for every non-ATOM first argument, a STRING included,
+  exactly as they already did for FIX and FORM. The check is the first
+  thing each call does, so nothing is interned, assigned, unassigned or
+  marked: the ATOM a STRING spells is unchanged (`tests/binding_atom_string_test.rkt`
+  checks that `<LOOKUP>` cannot find it afterwards).
+- `ASSIGNED?` is unchanged (it never accepted a STRING: `mdl-assigned?:
+  First arg to ASSIGNED? must be ATOM`).
+- `MANIFEST` checks every argument before it marks any, so
+  `<MANIFEST FOO "BAR">` (or `<MANIFEST FOO 5>`) fails and leaves FOO not
+  manifest. Before #199 FOO was marked before the bad argument failed.
+- The original MSETG with a STRING now raises at GASSIGNED?, and PSETG at
+  SETG, as in Confusion (`tests/declaration_test.rkt`; the former XFAIL).
+- The binding frames (`mdl-with-bindings`, `mdl-with-aux-bindings`), the
+  compiled FORM head (`mdl-apply-form`) and the host value API `mdl-apply`
+  share the same check (`binding-atom`, `mdl/runtime/core.rkt`). The compiler
+  never passes them a STRING: every source ATOM is resolved once per
+  top-level expression (`atom-ref`), and runtime-internal callers pass
+  `(mdl-root-atom NAME)`.
+
+**Recorded differences (not changed by #199).**
+
+- *Error reporting.* Confusion reports these errors in two ways: SETG, SET,
+  VALUE, GASSIGNED?, GBOUND?, ASSIGNED? and BOUND? print `Type Mismatch, 1st
+  arg to <P> must be atom` on stderr and abandon the evaluation back to level
+  1; GVAL, LVAL and GUNASSIGN call MDL `ERROR` (an `*ERROR*` level). This
+  runtime raises a strict Racket exception for all of them, as it did for
+  FIX and FORM before. This is the existing error-reporting difference, not
+  a new one.
+- *MANIFEST.* Rejecting a non-ATOM argument is part of the existing MANIFEST
+  deviation (M2 D1 above; "Deviations and unmodelled behaviour" of the M3
+  terminal CHANNEL section): Confusion's MANIFEST ignores its arguments,
+  this runtime's enforces the manifest restriction on a later SETG and
+  rejects every non-ATOM, a STRING included. The pinned 1977 sources call
+  MANIFEST only as `<MANIFEST .FOO>` inside MSETG (81prim.mud:8), after
+  `GASSIGNED? .FOO` has already required an ATOM.
+- *Not implemented here (out of scope):* `BOUND?` and `GBOUND?` (Confusion
+  has both; here they are unassigned operators even with an ATOM) and
+  `UNASSIGN` (absent in Confusion too).
+- *Confusion source defects (recorded only):* its GVAL calls ERROR for a
+  non-ATOM but does not return the ERROR's result, so an ERRET there would
+  continue with a non-ATOM lookup (not probed); its GUNASSIGN passes its
+  description as an extra ERROR argument, printed as `##ATOM 0 UNPRINTABLE`.
+  Neither is reproduced.
+
+**Host boundary (`mdl/loader.rkt`).** A host names an ATOM by an ATOM or by
+a Racket string. Because an MDL STRING literal is a Racket string too, the
+runtime cannot tell them apart, so the conversion happens in the host API
+and never in the binding primitives:
+
+- `mdl-session-global`, `mdl-session-call` (the operator name) and
+  `mdl-session-run-interactive` (the entry name) resolve a string with the
+  host-only `mdl-find-atom` (core): the ATOM the reader would produce through
+  the session's current `.OBLIST`, OBLIST trailers (`A!-B`, `A!-`) included,
+  **without interning** and without creating a trailer's OBLIST. A name the
+  session never read fails as `unassigned MDL global NAME (no such ATOM in
+  this session; a host read never interns)`. Any other name type is a
+  contract error.
+- `mdl-session-find-atom` (new) returns that ATOM or `#f`.
+  `mdl-session-atom` keeps its meaning (the ATOM the reader would produce,
+  interning like the reader).
+- The arguments of `mdl-session-call` are MDL values as given, so a Racket
+  string passed there is an MDL STRING and the binding SUBRs reject it
+  (`(mdl-session-call s "GVAL" "X")` fails; pass an ATOM).
+- The M4 scenario checkpoints (`existing-atom` in
+  `tests/m4_scenario_runner.rkt`) and the replay persistence state reader
+  (`zork/persistence.rkt`) name ATOMs only through `mdl-session-find-atom`
+  (strict when absent), so their reads cannot intern.
+
+`mdl-atom` and `mdl-find-atom` share one resolution (`resolve-pname`), so
+the host lookup and the reader cannot disagree about which ATOM a name
+denotes. Tests: `tests/binding_atom_string_test.rkt`,
+`tests/declaration_test.rkt`; evidence
+[I199-STRING-ATOM.md](evidence/M4/I199-STRING-ATOM.md).

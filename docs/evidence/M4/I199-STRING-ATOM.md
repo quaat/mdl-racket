@@ -316,3 +316,102 @@ error reporting is not uniform (three variants, described above).
   and eval path the loader uses for each expression, but it is not the
   loader's own per-file loop, and it continues after errors, which the
   loader does not.
+
+## Fix (branch `fix/199-binding-atom-string`, 2026-11-26)
+
+Commits: `f2ffee6` (tests first), `5af5d14` (runtime, host boundary, test
+adaptations), then the documentation commit. Upstream mdlzork
+`bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3` and mit_zork
+`d94501340842e006791fce0757dc0043b8ec8916` (`sources.lock.json`); the
+mdlzork checkout's `git status --short` is empty. Racket v7.9 [bc], Python
+3.9.2. `make reference-build` was not run; no new Confusion capture was
+needed (the observations above are the reference).
+
+**What changed.** `binding-atom` accepts ATOMs only, so SETG, GVAL,
+GASSIGNED?, SET, LVAL, VALUE, GUNASSIGN and MANIFEST raise `mdl-<p>: expected
+an MDL ATOM` for a STRING, as they did for FIX and FORM; MANIFEST checks all
+arguments before marking any. The host API (`mdl/loader.rkt`) converts its
+string names with the new non-interning `mdl-find-atom`. Rules: SEMANTICS
+"M4 #199"; decision: DECISIONS "Binding primitives take ATOMs only".
+
+After the fix, every STRING row of the side-by-side tables above that was
+marked **no** for SETG, GVAL, GASSIGNED?, SET, LVAL, VALUE, GUNASSIGN and
+the original MSETG/PSETG now errors here, with the ATOM unchanged, as in
+Confusion (error text and mechanism still differ: the existing
+error-reporting difference). MANIFEST now errors for a STRING here, while
+Confusion returns T (the existing MANIFEST deviation). Not changed: BOUND?,
+GBOUND?, UNASSIGN; the compiled DEFINE value.
+
+**MANIFEST source check.** `grep -rni manifest .cache/upstream --include=*.mud`
+finds, for the 1977 game (`mdlzork_771212/patched_confusion`), only
+`81prim.mud:8 <MANIFEST .FOO>` inside MSETG, reached after `<GASSIGNED?
+.FOO>` (which requires an ATOM). Every MSETG/PSETG call site in the 771212
+`.mud` files passes a literal ATOM, except `81prim.mud:28` (`.F`, guarded by
+`<TYPE? .F ATOM>`), `:69` (`.OFFS`, guarded by `<TYPE? .OFFS ATOM>`) and
+`:71` (elements of an OFFS LIST; the `"REST"` STRING is handled before).
+Later versions (780124, 791211, 810722) add only ATOM arguments
+(`<MANIFEST PUSHJ ADDI BASE-INST>`, `<MANIFEST LEXSIZE>`). `mit_zork` has no
+MANIFEST. No pinned source passes a non-ATOM to MANIFEST.
+
+**Failing before.** The MDL-level part of `tests/binding_atom_string_test.rkt`
+(everything before its "runtime value API" section, copied unchanged to a
+scratch file because the rest needs functions this fix adds) run against
+`a9626da`: exit 0 (rackunit prints failures without failing the process),
+**53 failing checks**: the 16 STRING cases (8 primitives, top level and in a
+FUNCTION), the 16 "no ATOM interned" cases, 19 unchanged-ATOM and in-FUNCTION
+cases, and the two MANIFEST check-all-first cases (`<MANIFEST FOO "BAR">`,
+`<MANIFEST FOO 5>`). Every FIX and FORM case already passed. The host-API
+part could not compile there (`mdl-find-atom`, `mdl-session-find-atom`
+unbound). Note: at `f2ffee6` the module's value-API check also named four
+non-exported runtime functions; `5af5d14` restricts it to the exported ones.
+
+**Passing after** (`5af5d14`, documentation uncommitted at the time of the
+gate runs; commands outside the sandbox with
+`PLTCOLLECTS=":$PWD" TMPDIR=/tmp PYTHONPATH=$PWD/.sandbox-pydeps/lib make PYTHON=/usr/bin/python3 <target>`):
+
+| Command | Exit | Result |
+|---|---:|---|
+| `racket tests/binding_atom_string_test.rkt` | 0 | 0 failures |
+| `racket tests/declaration_test.rkt`, `tests/muddle_test.rkt` | 0 | 0 failures |
+| `make test` (first run, before two test fixes below) | 2 | 4/5307 raco failures: `channel_port_test.rkt` (a host string applied directly to the GASSIGNED? SUBR) and `oblist_identity_test.rkt` (3: host `mdl-with-bindings` with a string name); both fixed by passing `(mdl-atom NAME)` |
+| `make test` | 0 | raco 5307 tests passed; pytest 104 passed, 1 deselected |
+| `make test-historical` | 0 | all historical probes passed (MSETG computed-global, MSETG ERROR, PSETG MEMQ, OBLIST placement 2350 entries, ...) |
+| `make test-m2-g3` | 0 | G3 integrated gate passed: 58 assertions |
+| `make test-m3-session` | 0 | 85 tests passed |
+| `make test-m3-launcher` | 0 | 57 tests passed |
+| `make m3-check` | 0 | candidate-vs-committed-reference PASS; native-fresh-capture-parity PASS; overall PASS |
+| `make m4-check` | 0 | 28 checks PASS (sources, 26 scenarios, persistence); SCENARIO_PARITY PASS (26), GAMEPLAY_RELIABILITY NOT YET 20 of 23 (the three save branches; open INV-06, INV-07), PLAYABLE NOT RUN, FULL_COMPLETION NOT RUN, M4_ACCEPTED NOT YET (unchanged from `6d6e5b1`) |
+| `git diff --check origin/main HEAD` | 0 | no whitespace errors |
+
+The first passing `make test` ran before the `on_save_test.rkt` fix and the
+`zork/persistence.rkt` helper move (both in `5af5d14`); `make test` re-run at
+`5af5d14`: exit 0, raco 5307 passed, pytest 104 passed, 1 deselected.
+
+**Changed test assertions and inputs.**
+
+- `tests/declaration_test.rkt`: the tracked XFAIL `(MSETG "M2-D1-STRING" 3)
+  → T` is now `raises ^mdl-gassigned\?: expected an MDL ATOM$`; added PSETG
+  (verbatim 81prim.mud:10-18) with a STRING and a FIX (`raises
+  ^mdl-setg: expected an MDL ATOM$`), checks that neither STRING's ATOM was
+  interned and that no PURE-LIST was created, and a PSETG control with an
+  ATOM (→ 4).
+- `tests/muddle_test.rkt`: three host calls passed the string `"MUDDLE"` as
+  the MDL argument of GVAL/GASSIGNED?; they now pass
+  `(mdl-session-atom session "MUDDLE")`. Assertions unchanged.
+- `tests/on_save_test.rkt:105`: `(apply mdl-apply "ON" bad)` inside
+  `check-exn exn:fail?` would have passed for the wrong reason (the name
+  check); it now passes `(mdl-atom "ON")`.
+- `tests/channel_port_test.rkt:340`, `tests/oblist_identity_test.rkt`
+  (3 `mdl-with-bindings` calls): string names → `(mdl-atom NAME)`.
+- 18 test files and `scripts/bench/gc_growth_bench.rkt`: every direct host
+  call `(mdl-gval "X")`, `(mdl-setg! "X" v)`, `(mdl-lval "X")`,
+  `(mdl-set! "X" v)`, `(mdl-apply "X" ...)` and so on became
+  `(... (mdl-atom "X") ...)` (mechanical; `mdl-atom` is what `binding-atom`
+  called before, so the ATOM is the same). No expected value changed.
+- `tests/historical_parser_ambiguity_test.rkt`: its PARSE-WON checkpoint read
+  uses the runner's non-interning `existing-atom`.
+
+**Security and licensing.** No new MDL-reachable capability: `mdl-find-atom`
+and `mdl-session-find-atom` are host-only (not in the builtin table) and only
+read. No GPLv3 code copied (the Confusion behaviour is summarised above). No
+upstream bytes changed.
