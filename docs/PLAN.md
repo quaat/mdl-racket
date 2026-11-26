@@ -230,7 +230,7 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
 
 ## M4 — Comprehensive behavioral equivalence
 
-> **Progress (2026-11-26, `main` = `da973a7` + #173 B2).** On mainline, each
+> **Progress (2026-11-26, `main` = `1fcebf9`).** On mainline, each
 > scenario-scoped: 26 native-parity scenarios match pinned Confusion
 > (SCENARIO_PARITY PASS); 20 of the 23 approved required gameplay branches
 > are covered (GAMEPLAY_RELIABILITY NOT YET: the three save branches; open

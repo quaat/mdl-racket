@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "name": "m4-i173-oblist-name",
+  "recorded_at": "2026-11-26T21:27:52.814674+00:00",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "name-removed-membership-identity",
+      "expression": "<PROG () <SETG OBQ1 <MOBLIST OBQ1 7>> <SET X <INSERT \"QX1\" ,OBQ1>> <PUT ,OBQ1 OBLIST> (<==? <LOOKUP \"QX1\" ,OBQ1> .X> <==? <OBLIST? .X> ,OBQ1> <==? <GET OBQ1 OBLIST> ,OBQ1>)>",
+      "input": "<PROG () <SETG OBQ1 <MOBLIST OBQ1 7>> <SET X <INSERT \"QX1\" ,OBQ1>> <PUT ,OBQ1 OBLIST> (<==? <LOOKUP \"QX1\" ,OBQ1> .X> <==? <OBLIST? .X> ,OBQ1> <==? <GET OBQ1 OBLIST> ,OBQ1>)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n(T T T)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "(T T T)\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "name-removed-bindings-properties-path",
+      "expression": "<PROG () <SETG OBQ2 <MOBLIST OBQ2 7>> <SET X <INSERT \"QX2\" ,OBQ2>> <SETG .X 42> <SET .X 7> <PUT .X PROPZ 9> <SET P .OBLIST> <PUT ,OBQ2 OBLIST> (<GVAL .X> <LVAL .X> <GET .X PROPZ> <==? .P .OBLIST>)>",
+      "input": "<PROG () <SETG OBQ2 <MOBLIST OBQ2 7>> <SET X <INSERT \"QX2\" ,OBQ2>> <SETG .X 42> <SET .X 7> <PUT .X PROPZ 9> <SET P .OBLIST> <PUT ,OBQ2 OBLIST> (<GVAL .X> <LVAL .X> <GET .X PROPZ> <==? .P .OBLIST>)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n(42 7 9 T)\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "(42 7 9 T)\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "name-removed-reachable-no-trailer",
+      "expression": "<PROG () <SETG OBQ3 <MOBLIST OBQ3 7>> <SET X <INSERT \"QX3\" ,OBQ3>> <PUT ,OBQ3 OBLIST> <PROG ((OBLIST (,OBQ3 <ROOT>))) <PRIN1 .X> <TERPRI>> <PRIN1 .X> <TERPRI> 0>",
+      "input": "<PROG () <SETG OBQ3 <MOBLIST OBQ3 7>> <SET X <INSERT \"QX3\" ,OBQ3>> <PUT ,OBQ3 OBLIST> <PROG ((OBLIST (,OBQ3 <ROOT>))) <PRIN1 .X> <TERPRI>> <PRIN1 .X> <TERPRI> 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nQX3\nQX3!-!-#FALSE ()\n0\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "QX3\nQX3!-!-#FALSE ()\n0\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "name-removed-restored-renamed",
+      "expression": "<PROG () <SETG OBQ4 <MOBLIST OBQ4 7>> <SET X <INSERT \"QX4\" ,OBQ4>> <PUT ,OBQ4 OBLIST> <PRIN1 .X> <TERPRI> <PUT ,OBQ4 OBLIST OBQ4> <PRIN1 .X> <TERPRI> <PUT ,OBQ4 OBLIST OTHERNAME> <PRIN1 .X> <TERPRI> <==? <LOOKUP \"QX4\" ,OBQ4> .X>>",
+      "input": "<PROG () <SETG OBQ4 <MOBLIST OBQ4 7>> <SET X <INSERT \"QX4\" ,OBQ4>> <PUT ,OBQ4 OBLIST> <PRIN1 .X> <TERPRI> <PUT ,OBQ4 OBLIST OBQ4> <PRIN1 .X> <TERPRI> <PUT ,OBQ4 OBLIST OTHERNAME> <PRIN1 .X> <TERPRI> <==? <LOOKUP \"QX4\" ,OBQ4> .X>>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nQX4!-!-#FALSE ()\nQX4!-OBQ4\nQX4!-OTHERNAME\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "QX4!-!-#FALSE ()\nQX4!-OBQ4\nQX4!-OTHERNAME\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "printers-agree",
+      "expression": "<PROG () <SETG OBQ5 <MOBLIST OBQ5 7>> <SET X <INSERT \"QX5\" ,OBQ5>> <PRIN1 .X> <PRINT .X> <TERPRI> <PRINC <UNPARSE .X>> <TERPRI> <PUT ,OBQ5 OBLIST> <PRIN1 .X> <PRINT .X> <TERPRI> <PRINC <UNPARSE .X>> <TERPRI> <SET Y <ATOM \"QU5\">> <PRIN1 .Y> <PRINT .Y> <TERPRI> <PRINC <UNPARSE .Y>> <TERPRI> <SET R ZQROOT5!-> <INSERT \"ZQROOT5\" <1 .OBLIST>> <PRIN1 .R> <PRINT .R> <TERPRI> <PRINC <UNPARSE .R>> <TERPRI> 0>",
+      "input": "<PROG () <SETG OBQ5 <MOBLIST OBQ5 7>> <SET X <INSERT \"QX5\" ,OBQ5>> <PRIN1 .X> <PRINT .X> <TERPRI> <PRINC <UNPARSE .X>> <TERPRI> <PUT ,OBQ5 OBLIST> <PRIN1 .X> <PRINT .X> <TERPRI> <PRINC <UNPARSE .X>> <TERPRI> <SET Y <ATOM \"QU5\">> <PRIN1 .Y> <PRINT .Y> <TERPRI> <PRINC <UNPARSE .Y>> <TERPRI> <SET R ZQROOT5!-> <INSERT \"ZQROOT5\" <1 .OBLIST>> <PRIN1 .R> <PRINT .R> <TERPRI> <PRINC <UNPARSE .R>> <TERPRI> 0>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nQX5!-OBQ5\nQX5!-OBQ5 \nQX5!-OBQ5\nQX5!-!-#FALSE ()\nQX5!-!-#FALSE () \nQX5!-!-#FALSE ()\nQU5!-#FALSE ()\nQU5!-#FALSE () \nQU5!-#FALSE ()\nZQROOT5!-\nZQROOT5!- \nZQROOT5!-\n0\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "QX5!-OBQ5\nQX5!-OBQ5 \nQX5!-OBQ5\nQX5!-!-#FALSE ()\nQX5!-!-#FALSE () \nQX5!-!-#FALSE ()\nQU5!-#FALSE ()\nQU5!-#FALSE () \nQU5!-#FALSE ()\nZQROOT5!-\nZQROOT5!- \nZQROOT5!-\n0\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

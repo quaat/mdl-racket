@@ -62,6 +62,7 @@ raco test mdl/runtime/core.rkt \
   tests/readstring_test.rkt \
   tests/readstring_bang_test.rkt \
   tests/prin1_test.rkt tests/print_test.rkt tests/print_trailer_test.rkt \
+  tests/oblist_name_print_test.rkt \
   tests/host_loop_test.rkt \
   tests/unwind_raise_test.rkt \
   tests/session_clock_test.rkt \

@@ -104,10 +104,20 @@
   (define guard
     (make-security-guard
      original-guard
+     ;; A write or delete attempt is recorded and refused at once (the
+     ;; run then fails with the guard's exception), not merely recorded.
      (lambda (who path modes)
        (when (and path (or (memq 'write modes) (memq 'delete modes)))
-         (set! writes (cons (list who path modes) writes))))
-     (lambda (who host port mode) (void))))
+         (set! writes (cons (list who path modes) writes))
+         (raise (make-exn:fail
+                 (format "historical-handle guard: ~a refused ~a on ~a" who modes path)
+                 (current-continuation-marks)))))
+     ;; No network access at all.
+     (lambda (who host port mode)
+       (set! writes (cons (list who host port mode) writes))
+       (raise (make-exn:fail
+               (format "historical-handle guard: ~a refused network ~a:~a" who host port)
+               (current-continuation-marks))))))
   (define injected? #f)
   (define (observer stage data)
     (unless injected? (set! injected? #t) (inject)))
@@ -219,3 +229,15 @@
               (string-append native-north-prefix handle-tell "\n"
                              vers "\n"
                              "\nUNASSIGNED-VARIABLE!-ERRORS "))
+
+;; === H4: the guard itself refuses a write at once (a host-side attempt from
+;; inside the guarded run; MDL code has no file access, ADR-0055) =============
+(define-values (h4 h4-raw h4-unread h4-session h4-writes h4-cwd h4-unchanged)
+  (run-game '("north" "look")
+            (lambda () (call-with-output-file "guard-probe.txt" void))))
+(check-pred exn:fail? h4 (format "~a" h4))
+(when (exn? h4)
+  (check-regexp-match #rx"^historical-handle guard: .* refused" (exn-message h4)))
+(check-equal? (length h4-writes) 1)
+(check-equal? h4-cwd '())          ; nothing was created
+(check-true h4-unchanged)
