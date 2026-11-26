@@ -10,7 +10,8 @@ response. An unassigned operator, or a strict error that reaches the
 launcher and ends the session, is a runtime failure. No runtime code was
 changed in this slice. Fixes are separate slices (see the fix order at the
 end). Issue and PR columns read "to create" where no issue exists yet
-(INV-06 is #172, INV-07 is #173; INV-11, added by M4 Phase 3b, is #193).
+(INV-06 is #172, INV-07 is #173; INV-11, added by M4 Phase 3b, is #193;
+INV-12, added by M4 Phase 3c, is #196).
 
 ## Provenance and commands
 
@@ -174,6 +175,7 @@ result, and the fix and regression test.
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
 | **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)); **fixed** by M4 S14 (#193, the #98 ADR amendment): the dam-sluice and maint-leak scenarios match native at all 42 and 36 turns | #193 |
+| **INV-12** BALLOON's PRSO #DECL | troll16, then the balloon route of tests/scenarios/balloon-ledge.json to the Volcano Bottom, `open receptacle` `put guide in receptacle` `board basket` (command 57) | (a) | the game's own value violates an attached declaration of known types: CLOCK-DEMON sets PRSVEC 2 to #FALSE (), BALLOON (READ-OUT) declares PRSO `<OR OBJECT DIRECTION>`; strict here (known types, #98 and its #193 amendment), unchecked natively | **P1**: the balloon cannot be flown (any turn in it) | confirmed in both engines (M4 Phase 3c, 2026-11-25; [PUZZLES.md](PUZZLES.md)); tracked by `make xfail-m4-balloon-frontier` | #196 (maintainer decision pending) |
 
 **INV-01: ABS.** *Status: fixed by M4 S8 (#167). ABS is a builtin, and the operator sweep JSON was regenerated, so ABS is now class `builtin`.*
 
@@ -304,6 +306,71 @@ local branch `feat/m4-dam`); recorded by [DAM-CLOCKS.md](DAM-CLOCKS.md).*
   XFAIL `tests/historical_dam_frontier_test.rkt`), and the unit tests in
   `tests/deferred_decl_type_test.rkt`.
 
+**INV-12: BALLOON's PRSO #DECL meets CLOCK-DEMON's #FALSE ().** *Status:
+open (found by M4 Phase 3c, 2026-11-25, local branch `feat/m4-puzzles`;
+recorded by [PUZZLES.md](PUZZLES.md); no runtime change; tracked expected
+failure `make xfail-m4-balloon-frontier`). Issue #196; maintainer decision
+2026-11-26: an instrumented sweep first.*
+
+- *First failing location and call path:* RDCOM (77rooms.mud:600), the
+  turn of `board basket` (command 57 of balloon-ledge): the BOARD verb puts
+  the hero in the balloon (AVEHICLE BALLO; "You are in the basket."); the
+  demons run, and CLOCK-DEMON (77rooms.mud:1630), with PARSE-WON true,
+  executes `<PUT ,PRSVEC 2 <>>` and `<PUT ,PRSVEC 3 <>>` (:1633-1634); then
+  RDCOM applies the vehicle's action with READ-OUT (:648-651). BALLOON
+  (77act2.mud:419) binds the AUX `(PRSO <2 .PRSVEC>)`, i.e. #FALSE (), under
+  its attached declaration `(PRSO) <OR OBJECT DIRECTION>` (77act2.mud:424-425):
+  `mdl-decl: DECL 424:9: PRSO does not satisfy declaration`. The same
+  happens at every later turn in the balloon (READ-OUT after the demons) and
+  at every BINT clock call (C-INT, after the same PUT). Source-derived, not
+  run here: once a burning object is in the receptacle, BALLOON also binds
+  `(BINF ,BINF!-FLAG)` (an OBJECT, 77act2.mud:488) under `(BINF) <OR FALSE
+  ROOM>` (77act2.mud:426), a second violation of the same declaration. By
+  contrast BUCKET (77act3.mud:40-44), the other READ-IN/READ-OUT vehicle
+  action with such a binding, declares `(PO) <OR DIRECTION FALSE OBJECT>`.
+- *Native:* pinned Confusion checks no attached declaration: the game goes
+  on (balloon-ledge-reference.json, captured twice: the guidebook burns, the
+  balloon rises to VAIR1 and VAIR2, lands on the Narrow Ledge, the wire is
+  tied and untied, the balloon descends and lands). A native diagnostic
+  (wrapping BALLOON to print its arguments and `<TYPE <2 ,PRSVEC>>`, not a
+  committed reference) shows READ-OUT with PRSO a FALSE on the `board
+  basket` and `light match` turns; the OBJECT-PRSO call on `board basket` is
+  BOARD's object action with no ARG (77rooms.mud:1680), not READ-IN.
+  BINF (`<OR FALSE ROOM>`, 77act2.mud:426) holds the OBJECT GUIDE from entry
+  59 on in the native checkpoints, so that declaration is violated as well
+  (confirmed by native state).
+- *Further candidates from the independent review's static sweep* (not
+  run; reachability unconfirmed):
+  - MSWITCH-FUNCTION (77act2.mud:139-142): `(IMP <3 ,PRSVEC>)` is declared
+    OBJECT, but slot 3 is FALSE without an indirect object. For example,
+    `push switch` in the Machine Room reaches it.
+  - SPHERE-FUNCTION (77act3.mud:243-246): `(PV ,PRSVEC)` is declared
+    `<VECTOR VERB OBJECT>`. As the SPHIN clock action it runs after
+    CLOCK-DEMON has put `<>` in slot 2.
+  The instrumented sweep decided on #196 is meant to confirm or rule these
+  out.
+- *Ours:* READSTRING entries 0-56 equal the native reference (output and
+  checkpoint); the turn of command 57 prints "You are in the basket." and
+  ends on the strict failure (kind `run-guard`, earliest failing k = 57).
+- *Root cause:* the runtime checks attached declarations of known TYPEs
+  (the #98 ADR; its #193 amendment relaxed only still-undefined names);
+  the 1977 game violates BALLOON's own declaration on its normal path, which
+  the native engine never notices.
+- *Options (maintainer decision; this slice changed no runtime semantics):*
+  (1) keep the strict check and accept that the balloon (and the volcano
+  beyond it) is unreachable; (2) amend the attached-declaration ADR further,
+  for example to follow pinned Confusion and not enforce attached
+  declarations of AUX bindings (or of all attached declarations), as a
+  recorded deviation from the manual; (3) a separately versioned source
+  patch widening BALLOON's declaration (`(PRSO) <OR OBJECT DIRECTION
+  FALSE>`, `(BINF) <OR FALSE OBJECT>`), which changes upstream provenance and
+  needs approval. Recommended next action: a maintainer decision between
+  (2) and (3) (a sweep of other attached declarations violated on normal
+  play paths should inform it), then promote balloon-ledge to a gated
+  scenario with its committed native reference.
+- *Regression test:* `tests/historical_balloon_frontier_test.rkt` (`make
+  xfail-m4-balloon-frontier`; XPASS once the balloon can be boarded).
+
 ### No failure found (exercised in both engines)
 
 - **Parser and common verbs** (F11). 125 commands give byte-identical
@@ -421,6 +488,10 @@ during the load, which completes.
    this ranking). **Maintainer decision** on attached declarations naming
    an undefined TYPE (ADR #98 amendment or a provenance-recorded source
    patch); see INV-11 above.
+10. **INV-12 BALLOON's PRSO #DECL** (P1, (a), found by M4 Phase 3c after
+   this ranking). **Maintainer decision** on attached declarations of known
+   types that the game itself violates (a further ADR amendment or a
+   provenance-recorded source patch); see INV-12 above.
 
 After each fix, re-run the matching F case in both engines. Re-run F8 and
 F10 to find the next frontier: the Strange Passage, the treasure room and

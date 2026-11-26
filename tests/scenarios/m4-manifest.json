@@ -206,6 +206,24 @@
       "runner_test": "tests/historical_maint_leak_test.rkt",
       "issue": "#193 (INV-11; the #98 ADR amendment), epic #163 Phase 3b (other clock events)",
       "covers": "the Maintenance Room entered (MAINT-ROOM's #DECL names the undefined type PRSOBJ, not enforced); the blue button's leak queues the clock event MNTIN (CTICK -1, fires on every clock pass), the water level rises each turn and five times during `wait`; the putty plugs the leak (RVARS -1, MNTIN CTICK 0); the blue button jammed"
+    },
+    {
+      "id": "S15a",
+      "name": "coal-machine",
+      "target": "test-m4-coal-machine",
+      "scenario_file": "tests/scenarios/coal-machine.json",
+      "runner_test": "tests/historical_coal_machine_test.rkt",
+      "issue": "epic #163 Phase 3c (objects beyond the house: the coal-mine machine and basket)",
+      "covers": "the screwdriver and the dam's sluice gates (the drained reservoir), the mirror to the Altar's burning candles (CNDIN), the coal from the Dead End through the mine; coal, screwdriver and candles put in the basket and lowered (CAGE-TOP false); `drop all` for the empty-handed passage (EMPTY-HANDED, NO-OBJS) to the Lower Shaft lit by the candles (LIGHT-SHAFT scored); the machine's lid, the coal in, the switch turned with the screwdriver: the diamond (MSWITCH-FUNCTION); the diamond put in the basket and raised (CAGE-TOP T)"
+    },
+    {
+      "id": "S15b",
+      "name": "gas-room",
+      "target": "test-m4-gas-room",
+      "scenario_file": "tests/scenarios/gas-room.json",
+      "runner_test": "tests/historical_gas_room_test.rkt",
+      "issue": "epic #163 Phase 3c (objects beyond the house: the gas room)",
+      "covers": "coal-machine's way to the Shaft Room with the burning candles; the Gas Room entered with the lamp only (BOOM-ROOM: nothing happens; the bracelet taken) and then with the burning candles: the coal-gas explosion, JIGS-UP's death question at READSTRING entry 58 answered `y` (patched in the forest)"
     }
   ],
   "persistence": [
@@ -289,6 +307,10 @@
     {
       "file": "tests/scenarios/failure-inventory-cases.json",
       "reason": "M4 Phase 1 discovery evidence (GAMEPLAY-FAILURE-INVENTORY.md); command sequences, not a gated parity check"
+    },
+    {
+      "file": "tests/scenarios/balloon-ledge.json",
+      "reason": "M4 Phase 3c native reference only (the balloon): this runtime stops at command 57 on boarding the balloon (INV-12: BALLOON's attached #DECL (PRSO) <OR OBJECT DIRECTION> meets the #FALSE () CLOCK-DEMON leaves in PRSVEC); tracked as an expected failure by make xfail-m4-balloon-frontier, not a gated parity check"
     }
   ]
 }

@@ -125,6 +125,8 @@ m4-scenarios-per-prefix` runs the slower one-boot-per-prefix protocol:
 | The boat and the river (Phase 3b, same branch) | `test-m4-boat-river` | the pump, inflate, board, launch, land, deflate |
 | The dam's sluice gates (S14, branch `feat/m4-prsobj-decl`) | `test-m4-dam-sluice` | the Maintenance Room, the yellow button, the bolt, the trunk |
 | The Maintenance Room leak (S14, same branch) | `test-m4-maint-leak` | the clock event MNTIN, the putty |
+| The coal-mine machine and basket (Phase 3c, branch `feat/m4-puzzles`) | `test-m4-coal-machine` | the basket lowered and raised, the empty-handed passage, coal into diamond |
+| The gas room (Phase 3c, same branch) | `test-m4-gas-room` | in with the lamp only, then with burning candles: the explosion |
 
 The three Phase 2 death scenarios ([record](docs/evidence/M4/DEATH-BRANCHES.md))
 use two opt-in runner options (ADR-0062 amendment): the death question as the
@@ -163,7 +165,24 @@ uncovered. On that branch `make m4-check` exits 0: SCENARIO_PARITY PASS for 22
 scenarios, GAMEPLAY_RELIABILITY NOT YET with 18 of 23 required branches
 covered and open blockers INV-06 and INV-07. Branch evidence until merged.
 
-`make m4-check` runs all twenty-two plus the persistence check; options
+**Phase 3c (branch `feat/m4-puzzles`; gate PASS for two scenarios,
+scenario-scoped; the balloon BLOCKED; [record](docs/evidence/M4/PUZZLES.md)).**
+No runtime change. Two more gated scenarios under the same clock and seed:
+the coal-mine machine and basket (`make test-m4-coal-machine`) and the gas
+room (`make test-m4-gas-room`). Both match pinned Confusion at every turn in
+single-run and per-prefix modes. The balloon is a frontier finding (INV-12):
+this runtime stops when the hero boards it, because the game's BALLOON
+function receives a FALSE where its own attached declaration allows only an
+OBJECT or DIRECTION; known types are checked here and nothing is checked
+natively. The native reference is committed and `make
+xfail-m4-balloon-frontier` tracks the failure (not a parity check). Puzzles
+beyond the house: four of the five listed are exercised; the branch stays
+uncovered until the balloon runs. On that branch `make m4-check` exits 0:
+SCENARIO_PARITY PASS for 24 scenarios, GAMEPLAY_RELIABILITY NOT YET with 18
+of 23 required branches covered and open blockers INV-06, INV-07 and INV-12.
+Next: a maintainer decision on INV-12. Branch evidence until merged.
+
+`make m4-check` runs all twenty-four plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:
