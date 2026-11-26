@@ -265,13 +265,13 @@
     }
   ],
   "playable_missing": [
-    "no declared PLAYABLE gate (start, interact, progress, quit and resume through one verified session) exists yet",
-    "player-facing save and resume (WP4.7, needs an ADR-0055 amendment); the game's own RESTORE is strict (INV-06)",
-    "progress beyond the recorded scenarios is not verified: full playthrough (epic #163 Phase 6)"
+    "no declared PLAYABLE gate yet: the approved definition (ADR-0063 amendment, 2026-11-26) is one reproducible user-facing session with start, progression, save, process termination, restore in a fresh process, continuation and quit",
+    "player-facing save and resume: direction approved (#172, ADR-0061 amendment, 2026-11-26: host-owned deterministic replay), not implemented (Phase C); the game's own RESTORE is strict (INV-06)",
+    "progress beyond the recorded scenarios is not verified: full playthrough (epic #163 Phase D)"
   ],
   "full_completion": {
     "check": null,
-    "reason": "no complete-game run exists yet: the 500-point completion playthrough is epic #163 Phase 6"
+    "reason": "no complete-game run exists yet. Approved definition (ADR-0063 amendment, 2026-11-26): the original game's own completion conditions and scoring rules, the complete 500-point game reached through a real native-backed playthrough of the unchanged sources; no synthetic endpoint, manually modified world state, skipped puzzle or hardcoded victory (epic #163 Phase D)"
   },
   "m4_plan_requirements": [
     {
@@ -297,6 +297,7 @@
     {
       "id": "R5-accepted-exceptions-justified",
       "text": "accepted exceptions are source-justified (PLAN M4 Gate); a maintainer review, not machine-checkable",
+      "maintainer_record_policy": "ADR-0063 amendment (2026-11-26): a committed maintainer record, written or explicitly approved by the maintainer, never manufactured by an agent. It must contain the lines 'Maintainer acceptance: ACCEPTED', 'Accepted by:', 'Date: YYYY-MM-DD', 'Reviewed commit: <40-hex SHA>', 'Source pins:' and the sections '## Accepted semantic deviations', '## Evidence', '## Scope and consequences', '## Remaining limitations' (checked by scripts/m4_check.py). maintainer_record stays null until that record exists; a draft prepared for review lives at docs/evidence/M4/R5-MAINTAINER-RECORD-DRAFT.md and is never cited here.",
       "satisfied_by_term": null,
       "maintainer_record": null
     }

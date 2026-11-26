@@ -32,7 +32,9 @@ MANIFEST = {
 }
 
 BRANCHES = {
-    "list_status": "PROVISIONAL test list",
+    "list_status": "APPROVED test list",
+    "baseline_version": 1,
+    "baseline_history": [{"version": 1}],
     "categories": [
         {"name": "combat", "branches": [
             {"id": "combat.one", "required": True, "checks": ["test-m4-a"]},
@@ -125,6 +127,37 @@ def test_uncovered_branch_is_never_pass():
     assert t["branches"]["combat.three"]["status"] == UNCOVERED
 
 
+@pytest.mark.parametrize("status", ["PROVISIONAL (draft)", "", None])
+def test_unapproved_branch_list_is_never_pass(status):
+    b = deepcopy(BRANCHES)
+    if status is None:
+        del b["list_status"]
+    else:
+        b["list_status"] = status
+    t = m.gameplay_reliability_term(b, ALL_PASS)
+    assert t["status"] == NOT_YET
+    assert any("not maintainer-approved" in r for r in t["reasons"])
+
+
+def test_non_string_list_status_is_unapproved():
+    b = {**deepcopy(BRANCHES), "list_status": ["APPROVED"]}
+    assert m.gameplay_reliability_term(b, ALL_PASS)["status"] == NOT_YET
+
+
+def test_baseline_version_must_match_history():
+    b = {**deepcopy(BRANCHES), "baseline_version": 2,
+         "baseline_history": [{"version": 1}]}
+    problems = m.completeness_problems(MANIFEST, MAKEFILE, FILES, b)
+    assert any("baseline_version" in p for p in problems)
+    b["baseline_history"].append({"version": 2})
+    assert not any("baseline_version" in p for p in m.completeness_problems(MANIFEST, MAKEFILE, FILES, b))
+
+
+def test_approved_branch_list_scope_names_the_baseline():
+    t = m.gameplay_reliability_term(BRANCHES, ALL_PASS)
+    assert "branch list APPROVED (baseline v1)" in t["scope"]
+
+
 def test_open_blocking_item_is_never_pass():
     b = deepcopy(BRANCHES)
     b["blocking_inventory"] = [{"id": "INV-06", "status": "open"}]
@@ -181,13 +214,33 @@ def _terms(**over):
     return base
 
 
+FULL = {"results": {}, "per_prefix": {"status": PASS}}   # a full final-gate run
+
+
+def acc(terms, man, results=None, per_prefix=FULL["per_prefix"]):
+    return m.m4_accepted_term(terms, man, {} if results is None else results, per_prefix)
+
+
 def test_m4_accepted_pass_only_when_all_four_terms_pass():
-    assert m.m4_accepted_term(_terms(), MANIFEST)["status"] == PASS
+    assert acc(_terms(), MANIFEST)["status"] == PASS
     for name in m.TERMS[:-1]:
         for s in (FAIL, NOT_RUN, NOT_YET):
-            t = m.m4_accepted_term(_terms(**{name: s}), MANIFEST)
+            t = acc(_terms(**{name: s}), MANIFEST)
             assert t["status"] == NOT_YET, (name, s)
             assert any(name in r for r in t["reasons"])
+
+
+@pytest.mark.parametrize("per_prefix", [None, {"status": NOT_RUN}, {"status": FAIL}])
+def test_m4_accepted_needs_the_per_prefix_protocol(per_prefix):
+    t = acc(_terms(), MANIFEST, per_prefix=per_prefix)
+    assert t["status"] == NOT_YET
+    assert any("m4-accept" in r for r in t["reasons"])
+
+
+def test_m4_accepted_needs_every_declared_check_run():
+    t = acc(_terms(), MANIFEST, results={"test-m3-s": {"status": NOT_RUN}})
+    assert t["status"] == NOT_YET
+    assert any("not run: test-m3-s" in r for r in t["reasons"])
 
 
 def test_m4_accepted_needs_maintainer_record_for_manual_requirement():
@@ -195,15 +248,125 @@ def test_m4_accepted_needs_maintainer_record_for_manual_requirement():
     man["m4_plan_requirements"].append({"id": "R5", "text": "exceptions justified",
                                         "satisfied_by_term": None,
                                         "maintainer_record": None})
-    t = m.m4_accepted_term(_terms(), man)
+    t = acc(_terms(), man)
     assert t["status"] == NOT_YET
     man["m4_plan_requirements"][-1]["maintainer_record"] = "docs/does-not-exist.md"
-    assert m.m4_accepted_term(_terms(), man)["status"] == NOT_YET
+    assert acc(_terms(), man)["status"] == NOT_YET
+
+
+def test_r5_can_never_be_satisfied_by_a_term():
+    man = deepcopy(MANIFEST)
+    man["m4_plan_requirements"].append({"id": "R5", "text": "exceptions justified",
+                                        "satisfied_by_term": "SCENARIO_PARITY",
+                                        "maintainer_record": None})
+    t = acc(_terms(), man)
+    assert t["status"] == NOT_YET
+    assert any("may not be satisfied by a term" in r for r in t["reasons"])
+
+
+LOCK = {"sources": {"mit_zork": {"commit": "d94501340842e006791fce0757dc0043b8ec8916"},
+                    "mdlzork": {"commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3"}}}
+
+GOOD_RECORD = """# M4 maintainer acceptance (R5)
+
+Maintainer acceptance: ACCEPTED
+Accepted by: the maintainer
+Date: 2027-01-31
+Reviewed commit: 0123456789abcdef0123456789abcdef01234567
+Source pins: mit_zork d945013, mdlzork bdcd4a6
+
+## Accepted semantic deviations
+ADR-0048 SAVE record.
+## Evidence
+make m4-accept report.
+## Scope and consequences
+As listed.
+## Remaining limitations
+Full MDL SAVE/RESTORE (#204).
+"""
+
+
+@pytest.fixture
+def record_repo(tmp_path, monkeypatch):
+    """A fake repository where git reports the record tracked and the reviewed
+    commit an ancestor, unless a test says otherwise."""
+    import json as _json
+    monkeypatch.setattr(m, "ROOT", tmp_path)
+    (tmp_path / "sources.lock.json").write_text(_json.dumps(LOCK), encoding="utf-8")
+    git_ok = {"ls-files": True, "merge-base": True}
+    monkeypatch.setattr(m, "git", lambda *a: "" if git_ok.get(a[0], False) else None)
+    man = deepcopy(MANIFEST)
+    man["m4_plan_requirements"].append({"id": "R5", "text": "exceptions justified",
+                                        "satisfied_by_term": None,
+                                        "maintainer_record": "r5.md",
+                                        "maintainer_record_policy": "ADR-0063"})
+    def run(text, name="r5.md", data=None):
+        man["m4_plan_requirements"][-1]["maintainer_record"] = name
+        path = tmp_path / name
+        if data is not None:
+            path.write_bytes(data)
+        else:
+            path.write_text(text, encoding="utf-8")
+        return acc(_terms(), man)
+    run.git_ok = git_ok
+    return run
+
+
+def test_good_maintainer_record_passes(record_repo):
+    assert record_repo(GOOD_RECORD)["status"] == PASS
+
+
+@pytest.mark.parametrize("label,record", [
+    ("missing acceptance", GOOD_RECORD.replace("Maintainer acceptance: ACCEPTED\n", "")),
+    ("pending", GOOD_RECORD.replace("ACCEPTED\n", "PENDING\n", 1)),
+    ("missing date", GOOD_RECORD.replace("Date: 2027-01-31\n", "")),
+    ("invalid date", GOOD_RECORD.replace("2027-01-31", "2027-13-45")),
+    ("short sha", GOOD_RECORD.replace("0123456789abcdef0123456789abcdef01234567", "0123456")),
+    ("placeholder", GOOD_RECORD.replace("Accepted by: the maintainer", "Accepted by: (maintainer)")),
+    ("empty field across newline", GOOD_RECORD.replace("Accepted by: the maintainer", "Accepted by:")),
+    ("acceptance value on next line",
+     GOOD_RECORD.replace("Maintainer acceptance: ACCEPTED", "Maintainer acceptance:\nACCEPTED")),
+    ("contradictory acceptance",
+     GOOD_RECORD + "\nMaintainer acceptance: REJECTED\n"),
+    ("pins missing a lock commit", GOOD_RECORD.replace(", mdlzork bdcd4a6", "")),
+    ("missing section", GOOD_RECORD.replace("## Remaining limitations\nFull MDL SAVE/RESTORE (#204).\n", "")),
+    ("empty section", GOOD_RECORD.replace("make m4-accept report.\n", "")),
+    ("fields only in a code fence",
+     GOOD_RECORD.replace("Maintainer acceptance: ACCEPTED", "Maintainer acceptance: PENDING")
+     + "\n```\nMaintainer acceptance: ACCEPTED\n```\n"),
+    ("everything in an HTML comment", "<!--\n" + GOOD_RECORD + "\n-->\n"),
+])
+def test_bad_maintainer_records_never_pass(record_repo, label, record):
+    t = record_repo(record)
+    assert t["status"] == NOT_YET, label
+    assert any("maintainer record r5.md" in r for r in t["reasons"]), label
+
+
+def test_draft_file_and_bad_encoding_never_pass(record_repo):
+    assert record_repo(GOOD_RECORD, name="R5-MAINTAINER-RECORD-DRAFT.md")["status"] == NOT_YET
+    t = record_repo(None, data=b"Maintainer acceptance: \xff\xfe ACCEPTED\n")
+    assert t["status"] == NOT_YET and any("unreadable" in r for r in t["reasons"])
+
+
+def test_record_must_be_committed_and_anchored(record_repo):
+    record_repo.git_ok["ls-files"] = False
+    t = record_repo(GOOD_RECORD)
+    assert t["status"] == NOT_YET and any("git-tracked" in r for r in t["reasons"])
+    record_repo.git_ok["ls-files"] = True
+    record_repo.git_ok["merge-base"] = False
+    t = record_repo(GOOD_RECORD)
+    assert t["status"] == NOT_YET and any("not an ancestor" in r for r in t["reasons"])
+
+
+def test_real_draft_never_counts():
+    draft = m.ROOT / "docs/evidence/M4/R5-MAINTAINER-RECORD-DRAFT.md"
+    assert draft.is_file()
+    assert m.maintainer_record_problems(draft, check_git=False)
 
 
 def test_m4_accepted_without_requirements_is_not_pass():
     man = {**MANIFEST, "m4_plan_requirements": []}
-    assert m.m4_accepted_term(_terms(), man)["status"] == NOT_YET
+    assert acc(_terms(), man)["status"] == NOT_YET
 
 
 def test_compute_terms_on_real_shape_never_accepts_today():
@@ -294,6 +457,17 @@ def test_real_branch_list_cannot_pass_today():
     assert terms["PLAYABLE"]["status"] == NOT_RUN
     assert terms["FULL_COMPLETION"]["status"] == NOT_RUN
     assert terms["M4_ACCEPTED"]["status"] == NOT_YET
+    # The 23-branch baseline is maintainer-approved (2026-11-26); R5 has no
+    # maintainer record yet, so M4_ACCEPTED cannot be PASS whatever passes.
+    assert m.list_approved(branches)
+    assert branches["baseline_version"] == 1
+    required = [b for c in branches["categories"] for b in c["branches"]
+                if b.get("required", True)]
+    assert len(required) == 23
+    r5 = [r for r in manifest["m4_plan_requirements"] if r["id"].startswith("R5")]
+    assert r5 and r5[0]["maintainer_record"] is None
+    assert r5[0]["satisfied_by_term"] is None
+    assert any("R5" in r for r in terms["M4_ACCEPTED"]["reasons"])
     for name in ("combat", "death-and-recovery", "timers", "objects", "scoring",
                  "save-load"):
         assert name in {c["name"] for c in branches["categories"]}

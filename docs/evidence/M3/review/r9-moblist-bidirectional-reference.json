@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "r9-moblist-bidirectional",
+  "recorded_at": "2026-11-26T17:12:09.525270+00:00",
+  "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+  "protocol": "one local process per case; stdin expression then <QUIT>",
+  "cases": [
+    {
+      "name": "setup-then-get-atom-to-oblist",
+      "expression": "<SETG OB <MOBLIST R9X>> <==? <GET R9X OBLIST> ,OB>",
+      "input": "<SETG OB <MOBLIST R9X>> <==? <GET R9X OBLIST> ,OB>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![() () () () () () () () () () () () () () () () ()!]\nT\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "getprop-oblist-after-setup",
+      "expression": "<MOBLIST R9Y> <GETPROP R9Y OBLIST>",
+      "input": "<MOBLIST R9Y> <GETPROP R9Y OBLIST>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "get-oblist-from-atom-after-setup",
+      "expression": "<MOBLIST R9Z> <GET R9Z OBLIST>",
+      "input": "<MOBLIST R9Z> <GET R9Z OBLIST>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "both-directions-together",
+      "expression": "<SETG OB <MOBLIST R9W>> <==? <GET <MOBLIST R9W> OBLIST> R9W>",
+      "input": "<SETG OB <MOBLIST R9W>> <==? <GET <MOBLIST R9W> OBLIST> R9W>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n#OBLIST ![() () () () () () () () () () () () () () () () ()!]\nT\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "#OBLIST ![() () () () () () () () () () () () () () () () ()!]\nT\n",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "complete": true
+}

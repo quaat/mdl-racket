@@ -118,6 +118,49 @@ Exit 0 under the policy (no FAIL; NOT RUN and NOT YET allowed). With
    orchestrator brief. GAMEPLAY-FAILURE-INVENTORY.md still says "to create".
    They could not be checked here because `gh` is not authenticated.
 
+### Maintainer decisions (2026-11-26)
+
+The readings above are decided (ADR-0063 amendment):
+
+1. The 23-branch list is approved unchanged as the initial required baseline
+   (`list_status` APPROVED, `baseline_version` 1, `baseline_history`). It is
+   a minimum contract; later additions are versioned. `m4_check.py` now
+   refuses GAMEPLAY_RELIABILITY PASS for a list that is not APPROVED.
+2. `combat.thief` is covered by thief-robbery and thief-fight together; the
+   thief behaviour neither covers is in `full_completion_backlog`.
+3. PLAYABLE and FULL_COMPLETION have approved definitions (a reproducible
+   save/terminate/restore/continue/quit session; the real 500-point game),
+   recorded in the manifest. Both stay NOT RUN until their gates exist.
+4. R5 is a committed maintainer record; `m4_check.py` checks its form
+   (`maintainer_record_policy`). A draft for the maintainer is
+   `R5-MAINTAINER-RECORD-DRAFT.md`; it is not cited and does not count.
+5. Exit policy 0/1/3 approved. `make m4-accept` is the final gate
+   (`--require-accepted --per-prefix`); `make m4-check` is the PR regression
+   gate. Both print the regression result and the milestone acceptance as
+   two separately labelled results on the final console line, and as two
+   JSON fields (`regression_result`, `milestone_acceptance`).
+7. Hardened after an independent review of PR #205: M4_ACCEPTED also needs
+   the per-prefix protocol to have run and passed and every declared check
+   to have run (so only a full `make m4-accept` can give PASS); R5 can never
+   be satisfied by a term; the record is checked as rendered (fenced code
+   and HTML comments ignored), with exactly one value per field, no
+   placeholders, a valid date, non-empty sections, the `sources.lock.json`
+   commits named, git-tracked, and its reviewed commit an ancestor of the
+   checked commit; a file named as a draft never counts; and
+   `baseline_version` must match the last `baseline_history` entry.
+
+**Verification of this change (branch `docs/m4-decisions`).** `make test`
+exit 0 (raco 5321 passed; pytest 112 passed, 1 deselected) and
+`make m4-check` exit 0 at c02628f (SCENARIO_PARITY PASS 26;
+GAMEPLAY_RELIABILITY NOT YET, 20 of 23, "branch list APPROVED (baseline
+v1)", INV-06 and INV-07 open; PLAYABLE and FULL_COMPLETION NOT RUN;
+M4_ACCEPTED NOT YET; final line "regression result OK ...; milestone
+acceptance M4_ACCEPTED NOT YET"). The review fixes after it are covered by
+`tests/test_m4_check.py` (62 with the corpus tests) and re-run as recorded
+in the PR.
+6. #172 and #173 are decided (ADR-0048 and ADR-0061 amendments; ADR-0064);
+   INV-06 and INV-07 stay open blockers until implemented.
+
 ## Security and licensing
 
 There is no runtime change, and no network service or evaluator is exposed.
@@ -127,7 +170,7 @@ original MIT-0 code and data; nothing was taken from Confusion.
 
 ## Next actionable task
 
-The maintainer reviews the provisional branch list and the exit policy
-(ADR-0063). The next slice after that is the first uncovered combat or
-death branch: promote F12/F13 to native-parity scenario targets in the
-manifest.
+(As of 2026-11-25; done.) Superseded by the approved order of 2026-11-26
+in [PLAN](../../PLAN.md) M4: PRINT and error handling (#173), then
+player-facing persistence (#172), then the PLAYABLE gate and the full
+playthrough.

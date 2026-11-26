@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "r9-channels-errors",
+  "cases": [
+    {"name": "printstring-to-inchan", "expression": "<PRINTSTRING \"abc\" ,INCHAN>"},
+    {"name": "printstring-negative-count", "expression": "<PRINTSTRING \"abc\" ,OUTCHAN -1>"}
+  ]
+}

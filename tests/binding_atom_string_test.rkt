@@ -148,6 +148,29 @@
 (check-equal? (steps "<SETG FOO 1>" "<MANIFEST FOO>" "<SETG FOO 2>" ",FOO")
               (list 1 "T" '(error "mdl-setg: ATTEMPT-TO-CHANGE-MANIFEST-VARIABLE FOO") 1))
 
+;; --- #121 (superseded by #199): APPLY and a FORM head with a STRING; REST views ---
+;; Pinned Confusion: NON-APPLICABLE-TYPE for <APPLY "F" 1>, <APPLY "+" 1 2> and
+;; <"F" 1>; SETG and GVAL reject <REST "XFOO" 1>
+;; (docs/evidence/M4/i121-apply-string-reference.json). The STRING never names
+;; the function, and nothing is interned.
+(let ([r (steps "<DEFINE M121-F (X) <+ .X 1>>"
+                "<APPLY \"M121-F\" 1>"
+                "<\"M121-F\" 1>"
+                "<APPLY \"+\" 1 2>"
+                "<APPLY ,M121-F 1>"
+                "<LOOKUP \"M121-G\" <1 .OBLIST>>"
+                "<APPLY \"M121-G\" 1>"
+                "<LOOKUP \"M121-G\" <1 .OBLIST>>")])
+  (check-equal? (list-ref r 0) 'DEFINED)
+  (for ([i '(1 2 3 6)])
+    (check-match (list-ref r i) (list 'error (regexp #rx"NON-APPLICABLE-TYPE"))))
+  (check-equal? (list-ref r 4) 2)
+  (check-equal? (list-ref r 5) 'FALSE)
+  (check-equal? (list-ref r 7) 'FALSE))
+(check-equal? (steps "<SETG M121-V 7>" "<SETG <REST \"XM121-V\" 1> 3>"
+                     "<GVAL <REST \"XM121-V\" 1>>" ",M121-V")
+              (list 7 (rejected "mdl-setg") (rejected "mdl-gval") 7))
+
 ;; --- the runtime value API takes ATOMs only ----------------------------------
 (parameterize ([current-namespace ns]
                [current-mdl-globals (make-hasheq)]

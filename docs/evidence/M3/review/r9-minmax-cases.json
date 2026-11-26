@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "r9-minmax-reference",
+  "cases": [
+    {"name": "min-no-args", "expression": "<MIN>"},
+    {"name": "max-no-args", "expression": "<MAX>"},
+    {"name": "type-of-min", "expression": "<TYPE <MIN>>"},
+    {"name": "type-of-max", "expression": "<TYPE <MAX>>"},
+    {"name": "chtype-min-fix", "expression": "<CHTYPE <MIN> FIX>"},
+    {"name": "chtype-max-fix", "expression": "<CHTYPE <MAX> FIX>"},
+    {"name": "min-two-ints", "expression": "<MIN 1 2>"},
+    {"name": "min-two-floats", "expression": "<MIN 4.0 2.0>"},
+    {"name": "min-mixed", "expression": "<MIN 4 2.0>"},
+    {"name": "max-two-ints", "expression": "<MAX 1 2>"},
+    {"name": "max-two-floats", "expression": "<MAX 4.0 2.0>"},
+    {"name": "max-mixed", "expression": "<MAX 4 2.0>"},
+    {"name": "min-with-sentinel", "expression": "<MIN <MIN> 1>"},
+    {"name": "max-with-sentinel", "expression": "<MAX <MAX> 1>"},
+    {"name": "g?-min-sentinel", "expression": "<G? <MIN> 1.0>"},
+    {"name": "l?-max-sentinel", "expression": "<L? <MAX> 1.0>"},
+    {"name": "eq-min-min", "expression": "<==? <MIN> <MIN>>"},
+    {"name": "equal-min-min", "expression": "<=? <MIN> <MIN>>"
+    }
+  ]
+}

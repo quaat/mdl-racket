@@ -1318,6 +1318,43 @@ pending (DIVERT-CNT stayed 0). The run then stops in CONTIN at
 `evidence/M3/S5-SAVE-RECORD.md`. INITIALIZED remains FAIL. No GPLv3
 implementation was copied.
 
+### Amendment (maintainer decision on #172, 2026-11-26): four persistence capabilities
+
+The maintainer decided #172: deterministic replay is approved for Zork
+player-facing persistence and command-boundary restoration, subject to
+native-backed behavioural verification. That is **not** complete
+language-level MDL SAVE/RESTORE support; the original continuation semantics
+stay a separate conformance objective. Four capabilities are therefore kept
+apart. None of them implies another.
+
+| # | Capability | Status | Where |
+|---|---|---|---|
+| 1 | **The M3 SAVE record.** `<SAVE file-spec>` returns a fresh `"SAVED"` and appends a host-visible record; no file, no GC, no RESTORE (points 1–3 above). | In force, unchanged | This ADR |
+| 2 | **Host replay persistence.** The host records a session's inputs and clock observations at a stable command boundary and rebuilds the state by replaying them from a fresh boot, then verifies it. | Proof of concept on `main`; player-facing slice approved, not implemented | ADR-0061 and its amendment |
+| 3 | **In-game Zork SAVE/RESTORE compatibility.** The game's own `save` and `restore` commands (DO-SAVE, DO-RESTORE, SAVE-GAME, RESTORE-GAME) behave observably as the original does at the points the game uses them. | Not implemented; strict. Implemented through capability 2 **only where equivalence with the native behaviour is demonstrated**; any game-level continuation adapter stays outside the generic MDL primitives | ADR-0061 amendment, Phase C |
+| 4 | **Full MDL SAVE/RESTORE.** The manual's semantics (11.6): SAVE returns `"SAVED"`; a successful RESTORE does not return to its caller but resumes the suspended SAVE activation, which then returns `"RESTORED"`. | Not implemented; a language-conformance objective (epic #177, L-level issue) | Future |
+
+Rules that follow:
+
+- The manual and pinned Confusion disagree on capability 4 (recorded in
+  point 3 above and in `evidence/M3/S5-SAVE-FRONTIER.md`). Confusion's
+  successful RESTORE replaces the heap and re-enters the top-level LISTEN
+  loop; it does not resume the SAVE activation. The two behaviours are never
+  conflated: capability 3 follows the game's observable behaviour under the
+  pinned reference, and capability 4 follows the manual.
+- No fake RESTORE: a RESTORE that only returns `"RESTORED"` from an ordinary
+  call, or that silently restarts the game and calls that a restoration
+  without checking the resulting state and continuation, is not allowed.
+- A claim of capability 4 needs restoring the suspended SAVE activation
+  itself, not only global values or a return to a command loop. Direct
+  runtime snapshots remain a possible implementation strategy, subject to
+  validation of frame ownership, continuations, shared mutable objects,
+  channels and other execution state.
+- Capability 1 stays as decided: RESTORE remains a strict error at the MDL
+  level until capability 4 replaces it under its own reviewed slice.
+  Capability 3 is served by the Zork compatibility layer and does not change
+  the MDL RESTORE primitive.
+
 ## ADR-0049: Inert REP and a host top-level loop
 
 **Decision (maintainer, 2026-11-23, "Inert REP + host loop"):**
@@ -2070,7 +2107,7 @@ not needed by the game; recorded as a deviation).
 
 ## ADR-0061: Game persistence by deterministic replay first (hybrid strategy)
 
-Status: accepted direction (maintainer, 2026-11-23): hybrid persistence, deterministic replay first. Decisions taken: the resumed clock, any runtime with the same game sources, saves at the command prompt only. The implementation is validated by the WP4.5 proof of concept. ADR-0048 and ADR-0055 stay in force; this ADR does not amend them. Epic #163, WP4.
+Status: accepted direction (maintainer, 2026-11-23): hybrid persistence, deterministic replay first. Decisions taken: the resumed clock, any runtime with the same game sources, saves at the command prompt only. The implementation is validated by the WP4.5 proof of concept. ADR-0048 and ADR-0055 stay in force; this ADR does not amend them. Epic #163, WP4. **Amended 2026-11-26** (maintainer decision on #172): see "Amendment (maintainer decision on #172, 2026-11-26): player-facing persistence" below; ADR-0048 is amended alongside, and ADR-0055 stays in force for MDL code.
 
 ### Context
 
@@ -2248,6 +2285,64 @@ checkpoint taken after a SLEEP or TIME restores exactly and its replay never
 waits (`tests/replay_sleep_time_test.rkt`). The format `mdl-zork-replay/v1`
 is unchanged.
 
+### Amendment (maintainer decision on #172, 2026-11-26): player-facing persistence
+
+Status: accepted direction. Amends this ADR and ADR-0048 (its four-capability
+amendment). ADR-0055 stays in force for MDL code.
+
+**Decision.** Player-facing Zork persistence uses this ADR's deterministic
+replay now. It is host-owned and claimed only at the supported stable
+command-loop boundaries (the RDCOM prompt rule above); it never claims to
+capture an arbitrary continuation. The validated replay machinery is reused
+in preference to a new serialization mechanism.
+
+**Requirements for the player-facing slice (Phase C):**
+
+- explicit host-owned persistence: the host (launcher) owns a save store with
+  confined slot names and no player-controlled paths; MDL code gains no file
+  access, and ADR-0055's virtual no-file policy for OPEN is unchanged;
+- bounded, versioned checkpoint data with source and runtime compatibility
+  identifiers (`format`, source manifest hash, runtime provenance as above);
+- verified RNG continuity, both state words, including an explicit
+  `<RANDOM s1 s2>` reseed made by the game;
+- verified clock observations and the replay-to-live transition (the
+  resumed clock);
+- verification of the reconstructed game state before the restore is
+  accepted;
+- atomic writes and integrity checks; safe rejection of corrupted,
+  incomplete or incompatible saves, before any session is created;
+- a failed restore never corrupts the active session; sessions are isolated;
+- replay never duplicates external side effects or historical output.
+
+**The game's own commands.** Before the game's `save`/`restore` are wired to
+the host store, the original DO-SAVE, DO-RESTORE and the patched startup
+paths are inspected and recorded: the exact point where the in-game SAVE
+captures state; how it differs from the startup SAVE-IT; what happens when
+the in-game RESTORE succeeds or fails; the 20-minute rule and its WINNERS
+exception; how INTIME, PLAYED-TIME, THEN and the resumed clock interact;
+whether reconstruction at the next command prompt is observably equivalent;
+and how the manual's and pinned Confusion's messages and return paths
+differ. Host replay implements the game's SAVE/RESTORE only where that
+equivalence is demonstrated; a game-level continuation adapter, if needed,
+lives in the Zork compatibility layer (`zork/`), never in the MDL runtime.
+
+**Required tests** (epic #163 Phase C): save, terminate the process, restore
+in a new process and continue; save before combat and get identical combat
+outcomes for identical later inputs; save after combat and verify inventory,
+room, flags, score and NPC state; restore with pending lamp, healing and
+other clock events; an explicit RANDOM reseed preserved through replay;
+rejection of tampering, invalid versions, changed sources and inconsistent
+clock histories; the same save restored repeatedly without changing its
+contents; a failed restore leaving the active session intact; no duplicated
+side effects or historical output; in-game SAVE and RESTORE compared with
+pinned native behaviour wherever meaningful; the 20-minute rule and the
+WINNERS exception; the transition from a successful restore into later
+commands. The three save branches (`save.game-save-command`,
+`save.game-restore-command`, `save.player-facing-resume`) get formal checks.
+
+**Trust model unchanged:** the checksum is integrity, not authentication
+(review L4 above).
+
 ## ADR-0062: M4 scenarios run once per scenario, checked at every READSTRING entry
 
 Status: proposed (2026-11-24, branch `feat/m4-single-run-runner`; Phase 1 of
@@ -2349,7 +2444,9 @@ non-standard (treasure-deposit prefix 15 is re-run).
 
 ## ADR-0063: `make m4-check` reports the five M4 terms from declared manifests
 
-Status: proposed (2026-11-25, branch `feat/m4-check`; Phase 7 of epic #163).
+Status: proposed 2026-11-25 (branch `feat/m4-check`; Phase 7 of epic #163);
+**accepted 2026-11-26 with the amendment below**, which decides the
+conservative readings.
 Evidence: `docs/evidence/M4/M4-CHECK.md`. Needs maintainer review of the
 conservative readings marked below.
 
@@ -2380,6 +2477,57 @@ conservative readings marked below.
 - CI: the reference workflow's twelve per-scenario steps are replaced by one
   `make m4-check` step running the same targets sequentially; per-target logs
   are uploaded from `artifacts/m4-check/logs/`.
+
+### Amendment (maintainer decisions, 2026-11-26): approved baseline, exit policy, R5 record
+
+Status: **accepted** (the conservative readings above are decided as follows).
+
+- *Branch baseline.* The 23-branch list in
+  `docs/evidence/M4/gameplay-branches.json` is approved as the initial
+  required baseline (`list_status` APPROVED, `baseline_version` 1). It is a
+  minimum acceptance contract, not a claim that every game behaviour is
+  exercised. Branches may be added when justified by reachability, risk,
+  full-completion dependencies or new defects; every change bumps
+  `baseline_version`, is listed in `baseline_history` and recorded here.
+  `scripts/m4_check.py` never gives GAMEPLAY_RELIABILITY PASS for a list that
+  is not APPROVED.
+- *Thief coverage.* `combat.thief` is covered by `test-m4-thief-robbery` and
+  `test-m4-thief-fight` together; both stay required and must pass. Neither
+  covers all thief behaviour. The hero defeating or killing the thief, the
+  thief's death or unconsciousness, the release or redistribution of stolen
+  objects, treasure recovery with its score and object-state changes, and
+  other combat endings are in the file's `full_completion_backlog`. An item
+  shown to be required for completing the game becomes its own native-backed
+  regression and required branch; it is never marked covered because the two
+  scenarios pass.
+- *The five terms stay separate:* SCENARIO_PARITY, GAMEPLAY_RELIABILITY,
+  PLAYABLE, FULL_COMPLETION, M4_ACCEPTED. No combined success flag.
+- *Exit policy (approved):* 0 = every executed check passed, acceptance may
+  be incomplete; 1 = an executed check failed or a manifest is invalid;
+  3 = `--require-accepted` and M4_ACCEPTED is not PASS. Ordinary PR CI runs
+  `make m4-check` without `--require-accepted`. The final acceptance gate is
+  `make m4-accept` (`--require-accepted --per-prefix`, report under
+  `artifacts/m4-accept/`). The console and the JSON report state the
+  regression result (`regression_result`) and the milestone acceptance
+  (`milestone_acceptance`) separately.
+- *R5 sign-off.* "Accepted exceptions are source-justified" is satisfied only
+  by a committed maintainer record. It states the exact commit and source
+  pins reviewed, the accepted semantic deviations with the evidence for each,
+  their scope and consequences, the remaining limitations, the maintainer's
+  explicit acceptance and its date. The check verifies its form (the required
+  lines and sections, `maintainer_record_policy` in the manifest), not its
+  truth. An agent may prepare a draft (`R5-MAINTAINER-RECORD-DRAFT.md`, never
+  cited by the manifest) but never writes or implies the maintainer's
+  approval. M4_ACCEPTED stays NOT YET until the record exists and every other
+  condition holds.
+- *PLAYABLE (definition approved).* A reproducible user-facing session gate:
+  start, progression, save, process termination, restore in a fresh process,
+  continuation and quit. Until that gate exists the term stays NOT RUN.
+- *FULL_COMPLETION (definition approved).* The original game's own
+  completion conditions and scoring rules: the complete 500-point game,
+  reached by a real native-backed playthrough of the unchanged sources. No
+  synthetic endpoint, manually modified world state, skipped puzzle or
+  hardcoded victory.
 
 ## ADR: Binding primitives take ATOMs only; hosts resolve names without interning (M4 issue #199)
 
@@ -2415,3 +2563,86 @@ Evidence: `docs/evidence/M4/I199-STRING-ATOM.md`; SEMANTICS "M4 #199".
 - *Consequences.* Host code and tests that called the runtime's value API
   with a string name now pass `(mdl-atom NAME)` explicitly. A host that wants
   a missing name to be created must say so with `mdl-session-atom`.
+
+## ADR-0064: Historical PRINT; MDL errors, language evaluation errors and host failures are classified separately (#173)
+
+Status: accepted direction (maintainer decision on #173, 2026-11-26).
+Implementation: epic #163 Phase B, in small separately reviewed PRs.
+
+- *Context.* The game's error handler HANDLE (`77rooms.mud:251`) calls PRINT,
+  which this runtime does not define (INV-07). More generally, the runtime
+  raises host exceptions for many language-level errors that historical MDL
+  delivers through its ERROR mechanism.
+- *Decision 1: PRINT.* Implement PRINT as the manual specifies (11.1.2.1):
+  evaluate the argument once; output the leading line separator; output the
+  object's printed representation exactly as PRIN1 does; output the trailing
+  space; return the evaluated object. It uses the current or the given output
+  channel, keeps the object's TYPE and identity, and does not mutate it. It
+  gets independent primitive tests (ordinary, structured, STRING and custom
+  TYPE values, wrong arity, output, evaluation side effects), exact output
+  compared with pinned Confusion where supported, and the game's
+  error-handler path as a regression. PRINT has no special case for HANDLE.
+- *Decision 2: three error classes, never merged.*
+  - **A. Explicit MDL errors** (`<ERROR ...>`): the existing ERROR,
+    interrupt-frame, handler and ERRET machinery (ADR-0025, #113 R8), with the
+    documented interrupt-level and non-local control semantics.
+  - **B. Language-level evaluation errors** (type mismatch, wrong argument
+    count, unassigned variable, non-applicable object, invalid structure
+    operation): for each category, establish from the manual and pinned
+    Confusion whether historical MDL enters the ERROR mechanism or produces
+    another error-level transition, then deliver it faithfully where
+    warranted. One category per change, each with evidence and its own tests;
+    no blanket conversion of host exceptions.
+  - **C. Host and infrastructure failures** (memory and resource limits,
+    invalid or corrupted checkpoints, I/O policy violations, session
+    termination, internal invariant failures): stay distinguishable from
+    language-generated ERROR occurrences and are never suppressed or
+    recovered by a user-defined MDL error handler.
+- *Interrupts.* Where Confusion's implementation is incomplete or stubbed,
+  the manual is the specification for interrupt behaviour.
+- *Required regressions:* explicit ERROR delivery, eligible handler
+  execution, correct arguments and FRAME identity, ERRET where documented,
+  normal fall-through, interrupt-level suppression, nested errors, UNWIND and
+  activation cleanup, no cross-session or stale-frame use, host failures
+  bypassing language-level recovery, and no regression in the M4 scenarios.
+- *Closing #173.* Only when its agreed scope (PRINT and the game's handler
+  path) is implemented and independently reviewed. Broader error
+  compatibility goes to a separate language-conformance issue with explicit
+  acceptance criteria.
+
+## ADR-0065: Reference corpus retention and size policy
+
+Status: accepted (maintainer decision, 2026-11-26).
+
+- *Context.* The tracked evidence and fixture corpus on `main` `5b27177` is
+  41.6 MiB in 558 files (audit 2026-11-26, `scripts/reference_size_audit.py`): `docs/evidence/M4`
+  38.4 MiB in 103 files, of which twelve native scenario references exceed
+  1 MiB (the largest 5.9 MiB). The packed Git history is about 3.5 MiB, since
+  the JSON compresses well.
+- *Decision.*
+  - Keep every validated reference needed for reproducibility.
+  - Soft total budget (maintainer decision): 64 MiB for tracked files under
+    `docs/evidence/`, `tests/scenarios/` and `tests/fixtures/`. Exceeding it
+    is allowed only with a recorded justification in
+    `docs/evidence/reference-corpus-policy.json`; until that entry exists,
+    `tests/test_reference_corpus.py` fails CI, so "soft" means
+    "justification required", not "warning only".
+  - Single-file limit of 8 MiB: **proposed by the orchestrator, pending
+    maintainer confirmation** (the decision asked to audit actual sizes
+    before any per-file restriction; the audit's largest file is 5.9 MiB, so
+    the limit binds no current file). It is enforced the same way and is
+    removed or changed if the maintainer does not confirm it.
+  - Keep small, human-reviewable canonical fixtures in Git. Prefer compact,
+    structured reference data over duplicated raw execution traces. Every
+    reference keeps its source hashes, interpreter hash, scenario id, clock
+    settings and provenance.
+  - Oversized reproducible captures go to hash-verified CI artifacts or
+    release archives, with the hash and the capture command committed.
+  - No Git LFS unless its operational advantages and CI requirements are shown
+    to justify it.
+  - Reference updates are explicit, reviewed changes made by the capture
+    tools. A normal test run never replaces an accepted historical reference.
+    Related, to be changed: the diagnostic target `make m4-decl-sweep` (not
+    part of `make test` or `make m4-check`) rewrites its committed report
+    `docs/evidence/M4/decl-violation-sweep.json`, an our-runtime diagnostic,
+    not a native reference.
