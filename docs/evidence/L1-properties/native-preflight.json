@@ -1,0 +1,46 @@
+{
+  "source_commit": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+  "exe_sha256": "da8472a991a8f2fe109c117cfe00c6207edb5bb8d9033dfe36f1e2d478380f68",
+  "cases": [
+    {
+      "name": "numeric-indicator",
+      "input": "<SET L '(1 2 3 4)>\n<PUTPROP .L 3 '![4]>\n<GETPROP .L 3>\n<GET .L 3>\n<QUIT>\n",
+      "result_output": "(1 2 3 4)\n(1 2 3 4)\n![4!]\n3\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "replacement-removal",
+      "input": "<PUTPROP ITEM KEY 9>\n<GETPROP ITEM KEY>\n<PUTPROP ITEM KEY 12>\n<GETPROP ITEM KEY>\n<PUTPROP ITEM KEY>\n<PUTPROP ITEM KEY>\n<GETPROP ITEM KEY>\n<QUIT>\n",
+      "result_output": "ITEM\n9\nITEM\n12\nITEM\nITEM\n#FALSE ()\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "fallback-order",
+      "input": "<SET A 0>\n<SET B 0>\n<GETPROP ITEM KEY <PROG () <SET A <+ .A 1>> '<SET B <+ .B 1>>>>\n.A\n.B\n<PUTPROP ITEM KEY #FALSE ()>\n<GETPROP ITEM KEY <PROG () <SET A <+ .A 1>> '<SET B <+ .B 1>>>>\n.A\n.B\n<QUIT>\n",
+      "result_output": "0\n0\n1\n1\n1\nITEM\n#FALSE ()\n2\n1\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "identity",
+      "input": "<SET IND '(1 2)>\n<SET SAME .IND>\n<PUTPROP ITEM .IND 8>\n<GETPROP ITEM .SAME>\n<GETPROP ITEM '(1 2)>\n<QUIT>\n",
+      "result_output": "(1 2)\n(1 2)\nITEM\n8\n#FALSE ()\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    },
+    {
+      "name": "interoperability",
+      "input": "<SET L '(1 2 3)>\n<PUTPROP .L IND 15>\n<GET .L IND>\n<PUT .L IND 16>\n<GETPROP .L IND>\n<PUTPROP .L 99 5>\n<GETPROP .L 99>\n<QUIT>\n",
+      "result_output": "(1 2 3)\n(1 2 3)\n15\n(1 2 3)\n16\n(1 2 3)\n5\n",
+      "stderr": "",
+      "exit_code": 0,
+      "ok": true
+    }
+  ]
+}

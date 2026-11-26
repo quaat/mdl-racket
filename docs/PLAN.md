@@ -1,5 +1,10 @@
 # Development roadmap: MDL on Racket and the 1977 Zork
 
+## Parallel language conformance track
+
+General MDL conformance uses L0–L5 and the same runtime as this roadmap.
+See the [language plan](conformance/PLAN.md) and [status](conformance/STATUS.md).
+
 ## Definition of done
 
 **Playable** means the original parser, rooms, objects, puzzles, NPC behaviors,

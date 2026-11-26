@@ -1,0 +1,54 @@
+name: MDL language conformance
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  conformance:
+    runs-on: ubuntu-24.04
+    container:
+      image: racket/racket:8.10-bc@sha256:8c527e0cca4650a6bdd73f3f73fe203ede6317c82f3f3f33bc861cec981e8b2d
+    timeout-minutes: 15
+    steps:
+      - name: Install Git and Make
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git make
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Trust the container-mounted checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Racket libraries and link this checkout
+        run: |
+          raco pkg install --auto --no-docs compiler-lib rackunit-lib compatibility-lib
+          raco pkg install --auto --no-docs --link
+      - name: Install Python test dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Fetch pinned manual transcription
+        run: |
+          mkdir -p .cache/conformance-manual
+          git -C .cache/conformance-manual init --quiet
+          manual_revision=$(python -c 'from scripts.conformance_evidence import MANUAL_REVISION; print(MANUAL_REVISION)')
+          git -C .cache/conformance-manual fetch --depth 1 https://github.com/taradinoc/mdl-docs.git "$manual_revision"
+          git -C .cache/conformance-manual checkout --detach FETCH_HEAD
+      - name: Validate fixtures, evidence and inventory
+        run: python scripts/inventory_manual.py .cache/conformance-manual --check
+      - name: Test conformance infrastructure
+        run: make test-conformance-harness PYTHON=python
+      - name: Run the manual corpus
+        shell: bash
+        run: |
+          mkdir -p artifacts/l0
+          set -o pipefail
+          make test-manual PYTHON=python 2>&1 | tee artifacts/l0/manual.log
+      - name: Upload conformance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdl-conformance
+          path: artifacts/l0/

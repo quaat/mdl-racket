@@ -1,5 +1,8 @@
 # Status — 2026-11-25 (`main` = `513272f`: M3 accepted; M4 S1–S10 merged (11 native-parity scenarios); SCENARIO_PARITY PASS for those 11 in a local `make m4-check` run on branch `feat/m4-check` (main + check scaffold, no runtime change; scenario-scoped, one fixed clock and seed); WP4 replay persistence proof of concept; GAMEPLAY_RELIABILITY NOT YET; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN; M4_ACCEPTED NOT YET)
 
+The parallel [language conformance status](conformance/STATUS.md) records L0
+and its regression evidence. Gameplay acceptance remains with epic #163.
+
 ## Current state (2026-11-23)
 
 States used below: **PASS (mainline)** = verified on `main`; **PASS (branch

@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "provenance": {
+    "manifest_version": 2,
+    "manifest_sha256": "180468097b091217d0eeafd7b666158721bf153ad860948b3221975376966040",
+    "manual_revision": "89707367b951ea79bedc71f51ab213886e0f62ce",
+    "reference_revision": "bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3",
+    "exe_sha256": "da8472a991a8f2fe109c117cfe00c6207edb5bb8d9033dfe36f1e2d478380f68",
+    "toolchain": {
+      "python": "3.13.5",
+      "machine": "x86_64"
+    }
+  },
+  "agreements": {
+    "fix-literal": "ef7db4d74203fe6be840334d09e375ed6835f3ffebca8f28a8fa760edcab5573",
+    "float-literal": "928666220f5ce057f3f14fb020c98899dc6d1728ac2527880ea0a9312706b726",
+    "atom-literal": "f6582c9bbffee71a781aa9557828eb2deeb5003e90b9032a3a6b96f871bc39ea",
+    "add": "f9dac1b4686f15dfa69470386715d676dbca6da4553b85eefe20efb62dff2eec",
+    "fix-cast": "68dafd9ea2a7d3226c3b29caefee7f6594f3570204ba1b2a551ed5cbcd990acf",
+    "mixed-division": "18d44432c1ec3b046e6a5e589fd12c3c8cdd3ca44e5daf48feb4c10ddd2b6efd",
+    "setg": "804854cc3c7e97bf1ce0d17a83bd1d129c071545d593cf2b848bd94cf83d2120",
+    "gval": "c476f34eb6a5d3c5105645d88ace496333ef9aec3e57613d0d5896a42fc95f67",
+    "builtin-type": "c4ad74d49d3631fb2e266b419bccc2a7b599f06e0ebd1b004973d1aa5cc6aa90",
+    "float-primtype": "7f91f6f5440ab8bec8a8939d4d5e3ba2c11a7f5a7345fa8b7e2b89f0db6a40f7",
+    "evaluated-list": "84580dfd9c405271d11440d8d9f44f52a4eb3cac45e81b0f236d7073bedbd163",
+    "empty-form": "e356ec7c19a19ac1c3c43c349bc4d8f52d90ac2e69cb83e38d4f8d5007321f32",
+    "member-string": "6f33951d805a15c7f6d5ce19fac00113d82c65c53111d28a45366e854a66515d",
+    "sequential-aux": "eccf703809270887cffe0b50cd2131ca67f8395358a097be343b8d880072977b",
+    "mapf-string": "de9b4ee3cd08ce7529a9af2655c29c294510394d34d331a6bbb3a72dee95b113",
+    "association": "84cc207991fa9b5ed3164a8da6266560f054adb4f205c756d02311bf1c280bf1",
+    "numeric-get": "95cff0ffe50ad5985c6dd4e634e503ed3c00b928ff73d6238187b51a8699e595",
+    "declaration-match": "25c7a5e44b7fc7560b494520d548fa38cc796a5517976a1e23ce34ba814370dd",
+    "macro-increment": "610e3d0aed8954bbbc851b6d1049e3d79e0775e560566fb55745b07d263caf60",
+    "getbits": "8c04768f20dfe525c8655ff9c7cfa1cc4599e7321965f4a170e94f2cb45134d6"
+  }
+}
