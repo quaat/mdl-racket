@@ -54,6 +54,19 @@ directory). Exit 0 when every unit produced a result (a unit that diverges
 from native with the recorder on is data) and the report was written.
 Options: `M4_DECL_SWEEP_ARGS="--units a,b --reuse --out P --work D"`.
 
+## Reference corpus size policy (ADR-0065, 2026-11-26)
+
+`scripts/reference_size_audit.py` reports the tracked files under
+`docs/evidence/`, `tests/scenarios/` and `tests/fixtures/` against
+[`docs/evidence/reference-corpus-policy.json`](evidence/reference-corpus-policy.json):
+a soft total budget of 64 MiB and a single-file limit of 8 MiB, each
+exceedable only with a recorded justification. `tests/test_reference_corpus.py`
+(in `make test-python`) enforces both. Audit of 2026-11-26: 41.59 MiB in 558
+files; the largest file is 5.91 MiB. Reference updates are explicit changes
+made by the capture tools and reviewed; a normal test run never replaces an
+accepted reference (known exception to remove: `make m4-decl-sweep` rewrites
+its own diagnostic report).
+
 ## M4 acceptance-term check (`make m4-check`, 2026-11-25)
 
 `make m4-check` (`scripts/m4_check.py`, epic #163 Phase 7) runs every check
@@ -67,10 +80,10 @@ acceptance terms of [STATUS](STATUS.md) separately, never as one PASS:
 | Term | Rule in `m4_check.py` |
 |---|---|
 | SCENARIO_PARITY | PASS only if every declared scenario target exits 0 (scope: N scenarios, each under one fixed clock and seed); FAIL if any fails, if `--per-prefix` fails, or if the manifest is incomplete; NOT RUN if any scenario did not run |
-| GAMEPLAY_RELIABILITY | per required branch of [`gameplay-branches.json`](evidence/M4/gameplay-branches.json): UNCOVERED (no covering check), PASS (all covering checks ran and passed), FAIL, or NOT RUN. The term is FAIL if a covering check failed; NOT YET while any required branch is UNCOVERED or a blocking inventory item is open; NOT RUN if a covering check did not run; PASS only otherwise. Discovery runs (failure-inventory cases) never count as coverage |
+| GAMEPLAY_RELIABILITY | per required branch of [`gameplay-branches.json`](evidence/M4/gameplay-branches.json): UNCOVERED (no covering check), PASS (all covering checks ran and passed), FAIL, or NOT RUN. The term is FAIL if a covering check failed; NOT YET while any required branch is UNCOVERED or a blocking inventory item is open, or while the branch list is not maintainer-APPROVED (`list_status`; baseline v1 approved 2026-11-26); NOT RUN if a covering check did not run; PASS only otherwise. Discovery runs (failure-inventory cases) never count as coverage |
 | PLAYABLE | NOT RUN: no verified PLAYABLE gate exists. The sub-checks are run as evidence; a failing one makes the term FAIL; passing ones never make it PASS |
 | FULL_COMPLETION | NOT RUN: no complete-game check is declared (Phase 6) |
-| M4_ACCEPTED | PASS only if all four terms PASS and every `m4_plan_requirements` entry is met (a manual requirement needs a committed maintainer record); otherwise NOT YET with the unmet list |
+| M4_ACCEPTED | PASS only if all four terms PASS and every `m4_plan_requirements` entry is met (R5 needs a committed maintainer record with the required lines and sections, `maintainer_record_policy`); otherwise NOT YET with the unmet list |
 
 **Statuses.** PASS; FAIL; NOT RUN (not executed: skipped, prerequisite
 failed, or no check exists); NOT YET (what exists was executed, the
@@ -79,7 +92,13 @@ requirements are not met).
 **Exit policy.** 0 when no term and no executed check is FAIL (NOT RUN and
 NOT YET are allowed); 1 on any FAIL, including an incomplete manifest or a
 failed `make sources`; with `--require-accepted`, 3 when M4_ACCEPTED is not
-PASS and nothing failed.
+PASS and nothing failed (approved, ADR-0063 amendment 2026-11-26). Ordinary
+PR CI runs `make m4-check` (regression result). The final milestone gate is
+`make m4-accept` (`--require-accepted --per-prefix`, report
+`artifacts/m4-accept/m4-check.json`); it exits 3 until M4_ACCEPTED is PASS.
+The console's last lines and the JSON fields `regression_result` and
+`milestone_acceptance` state the two results separately; exit 0 from
+`make m4-check` is never milestone acceptance.
 
 **Options** (`make m4-check M4_CHECK_ARGS="..."`): `--scenarios-only` (only
 `sources` and the scenario targets; persistence and PLAYABLE sub-checks NOT

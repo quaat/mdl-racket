@@ -230,26 +230,36 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
 
 ## M4 — Comprehensive behavioral equivalence
 
-> **Progress (2026-11-24, `main` = `065098d`).** On mainline, each
-> scenario-scoped:
-> - S1–S7 match native: house and cellar, SEGMENT, CHARACTER, TOP and the
->   parser, take the sword, troll combat, parser ambiguity.
-> - WP4 replay persistence is proven (#165, ADR-0061).
+> **Progress (2026-11-26, `main` = `5b27177`).** On mainline, each
+> scenario-scoped: 26 native-parity scenarios match pinned Confusion
+> (SCENARIO_PARITY PASS); 20 of the 23 approved required gameplay branches
+> are covered (GAMEPLAY_RELIABILITY NOT YET: the three save branches; open
+> blockers INV-06 RESTORE and INV-07 PRINT); WP4 replay persistence is
+> proven (#165, ADR-0061). PLAYABLE and FULL_COMPLETION are NOT RUN;
+> M4_ACCEPTED is NOT YET. The five acceptance terms stay separate
+> (definitions in [STATUS](STATUS.md)).
 >
-> The M4 gate is NOT YET PASSED. The completion plan and its tracking are
-> epic [#163](https://github.com/quaat/mdl-racket/issues/163), phases 0–7:
-> - baseline;
-> - failure discovery and harness;
-> - combat, death and recovery;
-> - parser, objects, scoring and timers;
-> - persistence;
-> - known defects;
-> - the full playthrough;
-> - the gates.
+> **Approved development order (maintainer, 2026-11-26)**, tracked in epic
+> [#163](https://github.com/quaat/mdl-racket/issues/163):
+> - **A. Decisions and tracking:** ADR amendments (ADR-0048, ADR-0061,
+>   ADR-0063; new ADR-0064 PRINT and error classes, ADR-0065 reference
+>   corpus), the approved 23-branch baseline, #121 and #113 dispositions.
+> - **B. PRINT and error handling (#173):** PRINT per the manual, then
+>   evidence-backed error-classification steps (ADR-0064).
+> - **C. Player-facing persistence (#172):** host-owned replay save/resume,
+>   then the game's own SAVE/RESTORE where equivalence is demonstrated
+>   (ADR-0061 amendment); formal checks for the three save branches.
+> - **D. Gameplay completion:** the PLAYABLE gate, a native-backed
+>   playthrough to the real 500-point ending, `make m4-accept`, the R5
+>   maintainer record.
+> - **E. Semantic correctness and safety backlog:** #120 (release blocker
+>   for any shared service), #127, #129, #126, #134, coordinated with the
+>   conformance epic.
+> - **F. General MDL conformance (after M4):** epic #177 and the L0
+>   inventory (#178, PR #180).
 >
-> Acceptance terms are kept separate: SCENARIO_PARITY, GAMEPLAY_RELIABILITY,
-> PLAYABLE, FULL_COMPLETION and M4_ACCEPTED (definitions in
-> [STATUS](STATUS.md)).
+> General principle: historical MDL semantics come first; no Zork-specific
+> shortcut enters the language runtime.
 
 **Build:** scripted paths across map/puzzles; inventory, game death,
 NPCs, lamp/timers, parser edge cases, randomness, scoring, save/restore,
@@ -266,8 +276,9 @@ issues and PRs, not M4 tasks. The epic's items:
 - state schema: per-scenario checkpoints plus the Phase 1 runner;
 - deterministic RNG: done on mainline (#109, ADR-0061 `rng/v1`);
 - complete-game test: Phase 6;
-- save/restore: WP4 (host replay proven in #165; player-facing WP4.7; native
-  SAVE/RESTORE needs its own decision);
+- save/restore: WP4 (host replay proven in #165); player-facing persistence
+  and the game's own SAVE/RESTORE are Phase C (#172 decided 2026-11-26);
+  full MDL SAVE/RESTORE continuation semantics are a conformance objective;
 - security review: Phase 5, with #120 blocking any exposed service.
 
 ## M5 — Browser application (server-backed first)

@@ -32,7 +32,8 @@ MANIFEST = {
 }
 
 BRANCHES = {
-    "list_status": "PROVISIONAL test list",
+    "list_status": "APPROVED test list",
+    "baseline_version": 1,
     "categories": [
         {"name": "combat", "branches": [
             {"id": "combat.one", "required": True, "checks": ["test-m4-a"]},
@@ -125,6 +126,23 @@ def test_uncovered_branch_is_never_pass():
     assert t["branches"]["combat.three"]["status"] == UNCOVERED
 
 
+@pytest.mark.parametrize("status", ["PROVISIONAL (draft)", "", None])
+def test_unapproved_branch_list_is_never_pass(status):
+    b = deepcopy(BRANCHES)
+    if status is None:
+        del b["list_status"]
+    else:
+        b["list_status"] = status
+    t = m.gameplay_reliability_term(b, ALL_PASS)
+    assert t["status"] == NOT_YET
+    assert any("not maintainer-approved" in r for r in t["reasons"])
+
+
+def test_approved_branch_list_scope_names_the_baseline():
+    t = m.gameplay_reliability_term(BRANCHES, ALL_PASS)
+    assert "branch list APPROVED (baseline v1)" in t["scope"]
+
+
 def test_open_blocking_item_is_never_pass():
     b = deepcopy(BRANCHES)
     b["blocking_inventory"] = [{"id": "INV-06", "status": "open"}]
@@ -198,6 +216,42 @@ def test_m4_accepted_needs_maintainer_record_for_manual_requirement():
     t = m.m4_accepted_term(_terms(), man)
     assert t["status"] == NOT_YET
     man["m4_plan_requirements"][-1]["maintainer_record"] = "docs/does-not-exist.md"
+    assert m.m4_accepted_term(_terms(), man)["status"] == NOT_YET
+
+
+GOOD_RECORD = """# M4 maintainer acceptance (R5)
+
+Maintainer acceptance: ACCEPTED
+Accepted by: the maintainer
+Date: 2027-01-31
+Reviewed commit: 0123456789abcdef0123456789abcdef01234567
+Source pins: mit_zork d945013, mdlzork bdcd4a6
+
+## Accepted semantic deviations
+## Evidence
+## Scope and consequences
+## Remaining limitations
+"""
+
+
+def test_maintainer_record_must_have_every_field(tmp_path, monkeypatch):
+    monkeypatch.setattr(m, "ROOT", tmp_path)
+    man = deepcopy(MANIFEST)
+    man["m4_plan_requirements"].append({"id": "R5", "text": "exceptions justified",
+                                        "satisfied_by_term": None,
+                                        "maintainer_record": "r5.md"})
+    (tmp_path / "r5.md").write_text(GOOD_RECORD, encoding="utf-8")
+    assert m.m4_accepted_term(_terms(), man)["status"] == PASS
+    for broken in ("Maintainer acceptance: ACCEPTED", "Date: 2027-01-31",
+                   "Reviewed commit: 0123456789abcdef0123456789abcdef01234567",
+                   "## Remaining limitations"):
+        (tmp_path / "r5.md").write_text(GOOD_RECORD.replace(broken, ""), encoding="utf-8")
+        t = m.m4_accepted_term(_terms(), man)
+        assert t["status"] == NOT_YET, broken
+        assert any("maintainer record r5.md" in r for r in t["reasons"])
+    # A draft or pending record never counts.
+    (tmp_path / "r5.md").write_text(
+        GOOD_RECORD.replace("ACCEPTED\n", "PENDING\n", 1), encoding="utf-8")
     assert m.m4_accepted_term(_terms(), man)["status"] == NOT_YET
 
 
@@ -294,6 +348,16 @@ def test_real_branch_list_cannot_pass_today():
     assert terms["PLAYABLE"]["status"] == NOT_RUN
     assert terms["FULL_COMPLETION"]["status"] == NOT_RUN
     assert terms["M4_ACCEPTED"]["status"] == NOT_YET
+    # The 23-branch baseline is maintainer-approved (2026-11-26); R5 has no
+    # maintainer record yet, so M4_ACCEPTED cannot be PASS whatever passes.
+    assert m.list_approved(branches)
+    assert branches["baseline_version"] == 1
+    required = [b for c in branches["categories"] for b in c["branches"]
+                if b.get("required", True)]
+    assert len(required) == 23
+    r5 = [r for r in manifest["m4_plan_requirements"] if r["id"].startswith("R5")]
+    assert r5 and r5[0]["maintainer_record"] is None
+    assert any("R5" in r for r in terms["M4_ACCEPTED"]["reasons"])
     for name in ("combat", "death-and-recovery", "timers", "objects", "scoring",
                  "save-load"):
         assert name in {c["name"] for c in branches["categories"]}

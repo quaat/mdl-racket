@@ -7,14 +7,16 @@ collapsed into one PASS:
   SCENARIO_PARITY       every declared M4 native-parity scenario target exits 0
                         (scoped: N scenarios, each under one fixed clock and seed)
   GAMEPLAY_RELIABILITY  every declared required gameplay branch is covered by a
-                        check that ran and passed, and no blocking inventory item
-                        is open (docs/evidence/M4/gameplay-branches.json)
+                        check that ran and passed, no blocking inventory item
+                        is open, and the branch list is maintainer-APPROVED
+                        (docs/evidence/M4/gameplay-branches.json)
   PLAYABLE              NOT RUN: no verified PLAYABLE gate exists; the available
                         evidence sub-checks are run and reported, a failing one
                         makes the term FAIL, passing ones never make it PASS
   FULL_COMPLETION       NOT RUN: no complete-game run exists (Phase 6)
   M4_ACCEPTED           PASS only if all four terms PASS and every M4 PLAN
-                        requirement is met; otherwise NOT YET
+                        requirement is met (R5: a committed maintainer record
+                        with the required fields); otherwise NOT YET
 
 Every check is declared in tests/scenarios/m4-manifest.json; nothing is
 discovered implicitly at run time, and tests/test_m4_check.py fails when a
@@ -26,7 +28,9 @@ no check exists), NOT YET (executed what exists, requirements unmet).
 Exit policy: 0 when no term and no executed check is FAIL (NOT RUN and NOT YET
 are allowed); 1 on any FAIL (including an incomplete manifest or a failed
 `make sources`); with --require-accepted, 3 when M4_ACCEPTED is not PASS and
-nothing FAILed. The report is written to artifacts/m4-check/m4-check.json,
+nothing FAILed. Ordinary PR CI runs without --require-accepted (regression
+result); the final milestone gate is `make m4-accept` (--require-accepted
+--per-prefix). The report is written to artifacts/m4-check/m4-check.json,
 per-check logs to artifacts/m4-check/logs/. A PASS here is a technical result
 of the commit it ran on; a local branch result is never mainline acceptance.
 """
@@ -209,6 +213,16 @@ def branch_status(branch: dict, results: dict) -> str:
     return PASS
 
 
+def list_status_word(branches: dict) -> str:
+    return (branches.get("list_status") or "").split(" ")[0] or "UNSPECIFIED"
+
+
+def list_approved(branches: dict) -> bool:
+    """The maintainer approved the required-branch list (ADR-0063 amendment,
+    2026-11-26). A PROVISIONAL or unspecified list can never give PASS."""
+    return list_status_word(branches) == "APPROVED"
+
+
 def gameplay_reliability_term(branches: dict, results: dict) -> dict:
     per: dict[str, dict] = {}
     for cat in branches.get("categories", []):
@@ -233,9 +247,13 @@ def gameplay_reliability_term(branches: dict, results: dict) -> dict:
         reasons.append("covering check not run: " + ", ".join(not_run))
     if not per:
         reasons.append("no required branches declared")
+    approved = list_approved(branches)
+    if not approved:
+        reasons.append("the required-branch list is not maintainer-approved "
+                       f"(list_status {list_status_word(branches)})")
     if failed:
         status = FAIL
-    elif uncovered or open_items or not per:
+    elif uncovered or open_items or not per or not approved:
         status = NOT_YET
     elif not_run:
         status = NOT_RUN
@@ -244,7 +262,9 @@ def gameplay_reliability_term(branches: dict, results: dict) -> dict:
     covered = len(per) - len(uncovered)
     return {"status": status,
             "scope": f"{covered} of {len(per)} required branches have a covering check; "
-                     f"branch list {branches.get('list_status', '').split(' ')[0] or 'UNSPECIFIED'}",
+                     f"branch list {list_status_word(branches)}"
+                     + (f" (baseline v{branches['baseline_version']})"
+                        if approved and branches.get("baseline_version") else ""),
             "reasons": reasons, "branches": per, "blocking_open": open_items}
 
 
@@ -272,6 +292,32 @@ def full_completion_term(manifest: dict, results: dict) -> dict:
             "reasons": [] if s == PASS else [f"{check}: {s}"]}
 
 
+# The committed R5 maintainer record (ADR-0063 amendment, 2026-11-26). Claude
+# may prepare a draft elsewhere, but only the maintainer writes this record;
+# the check verifies its form, never its truth.
+MAINTAINER_RECORD_FIELDS = (
+    ("Maintainer acceptance", re.compile(r"^Maintainer acceptance:\s*ACCEPTED\s*$", re.M)),
+    ("Accepted by", re.compile(r"^Accepted by:\s*\S.*$", re.M)),
+    ("Date", re.compile(r"^Date:\s*\d{4}-\d{2}-\d{2}\s*$", re.M)),
+    ("Reviewed commit", re.compile(r"^Reviewed commit:\s*[0-9a-f]{40}\s*$", re.M)),
+    ("Source pins", re.compile(r"^Source pins:\s*\S.*$", re.M)),
+)
+MAINTAINER_RECORD_SECTIONS = ("Accepted semantic deviations", "Evidence", "Scope and consequences",
+                              "Remaining limitations")
+
+
+def maintainer_record_problems(path: Path) -> list[str]:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as e:
+        return [f"unreadable ({e.strerror})"]
+    problems = [f"missing field '{name}:'" for name, rx in MAINTAINER_RECORD_FIELDS
+                if not rx.search(text)]
+    problems += [f"missing section '## {sec}'" for sec in MAINTAINER_RECORD_SECTIONS
+                 if not re.search(rf"^##\s+{re.escape(sec)}\s*$", text, re.M)]
+    return problems
+
+
 def m4_accepted_term(terms: dict, manifest: dict) -> dict:
     unmet: list[str] = []
     reqs = manifest.get("m4_plan_requirements", [])
@@ -289,6 +335,9 @@ def m4_accepted_term(terms: dict, manifest: dict) -> dict:
             unmet.append(f"{req['id']}: {req['text']} (no maintainer record)")
         elif not (ROOT / req["maintainer_record"]).is_file():
             unmet.append(f"{req['id']}: maintainer record {req['maintainer_record']} missing")
+        else:
+            unmet += [f"{req['id']}: maintainer record {req['maintainer_record']}: {p}"
+                      for p in maintainer_record_problems(ROOT / req["maintainer_record"])]
     if not reqs:
         unmet.append("no M4 PLAN requirements declared")
     return {"status": NOT_YET if unmet else PASS,
@@ -512,13 +561,23 @@ def main(argv: list[str] | None = None) -> int:
                        f"FAIL; {EXIT_NOT_ACCEPTED}: --require-accepted and M4_ACCEPTED "
                        "not PASS",
         "exit_code": code,
+        "regression_result": "FAIL" if code == EXIT_FAIL else "OK",
+        "milestone_acceptance": terms["M4_ACCEPTED"]["status"],
+        "result_meaning": "regression_result OK means every executed check passed (the "
+                          "ordinary PR gate); it is not milestone acceptance. Milestone "
+                          "acceptance is M4_ACCEPTED PASS under `make m4-accept` "
+                          "(--require-accepted), plus the maintainer's committed record.",
         "claim": "technical result of this commit only; a local branch result is not "
                  "mainline acceptance, and no term is decided here beyond what ran",
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print_table(terms)
-    print(f"\nm4-check: exit {code}; report {rel(args.report)}; commit "
+    print(f"\nm4-check: regression result "
+          f"{'FAIL' if code == EXIT_FAIL else 'OK (no executed check failed)'}; "
+          f"milestone acceptance M4_ACCEPTED {terms['M4_ACCEPTED']['status']}"
+          f"{'' if args.require_accepted else ' (not required in this mode)'}")
+    print(f"m4-check: exit {code}; report {rel(args.report)}; commit "
           f"{(report['git_commit'] or '?')[:7]}{' (dirty)' if report['git_worktree_dirty'] else ''}")
     return code
 

@@ -1,6 +1,6 @@
-# Status — 2026-11-25 (`main` = `513272f`: M3 accepted; M4 S1–S10 merged (11 native-parity scenarios); SCENARIO_PARITY PASS for those 11 in a local `make m4-check` run on branch `feat/m4-check` (main + check scaffold, no runtime change; scenario-scoped, one fixed clock and seed); WP4 replay persistence proof of concept; GAMEPLAY_RELIABILITY NOT YET; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN; M4_ACCEPTED NOT YET)
+# Status — 2026-11-26 (`main` = `5b27177`: M3 accepted; M4: SCENARIO_PARITY PASS (26 native-parity scenarios, scenario-scoped); GAMEPLAY_RELIABILITY NOT YET (20 of 23 approved branches; blockers INV-06, INV-07); PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN; M4_ACCEPTED NOT YET)
 
-## Current state (2026-11-23)
+## Current state (2026-11-26)
 
 States used below: **PASS (mainline)** = verified on `main`; **PASS (branch
 evidence)** = verified on an unmerged branch only; **FAIL**; **BLOCKED**;
@@ -24,7 +24,82 @@ Racket v7.9 BC; CI: racket:8.10-bc (runs 45176163020, 45176121779).
 | Local session smoke | **PASS (mainline)** | quit/n, inventory, quit/y through the game's FINISH → RECORD → QUIT, byte-identical to native, no files written (`make test-m3-session`, `make test-m3-launcher`) |
 | PLAYABLE | NOT RUN | M4 ([backlog](evidence/M4/SCENARIO-BACKLOG.md)) |
 
-### M4 on `main` (`b6b86d0` 2026-11-23; S8–S10 and the runner merged up to `513272f`, 2026-11-25)
+### M4 on `main` (`5b27177`, 2026-11-26)
+
+Verified 2026-11-26: `origin/main` = `5b27177`; every PR below is merged and
+its merge commit's hosted "Harness checks" run (smoke and reference, the
+reference job running `make m4-check`) concluded success. Upstream pins
+match `sources.lock.json` (mit_zork `d94501340842e006791fce0757dc0043b8ec8916`,
+mdlzork `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`, checkouts clean); the
+reference `mdli` SHA-256 is
+`6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789`. Local
+baseline on `5b27177`: `make test` exit 0 (raco 5312 passed; pytest 104
+passed, 1 deselected), `make test-historical` exit 0.
+
+| Slice | PR, merge commit | Scope |
+|---|---|---|
+| S1–S7 | #153–#164 | house and cellar, SEGMENT, CHARACTER, TOP and parser, sword, troll combat, parser ambiguity |
+| S8 ABS, cyclops | #175, `9f16d47` | ABS; `test-m4-cyclops-room` |
+| S9 IMAGE, SLEEP, TIME | #176, `522b563` | bat, Strange Passage |
+| Single-run runner (ADR-0062) | #188, `6b826d5` | test infrastructure |
+| S10 help/info allowlist | #189, `513272f` | ADR-0055 amendment |
+| `make m4-check` (ADR-0063) | #190, `ab4fdfa` | the five-term report |
+| Death and recovery | #191, `903ba6c` | grue-resurrection, grue-refusal, troll-death |
+| Timers and scoring | #192, `67bd41f` | treasure-deposit, thief-robbery, cure-recovery, lamp-burnout |
+| Beyond the house | #194, `69f3334` | match-clock, boat-river |
+| S14 undefined attached TYPE names (#193) | #195, `6cd1b68` | dam-sluice, maint-leak |
+| Puzzles | #197, `58c3e4f` | coal-machine, gas-room |
+| Declaration sweep (diagnostic) | #198, `8c398fe` | `make m4-decl-sweep` |
+| S16 attached declarations unenforced (#196) | #200, `e98e46c` | balloon-ledge |
+| Thief fight | #201, `6a9f0fe` | thief-fight |
+| #199 binding primitives take ATOMs only | #202, `5b27177` | no gameplay change |
+| WP4 replay persistence (ADR-0061) | #165 | host proof of concept |
+
+#### Acceptance terms (epic [#163](https://github.com/quaat/mdl-racket/issues/163))
+
+Kept separate, never collapsed into one PASS; computed by `make m4-check`
+(ADR-0063, accepted with its 2026-11-26 amendment; rules in
+[TESTING](TESTING.md)). The states below are the result of `make m4-check`
+on `5b27177` content (local, Racket v7.9 BC, exit 0, the #199 gate and its
+re-run) and of the same target in the hosted reference job; they are the
+technical result of that commit, not a milestone acceptance.
+
+| Term | Meaning | State on `main` `5b27177` |
+|---|---|---|
+| SCENARIO_PARITY | each declared scenario matches pinned Confusion in text and state checkpoints | **PASS**, 26 scenarios, each under one fixed clock (250776000 UTC) and seed; per scenario, not gameplay coverage |
+| GAMEPLAY_RELIABILITY | every declared required gameplay branch runs without an unexpected runtime failure | **NOT YET**: 20 of 23 branches of the approved baseline (v1, maintainer 2026-11-26) are covered; uncovered: `save.game-save-command`, `save.game-restore-command`, `save.player-facing-resume`; open blockers INV-06 (#172) and INV-07 (#173) |
+| PLAYABLE | a reproducible user-facing session: start, progression, save, process termination, restore in a fresh process, continuation, quit | NOT RUN: no gate yet (sub-checks `test-m3-session`, `test-m3-launcher` pass as evidence) |
+| FULL_COMPLETION | the original game's own completion conditions and scoring: the real 500-point game, no synthetic endpoint or modified state | NOT RUN: no complete-game check yet |
+| M4_ACCEPTED | all four terms PASS and the R5 maintainer record exists (final gate `make m4-accept`) | **NOT YET** |
+
+#### Maintainer decisions (2026-11-26)
+
+- **#172 SAVE/RESTORE:** deterministic replay for Zork player-facing
+  persistence and command-boundary restoration, subject to native-backed
+  verification; not full MDL SAVE/RESTORE (ADR-0048 and ADR-0061
+  amendments: four separate capabilities).
+- **#173 PRINT and errors:** PRINT per manual 11.1.2.1; explicit MDL errors,
+  language evaluation errors and host failures classified separately and
+  changed incrementally (ADR-0064).
+- **Thief coverage:** thief-robbery and thief-fight together cover
+  `combat.thief`; the uncovered thief behaviour is in the full-completion
+  backlog (`gameplay-branches.json`).
+- **#190 / ADR-0063:** the 23-branch baseline approved; exit policy 0/1/3;
+  `make m4-accept` is the final gate; R5 is a committed maintainer record.
+- **Reference corpus:** ADR-0065, soft budget 64 MiB (41.59 MiB today).
+
+#### Next (approved order, [PLAN](PLAN.md) M4)
+
+A decisions and tracking → B PRINT and error handling (#173) → C
+player-facing persistence (#172) → D gameplay completion (PLAYABLE gate,
+full playthrough, `make m4-accept`, R5 record) → E semantic and safety
+backlog (#120, #127, #129, #126, #134) → F general MDL conformance (#177).
+
+### M4 slice details, as recorded at the time (2026-11-23 to 2026-11-26)
+
+The rows below keep each slice's evidence summary as written when it was
+made. Their "local branch, not merged" states are superseded: every slice
+is merged, as the table above shows.
 
 M4 scenarios run on `main` with the session clock fixed at 250776000 UTC,
 compared prefix by prefix with pinned native Confusion and read-only state

@@ -9,7 +9,7 @@
 > available. All verification below is local and reproducible, modulo toolchain
 > versions and original input/time/randomness.
 
-## Verified status (2026-11-23)
+## Verified status (2026-11-26)
 
 **Mainline (`main` = `2a86d5d`, M3 acceptance 2026-11-23).** M0, M1, M2:
 **PASS (mainline)**. M3, gate rerun on `main` with `M3_NATIVE=require` (local
@@ -82,17 +82,25 @@ The reference CI workflow runs all of these.
 [scenario manifest](tests/scenarios/m4-manifest.json) and
 [gameplay branches](docs/evidence/M4/gameplay-branches.json) and reports
 them separately ([TESTING](docs/TESTING.md),
-[record](docs/evidence/M4/M4-CHECK.md)). The column is a **local branch
-result** (`feat/m4-check`, `main` 513272f plus the check scaffold, no
-runtime change; Racket v7.9 BC; exit 0), not mainline acceptance:
+[record](docs/evidence/M4/M4-CHECK.md)). State on **`main` `5b27177`**
+(2026-11-26; local Racket v7.9 BC exit 0, and the hosted reference job;
+the technical result of that commit, not milestone acceptance):
 
-| Term | State (local `make m4-check`, 2026-11-25) |
+| Term | State on `main` `5b27177` |
 |---|---|
-| SCENARIO_PARITY | PASS for the 11 declared scenarios (S1–S10), each under one fixed clock and seed |
-| GAMEPLAY_RELIABILITY | NOT YET: 9 of 23 declared required branches covered (provisional list); open blockers INV-06 RESTORE, INV-07 PRINT in HANDLE |
-| PLAYABLE | NOT RUN: no PLAYABLE gate; quit-session and launcher sub-checks pass |
-| FULL_COMPLETION | NOT RUN (Phase 6) |
-| M4_ACCEPTED | NOT YET |
+| SCENARIO_PARITY | PASS for the 26 declared scenarios, each under one fixed clock and seed |
+| GAMEPLAY_RELIABILITY | NOT YET: 20 of 23 required branches covered (baseline v1, approved by the maintainer 2026-11-26); uncovered: the game's save, the game's restore, player-facing resume; open blockers INV-06 RESTORE (#172), INV-07 PRINT in HANDLE (#173) |
+| PLAYABLE | NOT RUN: no PLAYABLE gate yet (approved definition: start, progress, save, terminate the process, restore in a fresh process, continue, quit); quit-session and launcher sub-checks pass |
+| FULL_COMPLETION | NOT RUN: the real 500-point game, no synthetic endpoint (approved definition); no complete-game run yet |
+| M4_ACCEPTED | NOT YET: needs all four terms and the maintainer's R5 record; final gate `make m4-accept` |
+
+Maintainer decisions of 2026-11-26 (ADR-0048, ADR-0061 and ADR-0063
+amendments; ADR-0064; ADR-0065): player-facing saves by deterministic
+replay, kept apart from full MDL SAVE/RESTORE continuation semantics; PRINT
+per the manual and a classified error model; the 23-branch baseline and the
+exit policy 0/1/3; a 64 MiB soft budget for the reference corpus. Next:
+PRINT and error handling, then player-facing persistence, then the full
+playthrough ([PLAN](docs/PLAN.md) M4).
 
 **Native scenarios (merged on `main`).** Each is compared with pinned Confusion
 turn by turn, with state checkpoints, and each PASS is
@@ -248,11 +256,14 @@ abort or `*ERROR*` level; MANIFEST rejecting non-ATOMs is part of the
 existing enforced-MANIFEST deviation (Confusion's MANIFEST does nothing);
 `BOUND?`, `GBOUND?` and `UNASSIGN` are not implemented. Host callers name
 globals by strings through `mdl-session-global`/`mdl-session-call`, which
-now resolve them without interning. `make test` and `make m4-check` exit 0
-on that branch (M4 terms unchanged). Branch evidence until merged.
+now resolve them without interning. Merged as PR #202 (`main` `5b27177`,
+hosted CI success); M4 terms unchanged.
 
 `make m4-check` runs all twenty-six plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
+Exit 0 means every executed check passed; it is not milestone acceptance.
+`make m4-accept` is the final milestone gate (`--require-accepted
+--per-prefix`; exits 3 until M4_ACCEPTED is PASS).
 
 Also on `main`:
 - MAX (ADR-0059);
@@ -265,6 +276,10 @@ deterministic replay in a fresh process. Its output and state are verified
 against the native troll-combat run. Limits:
 - It is not yet a player-facing save. `run-zork` writes no files.
 - The game's own SAVE and RESTORE commands stay unsupported.
+- Approved next step (#172): host-owned player-facing saves by this replay,
+  then the game's own commands where equivalence with the original is
+  demonstrated. This is not the manual's full SAVE/RESTORE, which resumes
+  the suspended SAVE activation; that stays a language-conformance goal.
 
 Evidence: [docs/evidence/M4](docs/evidence/M4/).
 

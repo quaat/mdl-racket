@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "name": "m4-i121-apply-string",
+  "cases": [
+    {"name": "apply-string-names-function", "expression": "<DEFINE F (X) <+ .X 1>>\n<APPLY \"F\" 1>"},
+    {"name": "apply-string-names-subr", "expression": "<APPLY \"+\" 1 2>"},
+    {"name": "form-head-string", "expression": "<DEFINE F (X) <+ .X 1>>\n<\"F\" 1>"},
+    {"name": "apply-atom-control", "expression": "<DEFINE F (X) <+ .X 1>>\n<APPLY ,F 1>"},
+    {"name": "apply-gval-subr-control", "expression": "<APPLY ,+ 1 2>"},
+    {"name": "setg-rest-view", "expression": "<SETG FOO 7>\n<SETG <REST \"XFOO\" 1> 3>\n,FOO"},
+    {"name": "gval-rest-view", "expression": "<SETG FOO 7>\n<GVAL <REST \"XFOO\" 1>>"}
+  ]
+}
