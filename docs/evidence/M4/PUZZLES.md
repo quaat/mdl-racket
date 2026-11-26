@@ -73,8 +73,11 @@ parse won, has just set PRSVEC 2 and 3 to `<>` (77rooms.mud:1633-1634).
 BALLOON (77act2.mud:419) binds `(PRSO <2 .PRSVEC>)` under its attached
 declaration `(PRSO) <OR OBJECT DIRECTION>` (77act2.mud:424-425). The value is
 `#FALSE ()`: a native diagnostic run (BALLOON wrapped after FLOAD to print
-`<TYPE <2 ,PRSVEC>>`) shows READ-IN with an OBJECT and READ-OUT with a FALSE
-on both the `board basket` and the `light match` turns. Pinned Confusion
+`<TYPE <2 ,PRSVEC>>`) shows READ-OUT with a FALSE on both the `board basket`
+and the `light match` turns. The OBJECT-PRSO call on the `board basket` turn
+is BOARD's object action with no ARG (77rooms.mud:1680), not READ-IN:
+AVEHICLE is still false before the verb runs (77rooms.mud:628-630; corrected
+after the independent review, as BALLOON-LEDGE-REFERENCE.md already says). Pinned Confusion
 checks no attached declaration; this runtime checks those of known TYPEs
 (the #98 ADR; the #193 amendment relaxed only still-undefined names, such as
 WIRE-FUNCTION's PRSOBJ, which this route never reaches in our runtime).
@@ -86,7 +89,7 @@ such a binding, declares `<OR DIRECTION FALSE OBJECT>` (77act3.mud:44).
 As the slice brief requires, no runtime semantics were changed. The finding
 is INV-12 in [GAMEPLAY-FAILURE-INVENTORY.md](GAMEPLAY-FAILURE-INVENTORY.md)
 (class (a), P1) and a new open item in `gameplay-branches.json`'s
-`blocking_inventory` (no GitHub issue yet). Options: (1) keep it strict (the
+`blocking_inventory` (#196). Options: (1) keep it strict (the
 balloon and the volcano stay unreachable); (2) a further ADR amendment, for
 example not enforcing attached declarations (or those of AUX bindings),
 following pinned Confusion, as a recorded deviation; (3) a separately
@@ -136,7 +139,7 @@ system"). Native captures ran inside the sandbox with its `$TMPDIR`.
 | Command | Exit | Result |
 |---|---|---|
 | `python3 -I scripts/probe_death_scenario_reference.py NAME …` (gas-room, coal-machine, balloon-ledge; twice each) | 0 | `CAPTURE OK` six times; all transcript cases byte-identical between captures (64, 96, 83), diagnostic game parts and logs, X1 checkpoints, RANDOM draws and end checkpoints identical; mdli sha256 unchanged |
-| every committed reference's `diag_forms` against `PROFILES` | — | 14 of 14 equal (the eleven earlier profiles unchanged) |
+| every committed reference's `diag_forms` against `PROFILES` | — | 14 of 14 equal (the eleven earlier references, which use four profiles, unchanged) |
 | first single run of balloon-ledge (minimal test, before the XFAIL test) | 1 | `earliest failing k = 57, kind run-guard … DECL 424:9: PRSO does not satisfy declaration` (the finding) |
 | `make test-m4-coal-machine` (single-run) | 0 | all 95 turns match (D1 only); 5 boots (prefixes 36, 38: the sword's glow; 53, 61: the thief's bag); 30.9 s |
 | `make test-m4-gas-room` (single-run) | 0 | all 63 turns match; 5 boots (36, 38; 53; 58: the death question); 30.4 s |
@@ -198,7 +201,7 @@ definition (exit 1, unbound identifier) and a first M5 run passed a literal
 | `objects.puzzles-beyond-the-house` | none (evidence only: boat-river, dam-sluice, coal-machine, gas-room; xfail-m4-balloon-frontier) | UNCOVERED (read as strictly as combat.thief): four of the five listed puzzles are exercised by gated scenarios (the boat, the dam, the coal-mine machine and basket, the gas room); the balloon is blocked by INV-12. Not exercised either: the river downstream, the reservoir refilling, the gas room's ON branch, the volcano gnome |
 | `timers.other-clock-events` | match-clock, maint-leak (unchanged) | note extended: the candle clock CNDIN is queued and fired in coal-machine and gas-room (evidence beyond the cited checks); BINT and BRNIN are native only (INV-12) |
 
-New blocking item: INV-12 (open; no issue yet). GAMEPLAY_RELIABILITY stays
+New blocking item: INV-12 (#196; maintainer decision 2026-11-26: sweep first). GAMEPLAY_RELIABILITY stays
 NOT YET.
 
 ## Security and licensing

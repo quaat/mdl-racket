@@ -309,9 +309,10 @@ local branch `feat/m4-dam`); recorded by [DAM-CLOCKS.md](DAM-CLOCKS.md).*
 **INV-12: BALLOON's PRSO #DECL meets CLOCK-DEMON's #FALSE ().** *Status:
 open (found by M4 Phase 3c, 2026-11-25, local branch `feat/m4-puzzles`;
 recorded by [PUZZLES.md](PUZZLES.md); no runtime change; tracked expected
-failure `make xfail-m4-balloon-frontier`). No issue yet.*
+failure `make xfail-m4-balloon-frontier`). Issue #196; maintainer decision
+2026-11-26: an instrumented sweep first.*
 
-- *First failing location and call path:* RDCOM (77rooms.mud:599), the
+- *First failing location and call path:* RDCOM (77rooms.mud:600), the
   turn of `board basket` (command 57 of balloon-ledge): the BOARD verb puts
   the hero in the balloon (AVEHICLE BALLO; "You are in the basket."); the
   demons run, and CLOCK-DEMON (77rooms.mud:1630), with PARSE-WON true,
@@ -332,8 +333,22 @@ failure `make xfail-m4-balloon-frontier`). No issue yet.*
   balloon rises to VAIR1 and VAIR2, lands on the Narrow Ledge, the wire is
   tied and untied, the balloon descends and lands). A native diagnostic
   (wrapping BALLOON to print its arguments and `<TYPE <2 ,PRSVEC>>`, not a
-  committed reference) shows READ-IN called with PRSO an OBJECT and READ-OUT
-  with PRSO a FALSE on the `board basket` and `light match` turns.
+  committed reference) shows READ-OUT with PRSO a FALSE on the `board
+  basket` and `light match` turns; the OBJECT-PRSO call on `board basket` is
+  BOARD's object action with no ARG (77rooms.mud:1680), not READ-IN.
+  BINF (`<OR FALSE ROOM>`, 77act2.mud:426) holds the OBJECT GUIDE from entry
+  59 on in the native checkpoints, so that declaration is violated as well
+  (confirmed by native state).
+- *Further candidates from the independent review's static sweep* (not
+  run; reachability unconfirmed):
+  - MSWITCH-FUNCTION (77act2.mud:139-142): `(IMP <3 ,PRSVEC>)` is declared
+    OBJECT, but slot 3 is FALSE without an indirect object. For example,
+    `push switch` in the Machine Room reaches it.
+  - SPHERE-FUNCTION (77act3.mud:243-246): `(PV ,PRSVEC)` is declared
+    `<VECTOR VERB OBJECT>`. As the SPHIN clock action it runs after
+    CLOCK-DEMON has put `<>` in slot 2.
+  The instrumented sweep decided on #196 is meant to confirm or rule these
+  out.
 - *Ours:* READSTRING entries 0-56 equal the native reference (output and
   checkpoint); the turn of command 57 prints "You are in the basket." and
   ends on the strict failure (kind `run-guard`, earliest failing k = 57).
