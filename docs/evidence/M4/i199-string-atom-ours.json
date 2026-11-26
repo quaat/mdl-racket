@@ -1,0 +1,1081 @@
+{
+  "schema_version": 1,
+  "name": "m4-i199-string-atom-ours",
+  "runtime": "this repository's Racket runtime (mdl/), worktree commit 6a9f0fe2f61eed41fe3ca0c310cceda4dd9a1dd2",
+  "mdl_runtime_core_sha256": "4f8038191b8eb93902fc9c7786b6e472f97607be2c7dc7e4724ef3a6d0983abf",
+  "racket": "Welcome to Racket v7.9 [bc].",
+  "protocol": "one fresh make-mdl-session per case, rooted at a disposable $TMPDIR copy of mdlzork_771212/patched_confusion; each top-level form compiled with compile-expression and evaluated in the session; value printed with the runtime's mdl-unparse-value (#<TYPE> when it cannot print one), or the Racket exn message; evaluation continues with the next form after an error",
+  "determinism": "captured twice; both JSON outputs byte-identical",
+  "cases": [
+    {
+      "name": "control-setg-gval-gassigned-atom",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<SETG FOO 3>\n,FOO\n<GVAL FOO>\n<GASSIGNED? FOO>\n<GBOUND? FOO>",
+      "forms": [
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "control-set-lval-value-atom",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<SET FOO 3>\n.FOO\n<LVAL FOO>\n<VALUE FOO>\n<ASSIGNED? FOO>\n<BOUND? FOO>",
+      "forms": [
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator BOUND?"
+        }
+      ]
+    },
+    {
+      "name": "control-gunassign-atom",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<SETG FOO 3>\n<GUNASSIGN FOO>\n<GASSIGNED? FOO>",
+      "forms": [
+        {
+          "value": "3"
+        },
+        {
+          "value": "FOO"
+        },
+        {
+          "value": "#FALSE ()"
+        }
+      ]
+    },
+    {
+      "name": "control-manifest-atom",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<SETG FOO 1>\n<MANIFEST FOO>\n<SETG FOO 2>\n,FOO",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "error": "mdl-setg: ATTEMPT-TO-CHANGE-MANIFEST-VARIABLE FOO"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "control-msetg-atom",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<MSETG FOO 3>\n,FOO",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "T"
+        },
+        {
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "control-psetg-atom",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<PSETG FOO 3>\n,FOO\n,PURE-LIST",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "(FOO)"
+        }
+      ]
+    },
+    {
+      "name": "manifest-string-fresh",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<MANIFEST \"FOO\">\n<GASSIGNED? FOO>\n<GBOUND? FOO>",
+      "forms": [
+        {
+          "value": "T"
+        },
+        {
+          "value": "#FALSE ()"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "manifest-string-preset",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<SETG FOO 1>\n<MANIFEST \"FOO\">\n<SETG FOO 2>\n,FOO",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "error": "mdl-setg: ATTEMPT-TO-CHANGE-MANIFEST-VARIABLE FOO"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "manifest-fix",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<MANIFEST 5>",
+      "forms": [
+        {
+          "error": "mdl-manifest: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "manifest-form",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<MANIFEST '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-manifest: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "manifest-string-in-function",
+      "cases_file": "i199-string-atom-cases.json",
+      "expression": "<SETG X 1>\n<DEFINE F () <MANIFEST \"X\">>\n<F>\n<SETG X 2>\n,X",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "error": "mdl-setg: ATTEMPT-TO-CHANGE-MANIFEST-VARIABLE X"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "setg-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG \"FOO\" 3>\n<GASSIGNED? FOO>\n<GBOUND? FOO>",
+      "forms": [
+        {
+          "value": "3"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "setg-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG FOO 1>\n<SETG \"FOO\" 3>\n,FOO",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "setg-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG 5 3>",
+      "forms": [
+        {
+          "error": "mdl-setg: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "setg-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG '<FOO> 3>",
+      "forms": [
+        {
+          "error": "mdl-setg: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "setg-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F () <SETG \"X\" 1>>\n<F>\n<GASSIGNED? X>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "1"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "gval-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GVAL \"FOO\">",
+      "forms": [
+        {
+          "error": "mdl-gval: unassigned MDL global FOO"
+        }
+      ]
+    },
+    {
+      "name": "gval-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG FOO 1>\n<GVAL \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "gval-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GVAL 5>",
+      "forms": [
+        {
+          "error": "mdl-gval: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "gval-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GVAL '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-gval: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "gval-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG X 1>\n<DEFINE F () <GVAL \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "gassigned-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GASSIGNED? \"FOO\">",
+      "forms": [
+        {
+          "value": "#FALSE ()"
+        }
+      ]
+    },
+    {
+      "name": "gassigned-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG FOO 1>\n<GASSIGNED? \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "gassigned-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GASSIGNED? 5>",
+      "forms": [
+        {
+          "error": "mdl-gassigned?: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "gassigned-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GASSIGNED? '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-gassigned?: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "gassigned-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG X 1>\n<DEFINE F () <GASSIGNED? \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "gbound-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GBOUND? \"FOO\">",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "gbound-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG FOO 1>\n<GBOUND? \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "gbound-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GBOUND? 5>",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "gbound-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GBOUND? '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "gbound-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG X 1>\n<DEFINE F () <GBOUND? \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator GBOUND?"
+        }
+      ]
+    },
+    {
+      "name": "set-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET \"FOO\" 3>\n<ASSIGNED? FOO>\n<BOUND? FOO>",
+      "forms": [
+        {
+          "value": "3"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator BOUND?"
+        }
+      ]
+    },
+    {
+      "name": "set-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET FOO 1>\n<SET \"FOO\" 3>\n.FOO",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "set-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET 5 3>",
+      "forms": [
+        {
+          "error": "mdl-set: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "set-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET '<FOO> 3>",
+      "forms": [
+        {
+          "error": "mdl-set: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "set-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F () <SET \"X\" 1>>\n<F>\n<ASSIGNED? X>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "1"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "set-string-in-function-bound",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F (\"AUX\" (X 0)) <SET \"X\" 1> .X>\n<F>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "lval-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<LVAL \"FOO\">",
+      "forms": [
+        {
+          "error": "mdl-lval: unassigned MDL local FOO"
+        }
+      ]
+    },
+    {
+      "name": "lval-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET FOO 1>\n<LVAL \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "lval-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<LVAL 5>",
+      "forms": [
+        {
+          "error": "mdl-lval: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "lval-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<LVAL '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-lval: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "lval-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F (\"AUX\" (X 1)) <LVAL \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "value-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<VALUE \"FOO\">",
+      "forms": [
+        {
+          "error": "mdl-gval: unassigned MDL global FOO"
+        }
+      ]
+    },
+    {
+      "name": "value-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET FOO 1>\n<VALUE \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "value-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<VALUE 5>",
+      "forms": [
+        {
+          "error": "mdl-value: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "value-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<VALUE '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-value: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "value-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F (\"AUX\" (X 1)) <VALUE \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "value-string-preset-global",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG FOO 1>\n<VALUE \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "gunassign-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GUNASSIGN \"FOO\">",
+      "forms": [
+        {
+          "value": "FOO"
+        }
+      ]
+    },
+    {
+      "name": "gunassign-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG FOO 1>\n<GUNASSIGN \"FOO\">\n,FOO",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "FOO"
+        },
+        {
+          "error": "mdl-gval: unassigned MDL global FOO"
+        }
+      ]
+    },
+    {
+      "name": "gunassign-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GUNASSIGN 5>",
+      "forms": [
+        {
+          "error": "mdl-gunassign: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "gunassign-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<GUNASSIGN '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-gunassign: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "gunassign-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SETG X 1>\n<DEFINE F () <GUNASSIGN \"X\">>\n<F>\n<GASSIGNED? X>",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "X"
+        },
+        {
+          "value": "#FALSE ()"
+        }
+      ]
+    },
+    {
+      "name": "assigned-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<ASSIGNED? \"FOO\">",
+      "forms": [
+        {
+          "error": "mdl-assigned?: First arg to ASSIGNED? must be ATOM"
+        }
+      ]
+    },
+    {
+      "name": "assigned-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET FOO 1>\n<ASSIGNED? \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "error": "mdl-assigned?: First arg to ASSIGNED? must be ATOM"
+        }
+      ]
+    },
+    {
+      "name": "assigned-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<ASSIGNED? 5>",
+      "forms": [
+        {
+          "error": "mdl-assigned?: First arg to ASSIGNED? must be ATOM"
+        }
+      ]
+    },
+    {
+      "name": "assigned-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<ASSIGNED? '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-assigned?: First arg to ASSIGNED? must be ATOM"
+        }
+      ]
+    },
+    {
+      "name": "assigned-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F (\"AUX\" (X 1)) <ASSIGNED? \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "error": "mdl-assigned?: First arg to ASSIGNED? must be ATOM"
+        }
+      ]
+    },
+    {
+      "name": "bound-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<BOUND? \"FOO\">",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator BOUND?"
+        }
+      ]
+    },
+    {
+      "name": "bound-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET FOO 1>\n<BOUND? \"FOO\">",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator BOUND?"
+        }
+      ]
+    },
+    {
+      "name": "bound-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<BOUND? 5>",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator BOUND?"
+        }
+      ]
+    },
+    {
+      "name": "bound-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<BOUND? '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator BOUND?"
+        }
+      ]
+    },
+    {
+      "name": "bound-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F (\"AUX\" (X 1)) <BOUND? \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator BOUND?"
+        }
+      ]
+    },
+    {
+      "name": "unassign-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<UNASSIGN \"FOO\">",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator UNASSIGN"
+        }
+      ]
+    },
+    {
+      "name": "unassign-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<SET FOO 1>\n<UNASSIGN \"FOO\">\n.FOO",
+      "forms": [
+        {
+          "value": "1"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator UNASSIGN"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "unassign-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<UNASSIGN 5>",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator UNASSIGN"
+        }
+      ]
+    },
+    {
+      "name": "unassign-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<UNASSIGN '<FOO>>",
+      "forms": [
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator UNASSIGN"
+        }
+      ]
+    },
+    {
+      "name": "unassign-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<DEFINE F (\"AUX\" (X 1)) <UNASSIGN \"X\">>\n<F>",
+      "forms": [
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "error": "mdl-eval: unassigned or non-applicable MDL operator UNASSIGN"
+        }
+      ]
+    },
+    {
+      "name": "msetg-string-x-original",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\"> <MSETG \"x\" 3>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "msetg-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<MSETG \"FOO\" 3>\n<GASSIGNED? FOO>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "T"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "msetg-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<SETG FOO 1>\n<MSETG \"FOO\" 3>\n,FOO",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "1"
+        },
+        {
+          "error": "mdl-error: MSETG \"FOO\" ALREADY-GASSIGNED 1"
+        },
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "msetg-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<MSETG 5 3>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "error": "mdl-gassigned?: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "msetg-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<MSETG '<FOO> 3>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "error": "mdl-gassigned?: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "msetg-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<DEFINE G () <MSETG \"X\" 3>>\n<G>\n<GASSIGNED? X>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "psetg-string-x-original",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\"> <PSETG \"x\" 3>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "psetg-string-fresh",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<PSETG \"FOO\" 3>\n<GASSIGNED? FOO>\n<GASSIGNED? PURE-LIST>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "T"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "name": "psetg-string-preset",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<SETG FOO 1>\n<PSETG \"FOO\" 3>\n,FOO",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "1"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "name": "psetg-fix",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<PSETG 5 3>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "error": "mdl-setg: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "psetg-form",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<PSETG '<FOO> 3>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "error": "mdl-setg: expected an MDL ATOM"
+        }
+      ]
+    },
+    {
+      "name": "psetg-string-in-function",
+      "cases_file": "i199-string-atom-error-cases.json",
+      "expression": "<FLOAD \"81prim.mud\">\n<DEFINE G () <PSETG \"X\" 3>>\n<G>\n<GASSIGNED? X>",
+      "forms": [
+        {
+          "value": "\"DONE\""
+        },
+        {
+          "value": "#<FUNCTION>"
+        },
+        {
+          "value": "3"
+        },
+        {
+          "value": "T"
+        }
+      ]
+    }
+  ]
+}
