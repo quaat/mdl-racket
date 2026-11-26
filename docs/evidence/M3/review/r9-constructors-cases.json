@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "r9-constructors-reference",
+  "cases": [
+    {"name": "istring-uniform-fill", "expression": "<STRING <ISTRING 3 !\\X>>"},
+    {"name": "istring-no-fill", "expression": "<LENGTH <ISTRING 3>>"},
+    {"name": "istring-sideeffect-count", "expression": "<SETG C 64> <ISTRING 3 '<ASCII <SETG C <+ ,C 1>>>> ,C"},
+    {"name": "istring-sideeffect-result", "expression": "<SETG C 64> <STRING <ISTRING 3 '<ASCII <SETG C <+ ,C 1>>>>>"},
+    {"name": "ivector-no-fill-length", "expression": "<LENGTH <IVECTOR 3>>"},
+    {"name": "ivector-sideeffect-count", "expression": "<SETG N 0> <IVECTOR 3 '<SETG N <+ ,N 1>>> ,N"},
+    {"name": "ivector-sideeffect-result", "expression": "<SETG N 0> <IVECTOR 3 '<SETG N <+ ,N 1>>>"},
+    {"name": "iuvector-sideeffect-count", "expression": "<SETG N 0> <IUVECTOR 3 '<SETG N <+ ,N 1>>> ,N"},
+    {"name": "iuvector-uniform-fill", "expression": "<LENGTH <IUVECTOR 3 1>>"},
+    {"name": "ivector-const-value", "expression": "<IVECTOR 3 42>"},
+    {"name": "ivector-lazy-eval-quote", "expression": "<SETG N 0> <IVECTOR 3 '<SETG N <+ ,N 1>>>"}
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "r9-moblist-reference",
+  "cases": [
+    {"name": "moblist-create", "expression": "<TYPE <MOBLIST R9T>>"},
+    {"name": "moblist-identity", "expression": "<==? <MOBLIST R9T> <MOBLIST R9T>>"},
+    {"name": "moblist-with-size", "expression": "<TYPE <MOBLIST R9T2 100>>"},
+    {"name": "moblist-size-identity", "expression": "<==? <MOBLIST R9T3 50> <MOBLIST R9T3 50>>"},
+    {"name": "get-oblist-from-atom", "expression": "<GET R9T OBLIST>"},
+    {"name": "get-atom-from-oblist", "expression": "<GET <MOBLIST R9T> OBLIST>"},
+    {"name": "getprop-oblist", "expression": "<GETPROP R9T OBLIST>"},
+    {"name": "get-eq-moblist", "expression": "<==? <GET R9T OBLIST> <MOBLIST R9T>>"}
+  ]
+}

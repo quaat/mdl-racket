@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "r9-mapr-reference",
+  "cases": [
+    {"name": "basic-mapr-first-of-rest", "expression": "<MAPR ,LIST <FUNCTION (X) <1 .X>> '(3 4 5)>"},
+    {"name": "mapr-two-structs", "expression": "<MAPR ,LIST <FUNCTION (X Y) <+ <1 .X> <1 .Y>>> '(1 2 3) '(4 5)>"},
+    {"name": "mapr-mutate-vector", "expression": "<SETG V [1 2 3]> <MAPR <> <FUNCTION (X) <PUT .X 1 <+ <1 .X> 1>>> ,V> <2 ,V>"},
+    {"name": "mapr-mutate-list", "expression": "<SETG L '(1 2 3)> <MAPR <> <FUNCTION (X) <PUT .X 1 <+ <1 .X> 1>>> ,L> <3 ,L>"},
+    {"name": "mapr-rest-view-exposed", "expression": "<MAPR ,LIST <FUNCTION (X) <TYPE .X>> '(1 2 3)>"},
+    {"name": "mapr-vs-mapf-type", "expression": "<MAPF ,LIST <FUNCTION (X) <TYPE .X>> '(1 \"a\" 2)>"},
+    {"name": "mapr-type-of-rests", "expression": "<MAPR ,LIST <FUNCTION (X) <TYPE .X>> '(1 \"a\" 2)>"},
+    {"name": "mapr-empty-result", "expression": "<MAPR <> <FUNCTION (X) .X> '(1 2)>"},
+    {"name": "mapr-mapstop", "expression": "<MAPR ,LIST <FUNCTION (X) <COND (<==? <1 .X> 2> <MAPSTOP 99>) (T <1 .X>)>> '(1 2 3)>"},
+    {"name": "mapr-mapleave", "expression": "<MAPR ,LIST <FUNCTION (X) <COND (<==? <1 .X> 2> <MAPLEAVE 42>) (T <1 .X>)>> '(1 2 3)>"},
+    {"name": "mapr-mapret", "expression": "<MAPR ,LIST <FUNCTION (X) <MAPRET <1 .X> <1 .X>>> '(1 2 3)>"}
+  ]
+}

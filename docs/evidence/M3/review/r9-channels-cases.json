@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "name": "r9-channels-reference",
+  "cases": [
+    {"name": "outchan-type", "expression": "<TYPE ,OUTCHAN>"},
+    {"name": "inchan-type", "expression": "<TYPE ,INCHAN>"},
+    {"name": "outchan-length", "expression": "<LENGTH ,OUTCHAN>"},
+    {"name": "outchan-slot2", "expression": "<2 ,OUTCHAN>"},
+    {"name": "inchan-slot2", "expression": "<2 ,INCHAN>"},
+    {"name": "outchan-slot10", "expression": "<10 ,OUTCHAN>"},
+    {"name": "printstring-no-chan", "expression": "<PRINTSTRING \"hello\">"},
+    {"name": "printstring-explicit-chan", "expression": "<PRINTSTRING \"hello\" ,OUTCHAN>"},
+    {"name": "printstring-with-count", "expression": "<PRINTSTRING \"hello\" ,OUTCHAN 3>"},
+    {"name": "terpri-no-args", "expression": "<TERPRI>"},
+    {"name": "crlf-no-args", "expression": "<CRLF>"},
+    {"name": "terpri-explicit-chan", "expression": "<TERPRI ,OUTCHAN>"}
+  ]
+}

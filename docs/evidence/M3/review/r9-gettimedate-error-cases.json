@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "r9-gettimedate-errors",
+  "cases": [
+    {"name": "bad-arg-string", "expression": "<GETTIMEDATE \"bad\">"},
+    {"name": "too-many-args", "expression": "<GETTIMEDATE 0 T 1>"}
+  ]
+}
