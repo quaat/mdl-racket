@@ -149,8 +149,8 @@
            (lambda () (run "<PUT A DECL 'B> <PUT B DECL 'A> <DECL? 3 A>")))
 ;; The same alias normalization is used by attached declarations.
 (check-equal? (run "<PUT A DECL 'FIX> <DEFINE F (X) #DECL ((X) A) .X> <F 3>") "3")
-(check-exn #rx"DECL.*X"
-           (lambda () (run "<PUT A DECL 'FIX> <DEFINE F (X) #DECL ((X) A) .X> <F \"x\">")))
+;; ...but since M4 #196 an attached declaration is not enforced at the call.
+(check-equal? (run "<PUT A DECL 'FIX> <DEFINE F (X) #DECL ((X) A) .X> <F \"x\">") "\"x\"")
 ;; SETG ignores the atom's DECL property (setg-ignores-atom-decl).
 (check-equal? (run "<PUT SOMETHING DECL 'FIX> <SETG SOMETHING \"str\"> ,SOMETHING")
               "\"str\"")

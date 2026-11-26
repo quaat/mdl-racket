@@ -18,28 +18,28 @@
 (check-eq? (mdl-node-kind decl) 'decl)
 (check-equal? (list (mdl-node-line decl) (mdl-node-column decl)) '(1 15))
 (check-equal? (run source) 2)
-(check-exn #rx"DECL.*X" (lambda () (run "<DEFINE F (X) #DECL ((X) FIX) .X> <F \"bad\">")))
-(check-exn #rx"DECL.*X" (lambda () (run "<DEFINE F (X) #DECL ((X) FIX) <SET X \"bad\">> <F 1>")))
+(check-equal? (run "<DEFINE F (X) #DECL ((X) FIX) .X> <F \"bad\">") "bad")
+(check-equal? (run "<DEFINE F (X) #DECL ((X) FIX) <SET X \"bad\">> <F 1>") "bad")
 (check-equal? (run "<DEFINE F (X) #DECL ((X) FIX) <SET X 4>> <F 1>") 4)
-(check-exn #rx"DECL.*VALUE" (lambda () (run "<DEFINE F () #DECL ((VALUE) FIX) \"bad\"> <F>")))
-(check-exn #rx"DECL.*VALUE" (lambda () (run "<DEFINE F A () #DECL ((VALUE) FIX) <RETURN \"bad\" .A>> <F>")))
+(check-equal? (run "<DEFINE F () #DECL ((VALUE) FIX) \"bad\"> <F>") "bad")
+(check-equal? (run "<DEFINE F A () #DECL ((VALUE) FIX) <RETURN \"bad\" .A>> <F>") "bad")
 (check-equal? (run "<DEFINE F () #DECL ((VALUE) FIX) 4> <F>") 4)
 
 (check-equal? (run "<DEFINE F (\"OPTIONAL\" (X 3)) #DECL ((X) FIX) .X> <F>") 3)
-(check-exn #rx"DECL.*X" (lambda () (run "<DEFINE F (\"OPTIONAL\" (X \"bad\")) #DECL ((X) FIX) .X> <F>")))
-(check-exn #rx"DECL.*X" (lambda () (run "<DEFINE F (\"AUX\" X) #DECL ((X) FIX) <SET X \"bad\">> <F>")))
+(check-equal? (run "<DEFINE F (\"OPTIONAL\" (X \"bad\")) #DECL ((X) FIX) .X> <F>") "bad")
+(check-equal? (run "<DEFINE F (\"AUX\" X) #DECL ((X) FIX) <SET X \"bad\">> <F>") "bad")
 (check-equal? (run "<DEFINE F (\"AUX\" X) #DECL ((X) FIX) <SET X 2>> <F>") 2)
-(check-exn #rx"DECL.*X" (lambda () (run "<DEFINE F ('X) #DECL ((X) FORM) .X> <F 1>")))
+(check-equal? (run "<DEFINE F ('X) #DECL ((X) FORM) .X> <F 1>") 1)
 
 (check-equal? (run "<DEFINE F (X) #DECL ((X) <OR FIX STRING>) .X> <F \"ok\">") "ok")
-(check-exn #rx"DECL.*X" (lambda () (run "<DEFINE F (X) #DECL ((X) <OR FIX STRING>) .X> <F []>")))
+(check-equal? (run "<DEFINE F (X) #DECL ((X) <OR FIX STRING>) .X> <LENGTH <F []>>") 0)
 (check-equal? (run "<DEFINE F (X) #DECL ((X) <PRIMTYPE WORD>) .X> <F 2>") 2)
-(check-exn #rx"DECL.*X" (lambda () (run "<DEFINE F (X) #DECL ((X) <PRIMTYPE WORD>) .X> <F \"bad\">")))
+(check-equal? (run "<DEFINE F (X) #DECL ((X) <PRIMTYPE WORD>) .X> <F \"bad\">") "bad")
 (check-equal? (mdl-atom-pname (run "<NEWTYPE M2-DECL-T LIST> <DEFINE F (X) #DECL ((X) M2-DECL-T) .X> <TYPE <F <CHTYPE (1) M2-DECL-T>>>") ) "M2-DECL-T")
 
 (check-equal? (run "<PROG ((X 2)) #DECL ((X VALUE) FIX) .X>") 2)
-(check-exn #rx"DECL.*X" (lambda () (run "<PROG ((X 2)) #DECL ((X) FIX) <SET X \"bad\">>")))
-(check-exn #rx"DECL.*VALUE" (lambda () (run "<PROG () #DECL ((VALUE) FIX) \"bad\">")))
+(check-equal? (run "<PROG ((X 2)) #DECL ((X) FIX) <SET X \"bad\">>") "bad")
+(check-equal? (run "<PROG () #DECL ((VALUE) FIX) \"bad\">") "bad")
 
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL")))
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL FIX")))
@@ -78,11 +78,15 @@
 ;; (77act1.mud:110); Confusion's generic #type reader treats the extra
 ;; #DECL as a DECL re-typing no-op, so it collapses to one declaration.
 (check-equal? (run "<DEFINE F (X) #DECL #DECL ((X) FIX) .X> <F 2>") 2)
-(check-exn #rx"DECL.*X"
-           (lambda () (run "<DEFINE F (X) #DECL #DECL ((X) FIX) .X> <F \"bad\">")))
+(check-equal? (run "<DEFINE F (X) #DECL #DECL ((X) FIX) .X> <F \"bad\">") "bad")
 (check-equal? (run "#DECL #DECL ((X) FIX) 5") 5)
 (check-exn #rx"#DECL" (lambda () (parse-mdl "#DECL #DECL FIX")))
 
+;; Since M4 #196 attached declarations are not enforced (DECISIONS.md, the
+;; attached-declaration ADR amendment; tests/attached_decl_unenforced_test.rkt):
+;; the calls above and below that used to raise "does not satisfy
+;; declaration" now proceed with the value; the old assertions are listed in
+;; docs/evidence/M4/S16-ATTACHED-DECL.md.
 ;; Review-derived regressions: manifest gating, frame isolation, and macro
 ;; declarations. A manifest global accepts only an ==?-identical reassignment
 ;; unless .REDEFINE is true; MANIFEST before assignment does not make the
@@ -97,15 +101,15 @@
               "str")
 (check-equal? (run "<DEFMAC ADD1M ('X) #DECL ((X) FIX) <FORM + .X 1>> <ADD1M 3>")
               4)
-(check-exn #rx"DECL.*X"
+(check-exn #rx"^mdl-add: expected MDL FIX or FLOAT"
            (lambda ()
              (run "<DEFMAC ADD1M ('X) #DECL ((X) FIX) <FORM + .X 1>> <ADD1M \"s\">")))
 ;; An inner PROG's VALUE declaration is independent of the enclosing
-;; function's: the PROG accepts its result, and the function's own
-;; declaration then rejects it (error position is the function's #DECL).
-(check-exn #rx"DECL.*VALUE"
-           (lambda ()
-             (run "<DEFINE F () #DECL ((VALUE) FIX) <PROG () #DECL ((VALUE) STRING) <RETURN \"x\"> 1>> <F>")))
+;; function's; neither is enforced (#196), so the PROG's "x" is F's value.
+;; The DEFMAC's declared FIX formal is not enforced either: its expansion
+;; fails at + instead.
+(check-equal? (run "<DEFINE F () #DECL ((VALUE) FIX) <PROG () #DECL ((VALUE) STRING) <RETURN \"x\"> 1>> <F>")
+              "x")
 
 ;; The original MSETG definition, verbatim from the pinned 81prim.mud
 ;; (SHA-256 8d0e9365109f3583a7d232a60fb893e274bb6a9e225c826178dc38e026c6c571,
@@ -130,8 +134,22 @@
 (define original-session (make-mdl-session original-root))
 (check-equal? (hash-ref (mdl-session-load! original-session "msetg.mud") 'status)
               "PASS")
-(check-exn #rx"DECL.*FOO"
-           (lambda () (mdl-session-call original-session "MSETG" "bad" 3)))
+;; With MSETG's attached (FOO) ATOM no longer enforced (#196) a non-ATOM FOO
+;; fails at GASSIGNED?, where pinned Confusion fails too
+;; (docs/evidence/M2/decl-error-reference.json original-msetg-wrong-atom:
+;; "1st arg to GASSIGNED? must be atom"). A STRING FOO is not used here:
+;; this runtime's GASSIGNED? accepts a STRING as an ATOM name (a known
+;; divergence recorded in docs/evidence/M4/S16-ATTACHED-DECL.md).
+(check-exn #rx"^mdl-gassigned\\?: expected an MDL ATOM$"
+           (lambda () (mdl-session-call original-session "MSETG" 5 3)))
+;; XFAIL, tracked (not a parity claim): the STRING case. Pinned Confusion
+;; stops at GASSIGNED? ("1st arg to GASSIGNED? must be atom"); this runtime's
+;; GASSIGNED?/SETG take a STRING as an ATOM name (binding-atom), so MSETG
+;; completes. Until #196 MSETG's attached (FOO) ATOM hid this. This assertion
+;; must flip when that divergence is fixed.
+(check-equal? (mdl-atom-pname
+               (mdl-session-call original-session "MSETG" "M2-D1-STRING" 3))
+              "T")
 (define original-atom (mdl-session-call original-session "ATOM" "M2-D1-TEMP"))
 (check-equal? (mdl-atom-pname
                (mdl-session-call original-session "MSETG" original-atom 3))

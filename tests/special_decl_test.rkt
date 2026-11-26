@@ -13,8 +13,8 @@
 
 (check-equal? (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X> <F 7>") 7)
 (check-equal? (run "<DEFINE F (X) #DECL ((X) <UNSPECIAL STRING>) .X> <F \"ok\">") "ok")
-(check-exn #rx"TYPE-MISMATCH|DECL.*X"
-           (lambda () (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X> <F \"bad\">")))
+;; not enforced at the call since M4 #196 (attached declarations)
+(check-equal? (run "<DEFINE F (X) #DECL ((X) <SPECIAL FIX>) .X> <F \"bad\">") "bad")
 (check-exn #rx"SPECIAL.*one|SPECIAL.*Pattern|unsupported"
            (lambda () (run "<DEFINE F (X) #DECL ((X) <SPECIAL>) .X>")))
 (check-exn #rx"SPECIAL.*one|SPECIAL.*Pattern|unsupported"

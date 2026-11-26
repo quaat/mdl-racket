@@ -105,12 +105,16 @@
              (run "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) .P> <F (A B)>")))
  '("A" "B"))
 (check-true (null? (run "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) .P> <F ()>")))
-;; the same declaration rejects a bad argument at the binding boundary
-(check-exn #rx"DECL.*P" (lambda ()
-  (run "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) .P> <F (A 1)>")))
-;; a later SET in the owning frame is checked (compiled path)
-(check-exn #rx"DECL.*P" (lambda ()
-  (run "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) <SET P (A 1)> .P> <F (B)>")))
+;; Since M4 #196 attached declarations are not enforced (DECISIONS.md;
+;; tests/attached_decl_unenforced_test.rkt): a bad argument, SET or VALUE
+;; proceeds with its value (these were strict errors before).
+(check-equal? (length (mdl-list->list
+                       (run "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) .P> <F (A 1)>")))
+              2)
+;; a later SET in the owning frame (compiled path)
+(check-equal? (length (mdl-list->list
+                       (run "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) <SET P (A 1)> .P> <F (B)>")))
+              2)
 (check-equal? (map pname (mdl-list->list
              (run "<DEFINE F (P) #DECL ((P) <LIST [REST ATOM]>) <SET P (B)> .P> <F (A)>")))
               '("B"))
@@ -119,17 +123,20 @@
  (map pname (mdl-list->list
              (run "<DEFINE F () #DECL ((VALUE) <LIST [REST ATOM]>) (A B)> <F>")))
  '("A" "B"))
-(check-exn #rx"DECL.*VALUE" (lambda ()
-  (run "<DEFINE F () #DECL ((VALUE) <LIST [REST ATOM]>) (A 1)> <F>")))
+(check-equal? (length (mdl-list->list
+                       (run "<DEFINE F () #DECL ((VALUE) <LIST [REST ATOM]>) (A 1)> <F>")))
+              2)
 ;; interpreted twins: a quoted formal forces the interpreted FUNCTION path
 (check-equal?
  (map pname (mdl-list->list
              (run "<DEFINE F ('P) #DECL ((P) <LIST [REST ATOM]>) .P> <F (A B)>")))
  '("A" "B"))
-(check-exn #rx"DECL.*P" (lambda ()
-  (run "<DEFINE F ('P) #DECL ((P) <LIST [REST ATOM]>) .P> <F (A 1)>")))
-(check-exn #rx"DECL.*P" (lambda ()
-  (run "<DEFINE F ('P) #DECL ((P) <LIST [REST ATOM]>) <SET P (A 1)> .P> <F (B)>")))
+(check-equal? (length (mdl-list->list
+                       (run "<DEFINE F ('P) #DECL ((P) <LIST [REST ATOM]>) .P> <F (A 1)>")))
+              2)
+(check-equal? (length (mdl-list->list
+                       (run "<DEFINE F ('P) #DECL ((P) <LIST [REST ATOM]>) <SET P (A 1)> .P> <F (B)>")))
+              2)
 
 ;; --- explicit failures for constructs outside the D3 scope -----------------
 

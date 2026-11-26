@@ -27,10 +27,11 @@
 (check-true (true? (run "<DECL? (1 2 3 A B) '<LIST [3 FIX] [REST ATOM]>>")))
 (check-true (false? (run "<DECL? [] '<VECTOR [34359738367 FIX]>>")))
 
-;; Attached declaration from unchanged 77act1.mud:78.
+;; Attached declaration from unchanged 77act1.mud:78. Since M4 #196 it is not
+;; enforced at the call, so a short vector proceeds (as in pinned Confusion);
+;; DECL? above keeps the manual's length rule.
 (check-true (true? (run "<DEFINE F (PV) #DECL ((PV) <VECTOR [3 ANY]>) T> <F [1 A 3]>")))
-(check-exn #rx"declaration|DECL|satisf" (lambda ()
-  (run "<DEFINE F (PV) #DECL ((PV) <VECTOR [3 ANY]>) T> <F [1 2]>")))
+(check-true (true? (run "<DEFINE F (PV) #DECL ((PV) <VECTOR [3 ANY]>) T> <F [1 2]>")))
 
 (check-exn #rx"positive|count|NTH" (lambda ()
   (run "<DECL? [1] '<VECTOR [0 FIX]>>")))

@@ -25,8 +25,8 @@
 (check-equal? (run "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX FIX FIX) .X> <M3FD 1>") 1)
 (check-equal? (run "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX) .X> <M3FD 1>") 1)
 
-;; Grammar and Pattern errors remain strict; ATOM declarations retain
-;; their existing binding checks.
+;; Grammar and Pattern errors remain strict. ATOM declarations are attached
+;; declarations, not enforced at the call since M4 #196.
 (check-exn #rx"must start with VALUE"
            (lambda () (run "<DEFINE M3FD (X) #DECL (\"WRONG\" FIX FIX) .X>")))
 (check-exn #rx"unsupported positional declaration marker QUOTE"
@@ -35,7 +35,6 @@
            (lambda () (run "<DEFINE M3FD (X) #DECL (\"VALUE\" FIX \"OPTIONAL\") .X>")))
 (check-exn #rx"unknown declaration type M3-UNKNOWN"
            (lambda () (run "<DEFINE M3FD (X) #DECL (\"VALUE\" M3-UNKNOWN FIX) .X>")))
-(check-exn #rx"DECL.*X"
-           (lambda () (run "<DEFINE M3FD (X) #DECL ((X) FIX) .X> <M3FD \"BAD\">")))
+(check-equal? (run "<DEFINE M3FD (X) #DECL ((X) FIX) .X> <M3FD \"BAD\">") "BAD")
 
 (displayln "positional FUNCTION declaration metadata tests passed")
