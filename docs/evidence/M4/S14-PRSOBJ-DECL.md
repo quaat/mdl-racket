@@ -1,5 +1,13 @@
 # M4 S14: still-undefined attached TYPE names (#193, INV-11) and the dam scenarios
 
+> **Superseded for attached checks (2026-11-26, M4 S16, #196).** The #193
+> rules below ("known types stay strict"; a later-defined name checked
+> strictly) no longer apply in production: attached #DECLs are not enforced
+> at all (the attached-declaration ADR amendment). They now describe only what
+> the test-only decl-violation recorder evaluates. DECL?, positional
+> declarations, GDECL/SETG and CHTYPE are unchanged. See
+> [S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md).
+
 Date: 2026-11-25. Branch `feat/m4-prsobj-decl` from `main` `69f3334`.
 Issue #193 (INV-11). Gate label: **PASS (local branch, not merged;
 scenario-scoped)** for the declaration amendment and the two promoted

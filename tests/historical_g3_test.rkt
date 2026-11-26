@@ -138,11 +138,12 @@
    (check-exn-verb
     (lambda () (mdl-session-call session "MSETG" atom 4))
     #rx"MSETG.*G3-TEMP.*ALREADY-GASSIGNED.*3")
-   ;; The original declaration still rejects a non-ATOM first argument at
-   ;; the boundary and the global is unchanged after the failed conflict.
+   ;; A non-ATOM first argument fails (at GASSIGNED? since M4 #196: MSETG's
+   ;; attached declaration is not enforced, as in pinned Confusion) and the
+   ;; global is unchanged after the failed conflict.
    (check-exn-verb
-    (lambda () (mdl-session-call session "MSETG" "bad" 3))
-    #rx"DECL.*FOO")
+    (lambda () (mdl-session-call session "MSETG" 5 3))
+    #rx"^mdl-gassigned\\?: expected an MDL ATOM$")
    (check (mdl-session-global session atom) 3)
 
    ;; --- Original PSETG (81prim.mud expression 3) --------------------------

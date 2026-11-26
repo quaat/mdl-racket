@@ -119,7 +119,7 @@
 (define (or-false v f) (if (mdl-truthy? v) (f v) "#FALSE ()"))
 
 ;; --- diagnostic only: the attached-declaration violation sweep (M4 #196) ------------
-;; #f (the default: every scenario run is strict, exactly as before) or a
+;; #f (the default: production behaviour, no attached check evaluated, #196) or a
 ;; procedure (info k n session) for tests/decl_violation_sweep.rkt only. When
 ;; set, each game run below makes its session with make-mdl-session's host-only
 ;; #:decl-violation-recorder, so an attached #DECL check that would fail is

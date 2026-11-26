@@ -2,11 +2,16 @@
 ;; M4 issue #196 ("sweep first", maintainer decision 2026-11-26): the
 ;; attached-declaration violation sweep. DIAGNOSTIC ONLY: not a test of
 ;; `make test`, not a scenario target, not part of `make m4-check`; it changes
-;; no runtime semantics (production stays strict). Run with `make m4-decl-sweep`.
+;; no runtime semantics. Run with `make m4-decl-sweep`.
 ;;
-;; Every gated M4 scenario (tests/scenarios/m4-manifest.json), the balloon-ledge
-;; route (the INV-12 frontier) and the targeted probe routes
-;; (tests/decl_sweep_probes.json) run in single-run mode with the host-only,
+;; Since the #196 amendment (maintainer decision 2026-11-26) production
+;; enforces no attached #DECL; the recorder is where attached checks are still
+;; evaluated. So every unit runs twice, each in its own process: with the
+;; recorder (the would-be violations) and without it (production: the unit's
+;; result as shipped). balloon-ledge is a gated scenario since #196.
+;;
+;; Every gated M4 scenario (tests/scenarios/m4-manifest.json) and the targeted
+;; probe routes (tests/decl_sweep_probes.json) run in single-run mode with the host-only,
 ;; test-only decl-violation recorder on (make-mdl-session #:decl-violation-
 ;; recorder through the runner's current-m4-decl-violation-recorder; SEMANTICS
 ;; "Diagnostic-only: attached-declaration violation recorder"): an attached
@@ -19,8 +24,6 @@
 ;; whether, allowed to proceed, the run still matches the native reference:
 ;;   gated scenarios: the scenario test module itself (every turn's output and
 ;;     checkpoint, the whole transcript, the end state; prefix re-runs);
-;;   balloon-ledge: run-m4-scenario against its committed native reference
-;;     (all 81 commands, the puzzles checkpoint);
 ;;   probe routes: the whole transcript (D1 only) against the native
 ;;     transcript-only capture docs/evidence/M4/decl-sweep-probes-reference.json.
 ;; Violations are deduplicated by site: the #DECL's file, line and column
@@ -29,7 +32,7 @@
 ;;
 ;; Usage:
 ;;   racket tests/decl_violation_sweep.rkt [--out OUT.json] [--work DIR] [--units a,b] [--reuse]
-;;   racket tests/decl_violation_sweep.rkt --one UNIT RESULT.json      (one unit; internal)
+;;   racket tests/decl_violation_sweep.rkt --one UNIT RESULT.json [production]   (one unit; internal)
 ;; Each unit runs in its own racket process (memory), one at a time. The
 ;; exit status is 0 when every unit ran to a result (a scenario that diverges
 ;; with the recorder on is data, reported, not a sweep failure) and the
@@ -38,7 +41,7 @@
          racket/cmdline json file/sha1 (only-in rackunit current-check-handler)
          "../mdl/parser.rkt" "../mdl/loader.rkt"
          (only-in "../mdl/runtime/core.rkt" mdl-atom? mdl-atom-pname)
-         "m4_scenario_runner.rkt" "m4_puzzles_checkpoint.rkt")
+         "m4_scenario_runner.rkt")
 
 (define-runtime-path repo "..")
 (define-runtime-path this-file "decl_violation_sweep.rkt")
@@ -50,12 +53,12 @@
 (define (read-json-file p) (call-with-input-file p read-json))
 
 ;; --- units ---------------------------------------------------------------------------
-;; (name class detail): class gated | frontier | probe | direct.
+;; (name class detail): class gated | probe | direct. (Until #196 balloon-ledge
+;; was a separate "frontier" unit; it is gated now and comes from the manifest.)
 (define (units)
   (append
    (for/list ([s (in-list (hash-ref (read-json-file manifest-path) 'scenarios))])
      (list (hash-ref s 'name) "gated" (hash-ref s 'runner_test)))
-   (list (list "balloon-ledge" "frontier" "tests/scenarios/balloon-ledge.json"))
    (for/list ([p (in-list (hash-ref (read-json-file probes-path) 'probes))])
      (list (hash-ref p 'name) "probe" "tests/decl_sweep_probes.json"))
    (list (list "sphere-clock-direct" "direct" "SPHERE-FUNCTION applied in a loaded game"))))
@@ -92,13 +95,15 @@
                      [(and commands (= n (length commands))) "single-run"]
                      [else (format "prefix-rerun ~a" n)])))
 
-(define (run-one name out-path)
+;; PRODUCTION?: run without the recorder (current-m4-decl-violation-recorder
+;; stays #f), as every production host does.
+(define (run-one name out-path production?)
   (define unit (or (assoc name (units)) (error 'decl-sweep "unknown unit ~a" name)))
   (define class (second unit))
   (define recorded '())
   (define commands
     (case class
-      [("gated" "frontier")
+      [("gated")
        (hash-ref (read-json-file (build-path repo "tests/scenarios" (string-append name ".json"))) 'commands)]
       [("probe")
        (hash-ref (findf (lambda (p) (equal? (hash-ref p 'name) name))
@@ -109,7 +114,7 @@
     (set! recorded (cons (violation->json info k n session commands) recorded)))
   (define started (current-inexact-milliseconds))
   (define-values (result native)
-    (parameterize ([current-m4-decl-violation-recorder recorder])
+    (parameterize ([current-m4-decl-violation-recorder (and (not production?) recorder)])
       (case class
         [("gated")
          (define msg
@@ -118,26 +123,18 @@
              #f))
          (values (or msg "PASS")
                  "the scenario test module: every READSTRING entry's output and checkpoint, the whole transcript and end state (single-run, prefix re-runs as declared)")]
-        [("frontier")
-         (define msg
-           (with-handlers ([exn:fail? exn-message])
-             (run-m4-scenario "balloon-ledge" commands
-                              #:checkpoint puzzles-checkpoint
-                              #:eof-classification-ignore-keys '(robber_hroom))
-             #f))
-         (values (or msg "PASS")
-                 "run-m4-scenario against docs/evidence/M4/balloon-ledge-reference.json (81 commands, puzzles checkpoint), as historical_balloon_frontier_test.rkt")]
         [("probe") (parameterize ([current-check-handler raise]) (run-probe-route name commands))]
         [("direct") (run-sphere-direct)])))
   (define doc
     (hasheq 'unit name 'class class 'source (third unit)
+            'mode (if production? "production (no recorder)" "recorder")
             'result result 'native_comparison native
             'elapsed_seconds (string->number
                               (real->decimal-string (/ (- (current-inexact-milliseconds) started) 1000.0) 1))
             'violations (reverse recorded)))
   (call-with-output-file out-path #:exists 'truncate
     (lambda (out) (write-json doc out) (newline out)))
-  (printf "~a: ~a violation(s); ~a\n" name (length recorded)
+  (printf "~a [~a]: ~a violation(s); ~a\n" name (if production? "production" "recorder") (length recorded)
           (if (> (string-length result) 200) (substring result 0 200) result)))
 
 ;; A probe route: one boot (recorder on), its whole transcript compared with
@@ -183,10 +180,10 @@
 ;; (77rooms.mud:1633-1648) puts <> in PRSVEC 2 and 3, then C-INT!-WORDS in
 ;; PRSVEC 1, then applies the action. Here the game boots by <SAVE-IT> with no
 ;; command (input ends at the first prompt; START has run), PRSVEC is set
-;; exactly so, and SPHERE-FUNCTION is applied once by a host call: with the
-;; recorder on, then in a strict run. Ours only: a direct call, not a route
-;; and not compared with native (the route to the caged sphere, the Low Room
-;; robot and the carousel, was not built).
+;; exactly so, and SPHERE-FUNCTION is applied once by a host call (with the
+;; recorder in the recorder run, without it in the production run). Ours only:
+;; a direct call, not a route and not compared with native (the route to the
+;; caged sphere, the Low Room robot and the carousel, was not built).
 (define (run-sphere-direct)
   (define (call-sphere)
     (define r (m4-run-commands '()))
@@ -210,10 +207,8 @@
         "returned"))
     (values ending (substring ((hash-ref r 'output-now)) before)))
   (define-values (ending output) (call-sphere))
-  (define-values (strict-ending strict-output)
-    (parameterize ([current-m4-decl-violation-recorder #f]) (call-sphere)))
-  (values (format "ours only (direct call after the boot): with the recorder the call ended: ~a; its output ~s. Strict (no recorder): ~a; output ~s"
-                  ending output strict-ending strict-output)
+  (values (format "ours only (direct call after the boot): the call ended: ~a; its output ~s"
+                  ending output)
           "none: ours only (a direct host call of the clock action in a booted game; no route, no native comparison)"))
 
 ;; --- source index: every #DECL of the loaded game files ---------------------------------
@@ -377,10 +372,9 @@
                (if (and (pair? ys) (= (car ys) (add1 prev))) (r (car ys) (cdr ys)) (values prev ys))))
            (loop rest (cons (if (= start run) (number->string start) (format "~a-~a" start run)) acc))])))
 
-(define class-rank (hash "gated" 0 "frontier" 1 "probe" 2 "direct" 3))
+(define class-rank (hash "gated" 0 "probe" 2 "direct" 3))
 (define reachability
   (hash "gated" "on a gated scenario route"
-        "frontier" "on the balloon-ledge route (INV-12 frontier)"
         "probe" "targeted probe route"
         "direct" "direct call only (no route run)"))
 
@@ -454,32 +448,40 @@
         (error 'decl-sweep "cannot locate the racket executable ~a" (find-system-path 'exec-file))))
   (define selected (filter (lambda (u) (or (not only) (member (first u) only))) (units)))
   (define failures '())
-  (define results
-    (for/list ([u (in-list selected)])
+  (define (run-unit u production?)
       (define name (first u))
-      (define result-path (build-path work (format "~a.json" name)))
+      (define tag (if production? (format "~a.production" name) name))
+      (define result-path (build-path work (format "~a.json" tag)))
       (unless (and reuse? (file-exists? result-path))
         (when (file-exists? result-path) (delete-file result-path))
-        (printf "== ~a (~a)\n" name (second u))
+        (printf "== ~a (~a, ~a)\n" name (second u) (if production? "production, no recorder" "recorder"))
         (flush-output)
         (define env (environment-variables-copy (current-environment-variables)))
         (environment-variables-set! env #"M4_SCENARIO_DIVERGENCE_DIR" (string->bytes/utf-8 (path->string divergence)))
         (environment-variables-set! env #"M4_SCENARIO_MODE" #f)
         (define ok?
           (parameterize ([current-environment-variables env])
-            (call-with-output-file (build-path work "logs" (format "~a.log" name)) #:exists 'truncate
+            (call-with-output-file (build-path work "logs" (format "~a.log" tag)) #:exists 'truncate
               (lambda (log)
                 (parameterize ([current-output-port log] [current-error-port log])
-                  (system* racket-exe
-                           (path->string this-file) "--one" name (path->string result-path)))))))
+                  (apply system* racket-exe
+                         (path->string this-file) "--one" name (path->string result-path)
+                         (if production? '("production") '())))))))
         (unless (and ok? (file-exists? result-path))
-          (set! failures (cons name failures))))
+          (set! failures (cons tag failures))))
       (and (file-exists? result-path)
            (let ([r (read-json-file result-path)])
-             (printf "   ~a: ~a violation(s), ~as; ~a\n" name (length (hash-ref r 'violations))
+             (printf "   ~a: ~a violation(s), ~as; ~a\n" tag (length (hash-ref r 'violations))
                      (hash-ref r 'elapsed_seconds)
                      (let ([t (hash-ref r 'result)]) (if (> (string-length t) 160) (substring t 0 160) t)))
-             r))))
+             r)))
+  (define pairs
+    (for/list ([u (in-list selected)])
+      (cons (run-unit u #f) (run-unit u #t))))
+  (define results (map car pairs))
+  (define production-results
+    (for/hash ([u (in-list selected)] [p (in-list pairs)] #:when (cdr p))
+      (values (first u) (cdr p))))
   (define ok-results (filter values results))
   (define sites (aggregate ok-results))
   (define lock (read-json-file (build-path repo "sources.lock.json")))
@@ -488,7 +490,7 @@
      (hasheq 'schema_version 1
              'kind "m4-decl-violation-sweep"
              'issue "#196"
-             'note "Diagnostic only. Production behaviour is unchanged and strict: the recorder is a host-only, test-only hook (make-mdl-session #:decl-violation-recorder) that no production host passes. Here every attached #DECL check that would fail was recorded and the run proceeded."
+             'note "Diagnostic only. The recorder is a host-only, test-only hook (make-mdl-session #:decl-violation-recorder) that no production host passes. With it every attached #DECL check is evaluated and one that would fail is recorded and the run proceeds; without it (production, since the #196 amendment) no attached #DECL check is evaluated. Each unit ran both ways."
              'repository_commit (git-head)
              'upstream (hasheq 'mdlzork (hash-ref (hash-ref (hash-ref lock 'sources) 'mdlzork) 'commit)
                                'mit_zork (hash-ref (hash-ref (hash-ref lock 'sources) 'mit_zork) 'commit))
@@ -501,6 +503,12 @@
                       (hasheq 'unit (hash-ref r 'unit) 'class (hash-ref r 'class) 'source (hash-ref r 'source)
                               'violations (length (hash-ref r 'violations))
                               'result_with_recorder (hash-ref r 'result)
+                              'result_without_recorder
+                              (let ([p (hash-ref production-results (hash-ref r 'unit) #f)])
+                                (if p (hash-ref p 'result) "no result (crashed)"))
+                              'violations_without_recorder
+                              (let ([p (hash-ref production-results (hash-ref r 'unit) #f)])
+                                (if p (length (hash-ref p 'violations)) 'null))
                               'native_comparison (hash-ref r 'native_comparison)
                               'elapsed_seconds (hash-ref r 'elapsed_seconds)))
              'units_crashed (reverse failures)
@@ -538,8 +546,10 @@
   (define args (current-command-line-arguments))
   (cond
     [(and (>= (vector-length args) 1) (equal? (vector-ref args 0) "--one"))
-     (unless (= (vector-length args) 3) (error 'decl-sweep "usage: --one UNIT RESULT.json"))
-     (run-one (vector-ref args 1) (vector-ref args 2))]
+     (unless (or (= (vector-length args) 3)
+                 (and (= (vector-length args) 4) (equal? (vector-ref args 3) "production")))
+       (error 'decl-sweep "usage: --one UNIT RESULT.json [production]"))
+     (run-one (vector-ref args 1) (vector-ref args 2) (= (vector-length args) 4))]
     [else
      (define out (make-parameter default-out))
      (define work (make-parameter default-work))

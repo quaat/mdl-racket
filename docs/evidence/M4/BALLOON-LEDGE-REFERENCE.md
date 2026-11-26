@@ -1,5 +1,10 @@
 # M4 Phase 3c reference: the balloon; scenario `balloon-ledge` (native only, INV-12)
 
+> **Since 2026-11-26 (M4 S16, #196) this reference gates the scenario**
+> `make test-m4-balloon-ledge` (`tests/historical_balloon_ledge_test.rkt`);
+> the XFAIL `make xfail-m4-balloon-frontier` is retired. The reference itself
+> is unchanged (not recaptured). See [S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md).
+
 Date: 2026-11-25. Read-only reference investigation for epic #163 Phase 3c
 (the puzzles beyond the house); slice record [PUZZLES.md](PUZZLES.md).
 This runtime stops at command 57 of this route (INV-12 in

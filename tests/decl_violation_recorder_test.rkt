@@ -5,11 +5,15 @@
 ;; recorder"; docs/TESTING.md). It is NOT a semantic choice:
 ;;
 ;;   * without it (the default, and always in run-zork, the command line and
-;;     the replay host) every attached-declaration check is strict, with the
-;;     same message as before;
-;;   * with it, an attached check that would fail calls the recorder once
-;;     with a description of the violation and then proceeds as if the check
-;;     had passed;
+;;     the replay host) no attached-declaration check is evaluated: since the
+;;     #196 amendment (maintainer decision 2026-11-26) attached declarations
+;;     are not enforced in production (tests/attached_decl_unenforced_test.rkt);
+;;   * with it, every attached check is evaluated exactly as before #196; one
+;;     that would fail calls the recorder once with a description of the
+;;     violation and then proceeds as if the check had passed; one that
+;;     raises while being evaluated (a later DECL association to an unknown
+;;     name) still raises, which is how the isolation tests below tell a
+;;     recorder session from a production one;
 ;;   * every other declaration path (DECL?, GDECL/SETG, positional
 ;;     declarations, CHTYPE to a NEWTYPE with a DECL association, malformed or
 ;;     unknown declarations, the traversal limit) stays strict with it on;
@@ -56,9 +60,10 @@
 (check-equal? r1 "s")
 (check-equal? (map fields i1) '(("X" argument "FIX" "STRING" "\"s\"" 1 15)))
 (check-equal? (hash-ref (car i1) 'value) "s")
-;; the same call without the recorder: the same strict error as before
-(check-exn #rx"^mdl-decl: DECL 1:15: X does not satisfy declaration$"
-           (lambda () (run "<DEFINE F (X) #DECL ((X) FIX) .X> <F \"s\">")))
+;; the same call without the recorder proceeds too (#196: production checks no
+;; attached declaration; before #196 this raised "DECL 1:15: X does not
+;; satisfy declaration")
+(check-equal? (run "<DEFINE F (X) #DECL ((X) FIX) .X> <F \"s\">") "s")
 ;; a passing call records nothing
 (define-values (r1b i1b) (run/recorded "<DEFINE F (X) #DECL ((X) FIX) .X> <F 3>"))
 (check-equal? (list r1b i1b) '(3 ()))
@@ -145,11 +150,15 @@
 (define root (make-temporary-file "mdl-decl-recorder~a" 'directory))
 (define toy-program #<<MDL
 <DEFINE CHECKED (X) #DECL ((X) FIX) .X>
+<DEFINE LATE (X) #DECL ((X) LATE-TYPE) .X>
 <DEFINE SAVE-IT ("AUX" (B <ISTRING 10>))
   <PRINC "booted">
   <CRLF>
   <READSTRING .B ,INCHAN <STRING <ASCII 10>>>
   <PRINC <CHECKED "s">>
+  <CRLF>
+  <PUT LATE-TYPE DECL NOWHERE>
+  <PRINC <LATE 7>>
   <CRLF>
   <QUIT>>
 <DEFINE BOOT () <SAVE-IT>>
@@ -169,39 +178,57 @@ MDL
   (define-values (s out) (toy-session #:recorder (lambda (i) (set! infos (cons i infos)))))
   (check-equal? (mdl-session-call s "CHECKED" "s") "s")
   (check-equal? (map fields infos) '(("X" argument "FIX" "STRING" "\"s\"" 1 21))))
+;; LATE's declaration names LATE-TYPE, given a DECL association to the unknown
+;; NOWHERE after the definition: evaluating that check raises (#193), so only a
+;; session WITH a recorder raises; a production session evaluates nothing.
+(define (late! s)
+  (mdl-session-call s "PUT" (mdl-session-atom s "LATE-TYPE") (mdl-session-atom s "DECL")
+                    (mdl-session-atom s "NOWHERE")))
+(let ()
+  (define-values (s out) (toy-session #:recorder void))
+  (late! s)
+  (check-exn #rx"unknown declaration type NOWHERE" (lambda () (mdl-session-call s "LATE" 7))))
 (let ()
   (define-values (s out) (toy-session))
-  (check-exn #rx"DECL 1:21: X does not satisfy declaration"
-             (lambda () (mdl-session-call s "CHECKED" "s"))))
+  ;; production (#196): the violating call proceeds, nothing is evaluated
+  (check-equal? (mdl-session-call s "CHECKED" "s") "s")
+  (late! s)
+  (check-equal? (mdl-session-call s "LATE" 7) 7))
 (check-exn exn:fail:contract?
            (lambda () (make-mdl-session root #:decl-violation-recorder (lambda () 1))))
 
 ;; MDL code cannot enable it: a default session whose program first evaluates
-;; every MDL-visible handle on declarations still fails strictly.
+;; every MDL-visible handle on declarations still evaluates no attached check
+;; (LATE would raise if a recorder were on).
 (let ()
   (define-values (s out) (toy-session))
-  (check-exn #rx"DECL 1:21: X does not satisfy declaration"
-             (lambda ()
-               (mdl-session-call s "PUT" (mdl-session-atom s "FIX") (mdl-session-atom s "DECL")
-                                 (mdl-session-atom s "ANY"))
-               (mdl-session-call s "CHECKED" "s"))))
+  (mdl-session-call s "PUT" (mdl-session-atom s "FIX") (mdl-session-atom s "DECL")
+                    (mdl-session-atom s "ANY"))
+  (late! s)
+  (check-equal? (mdl-session-call s "LATE" 7) 7))
 
 ;; run-zork (and so the command line, which only calls run-zork) never enables
-;; it: the toy game's violation is a strict failure there.
-(check-exn #rx"DECL 1:21: X does not satisfy declaration"
-           (lambda ()
-             (run-zork #:input (open-input-string "go\n") #:output (open-output-string)
-                       #:source-root root #:notice? #f)))
-;; the replay host never enables it either.
+;; it: the toy game's SAVE-IT calls CHECKED with a violation and then LATE,
+;; whose check raises if evaluated; run-zork plays it to the game's own QUIT.
+;; (Before #196 the CHECKED call was a strict failure here.)
+(let ()
+  (define out (open-output-string))
+  (define result (run-zork #:input (open-input-string "go\n") #:output out
+                           #:source-root root #:notice? #f))
+  (check-equal? (zork-result-kind result) 'quit)
+  (check-equal? (get-output-string out) "booted\ns\n7\n"))
+;; the replay host never enables it either: the same game reaches its QUIT.
 (define toy-profile
   (replay-profile "test-decl-recorder/v1" "77loadall.mud" "BOOT" '("77loadall.mud")
                   (lambda () (hasheq 'test "none"))
                   (lambda (s info) #f) (lambda (s) (hasheq)) (lambda (s) 0)
                   (lambda (obs tz) (hasheq)) '()))
-(check-exn #rx"DECL 1:21: X does not satisfy declaration"
-           (lambda ()
-             (replay-record toy-profile #:source-root root #:input (open-input-string "go\n")
-                            #:output (open-output-string))))
+(let ()
+  (define out (open-output-string))
+  (replay-record toy-profile #:source-root root #:input (open-input-string "go\n")
+                 #:output out)
+  (check-true (string-contains? (get-output-string out) "booted\ns\n7\n")
+              (get-output-string out)))
 (delete-directory/files root)
 
 ;; --- static isolation (grep): one read site, immutable, no production host passes it ----
@@ -210,6 +237,9 @@ MDL
 (define core (source "mdl/runtime/core.rkt"))
 (check-equal? (length (regexp-match* #rx"\\(atom-space-decl-violation-recorder " core)) 1
               "exactly one read site of the recorder (check-declared!)")
+;; since #196 that read is the only gate of attached checking, and the old
+;; strict attached error is gone from the runtime
+(check-false (regexp-match? #rx"does not satisfy declaration\"" core))
 (check-false (regexp-match? #rx"set-atom-space-decl-violation-recorder!" core))
 (check-false (regexp-match? #rx"decl-violation-recorder[ \t\n]+#:mutable|\\[decl-violation-recorder #:mutable" core))
 ;; the accessor is not exported. Checked on the module itself (independent

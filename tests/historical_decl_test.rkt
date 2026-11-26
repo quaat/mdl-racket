@@ -66,10 +66,12 @@
    (check (hash-ref report 'completed_expressions) 8)
    ;; The original MSETG definition, from the pinned bytes, is retained and
    ;; executes; PSETG installs with its compound declaration and now
-   ;; completes its first MEMQ-backed invocation.
+   ;; completes its first MEMQ-backed invocation. Since M4 #196 MSETG's
+   ;; attached (FOO) ATOM is not enforced: a non-ATOM FOO fails at
+   ;; GASSIGNED?, as in pinned Confusion (original-msetg-wrong-atom).
    (check-exn-verb
-    (lambda () (mdl-session-call session "MSETG" "bad" 3))
-    #rx"DECL.*FOO")
+    (lambda () (mdl-session-call session "MSETG" 5 3))
+    #rx"^mdl-gassigned\\?: expected an MDL ATOM$")
    (define atom (mdl-session-call session "ATOM" "M2-D1-TEMP"))
    (check (mdl-atom-pname (mdl-session-call session "MSETG" atom 3)) "T")
    (check (mdl-session-global session atom) 3)

@@ -40,9 +40,11 @@
 (check-equal?
  (run "<DEFINE M3-DA (FN) #DECL ((FN) <OR APPLICABLE ATOM FIX>) 7> <M3-DA 'X>")
  7)
-(check-exn #rx"DECL.*FN"
-           (lambda ()
-             (run "<DEFINE M3-DA (FN) #DECL ((FN) <OR APPLICABLE ATOM FIX>) 7> <M3-DA '(1 2)>")))
+;; a non-matching argument proceeds: attached declarations are not enforced
+;; (M4 #196); DECL? above still rejects it
+(check-equal?
+ (run "<DEFINE M3-DA (FN) #DECL ((FN) <OR APPLICABLE ATOM FIX>) 7> <M3-DA '(1 2)>")
+ 7)
 
 ;; Unknown compound names remain strict errors.
 (check-exn #rx"unknown declaration type M3-UNKNOWN"

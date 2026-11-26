@@ -8,16 +8,18 @@ m4-check` or any scenario target, and not a parity check. It turns on the
 host-only, test-only decl-violation recorder (SEMANTICS "Diagnostic-only:
 attached-declaration violation recorder") through the scenario runner's
 `current-m4-decl-violation-recorder` parameter, so an attached `#DECL`
-check that would fail is recorded and the run proceeds. Production stays
-strict.
+check that would fail is recorded and the run proceeds. Since the #196
+amendment (2026-11-26) production enforces no attached `#DECL`, so each unit
+also runs a second time without the recorder (the production result,
+`result_without_recorder` in the report; logs `NAME.production.log`).
 
-Units, each in its own racket process, one at a time:
+Units, each run in its own racket process, one at a time:
 
 * every gated scenario of `tests/scenarios/m4-manifest.json`: its own test
   module (single-run mode, every READSTRING entry's output and checkpoint,
   the whole transcript and end state, declared prefix re-runs);
-* `balloon-ledge` (INV-12): `run-m4-scenario` against its committed native
-  reference, as `historical_balloon_frontier_test.rkt` (all 81 commands);
+  balloon-ledge is one of them since #196 (before, it was a separate
+  "frontier" unit run against its reference);
 * the probe routes of `tests/decl_sweep_probes.json`: one boot, the whole
   transcript (D1 only) compared with the native transcript-only capture
   `docs/evidence/M4/decl-sweep-probes-reference.json`
@@ -41,7 +43,7 @@ Options: `M4_DECL_SWEEP_ARGS="--units a,b --reuse --out P --work D"`.
 
 `make m4-check` (`scripts/m4_check.py`, epic #163 Phase 7) runs every check
 declared in [`tests/scenarios/m4-manifest.json`](../tests/scenarios/m4-manifest.json),
-one at a time: `make sources`; the twenty-four M4 native-parity scenario targets;
+one at a time: `make sources`; the twenty-five M4 native-parity scenario targets;
 the WP4 persistence check `test-m4-replay-persistence` (a separate entry,
 never counted as a scenario); and the PLAYABLE evidence sub-checks
 `test-m3-session` and `test-m3-launcher`. It then reports the five
@@ -97,13 +99,13 @@ per-scenario steps; per-target logs are uploaded with
 
 ## M4 scenario runner (2026-11-24)
 
-The twenty-four M4 native-parity scenarios (`make test-m4-house-cellar`,
+The twenty-five M4 native-parity scenarios (`make test-m4-house-cellar`,
 `-mailbox-drop`, `-orphan-prompt`, `-top-parser`, `-sword-glow`,
 `-troll-combat`, `-parser-ambiguity`, `-cyclops-room`, `-mirror-bat`,
 `-strange-passage`, `-help-info`, `-grue-resurrection`, `-grue-refusal`,
 `-troll-death`, `-treasure-deposit`, `-thief-robbery`, `-cure-recovery`,
 `-lamp-burnout`, `-match-clock`, `-boat-river`, `-dam-sluice`, `-maint-leak`,
-`-coal-machine`, `-gas-room`) run through one shared driver,
+`-coal-machine`, `-gas-room`, `-balloon-ledge`) run through one shared driver,
 `tests/m4_scenario_runner.rkt`. Each test file keeps only its command list,
 its scenario-specific reference assertions, its read-only checkpoint function
 and its post-FLOAD sections. Every comparison is byte-exact after ADR-0053
@@ -264,14 +266,16 @@ rope, torch, glacier and dome flags, the coal-mine basket (TBASK, FBASK,
 CAGE-TOP), coal, machine, diamond, screwdriver, LIGHT-SHAFT, EMPTY-HANDED,
 the candles and CNDIN, the bracelet) and declare
 `#:eof-classification-ignore-keys '(robber_hroom)`; gas-room also declares
-the death question at READSTRING entry 58 (`#:entry-prompts`). `make
-xfail-m4-balloon-frontier` (`tests/historical_balloon_frontier_test.rkt`) is
-**not** a parity check and is not counted by m4-check: a tracked expected
-failure (INV-12) that checks the native balloon-ledge reference's key turns
-and asserts that this runtime still stops at k = 57 (boarding the balloon:
-BALLOON's attached #DECL `(PRSO) <OR OBJECT DIRECTION>` meets the `#FALSE ()`
-CLOCK-DEMON leaves in PRSVEC); it fails (XPASS) once the balloon can be
-boarded. Evidence: [PUZZLES.md](evidence/M4/PUZZLES.md).
+the death question at READSTRING entry 58 (`#:entry-prompts`).
+balloon-ledge (`make test-m4-balloon-ledge`, `tests/historical_balloon_ledge_test.rkt`)
+uses the same profile and declares `#:eof-classification-ignore-keys
+'(robber_hroom)`. It became a gated scenario with the #196 amendment
+(INV-12 fixed: attached `#DECL`s are not enforced, so BALLOON's `(PRSO)
+<OR OBJECT DIRECTION>` no longer stops the `board basket` turn on the
+`#FALSE ()` CLOCK-DEMON leaves in PRSVEC). It replaces the retired XFAIL
+`make xfail-m4-balloon-frontier`; its native key-turn assertions moved into
+the new test. Evidence: [PUZZLES.md](evidence/M4/PUZZLES.md),
+[S16-ATTACHED-DECL.md](evidence/M4/S16-ATTACHED-DECL.md).
 
 *Diagnostic stdout hashes.* In every M4 reference, the diagnostic runs'
 (X1, Dkk) `stdout_sha256` is the hash of the raw native stdout. That stdout
@@ -281,7 +285,7 @@ corruption, and the runner never uses diagnostic stdouts. The P/T1/T1b
 transcripts it compares contain no path, and their hashes are re-checked.
 
 **Per-prefix mode** (`M4_SCENARIO_MODE=per-prefix`; `make
-m4-scenarios-per-prefix` runs all twenty-four; not on CI's default path). The
+m4-scenarios-per-prefix` runs all twenty-five; not on CI's default path). The
 pre-runner protocol through the same module: one boot per prefix k = 0..n
 with only k commands; the whole output equals the native prefix-k stdout and
 the state after end of input equals the reference end checkpoint k
@@ -319,7 +323,7 @@ export PLTCOLLECTS=":$PWD" TMPDIR=/tmp
 make test-m4-mirror-bat                          # single-run (default)
 M4_SCENARIO_MODE=per-prefix racket tests/historical_mirror_bat_test.rkt
 make test-m4-grue-refusal                        # declared QUIT ending
-make m4-scenarios-per-prefix                     # all twenty-four, per-prefix
+make m4-scenarios-per-prefix                     # all twenty-five, per-prefix
 raco test tests/m4_scenario_runner.rkt           # runner unit tests (also in make test)
 ```
 

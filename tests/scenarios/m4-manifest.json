@@ -224,6 +224,15 @@
       "runner_test": "tests/historical_gas_room_test.rkt",
       "issue": "epic #163 Phase 3c (objects beyond the house: the gas room)",
       "covers": "coal-machine's way to the Shaft Room with the burning candles; the Gas Room entered with the lamp only (BOOM-ROOM: nothing happens; the bracelet taken) and then with the burning candles: the coal-gas explosion, JIGS-UP's death question at READSTRING entry 58 answered `y` (patched in the forest)"
+    },
+    {
+      "id": "S16",
+      "name": "balloon-ledge",
+      "target": "test-m4-balloon-ledge",
+      "scenario_file": "tests/scenarios/balloon-ledge.json",
+      "runner_test": "tests/historical_balloon_ledge_test.rkt",
+      "issue": "#196 (INV-12 resolved: attached declarations are not enforced, the attached-declaration ADR amendment); epic #163 Phase 3c (objects beyond the house: the balloon)",
+      "covers": "troll-combat's sixteen commands; the attic's rope, the Dam Lobby's guidebook and matchbook; the rope tied to the Dome Room's railing, the torch thrown at the glacier (GLACIER-FLAG); the Volcano Bottom: the receptacle opened, the guidebook put in, the basket boarded (BALLOON's READ-OUT with PRSO #FALSE ()), the guidebook burned (BINF GUIDE; BINT and BRNIN queued), the balloon risen to VAIR1 and VAIR2, landed on the Narrow Ledge, left; the wire tied to the hook (WIRE-FUNCTION, BTIE, BINT disabled) and untied; the balloon boarded again, risen off the ledge, descending after `close receptacle`, landed at the Volcano Bottom; `disembark`, `score` (54)"
     }
   ],
   "persistence": [
@@ -307,10 +316,6 @@
     {
       "file": "tests/scenarios/failure-inventory-cases.json",
       "reason": "M4 Phase 1 discovery evidence (GAMEPLAY-FAILURE-INVENTORY.md); command sequences, not a gated parity check"
-    },
-    {
-      "file": "tests/scenarios/balloon-ledge.json",
-      "reason": "M4 Phase 3c native reference only (the balloon): this runtime stops at command 57 on boarding the balloon (INV-12: BALLOON's attached #DECL (PRSO) <OR OBJECT DIRECTION> meets the #FALSE () CLOCK-DEMON leaves in PRSVEC); tracked as an expected failure by make xfail-m4-balloon-frontier, not a gated parity check"
     }
   ]
 }
