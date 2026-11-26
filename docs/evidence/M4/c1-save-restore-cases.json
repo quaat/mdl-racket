@@ -1,0 +1,1137 @@
+{
+ "schema_version": 1,
+ "name": "c1-save-restore",
+ "issue": "#172 phase C1",
+ "engine": "confusion-patched-1977",
+ "game_dir": "mdlzork_771212/patched_confusion",
+ "entries": {
+  "game": [
+   "<FLOAD \"77loadall.mud\">",
+   "<SAVE-IT>"
+  ],
+  "game_diagnostic": [
+   "<FLOAD \"77loadall.mud\">",
+   "<diag forms>",
+   "<SAVE-IT>"
+  ],
+  "bare": []
+ },
+ "default_clock": {
+  "epoch": 250776000,
+  "tz": "UTC",
+  "microseconds": 0
+ },
+ "repetitions": 2,
+ "protocol": "Each case repetition gets ONE fresh copy of the game directory under $TMPDIR; its processes run sequentially in that copy (B sees A's files). Pipe mode: all stdin (entry lines + commands, one per line) is written at once, then EOF. Fixed clock per process via LD_PRELOAD fixed_time.so (scripts/reference/fixed_time.c), MDL_FIXED_EPOCH=<epoch>, TZ=UTC. 'diagnostic_twin' cases are also run with diagnostic forms (READSTRING/RANDOM wrappers printing {{...}} markers to stdout); the twin's stdout with markers removed must equal the transcript run's stdout from 'Welcome to Dungeon.' on.",
+ "cases": [
+  {
+   "name": "P1-cross-process",
+   "probe": "P1",
+   "question": "Is the RANDOM state part of a Confusion SAVE image (MDL level)?",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "bare",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "<SETG MARK 42>",
+      "<RANDOM 12345 67890>",
+      "<SAVE \"R.SAVE\">",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<QUIT>"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "bare",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "<SETG MARK 7>",
+      "<RANDOM 1 2>",
+      "<RANDOM>",
+      "<RESTORE \"R.SAVE\">",
+      ",MARK",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<QUIT>"
+     ]
+    },
+    {
+     "label": "C-control",
+     "entry": "bare",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "<RANDOM 1 2>",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<QUIT>"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": false,
+   "note": "A seeds and saves, then draws 3. B seeds differently, draws 1, restores A's image (MARK shows the heap came back), draws 3. C is B's sequence without a restore. If RANDOM were in the image, B's last 3 = A's 3; otherwise B's last 3 = C's draws 2-4."
+  },
+  {
+   "name": "P1-same-process",
+   "probe": "P1",
+   "question": "Within one process, does RESTORE rewind RANDOM to the SAVE point?",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "bare",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "<RANDOM 12345 67890>",
+      "<SAVE \"R.SAVE\">",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<RESTORE \"R.SAVE\">",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<RANDOM>",
+      "<QUIT>"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": false
+  },
+  {
+   "name": "P1g-A-then-restore-first",
+   "probe": "P1g",
+   "question": "Game-level: after restoring in a new process, does combat follow the saved game's RNG or the restoring process's?",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "save",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "score"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P1g-A-then-3looks-restore",
+   "probe": "P1g",
+   "question": "As P1g-A-then-restore-first, but B draws RANDOM (3 looks) before restore.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "save",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "score"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "look",
+      "look",
+      "look",
+      "restore",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P1g-A-then-restore-first-nextday",
+   "probe": "P1g",
+   "question": "As P1g-A-then-restore-first, but B boots at epoch E+86400 (different START seed).",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "save",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "score"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250862400,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P1g-in-process",
+   "probe": "P1g",
+   "question": "Single process: route, save, restore, kill x3.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "save",
+      "restore",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P2-lamp-moves",
+   "probe": "P2",
+   "question": "Are the save turn's clock demons (lamp tick) and MOVES as of the SAVE call?",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take lamp",
+      "turn on lamp",
+      "save",
+      "restore",
+      "look",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P3-troll-save-turn",
+   "probe": "P3",
+   "question": "Is the villain blow of the save turn (FIGHT-DEMON) undone by restore?",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "kill troll with sword",
+      "save",
+      "diagnose",
+      "restore",
+      "diagnose",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P3b-troll-save-turn-wound",
+   "probe": "P3",
+   "question": "Save turn on which the troll's blow gives a light wound; restore at once.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "kill troll with sword",
+      "diagnose",
+      "diagnose",
+      "diagnose",
+      "save",
+      "restore",
+      "diagnose",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true,
+   "note": "Inputs found by exploration: with 3 diagnose turns before save, the save turn's FIGHT-DEMON blow is 'skins across your forearm' (light wound)."
+  },
+  {
+   "name": "P3c-troll-save-turn-death",
+   "probe": "P3",
+   "question": "Save turn on which the troll kills the player; is the death undone by restore?",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "kill troll with sword",
+      "diagnose",
+      "diagnose",
+      "diagnose",
+      "diagnose",
+      "save",
+      "diagnose",
+      "restore",
+      "diagnose",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true,
+   "note": "With 4 diagnose turns before save, the save turn's blow kills the player; the death's 'patch you?' question consumes the next line ('diagnose')."
+  },
+  {
+   "name": "P4a-dark-cellar",
+   "probe": "P4",
+   "question": "Post-restore text in a dark room.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "move rug",
+      "open trap door",
+      "down",
+      "save",
+      "restore",
+      "look"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P4b-brief",
+   "probe": "P4",
+   "question": "Post-restore text with BRIEF set (seen room).",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "brief",
+      "north",
+      "west",
+      "save",
+      "restore",
+      "look"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P4c-superbrief",
+   "probe": "P4",
+   "question": "Post-restore text with SUPERBRIEF set (seen room).",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "superbrief",
+      "north",
+      "west",
+      "save",
+      "restore",
+      "look"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P4d-boat-board",
+   "probe": "P4",
+   "question": "Post-restore text while in the boat (not launched).",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "north",
+      "east",
+      "se",
+      "south",
+      "se",
+      "east",
+      "se",
+      "south",
+      "se",
+      "south",
+      "look",
+      "se",
+      "east",
+      "sw",
+      "rub mirror",
+      "east",
+      "down",
+      "se",
+      "take pump",
+      "north",
+      "up",
+      "north",
+      "west",
+      "west",
+      "down",
+      "east",
+      "north",
+      "north",
+      "down",
+      "up",
+      "east",
+      "down",
+      "inflate boat with pump",
+      "board boat",
+      "save",
+      "restore",
+      "look"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P4e-boat-river",
+   "probe": "P4",
+   "question": "Post-restore text while in the boat on the river.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "east",
+      "open window",
+      "west",
+      "west",
+      "take sword",
+      "inventory",
+      "take lamp",
+      "move rug",
+      "open trap door",
+      "turn on lamp",
+      "down",
+      "east",
+      "kill troll with sword",
+      "kill troll with sword",
+      "kill troll with sword",
+      "north",
+      "east",
+      "se",
+      "south",
+      "se",
+      "east",
+      "se",
+      "south",
+      "se",
+      "south",
+      "look",
+      "se",
+      "east",
+      "sw",
+      "rub mirror",
+      "east",
+      "down",
+      "se",
+      "take pump",
+      "north",
+      "up",
+      "north",
+      "west",
+      "west",
+      "down",
+      "east",
+      "north",
+      "north",
+      "down",
+      "up",
+      "east",
+      "down",
+      "inflate boat with pump",
+      "board boat",
+      "launch",
+      "save",
+      "restore",
+      "look"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P5a-downtime",
+   "probe": "P5",
+   "question": "Save at E, restore in a new process at E+3725, then time.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250779725,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "time"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P5a-control-no-restore",
+   "probe": "P5",
+   "question": "Control: a process at E+3725 types time without restoring; and save+time at E.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save",
+      "time"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250779725,
+     "tz": "UTC",
+     "commands": [
+      "time"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P5b-cross-midnight",
+   "probe": "P5",
+   "question": "Save at 23:59:00, restore next day 00:01:00 UTC, then time.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250819140,
+     "tz": "UTC",
+     "commands": [
+      "save"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250819260,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "time"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P5c-play-before-restore",
+   "probe": "P5",
+   "question": "B plays 3 commands before restore at E+3725, then time and score.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250779725,
+     "tz": "UTC",
+     "commands": [
+      "look",
+      "look",
+      "look",
+      "restore",
+      "time",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P6a-shipped-image",
+   "probe": "P6",
+   "question": "restore with the shipped SAVEFILE/ZORK.SAVE present (not removed).",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "look",
+      "score",
+      "inventory",
+      "time"
+     ]
+    }
+   ],
+   "setup": [
+    "keep shipped SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P6b-no-savefile-dir",
+   "probe": "P6",
+   "question": "save and restore with no SAVEFILE/ directory.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save",
+      "restore",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE",
+    "remove directory SAVEFILE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P6c-truncated-1000",
+   "probe": "P6",
+   "question": "restore of an image truncated to 1000 bytes.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "score",
+      "look"
+     ],
+     "host_before": [
+      "truncate SAVEFILE/ZORK.SAVE 1000"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P6d-truncated-half",
+   "probe": "P6",
+   "question": "restore of an image truncated to half its size.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "score",
+      "look"
+     ],
+     "host_before": [
+      "truncate SAVEFILE/ZORK.SAVE half"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P6e-empty-file",
+   "probe": "P6",
+   "question": "restore of an empty (0-byte) SAVEFILE/ZORK.SAVE.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "score",
+      "look"
+     ],
+     "host_before": [
+      "truncate SAVEFILE/ZORK.SAVE 0"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P7-rollback",
+   "probe": "P7",
+   "question": "save n restore look score inventory (one process).",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save",
+      "north",
+      "restore",
+      "look",
+      "score",
+      "inventory"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P8-restore-first",
+   "probe": "P8",
+   "question": "restore as the first command of a process after one that saved.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "save"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "restore",
+      "score",
+      "look"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P9a-orphan-throw",
+   "probe": "P9",
+   "question": "Orphan prompt ('at what?') then save, restore, look.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "open mailbox",
+      "take leaflet",
+      "throw leaflet",
+      "save",
+      "restore",
+      "look",
+      "mailbox"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P9c-orphan-throw-no-restore",
+   "probe": "P9",
+   "question": "Control for P9a without restore: does the orphan survive the save turn?",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "open mailbox",
+      "take leaflet",
+      "throw leaflet",
+      "save",
+      "mailbox"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P9b-orphan-kill",
+   "probe": "P9",
+   "question": "Bare 'kill' then save, restore, look.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "kill",
+      "save",
+      "restore",
+      "look"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P10a-twice-in-process",
+   "probe": "P10",
+   "question": "save n restore n restore look score (one process).",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save",
+      "north",
+      "restore",
+      "north",
+      "restore",
+      "look",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  },
+  {
+   "name": "P10b-twice-cross-process",
+   "probe": "P10",
+   "question": "A saves; B restores twice; image hash after each process.",
+   "processes": [
+    {
+     "label": "A",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "save"
+     ]
+    },
+    {
+     "label": "B",
+     "entry": "game",
+     "epoch": 250776000,
+     "tz": "UTC",
+     "commands": [
+      "north",
+      "restore",
+      "north",
+      "restore",
+      "look",
+      "score"
+     ]
+    }
+   ],
+   "setup": [
+    "remove SAVEFILE/ZORK.SAVE"
+   ],
+   "diagnostic_twin": true
+  }
+ ]
+}
