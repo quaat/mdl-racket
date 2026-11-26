@@ -7,14 +7,16 @@ collapsed into one PASS:
   SCENARIO_PARITY       every declared M4 native-parity scenario target exits 0
                         (scoped: N scenarios, each under one fixed clock and seed)
   GAMEPLAY_RELIABILITY  every declared required gameplay branch is covered by a
-                        check that ran and passed, and no blocking inventory item
-                        is open (docs/evidence/M4/gameplay-branches.json)
+                        check that ran and passed, no blocking inventory item
+                        is open, and the branch list is maintainer-APPROVED
+                        (docs/evidence/M4/gameplay-branches.json)
   PLAYABLE              NOT RUN: no verified PLAYABLE gate exists; the available
                         evidence sub-checks are run and reported, a failing one
                         makes the term FAIL, passing ones never make it PASS
   FULL_COMPLETION       NOT RUN: no complete-game run exists (Phase 6)
   M4_ACCEPTED           PASS only if all four terms PASS and every M4 PLAN
-                        requirement is met; otherwise NOT YET
+                        requirement is met (R5: a committed maintainer record
+                        with the required fields); otherwise NOT YET
 
 Every check is declared in tests/scenarios/m4-manifest.json; nothing is
 discovered implicitly at run time, and tests/test_m4_check.py fails when a
@@ -26,7 +28,9 @@ no check exists), NOT YET (executed what exists, requirements unmet).
 Exit policy: 0 when no term and no executed check is FAIL (NOT RUN and NOT YET
 are allowed); 1 on any FAIL (including an incomplete manifest or a failed
 `make sources`); with --require-accepted, 3 when M4_ACCEPTED is not PASS and
-nothing FAILed. The report is written to artifacts/m4-check/m4-check.json,
+nothing FAILed. Ordinary PR CI runs without --require-accepted (regression
+result); the final milestone gate is `make m4-accept` (--require-accepted
+--per-prefix). The report is written to artifacts/m4-check/m4-check.json,
 per-check logs to artifacts/m4-check/logs/. A PASS here is a technical result
 of the commit it ran on; a local branch result is never mainline acceptance.
 """
@@ -157,6 +161,11 @@ def completeness_problems(manifest: dict, makefile_text: str,
         if item.get("status") not in ("open", "closed"):
             problems.append(f"blocking item {item.get('id')} has status "
                             f"{item.get('status')!r}; expected open or closed")
+    if "baseline_version" in branches:
+        history = branches.get("baseline_history") or []
+        if not history or history[-1].get("version") != branches["baseline_version"]:
+            problems.append("baseline_version does not match the last baseline_history "
+                            "entry (every change to the required-branch list is versioned)")
     return problems
 
 
@@ -209,6 +218,17 @@ def branch_status(branch: dict, results: dict) -> str:
     return PASS
 
 
+def list_status_word(branches: dict) -> str:
+    status = branches.get("list_status")
+    return (status.split(" ")[0] if isinstance(status, str) else "") or "UNSPECIFIED"
+
+
+def list_approved(branches: dict) -> bool:
+    """The maintainer approved the required-branch list (ADR-0063 amendment,
+    2026-11-26). A PROVISIONAL or unspecified list can never give PASS."""
+    return list_status_word(branches) == "APPROVED"
+
+
 def gameplay_reliability_term(branches: dict, results: dict) -> dict:
     per: dict[str, dict] = {}
     for cat in branches.get("categories", []):
@@ -233,9 +253,13 @@ def gameplay_reliability_term(branches: dict, results: dict) -> dict:
         reasons.append("covering check not run: " + ", ".join(not_run))
     if not per:
         reasons.append("no required branches declared")
+    approved = list_approved(branches)
+    if not approved:
+        reasons.append("the required-branch list is not maintainer-approved "
+                       f"(list_status {list_status_word(branches)})")
     if failed:
         status = FAIL
-    elif uncovered or open_items or not per:
+    elif uncovered or open_items or not per or not approved:
         status = NOT_YET
     elif not_run:
         status = NOT_RUN
@@ -244,7 +268,9 @@ def gameplay_reliability_term(branches: dict, results: dict) -> dict:
     covered = len(per) - len(uncovered)
     return {"status": status,
             "scope": f"{covered} of {len(per)} required branches have a covering check; "
-                     f"branch list {branches.get('list_status', '').split(' ')[0] or 'UNSPECIFIED'}",
+                     f"branch list {list_status_word(branches)}"
+                     + (f" (baseline v{branches['baseline_version']})"
+                        if approved and branches.get("baseline_version") else ""),
             "reasons": reasons, "branches": per, "blocking_open": open_items}
 
 
@@ -272,25 +298,128 @@ def full_completion_term(manifest: dict, results: dict) -> dict:
             "reasons": [] if s == PASS else [f"{check}: {s}"]}
 
 
-def m4_accepted_term(terms: dict, manifest: dict) -> dict:
+# The committed R5 maintainer record (ADR-0063 amendment, 2026-11-26). An agent
+# may prepare a draft, but only the maintainer writes this record. The check
+# verifies its form and its anchoring (tracked in git, reviewed commit an
+# ancestor of the checked commit, source pins named), never its truth.
+MAINTAINER_RECORD_SECTIONS = ("Accepted semantic deviations", "Evidence",
+                              "Scope and consequences", "Remaining limitations")
+_FIELD = r"^{name}:[ \t]*(?P<value>[^\n]*?)[ \t]*$"
+
+
+def _visible_text(text: str) -> str:
+    """The record as rendered: fenced code blocks and HTML comments removed,
+    so a field written inside either never counts."""
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+    return re.sub(r"^[ \t]*(```|~~~).*?^[ \t]*\1[^\n]*$", "", text, flags=re.S | re.M)
+
+
+def _field_values(text: str, name: str) -> list[str]:
+    return [m.group("value") for m in re.finditer(_FIELD.format(name=re.escape(name)),
+                                                  text, re.M)]
+
+
+def maintainer_record_problems(path: Path, lock_commits: list[str] | None = None,
+                               check_git: bool = True) -> list[str]:
+    if "draft" in path.name.lower():
+        return ["a draft can never be the maintainer record"]
+    try:
+        text = _visible_text(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError) as e:
+        return [f"unreadable ({getattr(e, 'strerror', None) or e})"]
+    problems: list[str] = []
+
+    def one(name: str) -> str | None:
+        values = _field_values(text, name)
+        if len(values) != 1:
+            problems.append(f"needs exactly one '{name}:' line (found {len(values)})")
+            return None
+        v = values[0]
+        if not v or (v.startswith("(") and v.endswith(")")):
+            problems.append(f"'{name}:' is empty or a placeholder")
+            return None
+        return v
+
+    if (v := one("Maintainer acceptance")) is not None and v != "ACCEPTED":
+        problems.append(f"'Maintainer acceptance:' is {v!r}, not ACCEPTED")
+    one("Accepted by")
+    if (v := one("Date")) is not None:
+        try:
+            datetime.strptime(v, "%Y-%m-%d")
+        except ValueError:
+            problems.append(f"'Date:' {v!r} is not a valid YYYY-MM-DD date")
+    sha = one("Reviewed commit")
+    if sha is not None and not re.fullmatch(r"[0-9a-f]{40}", sha):
+        problems.append("'Reviewed commit:' is not a 40-hex commit SHA")
+        sha = None
+    pins = one("Source pins")
+    if pins is not None:
+        missing = [c for c in (lock_commits or []) if c[:7] not in pins]
+        if missing:
+            problems.append("'Source pins:' does not name the sources.lock.json commits "
+                            + ", ".join(c[:7] for c in missing))
+    # Each required section exists and has a non-empty body.
+    for sec in MAINTAINER_RECORD_SECTIONS:
+        m = re.search(rf"^##[ \t]+{re.escape(sec)}[ \t]*\n(?P<body>.*?)(?=^##[ \t]|\Z)",
+                      text, re.M | re.S)
+        if not m:
+            problems.append(f"missing section '## {sec}'")
+        elif not m.group("body").strip():
+            problems.append(f"section '## {sec}' is empty")
+    if check_git:
+        rel_path = path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else str(path)
+        if git("ls-files", "--error-unmatch", "--", rel_path) is None:
+            problems.append("not a committed (git-tracked) file, or git is unavailable")
+        if sha is not None and git("merge-base", "--is-ancestor", sha, "HEAD") is None:
+            problems.append(f"reviewed commit {sha[:12]} is not an ancestor of the checked "
+                            "commit, or git is unavailable")
+    return problems
+
+
+def m4_accepted_term(terms: dict, manifest: dict, results: dict,
+                     per_prefix: dict | None) -> dict:
+    """M4_ACCEPTED (ADR-0063 and its 2026-11-26 amendment): all four terms PASS,
+    every PLAN requirement met, and the run was the full final gate: the
+    per-prefix protocol ran and passed and no declared check was left NOT RUN."""
     unmet: list[str] = []
     reqs = manifest.get("m4_plan_requirements", [])
     cited = {r.get("satisfied_by_term") for r in reqs}
     for name in TERMS[:-1]:   # all four terms are required, cited by a requirement or not
         if name not in cited and terms.get(name, {}).get("status") != PASS:
             unmet.append(f"{name} is {terms.get(name, {}).get('status', NOT_RUN)}")
+    lock = []
+    try:
+        lock = [v["commit"] for v in load_json(ROOT / "sources.lock.json")["sources"].values()]
+    except (OSError, KeyError, ValueError):
+        unmet.append("sources.lock.json unreadable")
     for req in reqs:
         term = req.get("satisfied_by_term")
-        if term:
+        if req.get("maintainer_record_policy") is not None or str(req.get("id", "")).startswith("R5"):
+            # R5 is satisfied only by the maintainer's record, never by a term.
+            if term:
+                unmet.append(f"{req['id']}: may not be satisfied by a term ({term}); "
+                             "only the maintainer record counts")
+            elif not req.get("maintainer_record"):
+                unmet.append(f"{req['id']}: {req['text']} (no maintainer record)")
+            elif not (ROOT / req["maintainer_record"]).is_file():
+                unmet.append(f"{req['id']}: maintainer record {req['maintainer_record']} missing")
+            else:
+                unmet += [f"{req['id']}: maintainer record {req['maintainer_record']}: {p}"
+                          for p in maintainer_record_problems(ROOT / req["maintainer_record"], lock)]
+        elif term:
             if terms.get(term, {}).get("status") != PASS:
                 unmet.append(f"{req['id']}: {term} is "
                              f"{terms.get(term, {}).get('status', NOT_RUN)} ({req['text']})")
-        elif not req.get("maintainer_record"):
-            unmet.append(f"{req['id']}: {req['text']} (no maintainer record)")
-        elif not (ROOT / req["maintainer_record"]).is_file():
-            unmet.append(f"{req['id']}: maintainer record {req['maintainer_record']} missing")
+        else:
+            unmet.append(f"{req['id']}: declares neither a term nor a maintainer record")
     if not reqs:
         unmet.append("no M4 PLAN requirements declared")
+    if per_prefix is None or per_prefix.get("status") != PASS:
+        unmet.append("the per-prefix protocol did not run and pass (the final gate is "
+                     "`make m4-accept`)")
+    skipped = sorted(n for n, e in results.items() if e.get("status") == NOT_RUN)
+    if skipped:
+        unmet.append("declared checks not run: " + ", ".join(skipped))
     return {"status": NOT_YET if unmet else PASS,
             "scope": "technical result of this run; mainline acceptance is recorded by "
                      "the maintainer in docs/STATUS.md",
@@ -305,7 +434,7 @@ def compute_terms(manifest: dict, branches: dict, results: dict, problems: list[
         "PLAYABLE": playable_term(manifest, results),
         "FULL_COMPLETION": full_completion_term(manifest, results),
     }
-    terms["M4_ACCEPTED"] = m4_accepted_term(terms, manifest)
+    terms["M4_ACCEPTED"] = m4_accepted_term(terms, manifest, results, per_prefix)
     return terms
 
 
@@ -487,7 +616,8 @@ def main(argv: list[str] | None = None) -> int:
     commit, commit_source = git_commit()
     report = {
         "schema_version": 1,
-        "target": "make m4-check",
+        "target": "make m4-accept" if (args.require_accepted and args.per_prefix)
+                  else "make m4-check",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "mode": {"scenarios_only": args.scenarios_only, "per_prefix": args.per_prefix,
                  "skip": args.skip, "require_accepted": args.require_accepted,
@@ -512,13 +642,23 @@ def main(argv: list[str] | None = None) -> int:
                        f"FAIL; {EXIT_NOT_ACCEPTED}: --require-accepted and M4_ACCEPTED "
                        "not PASS",
         "exit_code": code,
+        "regression_result": "FAIL" if code == EXIT_FAIL else "OK",
+        "milestone_acceptance": terms["M4_ACCEPTED"]["status"],
+        "result_meaning": "regression_result OK means every executed check passed (the "
+                          "ordinary PR gate); it is not milestone acceptance. Milestone "
+                          "acceptance is M4_ACCEPTED PASS under `make m4-accept` "
+                          "(--require-accepted), plus the maintainer's committed record.",
         "claim": "technical result of this commit only; a local branch result is not "
                  "mainline acceptance, and no term is decided here beyond what ran",
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print_table(terms)
-    print(f"\nm4-check: exit {code}; report {rel(args.report)}; commit "
+    print(f"\nm4-check: regression result "
+          f"{'FAIL' if code == EXIT_FAIL else 'OK (no executed check failed)'}; "
+          f"milestone acceptance M4_ACCEPTED {terms['M4_ACCEPTED']['status']}"
+          f"{'' if args.require_accepted else ' (not required in this mode)'}")
+    print(f"m4-check: exit {code}; report {rel(args.report)}; commit "
           f"{(report['git_commit'] or '?')[:7]}{' (dirty)' if report['git_worktree_dirty'] else ''}")
     return code
 

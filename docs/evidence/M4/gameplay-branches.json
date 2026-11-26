@@ -3,7 +3,11 @@
   "name": "m4-gameplay-branches",
   "date": "2026-11-26",
   "description": "The declared required gameplay branches for the M4 acceptance term GAMEPLAY_RELIABILITY ('every declared required gameplay branch runs without an unexpected runtime failure', docs/STATUS.md). scripts/m4_check.py derives each branch's state only from checks it actually ran in the same invocation: a branch with no covering check is UNCOVERED, and GAMEPLAY_RELIABILITY is never PASS while any required branch is UNCOVERED, any covering check did not run or failed, or any blocking inventory item is open. A covering check proves only what its scenario exercises, under one fixed clock and seed.",
-  "list_status": "PROVISIONAL (conservative reading, 2026-11-25): the six categories are the ones epic #163 names (combat, death and recovery, timers, objects, scoring, save/load); the branches inside each are this file's reading of PLAN M4 'Build' and of the failure inventory's unexercised areas. The maintainer has not yet approved a final required-branch list. Adding a branch can only turn the term away from PASS.",
+  "list_status": "APPROVED (maintainer, 2026-11-26; ADR-0063 amendment): these 23 required branches in the six categories epic #163 names (combat, death and recovery, timers, objects, scoring, save/load) are the initial required baseline, version 1. The list is a minimum acceptance contract, not a claim that every game behaviour is exercised. Branches may be added when justified by reachability, risk, full-completion dependencies or new defects; each change bumps baseline_version and is recorded in docs/DECISIONS.md (ADR-0063) and docs/evidence/M4/M4-CHECK.md. Adding a branch can only turn the term away from PASS.",
+  "baseline_version": 1,
+  "baseline_history": [
+    {"version": 1, "date": "2026-11-26", "change": "the 23 branches of the PROVISIONAL list of 2026-11-25, approved unchanged by the maintainer (ADR-0063 amendment); combat.thief accepted as combined coverage by thief-robbery and thief-fight"}
+  ],
   "checks_namespace": "Each entry in `checks` is a make target listed in tests/scenarios/m4-manifest.json (scenarios, persistence or playable_subchecks). Discovery runs that are not gated checks (tests/scenarios/failure-inventory-cases.json) are cited in `evidence_only` and never count as coverage.",
   "categories": [
     {
@@ -26,7 +30,7 @@
         {"id": "combat.thief", "required": true,
          "description": "the thief (ROBBER) fights, steals and is fought",
          "checks": ["test-m4-thief-robbery", "test-m4-thief-fight"],
-         "note": "covered under the fixed clock and seed by two gated scenarios together, neither alone. Steals: test-m4-thief-robbery (observed, not chased) shows the ROBBER demon's thief taking the painting from the hero in the Gallery (and, at prefix 12's end of input, from the room), passing again without finding anything, and keeping it in his bag (HOBJS); there he is never in a room with the hero. Fights and is fought: test-m4-thief-fight enters his Treasure Room (strange-passage's way past the cyclops, `up`): TREASURE-ROOM (77act1.mud:623) brings him there whatever the seed, with FIGHTBIT set, and the FIGHTING demon has him attack at once (a miss); `kill thief with sword` twice: the hero wounds him twice (OCAPAC 4 -> 3 -> 2), he wounds the hero, then knocks him out and kills him (JIGS-UP, patched with `y`). Not exercised: the thief appearing by chance in another room (the ROBBER demon's PROB 30 \"Someone carrying a large bag is casually leaning against one of the walls here\") or leaving a fight (\"Your opponent, determining discretion ...\"), the hero killing or knocking out the thief (his booty and the treasures reappearing, ROBBER-FUNCTION's DEAD!, OUT! and IN!), the stiletto knocked from his hand, giving or throwing him objects, the chalice taken, and the thief stealing from the hero's room while present (\"The other occupant just left ...\")"}
+         "note": "covered under the fixed clock and seed by two gated scenarios together, neither alone. Steals: test-m4-thief-robbery (observed, not chased) shows the ROBBER demon's thief taking the painting from the hero in the Gallery (and, at prefix 12's end of input, from the room), passing again without finding anything, and keeping it in his bag (HOBJS); there he is never in a room with the hero. Fights and is fought: test-m4-thief-fight enters his Treasure Room (strange-passage's way past the cyclops, `up`): TREASURE-ROOM (77act1.mud:623) brings him there whatever the seed, with FIGHTBIT set, and the FIGHTING demon has him attack at once (a miss); `kill thief with sword` twice: the hero wounds him twice (OCAPAC 4 -> 3 -> 2), he wounds the hero, then knocks him out and kills him (JIGS-UP, patched with `y`). Not exercised: the thief appearing by chance in another room (the ROBBER demon's PROB 30 \"Someone carrying a large bag is casually leaning against one of the walls here\") or leaving a fight (\"Your opponent, determining discretion ...\"), the hero killing or knocking out the thief (his booty and the treasures reappearing, ROBBER-FUNCTION's DEAD!, OUT! and IN!), the stiletto knocked from his hand, giving or throwing him objects, the chalice taken, and the thief stealing from the hero's room while present (\"The other occupant just left ...\"). Maintainer decision 2026-11-26: the two scenarios together are accepted as coverage of this branch as declared; both stay required and must pass. Neither covers all thief behaviour; the unverified thief behaviours are listed in full_completion_backlog and are not covered by this branch."}
       ]
     },
     {
@@ -119,18 +123,30 @@
         {"id": "save.player-facing-resume", "required": true,
          "description": "a player saves and resumes a session (WP4.7)",
          "checks": [],
-         "note": "needs an ADR-0055 amendment; not implemented"}
+         "note": "direction approved (#172, maintainer 2026-11-26; ADR-0061 amendment): host-owned deterministic replay persistence at the command prompt, a real fresh-process resume; not implemented yet (Phase C)"}
       ]
     }
   ],
+  "full_completion_backlog": [
+    {"id": "thief.hero-defeats-thief", "source": "maintainer decision 2026-11-26 (combat.thief)", "text": "the hero defeats or kills the thief (ROBBER's death or unconsciousness in a fight the hero wins)"},
+    {"id": "thief.stolen-objects-released", "source": "maintainer decision 2026-11-26 (combat.thief)", "text": "the thief's stolen objects released or redistributed (his bag and the Treasure Room contents after his death)"},
+    {"id": "thief.treasure-recovery", "source": "maintainer decision 2026-11-26 (combat.thief)", "text": "treasure recovered from the thief, with the related score and object-state changes"},
+    {"id": "thief.other-combat-endings", "source": "maintainer decision 2026-11-26 (combat.thief)", "text": "other thief-combat termination paths (his retreat, \"Your opponent, determining discretion ...\"; fights ended by the hero's flight)"},
+    {"id": "thief.chance-appearance", "source": "combat.thief note, not exercised", "text": "the thief appearing by chance in another room (the ROBBER demon's PROB 30 \"Someone carrying a large bag is casually leaning against one of the walls here\")"},
+    {"id": "thief.stiletto-knocked-away", "source": "combat.thief note, not exercised", "text": "the stiletto knocked from his hand"},
+    {"id": "thief.give-or-throw", "source": "combat.thief note, not exercised", "text": "giving or throwing him objects"},
+    {"id": "thief.chalice-taken", "source": "combat.thief note, not exercised", "text": "the chalice taken from the Treasure Room"},
+    {"id": "thief.steals-from-room-while-present", "source": "combat.thief note, not exercised", "text": "the thief stealing from the hero's room while present (\"The other occupant just left ...\")"}
+  ],
+  "full_completion_backlog_note": "Behaviour the full-completion work (epic #163 Phase D) must reach or rule out. Nothing here is covered by an existing branch. An item demonstrably required for completing the game is promoted into a separately declared, native-backed regression and a new required branch (a baseline version bump); it is never marked covered because another scenario passes.",
   "blocking_inventory": [
     {"id": "INV-06", "title": "native RESTORE is strict: `restore` ends the session after \"Restored.\" (F4, F5)",
      "class": "(a) reachable by ordinary play", "severity": "P1",
-     "issue": "#172", "issue_source": "verified with gh by the orchestrator 2026-11-25 (open, maintainer decision pending); linked in GAMEPLAY-FAILURE-INVENTORY.md",
+     "issue": "#172", "issue_source": "maintainer decision 2026-11-26 (#172): deterministic replay for player-facing persistence; the game's RESTORE only where equivalence with the native continuation is demonstrated (ADR-0048 and ADR-0061 amendments). Open until implemented (Phase C).",
      "status": "open"},
     {"id": "INV-07", "title": "PRINT is unassigned on the game's ERROR handler path (HANDLE, 77rooms.mud:251)",
      "class": "(b) error path", "severity": "P2",
-     "issue": "#173", "issue_source": "verified with gh by the orchestrator 2026-11-25 (open, maintainer decision pending); linked in GAMEPLAY-FAILURE-INVENTORY.md",
+     "issue": "#173", "issue_source": "maintainer decision 2026-11-26 (#173): implement PRINT per the manual (11.1.2.1); MDL errors and host failures classified separately (ADR-0064). Open until implemented (Phase B).",
      "status": "open"}
   ],
   "resolved_inventory": [
