@@ -1,5 +1,14 @@
 # M4 #196: attached-declaration violation sweep (diagnostic only)
 
+> **Decision taken (2026-11-26, M4 S16):** option 2a. Attached `#DECL`s are
+> no longer enforced in production (the attached-declaration ADR amendment);
+> balloon-ledge is a gated scenario and `make xfail-m4-balloon-frontier` is
+> retired. The recorder and `make m4-decl-sweep` remain the diagnostic; the
+> sweep now runs each unit with and without the recorder. The text below is
+> the record of the original sweep; the re-run after the decision is at the
+> end ("Re-run after the decision") and in
+> [S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md).
+
 Issue #196, INV-12. Maintainer decision 2026-11-26, "Sweep first": add a
 host-only, test-only recorder for attached-declaration violations, run every
 gated scenario and the balloon route with it, publish the violating sites,

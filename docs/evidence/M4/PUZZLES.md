@@ -1,5 +1,11 @@
 # M4 Phase 3c: the puzzles beyond the house — coal mine, gas room, balloon frontier (INV-12)
 
+> **Superseded for the balloon (2026-11-26, M4 S16, #196).** INV-12 is
+> fixed: attached #DECLs are no longer enforced (the attached-declaration ADR
+> amendment). balloon-ledge is a gated scenario (`make test-m4-balloon-ledge`)
+> and `make xfail-m4-balloon-frontier` is retired. This record is kept as it
+> was found; see [S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md).
+
 Date: 2026-11-25. Branch `feat/m4-puzzles` from `main` `6cd1b68`. Epic #163
 Phase 3c (objects beyond the house: the remaining listed puzzles). Gate
 label: **PASS (local branch, not merged; scenario-scoped)** for the two new

@@ -175,7 +175,7 @@ result, and the fix and regression test.
 | INV-09 interrupt handlers ILO / BLO | None: IPC and BLOCKED have no source in a session | (b), unreachable by decision | decided-strict (ADR-0047/0048) | P3 | source | none needed |
 | INV-10 dead / guarded / superseded code | None | (c) | — | P3 | source + sweep tags | none needed |
 | **INV-11** PRSOBJ in MAINT-ROOM's #DECL | troll16, then `north` `north` `down` `up` `east` `north` `north` (tests/scenarios/dam-sluice.json and maint-leak.json, command 23) | (a) | attached declaration names a TYPE no source defines; strict at check time by the deferred-declaration ADR (#98), unchecked natively | **P1**: the dam puzzle and its leak clock are unreachable | confirmed in both engines (M4 Phase 3b, 2026-11-25; [DAM-CLOCKS.md](DAM-CLOCKS.md)); **fixed** by M4 S14 (#193, the #98 ADR amendment): the dam-sluice and maint-leak scenarios match native at all 42 and 36 turns | #193 |
-| **INV-12** BALLOON's PRSO #DECL | troll16, then the balloon route of tests/scenarios/balloon-ledge.json to the Volcano Bottom, `open receptacle` `put guide in receptacle` `board basket` (command 57) | (a) | the game's own value violates an attached declaration of known types: CLOCK-DEMON sets PRSVEC 2 to #FALSE (), BALLOON (READ-OUT) declares PRSO `<OR OBJECT DIRECTION>`; strict here (known types, #98 and its #193 amendment), unchecked natively | **P1**: the balloon cannot be flown (any turn in it) | confirmed in both engines (M4 Phase 3c, 2026-11-25; [PUZZLES.md](PUZZLES.md)); tracked by `make xfail-m4-balloon-frontier` | #196 (maintainer decision pending) |
+| **INV-12** BALLOON's PRSO #DECL | troll16, then the balloon route of tests/scenarios/balloon-ledge.json to the Volcano Bottom, `open receptacle` `put guide in receptacle` `board basket` (command 57) | (a) | the game's own value violates an attached declaration of known types: CLOCK-DEMON sets PRSVEC 2 to #FALSE (), BALLOON (READ-OUT) declares PRSO `<OR OBJECT DIRECTION>`; strict here (known types, #98 and its #193 amendment), unchecked natively | **P1**: the balloon cannot be flown (any turn in it) | confirmed in both engines (M4 Phase 3c, 2026-11-25; [PUZZLES.md](PUZZLES.md)); **fixed** by M4 S16 (#196, the attached-declaration ADR amendment: attached #DECLs are not enforced): the balloon-ledge scenario matches native at all 82 entries, gated by `make test-m4-balloon-ledge` ([S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md)) | #196 |
 
 **INV-01: ABS.** *Status: fixed by M4 S8 (#167). ABS is a builtin, and the operator sweep JSON was regenerated, so ABS is now class `builtin`.*
 
@@ -307,10 +307,14 @@ local branch `feat/m4-dam`); recorded by [DAM-CLOCKS.md](DAM-CLOCKS.md).*
   `tests/deferred_decl_type_test.rkt`.
 
 **INV-12: BALLOON's PRSO #DECL meets CLOCK-DEMON's #FALSE ().** *Status:
-open (found by M4 Phase 3c, 2026-11-25, local branch `feat/m4-puzzles`;
-recorded by [PUZZLES.md](PUZZLES.md); no runtime change; tracked expected
-failure `make xfail-m4-balloon-frontier`). Issue #196; maintainer decision
-2026-11-26: an instrumented sweep first.*
+fixed by M4 S16 (#196; maintainer decision 2026-11-26 after the sweep,
+option (2a): attached #DECLs are not enforced at all, matching Confusion; a
+recorded deviation from the manual; no source change). balloon-ledge is a
+gated scenario (`make test-m4-balloon-ledge`, single-run and per-prefix);
+the XFAIL `make xfail-m4-balloon-frontier` is retired. Record:
+[S16-ATTACHED-DECL.md](S16-ATTACHED-DECL.md). Found by M4 Phase 3c,
+2026-11-25, local branch `feat/m4-puzzles`; recorded by
+[PUZZLES.md](PUZZLES.md). The analysis below is kept as found.*
 
 - *First failing location and call path:* RDCOM (77rooms.mud:600), the
   turn of `board basket` (command 57 of balloon-ledge): the BOARD verb puts
@@ -377,8 +381,10 @@ failure `make xfail-m4-balloon-frontier`). Issue #196; maintainer decision
   needs approval. Recommended next action: a maintainer decision between
   (2) and (3), now informed by the sweep above, then promote balloon-ledge
   to a gated scenario with its committed native reference.
-- *Regression test:* `tests/historical_balloon_frontier_test.rkt` (`make
-  xfail-m4-balloon-frontier`; XPASS once the balloon can be boarded).
+- *Regression test:* `tests/historical_balloon_ledge_test.rkt` (`make
+  test-m4-balloon-ledge`, gated; it replaced the XFAIL
+  `tests/historical_balloon_frontier_test.rkt`), and the unit tests in
+  `tests/attached_decl_unenforced_test.rkt`.
 
 ### No failure found (exercised in both engines)
 
@@ -497,10 +503,9 @@ during the load, which completes.
    this ranking). **Maintainer decision** on attached declarations naming
    an undefined TYPE (ADR #98 amendment or a provenance-recorded source
    patch); see INV-11 above.
-10. **INV-12 BALLOON's PRSO #DECL** (P1, (a), found by M4 Phase 3c after
-   this ranking). **Maintainer decision** on attached declarations of known
-   types that the game itself violates (a further ADR amendment or a
-   provenance-recorded source patch); see INV-12 above.
+10. **INV-12 BALLOON's PRSO #DECL** — *fixed by M4 S16 (#196), option (2a)
+   decided 2026-11-26: attached #DECLs are not enforced.* (P1, (a), found by
+   M4 Phase 3c after this ranking); see INV-12 above.
 
 After each fix, re-run the matching F case in both engines. Re-run F8 and
 F10 to find the next frontier: the Strange Passage, the treasure room and

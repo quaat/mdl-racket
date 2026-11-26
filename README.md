@@ -195,8 +195,31 @@ native-captured probe route, and SPHERE-FUNCTION only by a direct host call (no
 route run, not compared with native). Production stays strict: the balloon is
 still blocked (`make xfail-m4-balloon-frontier`). Next: the maintainer's INV-12 decision
 (recommended: stop enforcing attached declarations, aligning with Confusion).
+(Superseded by S16 below.)
 
-`make m4-check` runs all twenty-four plus the persistence check; options
+**S16 (#196, INV-12 fixed; branch `feat/m4-attached-decl-unenforced`, gate
+@@GATE@@; [record](docs/evidence/M4/S16-ATTACHED-DECL.md)).** By maintainer
+decision attached `#DECL`s are no longer enforced at all, as in pinned
+Confusion: a bound argument, OPTIONAL, REST, AUX, PROG auxiliary, NAME
+formal, `SET` of a declared local or VALUE result is never checked in
+production. This is a recorded deviation from the manual. An attached
+`#DECL` is still validated when its function is defined (malformed Patterns
+stay strict errors), and `DECL?`, GDECL/SETG, positional declarations and
+CHTYPE stay strict with unchanged messages. The test-only recorder still
+evaluates every attached check, so `make m4-decl-sweep` still finds the same
+4 sites. The balloon (`make test-m4-balloon-ledge`, 81 commands: the
+guidebook burned, the balloon up to the Narrow Ledge, the wire tied and
+untied, the landing) now matches the committed native reference at every
+turn in single-run and per-prefix modes; `make xfail-m4-balloon-frontier`
+is retired. All five listed puzzles beyond the house are now exercised by
+gated checks (one route each; the river downstream, the balloon's other
+destinations and the volcano gnome are not). @@M4CHECK@@ Known
+limitation found here: with MSETG's declaration gone, this runtime's
+`GASSIGNED?`/`SETG` accept a STRING as an ATOM name where Confusion stops
+(tracked XFAIL in `tests/declaration_test.rkt`). Branch evidence until
+merged.
+
+`make m4-check` runs all twenty-five plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.
 
 Also on `main`:
