@@ -20,6 +20,6 @@
   (check-exn #rx"G3-FAIL.*1.*2"
              (lambda ()
                (run "<ERROR G3-FAIL <SETG G3-ERROR-SIDE 1> <SETG G3-ERROR-SIDE 2>>")))
-  (check-equal? (mdl-gval "G3-ERROR-SIDE") 2))
+  (check-equal? (mdl-gval (mdl-atom "G3-ERROR-SIDE")) 2))
 
 (displayln "ERROR primitive tests passed")

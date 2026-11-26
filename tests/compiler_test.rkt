@@ -5,13 +5,13 @@
 (define-runtime-path prog-fixture "fixtures/prog.mdl")
 (parameterize ([current-mdl-globals (make-hash)])
   (dynamic-require fixture #f)
-  (check-equal? (mdl-gval "ANSWER") 42)
-  (check-equal? (mdl-gval "CONDITIONAL") 42)
-  (check-true (mdl-false? (mdl-gval "NIL-EXAMPLE")))
-  (check-eq? (mdl-gval "FALSE-SAME") (mdl-atom "T")))
+  (check-equal? (mdl-gval (mdl-atom "ANSWER")) 42)
+  (check-equal? (mdl-gval (mdl-atom "CONDITIONAL")) 42)
+  (check-true (mdl-false? (mdl-gval (mdl-atom "NIL-EXAMPLE"))))
+  (check-eq? (mdl-gval (mdl-atom "FALSE-SAME")) (mdl-atom "T")))
 (parameterize ([current-mdl-globals (make-hash)])
   (dynamic-require prog-fixture #f)
-  (check-equal? (mdl-gval "M2-PROG-VALUE") 5))
+  (check-equal? (mdl-gval (mdl-atom "M2-PROG-VALUE")) 5))
 (check-exn exn:fail?
            (lambda () (compile-program (parse-mdl "<DEFINE F (\"BIND\" X) .X>"))))
 (check-exn exn:fail?

@@ -153,16 +153,12 @@
                [current-mdl-globals (make-hasheq)]
                [current-mdl-locals (list (make-hasheq))]
                [current-mdl-atom-space (make-mdl-atom-space)])
-  (for ([who '(mdl-setg mdl-gval mdl-gassigned? mdl-set mdl-lval mdl-value
-               mdl-gunassign mdl-manifest mdl-apply)]
+  ;; The exported value API (the other primitives are covered above).
+  (for ([who '(mdl-setg mdl-gval mdl-set mdl-lval mdl-apply)]
         [call (list (lambda () (mdl-setg! "M199-HOST" 1))
                     (lambda () (mdl-gval "M199-HOST"))
-                    (lambda () (mdl-gassigned? "M199-HOST"))
                     (lambda () (mdl-set! "M199-HOST" 1))
                     (lambda () (mdl-lval "M199-HOST"))
-                    (lambda () (mdl-value "M199-HOST"))
-                    (lambda () (mdl-gunassign! "M199-HOST"))
-                    (lambda () (mdl-manifest "M199-HOST"))
                     (lambda () (mdl-apply "TYPE" 1)))])
     (check-exn (regexp (string-append "^" (regexp-quote (format "~a: expected an MDL ATOM" who)) "$"))
                call (symbol->string who)))

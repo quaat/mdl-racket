@@ -20,8 +20,8 @@
                  [current-mdl-atom-space atom-space])
     (mdl-set-logical-storage-capacity! capacity-hint)
     (define collections 0)
-    (define header (mdl-apply "EVENT" "GC" 11))
-    (mdl-apply "HANDLER" header
+    (define header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+    (mdl-apply (mdl-atom "HANDLER") header
                (lambda (_elapsed _reason _initiator)
                  (set! collections (+ collections 1))))
     (define t0 (current-inexact-milliseconds))

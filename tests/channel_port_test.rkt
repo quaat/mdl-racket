@@ -54,10 +54,10 @@
 ;;    core.rkt), before any #lang mdl module runs: nothing above has
 ;;    instantiated an MDL module yet.
 (test-case "The process-wide default context has INCHAN/OUTCHAN at load."
-  (check-equal? (mdl-atom-pname (mdl-type (mdl-gval "OUTCHAN"))) "CHANNEL")
-  (check-equal? (mdl-atom-pname (mdl-type (mdl-lval "INCHAN"))) "CHANNEL")
+  (check-equal? (mdl-atom-pname (mdl-type (mdl-gval (mdl-atom "OUTCHAN")))) "CHANNEL")
+  (check-equal? (mdl-atom-pname (mdl-type (mdl-lval (mdl-atom "INCHAN")))) "CHANNEL")
   (define-values (n output)
-    (capture (lambda () ((mdl-gval "PRINTSTRING") "boot"))))
+    (capture (lambda () ((mdl-gval (mdl-atom "PRINTSTRING")) "boot"))))
   (check-equal? n 4)
   (check-equal? output "boot"))
 
@@ -65,11 +65,11 @@
 (test-case "Standalone #lang mdl module: no loader session binds OUTCHAN."
   (define-values (_ output)
     (capture (lambda () (dynamic-require standalone-fixture #f))))
-  (check-equal? (mdl-gval "R1-PS-RESULT") 10)
+  (check-equal? (mdl-gval (mdl-atom "R1-PS-RESULT")) 10)
   (check-regexp-match #rx"^standalone" output)
   ;; The default context itself has the bindings, with no setup at all.
   (define-values (n direct)
-    (capture (lambda () ((mdl-gval "PRINTSTRING") "dflt"))))
+    (capture (lambda () ((mdl-gval (mdl-atom "PRINTSTRING")) "dflt"))))
   (check-equal? n 4)
   (check-equal? direct "dflt"))
 
@@ -78,7 +78,7 @@
   (in-fresh-context
    (lambda ()
      (define-values (n output)
-       (capture (lambda () ((mdl-gval "PRINTSTRING") "direct"))))
+       (capture (lambda () ((mdl-gval (mdl-atom "PRINTSTRING")) "direct"))))
      (check-equal? n 6)
      (check-equal? output "direct"))))
 
@@ -189,7 +189,7 @@
    (lambda ()
      (check-false (eq? foreign (run ".OUTCHAN")))
      (check-exn #rx"not open in this MDL session"
-                (lambda () ((mdl-gval "PRINTSTRING") "x" foreign))))))
+                (lambda () ((mdl-gval (mdl-atom "PRINTSTRING")) "x" foreign))))))
 
 ;; 10. Loader sessions write to their injected port, not process stdout,
 ;;     and two sessions never cross.
@@ -252,8 +252,8 @@
   ;; Same in the process-wide default context used by standalone modules.
   (define-values (_ output)
     (capture (lambda () (dynamic-require gdecl-fixture #f))))
-  (check-equal? (mdl-atom-pname (mdl-gval "R1-GD-ASSIGNED")) "T")
-  (check-equal? (mdl-gval "R1-GD-RESULT") 1)
+  (check-equal? (mdl-atom-pname (mdl-gval (mdl-atom "R1-GD-ASSIGNED"))) "T")
+  (check-equal? (mdl-gval (mdl-atom "R1-GD-RESULT")) 1)
   ;; Module-level results are also printed; PRINTSTRING's "g" precedes 1.
   (check-regexp-match #rx"\ng1\n$" output))
 
@@ -276,9 +276,9 @@
   (check-regexp-match #rx"^from-b" (get-output-string out-b))
   (check-false (regexp-match? #rx"from-b" (get-output-string out-a)))
   (check-false (regexp-match? #rx"from-b" stray))
-  (check-equal? (call-with-mdl-context ctx-b (lambda () (mdl-gval "R1-B-RESULT"))) 6)
-  (check-false (eq? (call-with-mdl-context ctx-a (lambda () (mdl-gval "OUTCHAN")))
-                    (call-with-mdl-context ctx-b (lambda () (mdl-gval "OUTCHAN")))))
+  (check-equal? (call-with-mdl-context ctx-b (lambda () (mdl-gval (mdl-atom "R1-B-RESULT")))) 6)
+  (check-false (eq? (call-with-mdl-context ctx-a (lambda () (mdl-gval (mdl-atom "OUTCHAN"))))
+                    (call-with-mdl-context ctx-b (lambda () (mdl-gval (mdl-atom "OUTCHAN"))))))
   ;; Shared-context boundary, in a fresh namespace so both modules instantiate.
   (define ctx-shared (make-mdl-context #:output-port (open-output-string)))
   (parameterize ([current-namespace (fresh-mdl-namespace)])
@@ -337,10 +337,10 @@
                  [current-mdl-globals globals]
                  [current-mdl-locals bare]
                  [current-mdl-atom-space space])
-    (check-true (mdl-false? ((mdl-gval "GASSIGNED?") "OUTCHAN")))
+    (check-true (mdl-false? ((mdl-gval (mdl-atom "GASSIGNED?")) (mdl-atom "OUTCHAN"))))
     (define-values (_ output)
       (capture (lambda () (dynamic-require print-fixture #f))))
     (check-regexp-match #rx"^from-b" output)
-    (check-equal? (mdl-gval "R1-B-RESULT") 6)
-    (check-equal? (mdl-atom-pname (mdl-type (mdl-gval "OUTCHAN"))) "CHANNEL")
-    (check-eq? (mdl-lval "OUTCHAN") (mdl-gval "OUTCHAN"))))
+    (check-equal? (mdl-gval (mdl-atom "R1-B-RESULT")) 6)
+    (check-equal? (mdl-atom-pname (mdl-type (mdl-gval (mdl-atom "OUTCHAN")))) "CHANNEL")
+    (check-eq? (mdl-lval (mdl-atom "OUTCHAN")) (mdl-gval (mdl-atom "OUTCHAN")))))

@@ -41,15 +41,15 @@
 (run "<PUT ,OUTCHAN 13 1000>"
      #:after
      (lambda (_)
-       (define in (mdl-gval "INCHAN"))
-       (define out (mdl-gval "OUTCHAN"))
+       (define in (mdl-gval (mdl-atom "INCHAN")))
+       (define out (mdl-gval (mdl-atom "OUTCHAN")))
        (define before (list (slots in) (slots out)))
-       (define back-before (mdl-nth (mdl-apply "BACK" in) 1))
-       (mdl-apply "RESET" in)
-       (mdl-apply "RESET" out)
+       (define back-before (mdl-nth (mdl-apply (mdl-atom "BACK") in) 1))
+       (mdl-apply (mdl-atom "RESET") in)
+       (mdl-apply (mdl-atom "RESET") out)
        (check-equal? (list (slots in) (slots out)) before)
        (check-equal? (mdl-nth out 13) 1000)
-       (check-equal? (mdl-nth (mdl-apply "BACK" in) 1) back-before)
+       (check-equal? (mdl-nth (mdl-apply (mdl-atom "BACK") in) 1) back-before)
        (check-equal? (mdl-nth in 2) "READ")
        (check-equal? (mdl-nth in 9) "TTY")))
 ;; CONTIN 77rooms.mud:297-303: the association PUT on the predecessor slot
@@ -81,6 +81,6 @@
 ;; A CHANNEL of another session is refused.
 (define foreign
   (parameterize ([current-namespace ns])
-    (call-with-mdl-context (make-mdl-context) (lambda () (mdl-gval "INCHAN")))))
+    (call-with-mdl-context (make-mdl-context) (lambda () (mdl-gval (mdl-atom "INCHAN"))))))
 (check-exn #rx"^RESET: CHANNEL is not open in this MDL session"
-           (lambda () (run "T" #:after (lambda (_) (mdl-apply "RESET" foreign)))))
+           (lambda () (run "T" #:after (lambda (_) (mdl-apply (mdl-atom "RESET") foreign)))))

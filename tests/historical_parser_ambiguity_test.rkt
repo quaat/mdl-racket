@@ -168,7 +168,7 @@
            'lexv (paren (each s (mdl-session-global s "LEXV") (lambda (v) (render s v))))
            'prsvec (paren (each s (mdl-session-global s "PRSVEC") (lambda (v) (diag-any s v))))
            'parse_won (if (mdl-truthy? (mdl-session-call s "GASSIGNED?"
-                                                         (mdl-session-atom s "PARSE-WON")))
+                                                         (existing-atom s "PARSE-WON")))
                           (render s (mdl-session-global s "PARSE-WON"))
                           "UNASSIGNED")
            'orphan_flag (render s (field s orphans "OFLAG"))

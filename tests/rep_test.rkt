@@ -94,8 +94,8 @@
 ;; Host application paths refuse too.
 (session
  (lambda ()
-   (check-exn (regexp rep-error) (lambda () (mdl-apply "REP")))
-   (check-exn (regexp rep-error) (lambda () (mdl-apply "APPLY" (mdl-gval (mdl-root-atom "REP")))))))
+   (check-exn (regexp rep-error) (lambda () (mdl-apply (mdl-atom "REP"))))
+   (check-exn (regexp rep-error) (lambda () (mdl-apply (mdl-atom "APPLY") (mdl-gval (mdl-root-atom "REP")))))))
 ;; As an interrupt action: registration works (it is an APPLICABLE SUBR),
 ;; delivery applies it and is refused.
 (session
