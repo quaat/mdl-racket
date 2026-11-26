@@ -35,7 +35,7 @@
 (define (written source) (let-values ([(_ text) (run* source)]) text))
 (define (value-of source) (let-values ([(v _) (run* source)]) v))
 (define (oblist-placeholder text)
-  (regexp-replace* #rx"#OBLIST !\\[[^!]*!\\]" text "<OBLIST>"))
+  (regexp-replace* #rx"#OBLIST !\\[.*?!\\]" text "<OBLIST>"))
 
 ;; --- differential: every native case, byte for byte -------------------------
 (define cases

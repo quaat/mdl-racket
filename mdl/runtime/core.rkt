@@ -4421,7 +4421,7 @@
 (define (prin1-leaf-text who value)
   (cond [(and (mdl-atom? value) (string=? (atom-value-pname value) ""))
          (unless (atom-reachable? who value)
-           (error who "empty-PNAME ATOM not reachable via current OBLIST path; trailer notation not implemented (ADR-0050)"))
+           (error who "empty-PNAME ATOM not reachable via current OBLIST path; its trailer is not evidenced (M4 #173 B2)"))
          ""]
         [(or (exact-integer? value) (mdl-atom? value) (mdl-string? value)
              (mdl-character-code value))
@@ -4466,6 +4466,10 @@
        (emit! "#FALSE" separated?)
        (walk-list (mdl-false-value-payload value) #t)
        (hash-remove! active value)]
+      [(and (mdl-atom? value) (not (string=? (atom-value-pname value) "")))
+       (let ([parts (atom-print-tokens who value)])
+         (emit! (terminal-text who (car parts)) separated?)
+         (for ([part (in-list (cdr parts))]) (emit! (terminal-text who part) #t)))]
       [else (emit! (prin1-leaf-text who value) separated?)]))
   (walk value #f)
   (reverse tokens))
@@ -4957,6 +4961,56 @@
       (and (not (mdl-false? candidate)) candidate)))
   (eq? found atom))
 
+;; B2 (M2): only PNAMEs made of [A-Za-z0-9-], non-empty, and not parseable
+;; as a number print without \-escapes; others are strict (escapes are not
+;; implemented). Applies to every ATOM of an OBLIST trailer too.
+(define (check-safe-pname who pname)
+  (unless (and (not (string=? pname ""))
+               (for/and ([ch (in-string pname)])
+                 (or (char<=? #\A ch #\Z) (char<=? #\a ch #\z)
+                     (char<=? #\0 ch #\9) (char=? ch #\-)))
+               (not (string->number pname)))
+    (error who
+           "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"
+           pname)))
+
+;; M4 #173 B2 (manual 15.4, 15.2.1, 15.5, 15.7.4; SEMANTICS "M4 #173 B2"):
+;; the printed tokens of an ATOM. Reachable (the first ATOM of its PNAME on
+;; the current OBLIST path is this one): its PNAME. Otherwise PNAME!-
+;; followed by the name of its OBLIST, printed by the same rule: nothing for
+;; ROOT, `#FALSE ()` for no OBLIST, Confusion's `!-#FALSE ()` for an OBLIST
+;; without a name. The trailer is glued to the first token of the name's
+;; text; `#FALSE ()` is the two tokens `#FALSE` and `()` (as a FALSE prints).
+;; An OBLIST visited twice (the trailer would not terminate, manual 15.4)
+;; and a name that is not an ATOM are strict errors.
+(define (atom-print-tokens who atom)
+  (define root (atom-space-root (current-mdl-atom-space)))
+  (define indicator (mdl-root-atom "OBLIST"))
+  (define visited (make-hasheq))
+  (let loop ([a atom] [prefix ""])
+    (define pname (atom-value-pname a))
+    (check-safe-pname who pname)
+    (cond
+      [(atom-reachable? who a) (list (string-append prefix pname))]
+      [else
+       (define head (string-append prefix pname "!-"))
+       (define oblist (atom-value-oblist a))
+       (cond
+         [(not oblist) (list (string-append head "#FALSE") "()")]
+         [(eq? oblist root) (list head)]
+         [else
+          (when (hash-ref visited oblist #f)
+            (error who "UNPARSE ATOM: OBLIST trailer does not terminate (manual 15.4); atom ~s"
+                   (atom-value-pname atom)))
+          (hash-set! visited oblist #t)
+          (define found (association-lookup oblist indicator))
+          (cond
+            [(not found) (list (string-append head "!-#FALSE") "()")]
+            [(mdl-atom? (cdr found)) (loop (cdr found) head)]
+            [else
+             (error who "UNPARSE ATOM: OBLIST name is not an ATOM; atom ~s"
+                    (atom-value-pname atom))])])])))
+
 (define (mdl-unparse-value who value)
   (cond
     [(exact-integer? value)
@@ -4964,28 +5018,9 @@
      (check-fix who value)
      (number->string value)]
     [(mdl-atom? value)
-     ;; B2: whitelist — only PNAMEs made of [A-Za-z0-9-], non-empty, and not
-     ;; parseable as a number.  Atoms outside this set would require \-escaping
-     ;; (not implemented) or cannot be round-tripped as ATOMs.
-     ;;
-     ;; B1: reachability — emit the bare PNAME only when looking the PNAME up
-     ;; on the current OBLIST search path finds this exact atom (eq?).
-     ;; Otherwise Confusion appends a "!-oblist" trailer, which is not
-     ;; implemented; strict error.
-     (define pname (atom-value-pname value))
-     (unless (and (not (string=? pname ""))
-                  (for/and ([ch (in-string pname)])
-                    (or (char<=? #\A ch #\Z) (char<=? #\a ch #\z)
-                        (char<=? #\0 ch #\9) (char=? ch #\-)))
-                  (not (string->number pname)))
-       (error who
-              "UNPARSE ATOM: PNAME ~s not in safe-char whitelist ([A-Za-z0-9-], non-numeric); not implemented"
-              pname))
-     (unless (atom-reachable? who value)
-       (error who
-              "UNPARSE ATOM: trailer notation not implemented; atom ~s not reachable via current OBLIST path"
-              pname))
-     pname]
+     ;; The bare PNAME when reachable, else the OBLIST trailer (M4 #173 B2);
+     ;; UNPARSE joins the trailer's tokens with single spaces.
+     (string-join (atom-print-tokens who value) " ")]
     [(mdl-string? value)
      ;; STRING: double-quoted, internal " and \ escaped.
      ;; B4: control characters (codes 0-31, 127) in string content require the
