@@ -1351,7 +1351,9 @@ Rules that follow:
   validation of frame ownership, continuations, shared mutable objects,
   channels and other execution state.
 - Capability 1 stays as decided: RESTORE remains a strict error at the MDL
-  level until capability 3 or 4 replaces it under its own reviewed slice.
+  level until capability 4 replaces it under its own reviewed slice.
+  Capability 3 is served by the Zork compatibility layer and does not change
+  the MDL RESTORE primitive.
 
 ## ADR-0049: Inert REP and a host top-level loop
 
@@ -2105,7 +2107,7 @@ not needed by the game; recorded as a deviation).
 
 ## ADR-0061: Game persistence by deterministic replay first (hybrid strategy)
 
-Status: accepted direction (maintainer, 2026-11-23): hybrid persistence, deterministic replay first. Decisions taken: the resumed clock, any runtime with the same game sources, saves at the command prompt only. The implementation is validated by the WP4.5 proof of concept. ADR-0048 and ADR-0055 stay in force; this ADR does not amend them. Epic #163, WP4.
+Status: accepted direction (maintainer, 2026-11-23): hybrid persistence, deterministic replay first. Decisions taken: the resumed clock, any runtime with the same game sources, saves at the command prompt only. The implementation is validated by the WP4.5 proof of concept. ADR-0048 and ADR-0055 stay in force; this ADR does not amend them. Epic #163, WP4. **Amended 2026-11-26** (maintainer decision on #172): see "Amendment (maintainer decision on #172, 2026-11-26): player-facing persistence" below; ADR-0048 is amended alongside, and ADR-0055 stays in force for MDL code.
 
 ### Context
 
@@ -2442,7 +2444,9 @@ non-standard (treasure-deposit prefix 15 is re-run).
 
 ## ADR-0063: `make m4-check` reports the five M4 terms from declared manifests
 
-Status: proposed (2026-11-25, branch `feat/m4-check`; Phase 7 of epic #163).
+Status: proposed 2026-11-25 (branch `feat/m4-check`; Phase 7 of epic #163);
+**accepted 2026-11-26 with the amendment below**, which decides the
+conservative readings.
 Evidence: `docs/evidence/M4/M4-CHECK.md`. Needs maintainer review of the
 conservative readings marked below.
 
@@ -2610,18 +2614,24 @@ Implementation: epic #163 Phase B, in small separately reviewed PRs.
 
 Status: accepted (maintainer decision, 2026-11-26).
 
-- *Context.* The tracked evidence and fixture corpus is 41.6 MiB in 558 files
-  (audit 2026-11-26, `scripts/reference_size_audit.py`): `docs/evidence/M4`
+- *Context.* The tracked evidence and fixture corpus on `main` `5b27177` is
+  41.6 MiB in 558 files (audit 2026-11-26, `scripts/reference_size_audit.py`): `docs/evidence/M4`
   38.4 MiB in 103 files, of which twelve native scenario references exceed
   1 MiB (the largest 5.9 MiB). The packed Git history is about 3.5 MiB, since
   the JSON compresses well.
 - *Decision.*
   - Keep every validated reference needed for reproducibility.
-  - Soft total budget: 64 MiB for tracked files under `docs/evidence/`,
-    `tests/scenarios/` and `tests/fixtures/`. A change that takes the total
-    over it, or adds a single file over 8 MiB, needs a recorded justification
-    in `docs/evidence/reference-corpus-policy.json`; `tests/test_reference_corpus.py`
-    enforces both limits.
+  - Soft total budget (maintainer decision): 64 MiB for tracked files under
+    `docs/evidence/`, `tests/scenarios/` and `tests/fixtures/`. Exceeding it
+    is allowed only with a recorded justification in
+    `docs/evidence/reference-corpus-policy.json`; until that entry exists,
+    `tests/test_reference_corpus.py` fails CI, so "soft" means
+    "justification required", not "warning only".
+  - Single-file limit of 8 MiB: **proposed by the orchestrator, pending
+    maintainer confirmation** (the decision asked to audit actual sizes
+    before any per-file restriction; the audit's largest file is 5.9 MiB, so
+    the limit binds no current file). It is enforced the same way and is
+    removed or changed if the maintainer does not confirm it.
   - Keep small, human-reviewable canonical fixtures in Git. Prefer compact,
     structured reference data over duplicated raw execution traces. Every
     reference keeps its source hashes, interpreter hash, scenario id, clock
@@ -2632,6 +2642,7 @@ Status: accepted (maintainer decision, 2026-11-26).
     to justify it.
   - Reference updates are explicit, reviewed changes made by the capture
     tools. A normal test run never replaces an accepted historical reference.
-    Known exception, to be removed: `make m4-decl-sweep` rewrites its own
-    diagnostic report `docs/evidence/M4/decl-violation-sweep.json` (an
-    our-runtime diagnostic, not a native reference).
+    Related, to be changed: the diagnostic target `make m4-decl-sweep` (not
+    part of `make test` or `make m4-check`) rewrites its committed report
+    `docs/evidence/M4/decl-violation-sweep.json`, an our-runtime diagnostic,
+    not a native reference.

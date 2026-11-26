@@ -243,7 +243,8 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
 > [#163](https://github.com/quaat/mdl-racket/issues/163):
 > - **A. Decisions and tracking:** ADR amendments (ADR-0048, ADR-0061,
 >   ADR-0063; new ADR-0064 PRINT and error classes, ADR-0065 reference
->   corpus), the approved 23-branch baseline, #121 and #113 dispositions.
+>   corpus), the approved 23-branch baseline, #121 disposition (#113 R9 closed
+  by PR #203).
 > - **B. PRINT and error handling (#173):** PRINT per the manual, then
 >   evidence-backed error-classification steps (ADR-0064).
 > - **C. Player-facing persistence (#172):** host-owned replay save/resume,
@@ -260,6 +261,11 @@ session smoke (WP4) is **not** PLAYABLE and not M3 acceptance.
 >
 > General principle: historical MDL semantics come first; no Zork-specific
 > shortcut enters the language runtime.
+>
+> Mapping to the epic's earlier numbering: Phases 0–3 (baseline, failure
+> discovery, combat and death, objects, scoring, timers) are done; Phase 4
+> (persistence) is C; Phase 5 (known defects) is E; Phase 6 (full
+> playthrough) and Phase 7 (gates) are D.
 
 **Build:** scripted paths across map/puzzles; inventory, game death,
 NPCs, lamp/timers, parser edge cases, randomness, scoring, save/restore,

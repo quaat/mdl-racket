@@ -1,6 +1,6 @@
 # MDL on Racket — original Zork preservation harness
 
-> **Status (2026-11-23): `main` (`2a86d5d`) — M0, M1, M2 PASS; M3 accepted on mainline: the original 1977 game loads, initializes, matches native Confusion exactly on the fixed-clock fresh-boot house smoke (SMOKE_PARITY PASS, scoped) and completes a local session that quits through its own code (local session smoke PASS). PLAYABLE NOT RUN. NOT a complete playable game.** This repository is a starting
+> **Status (2026-11-26): `main` (`5b27177`) — M0, M1, M2 PASS; M4 in progress (SCENARIO_PARITY PASS for 26 scenarios; GAMEPLAY_RELIABILITY NOT YET, 20 of 23; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN; M4_ACCEPTED NOT YET). M3 (accepted on mainline at `2a86d5d`, 2026-11-23): the original 1977 game loads, initializes, matches native Confusion exactly on the fixed-clock fresh-boot house smoke (SMOKE_PARITY PASS, scoped) and completes a local session that quits through its own code (local session smoke PASS). PLAYABLE NOT RUN. NOT a complete playable game.** This repository is a starting
 > point for developing an MDL-compatible `#lang mdl` in Racket and validating it
 > against the reconstructed December 1977 Zork running in Confusion.
 >
@@ -83,8 +83,10 @@ The reference CI workflow runs all of these.
 [gameplay branches](docs/evidence/M4/gameplay-branches.json) and reports
 them separately ([TESTING](docs/TESTING.md),
 [record](docs/evidence/M4/M4-CHECK.md)). State on **`main` `5b27177`**
-(2026-11-26; local Racket v7.9 BC exit 0, and the hosted reference job;
-the technical result of that commit, not milestone acceptance):
+(2026-11-26; local Racket v7.9 BC exit 0, and the hosted reference run on
+PR #202 before its merge (the reference workflow runs on pull requests, not
+on pushes to `main`); the technical result of that content, not milestone
+acceptance):
 
 | Term | State on `main` `5b27177` |
 |---|---|
@@ -283,14 +285,15 @@ against the native troll-combat run. Limits:
 
 Evidence: [docs/evidence/M4](docs/evidence/M4/).
 
-**Next steps** (epic #163; the failure inventory, the single-run runner and
-the `make m4-check` scaffold are done):
-1. Maintainer review of the provisional required-branch list
-   (`gameplay-branches.json`).
-2. Combat, death and recovery branches (the uncovered branches listed by
-   `make m4-check`).
-3. Lamp and clock events, objects, scoring.
-4. RESTORE (INV-06) and player-facing saves, after an ADR-0055 amendment.
+**Next steps** (epic #163, approved order of 2026-11-26; [PLAN](docs/PLAN.md) M4):
+1. PRINT and the game's error-handler path (#173, ADR-0064).
+2. Player-facing saves by host-owned replay, then the game's own SAVE and
+   RESTORE where equivalence is shown (#172, ADR-0061 amendment; ADR-0055
+   unchanged for MDL code).
+3. The PLAYABLE gate and a native-backed playthrough to the 500-point ending;
+   `make m4-accept` and the maintainer's R5 record.
+4. The semantic and safety backlog (#120, #127, #129, #126, #134), then general
+   MDL conformance (#177).
 
 **Previous M3 S7 interactive terminal I/O (2026-11-23, `feat/m3-interactive-io`, ADR-0050):**
 summarised above; details in [S7 evidence](docs/evidence/M3/S7-INTERACTIVE.md).

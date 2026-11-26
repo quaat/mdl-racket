@@ -297,7 +297,7 @@
     {
       "id": "R5-accepted-exceptions-justified",
       "text": "accepted exceptions are source-justified (PLAN M4 Gate); a maintainer review, not machine-checkable",
-   "maintainer_record_policy": "ADR-0063 amendment (2026-11-26): a committed maintainer record, written or explicitly approved by the maintainer, never manufactured by an agent. It must contain the lines 'Maintainer acceptance: ACCEPTED', 'Accepted by:', 'Date: YYYY-MM-DD', 'Reviewed commit: <40-hex SHA>', 'Source pins:' and the sections '## Accepted semantic deviations', '## Evidence', '## Scope and consequences', '## Remaining limitations' (checked by scripts/m4_check.py). maintainer_record stays null until that record exists; a draft prepared for review lives at docs/evidence/M4/R5-MAINTAINER-RECORD-DRAFT.md and is never cited here.",
+      "maintainer_record_policy": "ADR-0063 amendment (2026-11-26): a committed maintainer record, written or explicitly approved by the maintainer, never manufactured by an agent. It must contain the lines 'Maintainer acceptance: ACCEPTED', 'Accepted by:', 'Date: YYYY-MM-DD', 'Reviewed commit: <40-hex SHA>', 'Source pins:' and the sections '## Accepted semantic deviations', '## Evidence', '## Scope and consequences', '## Remaining limitations' (checked by scripts/m4_check.py). maintainer_record stays null until that record exists; a draft prepared for review lives at docs/evidence/M4/R5-MAINTAINER-RECORD-DRAFT.md and is never cited here.",
       "satisfied_by_term": null,
       "maintainer_record": null
     }

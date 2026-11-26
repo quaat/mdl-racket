@@ -26,15 +26,22 @@ Racket v7.9 BC; CI: racket:8.10-bc (runs 45176163020, 45176121779).
 
 ### M4 on `main` (`5b27177`, 2026-11-26)
 
-Verified 2026-11-26: `origin/main` = `5b27177`; every PR below is merged and
-its merge commit's hosted "Harness checks" run (smoke and reference, the
-reference job running `make m4-check`) concluded success. Upstream pins
+Verified 2026-11-26: `origin/main` = `5b27177`; every PR below is merged.
+Two hosted workflows run, on different events: "Harness checks" (`ci.yml`,
+the smoke job: Racket smoke tests and the Python harness tests) runs on every
+push, including each merge commit on `main`, and concluded success for each
+merge commit below; "Native Confusion reference" (`reference.yml`, which
+builds the pinned interpreter and runs `make m4-check`) runs only on
+`pull_request` and `workflow_dispatch`, so it ran on each PR's merge preview
+before the merge, not on the `main` merge commit (for #202: smoke on `main`
+run 45832550002; reference on the PR run 45831447266, both success). Upstream pins
 match `sources.lock.json` (mit_zork `d94501340842e006791fce0757dc0043b8ec8916`,
 mdlzork `bdcd4a671b4707f7acad5a2e3aa3cc9f51bf19b3`, checkouts clean); the
 reference `mdli` SHA-256 is
 `6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789`. Local
 baseline on `5b27177`: `make test` exit 0 (raco 5312 passed; pytest 104
-passed, 1 deselected), `make test-historical` exit 0.
+passed, 1 deselected), `make test-historical` exit 0. Since then #203 (#113 R9
+evidence, test only) merged as `fe05f86` (smoke on `main` success).
 
 | Slice | PR, merge commit | Scope |
 |---|---|---|
@@ -60,9 +67,11 @@ passed, 1 deselected), `make test-historical` exit 0.
 Kept separate, never collapsed into one PASS; computed by `make m4-check`
 (ADR-0063, accepted with its 2026-11-26 amendment; rules in
 [TESTING](TESTING.md)). The states below are the result of `make m4-check`
-on `5b27177` content (local, Racket v7.9 BC, exit 0, the #199 gate and its
-re-run) and of the same target in the hosted reference job; they are the
-technical result of that commit, not a milestone acceptance.
+on the #202 branch content that became `5b27177` (local, Racket v7.9 BC,
+exit 0, the #199 gate and its re-run; and the PR's hosted reference run
+45831447266), re-run on the Phase A branch with the approved list (exit 0,
+same states). They are the technical result of that content, not a
+milestone acceptance.
 
 | Term | Meaning | State on `main` `5b27177` |
 |---|---|---|
@@ -129,12 +138,12 @@ checkpoints ([M4 baseline record](evidence/M4/M4-MAINLINE-BASELINE.md)):
 | combat.thief: thief-fight (epic #163) | **PASS (local branch `feat/m4-thief-fight`, not merged; scenario-scoped)** | No runtime change, no seed search; the probe gains the "thief" checkpoint profile (the timers fields plus the thief's OCAPAC, FIGHTBIT, STAGGERED, the stiletto, the chalice, HACTION; `tests/m4_thief_checkpoint.rkt`; the 14 earlier references' profiles unchanged); native reference captured twice, transcripts byte-identical. Route: strange-passage's first 25 commands, `up` into the Treasure Room (TREASURE-ROOM brings the thief whatever the seed; he attacks at once), `kill thief with sword` twice (the thief wounded twice, OCAPAC 4 -> 3 -> 2; the hero wounded, knocked out and killed), `y`, look, inventory, diagnose, score. `make test-m4-thief-fight` exit 0 (34 turns, 3 boots, 17.5 s); per-prefix exit 0 (34 boots, 197.0 s); 5 reference mutations each fail at the expected check or k; `combat.thief` covered by thief-robbery (steals) and thief-fight (fights, is fought) together; not exercised: his chance appearance elsewhere, his retreat, his death or knock-out. `make test` exit 0 (raco 5167 passed; pytest 104 passed, 1 deselected); `make m4-check` exit 0 at `6d6e5b1`: SCENARIO_PARITY PASS (26), GAMEPLAY_RELIABILITY NOT YET 20 of 23 (uncovered: the three save branches), open blockers INV-06, INV-07; PLAYABLE NOT RUN; FULL_COMPLETION NOT RUN; M4_ACCEPTED NOT YET. [record](evidence/M4/THIEF-FIGHT.md) |
 | #199 binding primitives take ATOMs only (STRING rejected) | **PASS (local branch `fix/199-binding-atom-string`, not merged; no gameplay change)** | Pinned Confusion evidence first ([I199 record](evidence/M4/I199-STRING-ATOM.md), 80 cases). SETG, GVAL, GASSIGNED?, SET, LVAL, VALUE, GUNASSIGN and MANIFEST now raise `mdl-<p>: expected an MDL ATOM` for a STRING (as for FIX/FORM), before any effect: the spelled ATOM is not interned or changed; the original MSETG/PSETG with a STRING stop at GASSIGNED?/SETG as in Confusion (XFAIL in `tests/declaration_test.rkt` flipped; PSETG cases added). Error mechanism differs from Confusion (existing difference); MANIFEST's non-ATOM rejection is part of the existing MANIFEST deviation (no pinned source passes a non-ATOM). Host boundary: `mdl/loader.rkt` resolves string names with the non-interning `mdl-find-atom` (new `mdl-session-find-atom`); M4 checkpoints and replay persistence read without interning. Not in scope: BOUND?, GBOUND?, UNASSIGN. `tests/binding_atom_string_test.rkt` new (53 checks failing before, 0 after); `make test`, `test-historical`, `test-m2-g3`, `test-m3-session`, `test-m3-launcher`, `m3-check` exit 0; `make m4-check` exit 0 (SCENARIO_PARITY PASS 26, GAMEPLAY_RELIABILITY NOT YET 20 of 23, unchanged); SEMANTICS "M4 #199", DECISIONS (proposed) |
 | Manual DrRacket checks (quit, Stop) | **PASS** | [record](evidence/M4/DRRACKET-MANUAL-CHECK.md) |
-| WP4 host persistence by deterministic replay (ADR-0061; WP4.1–4.5 + WP4.6 regressions) | **PASS (mainline, proof of concept, scenario-scoped)** | #165 (independent review: no blocking defects; findings fixed); `make test-m4-replay-persistence` (troll combat saved at the RDCOM prompt before the first kill, restored in-process and in a fresh process: both RNG words, MOVES, 34-field state and transcript digests verified; pre-save + post-restore output = native T1; save after combat; pending lamp event; resumed clock; tampering; independence; 0.85 s replay per 100 commands + 6 s boot); `replay_clock_test`, `replay_checkpoint_test` in `make test`; player-facing SAVE/LOAD not implemented (needs an ADR-0055 amendment); [WP4 record](evidence/M4/WP4-REPLAY-PERSISTENCE.md) |
+| WP4 host persistence by deterministic replay (ADR-0061; WP4.1–4.5 + WP4.6 regressions) | **PASS (mainline, proof of concept, scenario-scoped)** | #165 (independent review: no blocking defects; findings fixed); `make test-m4-replay-persistence` (troll combat saved at the RDCOM prompt before the first kill, restored in-process and in a fresh process: both RNG words, MOVES, 34-field state and transcript digests verified; pre-save + post-restore output = native T1; save after combat; pending lamp event; resumed clock; tampering; independence; 0.85 s replay per 100 commands + 6 s boot); `replay_clock_test`, `replay_checkpoint_test` in `make test`; player-facing SAVE/LOAD not implemented (approved 2026-11-26 as host-owned replay persistence, ADR-0061 amendment; ADR-0055 unchanged for MDL code); [WP4 record](evidence/M4/WP4-REPLAY-PERSISTENCE.md) |
 | Phase 1 single-run per-turn scenario runner (ADR-0062, proposed) | **PASS (mainline: PR #188, main 6b826d5, post-merge CI success; test infrastructure, no runtime change)** | `tests/m4_scenario_runner.rkt` drives all ten scenario tests: one boot per scenario, output and READSTRING-entry checkpoints compared at every turn, whole transcript and end state at end of input, non-standard end-of-input tails re-run per prefix (sword-glow 0, troll-combat 0, mirror-bat 33); both modes pass on all ten; 9 mutations give the same earliest failing k in both modes; divergence JSON and watchdog; `make test-m4-*` 1608.9 s → 292.3 s locally; lost coverage stated (212 standard EOF tails, `lit` read only at end); `make m4-scenarios-per-prefix` keeps the old protocol; [record](evidence/M4/SINGLE-RUN-RUNNER.md) |
 | M4 comprehensive-equivalence gate | NOT YET PASSED | scenario, state, save/restore and completion criteria not met |
 | PLAYABLE | NOT RUN | no playability gate executed |
 
-#### Acceptance terms (epic [#163](https://github.com/quaat/mdl-racket/issues/163))
+#### Acceptance terms as of 2026-11-25 (superseded by the table in "Current state" above)
 
 These are tracked separately and never collapsed into one PASS. Since
 2026-11-25 they are computed by `make m4-check` (`scripts/m4_check.py`,
@@ -170,12 +179,9 @@ and death unarmed under the same seed; unconsciousness is still not reached.) S7
 truncation, empty versus blank lines (only a non-empty line is a move) and
 one `Which door?` question answered by adjectives; it needed no runtime
 change. WP4 proves deterministic replay persistence. It is not a player-facing
-save yet, and native SAVE/RESTORE stays strict. Next, in the order of epic
-[#163](https://github.com/quaat/mdl-racket/issues/163):
-1. the gameplay failure inventory and a single-run checkpoint runner;
-2. combat branches found by searching clocks and seeds in the native game;
-3. lamp and clock events, objects, scoring;
-4. player-facing saves (WP4.7, after an ADR-0055 amendment).
+save yet, and native SAVE/RESTORE stays strict. (The "Next" list that stood
+here, as of 2026-11-25, is superseded by the approved order in the
+"Current state" section above.)
 
 The sections below describe the branch stack as it was integrated; they are
 kept as the integration history.
@@ -225,7 +231,7 @@ can now be closed against `main`.
 | #113 R5/R7 constructor evaluation, STRING views | PR #114 | [R5R7](evidence/M3/review/R5R7.md) |
 | #113 R6 MIN as an ordinary PDP-10 FLOAT | PR #115 | [R6](evidence/M3/review/R6.md) |
 | #113 R8 ERROR delivery, ERRET level | PR #116 | [R8](evidence/M3/review/R8.md) |
-| #113 R9 reference probe evidence | unknown: the branch `evidence/m3-107-reference-probes` named in #113 is not on `origin`; per-finding probes are in each R record | — |
+| #113 R9 reference probe evidence | PR #203 (`fe05f86`, 2026-11-26): the local-only capture re-run against the pinned mdli, identical apart from the build banner; #113 closed | [R9](evidence/M3/review/R9.md) |
 
 The issue #113 body still lists R2-R4 as "review running" and R6/R8 nits
 as open; the merges above supersede that table. The contracts are

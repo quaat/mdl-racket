@@ -5,6 +5,7 @@
   "roots": ["docs/evidence", "tests/scenarios", "tests/fixtures"],
   "soft_total_budget_bytes": 67108864,
   "single_file_limit_bytes": 8388608,
+  "single_file_limit_status": "proposed by the orchestrator 2026-11-26, pending maintainer confirmation (ADR-0065); binds no current file (largest 5.9 MiB)",
   "audit_2026_11_26": {"total_bytes_approx": 43610000, "files": 558,
                        "largest": "docs/evidence/M4/coal-machine-reference.json (5.9 MiB)"},
   "justifications": [],

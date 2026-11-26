@@ -39,8 +39,13 @@ SOURCE = "not run"
 
 
 def violations(policy: dict, sizes: dict[str, int]) -> list[str]:
-    allowed = {j["path"]: int(j["bytes_allowed"]) for j in policy.get("justifications", [])}
+    allowed = {}
     problems = []
+    for j in policy.get("justifications", []):
+        if not isinstance(j, dict) or "path" not in j or "bytes_allowed" not in j:
+            problems.append(f"malformed justification entry {j!r} (needs path and bytes_allowed)")
+            continue
+        allowed[j["path"]] = int(j["bytes_allowed"])
     total = sum(sizes.values())
     if total > policy["soft_total_budget_bytes"] and total > allowed.get("TOTAL", -1):
         problems.append(f"total {total} bytes exceeds the soft budget "

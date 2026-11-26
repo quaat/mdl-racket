@@ -61,11 +61,12 @@ Options: `M4_DECL_SWEEP_ARGS="--units a,b --reuse --out P --work D"`.
 [`docs/evidence/reference-corpus-policy.json`](evidence/reference-corpus-policy.json):
 a soft total budget of 64 MiB and a single-file limit of 8 MiB, each
 exceedable only with a recorded justification. `tests/test_reference_corpus.py`
-(in `make test-python`) enforces both. Audit of 2026-11-26: 41.59 MiB in 558
+(in `make test-python`) enforces both. Audit of 2026-11-26 on `main` `5b27177`: 41.59 MiB in 558
 files; the largest file is 5.91 MiB. Reference updates are explicit changes
 made by the capture tools and reviewed; a normal test run never replaces an
-accepted reference (known exception to remove: `make m4-decl-sweep` rewrites
-its own diagnostic report).
+accepted reference (related, to be changed: the diagnostic target
+`make m4-decl-sweep`, outside `make test` and `make m4-check`, rewrites its
+committed report).
 
 ## M4 acceptance-term check (`make m4-check`, 2026-11-25)
 
