@@ -6,7 +6,8 @@ troll-death, and the M4 Phase 3 timer, object and scoring scenarios
 lamp-burnout, and the M4 Phase 3b scenarios beyond the house: match-clock and
 boat-river, and the native-only dam-sluice and maint-leak references, and the
 M4 Phase 3c puzzle scenarios coal-machine and gas-room and the native-only
-balloon-ledge reference (tests/scenarios/<name>.json).
+balloon-ledge reference, and the combat.thief scenario thief-fight
+(tests/scenarios/<name>.json).
 
 Read-only reference investigation. Nothing here is runtime code, and the game
 sources under .cache/upstream are never written: every run boots a fresh copy
@@ -87,7 +88,11 @@ pump), compacted like the timers profile.  The Phase 3c scenarios use the
 receptacle, BLOC, BINF, BTIE and the clocks BINT and BRNIN, the guidebook,
 the rope and DOME-FLAG, the torch and GLACIER-FLAG, the coal-mine basket,
 coal, machine, diamond and screwdriver with CAGE-TOP, LIGHT-SHAFT and
-EMPTY-HANDED, the candles and CNDIN, the bracelet), compacted likewise.
+EMPTY-HANDED, the candles and CNDIN, the bracelet), compacted likewise.  The
+thief-fight scenario uses the "thief" profile (THIEF_DIAG_FORMS: the timers
+fields, then the thief's OCAPAC, FIGHTBIT and STAGGERED bits, the stiletto's
+OROOM and OCAN, the chalice's OROOM and TAKEBIT and the ROBBER demon's
+HACTION), compacted likewise.
 
 Confusion is GPLv3 and is used only as a behaviour reference; no Confusion
 source is copied into this script.
@@ -272,6 +277,29 @@ assert BOAT_DIAG_FORMS.count(_PUZ_FIND_OLD) == 1 and BOAT_DIAG_FORMS.count(_CP_E
 PUZZLES_DIAG_FORMS = (BOAT_DIAG_FORMS.replace(_PUZ_FIND_OLD, _PUZ_FIND_NEW)
                       .replace(_CP_END, _PUZ_FIELDS + _CP_END))
 
+# The "thief" profile (combat.thief): TIMERS_DIAG_FORMS with the stiletto and
+# the chalice found once and more checkpoint fields before CP-END: the thief's
+# OCAPAC (his fighting strength, 78melee.mud BLOW), FIGHTBIT and STAGGERED
+# bits, the stiletto's OROOM and OCAN (ROBBER-FUNCTION's FIGHT and SNARF-OBJECT,
+# 77act1.mud:1472), the chalice's OROOM and TAKEBIT (TREASURE-ROOM, CHALICE,
+# 77act1.mud:623) and the ROBBER demon's HACTION (ROBBER-FUNCTION's DEAD!,
+# OUT! and IN!).
+_THIEF_FIND_OLD = '<SETG DIAG-THIEF <FIND-OBJ "THIEF">> T>'
+_THIEF_FIND_NEW = ('<SETG DIAG-THIEF <FIND-OBJ "THIEF">> <SETG DIAG-STILL <FIND-OBJ "STILL">> '
+                   '<SETG DIAG-CHALI <FIND-OBJ "CHALI">> T>')
+_THIEF_FIELDS = (
+    '<DIAG "CP-THIEF-OCAPAC" <OCAPAC ,DIAG-THIEF>> '
+    '<DIAG "CP-THIEF-FIGHTING" <DIAG-BIT <OFLAGS ,DIAG-THIEF> ,FIGHTBIT>> '
+    '<DIAG "CP-THIEF-STAGGERED" <DIAG-BIT <OFLAGS ,DIAG-THIEF> ,STAGGERED>> '
+    '<DIAG "CP-STILL-OROOM" <DIAG-ROOM ,DIAG-STILL>> '
+    '<DIAG "CP-STILL-OCAN" <COND (<OCAN ,DIAG-STILL> <OID <OCAN ,DIAG-STILL>>)>> '
+    '<DIAG "CP-CHALI-OROOM" <DIAG-ROOM ,DIAG-CHALI>> '
+    '<DIAG "CP-CHALI-TAKEBIT" <DIAG-BIT <OFLAGS ,DIAG-CHALI> ,TAKEBIT>> '
+    '<DIAG "CP-ROBBER-HACTION" <HACTION ,ROBBER-DEMON>> ')
+assert TIMERS_DIAG_FORMS.count(_THIEF_FIND_OLD) == 1 and TIMERS_DIAG_FORMS.count(_CP_END) == 1
+THIEF_DIAG_FORMS = (TIMERS_DIAG_FORMS.replace(_THIEF_FIND_OLD, _THIEF_FIND_NEW)
+                    .replace(_CP_END, _THIEF_FIELDS + _CP_END))
+
 # Scenario name -> its checkpoint profile's diagnostic forms.
 PROFILES = {
     "grue-resurrection": DIAG_FORMS,
@@ -288,6 +316,7 @@ PROFILES = {
     "balloon-ledge": PUZZLES_DIAG_FORMS,
     "coal-machine": PUZZLES_DIAG_FORMS,
     "gas-room": PUZZLES_DIAG_FORMS,
+    "thief-fight": THIEF_DIAG_FORMS,
 }
 NAMES = tuple(PROFILES)
 
@@ -465,7 +494,7 @@ def main() -> int:
     # by its sha256 and size; what the runner uses from it, its last
     # checkpoint, is kept in end_checkpoints, and X1's log is kept in full.
     compact = any(diag_forms is f for f in (TIMERS_DIAG_FORMS, DAM_DIAG_FORMS, BOAT_DIAG_FORMS,
-                                            PUZZLES_DIAG_FORMS))
+                                            PUZZLES_DIAG_FORMS, THIEF_DIAG_FORMS))
     if compact:
         for r in rows[3 + n:]:
             log = r.pop("diag_log", "").encode("latin-1")

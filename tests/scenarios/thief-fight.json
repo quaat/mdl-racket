@@ -1,0 +1,53 @@
+{
+  "name": "thief-fight",
+  "description": "M4 scenario (epic #163; combat.thief): the thief fights the hero and is fought. Fresh boot by <FLOAD \"77loadall.mud\"> and <SAVE-IT> on the fixed session clock (fixed_epoch 250776000, zone UTC, microseconds 0); unmodified pinned sources, START seeds RANDOM from DSKDATE, no RANDOM override and no seed search. The first 25 commands are strange-passage's: the troll killed with the sword, the maze route into the Cyclops Room, `odysseus` (the cyclops flees, CYCLOPS-FLAG). `up` into the Treasure Room: its room action TREASURE-ROOM (77act1.mud:623) brings the thief there whatever the seed (\"You hear a scream of anguish as you violate the robber's hideaway. ...\": FIGHTBIT set, HROOM the Treasure Room), and the FIGHTING demon (78melee.mud:282) has him attack at once (\"You dodge as the thief comes in low.\"). `kill thief with sword` twice: the hero wounds the thief twice (OCAPAC 4 -> 3 -> 2) and the thief wounds the hero, then knocks him out and kills him (\"The thief knocks you out.\", JIGS-UP, death question at READSTRING entry 28); `y` (patched in the forest); `look`, `inventory`, `diagnose`, `score`. Under this clock and seed the thief wins; he is not killed and his treasures are not recovered. Each command was confirmed by the pinned native reference; see docs/evidence/M4/THIEF-FIGHT-REFERENCE.md. Input ends after `score` (D3 end-of-input applies).",
+  "fixed_epoch": 250776000,
+  "tz": "UTC",
+  "entry": [
+    "<FLOAD \"77loadall.mud\">",
+    "<SAVE-IT>"
+  ],
+  "commands": [
+    "north",
+    "east",
+    "open window",
+    "west",
+    "west",
+    "take sword",
+    "inventory",
+    "take lamp",
+    "move rug",
+    "open trap door",
+    "turn on lamp",
+    "down",
+    "east",
+    "kill troll with sword",
+    "kill troll with sword",
+    "kill troll with sword",
+    "south",
+    "south",
+    "east",
+    "up",
+    "sw",
+    "east",
+    "south",
+    "ne",
+    "odysseus",
+    "up",
+    "kill thief with sword",
+    "kill thief with sword",
+    "y",
+    "look",
+    "inventory",
+    "diagnose",
+    "score"
+  ],
+  "entry_prompts": {
+    "28": "Do you want me to try to patch you?"
+  },
+  "quit_prefixes": [],
+  "reference": {
+    "file": "docs/evidence/M4/thief-fight-reference.json",
+    "case": "T1-thief-fight-pipe"
+  }
+}
