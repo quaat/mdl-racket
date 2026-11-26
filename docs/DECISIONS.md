@@ -177,6 +177,76 @@ scenarios, the balloon route and targeted probes with it and publishes the
 violated sites: `docs/evidence/M4/DECL-VIOLATION-SWEEP.md`. This ADR is
 unchanged; the decision on INV-12 remains the maintainer's.
 
+**Amendment (M4 issue #196, INV-12; maintainer decision 2026-11-26):**
+"Stop enforcing attached declarations. Amend the attached-declaration ADR:
+attached #DECLs are not enforced at all, matching Confusion. DECL?,
+GDECL/SETG, positional declarations and CHTYPE stay strict. A recorded
+deviation from the manual. Promote balloon-ledge to a gated scenario. The
+recorder stays test-only for future sweeps."
+
+This supersedes, for attached declarations, the #98 rule that the manual's
+checks are enforced when the function runs, the #193 rule that known types
+stay strict, and the call-time halves of the #100 (duplicate ATOM
+conjunction) and #96 (NTH required length) ADRs. Precisely:
+
+* **Call time: never fails in production.** An attached `#DECL` (an ATOM
+  list/Pattern pair after the formals of `FUNCTION`/`DEFINE`/`DEFMAC`, or
+  after the auxiliary list of `PROG`/`REPEAT`) is not checked when an
+  argument, OPTIONAL, REST ("TUPLE"/"ARGS"), AUX, PROG/REPEAT auxiliary or
+  NAME/activation formal is bound, when a declared local is `SET`, or when
+  the VALUE result is returned (normally, by `RETURN`, or from a PROG).
+  Without the recorder no conformance check is performed at all: the Pattern
+  is not even matched, so a Pattern that would raise *while* being matched
+  (a `DECL` association added after the definition whose target is unknown,
+  cyclic or malformed; the traversal limit) raises nothing either. The value
+  is bound, assigned or returned unchanged.
+* **Definition time: unchanged and strict.** The attached `#DECL` is still
+  parsed and normalized when the function or PROG is defined, exactly as
+  before: malformed pairs, non-ATOM names, a duplicate VALUE, an empty `OR`,
+  unsupported Pattern forms and unknown structure keywords (`<FOO FIX>`),
+  bad NTH counts, `OPT`, misplaced `SPECIAL`/`UNSPECIAL` and cyclic `DECL`
+  associations are rejected with the same messages. An unknown TYPE ATOM is
+  still retained (the #98 deferral). This is a different check from call-time
+  conformance: it validates the declaration's syntax, not a value. Pinned
+  Confusion's behaviour for a malformed attached Pattern at definition has not
+  been probed (no evidence under `docs/evidence/M3/`), so today's behaviour is
+  kept and that question stays open.
+* **Strict and unchanged, with the same messages:** explicit `DECL?`
+  (including its unknown-name error), GDECL (against an existing value) and
+  every SETG of a GDECLed global, positional (RSUBR-style `"VALUE"`)
+  declarations, CHTYPE to a NEWTYPE with a `DECL` association, NEWTYPE's own
+  Pattern validation, and every other path that does not go through the
+  attached-binding check.
+* **The test-only recorder keeps working.** With
+  `#:decl-violation-recorder` (test hosts only; never `run-zork`, the
+  command line or the replay host), each attached check is evaluated exactly
+  as it was before this amendment (the #98/#193 resolution, the #100
+  conjunction, the #96 NTH rule) and every would-be violation is reported to
+  the recorder once and proceeds, so `make m4-decl-sweep` still finds them.
+  An error raised while evaluating a check still raises in a recorder host
+  (as before), which a sweep reports as a finding; production never raises
+  it. The recorder is still read at exactly one place, now the only branch
+  in which an attached check is evaluated.
+* **A recorded deviation from the manual** (chapter 14: checking is on
+  initially for attached declarations) and an alignment with pinned
+  Confusion, whose only call to `mdl_check_decl` is `DECL?` and which accepts
+  every attached violation probed (`docs/evidence/M2/DECLARATIONS.md`,
+  `docs/evidence/M3/FUNCTION-DECL.md`, `docs/evidence/M3/DEFERRED-DECL-TYPE.md`).
+
+**Why:** The #196 sweep (`docs/evidence/M4/DECL-VIOLATION-SWEEP.md`) found
+4 violated bindings in 3 functions of the 1977 sources (BALLOON PRSO and
+BINF, MSWITCH-FUNCTION IMP, SPHERE-FUNCTION PV), none on the 24 gated routes;
+allowed to proceed, the balloon route and the switch probe matched Confusion
+byte for byte. Under the strict reading the balloon could not be boarded
+(INV-12).
+
+**Consequence:** A runtime bug that produces a wrongly typed value is no
+longer caught at an attached binding; it must change output or state to be
+seen, which the scenario checkpoints compare. The recorder and
+`make m4-decl-sweep` remain the diagnostic. balloon-ledge becomes a gated
+scenario (`make test-m4-balloon-ledge`). Evidence:
+`docs/evidence/M4/S16-ATTACHED-DECL.md`.
+
 ## ADR: Lazy NTH declaration matching for M3 issue #96
 
 **Decision:** Normalize `[n pattern ...]` as a counted sequence in the

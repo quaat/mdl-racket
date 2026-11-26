@@ -680,6 +680,14 @@ enforcement semantics and record this as a reference deviation rather than
 copying the reference's missing checks. Reference success, errors, and
 source hashes belong in `docs/evidence/M2/DECLARATIONS.md`.
 
+**Superseded for call-time checks (M4 issue #196, maintainer decision
+2026-11-26; see "Amendment: attached declarations are not enforced" below).**
+Attached declarations are now parsed and validated at definition time as
+described here, but bound arguments, initialized locals, `SET`s and results
+are no longer checked against them in production, matching pinned Confusion.
+The rules above for which bindings an attached Pattern applies to still
+define what the test-only recorder evaluates. `DECL?` is unchanged.
+
 The original `MSETG` first tests `GASSIGNED?`, then `SETG`s and `MANIFEST`s
 an atom on the first assignment. The manual says `GASSIGNED?` is true only
 when a global value is assigned. `MANIFEST` marks global slots as constants
@@ -1498,6 +1506,10 @@ attached `#DECL` accepts `[3 ANY]` but does not reject a two-element
 argument. The manual and this runtime's existing `ANY` Pattern and
 attached-declaration enforcement require a three-element minimum.
 This is an explicit manual/reference deviation, not silent parity.
+(Since #196, attached declarations are not enforced in production, so
+the attached two-element case now proceeds as in Confusion; the
+three-element rule still holds for `DECL?` and in the test-only
+recorder's evaluation.)
 
 Focused tests must first fail on NTH normalization, then cover the
 manual rule in DECL?, attached FUNCTION declarations, zero/negative
@@ -1530,7 +1542,15 @@ and the unchanged source progression.
 
 Maintainer decision 2026-11-25 (DECISIONS.md, amendment to the #98 ADR).
 This replaces the "still neither ... raises `unknown declaration type`"
-sentence above for attached declarations only:
+sentence above for attached declarations only.
+
+**Since #196 (next amendment) production checks no attached declaration at
+all.** The rules below, and "known types stay strict", now describe only what
+the test-only recorder evaluates when a test host enables it (which
+would-be violations it reports, and which checks raise while being
+evaluated); in production every case below proceeds with the value. The
+strict-path list at the end (DECL?, positional, GDECL/SETG, CHTYPE) is
+unchanged.
 
 * At each attached check (argument, OPTIONAL/AUX binding, SET of a declared
   local, VALUE result), a retained unresolved TYPE ATOM is looked up again.
@@ -1578,19 +1598,22 @@ Maintainer decision 2026-11-26 on #196 ("sweep first"): gather data on
 which attached declarations the 1977 game violates on its own play paths
 before deciding INV-12. This is a **host-only, test-only diagnostic mode**.
 It changes no semantics: nothing in production uses it, and every rule
-above stays as written.
+above stays as written. (Since the #196 amendment below, production checks
+no attached declaration; the recorder is where the rules above are still
+evaluated. The bullets below say where that changed the text.)
 
 * **Hook.** `make-mdl-session`, `make-mdl-context` and
   `make-mdl-atom-space` accept `#:decl-violation-recorder`: `#f` (the
   default) or a procedure of one argument (anything else is a contract
   error). It is stored in an immutable field of the session's atom space
-  at construction and read at exactly one place, the mismatch branch of
-  the attached-declaration check (`check-declared!` in
-  `mdl/runtime/core.rkt`).
+  at construction and read at exactly one place, the attached-declaration
+  check (`check-declared!` in `mdl/runtime/core.rkt`); since #196 that read
+  decides whether the check is evaluated at all.
 * **Absent (the default; always in `run-zork`, the command line and the
-  replay host):** every attached check is strict, raising
-  `mdl-decl: DECL line:column: NAME does not satisfy declaration` exactly as
-  before.
+  replay host):** before #196's amendment every attached check was strict,
+  raising `mdl-decl: DECL line:column: NAME does not satisfy declaration`.
+  Since that amendment no attached check is evaluated and that error no
+  longer exists.
 * **Present:** an attached check whose value does not match its Pattern
   calls the recorder once with a description and then proceeds as if the
   check had passed (the binding, assignment or result keeps the value).
@@ -1610,8 +1633,9 @@ above stays as written.
   NEWTYPE with a `DECL` association; malformed attached declarations
   (definition-time errors); errors raised *while* checking (an association
   added later whose target is unknown, cyclic or malformed; the traversal
-  limit). An unassigned binding is still not checked, and a still-undefined
-  name (#193) still matches, so neither is recorded.
+  limit; these raise only in a recorder host since #196). An unassigned
+  binding is still not checked, and a still-undefined name (#193) still
+  matches, so neither is recorded.
 * **Unreachable from MDL.** No SUBR, ROOT name, GVAL or association exposes
   or sets it; MDL code can neither read nor enable it. The only callers that
   pass it are `tests/m4_scenario_runner.rkt` (when the sweep sets its
@@ -1630,10 +1654,72 @@ first on the unknown keyword) covers each kind recorded once with the right
 description and the call proceeding; the same calls raising the old error
 without the recorder; DECL?, GDECL/SETG, positional, CHTYPE and
 checking-time errors strict with it on; argument validation; and isolation
-(one read site, immutable field, no production host passes it, run-zork and
-the replay host fail strictly on a toy game's violation). The sweep:
+(one read site, immutable field, no production host passes it; since #196,
+run-zork and the replay host run a toy game whose attached check would raise
+while being evaluated, and finish, which only a session without a recorder
+can do). The sweep:
 `make m4-decl-sweep`, docs/TESTING.md and
 `docs/evidence/M4/DECL-VIOLATION-SWEEP.md`.
+
+### Amendment: attached declarations are not enforced (M4 issue #196, INV-12; specification before implementation)
+
+Maintainer decision 2026-11-26 (DECISIONS.md, amendment to the #98 ADR):
+"Stop enforcing attached declarations. Amend the attached-declaration ADR:
+attached #DECLs are not enforced at all, matching Confusion. DECL?,
+GDECL/SETG, positional declarations and CHTYPE stay strict. A recorded
+deviation from the manual. Promote balloon-ledge to a gated scenario. The
+recorder stays test-only for future sweeps."
+
+* **Call time (production): no check.** For an attached `#DECL` on
+  `FUNCTION`, `DEFINE`, `DEFMAC`, `PROG` or `REPEAT`, nothing is checked when
+  a required argument, an OPTIONAL, a REST (`"TUPLE"`/`"ARGS"`), an AUX, a
+  PROG/REPEAT auxiliary or a NAME/activation formal is bound, when a declared
+  local is `SET`, or when the VALUE result is produced (the body's value,
+  `RETURN`, a PROG's result). The value is bound, assigned or returned as
+  is. The Pattern is not matched, so nothing that matching could raise (a
+  `DECL` association added after the definition whose target is unknown,
+  cyclic or malformed; the traversal limit) is raised either. This covers
+  every known type, nested `OR`/structure/`[REST ...]`/NTH Patterns, the
+  #100 conjunction of a name declared twice and the #96 NTH length rule.
+  The error `NAME does not satisfy declaration` no longer occurs.
+* **Definition time: unchanged.** The `#DECL` is still parsed and normalized
+  when its function is defined or its PROG entered: malformed pairs,
+  non-ATOM names, a duplicate VALUE, an empty `OR`, unsupported Pattern forms
+  and unknown structure keywords (`<FOO FIX>`), bad NTH counts, `OPT`,
+  `SPECIAL`/`UNSPECIAL` inside another Pattern and cyclic `DECL`
+  associations stay strict errors with their messages; unknown TYPE ATOMs are
+  retained (#98). This validates the declaration, not a value. Pinned
+  Confusion's definition-time behaviour for malformed attached Patterns is
+  not recorded, so this is kept as it was and recorded as an open question.
+* **Strict, unchanged messages:** `DECL?` (`DECL?: unknown declaration type
+  ...` and its FALSE results), `GDECL` (`existing value does not satisfy
+  GDECL for ...`), `SETG` of a GDECLed global (`value does not satisfy GDECL
+  declaration for ...`), positional declarations (definition-time
+  validation; they never had call-time checks), CHTYPE to a NEWTYPE with a
+  `DECL` association (`TYPE-MISMATCH: value does not satisfy NEWTYPE
+  declaration`) and NEWTYPE's Pattern validation.
+* **Recorder (test hosts only).** With `#:decl-violation-recorder`, each
+  attached check is evaluated exactly as before this amendment (the rules of
+  the sections above, including #193's), and a value that does not match is
+  reported once and proceeds. An error raised while evaluating a check still
+  raises in that host, as before. Without a recorder `check-declared!`
+  returns at once; this is the simplest implementation that performs no
+  conformance check, and it keeps the recorder's read as the only switch.
+* **Recorded deviation** from the manual (chapter 14: checking is on
+  initially) and an alignment with pinned Confusion, which checks no attached
+  declaration (its only `mdl_check_decl` call is `DECL?`). Evidence and the
+  data behind the decision: `docs/evidence/M4/DECL-VIOLATION-SWEEP.md`,
+  `docs/evidence/M4/S16-ATTACHED-DECL.md`.
+
+Tests (written first, failing on the old strict behaviour):
+`tests/attached_decl_unenforced_test.rkt` (every binding kind and nested
+Patterns proceed; DECL?, GDECL/SETG, positional and CHTYPE strict with the
+same messages; definition-time errors unchanged; late-association and
+traversal-limit errors not raised in production); the converted assertions in
+the declaration test files (each listed in the evidence record);
+`tests/deferred_decl_type_test.rkt` (each #193 case in production and with
+the recorder); `tests/decl_violation_recorder_test.rkt` (recording unchanged;
+isolation proved by a check that can only raise when evaluated).
 
 ## M3 duplicate attached ATOM declarations (issue #100; specification before implementation)
 
@@ -1651,7 +1737,9 @@ unsupported Patterns remain strict errors.
 
 Tests must first fail at the existing duplicate-name error, then verify
 both constraints, source-order failure, acceptance of the original
-`BALLOON` declaration, and source-load progression. This conjunction is
+`BALLOON` declaration, and source-load progression. (Since #196 the
+conjunction is evaluated only by the test-only recorder; production
+checks no attached declaration.) This conjunction is
 an explicit inference from the manual's pairing semantics, not a claim of
 verified historical precedence.
 
