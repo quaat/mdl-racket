@@ -3375,8 +3375,11 @@
   ;; elements; original CONTIN uses BACK to reach it. #117 keys the host-port
   ;; registry by the shared backing storage, so the REST/BACK/TOP views of
   ;; this channel all resolve to the same port.
+  ;; M4 #173: a PRINT channel starts with line width (element 13) 0, i.e.
+  ;; unlimited, and column (element 14) 0, as pinned Confusion's terminal
+  ;; OUTCHAN; the READ channel's element 13 is not interpreted.
   (define storage (mdl-vector 0 0 mode "" "" "" "" "" "" "TTY" ""
-                              0 0 80 0 24 0 0 10 0))
+                              0 0 (if (equal? mode "PRINT") 0 80) 0 24 0 0 10 0))
   (hash-set! (atom-space-channels (current-mdl-atom-space))
              (mdl-array-storage storage)
              (host-channel (string->symbol mode) port #f #f))
@@ -4283,25 +4286,100 @@
     (error 'mdl-printstring "PRINTSTRING count must be a nonnegative FIX"))
   (define written (if count (min count (mdl-string-length buffer))
                       (mdl-string-length buffer)))
-  (write-string (substring (mdl-string-content buffer) 0 written)
-                (host-channel-output-port/strict 'mdl-printstring host))
+  ;; PRINTSTRING never breaks a line, but it moves the column (M4 #173).
+  (channel-output! 'mdl-printstring channel host
+                   (lambda (out line)
+                     (write-text! out line (substring (mdl-string-content buffer) 0 written))))
   ;; The MDL manual returns the number of characters printed. Pinned
   ;; Confusion returns the original STRING; see docs/SEMANTICS.md.
   written)
 
 (define (mdl-terpri [channel (default-output-channel 'mdl-terpri)])
-  (newline (channel-output-port 'mdl-terpri channel))
+  (channel-output! 'mdl-terpri channel (channel-output-host 'mdl-terpri channel)
+                   write-newline!)
   (mdl-false '()))
 
 (define (mdl-crlf [channel (default-output-channel 'mdl-crlf)])
-  (newline (channel-output-port 'mdl-crlf channel))
+  (channel-output! 'mdl-crlf channel (channel-output-host 'mdl-crlf channel)
+                   write-newline!)
   (mdl-root-atom "T"))
+
+;; M4 #173: line width and column of an output CHANNEL (manual 11.1.2 and
+;; 11.2.8.1; pinned Confusion, evidence/M4/i173-print-reference-raw.json).
+;; Element 13 is the width W, element 14 the column C, both read from the
+;; CHANNEL on every call (a PUT takes effect at the next output) and both
+;; required to be nonnegative FIXes. When W is nonzero every written
+;; character advances C (a control character other than TAB/LF/VT/FF/CR by
+;; two, Confusion's ^X width), CR sets it to 0, and a newline written by
+;; TERPRI, CRLF or PRINT sets it to 0; when W is 0 C is neither advanced nor
+;; reset. A line feed inside written text counts as a column, as in
+;; Confusion. Text is laid out into a string first and written at once, so a
+;; failed operation writes nothing and leaves C unchanged.
+(struct line-state (width [column #:mutable]))
+
+(define (channel-line-slot who channel index label)
+  (define view (mdl-typed-value-value channel))
+  (unless (and (mdl-array? view) (>= (mdl-array-length view) index))
+    (error who "CHANNEL has no element ~a (~a) (M4 #173)" index label))
+  (define value (mdl-nth view index))
+  (unless (and (exact-nonnegative-integer? value) (<= value fix-max))
+    (error who "CHANNEL element ~a (~a) must be a nonnegative FIX (M4 #173)" index label))
+  value)
+
+(define (char-columns ch)
+  (define code (char->integer ch))
+  (if (and (or (< code 32) (= code 127)) (not (<= 9 code 13))) 2 1))
+
+(define (text-columns text)
+  (for/sum ([ch (in-string text)]) (char-columns ch)))
+
+(define (write-text! out line text)
+  (write-string text out)
+  (unless (zero? (line-state-width line))
+    (for ([ch (in-string text)])
+      (set-line-state-column! line (if (char=? ch #\return)
+                                       0
+                                       (+ (line-state-column line) (char-columns ch)))))))
+
+(define (write-newline! out line)
+  (newline out)
+  (unless (zero? (line-state-width line))
+    (set-line-state-column! line 0)))
+
+;; A token is (text . separated?): SEPARATED? means a separating space goes
+;; before it. Before each token, when W and C are nonzero and the token (plus
+;; its space) does not fit in W - C columns, a newline replaces the space.
+(define (write-tokens! out line tokens)
+  (for ([token (in-list tokens)])
+    (define text (car token))
+    (define separated? (cdr token))
+    (define width (line-state-width line))
+    (define column (line-state-column line))
+    (cond [(and (positive? width) (positive? column)
+                (> (+ (text-columns text) (if separated? 1 0)) (- width column)))
+           (write-newline! out line)]
+          [separated? (write-text! out line " ")])
+    (write-text! out line text)))
+
+;; Lay out one output operation on CHANNEL (HOST already validated): EMIT
+;; writes into a string port while updating the line state; then the text
+;; reaches the host port and the new column is stored in element 14.
+(define (channel-output! who channel host emit)
+  (define line (line-state (channel-line-slot who channel 13 "line width")
+                           (channel-line-slot who channel 14 "column")))
+  (define out (open-output-string))
+  (emit out line)
+  (unless (<= (line-state-column line) fix-max)
+    (error who "CHANNEL column would exceed the FIX range (M4 #173)"))
+  (write-string (get-output-string out) (host-channel-output-port/strict who host))
+  (unless (zero? (line-state-width line))
+    (mdl-put-element! (mdl-typed-value-value channel) 14 (line-state-column line))))
 
 ;; ADR-0050 terminal printing. Text reaches the port unchanged only when every
 ;; character is printable ASCII, CR or LF: Confusion prints other control
 ;; characters in ^X notation and non-ASCII is not a 1977 terminal character,
 ;; so both are strict errors here. The whole text is checked before anything
-;; is written. No line breaking is done (CHANNEL slot 13 is ignored).
+;; is written. Line breaking: see channel-output! (M4 #173).
 (define (terminal-text who content)
   (for ([ch (in-string content)])
     (define code (char->integer ch))
@@ -4313,17 +4391,17 @@
   content)
 
 ;; One or two arguments: the object and an optional output CHANNEL whose
-;; default is the LVAL of OUTCHAN. Returns the validated CHANNEL host record;
-;; the port is resolved after the object's text is validated.
+;; default is the LVAL of OUTCHAN. Returns the CHANNEL and its validated host
+;; record; the port is resolved after the object's text is validated.
 (define (print-arguments who args)
   (unless (<= 1 (length args) 2)
     (error who "~a takes an object and an optional CHANNEL (ADR-0050)" who))
-  (channel-output-host who (if (null? (cdr args))
-                               (default-output-channel who)
-                               (cadr args))))
+  (define channel (if (null? (cdr args)) (default-output-channel who) (cadr args)))
+  (values channel (channel-output-host who channel)))
 
 ;; PRINC (manual 11.1.2.3): STRING (native or view) without quotes, CHARACTER
-;; bare, FIX in decimal. Returns the object. Every other TYPE is strict.
+;; bare, FIX in decimal, written as one token. Returns the object. Every other
+;; TYPE is strict.
 (define (princ-text value)
   (cond [(mdl-string? value) (terminal-text 'PRINC (mdl-string-content value))]
         [(mdl-character-code value)
@@ -4332,28 +4410,85 @@
         [else (error 'PRINC "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))
 
 (define (mdl-princ . args)
-  (define host (print-arguments 'PRINC args))
-  (define text (princ-text (car args)))
-  (write-string text (host-channel-output-port/strict 'PRINC host))
+  (define-values (channel host) (print-arguments 'PRINC args))
+  (define tokens (list (cons (princ-text (car args)) #f)))
+  (channel-output! 'PRINC channel host (lambda (out line) (write-tokens! out line tokens)))
   (car args))
 
-;; PRIN1 (manual 11.1.2.3): FIX in decimal; an ATOM with an empty PNAME that
-;; is reachable on the OBLIST path prints nothing (Confusion: the game's
-;; ,NULL); any other ATOM follows the UNPARSE ATOM rules (safe PNAME,
-;; reachable, no trailer). Returns the object. Every other TYPE is strict.
-(define (prin1-text value)
-  (cond [(exact-integer? value) (number->string (check-fix 'PRIN1 value))]
-        [(and (mdl-atom? value) (string=? (atom-value-pname value) ""))
-         (unless (atom-reachable? 'PRIN1 value)
-           (error 'PRIN1 "empty-PNAME ATOM not reachable via current OBLIST path; trailer notation not implemented (ADR-0050)"))
+;; PRIN1 text (manual 11.1.2.2: the UNPARSE representation; M4 #173). A leaf
+;; is a FIX, an ATOM, a STRING or a CHARACTER, printed by mdl-unparse-value
+;; (so its strict refusals apply), except that a reachable ATOM with an empty
+;; PNAME prints nothing (Confusion: the game's ,NULL). Every other TYPE is
+;; strict.
+(define (prin1-leaf-text who value)
+  (cond [(and (mdl-atom? value) (string=? (atom-value-pname value) ""))
+         (unless (atom-reachable? who value)
+           (error who "empty-PNAME ATOM not reachable via current OBLIST path; trailer notation not implemented (ADR-0050)"))
          ""]
-        [(mdl-atom? value) (mdl-unparse-value 'PRIN1 value)]
-        [else (error 'PRIN1 "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))
+        [(or (exact-integer? value) (mdl-atom? value) (mdl-string? value)
+             (mdl-character-code value))
+         (terminal-text who (mdl-unparse-value who value))]
+        [else (error who "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))
+
+;; The PRIN1 tokens of VALUE (see write-tokens!), as Confusion splits them: a
+;; leaf is one token; a LIST is `()`, or `(`, its elements (all but the first
+;; separated) and `)`; a FALSE is `#FALSE` followed by its LIST part as a
+;; separated element. The traversal reads the structure only. ACTIVE holds
+;; the LIST cells and FALSEs being printed, so a structure that contains an
+;; enclosing one is refused (Confusion would not terminate); a cyclic tail is
+;; refused too. Each nesting level adds a distinct cell, so it is bounded.
+(define (prin1-tokens who value)
+  (define active (make-hasheq))
+  (define tokens '())
+  (define (emit! text separated?) (set! tokens (cons (cons text separated?) tokens)))
+  (define (enter! key)
+    (when (hash-ref active key #f)
+      (error who "self-referencing LIST or FALSE cannot be printed (M4 #173)"))
+    (hash-set! active key #t))
+  (define (walk-list head separated?)
+    (cond
+      [(null? head) (emit! "()" separated?)]
+      [else
+       (enter! head)
+       (emit! "(" separated?)
+       (let loop ([cell head] [first? #t] [seen (make-hasheq)])
+         (cond [(null? cell) (void)]
+               [(not (mpair? cell)) (error who "improper LIST cannot be printed (M4 #173)")]
+               [(hash-ref seen cell #f) (error who "cyclic LIST cannot be printed (M4 #173)")]
+               [else (hash-set! seen cell #t)
+                     (walk (mcar cell) (not first?))
+                     (loop (mcdr cell) #f seen)]))
+       (emit! ")" #f)
+       (hash-remove! active head)]))
+  (define (walk value separated?)
+    (cond
+      [(or (null? value) (mpair? value)) (walk-list value separated?)]
+      [(mdl-false? value)
+       (enter! value)
+       (emit! "#FALSE" separated?)
+       (walk-list (mdl-false-value-payload value) #t)
+       (hash-remove! active value)]
+      [else (emit! (prin1-leaf-text who value) separated?)]))
+  (walk value #f)
+  (reverse tokens))
 
 (define (mdl-prin1 . args)
-  (define host (print-arguments 'PRIN1 args))
-  (define text (prin1-text (car args)))
-  (write-string text (host-channel-output-port/strict 'PRIN1 host))
+  (define-values (channel host) (print-arguments 'PRIN1 args))
+  (define tokens (prin1-tokens 'PRIN1 (car args)))
+  (channel-output! 'PRIN1 channel host (lambda (out line) (write-tokens! out line tokens)))
+  (car args))
+
+;; PRINT (manual 11.1.2.1; M4 #173): a newline (the line feed TERPRI writes),
+;; the PRIN1 text laid out from column 0, then one space. The object's text
+;; is validated before anything is written. Returns the object itself.
+(define (mdl-print . args)
+  (define-values (channel host) (print-arguments 'PRINT args))
+  (define tokens (prin1-tokens 'PRINT (car args)))
+  (channel-output! 'PRINT channel host
+                   (lambda (out line)
+                     (write-newline! out line)
+                     (write-tokens! out line tokens)
+                     (write-text! out line " ")))
   (car args))
 
 ;; ADR-0049 part 3 / ADR-0050 host top-level loop, in the current context.
@@ -5167,6 +5302,7 @@
         "RESET" mdl-reset
         "PRINC" mdl-princ
         "PRIN1" mdl-prin1
+        "PRINT" mdl-print
         "READSTRING" mdl-readstring
         "ERROR" mdl-error
         "ERRET" mdl-erret

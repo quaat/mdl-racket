@@ -77,7 +77,11 @@ def test_committed_sweep_matches_fresh_run():
     live = {m["name"] for m in data["missing"] if m["class"] == "missing"}
     # The inventory's static candidates still unimplemented
     # (GAMEPLAY-FAILURE-INVENTORY.md); fixed ones move to builtins.
-    assert {"ACCESS", "PRINT", "EVAL", "PARSE"} <= live
+    assert {"ACCESS", "EVAL", "PARSE"} <= live
+    # INV-07 PRINT implemented by M4 #173 (HANDLE's MAPF of PRINT).
+    assert "PRINT" not in live
+    assert "PRINT" in data["runtime_name_sources"]["builtin_table"]
+    assert "PRINT" in data["builtin_used"]
     # INV-05 fixed by M4 S10 (#171): FILE-LENGTH and CLOSE are builtins now
     # (read-only file CHANNELs of the allowlist only, ADR-0055 amendment).
     for name in ("FILE-LENGTH", "CLOSE"):
