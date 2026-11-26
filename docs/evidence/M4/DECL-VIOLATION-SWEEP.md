@@ -201,8 +201,15 @@ written before the change, belong to the maintainer and the next slice.
 | `racket tests/decl_violation_recorder_test.rkt` | 0 | `decl_violation_recorder_test: OK` |
 | `python3 -I scripts/probe_decl_sweep_reference.py docs/evidence/M4/decl-sweep-probes-reference.json` | 0 | CAPTURE OK; T1 = T1b; mdli sha256 pinned before and after |
 | `make m4-decl-sweep` | 0 | 27 units, all with a result; 4 distinct sites; report `decl-violation-sweep.json` |
-| `make test` | see the slice record | |
-| `make test-historical`, `make m3-check`, `make m4-check`, `make xfail-m4-balloon-frontier` | see the slice record | production strict: the balloon still XFAILs at k = 57 |
+| `make test` | 0 | raco: 5042 tests passed (the recorder test included); pytest: 104 passed, 1 deselected |
+| `make test-historical` | 0 | |
+| `make m3-check` | 0 | overall PASS (native fresh capture parity included) |
+| `make xfail-m4-balloon-frontier` | 0 | XFAIL as recorded: entries 0-56 equal the reference, k = 57 BALLOON's PRSO #DECL. Production is still strict |
+| `make m4-check` | 0 | SCENARIO_PARITY PASS (24 scenarios); persistence and PLAYABLE sub-checks PASS; GAMEPLAY_RELIABILITY NOT YET (18 of 23 branches; open blockers INV-06, INV-07, INV-12); M4_ACCEPTED NOT YET (run on 141eacf with only a SEMANTICS wording fix uncommitted) |
+| `git diff --check` | 0 | |
+
+All runs: Racket v7.9 [bc], Python 3 from `/usr/bin/python3`,
+`PLTCOLLECTS=":$PWD"`, `TMPDIR=/tmp`. Each heavy job ran on its own.
 
 ## Limitations
 

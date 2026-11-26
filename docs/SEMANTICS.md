@@ -1619,9 +1619,11 @@ above stays as written.
   `tests/decl_violation_sweep.rkt`.
 
 Control flow touched: the attached-check call sites now pass the binding
-kind (`check-frame-binding!` gained a `kind` argument at its six call sites:
-SET, compiled formal binding, PROG auxiliaries, interpreted formal binding;
-`check-result!` passes `value`). The strict path is otherwise unchanged.
+kind (`check-frame-binding!` gained a `kind` argument at its four call
+sites: SET, compiled formal binding, PROG auxiliaries, interpreted formal
+binding, whose local `bind!` helpers pass the formal's kind; `check-result!`
+passes `value`). The strict path is otherwise unchanged: the same match,
+the same error, raised at the same point.
 
 Tests: `tests/decl_violation_recorder_test.rkt` (in `make test`; failed
 first on the unknown keyword) covers each kind recorded once with the right
