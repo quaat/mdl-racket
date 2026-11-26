@@ -212,8 +212,12 @@ MDL
               "exactly one read site of the recorder (check-declared!)")
 (check-false (regexp-match? #rx"set-atom-space-decl-violation-recorder!" core))
 (check-false (regexp-match? #rx"decl-violation-recorder[ \t\n]+#:mutable|\\[decl-violation-recorder #:mutable" core))
-;; the accessor is not exported
-(check-false (regexp-match? #rx"\\(provide[^)]*atom-space-decl-violation-recorder" core))
+;; the accessor is not exported. Checked on the module itself (independent
+;; review: a regex over the provide form stopped at its first `)`, so an
+;; export added next to atom-space-outchan would not have been caught).
+(check-false (dynamic-require (build-path repo "mdl/runtime/core.rkt")
+                              'atom-space-decl-violation-recorder (lambda () #f))
+             "atom-space-decl-violation-recorder must not be exported")
 (for ([path '("zork/main.rkt" "zork/cli.rkt" "zork/persistence.rkt" "zork/game-files.rkt"
               "mdl/replay.rkt" "mdl/compiler.rkt" "mdl/parser.rkt"
               "mdl/lang/main.rkt" "mdl/lang/reader.rkt")])

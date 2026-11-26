@@ -213,6 +213,15 @@ All runs: Racket v7.9 [bc], Python 3 from `/usr/bin/python3`,
 
 ## Limitations
 
+- **The SPHERE continuation (independent review).** The poisoning line
+  follows the source (77act3.mud, the SPHIN branch). The "Now, let me
+  see..." text after it does not come from the game's flow. It is YES/NO's
+  RESET plus a READSTRING at exhausted input during a host call. Natively,
+  that point would be "Unexpected EOF". This is not a native comparison.
+- **Prefix re-runs.** The balloon's re-run prefixes 52 and 60 come from the
+  runner's own output. The JSON records 60, through its violations, but not
+  52. Whether `--reuse` was used for the probe capture is not recorded either.
+
 - **SPHERE-FUNCTION's site** is shown only by a direct host call, not by a
   route, and is not compared with native.
 - **The MSWITCH probe** is compared on the whole transcript only. There are

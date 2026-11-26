@@ -190,9 +190,10 @@ replay) lets `make m4-decl-sweep` run every gated scenario, the balloon route
 and targeted probes with attached `#DECL` violations recorded instead of
 fatal. Result: no violation on the 24 gated routes; the balloon violates
 BALLOON's PRSO and BINF declarations and, allowed to proceed, matches pinned
-Confusion through all 81 commands; MSWITCH (`push switch`) and SPHERE-FUNCTION
-are confirmed too. Production stays strict: the balloon is still blocked
-(`make xfail-m4-balloon-frontier`). Next: the maintainer's INV-12 decision
+Confusion through all 81 commands; MSWITCH (`push switch`) is confirmed on a
+native-captured probe route, and SPHERE-FUNCTION only by a direct host call (no
+route run, not compared with native). Production stays strict: the balloon is
+still blocked (`make xfail-m4-balloon-frontier`). Next: the maintainer's INV-12 decision
 (recommended: stop enforcing attached declarations, aligning with Confusion).
 
 `make m4-check` runs all twenty-four plus the persistence check; options
