@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "r9-printstring-return-value",
+  "cases": [
+    {"name": "printstring-no-count-return", "expression": "<TYPE <PRINTSTRING \"hello\">>"},
+    {"name": "printstring-count-return-type", "expression": "<TYPE <PRINTSTRING \"hello\" ,OUTCHAN 3>>"},
+    {"name": "printstring-no-count-eq", "expression": "<==? <PRINTSTRING \"hello\"> \"hello\">"},
+    {"name": "printstring-count-val", "expression": "<PRINTSTRING \"hello\" ,OUTCHAN 3>"}
+  ]
+}

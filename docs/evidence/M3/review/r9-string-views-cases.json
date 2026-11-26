@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "name": "r9-string-views-reference",
+  "cases": [
+    {"name": "rest-string-basic", "expression": "<REST \"abc\" 1>"},
+    {"name": "rest-string-type", "expression": "<TYPE <REST \"abc\" 1>>"},
+    {"name": "rest-string-length", "expression": "<LENGTH <REST \"abc\" 1>>"},
+    {"name": "rest-string-eq-two-calls", "expression": "<SETG S \"abc\"> <==? <REST ,S 1> <REST ,S 1>>"},
+    {"name": "rest-string-equal-two-calls", "expression": "<SETG S \"abc\"> <=? <REST ,S 1> <REST ,S 1>>"},
+    {"name": "rest-string-alias-mutation", "expression": "<SETG S <ISTRING 3 !\\X>> <SETG T <REST ,S 1>> <PUT ,T 1 !\\Y> <STRING ,S>"},
+    {"name": "rest-string-alias-mutation-t", "expression": "<SETG S <ISTRING 3 !\\X>> <SETG T <REST ,S 1>> <PUT ,T 1 !\\Y> <STRING ,T>"},
+    {"name": "rest-string-spname", "expression": "<SETG S <ISTRING 5 !\\A>> <SETG T <REST ,S 2>> <TYPE .T>"},
+    {"name": "rest-string-atom", "expression": "<ATOM <REST \"ab\" 1>>"},
+    {"name": "string-from-rest", "expression": "<STRING <REST \"hello\" 2>>"},
+    {"name": "rest-string-first", "expression": "<1 <REST \"abc\" 1>>"},
+    {"name": "princ-rest-string", "expression": "<PRINC <REST \"hello\" 2>>"}
+  ]
+}

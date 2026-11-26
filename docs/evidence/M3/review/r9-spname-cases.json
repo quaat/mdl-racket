@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "r9-spname-reference",
+  "cases": [
+    {"name": "spname-basic", "expression": "<SPNAME NORTH>"},
+    {"name": "spname-type", "expression": "<TYPE <SPNAME NORTH>>"},
+    {"name": "pname-basic", "expression": "<PNAME NORTH>"},
+    {"name": "pname-type", "expression": "<TYPE <PNAME NORTH>>"},
+    {"name": "spname-vs-pname-eq", "expression": "<==? <SPNAME NORTH> <PNAME NORTH>>"},
+    {"name": "spname-vs-pname-strequal", "expression": "<=? <SPNAME NORTH> <PNAME NORTH>>"},
+    {"name": "pname-mutable", "expression": "<SETG S <PNAME NORTH>> <PUT ,S 1 !\\X> ,S"},
+    {"name": "spname-two-calls-eq", "expression": "<==? <SPNAME NORTH> <SPNAME NORTH>>"}
+  ]
+}

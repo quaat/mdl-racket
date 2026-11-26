@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "r9-minmax-errors",
+  "cases": [
+    {"name": "min-atom-arg", "expression": "<MIN A>"},
+    {"name": "max-atom-arg", "expression": "<MAX A>"}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "r9-constructors-errors",
+  "cases": [
+    {"name": "istring-negative-length", "expression": "<ISTRING -1>"},
+    {"name": "istring-non-char-fill", "expression": "<ISTRING 2 7>"},
+    {"name": "ivector-negative-length", "expression": "<IVECTOR -1>"},
+    {"name": "iuvector-negative-length", "expression": "<IUVECTOR -1>"}
+  ]
+}

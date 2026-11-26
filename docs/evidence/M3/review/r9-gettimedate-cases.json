@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "name": "r9-gettimedate-reference",
+  "cases": [
+    {"name": "type-of-result", "expression": "<TYPE <GETTIMEDATE>>"},
+    {"name": "utype-of-result", "expression": "<UTYPE <GETTIMEDATE>>"},
+    {"name": "length-of-result", "expression": "<LENGTH <GETTIMEDATE>>"},
+    {"name": "epoch-utc-length", "expression": "<LENGTH <GETTIMEDATE 0 T>>"},
+    {"name": "epoch-utc-slot1", "expression": "<1 <GETTIMEDATE 0 T>>"},
+    {"name": "epoch-utc-slot2", "expression": "<2 <GETTIMEDATE 0 T>>"},
+    {"name": "epoch-utc-slot3", "expression": "<3 <GETTIMEDATE 0 T>>"},
+    {"name": "epoch-utc-slot4", "expression": "<4 <GETTIMEDATE 0 T>>"},
+    {"name": "epoch-utc-slot5", "expression": "<5 <GETTIMEDATE 0 T>>"},
+    {"name": "epoch-utc-slot6", "expression": "<6 <GETTIMEDATE 0 T>>"},
+    {"name": "epoch-utc-slot7", "expression": "<7 <GETTIMEDATE 0 T>>"},
+    {"name": "microseconds-arg", "expression": "<7 <GETTIMEDATE ![0 123456!] T>>"},
+    {"name": "no-args-returns-uvector", "expression": "<UTYPE <GETTIMEDATE>>"}
+  ]
+}
