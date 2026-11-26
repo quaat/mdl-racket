@@ -41,7 +41,7 @@
 ;; Run with: racket tests/historical_top_parser_test.rkt   (exit status is authoritative)
 (require rackunit racket/runtime-path racket/string racket/list json
          (except-in "m4_scenario_runner.rkt" render oids)
-         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global mdl-session-atom)
+         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global)
          (only-in "../mdl/runtime/core.rkt" mdl-atom? mdl-atom-pname mdl-truthy?))
 
 ;; Plain `racket` must exit non-zero on any failed check.
@@ -101,7 +101,7 @@
          (cond [(equal? t "OBJECT") (render s (field s v "OID"))]
                [(equal? t "PHRASE")
                 (paren (list (render s (mdl-session-call s "CHTYPE" (nth s v 1)
-                                                         (mdl-session-atom s "ATOM")))
+                                                         (existing-atom s "ATOM")))
                              (render s (field s (nth s v 2) "OID"))))]
                [(member t '("VERB" "ACTION")) (paren (list t (render s (nth s v 1))))]
                [else t])]))

@@ -37,7 +37,7 @@
 ;; Requires the pinned upstream source: .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/
 ;; Run with: racket tests/historical_orphan_prompt_test.rkt   (exit status is authoritative)
 (require rackunit racket/runtime-path racket/string racket/list json "m4_scenario_runner.rkt"
-         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global mdl-session-atom)
+         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global)
          (only-in "../mdl/runtime/core.rkt" mdl-atom-pname mdl-truthy?
                   mdl-false mdl-string-snapshot))
 
@@ -114,7 +114,7 @@
           'orphan_slot1 (orphan-object s (field s orphans "OSLOT1"))
           'orphan_prep (or-false (field s orphans "OPREP")
                                  (lambda (p) (render s (mdl-session-call s "CHTYPE" p
-                                                                         (mdl-session-atom s "ATOM")))))
+                                                                         (existing-atom s "ATOM")))))
           'orphan_name (render s (field s orphans "ONAME"))
           'scrstr_codes (codes s (mdl-session-call s "BACK" (mdl-session-global s "SCRSTR") 5))
           'raw_score (render s (mdl-session-global s "RAW-SCORE"))
@@ -141,7 +141,7 @@
   (define s (m4-run-load-only "prstr"))
   (define (scr) (codes s (mdl-session-call s "BACK" (mdl-session-global s "SCRSTR") 5)))
   (define (prep-atom name)
-    (mdl-session-call s "CHTYPE" (mdl-session-call s "FIND-PREP" name) (mdl-session-atom s "ATOM")))
+    (mdl-session-call s "CHTYPE" (mdl-session-call s "FIND-PREP" name) (existing-atom s "ATOM")))
   (define (text v) (mdl-string-snapshot 'orphan-test v "expected a STRING"))
   (check-equal? (scr) "(0 0 0 0 0)")
   (check-equal? (text (mdl-session-call s "PRSTR" (prep-atom "WITH"))) "with")

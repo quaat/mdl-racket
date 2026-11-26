@@ -415,3 +415,56 @@ The first passing `make test` ran before the `on_save_test.rkt` fix and the
 and `mdl-session-find-atom` are host-only (not in the builtin table) and only
 read. No GPLv3 code copied (the Confusion behaviour is summarised above). No
 upstream bytes changed.
+
+## Independent review (2026-11-26)
+
+An independent reviewer (a separate subagent given the diff, not this
+summary) read the fix and its invariants and ran seven mutations against
+`make test`. Six were caught. It reported no blocking defect. The seventh
+mutation showed an untested property, and three smaller points followed.
+All were addressed on this branch:
+
+- **Untested property (should fix).** Non-interning lookup of
+  `NAME!-OWNER`, where the OWNER ATOM exists but has no OBLIST, must not
+  create that OBLIST. The mutation `(mdl-moblist owner)` in the
+  non-interning branch of `resolve-pname` went undetected.
+  `tests/binding_atom_string_test.rkt` now reads `M199-X!-M199-G` (`M199-G`
+  exists and has no OBLIST). It checks that the read fails as an unassigned
+  global, that `mdl-session-find-atom` returns false, and that
+  `<GET M199-G OBLIST>` is still FALSE afterwards. The positive control is
+  `<GET M199-OBL OBLIST>`, which is not FALSE. Re-run of the mutation: the
+  test fails at line 211, which is the FALSE check after the read. Without
+  the mutation the test passes.
+- **Temp directory.** The tests made their temporary directories under a
+  hard-coded `/tmp`. They now use the system temp directory
+  (`make-temporary-file "mdl-i199-test~a"`, and likewise in
+  `declaration_test.rkt`).
+- **Error message wording.** The message now says "no such ATOM on the
+  session's .OBLIST path". The `unassigned MDL global` prefix is unchanged.
+- **Checkpoint purity by construction.** Six remaining checkpoint ATOM
+  reads used the interning `mdl-session-atom`: house-cellar,
+  top-parser, parser-ambiguity (two), orphan-prompt (two) and sword-glow.
+  They now use the runner's non-interning `existing-atom`, which fails if
+  the ATOM is missing.
+- **Left as is (pre-existing, outside #199).** `mdl/compiler.rkt:70-73`
+  interns ATOMs at compile time, as the reader does.
+- **Process note.** `docs/SEMANTICS.md` was updated in the docs commit
+  (dcc19be), after the fix commit (5af5d14). AGENTS.md asks for the
+  SEMANTICS entry before the implementation. The probe evidence (a9626da)
+  and the failing tests (f2ffee6) did come first, but the SEMANTICS text
+  did not.
+
+**Gate on `dcc19be`, run before the review fixes.** Each target ran
+sequentially, outside the sandbox, and exited 0: test, test-historical,
+test-m2-g3, m3-source-progress, test-m3-interactive, test-m3-session,
+test-m3-launcher, test-m3-bang, m3-check, m4-check, m4-decl-sweep and
+m4-scenarios-per-prefix (6150 s). `git diff --check` was clean. In the
+sweep JSON only `repository_commit` and the timings changed, so it was not
+committed.
+
+**Re-run after the review fixes.** `make test` exited 0: raco reported
+5312 tests passed, and pytest 104 passed with 1 deselected. `make m4-check`
+exited 0. It runs the five changed checkpoint tests (house-cellar,
+orphan-prompt, top-parser, sword-glow, parser-ambiguity), and each one
+passed. Its summary was SCENARIO_PARITY PASS (26) and GAMEPLAY_RELIABILITY
+NOT YET (20 of 23; open INV-06 and INV-07), unchanged from the gate run.

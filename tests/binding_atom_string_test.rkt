@@ -172,14 +172,15 @@
   (check-exn #rx"expected a STRING PNAME" (lambda () (mdl-find-atom later))))
 
 ;; --- the host API converts its string names at the boundary, never interning ---
-(define root (make-temporary-file "/tmp/mdl-i199-test~a" 'directory))
+(define root (make-temporary-file "mdl-i199-test~a" 'directory))
 (call-with-output-file (build-path root "i199.mud") #:exists 'truncate/replace
   (lambda (out)
     (display (string-append
               "<SETG M199-G 7>\n"
               "<DEFINE M199-ADD (A B) <+ .A .B>>\n"
               "<DEFINE M199-INTERNED? (S) <OR <LOOKUP .S <1 .OBLIST>> <LOOKUP .S <ROOT>>>>\n"
-              "<SETG M199-FLAGGED!-M199-OBL 9>\n")
+              "<SETG M199-FLAGGED!-M199-OBL 9>\n"
+              "<DEFINE M199-OBL-OF (A) <GET .A OBLIST>>\n")
              out)))
 (define s (make-mdl-session root))
 (check-equal? (hash-ref (mdl-session-load! s "i199.mud") 'status) "PASS")
@@ -198,6 +199,17 @@
 (check-exn #rx"unassigned MDL global M199-X!-M199-NO-OBLIST"
            (lambda () (mdl-session-global s "M199-X!-M199-NO-OBLIST")))
 (check-false (interned? "M199-NO-OBLIST"))
+;; The trailer's owner ATOM exists but has no OBLIST: the host read neither
+;; finds the name nor creates the OBLIST (MOBLIST would).
+(check-false (mdl-false? (mdl-session-call s "M199-OBL-OF"
+                                           (mdl-session-find-atom s "M199-OBL"))))
+(check-true (mdl-false? (mdl-session-call s "M199-OBL-OF"
+                                          (mdl-session-find-atom s "M199-G"))))
+(check-exn #rx"unassigned MDL global M199-X!-M199-G"
+           (lambda () (mdl-session-global s "M199-X!-M199-G")))
+(check-false (mdl-session-find-atom s "M199-X!-M199-G"))
+(check-true (mdl-false? (mdl-session-call s "M199-OBL-OF"
+                                          (mdl-session-find-atom s "M199-G"))))
 ;; A name the session never read is not interned by a host read or call.
 (check-false (interned? "M199-NEVER"))
 (check-exn #rx"unassigned MDL global M199-NEVER"

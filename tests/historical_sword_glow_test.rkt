@@ -45,7 +45,7 @@
 ;; Requires the pinned upstream source: .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/
 ;; Run with: racket tests/historical_sword_glow_test.rkt   (exit status is authoritative)
 (require rackunit racket/runtime-path racket/string racket/list json "m4_scenario_runner.rkt"
-         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global mdl-session-atom)
+         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global)
          (only-in "../mdl/runtime/core.rkt" mdl-atom-pname mdl-truthy?))
 
 ;; Plain `racket` must exit non-zero on any failed check.
@@ -134,7 +134,7 @@
   (define s (m4-run-load-only "game-sword-glow"))
   (define (type-of v) (mdl-atom-pname (mdl-session-call s "TYPE" v)))
   (define (g name) (mdl-session-global s name))
-  (define noffset (mdl-session-atom s "NOFFSET"))
+  (define noffset (existing-atom s "NOFFSET"))
   (check-equal? (type-of (g "SWORD-GLOW")) "FUNCTION")
   (check-equal? (mdl-atom-pname (mdl-session-call s "PRIMTYPE" (g "SWORD-GLOW"))) "LIST")
   (check-false (mdl-truthy? (mdl-session-call s "TYPE?" (g "SWORD-GLOW") noffset)))

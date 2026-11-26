@@ -396,7 +396,7 @@
   (cond [(mdl-atom? name) name]
         [(string? name)
          (or (mdl-find-atom name)
-             (error who "unassigned MDL global ~a (no such ATOM in this session; a host read never interns)"
+             (error who "unassigned MDL global ~a (no such ATOM on the session's .OBLIST path; a host read never interns)"
                     name))]
         [else (raise-argument-error who "(or/c string? mdl-atom?)" name)]))
 

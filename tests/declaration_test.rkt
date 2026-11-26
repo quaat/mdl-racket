@@ -140,7 +140,7 @@
    "              (<AND <GASSIGNED? PURE-CAREFUL> ,PURE-CAREFUL>\n"
    "               <ERROR PSETG-DUPLICATE .FOO>)>\n"
    "        .BAR>\n"))
-(define original-root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
+(define original-root (make-temporary-file "mdl-decl-test~a" 'directory))
 (define original-path (build-path original-root "msetg.mud"))
 (call-with-output-file original-path #:exists 'truncate/replace
   (lambda (out) (display msetg-source out)))
