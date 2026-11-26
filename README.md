@@ -217,9 +217,9 @@ gated checks (one route each; the river downstream, the balloon's other
 destinations and the volcano gnome are not). On that branch `make m4-check` exits 0: SCENARIO_PARITY PASS for 25 scenarios, GAMEPLAY_RELIABILITY NOT YET with 19 of 23 required branches covered (objects.puzzles-beyond-the-house now covered) and open blockers INV-06 and INV-07 only. Known
 limitation found here: with MSETG's declaration no longer enforced, this
 runtime's ATOM-taking binding primitives (`SETG`, `GVAL`, `GASSIGNED?`,
-`SET`, `LVAL`, `VALUE`, `GUNASSIGN`, `MANIFEST`) accept a STRING as an ATOM
-name where Confusion stops at least for `GASSIGNED?` (#199; tracked XFAIL in
-`tests/declaration_test.rkt`). Branch evidence until
+`SET`, `LVAL`, `VALUE`, `GUNASSIGN`, `MANIFEST`) accepted a STRING as an ATOM
+name where Confusion stops (#199; fixed by branch `fix/199-binding-atom-string`,
+below). Branch evidence until
 merged.
 
 **combat.thief (branch `feat/m4-thief-fight`, gate PASS, scenario-scoped;
@@ -236,6 +236,20 @@ covers the `combat.thief` branch; not exercised: the thief appearing by
 chance elsewhere, leaving a fight, being knocked out or killed (his booty),
 and the hero recovering from unconsciousness. On that branch `make m4-check` exits 0 (677.8 s, at `6d6e5b1`, clean tree): SCENARIO_PARITY PASS for 26 scenarios, GAMEPLAY_RELIABILITY NOT YET with 20 of 23 required branches covered (combat.thief now covered; uncovered: the three save branches) and open blockers INV-06 and INV-07; PLAYABLE NOT RUN, FULL_COMPLETION NOT RUN, M4_ACCEPTED NOT YET. Branch evidence
 until merged.
+
+**#199 binding primitives (branch `fix/199-binding-atom-string`, gate
+PASS, no gameplay change; [record](docs/evidence/M4/I199-STRING-ATOM.md)).**
+`SETG`, `GVAL`, `GASSIGNED?`, `SET`, `LVAL`, `VALUE`, `GUNASSIGN` and
+`MANIFEST` now reject a STRING first argument (`mdl-<p>: expected an MDL
+ATOM`, as for FIX and FORM) without interning or changing the ATOM it
+spells; the original MSETG/PSETG with a STRING stop where pinned Confusion
+stops. Limits: the error is a strict host error, not Confusion's level-1
+abort or `*ERROR*` level; MANIFEST rejecting non-ATOMs is part of the
+existing enforced-MANIFEST deviation (Confusion's MANIFEST does nothing);
+`BOUND?`, `GBOUND?` and `UNASSIGN` are not implemented. Host callers name
+globals by strings through `mdl-session-global`/`mdl-session-call`, which
+now resolve them without interning. `make test` and `make m4-check` exit 0
+on that branch (M4 terms unchanged). Branch evidence until merged.
 
 `make m4-check` runs all twenty-six plus the persistence check; options
 `M4_CHECK_ARGS="--scenarios-only"`, `"--per-prefix"`, `"--require-accepted"`.

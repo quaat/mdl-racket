@@ -30,7 +30,7 @@
 (parameterize ([current-mdl-globals (make-hasheq)]
                [current-mdl-locals (list (make-hasheq))]
                [current-mdl-atom-space (make-mdl-atom-space)])
-  (check-exn #rx"session" (lambda () (mdl-apply "EVENT" foreign-header))))
+  (check-exn #rx"session" (lambda () (mdl-apply (mdl-atom "EVENT") foreign-header))))
 (check-exn #rx"priority|FIX" (lambda () (run "<EVENT \"M3-USER\" \"BAD\">")))
 (check-exn #rx"IHEADER" (lambda () (run "<HANDLER 1 2>")))
 (check-exn #rx"unsupported HANDLER action" (lambda () (run "<HANDLER <EVENT \"M3-USER\" 7> \"BAD\">")))

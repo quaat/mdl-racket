@@ -62,6 +62,6 @@
 (check-exn exn:fail? (lambda () (run "<ROT 1 1>")))
 
 (for ([n (in-range 0 36)])
-  (define word (mdl-apply "LSH" 1 n))
+  (define word (mdl-apply (mdl-atom "LSH") 1 n))
   (check-equal? (mdl-word-bits word) (arithmetic-shift 1 n)))
 (displayln "36-bit FIX and WORD tests passed")

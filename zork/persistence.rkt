@@ -58,6 +58,11 @@
     [else #f]))
 
 ;; --- the selected game state ---------------------------------------------------------
+;; The state is read through names that already exist; a read never interns
+;; an ATOM (#199). A missing one is an error.
+(define (existing-atom s name)
+  (or (mdl-session-find-atom s name)
+      (error 'zork-replay-state "no ATOM ~a in the session (a state read never interns)" name)))
 ;; Rendered like the troll scenario's checkpoints (FIX decimal, ATOM PNAME,
 ;; empty FALSE "#FALSE ()"), extended for WORD ("#WORD n"), STRING, non-empty
 ;; FALSE and other TYPEs (TYPE name only).
@@ -70,13 +75,13 @@
          (cond [(equal? type "FALSE")
                 (if (eqv? 0 (mdl-session-call s "LENGTH" v)) "#FALSE ()" "#FALSE (...)")]
                [(equal? type "WORD")
-                (format "#WORD ~a" (mdl-session-call s "CHTYPE" v (mdl-session-atom s "FIX")))]
+                (format "#WORD ~a" (mdl-session-call s "CHTYPE" v (existing-atom s "FIX")))]
                [(equal? type "STRING") (format "~s" (mdl-string-snapshot 'zork-state v "STRING"))]
                [else (string-append "#" type)])]))
 ;; A global the game may not have assigned yet (PARSE-WON before the first
 ;; command): "#UNASSIGNED" instead of a strict error.
 (define (render-global s name)
-  (if (mdl-truthy? (mdl-session-call s "GASSIGNED?" (mdl-session-atom s name)))
+  (if (mdl-truthy? (mdl-session-call s "GASSIGNED?" (existing-atom s name)))
       (render s (mdl-session-global s name))
       "#UNASSIGNED"))
 (define (field s obj name) (mdl-session-call s "NTH" obj (mdl-session-global s name)))
@@ -88,7 +93,7 @@
    ")"))
 (define (bit-set? s flags bit-name)
   (define w (mdl-session-call s "ANDB" flags (mdl-session-global s bit-name)))
-  (if (eqv? 0 (mdl-session-call s "CHTYPE" w (mdl-session-atom s "FIX"))) "#FALSE ()" "T"))
+  (if (eqv? 0 (mdl-session-call s "CHTYPE" w (existing-atom s "FIX"))) "#FALSE ()" "T"))
 
 (define (zork-replay-state s)
   (define here (mdl-session-global s "HERE"))

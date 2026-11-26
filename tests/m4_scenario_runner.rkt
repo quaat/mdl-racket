@@ -58,7 +58,7 @@
                   current-mdl-sleeper))
 (provide run-m4-scenario m4-reference m4-run-load-only
          m4-source-root m4-pinned-mdli m4-pinned-upstream
-         render strip-trailers field oids bit-set? or-false
+         render strip-trailers field oids bit-set? or-false existing-atom
          current-m4-decl-violation-recorder m4-run-commands reference-transcript)
 
 (define-runtime-path m4-source-root
@@ -115,7 +115,12 @@
 ;; like the reference's T / #FALSE ().
 (define (bit-set? s flags bit-name)
   (define w (mdl-session-call s "ANDB" flags (mdl-session-global s bit-name)))
-  (if (eqv? 0 (mdl-session-call s "CHTYPE" w (mdl-session-atom s "FIX"))) "#FALSE ()" "T"))
+  (if (eqv? 0 (mdl-session-call s "CHTYPE" w (existing-atom s "FIX"))) "#FALSE ()" "T"))
+;; A checkpoint names an ATOM that already exists; it never interns (#199;
+;; checkpoint reads are pure, docs/TESTING.md). A missing one is an error.
+(define (existing-atom s name)
+  (or (mdl-session-find-atom s name)
+      (error 'm4-checkpoint "no ATOM ~a in the session (a checkpoint read never interns)" name)))
 (define (or-false v f) (if (mdl-truthy? v) (f v) "#FALSE ()"))
 
 ;; --- diagnostic only: the attached-declaration violation sweep (M4 #196) ------------

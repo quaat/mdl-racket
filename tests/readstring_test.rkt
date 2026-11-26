@@ -218,4 +218,4 @@
                     (define buffer
                       (for/fold ([r #f]) ([expr (in-list (compile-program (parse-mdl (string-append prelude ",B"))))])
                         (eval expr)))
-                    (mdl-apply "READSTRING" buffer foreign-inchan)))))))
+                    (mdl-apply (mdl-atom "READSTRING") buffer foreign-inchan)))))))

@@ -1,5 +1,20 @@
 # Test strategy, reference capture, and parity contract
 
+## M4 #199: binding primitives reject non-ATOM names (2026-11-26)
+
+`tests/binding_atom_string_test.rkt` (in `make test`) covers SETG, GVAL,
+GASSIGNED?, SET, LVAL, VALUE, GUNASSIGN and MANIFEST with a STRING, a FIX and
+a quoted FORM, at top level and inside a FUNCTION; after each rejected STRING
+call it checks that the spelled ATOM was not interned (`LOOKUP` on the
+search path) and that a preset ATOM kept its value (no SETG/SET/GUNASSIGN
+effect, no MANIFEST mark). ASSIGNED? keeps its existing check. It also covers
+the host boundary: `mdl-session-global`/`mdl-session-call` with string names
+(OBLIST trailers included) never intern, an unread name fails as an
+unassigned global, `mdl-session-find-atom` returns #f for it, and a Racket
+string passed as an MDL argument is an MDL STRING. `tests/declaration_test.rkt`
+holds the original MSETG/PSETG cases (the former XFAIL). Evidence and
+failing-before counts: `docs/evidence/M4/I199-STRING-ATOM.md`.
+
 ## M4 attached-declaration violation sweep (diagnostic only; `make m4-decl-sweep`, 2026-11-26)
 
 Issue #196 ("sweep first"). `make m4-decl-sweep` runs
@@ -218,7 +233,10 @@ at a READSTRING entry that changes the RANDOM state, the storage ledger, the
 session output or the record of signalled MDL errors fails with kind
 `run-guard`; other mutation by a read (interning a new ATOM, game code that
 sets state) is not observed, so checkpoint functions must stay pure reads of
-existing names (as all twenty-four do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
+existing names (since #199 `mdl-session-global`, `mdl-session-call`'s name
+and the runner's `existing-atom` resolve names without interning;
+`mdl-session-atom` still interns a missing name, and the scenario tests use
+it only for names that exist, such as `ATOM`, `FIX` or `NOFFSET`) (as all twenty-four do: pure SUBRs, and FIND-OBJ/FIND-ROOM on IDs that
 exist). Coverage gained: the per-turn
 checkpoints at READSTRING entry (the newer per-prefix tests compared only
 end checkpoints) and the one-READSTRING-per-command check.

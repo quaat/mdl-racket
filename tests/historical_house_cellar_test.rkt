@@ -35,7 +35,7 @@
 ;; Requires the pinned upstream source: .cache/upstream/mdlzork/mdlzork_771212/patched_confusion/
 ;; Run with: racket tests/historical_house_cellar_test.rkt   (exit status is authoritative)
 (require rackunit racket/list json "m4_scenario_runner.rkt"
-         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global mdl-session-atom)
+         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global)
          (only-in "../mdl/runtime/core.rkt" mdl-truthy?))
 
 ;; Plain `racket` must exit non-zero on any failed check.
@@ -69,7 +69,7 @@
   (define lamp (mdl-session-call s "FIND-OBJ" "LAMP"))
   (define lroom (mdl-session-call s "FIND-ROOM" "LROOM"))
   (define oflags
-    (mdl-session-call s "CHTYPE" (field s door "OFLAGS") (mdl-session-atom s "FIX")))
+    (mdl-session-call s "CHTYPE" (field s door "OFLAGS") (existing-atom s "FIX")))
   (define ovison (mdl-session-global s "OVISON"))
   (define fields
    (hasheq 'here (render s (field s here "RID"))

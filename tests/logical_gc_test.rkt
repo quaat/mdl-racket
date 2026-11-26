@@ -43,23 +43,23 @@
 ;; --- Basic GC event interface ---
 (session
  (lambda ()
-   (define header (mdl-apply "EVENT" "GC" 11))
+   (define header (mdl-apply (mdl-atom "EVENT") "GC" 11))
    (define observed '())
-   (mdl-apply "HANDLER" header
+   (mdl-apply (mdl-atom "HANDLER") header
               (lambda (elapsed reason operation)
                 (set! observed (cons (list elapsed reason operation) observed))))
    (define live (mdl-list 1 2))
-   (check-equal? (mdl-apply "GC") 0)
+   (check-equal? (mdl-apply (mdl-atom "GC")) 0)
    (check-equal? (length observed) 1)
    (check-true (and (real? (caar observed)) (inexact? (caar observed))
                     (>= (caar observed) 0.0)))
    (check-equal? (cadar observed) 1)
    (check-eq? (caddar observed) (mdl-atom "GC"))
    (check-equal? (mdl-list->list live) '(1 2))
-   (check-exn #rx"GC|argument" (lambda () (mdl-apply "GC" "BAD")))
+   (check-exn #rx"GC|argument" (lambda () (mdl-apply (mdl-atom "GC") "BAD")))
    (check-equal? (length observed) 1)
-   (check-true (exact-integer? (mdl-apply "BLOAT" 200)))
-   (check-exn #rx"BLOAT|FIX" (lambda () (mdl-apply "BLOAT" -1)))
+   (check-true (exact-integer? (mdl-apply (mdl-atom "BLOAT") 200)))
+   (check-exn #rx"BLOAT|FIX" (lambda () (mdl-apply (mdl-atom "BLOAT") -1)))
    (check-invariant!)))
 
 ;; --- REST shares backing storage; head cell reclaimed when only tail is retained ---
@@ -78,7 +78,7 @@
   ;; shared goes out of scope when this function returns.
   (define shared (mdl-list 1 2 3))
   (define tail (mcdr shared))
-  (check-eq? (mdl-apply "REST" shared) tail)
+  (check-eq? (mdl-apply (mdl-atom "REST") shared) tail)
   tail)
 
 (session
@@ -91,11 +91,11 @@
    (check-equal? (- (hash-ref (mdl-logical-storage-stats) 'used)
                     (hash-ref before 'used)) 12)
    ;; The head cell (2 words) is dead; tail (4 words) + vector (6 words) are live.
-   (define reclaimed (mdl-apply "GC"))
+   (define reclaimed (mdl-apply (mdl-atom "GC")))
    (check-equal? reclaimed 2
                  "exactly 2 words reclaimed: head cell only (tail and vector live)")
    (check-equal? (mdl-list->list tail) '(2 3))
-   (check-equal? (mdl-apply "NTH" vector-value 2) 2)
+   (check-equal? (mdl-apply (mdl-atom "NTH") vector-value 2) 2)
    (check-invariant!)))
 
 ;; --- Discarded LIST: all words reclaimed after function returns ---
@@ -108,12 +108,12 @@
  (lambda ()
    (define initial-used (hash-ref (mdl-logical-storage-stats) 'used))
    (discard-list)
-   (define reclaimed (mdl-apply "GC"))
+   (define reclaimed (mdl-apply (mdl-atom "GC")))
    (check-true (>= reclaimed 6)
                "discarded 3-cell list (6 words) must be fully reclaimed")
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) initial-used
                  "used must return to initial after all words reclaimed")
-   (check-equal? (mdl-apply "GC") 0)
+   (check-equal? (mdl-apply (mdl-atom "GC")) 0)
    (check-invariant!)))
 
 ;; --- DIVERT-AGC with BLOAT handler: GC not triggered when BLOAT satisfies request ---
@@ -121,13 +121,13 @@
  (lambda ()
    (define diverted '())
    (define collected '())
-   (define divert-header (mdl-apply "EVENT" "DIVERT-AGC" 1000))
-   (define gc-header (mdl-apply "EVENT" "GC" 11))
-   (mdl-apply "HANDLER" divert-header
+   (define divert-header (mdl-apply (mdl-atom "EVENT") "DIVERT-AGC" 1000))
+   (define gc-header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+   (mdl-apply (mdl-atom "HANDLER") divert-header
               (lambda (words initiator)
                 (set! diverted (list words initiator))
-                (mdl-apply "BLOAT" (+ words 10))))
-   (mdl-apply "HANDLER" gc-header
+                (mdl-apply (mdl-atom "BLOAT") (+ words 10))))
+   (mdl-apply (mdl-atom "HANDLER") gc-header
               (lambda (elapsed reason initiator)
                 (set! collected (list elapsed reason initiator))))
    (mdl-set-logical-storage-capacity! 0)
@@ -143,15 +143,15 @@
 (session
  (lambda ()
    (define observed '())
-   (define header (mdl-apply "EVENT" "GC" 11))
-   (mdl-apply "HANDLER" header
+   (define header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+   (mdl-apply (mdl-atom "HANDLER") header
               (lambda (elapsed reason initiator)
                 (set! observed (list elapsed reason initiator))))
    (mdl-set-logical-storage-capacity! 0)
    (define retained (mdl-vector 7))
    (check-equal? (cadr observed) 2)
    (check-eq? (caddr observed) (mdl-atom "VECTOR"))
-   (check-equal? (mdl-apply "NTH" retained 1) 7)
+   (check-equal? (mdl-apply (mdl-atom "NTH") retained 1) 7)
    (check-invariant!)))
 
 ;; --- Live cycles are NOT collected (host weak-box still sees them) ---
@@ -159,7 +159,7 @@
  (lambda ()
    (define cycle (mdl-list 1))
    (mdl-putrest! cycle cycle)
-   (check-equal? (mdl-apply "GC") 0)
+   (check-equal? (mdl-apply (mdl-atom "GC")) 0)
    (check-eq? (mcdr cycle) cycle)
    (check-invariant!)))
 
@@ -167,12 +167,12 @@
 (session
  (lambda ()
    (define initial (hash-ref (mdl-logical-storage-stats) 'used))
-   (define base (mdl-apply "UVECTOR" 1 2 3))
-   (define tail (mdl-apply "REST" base 1))
+   (define base (mdl-apply (mdl-atom "UVECTOR") 1 2 3))
+   (define tail (mdl-apply (mdl-atom "REST") base 1))
    (check-equal? (- (hash-ref (mdl-logical-storage-stats) 'used) initial) 5)
-   (check-equal? (mdl-apply "GC") 0)
-   (check-equal? (mdl-apply "NTH" tail 1) 2)
-   (check-equal? (mdl-apply "NTH" base 2) 2)
+   (check-equal? (mdl-apply (mdl-atom "GC")) 0)
+   (check-equal? (mdl-apply (mdl-atom "NTH") tail 1) 2)
+   (check-equal? (mdl-apply (mdl-atom "NTH") base 2) 2)
    (check-invariant!)))
 
 ;; --- Discarded cycle: words reclaimed after function returns ---
@@ -186,19 +186,19 @@
  (lambda ()
    (define initial-used (hash-ref (mdl-logical-storage-stats) 'used))
    (discard-cycle)
-   (define reclaimed (mdl-apply "GC"))
+   (define reclaimed (mdl-apply (mdl-atom "GC")))
    (check-true (>= reclaimed 2)
                "discarded single-cell cycle (2 words) must be reclaimed")
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) initial-used
                  "used must return to initial after cycle reclaimed")
-   (check-equal? (mdl-apply "GC") 0)
+   (check-equal? (mdl-apply (mdl-atom "GC")) 0)
    (check-invariant!)))
 
 ;; --- Exception safety: DIVERT-AGC handler raises; state stays consistent ---
 (session
  (lambda ()
-   (define header (mdl-apply "EVENT" "DIVERT-AGC" 1000))
-   (mdl-apply "HANDLER" header
+   (define header (mdl-apply (mdl-atom "EVENT") "DIVERT-AGC" 1000))
+   (mdl-apply (mdl-atom "HANDLER") header
               (lambda (_words _initiator) (error 'pressure-handler "probe")))
    (mdl-set-logical-storage-capacity! 0)
    (check-exn #rx"probe" (lambda () (mdl-list 1)))
@@ -206,7 +206,7 @@
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 0)
    (check-invariant! " after DIVERT-AGC-handler raise")
    ;; After BLOAT, subsequent allocations succeed cleanly.
-   (mdl-apply "BLOAT" 2)
+   (mdl-apply (mdl-atom "BLOAT") 2)
    (check-equal? (mdl-list->list (mdl-list 1)) '(1))
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 2)
    (check-invariant! " after recovery")))
@@ -227,8 +227,8 @@
    (make-some-garbage)   ; 2 words registered then dead
    ;; Tighten capacity to used (= 2) so the next alloc triggers GC.
    (mdl-set-logical-storage-capacity! (hash-ref (mdl-logical-storage-stats) 'used))
-   (define gc-header (mdl-apply "EVENT" "GC" 11))
-   (mdl-apply "HANDLER" gc-header
+   (define gc-header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+   (mdl-apply (mdl-atom "HANDLER") gc-header
               (lambda (_elapsed _reason _initiator)
                 (error 'gc-handler "deliberate-raise")))
    ;; Triggers DIVERT-AGC → GC sweep (reclaims the 2 dead words) → GC event raises.
@@ -272,8 +272,8 @@
    (define live-cells (for/list ([i (in-range 499)]) (mdl-list i)))
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 998)
    (define gc-count 0)
-   (define header (mdl-apply "EVENT" "GC" 11))
-   (mdl-apply "HANDLER" header (lambda _ (set! gc-count (+ gc-count 1))))
+   (define header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+   (mdl-apply (mdl-atom "HANDLER") header (lambda _ (set! gc-count (+ gc-count 1))))
    ;; 500 garbage allocations. Without gc-min: 499 GCs. With gc-min: 1 GC.
    (for ([_ (in-range 500)]) (discard-one!))
    (check-equal? gc-count 1
@@ -307,16 +307,16 @@
    (define big-vec (apply mdl-vector (make-list 24999 0)))
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 50000)
    (define gc-count 0)
-   (define header (mdl-apply "EVENT" "GC" 11))
-   (mdl-apply "HANDLER" header (lambda _ (set! gc-count (+ gc-count 1))))
+   (define header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+   (mdl-apply (mdl-atom "HANDLER") header (lambda _ (set! gc-count (+ gc-count 1))))
    ;; 2-word alloc: 50000+2=50002 > 50001 → GC → 0 freed → growth.
    (define sentinel (mdl-list 42))
    (check-equal? gc-count 1)
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'capacity) 75002
                  "geometric: cap = ceil(50001 × 3/2) = 75002, dominating needed=58192")
    (check-invariant! " geometric-factor")
-   (check-equal? (mdl-apply "NTH" big-vec 1) 0)
-   (check-equal? (mdl-apply "NTH" sentinel 1) 42)))
+   (check-equal? (mdl-apply (mdl-atom "NTH") big-vec 1) 0)
+   (check-equal? (mdl-apply (mdl-atom "NTH") sentinel 1) 42)))
 
 ;; Growth test C: overflow error when needed > fix-max.
 ;; Uses test hook to set used near fix-max, then tries a 2-word alloc.
@@ -358,8 +358,8 @@
      ;; needed = (fix-max-2) + max(2,2) = fix-max ≤ fix-max → no overflow.
      ;; geometric: ceil((fix-max-1) × 1.5) > fix-max → cap clamps to fix-max.
      (define gc-count 0)
-     (define header (mdl-apply "EVENT" "GC" 11))
-     (mdl-apply "HANDLER" header (lambda _ (set! gc-count (+ gc-count 1))))
+     (define header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+     (mdl-apply (mdl-atom "HANDLER") header (lambda _ (set! gc-count (+ gc-count 1))))
      (define sentinel (mdl-list 99))
      (check-equal? gc-count 1)
      (check-equal? (hash-ref (mdl-logical-storage-stats) 'capacity) fix-max
@@ -394,13 +394,13 @@
  (lambda ()
    (define gc-count 0)
    (define diversions 0)
-   (define gc-header (mdl-apply "EVENT" "GC" 11))
-   (mdl-apply "HANDLER" gc-header (lambda _ (set! gc-count (+ gc-count 1))))
-   (define divert-header (mdl-apply "EVENT" "DIVERT-AGC" 1000))
-   (mdl-apply "HANDLER" divert-header
+   (define gc-header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+   (mdl-apply (mdl-atom "HANDLER") gc-header (lambda _ (set! gc-count (+ gc-count 1))))
+   (define divert-header (mdl-apply (mdl-atom "EVENT") "DIVERT-AGC" 1000))
+   (mdl-apply (mdl-atom "HANDLER") divert-header
               (lambda (words _initiator)
                 (set! diversions (+ diversions 1))
-                (mdl-apply "BLOAT" (+ words 10))))
+                (mdl-apply (mdl-atom "BLOAT") (+ words 10))))
    (mdl-set-logical-storage-capacity! 0)
    ;; 2-word alloc: used=0, cap=0 → pressure → BLOAT(2+10=12) → cap=12.
    ;; Second pressure check: 0+2=2 > 12? No → no collection.
@@ -432,13 +432,13 @@
  (lambda ()
    (define diversions 0)
    (define gc-count 0)
-   (define divert-header (mdl-apply "EVENT" "DIVERT-AGC" 1000))
-   (define gc-header (mdl-apply "EVENT" "GC" 11))
-   (mdl-apply "HANDLER" divert-header
+   (define divert-header (mdl-apply (mdl-atom "EVENT") "DIVERT-AGC" 1000))
+   (define gc-header (mdl-apply (mdl-atom "EVENT") "GC" 11))
+   (mdl-apply (mdl-atom "HANDLER") divert-header
               (lambda (words _init)
                 (set! diversions (+ diversions 1))
-                (mdl-apply "BLOAT" (+ words 200))))
-   (mdl-apply "HANDLER" gc-header
+                (mdl-apply (mdl-atom "BLOAT") (+ words 200))))
+   (mdl-apply (mdl-atom "HANDLER") gc-header
               (lambda _ (set! gc-count (+ gc-count 1))))
    (mdl-set-logical-storage-capacity! 0)
    ;; Allocate 1010 single-cell lists, keeping them all live in a list.
@@ -454,8 +454,8 @@
                  "game-like BLOAT(words+200): 10 diversions for 1010 allocs")
    (check-equal? gc-count 0 "game-like BLOAT: 0 GCs (handler always satisfied)")
    ;; Verify cells are still live
-   (check-equal? (mdl-apply "NTH" (car live-cells) 1) 0)
-   (check-equal? (mdl-apply "NTH" (car (reverse live-cells)) 1) 1009)
+   (check-equal? (mdl-apply (mdl-atom "NTH") (car live-cells) 1) 0)
+   (check-equal? (mdl-apply (mdl-atom "NTH") (car (reverse live-cells)) 1) 1009)
    (check-invariant! " game-like-BLOAT")))
 
 ;; --- Session isolation: two atom spaces have independent ledgers ---
@@ -468,8 +468,8 @@
     (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 0)
     (define other (mdl-vector 1))
     (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 4)
-    (check-equal? (mdl-apply "NTH" other 1) 1)
+    (check-equal? (mdl-apply (mdl-atom "NTH") other 1) 1)
     (check-invariant! " second-space"))
   (check-equal? (hash-ref (mdl-logical-storage-stats) 'used) 4)
-  (check-equal? (mdl-apply "NTH" retained 1) 1)
+  (check-equal? (mdl-apply (mdl-atom "NTH") retained 1) 1)
   (check-invariant! " first-space"))

@@ -31,7 +31,7 @@
    (check-equal? (hash-ref (mdl-session-load! session "guard.mud") 'status) "PASS")
    (check-true (mdl-false?
                 (mdl-session-call session "L?"
-                                  (mdl-session-call session "GVAL" "MUDDLE")
+                                  (mdl-session-call session "GVAL" (mdl-session-atom session "MUDDLE"))
                                   100)))
    (put "and.mud" "<AND <L? ,MUDDLE 100> <USE \"LSRTNS\">>\n")
    (check-equal? (hash-ref (mdl-session-load! session "and.mud") 'status) "PASS")
@@ -42,11 +42,11 @@
    ;; GASSIGNED? is true: the global is assigned, not merely named (an
    ;; unassigned global would return #FALSE () without erroring, so the
    ;; result value is asserted, not just the load status).
-   (check-equal? (mdl-atom-pname (mdl-session-call session "GASSIGNED?" "MUDDLE"))
+   (check-equal? (mdl-atom-pname (mdl-session-call session "GASSIGNED?" (mdl-session-atom session "MUDDLE")))
                  "T")
    ;; And its TYPE is FIX, asserted directly (review P3-b).
    (check-equal? (mdl-atom-pname (mdl-session-call session "TYPE"
-                                                   (mdl-session-call session "GVAL" "MUDDLE")))
+                                                   (mdl-session-call session "GVAL" (mdl-session-atom session "MUDDLE"))))
                  "FIX"))
  (lambda () (delete-directory/files scratch-root)))
 

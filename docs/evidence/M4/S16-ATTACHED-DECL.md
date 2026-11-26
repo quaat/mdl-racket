@@ -242,7 +242,11 @@ Reproduce: `make test`, `make test-m4-balloon-ledge`,
 
 ## Limitations and risks
 
-* **A newly visible divergence (not fixed here).** Pinned Confusion stops
+* **A newly visible divergence (not fixed here; fixed since by #199 on
+  branch `fix/199-binding-atom-string`, see
+  [I199-STRING-ATOM.md](I199-STRING-ATOM.md) and SEMANTICS "M4 #199": the
+  binding primitives now reject a STRING, the XFAIL below is flipped).**
+  Pinned Confusion stops
   `<MSETG "x" 3>` at GASSIGNED? ("1st arg to GASSIGNED? must be atom",
   `docs/evidence/M2/decl-error-reference.json` original-msetg-wrong-atom).
   This runtime's `binding-atom` accepts an MDL STRING as an ATOM name, so

@@ -16,31 +16,31 @@
 
 (session
  (lambda ()
-   (define header (mdl-apply "EVENT" "ERROR" 8))
+   (define header (mdl-apply (mdl-atom "EVENT") "ERROR" 8))
    (define seen '())
    (define frame #f)
-   (mdl-apply "HANDLER" header
+   (mdl-apply (mdl-atom "HANDLER") header
               (lambda (current-frame . args)
                 (set! frame current-frame)
                 (set! seen args)
                 (check-equal? (mdl-atom-pname (mdl-type current-frame)) "FRAME")
-                (mdl-apply "ERRET" 42 current-frame)))
-   (check-equal? (mdl-apply "ERROR" (mdl-atom "PROBE") 9) 42)
+                (mdl-apply (mdl-atom "ERRET") 42 current-frame)))
+   (check-equal? (mdl-apply (mdl-atom "ERROR") (mdl-atom "PROBE") 9) 42)
    (check-equal? seen (list (mdl-atom "PROBE") 9))
-   (check-exn #rx"FRAME|ERRET|live" (lambda () (mdl-apply "ERRET" 1 frame)))))
+   (check-exn #rx"FRAME|ERRET|live" (lambda () (mdl-apply (mdl-atom "ERRET") 1 frame)))))
 
 (session
  (lambda ()
-   (define header (mdl-apply "EVENT" "ERROR" 8))
+   (define header (mdl-apply (mdl-atom "EVENT") "ERROR" 8))
    (define calls 0)
-   (mdl-apply "HANDLER" header
+   (mdl-apply (mdl-atom "HANDLER") header
               (lambda args (set! calls (add1 calls))))
-   (check-exn #rx"FALLTHROUGH" (lambda () (mdl-apply "ERROR" (mdl-atom "FALLTHROUGH"))))
+   (check-exn #rx"FALLTHROUGH" (lambda () (mdl-apply (mdl-atom "ERROR") (mdl-atom "FALLTHROUGH"))))
    (check-equal? calls 1)
-   (mdl-apply "INT-LEVEL" 8)
-   (check-exn #rx"SUPPRESSED" (lambda () (mdl-apply "ERROR" (mdl-atom "SUPPRESSED"))))
+   (mdl-apply (mdl-atom "INT-LEVEL") 8)
+   (check-exn #rx"SUPPRESSED" (lambda () (mdl-apply (mdl-atom "ERROR") (mdl-atom "SUPPRESSED"))))
    (check-equal? calls 1)
-   (mdl-apply "INT-LEVEL" 0)
+   (mdl-apply (mdl-atom "INT-LEVEL") 0)
    (check-equal? calls 1)))
 
 (session
@@ -50,6 +50,6 @@
                           <SETG SEEN-FRAME-TYPE <TYPE .FRM>>
                           <SETG SEEN-ARG-COUNT <LENGTH .ZORK>>
                           <ERRET 17 .FRM>>>>")
-   (check-equal? (mdl-apply "ERROR" (mdl-atom "ONE") 2) 17)
-   (check-eq? (mdl-gval "SEEN-FRAME-TYPE") (mdl-atom "FRAME"))
-   (check-equal? (mdl-gval "SEEN-ARG-COUNT") 2)))
+   (check-equal? (mdl-apply (mdl-atom "ERROR") (mdl-atom "ONE") 2) 17)
+   (check-eq? (mdl-gval (mdl-atom "SEEN-FRAME-TYPE")) (mdl-atom "FRAME"))
+   (check-equal? (mdl-gval (mdl-atom "SEEN-ARG-COUNT")) 2)))

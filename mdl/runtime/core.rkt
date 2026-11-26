@@ -41,7 +41,7 @@
          mdl-splice-result-value mdl-splice-list mdl-splice-vector
          mdl-splice-uvector
          mdl-word mdl-word? mdl-word-bits mdl-chtype mdl-character
-         mdl-truthy? mdl-atom mdl-atom? mdl-atom-pname mdl-oblist?
+         mdl-truthy? mdl-atom mdl-find-atom mdl-atom? mdl-atom-pname mdl-oblist?
          mdl-string-snapshot
          current-mdl-atom-space make-mdl-atom-space mdl-root-atom
          mdl-oblist-pnames
@@ -116,15 +116,18 @@
 (define current-mdl-map-step (make-parameter #f))
 (define current-mdl-map-leave (make-parameter #f))
 
-;; A STRING here comes from MDL code (e.g. <SET "FOO" 3>, pre-existing
-;; acceptance) or from the host test/introspection API, and both mean "the
-;; ATOM the reader would produce", so it resolves through .OBLIST.
-;; Runtime-internal callers must never pass a STRING: they pass
+;; The first argument of SETG, GVAL, GASSIGNED?, SET, LVAL, VALUE, GUNASSIGN
+;; and MANIFEST, and the name given to the host value API (mdl-apply) and the
+;; binding frames, must be an ATOM (#199). Any other TYPE, a STRING included,
+;; is an error raised before the call touches anything: a STRING never names
+;; the ATOM it spells (pinned Confusion rejects it too; evidence
+;; docs/evidence/M4/I199-STRING-ATOM.md). A host that names an ATOM by a
+;; Racket string converts it at its own boundary (mdl/loader.rkt uses
+;; mdl-find-atom, which never interns). Runtime-internal callers pass
 ;; (mdl-root-atom NAME) so a user OBLIST cannot shadow or break them.
 (define (binding-atom who value)
-  (cond [(mdl-atom? value) value]
-        [(string? value) (mdl-atom value)]
-        [else (error who "expected an MDL ATOM")]))
+  (unless (mdl-atom? value) (error who "expected an MDL ATOM"))
+  value)
 
 ;; A declaration is parsed once when its containing definition is installed.
 ;; Patterns stay as MDL values until then, so NEWTYPE names use that session's
@@ -1855,9 +1858,12 @@
     (error 'mdl-assigned? "First arg to ASSIGNED? must be ATOM"))
   (mdl-boolean (not (eq? (local-option atom) unassigned))))
 
+;; Every argument is checked before any is marked (#199), so a rejected
+;; argument leaves the call without effect.
 (define (mdl-manifest . names)
   (for ([name (in-list names)])
-    (define atom (binding-atom 'mdl-manifest name))
+    (binding-atom 'mdl-manifest name))
+  (for ([atom (in-list names)])
     (hash-set! (atom-space-manifests (current-mdl-atom-space)) atom #t)
     (unless (hash-has-key? (current-mdl-globals) atom)
       (hash-set! (current-mdl-globals) atom unassigned)))
@@ -2776,30 +2782,47 @@
   (set-atom-space-lookup-stack! space (cdr stack))
   (mdl-set! (mdl-root-atom "OBLIST") (car stack)))
 
-(define (mdl-atom name)
-  (unless (string? name) (error 'mdl-atom "expected a STRING PNAME"))
+;; The ATOM the reader produces for NAME. With intern? #f nothing is created:
+;; the result is #f when reading NAME would have to insert an ATOM or create
+;; a trailer's OBLIST.
+(define (resolve-pname who name intern?)
+  (unless (string? name) (error who "expected a STRING PNAME"))
   (define trailer-match (regexp-match-positions #rx"!-" name))
   (define trailer-pos (and trailer-match (caar trailer-match)))
   (if trailer-pos
       (let* ([pname (substring name 0 trailer-pos)]
              [trailer (substring name (+ trailer-pos 2))])
         (when (string=? pname "")
-          (error 'mdl-atom "invalid OBLIST trailer ~a" name))
+          (error who "invalid OBLIST trailer ~a" name))
         ;; An empty trailer (A!-) names the session ROOT OBLIST directly,
         ;; with no .OBLIST lookup (Confusion prints ROOT atoms outside the
         ;; search path as A!-; review/R3R4-oblist-reference.json
         ;; empty-trailer-root). 81tell-repl.mud uses TOPLEVEL!-.
         (define oblist
-          (if (string=? trailer "")
-              (atom-space-root (current-mdl-atom-space))
-              (mdl-moblist (mdl-atom trailer))))
-        (define found (mdl-lookup pname oblist))
-        (if (mdl-false? found) (mdl-insert pname oblist) found))
-      (let* ([lookups (mdl-list->list (current-lookup-path 'mdl-atom))]
+          (cond [(string=? trailer "") (atom-space-root (current-mdl-atom-space))]
+                [intern? (mdl-moblist (mdl-atom trailer))]
+                ;; The OBLIST MOBLIST would return, if it exists already.
+                [else (let ([owner (resolve-pname who trailer #f)])
+                        (and owner
+                             (hash-ref (atom-space-named (current-mdl-atom-space))
+                                       owner #f)))]))
+        (define found (if oblist (mdl-lookup pname oblist) (mdl-false '())))
+        (cond [(not (mdl-false? found)) found]
+              [intern? (mdl-insert pname oblist)]
+              [else #f]))
+      (let* ([lookups (mdl-list->list (current-lookup-path who))]
              [found (for/or ([oblist (in-list lookups)])
                       (define candidate (mdl-lookup name oblist))
                       (and (not (mdl-false? candidate)) candidate))])
-        (or found (mdl-insert name (car lookups))))))
+        (or found (and intern? (mdl-insert name (car lookups)))))))
+
+(define (mdl-atom name) (resolve-pname 'mdl-atom name #t))
+
+;; Host-only (#199; never an MDL primitive): the ATOM that reading NAME in
+;; this session would produce, or #f when no such ATOM exists yet. It never
+;; interns and never creates an OBLIST, so a host read through it cannot
+;; change the session's ATOMs.
+(define (mdl-find-atom name) (resolve-pname 'mdl-find-atom name #f))
 
 (define (mdl-list . vals)
   (foldr (lambda (value tail)

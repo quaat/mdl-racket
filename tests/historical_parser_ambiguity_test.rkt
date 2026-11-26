@@ -50,7 +50,7 @@
 ;; Run with: racket tests/historical_parser_ambiguity_test.rkt   (exit status is authoritative)
 (require rackunit racket/string racket/list
          (except-in "m4_scenario_runner.rkt" render oids)
-         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global mdl-session-atom)
+         (only-in "../mdl/loader.rkt" mdl-session-call mdl-session-global)
          (only-in "../mdl/runtime/core.rkt" mdl-atom? mdl-atom-pname mdl-truthy?
                   mdl-string-snapshot))
 
@@ -148,7 +148,7 @@
          (cond [(equal? t "OBJECT") (render s (field s v "OID"))]
                [(equal? t "PHRASE")
                 (paren (list (render s (mdl-session-call s "CHTYPE" (nth s v 1)
-                                                         (mdl-session-atom s "ATOM")))
+                                                         (existing-atom s "ATOM")))
                              (render s (field s (nth s v 2) "OID"))))]
                [(member t '("VERB" "ACTION")) (paren (list t (render s (nth s v 1))))]
                [else t])]))
@@ -168,7 +168,7 @@
            'lexv (paren (each s (mdl-session-global s "LEXV") (lambda (v) (render s v))))
            'prsvec (paren (each s (mdl-session-global s "PRSVEC") (lambda (v) (diag-any s v))))
            'parse_won (if (mdl-truthy? (mdl-session-call s "GASSIGNED?"
-                                                         (mdl-session-atom s "PARSE-WON")))
+                                                         (existing-atom s "PARSE-WON")))
                           (render s (mdl-session-global s "PARSE-WON"))
                           "UNASSIGNED")
            'orphan_flag (render s (field s orphans "OFLAG"))
@@ -176,7 +176,7 @@
            'orphan_slot1 (diag-any s (field s orphans "OSLOT1"))
            'orphan_prep (or-false (field s orphans "OPREP")
                                   (lambda (p) (render s (mdl-session-call s "CHTYPE" p
-                                                                          (mdl-session-atom s "ATOM")))))
+                                                                          (existing-atom s "ATOM")))))
            'orphan_name (render s (field s orphans "ONAME"))
            'trap_door_flag (render s (mdl-session-global s "TRAP-DOOR!-FLAG"))
            'trap_door_visible (bit-set? s (field s tdoor "OFLAGS") "OVISON")

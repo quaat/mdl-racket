@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "m4-i199-string-atom",
+  "cases": [
+    {"name": "control-setg-gval-gassigned-atom", "expression": "<SETG FOO 3>\n,FOO\n<GVAL FOO>\n<GASSIGNED? FOO>\n<GBOUND? FOO>"},
+    {"name": "control-set-lval-value-atom", "expression": "<SET FOO 3>\n.FOO\n<LVAL FOO>\n<VALUE FOO>\n<ASSIGNED? FOO>\n<BOUND? FOO>"},
+    {"name": "control-gunassign-atom", "expression": "<SETG FOO 3>\n<GUNASSIGN FOO>\n<GASSIGNED? FOO>"},
+    {"name": "control-manifest-atom", "expression": "<SETG FOO 1>\n<MANIFEST FOO>\n<SETG FOO 2>\n,FOO"},
+    {"name": "control-msetg-atom", "expression": "<FLOAD \"81prim.mud\">\n<MSETG FOO 3>\n,FOO"},
+    {"name": "control-psetg-atom", "expression": "<FLOAD \"81prim.mud\">\n<PSETG FOO 3>\n,FOO\n,PURE-LIST"},
+    {"name": "manifest-string-fresh", "expression": "<MANIFEST \"FOO\">\n<GASSIGNED? FOO>\n<GBOUND? FOO>"},
+    {"name": "manifest-string-preset", "expression": "<SETG FOO 1>\n<MANIFEST \"FOO\">\n<SETG FOO 2>\n,FOO"},
+    {"name": "manifest-fix", "expression": "<MANIFEST 5>"},
+    {"name": "manifest-form", "expression": "<MANIFEST '<FOO>>"},
+    {"name": "manifest-string-in-function", "expression": "<SETG X 1>\n<DEFINE F () <MANIFEST \"X\">>\n<F>\n<SETG X 2>\n,X"}
+  ]
+}

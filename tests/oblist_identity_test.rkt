@@ -22,8 +22,8 @@
 
 (define (initial) (run "<GET INITIAL OBLIST>"))
 (define (root) (run "<ROOT>"))
-(define (oblist-of atom) (mdl-apply "OBLIST?" atom))
-(define (lookup name oblist) (mdl-apply "LOOKUP" name oblist))
+(define (oblist-of atom) (mdl-apply (mdl-atom "OBLIST?") atom))
+(define (lookup name oblist) (mdl-apply (mdl-atom "LOOKUP") name oblist))
 (define (t? value) (and (mdl-atom? value) (equal? (mdl-atom-pname value) "T")))
 
 ;; ---------------------------------------------------------------- R4
@@ -76,36 +76,36 @@
    (define x1 (run "<MOBLIST X1>"))
    (define path (mdl-list x1 (root)))
    (mdl-with-bindings
-    (list (cons "OBLIST" path))
+    (list (cons (mdl-atom "OBLIST") path))
     (lambda ()
-      (check-eq? (mdl-lval "OBLIST") path)
+      (check-eq? (mdl-lval (mdl-atom "OBLIST")) path)
       (check-eq? (oblist-of (mdl-atom "PFOO")) x1)))
    (check-eq? (oblist-of (mdl-atom "PFOO2")) (initial))))
 
 (test-case "R3 SET inside a PROG binding does not leak after normal exit"
   (in-fresh-session
-   (define before (mdl-lval "OBLIST"))
+   (define before (mdl-lval (mdl-atom "OBLIST")))
    (run "<PROG ((OBLIST .OBLIST)) <SET OBLIST (<MOBLIST X1> <ROOT>)> 1>")
-   (check-eq? (mdl-lval "OBLIST") before)
+   (check-eq? (mdl-lval (mdl-atom "OBLIST")) before)
    (check-eq? (oblist-of (run "'POUT")) (initial))))
 
 (test-case "R3 non-local RETURN and ERROR unwinding restore the path"
   (in-fresh-session
-   (define before (mdl-lval "OBLIST"))
+   (define before (mdl-lval (mdl-atom "OBLIST")))
    (run "<PROG OUTER () <PROG ((OBLIST .OBLIST)) <SET OBLIST (<MOBLIST X1> <ROOT>)> <RETURN 1 .OUTER>>>")
-   (check-eq? (mdl-lval "OBLIST") before)
+   (check-eq? (mdl-lval (mdl-atom "OBLIST")) before)
    (check-exn exn:fail?
               (lambda ()
                 (run "<PROG ((OBLIST .OBLIST)) <SET OBLIST (<MOBLIST X2> <ROOT>)> <ERROR FOO>>")))
-   (check-eq? (mdl-lval "OBLIST") before)
+   (check-eq? (mdl-lval (mdl-atom "OBLIST")) before)
    (check-eq? (oblist-of (run "'AFTER")) (initial))
    ;; A Racket exception raised inside the host binder.
    (check-exn #rx"host failure"
               (lambda ()
                 (mdl-with-bindings
-                 (list (cons "OBLIST" (mdl-list (run "<MOBLIST X3>"))))
+                 (list (cons (mdl-atom "OBLIST") (mdl-list (run "<MOBLIST X3>"))))
                  (lambda () (error 'test "host failure")))))
-   (check-eq? (mdl-lval "OBLIST") before)
+   (check-eq? (mdl-lval (mdl-atom "OBLIST")) before)
    (check-eq? (oblist-of (mdl-atom "AFTER2")) (initial))))
 
 (test-case "R3 a bound but unassigned OBLIST is unassigned, not the default"
@@ -113,7 +113,7 @@
    (check-exn #rx"unassigned" (lambda () (run "<PROG (OBLIST) .OBLIST>")))
    (check-exn #rx"OBLIST"
               (lambda ()
-                (mdl-with-bindings (list (cons "OBLIST" 1))
+                (mdl-with-bindings (list (cons (mdl-atom "OBLIST") 1))
                                    (lambda () (mdl-atom "BAD")))))))
 
 (test-case "R3 BLOCK in a function without an OBLIST binding sets top level"
@@ -121,25 +121,25 @@
    (define x1 (run "<SETG X1 <MOBLIST X1>>"))
    (run "<DEFINE F () <BLOCK (,X1 <GET INITIAL OBLIST> <ROOT>)> 1>")
    (run "<F>")
-   (check-eq? (car (mdl-list->list (mdl-lval "OBLIST"))) x1)
+   (check-eq? (car (mdl-list->list (mdl-lval (mdl-atom "OBLIST")))) x1)
    (check-eq? (oblist-of (run "'BF1")) x1)
    (run "<ENDBLOCK>")
    (check-eq? (oblist-of (run "'BF2")) (initial))))
 
 (test-case "R3 BLOCK inside a function binding OBLIST is frame-independent"
   (in-fresh-session
-   (define outer (mdl-lval "OBLIST"))
+   (define outer (mdl-lval (mdl-atom "OBLIST")))
    (define x1 (run "<SETG X1 <MOBLIST X1>>"))
    (run "<DEFINE G (\"AUX\" (OBLIST .OBLIST)) <BLOCK (,X1 <ROOT>)> .OBLIST>")
    (define inner (run "<G>"))
    (check-eq? (car (mdl-list->list inner)) x1)
    ;; G's binding is gone; the top-level path never changed.
-   (check-eq? (mdl-lval "OBLIST") outer)
+   (check-eq? (mdl-lval (mdl-atom "OBLIST")) outer)
    (check-eq? (oblist-of (run "'GA")) (initial))
    ;; ENDBLOCK pops the value BLOCK pushed (G's initial binding) and sets
    ;; the now-current (top-level) LVAL; a second ENDBLOCK fails.
    (check-eq? (run "<ENDBLOCK>") outer)
-   (check-eq? (mdl-lval "OBLIST") outer)
+   (check-eq? (mdl-lval (mdl-atom "OBLIST")) outer)
    (check-exn #rx"ENDBLOCK" (lambda () (run "<ENDBLOCK>")))))
 
 (test-case "R3 top-level SET OBLIST"
@@ -175,7 +175,7 @@
   (define a-block (in a a-locals (lambda () (run "<BLOCK (<MOBLIST AB> <ROOT>)>"))))
   (in b b-locals
       (lambda ()
-        (check-false (eq? (mdl-lval "OBLIST") a-block))
+        (check-false (eq? (mdl-lval (mdl-atom "OBLIST")) a-block))
         (check-eq? (oblist-of (run "'BONLY")) (initial))))
   (define a-t (in a a-locals (lambda () (run "T"))))
   (define b-t (in b b-locals (lambda () (run "T"))))
@@ -322,9 +322,9 @@
    (define root-vector (mdl-root-atom "VECTOR"))
    (define diverted '())
    (define collected '())
-   (mdl-apply "HANDLER" (mdl-apply "EVENT" "DIVERT-AGC" 1000)
+   (mdl-apply (mdl-atom "HANDLER") (mdl-apply (mdl-atom "EVENT") "DIVERT-AGC" 1000)
               (lambda (words initiator) (set! diverted (cons initiator diverted))))
-   (mdl-apply "HANDLER" (mdl-apply "EVENT" "GC" 11)
+   (mdl-apply (mdl-atom "HANDLER") (mdl-apply (mdl-atom "EVENT") "GC" 11)
               (lambda (elapsed reason initiator)
                 (set! collected (cons initiator collected))))
    ;; Shadow the initiator names in a user OBLIST and make it the only path.

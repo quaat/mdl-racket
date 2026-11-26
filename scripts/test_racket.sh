@@ -10,6 +10,7 @@ raco test mdl/runtime/core.rkt \
   tests/activation_target_test.rkt tests/formals_test.rkt \
   tests/control_test.rkt tests/macro_test.rkt tests/loader_test.rkt tests/muddle_test.rkt \
   tests/declaration_test.rkt tests/declaration_pattern_test.rkt tests/segment_test.rkt \
+  tests/binding_atom_string_test.rkt \
   tests/chtype_segment_test.rkt \
   tests/chtype_character_test.rkt \
   tests/atom_props_test.rkt tests/neq_test.rkt tests/error_test.rkt \

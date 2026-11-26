@@ -2380,3 +2380,38 @@ conservative readings marked below.
 - CI: the reference workflow's twelve per-scenario steps are replaced by one
   `make m4-check` step running the same targets sequentially; per-target logs
   are uploaded from `artifacts/m4-check/logs/`.
+
+## ADR: Binding primitives take ATOMs only; hosts resolve names without interning (M4 issue #199)
+
+Status: proposed (2026-11-26, branch `fix/199-binding-atom-string`).
+Evidence: `docs/evidence/M4/I199-STRING-ATOM.md`; SEMANTICS "M4 #199".
+
+- *Context.* `binding-atom` (`mdl/runtime/core.rkt`) turned a STRING into
+  the ATOM it spells (interning it) for SETG, GVAL, GASSIGNED?, SET, LVAL,
+  VALUE, GUNASSIGN, MANIFEST, the binding frames and the host value API. It
+  served two callers at once: MDL code (`<SETG "FOO" 3>`) and the host API,
+  which names globals by Racket strings. An MDL STRING literal is a Racket
+  string, so the runtime cannot tell them apart. Pinned Confusion rejects a
+  STRING in every one of these SUBRs except MANIFEST.
+- *Decision 1.* `binding-atom` accepts ATOMs only. The error is the existing
+  strict `mdl-<p>: expected an MDL ATOM`; Confusion's two error mechanisms
+  (abort to level 1, or an `*ERROR*` level) are not reproduced (the existing
+  error-reporting difference).
+- *Decision 2.* The host converts its names at its own boundary
+  (`mdl/loader.rkt`), through a new host-only `mdl-find-atom` that resolves
+  like the reader but never interns. A string name the session never read is
+  reported as an unassigned global (it can have no value); its text keeps
+  the old `unassigned MDL global NAME` prefix. `mdl-session-atom` keeps
+  interning like the reader (documented meaning; used by tests to make
+  ATOMs); pure reads (M4 checkpoints, replay persistence state) use
+  `mdl-session-find-atom`. Rejected alternative: keep converting strings in
+  `mdl-apply`/`mdl-gval` for host callers only — impossible without a second
+  entry point, since both callers pass the same Racket value.
+- *Decision 3 (MANIFEST).* The enforced MANIFEST is the existing M2 D1
+  decision (Confusion's MANIFEST does nothing); rejecting a STRING joins its
+  existing FIX/FORM rejection as part of that deviation, and MANIFEST now
+  checks all arguments before marking any. No pinned 1977 source passes a
+  non-ATOM to MANIFEST (only `<MANIFEST .FOO>` in MSETG, after GASSIGNED?).
+- *Consequences.* Host code and tests that called the runtime's value API
+  with a string name now pass `(mdl-atom NAME)` explicitly. A host that wants
+  a missing name to be created must say so with `mdl-session-atom`.

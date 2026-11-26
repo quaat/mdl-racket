@@ -128,8 +128,19 @@
    "               <ERROR MSETG .FOO ALREADY-GASSIGNED ,.FOO>)\n"
    "              (ELSE\n"
    "               <SETG .FOO .BAR>\n"
-   "               <MANIFEST .FOO>)>>\n"))
-(define original-root (make-temporary-file "/tmp/mdl-decl-test~a" 'directory))
+   "               <MANIFEST .FOO>)>>\n"
+   ;; PSETG, also verbatim from pinned 81prim.mud (lines 10-18).
+   "<DEFINE PSETG (FOO BAR \"AUX\" PL)\n"
+   "        #DECL ((FOO) ATOM (PL) <LIST [REST ATOM]>)\n"
+   "        <SETG .FOO .BAR>\n"
+   "        <COND (<GASSIGNED? PURE-LIST> <SET PL ,PURE-LIST>)\n"
+   "              (ELSE <SET PL <SETG PURE-LIST ()>>)>\n"
+   "        <COND (<NOT <MEMQ .FOO .PL>>\n"
+   "               <SETG PURE-LIST <SET PL (.FOO !.PL)>>)\n"
+   "              (<AND <GASSIGNED? PURE-CAREFUL> ,PURE-CAREFUL>\n"
+   "               <ERROR PSETG-DUPLICATE .FOO>)>\n"
+   "        .BAR>\n"))
+(define original-root (make-temporary-file "mdl-decl-test~a" 'directory))
 (define original-path (build-path original-root "msetg.mud"))
 (call-with-output-file original-path #:exists 'truncate/replace
   (lambda (out) (display msetg-source out)))
@@ -139,23 +150,32 @@
 ;; With MSETG's attached (FOO) ATOM no longer enforced (#196) a non-ATOM FOO
 ;; fails at GASSIGNED?, where pinned Confusion fails too
 ;; (docs/evidence/M2/decl-error-reference.json original-msetg-wrong-atom:
-;; "1st arg to GASSIGNED? must be atom"). A STRING FOO is not used here:
-;; this runtime's GASSIGNED? accepts a STRING as an ATOM name (a known
-;; divergence recorded in docs/evidence/M4/S16-ATTACHED-DECL.md).
+;; "1st arg to GASSIGNED? must be atom"; docs/evidence/M4/I199-STRING-ATOM.md
+;; msetg-*). Since #199 a STRING FOO fails there as well: the binding
+;; primitives take ATOMs only. The host string passed here is an MDL STRING.
 (check-exn #rx"^mdl-gassigned\\?: expected an MDL ATOM$"
            (lambda () (mdl-session-call original-session "MSETG" 5 3)))
-;; XFAIL, tracked (not a parity claim): the STRING case. Pinned Confusion
-;; stops at GASSIGNED? ("1st arg to GASSIGNED? must be atom"); this runtime's
-;; GASSIGNED?/SETG take a STRING as an ATOM name (binding-atom), so MSETG
-;; completes. Until #196 MSETG's attached (FOO) ATOM hid this. This assertion
-;; must flip when that divergence is fixed.
-(check-equal? (mdl-atom-pname
-               (mdl-session-call original-session "MSETG" "M2-D1-STRING" 3))
-              "T")
+(check-exn #rx"^mdl-gassigned\\?: expected an MDL ATOM$"
+           (lambda () (mdl-session-call original-session "MSETG" "M2-D1-STRING" 3)))
+;; PSETG fails at its first SETG for a STRING, as pinned Confusion does
+;; (I199 psetg-string-*), before PURE-LIST is created.
+(check-exn #rx"^mdl-setg: expected an MDL ATOM$"
+           (lambda () (mdl-session-call original-session "PSETG" "M2-D1-PSTRING" 3)))
+(check-exn #rx"^mdl-setg: expected an MDL ATOM$"
+           (lambda () (mdl-session-call original-session "PSETG" 5 3)))
+;; The ATOMs the STRINGs spell were never interned, so they are unchanged,
+;; and PSETG created no PURE-LIST.
+(check-false (mdl-session-find-atom original-session "M2-D1-STRING"))
+(check-false (mdl-session-find-atom original-session "M2-D1-PSTRING"))
+(check-false (mdl-truthy? (mdl-session-call original-session "GASSIGNED?"
+                                            (mdl-session-atom original-session "PURE-LIST"))))
 (define original-atom (mdl-session-call original-session "ATOM" "M2-D1-TEMP"))
 (check-equal? (mdl-atom-pname
                (mdl-session-call original-session "MSETG" original-atom 3))
               "T")
 (check-equal? (mdl-session-global original-session original-atom) 3)
+(define original-patom (mdl-session-call original-session "ATOM" "M2-D1-PTEMP"))
+(check-equal? (mdl-session-call original-session "PSETG" original-patom 4) 4)
+(check-equal? (mdl-session-global original-session original-patom) 4)
 
 (displayln "declaration tests passed")

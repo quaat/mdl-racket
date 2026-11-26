@@ -4,7 +4,7 @@
          "parser.rkt" "compiler.rkt" "runtime/core.rkt" "runtime/clock.rkt"
          (only-in "runtime/random36.rkt" random36-state-words random36-state-draws))
 (provide make-mdl-session mdl-session? mdl-session-load!
-         mdl-session-atom mdl-session-global mdl-session-call
+         mdl-session-atom mdl-session-find-atom mdl-session-global mdl-session-call
          mdl-session-save-records exn:fail:mdl-load?
          exn:fail:mdl-load-diagnostic
          mdl-session-run-interactive
@@ -385,13 +385,38 @@
               'events events
               'failure failure)))))
 
+;; Host boundary (#199): the host names a global by an ATOM or by a Racket
+;; string, the PNAME as the reader would resolve it through this session's
+;; .OBLIST (OBLIST trailers included). The string is converted here, never by
+;; the runtime's binding primitives (which take ATOMs only), and without
+;; interning: a read of a name the session never read creates no ATOM. Such a
+;; name has no global value, so it fails as an unassigned global. Runs inside
+;; call-in-session.
+(define (host-name->atom who name)
+  (cond [(mdl-atom? name) name]
+        [(string? name)
+         (or (mdl-find-atom name)
+             (error who "unassigned MDL global ~a (no such ATOM on the session's .OBLIST path; a host read never interns)"
+                    name))]
+        [else (raise-argument-error who "(or/c string? mdl-atom?)" name)]))
+
 (define (mdl-session-global session name)
-  (call-in-session session (lambda () (mdl-gval name))))
+  (call-in-session session
+    (lambda () (mdl-gval (host-name->atom 'mdl-session-global name)))))
 
 ;; Test/introspection boundary: obtain the atom interned by this session's
-;; source reader without exposing arbitrary evaluation.
+;; source reader without exposing arbitrary evaluation. Like the reader, it
+;; interns NAME when no such ATOM exists yet; a pure read uses
+;; mdl-session-find-atom instead.
 (define (mdl-session-atom session name)
   (call-in-session session (lambda () (mdl-atom name))))
+
+;; Host-only read (#199): the ATOM the reader would produce for NAME in this
+;; session, or #f when there is none. Never interns.
+(define (mdl-session-find-atom session name)
+  (unless (string? name)
+    (raise-argument-error 'mdl-session-find-atom "string?" name))
+  (call-in-session session (lambda () (mdl-find-atom name))))
 
 ;; Test/introspection boundary (ADR-0052): a detached copy of the session's
 ;; RANDOM state. Host-only; observing it never consumes the game's sequence.
@@ -424,15 +449,18 @@
 (define (mdl-session-save-records session)
   (call-in-session session mdl-save-records))
 
-(define (apply-global name args)
-  (define fn (mdl-gval name))
+;; NAME is converted at the host boundary (host-name->atom); ARGS are MDL
+;; values as given, so a Racket string among them is an MDL STRING.
+(define (apply-global who name args)
+  (define atom (host-name->atom who name))
+  (define fn (mdl-gval atom))
   (cond
     [(mdl-macro? fn) (mdl-eval (mdl-apply-interpreted fn args))]
     [(mdl-function? fn) (mdl-apply-interpreted fn args #t)]
-    [else (apply mdl-apply name args)]))
+    [else (apply mdl-apply atom args)]))
 
 (define (mdl-session-call session name . args)
-  (call-in-session session (lambda () (apply-global name args))))
+  (call-in-session session (lambda () (apply-global 'mdl-session-call name args))))
 
 ;; ADR-0049 part 3 / ADR-0050: run a loaded game session interactively. Local
 ;; host API only: no network or web entry point, and no MDL evaluator; input
@@ -458,5 +486,5 @@
   (call-in-session
    session
    (lambda ()
-     (mdl-run-host-loop (lambda () (apply-global entry '()))
+     (mdl-run-host-loop (lambda () (apply-global 'mdl-session-run-interactive entry '()))
                         #:max-passes max-passes #:on-event on-event))))

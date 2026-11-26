@@ -48,19 +48,19 @@
  (lambda ()
    (define seen '())
    (define (recorder tag) (lambda (v) (set! seen (append seen (list (list tag v))))))
-   (define old (mdl-apply "ON" "M3-USER" (recorder 'old) 7))
-   (define new (mdl-apply "ON" "M3-USER" (recorder 'new) 7))
+   (define old (mdl-apply (mdl-atom "ON") "M3-USER" (recorder 'old) 7))
+   (define new (mdl-apply (mdl-atom "ON") "M3-USER" (recorder 'new) 7))
    (check-equal? (type-name new) "HANDLER")
    (check-true (mdl-emit-event! "M3-USER" '(1)))
    (check-equal? seen '((new 1) (old 1)))
-   (check-eq? (mdl-apply "OFF" new) new)
+   (check-eq? (mdl-apply (mdl-atom "OFF") new) new)
    (mdl-emit-event! "M3-USER" '(2))
    (check-equal? seen '((new 1) (old 1) (old 2)))
    ;; ON finds the existing IHEADER and re-enables it (manual 21.6).
-   (define header (mdl-apply "EVENT" "M3-USER" 99))
-   (mdl-apply "DISABLE" header)
+   (define header (mdl-apply (mdl-atom "EVENT") "M3-USER" 99))
+   (mdl-apply (mdl-atom "DISABLE") header)
    (check-false (mdl-emit-event! "M3-USER" '(3)))
-   (mdl-apply "ON" "M3-USER" (recorder 'third) 7)
+   (mdl-apply (mdl-atom "ON") "M3-USER" (recorder 'third) 7)
    (check-true (mdl-emit-event! "M3-USER" '(4)))
    (check-equal? (drop seen 3) '((third 4) (old 4)))))
 
@@ -102,7 +102,7 @@
  (lambda ()
    (for ([bad (list (list "M3-NEW" 1 7) (list "M3-NEW" mdl-type 0)
                     (list "M3-NEW" mdl-type 7 1))])
-     (check-exn exn:fail? (lambda () (apply mdl-apply "ON" bad))))
+     (check-exn exn:fail? (lambda () (apply mdl-apply (mdl-atom "ON") bad))))
    (check-exn #rx"unknown or unregistered event M3-NEW"
               (lambda () (mdl-emit-event! "M3-NEW" '() #t)))))
 
@@ -111,14 +111,14 @@
 (session
  (lambda ()
    (define seen '())
-   (define handler (mdl-apply "ON" "IPC" (lambda args (set! seen (cons args seen))) 1))
+   (define handler (mdl-apply (mdl-atom "ON") "IPC" (lambda args (set! seen (cons args seen))) 1))
    (check-equal? (type-name handler) "HANDLER")
    (check-exn ipc-rx (lambda () (mdl-emit-event! "IPC" '())))
    (check-exn ipc-rx (lambda () (mdl-emit-event! "IPC" '("message") #t)))
    ;; Nothing was queued: a later safe point delivers nothing.
-   (check-equal? (mdl-apply "INT-LEVEL" 0) 0)
+   (check-equal? (mdl-apply (mdl-atom "INT-LEVEL") 0) 0)
    (check-equal? seen '())
-   (check-eq? (mdl-apply "OFF" handler) handler)
+   (check-eq? (mdl-apply (mdl-atom "OFF") handler) handler)
    (check-exn ipc-rx (lambda () (mdl-emit-event! "IPC" '())))
    (check-equal? seen '())))
 ;; Emission is refused even with no IPC registration at all.
@@ -137,13 +137,13 @@
 (session
  (lambda ()
    (define seen '())
-   (define handler (mdl-apply "ON" "BLOCKED" (lambda args (set! seen (cons args seen))) 100))
+   (define handler (mdl-apply (mdl-atom "ON") "BLOCKED" (lambda args (set! seen (cons args seen))) 100))
    (check-equal? (type-name handler) "HANDLER")
    (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '())))
    (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '(1) #t)))
-   (check-equal? (mdl-apply "INT-LEVEL" 0) 0)
+   (check-equal? (mdl-apply (mdl-atom "INT-LEVEL") 0) 0)
    (check-equal? seen '())
-   (check-eq? (mdl-apply "OFF" handler) handler)
+   (check-eq? (mdl-apply (mdl-atom "OFF") handler) handler)
    (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '())))
    (check-equal? seen '())
    ;; IPC keeps its own ADR-0047 message.
@@ -151,18 +151,18 @@
 (session (lambda () (check-exn blocked-rx (lambda () (mdl-emit-event! "BLOCKED" '())))))
 
 ;; --- session isolation --------------------------------------------------
-(define foreign-handler (session (lambda () (mdl-apply "ON" "IPC" mdl-type 1))))
+(define foreign-handler (session (lambda () (mdl-apply (mdl-atom "ON") "IPC" mdl-type 1))))
 (session
  (lambda ()
-   (check-exn #rx"another MDL session" (lambda () (mdl-apply "OFF" foreign-handler)))
+   (check-exn #rx"another MDL session" (lambda () (mdl-apply (mdl-atom "OFF") foreign-handler)))
    (check-exn #rx"unknown or unregistered event M3-USER"
               (lambda () (mdl-emit-event! "M3-USER" '() #t)))))
-(define foreign-user (session (lambda () (mdl-apply "ON" "M3-USER" mdl-type 7))))
+(define foreign-user (session (lambda () (mdl-apply (mdl-atom "ON") "M3-USER" mdl-type 7))))
 (session
  (lambda ()
-   (define header (mdl-apply "EVENT" "M3-USER" 7))
+   (define header (mdl-apply (mdl-atom "EVENT") "M3-USER" 7))
    (check-exn #rx"belongs to another IHEADER|another MDL session"
-              (lambda () (mdl-apply "HANDLER" header foreign-user)))))
+              (lambda () (mdl-apply (mdl-atom "HANDLER") header foreign-user)))))
 
 ;; --- SAVE: session record (ADR-0048) -----------------------------------
 (check-equal? (run "<SAVE \"S5PROBE.SAVE\">") "SAVED")
@@ -217,22 +217,22 @@
 (session
  (lambda ()
    (define seen '())
-   (mdl-apply "ON" "M3-USER" (lambda args (set! seen (cons (cons 'user args) seen))) 5)
-   (mdl-apply "ON" "GC" (lambda args (set! seen (cons (cons 'gc args) seen))) 1)
+   (mdl-apply (mdl-atom "ON") "M3-USER" (lambda args (set! seen (cons (cons 'user args) seen))) 5)
+   (mdl-apply (mdl-atom "ON") "GC" (lambda args (set! seen (cons (cons 'gc args) seen))) 1)
    (define stats-before (mdl-logical-storage-stats))
-   (mdl-apply "INT-LEVEL" 10)
+   (mdl-apply (mdl-atom "INT-LEVEL") 10)
    (check-true (mdl-emit-event! "M3-USER" '(1)) "recorded, queued below INT-LEVEL")
-   (check-true (true? (mdl-apply "=?" (mdl-apply "SAVE" "Q.SAVE") "SAVED")))
+   (check-true (true? (mdl-apply (mdl-atom "=?") (mdl-apply (mdl-atom "SAVE") "Q.SAVE") "SAVED")))
    (check-equal? seen '())
-   (check-equal? (mdl-apply "INT-LEVEL") 10)
+   (check-equal? (mdl-apply (mdl-atom "INT-LEVEL")) 10)
    (check-equal? (mdl-save-record-int-level (car (mdl-save-records))) 10)
    (check-equal? (hash-ref (mdl-logical-storage-stats) 'capacity)
                  (hash-ref stats-before 'capacity))
    ;; The queued occurrence is still pending and arrives at the next safe point.
-   (mdl-apply "INT-LEVEL" 0)
+   (mdl-apply (mdl-atom "INT-LEVEL") 0)
    (check-equal? seen '((user 1)))
    ;; At level 0 SAVE still neither collects nor signals GC.
-   (mdl-apply "SAVE" "Q2.SAVE")
+   (mdl-apply (mdl-atom "SAVE") "Q2.SAVE")
    (check-equal? seen '((user 1)))))
 
 ;; Strict errors (Confusion: <SAVE> writes MUDDLE.SAVE, <SAVE 1> SIGSEGV).
