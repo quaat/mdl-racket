@@ -136,9 +136,19 @@ heavy job at a time.
 | `racket tests/historical_thief_fight_test.rkt` (first run, before the target existed) | 0 | 34 turns; 3 boots (prefixes 28, 29 re-run); 16.6 s |
 | `make test-m4-thief-fight` (single-run) | 0 | 34 turns; 3 boots; 17.5 s |
 | `M4_SCENARIO_MODE=per-prefix make test-m4-thief-fight` | 0 | 34 turns; 34 boots; 197.0 s |
-| `make test` | @@MAKETEST@@ | @@MAKETEST_RESULT@@ |
-| `make m4-check` | @@M4CHECK@@ | @@M4CHECK_RESULT@@ |
-| `git diff --check origin/main HEAD` | @@DIFFCHECK@@ | |
+| `make test` (outside the tool sandbox, `TMPDIR=/tmp`) | 0 | 5167 Racket tests passed; Python 104 passed, 1 deselected; 102.9 s. (A first attempt inside the tool sandbox failed 3 of 5014 Racket tests: `loader_test`, `declaration_test` and `percent_read_test` create directories under a hard-coded `/tmp`, read-only there; environment, not code) |
+| `make m4-check` (outside the tool sandbox, at `6d6e5b1`, clean tree) | 0 | 677.8 s; manifest completeness PASS; all 26 scenario targets PASS (thief-fight 16.0 s, thief-robbery 112.5 s), `test-m4-replay-persistence`, `test-m3-session`, `test-m3-launcher` PASS; terms below |
+| `git diff --check origin/main HEAD` (origin/main `e98e46c`) | 0 | |
+
+`make m4-check` terms (a local branch result, not mainline acceptance):
+
+| Term | Status | Scope / reasons |
+|---|---|---|
+| SCENARIO_PARITY | PASS | 26 scenarios, each under one fixed clock and seed (250776000, UTC); per scenario, not gameplay coverage |
+| GAMEPLAY_RELIABILITY | NOT YET | 20 of 23 required branches covered (was 19; PROVISIONAL list); uncovered: save.game-save-command, save.game-restore-command, save.player-facing-resume; open blockers INV-06, INV-07 |
+| PLAYABLE | NOT RUN | sub-checks only; no PLAYABLE gate |
+| FULL_COMPLETION | NOT RUN | no complete-game check |
+| M4_ACCEPTED | NOT YET | R2–R5 unmet |
 
 No divergence: our runtime matches the native reference at every READSTRING
 entry and at every prefix end in both modes. No XFAIL was needed.

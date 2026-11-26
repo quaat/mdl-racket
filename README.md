@@ -234,7 +234,7 @@ every turn in single-run and per-prefix modes (native reference captured
 twice, transcripts byte-identical). With thief-robbery (stealing) this
 covers the `combat.thief` branch; not exercised: the thief appearing by
 chance elsewhere, leaving a fight, being knocked out or killed (his booty),
-and the hero recovering from unconsciousness. @@M4CHECK@@ Branch evidence
+and the hero recovering from unconsciousness. On that branch `make m4-check` exits 0 (677.8 s, at `6d6e5b1`, clean tree): SCENARIO_PARITY PASS for 26 scenarios, GAMEPLAY_RELIABILITY NOT YET with 20 of 23 required branches covered (combat.thief now covered; uncovered: the three save branches) and open blockers INV-06 and INV-07; PLAYABLE NOT RUN, FULL_COMPLETION NOT RUN, M4_ACCEPTED NOT YET. Branch evidence
 until merged.
 
 `make m4-check` runs all twenty-six plus the persistence check; options
