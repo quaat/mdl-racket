@@ -115,6 +115,18 @@
    "exit_code": 0,
    "result_bytes": "#OBLIST ![() () () () () () ()!]\nQX!-OBQ\n#OBLIST ![() () () () () (QX!-!-#FALSE ()) ()!]\nQX!-!-#FALSE ()QX!-!-#FALSE ()\n",
    "stderr_bytes": ""
+  },
+  {
+   "name": "prin1-root-shadowed",
+   "exit_code": 0,
+   "result_bytes": "ZQROOT\nZQROOT\nZQROOT!-ZQROOT!-\n#FALSE ()\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "unparse-uninterned",
+   "exit_code": 0,
+   "result_bytes": "\"QQ!-#FALSE ()\"\n\"(1 QQ!-#FALSE ())\"\n",
+   "stderr_bytes": ""
   }
  ]
 }

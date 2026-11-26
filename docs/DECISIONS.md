@@ -2592,6 +2592,14 @@ game's HANDLE path as a regression (`tests/historical_handle_test.rkt`;
 SEMANTICS "M4 #173 B2"). Class B (language-level errors) is unchanged:
 no host exception is converted into an MDL ERROR; that work belongs to the
 general conformance issue.
+- *Amendment (2026-11-26, B2, recorded disposition; flagged on the PR for
+  the maintainer).* An ATOM on an OBLIST whose name association was removed
+  prints `P!-!-#FALSE ()`, as pinned Confusion prints it. Manual §15.2.1
+  ("ATOMs in that OBLIST will PRINT the name as if they were in no OBLIST")
+  admits that reading as well as `P!-#FALSE ()`; the evidence hierarchy
+  resolves the ambiguity by the reference. No game path reaches it. If the
+  maintainer reads §15.2.1 the other way, the change is one line in
+  `atom-print-tokens` and one native-case classification.
 
 - *Context.* The game's error handler HANDLE (`77rooms.mud:251`) calls PRINT,
   which this runtime does not define (INV-07). More generally, the runtime

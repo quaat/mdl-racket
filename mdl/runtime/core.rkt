@@ -4423,7 +4423,9 @@
          (unless (atom-reachable? who value)
            (error who "empty-PNAME ATOM not reachable via current OBLIST path; its trailer is not evidenced (M4 #173 B2)"))
          ""]
-        [(or (exact-integer? value) (mdl-atom? value) (mdl-string? value)
+        ;; (An ATOM with a non-empty PNAME never gets here: prin1-tokens
+        ;; prints it with atom-print-tokens.)
+        [(or (exact-integer? value) (mdl-string? value)
              (mdl-character-code value))
          (terminal-text who (mdl-unparse-value who value))]
         [else (error who "unsupported TYPE ~a (ADR-0050)" (mdl-type-name value))]))

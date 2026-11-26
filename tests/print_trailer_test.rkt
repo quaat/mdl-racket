@@ -44,7 +44,7 @@
 (define native
   (for/hash ([c (in-list (hash-ref (call-with-input-file raw-path read-json) 'cases))])
     (values (hash-ref c 'name) c)))
-(check-equal? (length cases) 19)
+(check-equal? (length cases) 21)
 (for ([c (in-list cases)])
   (define name (car c))
   (define row (hash-ref native name))
@@ -59,7 +59,9 @@
 ;; A named OBLIST off the path; the name printed recursively.
 (check-equal? (written "<PRIN1 FOO!-ERRORS>") "FOO!-ERRORS")
 (check-equal? (written "<SETG OB1 <MOBLIST OB1 7>> <PRIN1 <INSERT \"BAR\" ,OB1>>") "BAR!-OB1")
-;; ROOT: the bare separator.
+;; ROOT: the bare separator, also when ROOT is on the path but an earlier
+;; ATOM of the same PNAME shadows this one (native prin1-root-shadowed).
+(check-equal? (written "<SET R ZQROOT!-> <INSERT \"ZQROOT\" <1 .OBLIST>> <PRIN1 .R>") "ZQROOT!-")
 (check-equal? (written "<SET R FOO!-> <SETG OB2 <MOBLIST OB2 7>> <PROG ((OBLIST (,OB2))) <PRIN1 .R>>")
               "FOO!-")
 ;; No OBLIST: !-#FALSE ().

@@ -4230,7 +4230,7 @@ current .OBLIST, no trailer is output. Otherwise, `!-` is output and the
 name of the OBLIST is recursively PRIN1ed"), §15.2.1 (an OBLIST's name is
 the ATOM associated with it under the indicator OBLIST), §15.5 (ROOT is
 referred to by the bare separator `!-`), §15.7.4 (an ATOM on no OBLIST
-prints with the trailer `!-#FALSE ()`). Native evidence: 19 cases,
+prints with the trailer `!-#FALSE ()`). Native evidence: 21 cases,
 [`i173-trailer-cases.json`](evidence/M4/i173-trailer-cases.json),
 [`i173-trailer-reference-raw.json`](evidence/M4/i173-trailer-reference-raw.json)
 (exact bytes), captured twice identically.
@@ -4240,8 +4240,9 @@ existing whitelist; others stay strict):
 1. A is *reachable* when looking P up on the current OBLIST path (the LVAL
    of ROOT OBLIST, R3/R4) finds A itself: the text is P (unchanged).
 2. Otherwise let O be A's OBLIST:
-   - O is the session ROOT: the text is `P!-` (`prin1-root-not-on-path`:
-     `FOO!-`).
+   - O is the session ROOT: the text is `P!-`, whether ROOT is off the
+     path (`prin1-root-not-on-path`: `FOO!-`) or on it behind an earlier
+     ATOM of the same PNAME (`prin1-root-shadowed`: `ZQROOT!-`).
    - A is on no OBLIST (made by ATOM, or REMOVEd): `P!-` followed by
      `#FALSE ()` (`QQ!-#FALSE ()`, `RMV!-#FALSE ()`).
    - O's name, `<GET O OBLIST>`, is an ATOM N: `P!-` followed by the text
@@ -4266,11 +4267,19 @@ existing whitelist; others stay strict):
 the name's own PRIN1 tokens: `FOO!-ERRORS` is one token, and `QQ!-#FALSE ()`
 is the two tokens `QQ!-#FALSE` and `()` (separated), exactly as a FALSE
 prints (`width-trailer-token`, `width-uninterned-token`). UNPARSE joins the
-tokens with single spaces.
+tokens with single spaces (`unparse-uninterned`: `"QQ!-#FALSE ()"`,
+`"(1 QQ!-#FALSE ())"`).
 
 **Classification.** Conforming (manual and Confusion agree): rules 1, 2
-(ROOT, no OBLIST, named OBLIST, recursion) and 3. Reference-specific,
-followed: the unnamed-OBLIST form `!-!-#FALSE ()`; the token split.
+(no OBLIST, named OBLIST, recursion) and 3. ROOT's bare `!-`: §15.5 says
+the separator `!-` alone refers to ROOT; §15.4 read literally would give
+`P!-ROOT`; Confusion prints `P!-` in both native cases; followed.
+Reference-specific, followed: the token split. **Unnamed OBLIST (recorded
+disposition, ADR-0064 amendment):** §15.2.1 ("ATOMs in that OBLIST will
+PRINT the name as if they were in no OBLIST") admits two readings, the
+whole ATOM printed as if on no OBLIST (`QX!-#FALSE ()`) or the missing name
+printed as an ATOM on no OBLIST (`QX!-!-#FALSE ()`); pinned Confusion
+prints the second; followed; no game path reaches it.
 Intentional deviation: the strict refusal of non-terminating trailers, of
 non-ATOM OBLIST names, of unreachable empty PNAMEs and of escaped PNAMEs.
 PRINC still refuses ATOMs (ADR-0050, unchanged).
@@ -4286,9 +4295,13 @@ not in WINNERS; TELL of the apology and of `,VERS`; `<MAPF <> <FUNCTION
 the question, RECORD (both OPENs denied, ADR-0055) and QUIT; the host loop
 returns `'quit-after-mdl-error` (ADR-0054). Nothing here is specific to
 HANDLE: it uses the ordinary ERROR delivery (ADR-0025) and the primitives
-above. No ordinary command signals an ERROR in the pinned sources (DA is
-never called and itself needs the unimplemented APPLICABLE?; FIND-PREP's
-ERROR runs only at load), so the regression injects one, test-only
+above. No ordinary command is known to signal an ERROR in the pinned
+sources: DA is never called (and needs the unimplemented APPLICABLE?);
+FIND-PREP's ERROR runs only at load; MELEE's (78melee.mud:462, `MELEE`,
+`"CHOMPS"`, a FIX) and DISPATCH's (81tell-repl.mud:133, a STRING, a TYPE
+name and the non-applicable object) are defensive branches. HANDLE would
+print all of these arguments except a DISPATCH object of a TYPE PRINT
+does not print here. The regression therefore injects an ERROR, test-only
 (`tests/historical_handle_test.rkt`, [I173-HANDLE.md](evidence/M4/I173-HANDLE.md)).
 Pinned Confusion stubs HANDLER/EVENT, so the expected bytes come from the
 source and the manual, anchored to native captures for the transcript

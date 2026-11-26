@@ -77,6 +77,14 @@
   {
    "name": "prin1-oblist-name-removed",
    "expression": "<SETG OBQ <MOBLIST OBQ 7>>\n<SET X <INSERT \"QX\" ,OBQ>>\n<PUT ,OBQ OBLIST>\n<PRIN1 .X>"
+  },
+  {
+   "name": "prin1-root-shadowed",
+   "expression": "<SET R ZQROOT!->\n<INSERT \"ZQROOT\" <1 .OBLIST>>\n<PRIN1 .R>\n<==? .R ZQROOT>"
+  },
+  {
+   "name": "unparse-uninterned",
+   "expression": "<UNPARSE <ATOM \"QQ\">>\n<UNPARSE (1 <ATOM \"QQ\">)>"
   }
  ]
 }

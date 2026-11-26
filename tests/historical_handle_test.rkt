@@ -4,9 +4,12 @@
 ;; 77rooms.mud:258-270) and runs its general branch to the end: TELL, TELL
 ;; ,VERS, PRINT of every ERROR argument, FINISH -> SCORE -> RECORD -> QUIT.
 ;;
-;; No ordinary command signals an ERROR in the unchanged 1977 sources (the
-;; game's play-time ERROR sites are DA, which nothing calls, and FIND-PREP,
-;; which runs only at load). The ERROR is therefore injected, test-only: at
+;; No ordinary command is known to signal an ERROR in the unchanged 1977
+;; sources. The ERROR sites outside load-time code: DA (77defs.mud:458;
+;; nothing calls it), FIND-PREP (77makstr.mud:129; only at load), and two
+;; defensive branches, MELEE's unknown blow result (78melee.mud:462,
+;; <ERROR MELEE "CHOMPS" .RES>, .RES a FIX) and DISPATCH of a non-applicable
+;; object (81tell-repl.mud:133, <ERROR "Wrong dispatch type" <TYPE .NO> .NO>). The ERROR is therefore injected, test-only: at
 ;; the first READSTRING the session's input observer (ADR-0061, host-only)
 ;; replaces the GVAL of the verb JARGON (synonym "foo", 77dung.mud:2770-2771;
 ;; dispatched by APPLY-RANDOM through the GVAL, 77defs.mud:440-446) with a
@@ -154,7 +157,8 @@
 (when (mdl-session-outcome? h1)
   ;; QUIT after an MDL ERROR was signalled (ADR-0054): not an acceptance run.
   (check-equal? (mdl-session-outcome-kind h1) 'quit-after-mdl-error)
-  (check-equal? (length (mdl-session-outcome-mdl-errors h1)) 1))
+  (check-equal? (mdl-session-outcome-mdl-errors h1)
+                '("UNASSIGNED-VARIABLE HANDLE-TEST-UNASSIGNED DA")))
 (define vers (mdl-session-global h1-session "VERS"))
 (check-equal? vers "This version created December 12.")
 (define expected-h1
@@ -191,6 +195,10 @@
                                 #:before (lambda () (mdl-apply (mdl-root-atom "INT-LEVEL") 8)))))
 (clean "H2" h2-writes h2-cwd h2-unchanged)
 (check-pred exn:fail? h2 (format "~a" h2))
+;; It is the undelivered ERROR itself, not some other host failure.
+(when (exn? h2)
+  (check-regexp-match #rx"UNASSIGNED-VARIABLE HANDLE-TEST-UNASSIGNED DA" (exn-message h2))
+  (check-false (regexp-match? #rx"INT-LEVEL|PRINT" (exn-message h2))))
 (check-false (mdl-session-outcome? h2))
 (check-equal? h2-raw native-north-prefix)
 (check-false (string-contains? h2-raw "I'm sorry"))

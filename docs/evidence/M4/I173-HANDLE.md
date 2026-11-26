@@ -15,10 +15,16 @@ PRINT. This slice adds what HANDLE still needed and the regression itself.
 A static trace of HANDLE (77rooms.mud:215-251) in this runtime showed that
 every primitive of its general branch is supported except the PRINT of the
 ERROR arguments when they are ATOMs off the current OBLIST path. The game's
-own play-time ERROR sites pass exactly such ATOMs:
-`<ERROR UNASSIGNED-VARIABLE!-ERRORS .FN DA>` (DA, 77defs.mud:458) and
-`<ERROR NO-PREP!-ERRORS>` (FIND-PREP, 77makstr.mud:129). PRIN1 refused
-trailer notation ("trailer notation not implemented").
+own ERROR sites outside load-time code are:
+`<ERROR UNASSIGNED-VARIABLE!-ERRORS .FN DA>` (DA, 77defs.mud:458; nothing
+calls DA) and `<ERROR NO-PREP!-ERRORS>` (FIND-PREP, 77makstr.mud:129; only
+at load), both with ERRORS-OBLIST ATOMs, and two defensive branches:
+`<ERROR MELEE "CHOMPS" .RES>` (78melee.mud:462, an unknown blow result, a
+FIX) and `<ERROR "Wrong dispatch type" <TYPE .NO> .NO>` (DISPATCH,
+81tell-repl.mud:133; DISPATCH is reached in play, e.g. 77rooms.mud:1643).
+PRIN1 refused trailer notation ("trailer notation not implemented"). After
+this slice HANDLE prints all these arguments except a DISPATCH object of a
+TYPE PRINT does not print here (VECTOR, FORM, ...).
 
 ## Manual
 
@@ -35,18 +41,21 @@ prints with the trailer `!-#FALSE ()`.
 
 ## Native reference
 
-19 cases ([`i173-trailer-cases.json`](i173-trailer-cases.json)), the same
+21 cases ([`i173-trailer-cases.json`](i173-trailer-cases.json)), the same
 tools and protocol as [I173-PRINT.md](I173-PRINT.md) (probe tool through a
 3-line wrapper repointing GAME/EXE; a raw-bytes helper), a fresh disposable
 copy of `patched_confusion` under the session scratchpad, two runs.
 
 | Run | Tool | Exit | Result |
 |---|---|---:|---|
-| 1 and 2 | probe tool | 0 | 19 ok |
-| 1 and 2 | raw helper | 0 | 19 rows |
+| 1 and 2 | probe tool | 0 | 21 ok |
+| 1 and 2 | raw helper | 0 | 21 rows |
 
 Run 1 == run 2 for both tools; the upstream tree hash `3041a19b…40c8` was
-the same before and after. Committed: [`i173-trailer-reference.json`](i173-trailer-reference.json),
+the same before and after. (The first capture had 19 cases;
+`prin1-root-shadowed` and `unparse-uninterned` were added after the
+independent review, recaptured twice the same way; the first 19 rows of
+both files are identical to the first capture.) Committed: [`i173-trailer-reference.json`](i173-trailer-reference.json),
 [`i173-trailer-reference-raw.json`](i173-trailer-reference-raw.json).
 
 | Case | Native | Ours after |
@@ -56,17 +65,19 @@ the same before and after. Committed: [`i173-trailer-reference.json`](i173-trail
 | ATOM on a MOBLIST OB1 | `BAR!-OB1` | same |
 | `T` on OB1 (shadowed by ROOT's T) | `T!-OB1` | same |
 | ROOT ATOM, ROOT off the path | `FOO!-` | same |
+| ROOT ATOM shadowed by an INITIAL ATOM, ROOT on the path | `ZQROOT!-` | same |
+| `<UNPARSE <ATOM "QQ">>`, in a LIST | `"QQ!-#FALSE ()"`, `"(1 QQ!-#FALSE ())"` | same |
 | INITIAL ATOM, path `(OB3 ROOT)` | `ZZZ!-INITIAL` | same |
 | OBLIST named by an ATOM on another OBLIST | `LEAF!-INNER!-OBA` | same |
 | nothing reachable | `LEAF2!-HIDDEN!-OBB!-INITIAL!-` | same |
 | `<ATOM "QQ">`, a REMOVEd ATOM | `QQ!-#FALSE ()`, `RMV!-#FALSE ()` | same |
 | `<PUT ,OBR OBLIST NEWNAME>` | `RX!-NEWNAME` | same |
-| name association removed | `QX!-!-#FALSE ()` | same |
+| name association removed | `QX!-!-#FALSE ()` | same (recorded disposition, ADR-0064 amendment) |
 | HANDLE's MAPF PRINT over `(UNASSIGNED-VARIABLE!-ERRORS FOO DA)` | `\nUNASSIGNED-VARIABLE!-ERRORS \nFOO \nDA ` | same |
 | width 10 after 6 columns, `FOO!-ERRORS` | break before it (one token) | same |
 | width 12, `QQ!-#FALSE ()` | `QQ!-#FALSE` and `()` break separately | same |
 
-All 19 are byte-identical (`tests/print_trailer_test.rkt`). In the LISTEN
+All 21 are byte-identical (`tests/print_trailer_test.rkt`). In the LISTEN
 echo, an OBLIST value is replaced by the placeholder `<OBLIST>` on both
 sides, because printing OBLISTs is outside this slice (PRIN1 of an OBLIST
 stays strict). Nothing else is normalised. Not captured natively: a
@@ -113,7 +124,32 @@ stale FRAME (`error_interrupt_test.rkt`); **new:** cross-session FRAME
 refused (`error_interrupt_test.rkt`, mutation: removing ERRET's owner check
 gives 2/14 failures); **new:** the game's own handler during play, at level
 8 suppressed, and a strict failure inside it (H1-H3); no M4 scenario
-regression (gate below).
+regression (gate below). H3 shows a strict failure inside the handler,
+not that host failures bypass it (that is `erret_interrupt_cleanup_test`).
+
+## Gate
+
+Run sequentially on branch head 0d601d0 (`gate.sh`, `make
+PYTHON=/usr/bin/python3 <target>`), before the review follow-up:
+
+| Target | Exit | Seconds |
+|---|---:|---:|
+| `test` (raco 5629 passed, now including print_test; pytest 136 passed, 1 deselected) | 0 | 133 |
+| `test-historical` (historical_handle_test: 32 passed) | 0 | 35 |
+| `test-m2-g3` | 0 | 1 |
+| `m3-source-progress` | 0 | 17 |
+| `test-m3-interactive` | 0 | 7 |
+| `test-m3-session` | 0 | 23 |
+| `test-m3-launcher` | 0 | 45 |
+| `test-m3-bang` | 0 | 53 |
+| `m3-check` | 0 | 27 |
+| `m4-check` | 0 | 761 |
+
+`m4-check`: SCENARIO_PARITY PASS (26); GAMEPLAY_RELIABILITY NOT YET (20 of
+23, baseline v1 APPROVED; open blocking item INV-06 only); PLAYABLE NOT
+RUN; FULL_COMPLETION NOT RUN; M4_ACCEPTED NOT YET. `m4-scenarios-per-prefix`
+not run: the runtime change only replaces a strict refusal that no
+scenario reached (all 26 passed before, single-run unchanged after).
 
 ## Mutation checks
 

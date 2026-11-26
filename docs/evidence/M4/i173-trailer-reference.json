@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "name": "m4-i173-trailer",
-  "recorded_at": "2026-11-26T20:42:15.616227+00:00",
+  "recorded_at": "2026-11-26T21:01:13.194168+00:00",
   "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
   "protocol": "one local process per case; stdin expression then <QUIT>",
   "cases": [
@@ -230,6 +230,30 @@
       "stderr": "",
       "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
       "result_output": "#OBLIST ![() () () () () () ()!]\nQX!-OBQ\n#OBLIST ![() () () () () (QX!-!-#FALSE ()) ()!]\nQX!-!-#FALSE ()QX!-!-#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "prin1-root-shadowed",
+      "expression": "<SET R ZQROOT!->\n<INSERT \"ZQROOT\" <1 .OBLIST>>\n<PRIN1 .R>\n<==? .R ZQROOT>",
+      "input": "<SET R ZQROOT!->\n<INSERT \"ZQROOT\" <1 .OBLIST>>\n<PRIN1 .R>\n<==? .R ZQROOT>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\nZQROOT\nZQROOT\nZQROOT!-ZQROOT!-\n#FALSE ()\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "ZQROOT\nZQROOT\nZQROOT!-ZQROOT!-\n#FALSE ()\n",
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "unparse-uninterned",
+      "expression": "<UNPARSE <ATOM \"QQ\">>\n<UNPARSE (1 <ATOM \"QQ\">)>",
+      "input": "<UNPARSE <ATOM \"QQ\">>\n<UNPARSE (1 <ATOM \"QQ\">)>\n<QUIT>\n",
+      "exit_code": 0,
+      "stdout": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\nLISTENING-AT-LEVEL 1 PROCESS 1\n\"QQ!-#FALSE ()\"\n\"(1 QQ!-#FALSE ())\"\n",
+      "stderr": "",
+      "startup_output": "Welcome to 'Confusion', a MDL interpreter.\nCopyright 2009 Matthew T. Russotto\nThis Confusion created Nov 22 2026 @ 20:58:42\nThis program comes with ABSOLUTELY NO WARRANTY; for details type <WARRANTY>.\nThis is free software, and you are welcome to distribute under certain conditions; type <COPYING> for details\n\n\n",
+      "result_output": "\"QQ!-#FALSE ()\"\n\"(1 QQ!-#FALSE ())\"\n",
       "ok": true,
       "error": null
     }
