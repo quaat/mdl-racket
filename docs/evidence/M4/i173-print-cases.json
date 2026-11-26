@@ -1,0 +1,178 @@
+{
+ "schema_version": 1,
+ "name": "m4-i173-print",
+ "cases": [
+  {
+   "name": "print-fix",
+   "expression": "<PRINT 42>"
+  },
+  {
+   "name": "print-negative-fix",
+   "expression": "<PRINT -17>"
+  },
+  {
+   "name": "print-atom",
+   "expression": "<PRINT FOO>"
+  },
+  {
+   "name": "print-empty-pname-atom",
+   "expression": "<SETG NULL <INSERT <ATOM \"\"> <ROOT>>>\n<PRINT ,NULL>\n<TYPE <PRINT ,NULL>>"
+  },
+  {
+   "name": "print-string-escapes",
+   "expression": "<PRINT \"a\\\"b\\\\c\">\n<LENGTH \"a\\\"b\\\\c\">"
+  },
+  {
+   "name": "print-character",
+   "expression": "<PRINT !\\A>\n<PRINT !\\\">"
+  },
+  {
+   "name": "print-list",
+   "expression": "<PRINT (1 FOO \"x\" !\\c)>"
+  },
+  {
+   "name": "print-nested-list",
+   "expression": "<PRINT (1 (2 (3 ())) ())>\n<PRINT ()>"
+  },
+  {
+   "name": "print-form",
+   "expression": "<PRINT '<FOO 1>>"
+  },
+  {
+   "name": "print-false",
+   "expression": "<PRINT <>>\n<PRINT #FALSE (1 \"x\")>"
+  },
+  {
+   "name": "print-vector",
+   "expression": "<PRINT [1 2]>"
+  },
+  {
+   "name": "print-chtype-newtype-list",
+   "expression": "<NEWTYPE ZZ LIST>\n<PRINT <CHTYPE (1 2) ZZ>>"
+  },
+  {
+   "name": "print-chtype-newtype-string",
+   "expression": "<NEWTYPE ZS STRING>\n<PRINT <CHTYPE \"ab\" ZS>>"
+  },
+  {
+   "name": "print-return-identity",
+   "expression": "<SET L (1 2)>\n<==? <PRINT .L> .L>\n<SET S \"ab\">\n<==? <PRINT .S> .S>\n<TYPE <PRINT !\\a>>"
+  },
+  {
+   "name": "print-no-mutation",
+   "expression": "<SET L (1 (2) \"s\")>\n<PROG () <PRINT .L> 0>\n.L\n<LENGTH .L>"
+  },
+  {
+   "name": "print-eval-once",
+   "expression": "<SET X 1>\n<PROG () <PRINT <SET X <+ .X 1>>> 0>\n.X"
+  },
+  {
+   "name": "print-explicit-channel",
+   "expression": "<PRINT 1 .OUTCHAN>\n<PRINT 2 ,OUTCHAN>"
+  },
+  {
+   "name": "print-arity-0",
+   "expression": "<PRINT>"
+  },
+  {
+   "name": "print-arity-3",
+   "expression": "<PRINT 1 .OUTCHAN 3>"
+  },
+  {
+   "name": "print-non-channel",
+   "expression": "<PRINT 1 2>"
+  },
+  {
+   "name": "print-input-channel",
+   "expression": "<PRINT 1 .INCHAN>"
+  },
+  {
+   "name": "print-binds-outchan-default-lval",
+   "expression": "<PROG ((OUTCHAN .OUTCHAN)) <PRINT 5> 0>"
+  },
+  {
+   "name": "default-width-and-column",
+   "expression": "<PROG () <TERPRI> <PRIN1 <13 .OUTCHAN>> <PRINC \" \"> <PRIN1 <14 .OUTCHAN>> 0>"
+  },
+  {
+   "name": "width-print-list-breaks",
+   "expression": "<PROG () <PUT .OUTCHAN 13 10> <PRINT (A B C D E F G H I J K)> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-print-close-paren-break",
+   "expression": "<PROG () <PUT .OUTCHAN 13 10> <PRINT (A B C D E)> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-print-resets-column",
+   "expression": "<PROG () <PUT .OUTCHAN 13 10> <PRINC \"abcdefgh\"> <PRINT \"abcdefghijkl\"> <PRINC \"xyz\"> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-print-scalar-at-zero",
+   "expression": "<PROG () <PUT .OUTCHAN 13 5> <PRINT FOOBARBAZQUUX> <PRINT 123456789> <PRINT \"abcdefgh\"> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-print-column-readback",
+   "expression": "<PROG (C) <PUT .OUTCHAN 13 80> <PRINT FOO> <SET C <14 .OUTCHAN>> <PUT .OUTCHAN 13 0> .C>"
+  },
+  {
+   "name": "width-prin1-positive-column",
+   "expression": "<PROG () <PUT .OUTCHAN 13 10> <PRINC \"abcdefgh\"> <PRIN1 \"abc\"> <PRIN1 12> <PRIN1 FOO> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-prin1-exact-fit",
+   "expression": "<PROG () <PUT .OUTCHAN 13 10> <PRINC \"abcdefgh\"> <PRIN1 12> <PRIN1 3> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-princ-column-zero",
+   "expression": "<PROG () <PUT .OUTCHAN 13 5> <TERPRI> <PRINC \"abcdefghij\"> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-zero-no-tracking",
+   "expression": "<PROG (C) <PUT .OUTCHAN 13 0> <PRINC \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"> <PRINC \"bbbb\"> <SET C <14 .OUTCHAN>> <TERPRI> .C>"
+  },
+  {
+   "name": "width-printstring-lf-counted",
+   "expression": "<PROG () <TERPRI> <PUT .OUTCHAN 13 10> <PRINTSTRING \"abcdefg\nxy\"> <PRIN1 <14 .OUTCHAN>> <PRINC \"abc\"> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-princ-cr-resets",
+   "expression": "<PROG (C) <TERPRI> <PUT .OUTCHAN 13 10> <PRINC <STRING \"abcdefgh\" <ASCII 13>>> <SET C <14 .OUTCHAN>> <PRINC \"xyz\"> <PUT .OUTCHAN 13 0> .C>"
+  },
+  {
+   "name": "width-terpri-crlf-reset",
+   "expression": "<PROG (C D) <PUT .OUTCHAN 13 10> <PRINC \"abcdefgh\"> <TERPRI> <SET C <14 .OUTCHAN>> <PRINC \"abcdefgh\"> <CRLF> <SET D <14 .OUTCHAN>> <PRINC \"abcdefgh\"> <PUT .OUTCHAN 13 0> (.C .D)>"
+  },
+  {
+   "name": "width-list-of-strings",
+   "expression": "<PROG () <PUT .OUTCHAN 13 10> <PRINT (\"abcdef\" \"ghijkl\" \"m\")> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-nested-list",
+   "expression": "<PROG () <PUT .OUTCHAN 13 8> <PRINT (AB (CD EF (GH IJ)) KL)> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-false-breaks",
+   "expression": "<PROG () <PUT .OUTCHAN 13 8> <PRINC \"abcdef\"> <PRIN1 <>> <PRINC \"abcdef\"> <PRIN1 #FALSE (1 2)> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-empty-list-token",
+   "expression": "<PROG () <PUT .OUTCHAN 13 8> <PRINC \"abcdefg\"> <PRIN1 ()> <PRINC \"abcdefg\"> <PRIN1 (())> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-character-token",
+   "expression": "<PROG () <PUT .OUTCHAN 13 8> <PRINC \"abcdefg\"> <PRIN1 !\\x> <PRINC \"z\"> <PRINC !\\y> <PUT .OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "width-empty-pname-atom",
+   "expression": "<SETG NULL <INSERT <ATOM \"\"> <ROOT>>>\n<PROG () <PUT .OUTCHAN 13 5> <PRINC \"abcde\"> <PRIN1 ,NULL> <PRINC \"f\"> <PRIN1 ,NULL> <PUT .OUTCHAN 13 0> 0>\n<PRINT (A ,NULL B)>"
+  },
+  {
+   "name": "width-handle-80",
+   "expression": "<PROG () <PUT ,OUTCHAN 13 80> <PRINT (\"I'm sorry, you seem to have encountered an error\" FOO-BAR-BAZ \"Send mail to DUNGEON@MIT-DMS\" 12345)> <PRINT \"a long string that is far longer than eighty characters, so it would not fit on one line\"> <PUT ,OUTCHAN 13 0> 0>"
+  },
+  {
+   "name": "error-handler-native",
+   "expression": "<HANDLER <OR <GET ERROR!-INTERRUPTS INTERRUPT> <EVENT \"ERROR\" 8>> <FUNCTION (FRM \"TUPLE\" Z) <MAPF <> <FUNCTION (X) <PRINT .X>> .Z> <ERRET T .FRM>>>\n<ERROR FOO \"BAR\">\n<PRINT 7>"
+  }
+ ]
+}

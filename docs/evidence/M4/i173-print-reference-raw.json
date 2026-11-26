@@ -1,0 +1,264 @@
+{
+ "interpreter_sha256": "6df359f676862b3468790fcd91448ccd66aa4e124bf9301bf221dd216a28b789",
+ "protocol": "raw stdout bytes after the LISTENING marker; stdin expression then <QUIT>",
+ "cases": [
+  {
+   "name": "print-fix",
+   "exit_code": 0,
+   "result_bytes": "\n42 42\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-negative-fix",
+   "exit_code": 0,
+   "result_bytes": "\n-17 -17\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-atom",
+   "exit_code": 0,
+   "result_bytes": "\nFOO FOO\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-empty-pname-atom",
+   "exit_code": 0,
+   "result_bytes": "\n\n \n\n ATOM\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-string-escapes",
+   "exit_code": 0,
+   "result_bytes": "\n\"a\\\"b\\\\c\" \"a\\\"b\\\\c\"\n5\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-character",
+   "exit_code": 0,
+   "result_bytes": "\n!\\A !\\A\n\n!\\\" !\\\"\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-list",
+   "exit_code": 0,
+   "result_bytes": "\n(1 FOO \"x\" !\\c) (1 FOO \"x\" !\\c)\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-nested-list",
+   "exit_code": 0,
+   "result_bytes": "\n(1 (2 (3 ())) ()) (1 (2 (3 ())) ())\n\n() ()\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-form",
+   "exit_code": 0,
+   "result_bytes": "\n<FOO 1> <FOO 1>\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-false",
+   "exit_code": 0,
+   "result_bytes": "\n#FALSE () #FALSE ()\n\n#FALSE (1 \"x\") #FALSE (1 \"x\")\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-vector",
+   "exit_code": 0,
+   "result_bytes": "\n[1 2] [1 2]\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-chtype-newtype-list",
+   "exit_code": 0,
+   "result_bytes": "ZZ\n\n#ZZ (1 2) #ZZ (1 2)\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-chtype-newtype-string",
+   "exit_code": 0,
+   "result_bytes": "ZS\n\n#ZS \"ab\" #ZS \"ab\"\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-return-identity",
+   "exit_code": 0,
+   "result_bytes": "(1 2)\n\n(1 2) T\n\"ab\"\n\n\"ab\" T\n\n!\\a CHARACTER\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-no-mutation",
+   "exit_code": 0,
+   "result_bytes": "(1 (2) \"s\")\n\n(1 (2) \"s\") 0\n(1 (2) \"s\")\n3\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-eval-once",
+   "exit_code": 0,
+   "result_bytes": "1\n\n2 0\n2\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-explicit-channel",
+   "exit_code": 0,
+   "result_bytes": "\n1 1\n\n2 2\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "print-arity-0",
+   "exit_code": 0,
+   "result_bytes": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+   "stderr_bytes": "Too few arguments to PRINT\n"
+  },
+  {
+   "name": "print-arity-3",
+   "exit_code": 0,
+   "result_bytes": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+   "stderr_bytes": "Too many arguments to PRINT\n"
+  },
+  {
+   "name": "print-non-channel",
+   "exit_code": 0,
+   "result_bytes": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+   "stderr_bytes": "Error: Attempt to write to non-channel\n"
+  },
+  {
+   "name": "print-input-channel",
+   "exit_code": 0,
+   "result_bytes": "\nLISTENING-AT-LEVEL 1 PROCESS 1\n",
+   "stderr_bytes": "Channel for PRINT must be output channel\n"
+  },
+  {
+   "name": "print-binds-outchan-default-lval",
+   "exit_code": 0,
+   "result_bytes": "\n5 0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "default-width-and-column",
+   "exit_code": 0,
+   "result_bytes": "\n0 00\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-print-list-breaks",
+   "exit_code": 0,
+   "result_bytes": "\n(A B C D E\nF G H I J\nK) 0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-print-close-paren-break",
+   "exit_code": 0,
+   "result_bytes": "\n(A B C D E\n) 0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-print-resets-column",
+   "exit_code": 0,
+   "result_bytes": "abcdefgh\n\"abcdefghijkl\" \nxyz0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-print-scalar-at-zero",
+   "exit_code": 0,
+   "result_bytes": "\nFOOBARBAZQUUX \n123456789 \n\"abcdefgh\" 0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-print-column-readback",
+   "exit_code": 0,
+   "result_bytes": "\nFOO 4\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-prin1-positive-column",
+   "exit_code": 0,
+   "result_bytes": "abcdefgh\n\"abc\"12FOO0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-prin1-exact-fit",
+   "exit_code": 0,
+   "result_bytes": "abcdefgh12\n30\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-princ-column-zero",
+   "exit_code": 0,
+   "result_bytes": "\nabcdefghij0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-zero-no-tracking",
+   "exit_code": 0,
+   "result_bytes": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb\n0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-printstring-lf-counted",
+   "exit_code": 0,
+   "result_bytes": "\nabcdefg\nxy\n10abc0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-princ-cr-resets",
+   "exit_code": 0,
+   "result_bytes": "\nabcdefgh\rxyz0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-terpri-crlf-reset",
+   "exit_code": 0,
+   "result_bytes": "abcdefgh\nabcdefgh\nabcdefgh(0 0)\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-list-of-strings",
+   "exit_code": 0,
+   "result_bytes": "\n(\"abcdef\"\n\"ghijkl\"\n\"m\") 0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-nested-list",
+   "exit_code": 0,
+   "result_bytes": "\n(AB (CD\nEF (GH\nIJ)) KL) 0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-false-breaks",
+   "exit_code": 0,
+   "result_bytes": "abcdef\n#FALSE\n()abcdef\n#FALSE (\n1 2)0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-empty-list-token",
+   "exit_code": 0,
+   "result_bytes": "abcdefg\n()\nabcdefg(\n())0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-character-token",
+   "exit_code": 0,
+   "result_bytes": "abcdefg\n!\\xzy0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-empty-pname-atom",
+   "exit_code": 0,
+   "result_bytes": "\nabcde\nf0\n\n(A  B) (A  B)\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "width-handle-80",
+   "exit_code": 0,
+   "result_bytes": "\n(\"I'm sorry, you seem to have encountered an error\" FOO-BAR-BAZ\n\"Send mail to DUNGEON@MIT-DMS\" 12345) \n\"a long string that is far longer than eighty characters, so it would not fit on one line\" 0\n",
+   "stderr_bytes": ""
+  },
+  {
+   "name": "error-handler-native",
+   "exit_code": 0,
+   "result_bytes": "T\n\n *ERROR* \n FOO \n \"BAR\" \nLISTENING-AT-LEVEL 2 PROCESS 1\n\n7 7\n",
+   "stderr_bytes": "Atom REP has neither LVAL nor GVAL\nAtom REP has neither LVAL nor GVAL\n"
+  }
+ ]
+}
